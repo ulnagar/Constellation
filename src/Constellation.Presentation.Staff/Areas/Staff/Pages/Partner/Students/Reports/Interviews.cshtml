@@ -1,106 +1,112 @@
-﻿@using Constellation.Core.Enums
-@model Student_InterviewDetails_ViewModel
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.InterviewsModel
+
+@using Constellation.Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+}
 
 <h2>Export PTO Interview File</h2>
 
-<div class="row">
-    <a asp-action="Index" asp-controller="Students" asp-area="Reports" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+<div class="page-menu">
+    <a asp-page="/Partner/Students/Reports/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
 
-<form asp-action="ExportInterviews" asp-controller="ExcelExport" asp-area="Utility" method="post">
-<div class="form-horizontal">
-    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-    <div class="form-group row">
-        <label class="col-md-4 offset-1">Filter by Grade</label>
-    </div>
+        <div class="form-group row">
+            <label class="col-md-4 offset-1">Filter by Grade</label>
+        </div>
 
-    <div class="form-group row">
-        <label asp-for="Filter.Grades" class="col-md-2">All Grades</label>
-        <div class="col-md-3">
-            <select id="allGrades" multiple="multiple" name="allGrades" class="form-control">
-                @foreach (var entry in Html.GetEnumSelectList<Grade>())
-                {
-                    <option value="@entry.Value">@entry.Text</option>
-                }
-            </select>
-            <span asp-validation-for="Filter.Grades" class="text-danger"></span>
+        <div class="form-group row">
+            <label asp-for="Grades" class="col-md-2">All Grades</label>
+            <div class="col-md-3">
+                <select id="allGrades" multiple="multiple" name="allGrades" class="form-control">
+                    @foreach (var entry in Html.GetEnumSelectList<Grade>())
+                    {
+                        <option value="@entry.Value">@entry.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="Grades" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="offset-2 col-md-3">
+                <btn class="btn btn-sm btn-secondary" onClick="addGrade()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeGrade()">Remove</btn>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Grades" class="col-md-2">Selected Grades</label>
+            <div class="col-md-3">
+                <select id="selectedGrades" multiple="multiple" name="selectedGrades" class="form-control"></select>
+            </div>
+            <div id="grade_inputs"></div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-4 offset-1">Filter by Class</label>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ClassList" class="col-md-2">All Classes</label>
+            <div class="col-md-3">
+                <select id="allClasses" multiple="multiple" name="allClasses" class="form-control">
+                    @foreach (var entry in Model.AllClasses)
+                    {
+                        <option value="@entry.Value">@entry.Text</option>
+                    }
+                </select>
+                <span asp-validation-for="ClassList" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="offset-2 col-md-3">
+                <btn class="btn btn-sm btn-secondary" onClick="addClass()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeClass()">Remove</btn>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ClassList" class="col-md-2">Selected Classes</label>
+            <div class="col-md-3">
+                <select id="selectedClasses" multiple="multiple" name="selectedClasses" class="form-control"></select>
+            </div>
+            <div id="class_inputs"></div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="PerFamily" class="col-md-3">Single login per family</label>
+            <div class="col-md-2">
+                <input asp-for="PerFamily" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ResidentialFamilyOnly" class="col-md-3">Only include residential families?</label>
+            <div class="col-md-2">
+                <input asp-for="ResidentialFamilyOnly" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Export" class="btn btn-primary btn-block btn-lg" />
+            </div>
         </div>
     </div>
-
-    <div class="form-group row">
-        <div class="offset-2 col-md-3">
-            <btn class="btn btn-sm btn-secondary" onClick="addGrade()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeGrade()">Remove</btn>
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label asp-for="Filter.Grades" class="col-md-2">Selected Grades</label>
-        <div class="col-md-3">
-            <select id="selectedGrades" multiple="multiple" name="selectedGrades" class="form-control"></select>
-        </div>
-        <div id="grade_inputs"></div>
-    </div>
-
-    <div class="form-group row">
-        <label class="col-md-4 offset-1">Filter by Class</label>
-    </div>
-
-    <div class="form-group row">
-        <label asp-for="Filter.ClassList" class="col-md-2">All Classes</label>
-        <div class="col-md-3">
-            <select id="allClasses" multiple="multiple" name="allClasses" class="form-control">
-                @foreach (var entry in Model.AllClasses)
-                {
-                    <option value="@entry.Value">@entry.Text</option>
-                }
-            </select>
-            <span asp-validation-for="Filter.ClassList" class="text-danger"></span>
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <div class="offset-2 col-md-3">
-            <btn class="btn btn-sm btn-secondary" onClick="addClass()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeClass()">Remove</btn>
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label asp-for="Filter.ClassList" class="col-md-2">Selected Classes</label>
-        <div class="col-md-3">
-            <select id="selectedClasses" multiple="multiple" name="selectedClasses" class="form-control"></select>
-        </div>
-        <div id="class_inputs"></div>
-    </div>
-
-    <div class="form-group row">
-        <label asp-for="Filter.PerFamily" class="col-md-3">Single login per family</label>
-        <div class="col-md-2">
-            <input asp-for="Filter.PerFamily" class="form-control" />
-        </div>
-    </div>
-
-    <div class="form-group row">
-        <label asp-for="Filter.ResidentialFamilyOnly" class="col-md-3">Only include residential families?</label>
-        <div class="col-md-2">
-            <input asp-for="Filter.ResidentialFamilyOnly" class="form-control" />
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-3">
-            <input type="submit" value="Export" class="btn btn-primary btn-block btn-lg" />
-        </div>
-    </div>
-</div>
 </form>
 
 @section scripts
 {
     <partial name="_ValidationScriptsPartial" />
-    
+
     <script>
         function addGrade() {
             var grade_list = $('select[id="allGrades"]')[0];

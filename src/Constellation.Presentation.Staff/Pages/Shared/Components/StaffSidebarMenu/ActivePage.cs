@@ -28,6 +28,7 @@ public sealed class ActivePage
     public const string SchoolAdmin_Awards_Nominations = "SchoolAdmin.Awards.Nominations";
     public const string SchoolAdmin_Compliance_Attendance = "SchoolAdmin.Compliance.Attendance";
     public const string SchoolAdmin_Compliance_AttendanceReports = "SchoolAdmin.Compliance.Reports";
+    public const string SchoolAdmin_Compliance_MasterFile = "SchoolAdmin.Compliance.MasterFile";
     public const string SchoolAdmin_Compliance_Wellbeing = "SchoolAdmin.Compliance.Wellbeing";
     public const string SchoolAdmin_Consent_Applications = "SchoolAdmin.Consent.Applications";
     public const string SchoolAdmin_Consent_Transactions = "SchoolAdmin.Consent.Transactions";

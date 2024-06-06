@@ -1,20 +1,23 @@
-namespace Constellation.Presentation.Server.Areas.Reports.Pages;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.MasterFile;
 
-using Application.Common.PresentationModels;
+using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.Models.Auth;
-using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Staff.Areas;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
-public class MasterFileModel : BasePageModel
+public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
 
-    public MasterFileModel(
+    public IndexModel(
         IMediator mediator,
         LinkGenerator linkGenerator)
     {
@@ -22,8 +25,11 @@ public class MasterFileModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_MasterFile;
+
     [BindProperty]
-    public IFormFile FormFile { get; set; }
+    public IFormFile? FormFile { get; set; }
+
     [BindProperty]
     public bool EmailReport { get; set; }
 
@@ -37,7 +43,7 @@ public class MasterFileModel : BasePageModel
         {
             try
             {
-                string emailAddress = string.Empty;
+                string? emailAddress = string.Empty;
 
                 if (EmailReport)
                 {
@@ -50,14 +56,14 @@ public class MasterFileModel : BasePageModel
                 await using var target = new MemoryStream();
                 await FormFile.CopyToAsync(target, cancellationToken);
 
-                var outputRequest = await _mediator.Send(new MasterFileConsistencyCoordinator(target, EmailReport, emailAddress), cancellationToken);
+                Result<List<UpdateItem>> outputRequest = await _mediator.Send(new MasterFileConsistencyCoordinator(target, EmailReport, emailAddress), cancellationToken);
 
                 if (outputRequest.IsFailure)
                 {
                     Error = new ErrorDisplay
                     {
                         Error = outputRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/MasterFile", values: new { area = "Reports" })
+                        RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" })
                     };
 
                     return Page();
@@ -69,8 +75,8 @@ public class MasterFileModel : BasePageModel
             {
                 Error = new ErrorDisplay
                 {
-                    Error = new Core.Shared.Error("Exception", ex.Message),
-                    RedirectPath = _linkGenerator.GetPathByPage("/MasterFile", values: new { area = "Reports" })
+                    Error = new Error("Exception", ex.Message),
+                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" })
                 };
 
                 return Page();

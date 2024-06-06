@@ -2,7 +2,6 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.ClassAuditModel
 
 @using Constellation.Core.Extensions
-@using Constellation.Application.Extensions
 
 <h2>Current Enrolments by Student</h2>
 
@@ -38,11 +37,11 @@
                         {
                             (string group, string line) details = course.Name.ExtractLine();
 
-                            <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@course.Id.Value" class="badge @details.group-@details.line">@course.Name</a>
+                            <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@course.Id.Value" class="badge @details.group-@details.line">@course.Name</a>
                         }
                         else
                         {
-                            <a asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@course.Id.Value" class="badge badge-secondary">@course.Name</a>
+                            <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@course.Id.Value" class="badge badge-secondary">@course.Name</a>
                         }
                     }
                 </td>

@@ -32,7 +32,6 @@ public interface IExcelService
     Task<MemoryStream> CreatePTOFile(List<InterviewExportDto> exportLines, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAbsencesReportFile(List<FilteredAbsenceResponse> exportAbsences, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateUnexplainedPartialAbsencesReportFile(List<UnexplainedPartialAbsenceResponse> absences, CancellationToken cancellationToken = default);
-    Task<MemoryStream> CreateAwardsCalculationFile(MemoryStream stream);
     Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data);
     Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);
     List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile);

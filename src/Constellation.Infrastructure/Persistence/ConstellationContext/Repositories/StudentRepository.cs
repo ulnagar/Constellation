@@ -323,15 +323,13 @@ public class StudentRepository : IStudentRepository
 
     public async Task<List<Student>> ForInterviewsExportAsync(
         List<int> filterGrades, 
-        List<OfferingId> filterClasses, 
-        bool perFamily, 
-        bool resFamilyOnly,
+        List<OfferingId> filterClasses,
         CancellationToken cancellationToken = default) =>
         await _context.Students
             .Include(student => student.Enrolments)
             .Include(student => student.FamilyMemberships)
             .Where(student => !student.IsDeleted)
-            .Where(FilterStudent(filterGrades, filterClasses, perFamily, resFamilyOnly))
+            .Where(FilterStudent(filterGrades, filterClasses))
             .ToListAsync(cancellationToken);
 
     public async Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate()
@@ -341,16 +339,16 @@ public class StudentRepository : IStudentRepository
             .ToListAsync();
     }
 
-    private static Expression<Func<Student, bool>> FilterStudent(List<int> filterGrades, List<OfferingId> filterClasses, bool perFamily, bool resFamilyOnly)
+    private static Expression<Func<Student, bool>> FilterStudent(List<int> filterGrades, List<OfferingId> filterClasses)
     {
         ExpressionStarter<Student> predicate = PredicateBuilder.New<Student>();
 
-        if (!filterGrades.Any())
+        if (filterGrades.Count > 0)
         {
             predicate.And(student => filterGrades.Contains((int)student.CurrentGrade));
         }
 
-        if (filterClasses.Any())
+        if (filterClasses.Count > 0)
         {
             predicate.And(student => student.Enrolments.Any(enrolment => !enrolment.IsDeleted && filterClasses.Contains(enrolment.OfferingId)));
         }

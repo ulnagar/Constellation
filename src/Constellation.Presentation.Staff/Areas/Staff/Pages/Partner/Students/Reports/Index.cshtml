@@ -1,0 +1,63 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.IndexModel
+@{
+}
+
+<h2>Student Reports</h2>
+
+<div class="page-menu">
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <h3>Data Verification Reports</h3>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Class Audit</h4>
+        A view of all students with the list the classes in which they are currently enrolled
+    </div>
+    <div class="col-md-2">
+        <a asp-page="/Partner/Students/Reports/ClassAudit" asp-area="Staff" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+
+    <div class="col-md-12">
+        <h4>Students without Sentral ID</h4>
+        A view of all students who do not have a listed Sentral Id
+    </div>
+    <div class="col-md-2">
+        <a asp-page="/Partner/Students/Reports/WithoutSentralId" asp-area="Staff" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    <div class="col-md-8">
+        <h3>Student Reports</h3>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Full Time Equivalent Breakdown</h4>
+        A view of FTE calculations for each Grade, broken down by Gender
+    </div>
+    <div class="col-md-2">
+        <a asp-page="/Partner/Students/Reports/FTEBreakdown" asp-area="Staff" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+    
+    <div class="col-md-12">
+        <h4>PTO Import File</h4>
+        An Excel file that can be used to import student and class data to Parent Teacher Online
+    </div>
+    <div class="col-md-2">
+        <a asp-page="/Partner/Students/Reports/Interviews" asp-area="Staff" class="btn btn-block btn-warning">Run Report</a>
+    </div>
+</div>
+
+<hr />
