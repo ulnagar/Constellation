@@ -16,19 +16,16 @@ namespace Constellation.Infrastructure.Services
         private readonly ISender _mediator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IOperationService _operationService;
-        private readonly IPeriodService _sessionService;
         private readonly IFacultyRepository _facultyRepository;
 
         public StaffService(
             ISender mediator,
-            IUnitOfWork unitOfWork, 
-            IPeriodService sessionService,
+            IUnitOfWork unitOfWork,
             IFacultyRepository facultyRepository,
             IOperationService operationService)
         {
             _mediator = mediator;
             _unitOfWork = unitOfWork;
-            _sessionService = sessionService;
             _facultyRepository = facultyRepository;
             _operationService = operationService;
         }

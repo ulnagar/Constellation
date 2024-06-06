@@ -110,7 +110,7 @@
 
                                                 if (authorised.Succeeded)
                                                 {
-                                                    <a asp-page="/Subject/Periods/Upsert" asp-area="Staff" asp-route-id="@period.Id" class="blockLink">
+                                                    <a asp-page="/Subject/Periods/Upsert" asp-area="Staff" asp-route-id="@period.PeriodId" class="blockLink">
                                                         <div class="Timetable-Period Timetable-@period.Type" style="height: @lengthpx;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
                                                             @period.Name<br />
                                                         </div>

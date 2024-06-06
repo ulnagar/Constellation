@@ -419,6 +419,10 @@ public static class DomainErrors
 
     public static class Period
     {
+        public static readonly Func<int, Error> NotFound = id => new(
+            "Periods.Period.NotFound",
+            $"Could not find a Period with the Id {id}");
+
         public static readonly Error NoneFoundForOffering = new(
             "Periods.Period.NoneFoundForOffering",
             "Could not find Periods attached to Offering");

@@ -1,4 +1,98 @@
-﻿@page
+﻿@page "{id?}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.UpsertModel
+
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
 @{
+}
+
+<h2>@(Model.Id.HasValue ? "Edit Period" : "New Period")</h2>
+
+<div class="row">
+    <a asp-page="/Subject/Periods/Index" asp-area="Staff" class="btn btn-danger btn-pull-right-solo">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group row">
+            <label asp-for="Timetable" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Timetable" class="form-control combo-with-tag">
+                    <option value="">-- Select or Enter --</option>
+                    <option value="PRIMARY">Primary</option>
+                    <option value="SECONDARY">Secondary</option>
+                </select>
+                <span asp-validation-for="Timetable" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Name" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Day" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Day" asp-items="Html.GetEnumSelectList<UpsertModel.ValidDays>()" class="form-control"></select>
+                <span asp-validation-for="Day" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Period" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Period" class="form-control" />
+                <span asp-validation-for="Period" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="StartTime" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="StartTime" class="form-control" />
+                <span asp-validation-for="StartTime" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="EndTime" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="EndTime" class="form-control" />
+                <span asp-validation-for="EndTime" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="Type" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Type" class="form-control combo-with-tag">
+                    <option value="">-- Select or Enter --</option>
+                    <option value="Teaching">Teaching</option>
+                    <option value="Break">Break</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
 }
