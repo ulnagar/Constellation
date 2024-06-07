@@ -36,7 +36,8 @@ public class GetCurrentStocktakeEventsQueryHandler
                 item.Id,
                 item.Name,
                 item.StartDate,
-                item.EndDate));
+                item.EndDate,
+                item.AcceptLateResponses));
         }
 
         return response;

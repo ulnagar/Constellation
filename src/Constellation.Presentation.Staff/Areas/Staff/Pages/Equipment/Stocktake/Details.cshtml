@@ -1,0 +1,60 @@
+@page "{id:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.DetailsModel
+
+@inject IAuthorizationService authService
+
+@{
+    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+}
+
+<h2>Stocktake details</h2>
+
+<div class="page-menu">
+    @if (authorised.Succeeded)
+    {
+        <a asp-page="/Equipment/Stocktake/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    }    
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl>
+        <dt><label asp-for="Stocktake.Name"></label></dt>
+        <dd>@Model.Stocktake.Name</dd>
+        
+        <dt><label asp-for="Stocktake.StartDate">Start Date</label></dt>
+        <dd>@Model.Stocktake.StartDate.ToShortDateString()</dd>
+        
+        <dt><label asp-for="Stocktake.EndDate">End Date</label></dt>
+        <dd>@Model.Stocktake.EndDate.ToShortDateString()</dd>
+    </dl>
+</div>
+
+<hr />
+
+<table class="table-hover table-striped data-table">
+    <thead>
+        <tr>
+            <th>Serial / Asset</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>User</th>
+            <th>Sighted</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Stocktake.Sightings)
+        {
+            <tr class="cancelled-@item.IsCancelled">
+                <td>@item.SerialNumber / @item.AssetNumber</td>
+                <td>@item.Description</td>
+                <td>@item.Location</td>
+                <td>@item.User</td>
+                <td>@item.SightedBy (@item.SightedOn.ToShortDateString())</td>
+            </tr>
+        }
+    </tbody>
+</table>

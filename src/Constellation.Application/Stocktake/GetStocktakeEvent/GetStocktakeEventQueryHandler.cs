@@ -42,6 +42,7 @@ internal sealed class GetStocktakeEventQueryHandler
             stocktakeEvent.Id,
             stocktakeEvent.Name,
             stocktakeEvent.StartDate,
-            stocktakeEvent.EndDate);
+            stocktakeEvent.EndDate,
+            stocktakeEvent.AcceptLateResponses);
     }
 }

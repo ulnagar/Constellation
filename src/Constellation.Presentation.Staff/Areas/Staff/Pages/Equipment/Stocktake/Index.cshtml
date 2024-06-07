@@ -1,0 +1,47 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+}
+
+<h2>Stocktake</h2>
+
+<div class="page-menu">
+    @if (authorised.Succeeded)
+    {
+        <div class="btn-group new-group" role="group">
+            <a asp-page="/Equipment/Stocktake/Upsert" asp-area="Staff" class="btn btn-primary">Create New</a>
+        </div>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table-sort-1">
+    <thead>
+        <tr>
+            <th>Active</th>
+            <th>Date Range</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Events)
+        {
+            bool? active = (item.EndDate.Date >= DateTime.Today && item.StartDate.Date <= DateTime.Today);
+
+            <tr>
+                <td>@Html.DisplayFor(model => active, "BooleanTick")</td>
+                <td data-order="@item.StartDate.ToString("yyyy-MM-dd")">@Html.DisplayFor(model => item.StartDate, "ShortDate") - @Html.DisplayFor(model => item.EndDate, "ShortDate")</td>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-page="/Equipment/Stocktake/Details" asp-area="Staff" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
