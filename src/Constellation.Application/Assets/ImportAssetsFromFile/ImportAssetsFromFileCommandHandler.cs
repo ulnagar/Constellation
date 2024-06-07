@@ -108,6 +108,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 assetNumber.Value,
                 importAsset.SerialNumber ?? string.Empty,
                 importAsset.SapNumber ?? string.Empty,
+                importAsset.Manufacturer ?? string.Empty,
                 importAsset.ModelNumber ?? string.Empty,
                 importAsset.ModelDescription ?? string.Empty,
                 category,

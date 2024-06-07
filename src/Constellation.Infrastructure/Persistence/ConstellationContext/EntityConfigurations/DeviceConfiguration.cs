@@ -8,6 +8,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<Device> builder)
         {
+            builder.ToTable("Devices");
+
             builder.HasKey(d => d.SerialNumber);
 
             builder.HasMany(d => d.Notes)

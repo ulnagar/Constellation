@@ -92,6 +92,7 @@ internal sealed class GetAssetByAssetNumberQueryHandler
             asset.AssetNumber,
             asset.SerialNumber,
             asset.SapEquipmentNumber,
+            asset.Manufacturer,
             asset.ModelNumber,
             asset.ModelDescription,
             asset.Status,

@@ -86,14 +86,15 @@ public class ExcelService : IExcelService
                 worksheet.Cells[row, 5].GetCellValue<string>(),
                 worksheet.Cells[row, 6].GetCellValue<string>(),
                 worksheet.Cells[row, 7].GetCellValue<string>(),
-                DateOnly.FromDateTime(worksheet.Cells[row, 8].GetCellValue<DateTime>()),
-                worksheet.Cells[row, 9].GetCellValue<decimal>(),
-                DateOnly.FromDateTime(worksheet.Cells[row, 10].GetCellValue<DateTime>()),
-                worksheet.Cells[row, 11].GetCellValue<string>(),
+                worksheet.Cells[row, 8].GetCellValue<string>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 9].GetCellValue<DateTime>()),
+                worksheet.Cells[row, 10].GetCellValue<decimal>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 11].GetCellValue<DateTime>()),
                 worksheet.Cells[row, 12].GetCellValue<string>(),
                 worksheet.Cells[row, 13].GetCellValue<string>(),
                 worksheet.Cells[row, 14].GetCellValue<string>(),
-                worksheet.Cells[row, 15].GetCellValue<string>());
+                worksheet.Cells[row, 15].GetCellValue<string>(),
+                worksheet.Cells[row, 16].GetCellValue<string>());
 
             assets.Add(entry);
         }

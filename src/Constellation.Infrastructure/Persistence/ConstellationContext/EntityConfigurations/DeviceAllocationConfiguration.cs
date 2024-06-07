@@ -8,6 +8,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<DeviceAllocation> builder)
         {
+            builder.ToTable("DeviceAllocations");
+
             builder.HasKey(d => d.Id);
 
             builder.HasOne(d => d.Student)

@@ -10,6 +10,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
     {
         public void Configure(EntityTypeBuilder<CanvasOperation> builder)
         {
+            builder.ToTable("CanvasOperations");
+
             builder.HasDiscriminator<string>("OperationType")
                 .HasValue<CreateUserCanvasOperation>("CreateUser")
                 .HasValue<ModifyEnrolmentCanvasOperation>("ModifyEnrolment")

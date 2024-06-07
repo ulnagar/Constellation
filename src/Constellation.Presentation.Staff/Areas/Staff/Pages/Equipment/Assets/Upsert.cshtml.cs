@@ -32,15 +32,18 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(AssetNumberBinder))]
-    public AssetNumber AssetNumber { get; set; }
+    public AssetNumber? AssetNumber { get; set; }
 
     [BindProperty]
     [Required]
     public string SerialNumber { get; set; }
 
     [BindProperty]
-    public string SapEquipmentNumber { get; set; }
-    
+    public string? SapEquipmentNumber { get; set; }
+
+    [BindProperty]
+    public string Manufacturer { get; set; }
+
     [BindProperty]
     [Required]
     public string ModelNumber { get; set; }
@@ -85,6 +88,7 @@ public class UpsertModel : BasePageModel
 
             SerialNumber = asset.Value.SerialNumber;
             SapEquipmentNumber = asset.Value.SapEquipmentNumber;
+            Manufacturer = asset.Value.Manufacturer;
             ModelNumber = asset.Value.ModelNumber;
             ModelDescription = asset.Value.ModelDescription;
             Status = asset.Value.Status;

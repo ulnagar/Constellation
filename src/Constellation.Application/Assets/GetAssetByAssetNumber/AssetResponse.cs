@@ -12,6 +12,7 @@ public sealed record AssetResponse(
     AssetNumber AssetNumber,
     string SerialNumber,
     string SapEquipmentNumber,
+    string Manufacturer,
     string ModelNumber,
     string ModelDescription,
     AssetStatus Status,

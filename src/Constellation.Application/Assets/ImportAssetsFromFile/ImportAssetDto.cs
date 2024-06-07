@@ -7,6 +7,7 @@ public sealed record ImportAssetDto(
     string AssetNumber,
     string SerialNumber,
     string SapNumber,
+    string Manufacturer,
     string ModelNumber,
     string ModelDescription,
     string Status,

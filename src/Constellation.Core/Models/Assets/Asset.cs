@@ -43,6 +43,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public AssetNumber AssetNumber { get; private set; } = AssetNumber.Empty;
     public string SerialNumber { get; private set; } = string.Empty;
     public string? SapEquipmentNumber { get; private set; }
+    public string Manufacturer { get; private set; } = string.Empty;
     public string ModelNumber { get; private set; } = string.Empty;
     public string ModelDescription { get; private set; } = string.Empty;
     public AssetStatus Status { get; private set; } = AssetStatus.Active;
@@ -82,6 +83,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         AssetNumber assetNumber,
         string serialNumber,
         string? sapEquipmentNumber,
+        string manufacturer,
         string modelNumber,
         string description,
         AssetCategory category,
@@ -108,6 +110,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             category)
         {
             SapEquipmentNumber = string.IsNullOrWhiteSpace(sapEquipmentNumber) ? null : sapEquipmentNumber,
+            Manufacturer = manufacturer,
             ModelNumber = modelNumber,
             PurchaseDocument = purchaseDocument,
             PurchaseCost = purchaseCost,
@@ -125,6 +128,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         AssetNumber assetNumber,
         string serialNumber,
         string? sapEquipmentNumber,
+        string manufacturer,
         string modelNumber,
         string description,
         AssetCategory category,
@@ -149,6 +153,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             category)
         {
             SapEquipmentNumber = string.IsNullOrWhiteSpace(sapEquipmentNumber) ? null : sapEquipmentNumber,
+            Manufacturer = manufacturer,
             ModelNumber = modelNumber,
             PurchaseDocument = purchaseDocument,
             PurchaseCost = purchaseCost,
@@ -165,6 +170,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     public static async Task<Result<Asset>> Create(
         AssetNumber assetNumber,
         string serialNumber,
+        string manufacturer,
         string description,
         AssetCategory category,
         IDateTimeProvider dateTime,
@@ -186,6 +192,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
             description,
             category)
         {
+            Manufacturer = manufacturer,
             PurchaseDate = dateTime.Today,
             Status = AssetStatus.Active
         };
@@ -196,6 +203,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
     }
 
     public Result Update(
+        string manufacturer,
         string modelNumber,
         string description,
         string sapEquipmentNumber,
@@ -206,6 +214,15 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         bool updatedProperty = false;
 
         List<string> messages = new();
+
+        if (!string.IsNullOrWhiteSpace(manufacturer))
+        {
+            messages.Add($"{nameof(Manufacturer)} changed from {Manufacturer} to {manufacturer}");
+
+            Manufacturer = manufacturer;
+
+            updatedProperty = true;
+        }
 
         if (!string.IsNullOrWhiteSpace(modelNumber))
         {

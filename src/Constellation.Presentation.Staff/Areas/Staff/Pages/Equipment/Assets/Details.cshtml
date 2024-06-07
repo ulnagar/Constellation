@@ -1,10 +1,21 @@
 ﻿@page "{assetNumber}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets.DetailsModel
 
+@inject IAuthorizationService authService
+
+@{
+    var canManageAssets = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+}
+
 <h2>Asset Details</h2>
 
 <div class="page-menu">
+    @if (canManageAssets.Succeeded)
+    {
+        <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-id="@Model.AssetNumber" class="btn btn-warning">Edit</a>
+    }
 
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
