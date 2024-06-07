@@ -1,0 +1,113 @@
+@page "{id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Devices.DetailsModel
+
+<h2>Device details</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr/>
+
+<div>
+    <dl>
+        <dt><label asp-for="Device.Make"></label></dt>
+        <dd>@Model.Device.Make</dd>
+        
+        <dt><label asp-for="Device.Model"></label></dt>
+        <dd>@Model.Device.Model</dd>
+        
+        <dt><label asp-for="Device.SerialNumber">Serial Number</label></dt>
+        <dd>@Model.Device.SerialNumber</dd>
+        
+        <dt><label asp-for="Device.Description"></label></dt>
+        <dd>@Model.Device.Description</dd>
+        
+        <dt><label asp-for="Device.Status"></label></dt>
+        <dd>@Html.DisplayFor(model => model.Device.Status, "Status")</dd>
+        
+        <dt><label asp-for="Device.DateReceived">Date Received</label></dt>
+        <dd>@Model.Device.DateReceived?.ToShortDateString()</dd>
+        
+        <dt><label asp-for="Device.DateWarrantyExpires">Date Warranty Expires</label></dt>
+        <dd>@Model.Device.DateWarrantyExpires?.ToShortDateString()</dd>
+        
+        <dt><label asp-for="Device.DateDisposed">Date Disposed</label></dt>
+        <dd>@Model.Device.DateDisposed?.ToShortDateString()</dd>
+    </dl>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#deviceAllocations" role="tab">
+                Allocations
+                @if (Model.Device.Allocations.Any())
+                {
+                    <span class="badge">@Model.Device.Allocations.Count()</span>
+                }
+            </a>
+        </li>
+        <li>
+            <a class="nav-link" href="#deviceNotes" data-toggle="tab">
+                Notes
+                @if (Model.Device.Notes.Any())
+                {
+                    <span class="badge">@Model.Device.Notes.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="deviceAllocations" class="tab-pane active">
+            <h3>Allocation History</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                <tr>
+                    <th>Date Allocated</th>
+                    <th>Student</th>
+                    <th>School</th>
+                    <th>Date Returned</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Device.Allocations.OrderByDescending(a => a.DateAllocated))
+                {
+                    <tr>
+                        <td data-order="@item.DateAllocated.ToString("yyyy-MM-dd")">@item.DateAllocated.ToShortDateString()</td>
+                        <td data-order="@item.Student.SortOrder">@item.Student.DisplayName (@Html.DisplayFor(model => item.Grade, "Grade"))</td>
+                        <td>@item.School</td>
+                        <td>@item.DateDeleted?.ToShortDateString()</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="deviceNotes" class="tab-pane">
+            <h3>Notes</h3>
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Date Entered</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Device.Notes.OrderByDescending(a => a.DateEntered))
+                    {
+                        <tr>
+                            <td data-order="@item.DateEntered.ToString("yyyy-MM-dd")">@item.DateEntered.ToShortDateString()</td>
+                            <td>@item.Details</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

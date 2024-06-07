@@ -1,0 +1,47 @@
+@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Devices.IndexModel
+
+@{
+
+}
+
+<h2>Archived Device Data</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table-sort-1">
+    <thead>
+    <tr>
+        <th>Make</th>
+        <th>Serial Number</th>
+        <th>Status</th>
+        <th>Student</th>
+        <th>School</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Devices)
+    {
+        <tr>
+            <td>@item.Make</td>
+            <td>@item.SerialNumber</td>
+            <td>@Html.DisplayFor(model => item.Status, "Status")</td>
+            <td>
+                @if (!string.IsNullOrWhiteSpace(item.StudentName)) 
+                {
+                    @:@item.StudentName (@Html.DisplayFor(model => item.StudentGrade, "Grade"))
+                }
+            </td>
+            <td>@item.StudentSchool</td>
+            <td>
+                <a asp-page="/Equipment/Devices/Details" asp-area="Staff" asp-route-id="@item.SerialNumber" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

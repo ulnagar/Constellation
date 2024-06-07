@@ -4,22 +4,21 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetDevicesAllocatedToStudentQueryHandler
     : IQueryHandler<GetDevicesAllocatedToStudentQuery, List<StudentDeviceResponse>>
 {
-    private readonly IDeviceAllocationRepository _allocationRepository;
     private readonly IDeviceRepository _deviceRepository;
 
     public GetDevicesAllocatedToStudentQueryHandler(
-        IDeviceAllocationRepository allocationRepository,
         IDeviceRepository deviceRepository)
     {
-        _allocationRepository = allocationRepository;
         _deviceRepository = deviceRepository;
     }
 
@@ -27,24 +26,25 @@ internal sealed class GetDevicesAllocatedToStudentQueryHandler
     {
         List<StudentDeviceResponse> returnData = new();
 
-        var allocations = await _allocationRepository.GetHistoryForStudent(request.StudentId, cancellationToken);
+        List<Device> devices = await _deviceRepository.GetHistoryForStudent(request.StudentId, cancellationToken);
 
-        if (allocations is null)
+        if (devices is null)
         {
             return Result.Failure<List<StudentDeviceResponse>>(DomainErrors.Assets.Allocations.NotFoundForStudent(request.StudentId));
         }
 
-        foreach (var allocation in allocations)
+        List<DeviceAllocation> allocations = devices
+            .SelectMany(device =>
+                device.Allocations.Where(allocation => 
+                    allocation.StudentId == request.StudentId))
+            .ToList();
+
+        foreach (DeviceAllocation allocation in allocations)
         {
-            var device = await _deviceRepository.GetDeviceById(allocation.SerialNumber, cancellationToken);
-
-            if (device is null)
-                continue;
-
             returnData.Add(new(
-                device.SerialNumber,
-                device.Make,
-                device.Status.ToString(),
+                allocation.Device.SerialNumber,
+                allocation.Device.Make,
+                allocation.Device.Status.ToString(),
                 DateOnly.FromDateTime(allocation.DateAllocated),
                 allocation.DateDeleted.HasValue ? DateOnly.FromDateTime(allocation.DateDeleted.Value) : null));
         }

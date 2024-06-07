@@ -11,7 +11,6 @@ public class UnitOfWork : IUnitOfWork
     
     public IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
     public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
-    public IDeviceRepository Devices { get; set; }
     public IMSTeamOperationsRepository MSTeamOperations { get; set; }
     public ISchoolRepository Schools { get; set; }
     public IStaffRepository Staff { get; set; }
@@ -26,7 +25,6 @@ public class UnitOfWork : IUnitOfWork
 
         AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
         AdobeConnectRooms = new AdobeConnectRoomRepository(context, dateTime);
-        Devices = new DeviceRepository(context);
         MSTeamOperations = new MSTeamOperationsRepository(context);
         Schools = new SchoolRepository(context);
         Staff = new StaffRepository(context);

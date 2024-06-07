@@ -26,10 +26,6 @@ public class AppDbContext : KeyApiAuthorizationDbContext<AppUser, AppRole, Guid>
     public DbSet<Staff> Staff { get; set; }
     public DbSet<TimetablePeriod> Periods { get; set; }
     public DbSet<AdobeConnectRoom> Rooms { get; set; }
-    public DbSet<Device> Devices { get; set; }
-    public DbSet<DeviceNotes> DeviceNotes { get; set; }
-    public DbSet<DeviceAllocation> DeviceAllocations { get; set; }
-    public DbSet<CanvasOperation> CanvasOperations { get; set; }
     public DbSet<JobActivation> JobActivations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
