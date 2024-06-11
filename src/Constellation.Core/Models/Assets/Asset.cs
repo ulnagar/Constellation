@@ -207,6 +207,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         string modelNumber,
         string description,
         string sapEquipmentNumber,
+        DateOnly purchaseDate,
         string purchaseDocument,
         decimal purchaseCost,
         DateOnly warrantyEndDate)
@@ -215,63 +216,72 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         List<string> messages = new();
 
-        if (!string.IsNullOrWhiteSpace(manufacturer))
+        if (!string.IsNullOrWhiteSpace(manufacturer) && Manufacturer != manufacturer)
         {
-            messages.Add($"{nameof(Manufacturer)} changed from {Manufacturer} to {manufacturer}");
+            messages.Add($@"{nameof(Manufacturer)} changed from ""{Manufacturer}"" to ""{manufacturer}""");
 
             Manufacturer = manufacturer;
 
             updatedProperty = true;
         }
 
-        if (!string.IsNullOrWhiteSpace(modelNumber))
+        if (!string.IsNullOrWhiteSpace(modelNumber) && ModelNumber != modelNumber)
         {
-            messages.Add($"{nameof(ModelNumber)} changed from {ModelNumber} to {modelNumber}");
+            messages.Add($@"{nameof(ModelNumber)} changed from ""{ModelNumber}"" to ""{modelNumber}""");
 
             ModelNumber = modelNumber;
 
             updatedProperty = true;
         }
 
-        if (!string.IsNullOrWhiteSpace(description))
+        if (!string.IsNullOrWhiteSpace(description) && ModelDescription != description)
         {
-            messages.Add($"{nameof(ModelDescription)} changed from {ModelDescription} to {description}");
+            messages.Add($@"{nameof(ModelDescription)} changed from ""{ModelDescription}"" to ""{description}""");
 
             ModelDescription = description;
 
             updatedProperty = true;
         }
 
-        if (!string.IsNullOrWhiteSpace(sapEquipmentNumber))
+        if (!string.IsNullOrWhiteSpace(sapEquipmentNumber) && SapEquipmentNumber != sapEquipmentNumber)
         {
-            messages.Add($"{nameof(SapEquipmentNumber)} changed from {SapEquipmentNumber} to {sapEquipmentNumber}");
+            messages.Add($@"{nameof(SapEquipmentNumber)} changed from ""{SapEquipmentNumber}"" to ""{sapEquipmentNumber}""");
 
             SapEquipmentNumber = sapEquipmentNumber;
 
             updatedProperty = true;
         }
 
-        if (!string.IsNullOrWhiteSpace(purchaseDocument))
+        if (purchaseDate > DateOnly.MinValue && PurchaseDate != purchaseDate)
         {
-            messages.Add($"{nameof(purchaseDocument)} changed from {PurchaseDocument} to {purchaseDocument}");
+            messages.Add($@"{nameof(PurchaseDate)} changed from ""{PurchaseDate}"" to ""{purchaseDate}""");
+
+            PurchaseDate = purchaseDate;
+
+            updatedProperty = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(purchaseDocument) && PurchaseDocument != purchaseDocument)
+        {
+            messages.Add($@"{nameof(purchaseDocument)} changed from ""{PurchaseDocument}"" to ""{purchaseDocument}""");
             
             PurchaseDocument = purchaseDocument;
 
             updatedProperty = true;
         }
 
-        if (purchaseCost > 0m)
+        if (purchaseCost > 0m && PurchaseCost != purchaseCost)
         {
-            messages.Add($"{nameof(PurchaseCost)} changed from {PurchaseCost} to {purchaseCost}");
+            messages.Add($@"{nameof(PurchaseCost)} changed from ""{PurchaseCost}"" to ""{purchaseCost}""");
 
             PurchaseCost = purchaseCost;
 
             updatedProperty = true;
         }
 
-        if (warrantyEndDate > DateOnly.MinValue)
+        if (warrantyEndDate > DateOnly.MinValue && WarrantyEndDate != warrantyEndDate)
         {
-            messages.Add($"{nameof(WarrantyEndDate)} changed from {WarrantyEndDate} to {warrantyEndDate}");
+            messages.Add($@"{nameof(WarrantyEndDate)} changed from ""{WarrantyEndDate}"" to ""{warrantyEndDate}""");
 
             WarrantyEndDate = warrantyEndDate;
 

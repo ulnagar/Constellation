@@ -256,7 +256,7 @@
                     @foreach (var entry in Model.Asset.Notes.OrderByDescending(item => item.CreatedAt))
                     {
                         <tr>
-                            <td>@entry.Message</td>
+                            <td>@Html.Raw(entry.Message.ReplaceLineEndings("<br />"))</td>
                             <td>@entry.CreatedBy</td>
                             <td data-order="@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")">@entry.CreatedAt</td>
                         </tr>

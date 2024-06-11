@@ -1,4 +1,115 @@
-﻿@page "{assetNumber?}"
+﻿@page "{id?}"
+@using Constellation.Core.Models.Assets.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets.UpsertModel
 @{
 }
+
+<h2>@(Model.Id is null ? "Add" : "Edit") Asset</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group row">
+            <label asp-for="AssetNumber" class="col-md-2">Asset Number</label>
+            <div class="col-md-5">
+                <input asp-for="AssetNumber" class="form-control" readonly="@(Model.Id is not null)" />
+                <span asp-validation-for="AssetNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="SerialNumber" class="col-md-2">Serial Number</label>
+            <div class="col-md-5">
+                <input asp-for="SerialNumber" class="form-control" readonly="@(Model.Id is not null)" />
+                <span asp-validation-for="SerialNumber" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="SapEquipmentNumber" class="col-md-2">SAP Equipment Number</label>
+            <div class="col-md-5">
+                <input asp-for="SapEquipmentNumber" class="form-control" />
+                <span asp-validation-for="SapEquipmentNumber" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Manufacturer" class="col-md-2"></label>
+            <div class="col-md-5">
+                <input asp-for="Manufacturer" class="form-control" />
+                <span asp-validation-for="Manufacturer" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="ModelNumber" class="col-md-2">Model Number</label>
+            <div class="col-md-5">
+                <input asp-for="ModelNumber" class="form-control" />
+                <span asp-validation-for="ModelNumber" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="ModelDescription" class="col-md-2">Description</label>
+            <div class="col-md-8">
+                <input asp-for="ModelDescription" class="form-control" />
+                <span asp-validation-for="ModelDescription" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="Category" class="col-md-2"></label>
+            <div class="col-md-5">
+                <select asp-for="Category" asp-items="@(new SelectList(AssetCategory.GetOptions, "Value", "Name"))" class="form-control" readonly="@(Model.Id is not null)">
+                    <option value=""> -- Select -- </option>
+                </select>
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="PurchaseDate" class="col-md-2">Purchase Date</label>
+            <div class="col-md-5">
+                <input asp-for="PurchaseDate" class="form-control" />
+                <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="PurchaseDocument" class="col-md-2">Purchase Document</label>
+            <div class="col-md-5">
+                <input asp-for="PurchaseDocument" class="form-control" />
+                <span asp-validation-for="PurchaseDocument" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="PurchaseCost" class="col-md-2">Purchase Cost</label>
+            <div class="col-md-5">
+                <input asp-for="PurchaseCost" class="form-control" />
+                <span asp-validation-for="PurchaseCost" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="WarrantyEndDate" class="col-md-2">Warranty End Date</label>
+            <div class="col-md-5">
+                <input asp-for="WarrantyEndDate" class="form-control" />
+                <span asp-validation-for="WarrantyEndDate" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-3">
+                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>

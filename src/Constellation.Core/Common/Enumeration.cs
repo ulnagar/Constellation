@@ -84,6 +84,10 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         Order = order;
     }
 
+    protected static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
+        .Select(entry => entry.Value)
+        .AsEnumerable();
+
     public string Value { get; protected init; }
     public string Name { get; protected init; }
     public int Order { get; protected init; }

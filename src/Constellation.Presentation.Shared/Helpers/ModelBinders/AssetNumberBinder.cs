@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
+using Core.Models.Assets.ValueObjects;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.ComponentModel;
 using System.Reflection;
@@ -31,9 +32,10 @@ public sealed class AssetNumberBinder : IModelBinder
     }
 
     private object? TryParse(Type assetNumberType, string? rawValue) =>
-        FromString(assetNumberType, rawValue) is object parsedValue
+        FromString(assetNumberType, rawValue) is string parsedValue
             //? Activator.CreateInstance(assetNumberType, parsedValue) // For Public Constructors Only
-            ? assetNumberType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null)?.Invoke(new object[] { parsedValue }) // For Private Constructors with Parameters
+            //? assetNumberType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null)?.Invoke(new object[] { parsedValue }) // For Private Constructors with Parameters
+            ? AssetNumber.FromValue(parsedValue) //Forces the item creation through the validation in the FromValue method
             : null;
 
     private object? FromString(Type assetNumberType, string? rawValue) =>
@@ -43,6 +45,8 @@ public sealed class AssetNumberBinder : IModelBinder
 
     private Type? GetContainedType(Type assetNumberType)
     {
+        return typeof(string);
+
         PropertyInfo? property = assetNumberType.GetProperty("Number");
 
         if (property is null)

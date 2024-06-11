@@ -100,7 +100,7 @@
                             
                             @if (canManageAssets.Succeeded)
                             {
-                                <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-assetNumber="@item.AssetNumber" class="dropdown-item">Update</a>
+                                <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-id="@item.AssetNumber" class="dropdown-item">Update</a>
                             }
                         </div>
                     </div>

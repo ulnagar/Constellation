@@ -10,7 +10,7 @@ public sealed class AssetNumber : ValueObject, IComparable
 {
     public static readonly AssetNumber Empty = new(string.Empty);
 
-    public string Number { get; }
+    private string Number { get; }
 
     private AssetNumber(string number) => Number = number;
 
