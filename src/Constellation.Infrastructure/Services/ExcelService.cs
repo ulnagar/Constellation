@@ -1084,15 +1084,33 @@ public class ExcelService : IExcelService
 
             if (entry is not null)
             {
-                entry.DayWeek = Convert.ToDecimal(line[11].FormatField(), null);
+                string value = line[11].FormatField();
+
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    entry.DayWeek = 0;
+
+                    continue;
+                }
+
+                entry.DayWeek = Convert.ToDecimal(value, null);
             }
             else
             {
+                string value = line[11].FormatField();
+
+                decimal dayWeekValue = 0;
+
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    dayWeekValue = Convert.ToDecimal(value, null);
+                }
+
                 entry = new()
                 {
                     StudentId = studentId,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
-                    DayWeek = Convert.ToDecimal(line[11].FormatField(), null)
+                    DayWeek = dayWeekValue
                 };
 
                 data.Add(entry);
