@@ -154,6 +154,19 @@
         <div id="allocations" class="tab-pane active">
             <h3>Allocation History</h3>
             
+            @{
+                if (Model.Asset.Allocations.Any(entry => entry.ReturnDate == DateOnly.MinValue))
+                {
+                    <button class="btn btn-warning deallocate-button">Deallocate</button>
+                }
+                else
+                {
+                    <button class="btn btn-warning allocate-button">Allocate</button>
+                }
+            }
+
+            <hr />
+
             <table class="table-striped table-hover data-table">
                 <thead>
                     <tr>
@@ -266,3 +279,35 @@
         </div>
     </div>
 </div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('.deallocate-button').click(function (event) {
+                var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: "?handler=AjaxDeallocate",
+                    type: "POST",
+                    data: {
+                        __RequestVerificationToken: xsrfHeader
+                    }
+                }).done(function (data) {
+                    $('#page-modal .modal-content').html(data);
+                    $('#page-modal').modal('show');
+                });
+            });
+
+
+        });
+    </script>
+}

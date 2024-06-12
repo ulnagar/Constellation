@@ -15,6 +15,10 @@
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Shared\PartialViews\DeallocateAssetConfirmationModal\" />
+  </ItemGroup>
+
 
 
 </Project>

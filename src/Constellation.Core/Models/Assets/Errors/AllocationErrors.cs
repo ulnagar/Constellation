@@ -1,9 +1,15 @@
 ﻿namespace Constellation.Core.Models.Assets.Errors;
 
+using Constellation.Core.Models.Assets.ValueObjects;
 using Shared;
+using System;
 
 public static class AllocationErrors
 {
+    public static readonly Func<AssetNumber, Error> AlreadyAllocated = assetNumber => new(
+        "Assets.Allocation.AlreadyAllocated",
+        $"The device {assetNumber} already has an active allocation");
+
     public static readonly Error StudentEmpty = new(
         "Assets.Allocation.StudentEmpty",
         "A Student record is required to create an Allocation for a student");

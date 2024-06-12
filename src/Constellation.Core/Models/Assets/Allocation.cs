@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using Constellation.Core.Abstractions.Clock;
+
 namespace Constellation.Core.Models.Assets;
 
 using Core.ValueObjects;
@@ -99,5 +101,11 @@ public class Allocation : IAuditableEntity
         return allocation;
     }
 
+    internal void Delete(IDateTimeProvider dateTime)
+    {
+        IsDeleted = true;
+        ReturnDate = dateTime.Today;
+    }
+    
     private void SetAllocationDate(DateOnly allocatedOn) => AllocationDate = allocatedOn;
 }

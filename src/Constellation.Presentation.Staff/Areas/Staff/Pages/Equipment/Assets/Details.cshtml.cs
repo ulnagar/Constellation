@@ -1,6 +1,7 @@
 #nullable enable
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
+using Application.Assets.DeallocateAsset;
 using Constellation.Application.Assets.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.Errors;
@@ -62,5 +63,40 @@ public class DetailsModel : BasePageModel
         }
 
         Asset = result.Value;
+    }
+
+    public async Task<IActionResult> OnPostAjaxAllocate()
+    {
+
+        return Partial("DeallocateAssetConfirmationModal");
+    }
+
+    public async Task<IActionResult> OnPostAllocate()
+    {
+
+
+        return RedirectToPage();
+    }
+    
+    public async Task<IActionResult> OnPostAjaxDeallocate() => Partial("DeallocateAssetConfirmationModal");
+
+    public async Task<IActionResult> OnGetDeallocate()
+    {
+        DeallocateAssetCommand command = new(AssetNumber);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            Error = new()
+            {
+                Error = result.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

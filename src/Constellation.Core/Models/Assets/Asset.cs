@@ -263,7 +263,7 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         if (!string.IsNullOrWhiteSpace(purchaseDocument) && PurchaseDocument != purchaseDocument)
         {
-            messages.Add($@"{nameof(purchaseDocument)} changed from ""{PurchaseDocument}"" to ""{purchaseDocument}""");
+            messages.Add($@"{nameof(PurchaseDocument)} changed from ""{PurchaseDocument}"" to ""{purchaseDocument}""");
             
             PurchaseDocument = purchaseDocument;
 
@@ -336,7 +336,22 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public void AddAllocation(Allocation allocation) => _allocations.Add(allocation);
+    public Result AddAllocation(Allocation allocation)
+    {
+        if (_allocations.Any(entry => !entry.IsDeleted))
+            return Result.Failure(AllocationErrors.AlreadyAllocated(AssetNumber));
+
+        _allocations.Add(allocation);
+
+        return Result.Success();
+    }
+
+    public void Deallocate(IDateTimeProvider dateTime)
+    {
+        foreach (Allocation allocation in _allocations.Where(entry => !entry.IsDeleted))
+            allocation.Delete(dateTime);
+    }
+
     public void AddLocation(Location location) => _locations.Add(location);
     public void AddSighting(Sighting sighting) => _sightings.Add(sighting);
     public void AddNote(Note note) => _notes.Add(note);
