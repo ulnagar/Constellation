@@ -33,7 +33,7 @@
     },
     {
       "library": "twitter-bootstrap@4.6.2",
-      "destination": "wwwroot/lib/bootstrap/"
+      "destination": "wwwroot/lib/bootstrap4/"
     },
     {
       "library": "jquery@3.5.1",

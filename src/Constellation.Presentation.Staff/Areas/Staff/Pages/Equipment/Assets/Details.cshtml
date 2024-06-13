@@ -15,7 +15,7 @@
         <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-id="@Model.AssetNumber" class="btn btn-warning">Edit</a>
     }
 
-    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Equipment/Assets/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -157,11 +157,11 @@
             @{
                 if (Model.Asset.Allocations.Any(entry => entry.ReturnDate == DateOnly.MinValue))
                 {
-                    <button class="btn btn-warning deallocate-button">Deallocate</button>
+                    <button type="button" class="btn btn-warning deallocate-button">Deallocate</button>
                 }
                 else
                 {
-                    <button class="btn btn-warning allocate-button">Allocate</button>
+                    <button type="button" data-toggle="modal" data-target="#allocate-device-modal" class="btn btn-warning allocate-button">Allocate</button>
                 }
             }
 
@@ -288,6 +288,8 @@
         </div>
     </div>
 </div>
+
+<vc:allocate-asset asset-id="@Model.Asset.AssetId" />
 
 @section scripts {
     <script>

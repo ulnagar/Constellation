@@ -59,7 +59,9 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
     public Allocation? CurrentAllocation => 
         _allocations
-            .Where(allocation => allocation.ReturnDate == DateOnly.MinValue)
+            .Where(allocation => 
+                allocation.ReturnDate == DateOnly.MinValue &&
+                !allocation.IsDeleted)
             .MaxBy(allocation => allocation.AllocationDate);
 
     public Location? CurrentLocation =>
