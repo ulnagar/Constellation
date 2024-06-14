@@ -2,8 +2,6 @@
 namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel;
-using System.Reflection;
 
 public sealed class StringEnumerableBinder : IModelBinder
 {
@@ -30,24 +28,15 @@ public sealed class StringEnumerableBinder : IModelBinder
             bindingContext.ModelState.TryAddModelError(modelName, "Invalid Enumerable Value");
     }
 
-    private object? TryParse(Type enumerableType, string? rawValue) =>
-        FromString(enumerableType, rawValue) is object parsedValue
-            //? Activator.CreateInstance(assetNumberType, parsedValue) // For Public Constructors Only
-            ? enumerableType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null)?.Invoke(new object[] { parsedValue }) // For Private Constructors with Parameters
-            : null;
-
-    private object? FromString(Type enumerableType, string? rawValue) =>
-        rawValue is string && !string.IsNullOrWhiteSpace(rawValue) && GetContainedType(enumerableType) is Type containedType
-            ? TypeDescriptor.GetConverter(containedType).ConvertFromString(rawValue)
-            : null;
-
-    private Type? GetContainedType(Type enumerableType)
+    private object? TryParse(Type enumerableType, string? rawValue)
     {
-        PropertyInfo? property = enumerableType.GetProperty("Value");
-
-        if (property is null)
+        if (rawValue is null)
             return null;
 
-        return property.PropertyType;
+        Type? baseType = enumerableType.BaseType;
+
+        object? typedValue = baseType!.GetMethod("FromValue")?.Invoke(null, new object?[] { rawValue });
+
+        return typedValue;
     }
 }

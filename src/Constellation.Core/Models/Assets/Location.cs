@@ -1,4 +1,7 @@
 ﻿#nullable enable
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Shared;
+
 namespace Constellation.Core.Models.Assets;
 
 using Enums;
@@ -86,12 +89,15 @@ public sealed record Location : IAuditableEntity
         return location;
     }
 
-    public static Location CreateCorporateOfficeLocationRecord(
+    public static Result<Location> CreateCorporateOfficeLocationRecord(
         AssetId assetId,
         string site,
         bool current,
         DateOnly arrivalDate)
     {
+        if (string.IsNullOrWhiteSpace(site))
+            return Result.Failure<Location>(LocationErrors.SiteEmpty);
+
         Location location = new(
             assetId,
             LocationCategory.CorporateOffice, 
@@ -112,7 +118,7 @@ public sealed record Location : IAuditableEntity
         Location location = new(
             assetId,
             LocationCategory.PrivateResidence, 
-            string.Empty,
+            LocationCategory.PrivateResidence.Name,
             string.Empty,
             string.Empty,
             current,
@@ -121,5 +127,9 @@ public sealed record Location : IAuditableEntity
         return location;
     }
 
-    public void SetDepartureDate(DateOnly departureDate) => DepartureDate = departureDate;
+    internal void SetDepartureDate(DateOnly departureDate)
+    {
+        DepartureDate = departureDate;
+        CurrentLocation = false;
+    } 
 }

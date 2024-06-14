@@ -41,6 +41,7 @@ public sealed record AssetResponse(
 {
     public sealed record AllocationDetails(
         AllocationId AllocationId,
+        AllocationType AllocationType,
         string UserId,
         string UserName,
         DateOnly AllocationDate,

@@ -152,7 +152,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 continue;
             }
 
-            Location location = locationCategory switch
+            Result<Location> location = locationCategory switch
             {
                 _ when locationCategory.Equals(LocationCategory.CoordinatingOffice) =>
                     Location.CreateOfficeLocationRecord(asset.Value.Id, importAsset.LocationRoom ?? string.Empty, true, _dateTime.Today),
@@ -163,8 +163,18 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 _ when locationCategory.Equals(LocationCategory.PublicSchool) =>
                     Location.CreatePublicSchoolLocationRecord(asset.Value.Id, importAsset.LocationSite ?? locationSchool!.Name, locationSchool!.Code, true, _dateTime.Today)
             };
-                
-            asset.Value.AddLocation(location);
+
+            if (location.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(ImportAssetDto), importAsset, true)
+                    .ForContext(nameof(Error), location.Error, true)
+                    .Warning("Failed to import Asset");
+
+                continue;
+            }
+
+            asset.Value.AddLocation(location.Value);
 
             if (!string.IsNullOrWhiteSpace(importAsset.ResponsibleOfficer))
             {

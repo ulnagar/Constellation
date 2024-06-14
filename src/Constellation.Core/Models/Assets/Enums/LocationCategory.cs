@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Assets.Enums;
 
 using Common;
+using System.Collections.Generic;
 
 public sealed class LocationCategory : StringEnumeration<LocationCategory>
 {
@@ -11,4 +12,6 @@ public sealed class LocationCategory : StringEnumeration<LocationCategory>
 
     private LocationCategory(string value, string name)
         : base(value, name) { }
+
+    public static IEnumerable<LocationCategory> GetOptions => GetEnumerable;
 }

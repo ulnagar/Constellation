@@ -43,6 +43,7 @@ internal sealed class GetAssetByAssetNumberQueryHandler
         {
             allocations.Add(new(
                 allocation.Id,
+                allocation.AllocationType,
                 allocation.UserId,
                 allocation.ResponsibleOfficer,
                 allocation.AllocationDate,

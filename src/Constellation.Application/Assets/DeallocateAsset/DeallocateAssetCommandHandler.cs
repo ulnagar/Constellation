@@ -45,7 +45,17 @@ internal sealed class DeallocateAssetCommandHandler
             return Result.Failure(AssetErrors.NotFoundByAssetNumber(request.AssetNumber));
         }
 
-        asset.Deallocate(_dateTime);
+        Result result = asset.Deallocate(_dateTime);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(DeallocateAssetCommand), request, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Could not deallocate device");
+
+            return Result.Failure(result.Error);
+        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

@@ -42,7 +42,7 @@ public class AllocateAssetViewComponent : ViewComponent
             return Content(string.Empty);
         }
 
-        viewModel.StaffList = new SelectList(staff.Value, "Key", "Value");
+        viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
 
         Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
@@ -51,8 +51,8 @@ public class AllocateAssetViewComponent : ViewComponent
             return Content(string.Empty);
         }
 
-        viewModel.SchoolList = new SelectList(schools.Value, "Code", "Name");
+        viewModel.SchoolList = new SelectList(schools.Value.OrderBy(entry => entry.Name), "Code", "Name");
 
-        return View();
+        return View(viewModel);
     }
 }

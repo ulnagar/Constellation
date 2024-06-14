@@ -1,10 +1,13 @@
 ﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.AllocateAsset;
 
 using Core.Models.Assets.Enums;
+using Helpers.ModelBinders;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 public sealed class AllocateDeviceSelection
 {
+    [ModelBinder(typeof(StringEnumerableBinder))]
     public AllocationType AllocationType { get; set; }
 
     public string StudentId { get; set; } = string.Empty;

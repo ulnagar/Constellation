@@ -167,7 +167,7 @@
 
             <hr />
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover location-data-table">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -187,7 +187,7 @@
                             : string.Empty;
 
                         <tr>
-                            <td>@entry.UserName</td>
+                            <td>@entry.UserName (@entry.AllocationType.Name)</td>
                             <td>@entry.AllocationDate</td>
                             <td data-order="@returnDateSort">@returnDateDisplay</td>
                         </tr>
@@ -199,7 +199,13 @@
         <div id="locations" class="tab-pane">
             <h3>Location History</h3>
             
-            <table class="table-striped table-hover data-table">
+            <div class="page-menu">
+                <button type="button" data-toggle="modal" data-target="#transfer-asset-modal" class="btn btn-warning transfer-button">Transfer</button>
+            </div>
+            
+            <hr />
+            
+            <table class="table-striped table-hover location-data-table">
                 <thead>
                     <tr>
                         <th>Category</th>
@@ -209,7 +215,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var entry in Model.Asset.Locations.OrderByDescending(item => item.ArrivalDate))
+                    @foreach (var entry in Model.Asset.Locations)
                     {
                         var departureDateSort = entry.DepartureDate != DateOnly.MinValue
                             ? entry.DepartureDate.ToString("yyyy-MM-dd")
@@ -233,11 +239,11 @@
         <div id="sightings" class="tab-pane">
             <h3>Sighting History</h3>
             
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover notes-data-table">
                 <thead>
                     <tr>
-                        <th>By</th>
                         <th>On</th>
+                        <th>By</th>
                         <th>Note</th>
                     </tr>
                 </thead>
@@ -245,8 +251,8 @@
                     @foreach (var entry in Model.Asset.Sightings.OrderByDescending(item => item.SightedAt))
                     {
                         <tr>
-                            <td>@entry.SightedBy</td>
                             <td data-order="@entry.SightedAt.ToString("yyyy-MM-dd HH:mm")">@entry.SightedAt</td>
+                            <td>@entry.SightedBy</td>
                             <td>@entry.Note</td>
                         </tr>
                     }
@@ -257,21 +263,21 @@
         <div id="notes" class="tab-pane">
             <h3>Notes</h3>
             
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover notes-data-table">
                 <thead>
                     <tr>
-                        <th>Note</th>
-                        <th>By</th>
                         <th>On</th>
+                        <th>By</th>
+                        <th>Note</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var entry in Model.Asset.Notes.OrderByDescending(item => item.CreatedAt))
                     {
                         <tr>
-                            <td>@Html.Raw(entry.Message.ReplaceLineEndings("<br />"))</td>
-                            <td>@entry.CreatedBy</td>
                             <td data-order="@entry.CreatedAt.ToString("yyyy-MM-dd HH:mm")">@entry.CreatedAt</td>
+                            <td>@entry.CreatedBy</td>
+                            <td>@Html.Raw(entry.Message.ReplaceLineEndings("<br />"))</td>
                         </tr>
                     }
                 </tbody>
@@ -290,10 +296,15 @@
 </div>
 
 <vc:allocate-asset asset-id="@Model.Asset.AssetId" />
+<vc:transfer-asset asset-id="@Model.Asset.AssetId" />
 
 @section scripts {
     <script>
         $(document).ready(function () {
+            $('.notes-data-table').DataTable({ "order": [[0, 'desc']] });
+            $('.location-data-table').DataTable({ "order": [[2, 'desc']] });
+
+
             $('.deallocate-button').click(function (event) {
                 var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
 
@@ -308,7 +319,6 @@
                     $('#page-modal').modal('show');
                 });
             });
-
 
         });
     </script>

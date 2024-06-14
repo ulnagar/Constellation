@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ValueObjects;
+using static Constellation.Core.Errors.DomainErrors.Assets;
 
 public sealed class Asset : AggregateRoot, IAuditableEntity
 {
@@ -345,16 +346,50 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         _allocations.Add(allocation);
 
+        Result<Note> note = Note.Create(Id, $"Asset allocated to {allocation.ResponsibleOfficer}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
         return Result.Success();
     }
 
-    public void Deallocate(IDateTimeProvider dateTime)
+    public Result Deallocate(IDateTimeProvider dateTime)
     {
         foreach (Allocation allocation in _allocations.Where(entry => !entry.IsDeleted))
+        {
             allocation.Delete(dateTime);
+
+            Result<Note> note = Note.Create(Id, $"Allocation to {allocation.ResponsibleOfficer} removed");
+
+            if (note.IsFailure)
+                return Result.Failure(note.Error);
+
+            _notes.Add(note.Value);
+        }
+
+        return Result.Success();
     }
 
-    public void AddLocation(Location location) => _locations.Add(location);
+    public Result AddLocation(Location location)
+    {
+        foreach (Location entry in _locations.Where(entry => entry.CurrentLocation))
+            entry.SetDepartureDate(location.ArrivalDate);
+
+        _locations.Add(location);
+        
+        Result<Note> note = Note.Create(Id, $"Asset transferred to {location.Site}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        return Result.Success();
+    }
+    
     public void AddSighting(Sighting sighting) => _sightings.Add(sighting);
     public void AddNote(Note note) => _notes.Add(note);
 

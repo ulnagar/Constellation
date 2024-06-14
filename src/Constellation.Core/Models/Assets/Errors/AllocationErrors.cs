@@ -25,4 +25,8 @@ public static class AllocationErrors
     public static readonly Error RecipientEmpty = new(
         "Assets.Allocation.RecipientEmpty",
         "A contact record is required to create an Allocation for a community member");
+
+    public static readonly Error UnknownType = new(
+        "Assets.Allocation.UnknownType",
+        "Unrecognised AllocationType provided");
 }
