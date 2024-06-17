@@ -3,7 +3,6 @@
 using Application.Schools.GetSchoolsForSelectionList;
 using Application.Schools.Models;
 using Core.Abstractions.Clock;
-using Core.Models.Assets.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +22,7 @@ public class TransferAssetViewComponent : ViewComponent
         _dateTime = dateTime;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(AssetId assetId)
+    public async Task<IViewComponentResult> InvokeAsync()
     {
         TransferAssetSelection viewModel = new();
 

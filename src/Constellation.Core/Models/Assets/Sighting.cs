@@ -1,4 +1,8 @@
 ﻿#nullable enable
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Shared;
+
 namespace Constellation.Core.Models.Assets;
 
 using Identifiers;
@@ -27,12 +31,19 @@ public sealed record Sighting
     public DateTime SightedAt { get; private set; }
     public string Note { get; private set; } = string.Empty;
 
-    public static Sighting Create(
+    public static Result<Sighting> Create(
         AssetId assetId,
         string sightedBy,
         DateTime sightedAt,
-        string note)
+        string note,
+        IDateTimeProvider dateTime)
     {
+        if (string.IsNullOrWhiteSpace(sightedBy))
+            return Result.Failure<Sighting>(SightingErrors.NoWitness);
+
+        if (sightedAt > dateTime.Now)
+            return Result.Failure<Sighting>(SightingErrors.FutureSighting);
+
         Sighting sighting = new(
             assetId,
             sightedBy,

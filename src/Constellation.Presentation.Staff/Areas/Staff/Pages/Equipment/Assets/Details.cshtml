@@ -154,7 +154,8 @@
         <div id="allocations" class="tab-pane active">
             <h3>Allocation History</h3>
             
-            @{
+            @if (canManageAssets.Succeeded)
+            {
                 if (Model.Asset.Allocations.Any(entry => entry.ReturnDate == DateOnly.MinValue))
                 {
                     <button type="button" class="btn btn-warning deallocate-button">Deallocate</button>
@@ -199,10 +200,11 @@
         <div id="locations" class="tab-pane">
             <h3>Location History</h3>
             
-            <div class="page-menu">
+            @if (canManageAssets.Succeeded)
+            {
                 <button type="button" data-toggle="modal" data-target="#transfer-asset-modal" class="btn btn-warning transfer-button">Transfer</button>
-            </div>
-            
+            }
+
             <hr />
             
             <table class="table-striped table-hover location-data-table">
@@ -239,6 +241,13 @@
         <div id="sightings" class="tab-pane">
             <h3>Sighting History</h3>
             
+            @if (canManageAssets.Succeeded)
+            {
+                <button type="button" data-toggle="modal" data-target="#add-asset-sighting-modal" class="btn btn-warning">Add Sighting</button>
+            }
+            
+            <hr />
+
             <table class="table-striped table-hover notes-data-table">
                 <thead>
                     <tr>
@@ -263,6 +272,13 @@
         <div id="notes" class="tab-pane">
             <h3>Notes</h3>
             
+            @if (canManageAssets.Succeeded)
+            {
+                <button type="button" data-toggle="modal" data-target="#add-asset-note-modal" class="btn btn-warning">Add Note</button>
+            }
+
+            <hr />
+
             <table class="table-striped table-hover notes-data-table">
                 <thead>
                     <tr>
@@ -295,8 +311,10 @@
     </div>
 </div>
 
-<vc:allocate-asset asset-id="@Model.Asset.AssetId" />
-<vc:transfer-asset asset-id="@Model.Asset.AssetId" />
+<vc:allocate-asset />
+<vc:transfer-asset />
+<vc:add-asset-note />
+<vc:add-asset-sighting />
 
 @section scripts {
     <script>

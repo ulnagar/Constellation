@@ -389,8 +389,21 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
 
         return Result.Success();
     }
-    
-    public void AddSighting(Sighting sighting) => _sightings.Add(sighting);
+
+    public Result AddSighting(Sighting sighting)
+    {
+        _sightings.Add(sighting);
+
+        Result<Note> note = Note.Create(Id, $"Asset sighted by {sighting.SightedBy}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        return Result.Success();
+    }
+
     public void AddNote(Note note) => _notes.Add(note);
 
     public void Delete() => IsDeleted = true;

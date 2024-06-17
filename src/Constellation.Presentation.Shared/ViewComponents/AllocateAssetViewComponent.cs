@@ -5,7 +5,6 @@ using Application.Schools.Models;
 using Application.StaffMembers.GetStaffForSelectionList;
 using Application.StaffMembers.Models;
 using Application.Students.GetCurrentStudentsAsDictionary;
-using Core.Models.Assets.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +21,7 @@ public class AllocateAssetViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(AssetId assetId)
+    public async Task<IViewComponentResult> InvokeAsync()
     {
         AllocateDeviceSelection viewModel = new();
 

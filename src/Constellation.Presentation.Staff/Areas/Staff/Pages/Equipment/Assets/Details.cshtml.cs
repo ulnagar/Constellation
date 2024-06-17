@@ -1,8 +1,10 @@
 #nullable enable
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
+using Application.Assets.AddAssetNote;
 using Application.Assets.AllocateAsset;
 using Application.Assets.DeallocateAsset;
+using Application.Assets.SightAsset;
 using Application.Assets.TransferAsset;
 using Constellation.Application.Assets.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
@@ -16,6 +18,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
+using Presentation.Shared.Pages.Shared.Components.AddAssetNote;
+using Presentation.Shared.Pages.Shared.Components.AddAssetSighting;
 using Presentation.Shared.Pages.Shared.Components.AllocateAsset;
 using Presentation.Shared.Pages.Shared.Components.TransferAsset;
 
@@ -396,5 +400,57 @@ public class DetailsModel : BasePageModel
         Asset = unknownResult.Value;
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostAddNote(AddAssetNoteSelection viewModel)
+    {
+        AddAssetNoteCommand command = new(
+            AssetNumber,
+            viewModel.Note);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            Error = new()
+            {
+                Error = result.Error,
+                RedirectPath = null
+            };
+
+            Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
+            Asset = resetResult.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddSighting(AddAssetSightingSelection viewModel)
+    {
+        SightAssetCommand command = new(
+            AssetNumber,
+            viewModel.StaffId,
+            viewModel.SightedAt,
+            viewModel.Note ?? string.Empty);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            Error = new()
+            {
+                Error = result.Error,
+                RedirectPath = null
+            };
+
+            Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
+            Asset = resetResult.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }
