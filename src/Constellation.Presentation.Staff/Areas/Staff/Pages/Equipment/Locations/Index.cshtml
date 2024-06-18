@@ -1,0 +1,71 @@
+@page
+@using Constellation.Core.Models.Assets.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Locations.IndexModel
+
+@{
+
+}
+
+<h2>Allocation List</h2>
+
+<div class="page-menu">
+    @{
+        var schoolStyle = "btn-outline-secondary";
+        var officeStyle = schoolStyle;
+        var corporateStyle = schoolStyle;
+        var privateStyle = schoolStyle;
+
+        if (Model.Category.Equals(LocationCategory.PublicSchool))
+        {
+            schoolStyle = "btn-primary";
+        }
+
+        if (Model.Category.Equals(LocationCategory.CoordinatingOffice))
+        {
+            officeStyle = "btn-primary";
+        }
+
+        if (Model.Category.Equals(LocationCategory.CorporateOffice))
+        {
+            corporateStyle = "btn-primary";
+        }
+
+        if (Model.Category.Equals(LocationCategory.PrivateResidence))
+        {
+            privateStyle = "btn-primary";
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-category="@LocationCategory.PublicSchool.Value" class="btn @schoolStyle">Public School</a>
+        <a asp-route-category="@LocationCategory.CoordinatingOffice.Value" class="btn @officeStyle">Coordinating Office</a>
+        <a asp-route-category="@LocationCategory.CorporateOffice.Value" class="btn @corporateStyle">Corporate Office</a>
+        <a asp-route-category="@LocationCategory.PrivateResidence.Value" class="btn @privateStyle">Private Residence</a>
+    </div>
+</div>
+
+<hr />
+
+<table class="table-hover grouped-data-table">
+    <thead>
+    <tr>
+        <th>Location</th>
+        <th>Type</th>
+        <th>Asset Number</th>
+        <th>Serial Number</th>
+        <th>User</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entry in Model.Locations.OrderBy(entry => entry.LocationName))
+    {
+        <tr>
+            <td>@entry.LocationName</td>
+            <td data-order="@entry.LocationCategory-@entry.LocationName-@entry.AssetNumber">@entry.ModelDescription</td>
+            <td>@entry.AssetNumber</td>
+            <td>@entry.SerialNumber</td>
+            <td>@entry.AllocatedTo</td>
+        </tr>
+    }
+    </tbody>
+</table>

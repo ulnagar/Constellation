@@ -1,0 +1,80 @@
+@page
+@using Constellation.Core.Models.Assets.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Allocations.IndexModel
+
+@{
+
+}
+
+<h2>Allocation List</h2>
+
+<div class="page-menu">
+    @{
+        var studentStyle = "btn-outline-secondary";
+        var staffStyle = studentStyle;
+        var schoolStyle = studentStyle;
+        var communityStyle = studentStyle;
+
+        if (Model.AllocationType.Equals(AllocationType.Student))
+        {
+            studentStyle = "btn-primary";
+        }
+
+        if (Model.AllocationType.Equals(AllocationType.Staff))
+        {
+            staffStyle = "btn-primary";
+        }
+
+        if (Model.AllocationType.Equals(AllocationType.School))
+        {
+            schoolStyle = "btn-primary";
+        }
+
+        if (Model.AllocationType.Equals(AllocationType.CommunityMember))
+        {
+            communityStyle = "btn-primary";
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-allocationType="@AllocationType.Student" class="btn @studentStyle">Student</a>
+        <a asp-route-allocationType="@AllocationType.Staff" class="btn @staffStyle">Staff</a>
+        <a asp-route-allocationType="@AllocationType.School" class="btn @schoolStyle">School</a>
+        <a asp-route-allocationType="@AllocationType.CommunityMember" class="btn @communityStyle">Community</a>
+    </div>
+</div>
+
+<hr />
+
+<table class="table-hover grouped-data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Asset Number</th>
+            <th>Serial Number</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Allocations)
+        {
+            <tr>
+                <td> <!-- data-order="@entry.UserGroup-@entry.UserName" -->
+                    @if (string.IsNullOrWhiteSpace(entry.UserGroup))
+                    {
+                        <span>@entry.UserName</span>
+                    }
+                    else
+                    {
+                        <span>@entry.UserName (@entry.UserGroup)</span>
+                    }
+                </td>
+                <td data-order="@entry.UserGroup-@entry.UserName-@entry.AssetNumber">@entry.ModelDescription</td>
+                <td>@entry.AssetNumber</td>
+                <td>@entry.SerialNumber</td>
+                <td>@entry.LocationName</td>
+            </tr>
+        }
+    </tbody>
+</table>

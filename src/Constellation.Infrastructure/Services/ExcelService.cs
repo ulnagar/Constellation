@@ -114,20 +114,21 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 1].Value = "Asset Number";
         worksheet.Cells[1, 2].Value = "Serial Number";
         worksheet.Cells[1, 3].Value = "SAP Equipment Number";
-        worksheet.Cells[1, 4].Value = "Model Number";
-        worksheet.Cells[1, 5].Value = "Model Description";
-        worksheet.Cells[1, 6].Value = "Status";
-        worksheet.Cells[1, 7].Value = "Device Category";
-        worksheet.Cells[1, 8].Value = "Purchase Date";
-        worksheet.Cells[1, 9].Value = "Purchase Cost";
-        worksheet.Cells[1, 10].Value = "Warranty End Date";
-        worksheet.Cells[1, 11].Value = "Location Category";
-        worksheet.Cells[1, 12].Value = "Location Site";
-        worksheet.Cells[1, 13].Value = "Location Room";
-        worksheet.Cells[1, 14].Value = "Responsible Officer";
-        worksheet.Cells[1, 15].Value = "Last Seen";
-        worksheet.Cells[1, 16].Value = "Last Seen By";
-        worksheet.Cells[1, 17].Value = "Notes";
+        worksheet.Cells[1, 4].Value = "Manufacturer";
+        worksheet.Cells[1, 5].Value = "Model Number";
+        worksheet.Cells[1, 6].Value = "Model Description";
+        worksheet.Cells[1, 7].Value = "Status";
+        worksheet.Cells[1, 8].Value = "Device Category";
+        worksheet.Cells[1, 9].Value = "Purchase Date";
+        worksheet.Cells[1, 10].Value = "Purchase Cost";
+        worksheet.Cells[1, 11].Value = "Warranty End Date";
+        worksheet.Cells[1, 12].Value = "Location Category";
+        worksheet.Cells[1, 13].Value = "Location Site";
+        worksheet.Cells[1, 14].Value = "Location Room";
+        worksheet.Cells[1, 15].Value = "Responsible Officer";
+        worksheet.Cells[1, 16].Value = "Last Seen";
+        worksheet.Cells[1, 17].Value = "Last Seen By";
+        worksheet.Cells[1, 18].Value = "Notes";
 
         int row = 2;
 
@@ -136,72 +137,73 @@ public class ExcelService : IExcelService
             worksheet.Cells[row, 1].Value = asset.AssetNumber;
             worksheet.Cells[row, 2].Value = asset.SerialNumber;
             worksheet.Cells[row, 3].Value = asset.SapEquipmentNumber;
-            worksheet.Cells[row, 4].Value = asset.ModelNumber;
-            worksheet.Cells[row, 5].Value = asset.ModelDescription;
-            worksheet.Cells[row, 6].Value = asset.Status.Name;
-            worksheet.Cells[row, 7].Value = asset.Category.Name;
+            worksheet.Cells[row, 4].Value = asset.Manufacturer;
+            worksheet.Cells[row, 5].Value = asset.ModelNumber;
+            worksheet.Cells[row, 6].Value = asset.ModelDescription;
+            worksheet.Cells[row, 7].Value = asset.Status.Name;
+            worksheet.Cells[row, 8].Value = asset.Category.Name;
 
             if (asset.PurchaseDate == DateOnly.MinValue)
             {
-                worksheet.Cells[row, 8].Value = string.Empty;
+                worksheet.Cells[row, 9].Value = string.Empty;
             }
             else
             {
-                worksheet.Cells[row, 8].Value = asset.PurchaseDate.ToDateTime(TimeOnly.MinValue);
-                worksheet.Cells[row, 8].Style.Numberformat.Format = "dd/MM/yyyy";
+                worksheet.Cells[row, 9].Value = asset.PurchaseDate.ToDateTime(TimeOnly.MinValue);
+                worksheet.Cells[row, 9].Style.Numberformat.Format = "dd/MM/yyyy";
             }
 
             if (asset.PurchaseCost == 0m)
             {
-                worksheet.Cells[row, 9].Value = string.Empty;
+                worksheet.Cells[row, 10].Value = string.Empty;
             }
             else 
             {
-                worksheet.Cells[row, 9].Value = asset.PurchaseCost;
-                worksheet.Cells[row, 9].Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"_-;_-@_-";
+                worksheet.Cells[row, 10].Value = asset.PurchaseCost;
+                worksheet.Cells[row, 10].Style.Numberformat.Format = "_-$* #,##0.00_-;-$* #,##0.00_-;_-$* \"-\"_-;_-@_-";
             }
 
             if (asset.WarrantyEndDate == DateOnly.MinValue)
             {
-                worksheet.Cells[row, 10].Value = string.Empty;
+                worksheet.Cells[row, 11].Value = string.Empty;
             }
             else
             {
-                worksheet.Cells[row, 10].Value = asset.WarrantyEndDate.ToDateTime(TimeOnly.MinValue);
-                worksheet.Cells[row, 10].Style.Numberformat.Format = "dd/MM/yyyy";
+                worksheet.Cells[row, 11].Value = asset.WarrantyEndDate.ToDateTime(TimeOnly.MinValue);
+                worksheet.Cells[row, 11].Style.Numberformat.Format = "dd/MM/yyyy";
             }
 
-            worksheet.Cells[row, 11].Value = asset.CurrentLocation?.Category.Name;
-            worksheet.Cells[row, 12].Value = asset.CurrentLocation?.Site;
-            worksheet.Cells[row, 13].Value = asset.CurrentLocation?.Room;
-            worksheet.Cells[row, 14].Value = asset.CurrentAllocation?.ResponsibleOfficer;
+            worksheet.Cells[row, 12].Value = asset.CurrentLocation?.Category.Name;
+            worksheet.Cells[row, 13].Value = asset.CurrentLocation?.Site;
+            worksheet.Cells[row, 14].Value = asset.CurrentLocation?.Room;
+            worksheet.Cells[row, 15].Value = asset.CurrentAllocation?.ResponsibleOfficer;
 
             if (asset.LastSighting is null || asset.LastSighting.SightedAt == DateTime.MinValue)
             {
-                worksheet.Cells[row, 15].Value = string.Empty;
+                worksheet.Cells[row, 16].Value = string.Empty;
             }
             else
             {
-                worksheet.Cells[row, 15].Value = asset.LastSighting.SightedAt;
-                worksheet.Cells[row, 15].Style.Numberformat.Format = "dd/MM/yyyy HH:mm";
+                worksheet.Cells[row, 16].Value = asset.LastSighting.SightedAt;
+                worksheet.Cells[row, 16].Style.Numberformat.Format = "dd/MM/yyyy HH:mm";
             }
 
-            worksheet.Cells[row, 16].Value = asset.LastSighting?.SightedBy;
+            worksheet.Cells[row, 17].Value = asset.LastSighting?.SightedBy;
 
             if (asset.Notes.Count > 0)
             {
                 IOrderedEnumerable<Note> orderedNotes = asset.Notes.OrderByDescending(note => note.CreatedAt);
                 IEnumerable<string> noteText = orderedNotes.Select(note => $"{note.CreatedAt} - {note.CreatedBy} - {note.Message}");
 
-                worksheet.Cells[row, 17].RichText.Add(string.Join("\r\n", noteText));
-                worksheet.Cells[row, 17].Style.WrapText = true;
-                worksheet.Cells[row, 17].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+                worksheet.Cells[row, 18].RichText.Add(string.Join("\r\n", noteText));
+                worksheet.Cells[row, 18].Style.WrapText = true;
+                worksheet.Cells[row, 18].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
             }
 
             row++;
         }
 
-        worksheet.Columns[17].Width = 80;
+        worksheet.Columns[18].Width = 80;
         worksheet.View.FreezePanes(2, 1);
         worksheet.Cells[1, 1, row, 17].AutoFilter = true;
         worksheet.Cells[1, 1, row, 16].AutoFitColumns();

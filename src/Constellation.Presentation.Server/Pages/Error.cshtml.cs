@@ -1,47 +1,46 @@
+namespace Constellation.Presentation.Server.Pages;
+
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using System.Diagnostics;
 
-namespace Constellation.Presentation.Server.Pages
+[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+[IgnoreAntiforgeryToken]
+public class ErrorModel : PageModel
 {
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    [IgnoreAntiforgeryToken]
-    public class ErrorModel : PageModel
+    private readonly ILogger _logger;
+    public string RequestId { get; set; }
+    public ProblemDetails ProblemDetails { get; set; }
+    public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    public ErrorModel(
+        ILogger logger)
     {
-        public string RequestId { get; set; }
-        public ProblemDetails ProblemDetails { get; set; }
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+        _logger = logger.ForContext<ErrorModel>();
+    }
 
-        private readonly ILogger<ErrorModel> _logger;
+    public void OnGet()
+    {
+        var exceptionDetails = HttpContext.Features.Get<IExceptionHandlerFeature>();
+        var ex = exceptionDetails?.Error;
 
-        public ErrorModel(ILogger<ErrorModel> logger)
+        if (ex != null)
         {
-            _logger = logger;
-        }
+            var title = "An error occured: " + ex.Message;
+            var details = ex.ToString();
 
-        public void OnGet()
-        {
-            var exceptionDetails = HttpContext.Features.Get<IExceptionHandlerFeature>();
-            var ex = exceptionDetails?.Error;
-
-            if (ex != null)
+            ProblemDetails = new ProblemDetails
             {
-                var title = "An error occured: " + ex.Message;
-                var details = ex.ToString();
+                Status = 500,
+                Title = title,
+                Detail = details
+            };
 
-                ProblemDetails = new ProblemDetails
-                {
-                    Status = 500,
-                    Title = title,
-                    Detail = details
-                };
-
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
-                if (RequestId != null)
-                    ProblemDetails.Extensions["traceId"] = RequestId;
-            }
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            if (RequestId != null)
+                ProblemDetails.Extensions["traceId"] = RequestId;
         }
     }
 }

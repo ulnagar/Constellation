@@ -55,6 +55,17 @@ internal sealed class AssetRepository : IAssetRepository
             .Where(asset => asset.Status.Equals(status))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Asset>> GetAllByLocationCategory(
+        LocationCategory category, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .Where(asset => 
+                asset.Locations.Any(location => 
+                    location.CurrentLocation &&
+                    location.Category == category))
+            .ToListAsync(cancellationToken);
+
     public async Task<bool> IsAssetNumberTaken(
         AssetNumber assetNumber,
         CancellationToken cancellationToken = default) =>

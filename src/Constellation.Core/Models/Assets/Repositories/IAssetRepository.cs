@@ -15,6 +15,7 @@ public interface IAssetRepository
     Task<List<Asset>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllByStatus(AssetStatus status, CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllByLocationCategory(LocationCategory category, CancellationToken cancellationToken = default);
     Task<bool> IsAssetNumberTaken(AssetNumber assetNumber, CancellationToken cancellationToken = default);
 
     void Insert(Asset asset);

@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Devices;
 
-using Application.Assets.GetDevicesAllocatedToStudent;
 using Application.Devices.GetDevices;
 using Application.Models.Auth;
 using Core.Shared;
@@ -9,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[Authorize(Policy = AuthPolicies.CanManageAssets)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -8,22 +8,25 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly IAuthorizationService _authService;
 
     public IndexModel(
-        ISender mediator)
+        ISender mediator,
+        IAuthorizationService authService)
     {
         _mediator = mediator;
+        _authService = authService;
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_List;
 
     public List<StocktakeEventResponse> Events { get; set; }
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
         Result<List<StocktakeEventResponse>> events = await _mediator.Send(new GetStocktakeEventListQuery());
 
@@ -35,9 +38,20 @@ public class IndexModel : BasePageModel
                 RedirectPath = null
             };
 
-            return;
+            return Page();
         }
 
+        StocktakeEventResponse? currentEvent = events.Value.FirstOrDefault(entry => entry.EndDate >= DateTime.Now);
+
+        if (!(await _authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets)).Succeeded)
+        {
+            return currentEvent is not null 
+                ? RedirectToPage("/Equipment/Stocktake/Dashboard", new { area = "Staff", Id = currentEvent.Id }) 
+                : RedirectToPage("/AccessDenied", new { area = "Admin", returnUrl = "/Equipment/Stocktake" });
+        }
+        
         Events = events.Value;
+
+        return Page();
     }
 }
