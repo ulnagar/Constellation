@@ -316,6 +316,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         if (note.IsFailure)
             return Result.Failure(note.Error);
 
+        _notes.Add(note.Value);
+        
         Category = category;
 
         return Result.Success();
@@ -334,6 +336,8 @@ public sealed class Asset : AggregateRoot, IAuditableEntity
         if (note.IsFailure)
             return Result.Failure(note.Error);
 
+        _notes.Add(note.Value);
+        
         Status = status;
 
         return Result.Success();

@@ -1,10 +1,14 @@
 ﻿@page "{assetNumber}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets.DetailsModel
 
+@using Constellation.Core.Models.Assets.Enums
 @inject IAuthorizationService authService
 
 @{
     var canManageAssets = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+
+    if (Model.Asset.Status.Equals(AssetStatus.Disposed))
+        canManageAssets = AuthorizationResult.Failed();
 }
 
 <h2>Asset Details</h2>
@@ -13,6 +17,8 @@
     @if (canManageAssets.Succeeded)
     {
         <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-id="@Model.AssetNumber" class="btn btn-warning">Edit</a>
+
+        <button type="button" data-toggle="modal" data-target="#update-asset-status-modal" class="btn btn-warning">Update Status</button>
     }
 
     <a asp-page="/Equipment/Assets/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -311,6 +317,7 @@
     </div>
 </div>
 
+<vc:update-asset-status status="@Model.Asset.Status" />
 <vc:allocate-asset />
 <vc:transfer-asset />
 <vc:add-asset-note />

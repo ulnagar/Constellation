@@ -6,6 +6,7 @@ using Application.Assets.AllocateAsset;
 using Application.Assets.DeallocateAsset;
 using Application.Assets.SightAsset;
 using Application.Assets.TransferAsset;
+using Application.Assets.UpdateAssetStatus;
 using Constellation.Application.Assets.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.Errors;
@@ -22,6 +23,7 @@ using Presentation.Shared.Pages.Shared.Components.AddAssetNote;
 using Presentation.Shared.Pages.Shared.Components.AddAssetSighting;
 using Presentation.Shared.Pages.Shared.Components.AllocateAsset;
 using Presentation.Shared.Pages.Shared.Components.TransferAsset;
+using Presentation.Shared.Pages.Shared.Components.UpdateAssetStatus;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -434,6 +436,31 @@ public class DetailsModel : BasePageModel
             viewModel.StaffId,
             viewModel.SightedAt,
             viewModel.Note ?? string.Empty);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            Error = new()
+            {
+                Error = result.Error,
+                RedirectPath = null
+            };
+
+            Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
+            Asset = resetResult.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostUpdateStatus(UpdateAssetStatusSelection viewModel)
+    {
+        UpdateAssetStatusCommand command = new(
+            AssetNumber,
+            viewModel.SelectedStatus);
 
         Result result = await _mediator.Send(command);
 

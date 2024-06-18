@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Assets.Enums;
 
 using Common;
+using System.Collections.Generic;
 
 public sealed class AssetStatus : StringEnumeration<AssetStatus>
 {
@@ -12,4 +13,6 @@ public sealed class AssetStatus : StringEnumeration<AssetStatus>
 
     private AssetStatus(string value)
         : base(value, value) { }
+
+    public static IEnumerable<AssetStatus> GetOptions => GetEnumerable;
 }
