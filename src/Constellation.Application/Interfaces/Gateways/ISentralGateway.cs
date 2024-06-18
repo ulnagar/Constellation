@@ -34,5 +34,5 @@ public interface ISentralGateway
     Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate);
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week);
     Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date);
-    Task<Stream> GetNAwardReport();
+    Task<(Stream, Stream)> GetNAwardReport();
 }

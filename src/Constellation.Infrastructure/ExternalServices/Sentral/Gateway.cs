@@ -1556,11 +1556,12 @@ public class Gateway : ISentralGateway
         return document;
     }
 
-    public async Task<Stream> GetNAwardReport()
+    public async Task<(Stream, Stream)> GetNAwardReport()
     {
-        Stream file = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All", default);
+        Stream baseFile = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All", default);
+        Stream detailFile = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All&extra-n-award-details=true", default);
 
-        return file;
+        return (baseFile, detailFile);
     }
 
     public async Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate)

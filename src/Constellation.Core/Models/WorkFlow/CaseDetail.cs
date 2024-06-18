@@ -77,3 +77,8 @@ public sealed class AttendanceCaseDetail : CaseDetail
 
     public override string ToString() => $"Attendance Case for {Name} ({Grade.AsName()}): {PeriodLabel} - {Severity.Name}";
 }
+
+public sealed class NAwardCaseDetail
+{
+
+}

@@ -1179,23 +1179,28 @@ public class ExcelService : IExcelService
     }
 
     public Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(
-        Stream reportFile, 
+        Stream baseFile, 
+        Stream detailFile,
         List<DateOnly> excludedDates, 
         CancellationToken cancellationToken = default)
     {
         List<SentralIncidentDetails> response = new();
 
-        if (reportFile is null)
+        if (detailFile is null || baseFile is null)
             return Task.FromResult(response);
 
-        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(reportFile);
-        DataSet result = reader.AsDataSet(new ExcelDataSetConfiguration { UseColumnDataType = true });
+        using IExcelDataReader detailReader = ExcelReaderFactory.CreateReader(detailFile);
+        DataSet detailResult = detailReader.AsDataSet(new ExcelDataSetConfiguration { UseColumnDataType = true });
+        
+        using IExcelDataReader baseReader = ExcelReaderFactory.CreateReader(baseFile);
+        DataSet baseResult = baseReader.AsDataSet(new ExcelDataSetConfiguration { UseColumnDataType = true });
 
-        foreach (DataRow row in result.Tables[0].Rows)
+        foreach (DataRow row in detailResult.Tables[0].Rows)
         {
             if (row.ItemArray.First()?.ToString() == "Student Id") // This is a header row
                 continue;
 
+            // baseFile
             // Index 0: Student Id
             // Index 1: Confidential
             // Index 2: Date Created
@@ -1226,9 +1231,33 @@ public class ExcelService : IExcelService
             // Index 27: Roll Class
             // Index 28: Location
 
+            // detailFile
+            // Index 0: Student Id
+            // Index 1: Given Name
+            // Index 2: Surname
+            // Index 3: Year
+            // Index 4: RollClass
+            // Index 5: Incident #
+            // Index 6: Date
+            // Index 7: Incident Record Description
+            // Index 8: Incident Record Details
+            // Index 9: Subject
+            // Index 10: Faculty
+            // Index 11: Type
+            // Index 12: Status
+            // Index 13: Task Name / Course Requirement
+            // Index 14: Initial Due Date
+            // Index 15: Required Student Actions
+            // Index 16: New Due Date
+
+            string incidentId = row[5].ToString().FormatField();
+
+            if (response.Any(entry => entry.IncidentId == incidentId))
+                continue;
+
             string studentId = row[0].ToString();
 
-            bool dateExtractionSucceeded = DateOnly.TryParse(row[2].ToString(), out DateOnly dateCreated);
+            bool dateExtractionSucceeded = DateOnly.TryParse(row[6].ToString(), out DateOnly dateCreated);
 
             if (!dateExtractionSucceeded)
                 continue;
@@ -1243,18 +1272,23 @@ public class ExcelService : IExcelService
 
             int severity = datesBetween.Count - 1;
 
-            int gradeNum = Convert.ToInt32(row[25], null);
+            int gradeNum = Convert.ToInt32(row[3], null);
             Grade grade = (Grade)gradeNum;
-            
+
+            DataRow? matchingRow = baseResult.Tables[0].Select($"Column5 = '{incidentId}'").FirstOrDefault();
+
+            if (matchingRow is null)
+                continue;
+
             response.Add(new(
                 studentId,
                 dateCreated,
                 row[5].ToString().FormatField(),
                 row[9].ToString().FormatField(),
                 row[11].ToString().FormatField(),
-                row[19].ToString().FormatField(),
-                row[21].ToString().FormatField(),
-                row[20].ToString().FormatField(),
+                matchingRow[19].ToString().FormatField(),
+                row[1].ToString().FormatField(),
+                row[2].ToString().FormatField(),
                 grade,
                 severity));
         }

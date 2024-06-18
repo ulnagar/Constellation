@@ -29,9 +29,9 @@
         @foreach (var entry in Model.Data.OrderByDescending(entry => entry.DateCreated))
         {
             var style = (entry.Severity < 10) ? "ffffff"
-                : (entry.Severity >= 14 & entry.Severity < 15) ? "fbe4d5"
-                : (entry.Severity >= 21 & entry.Severity < 20) ? "f7caac"
-                : (entry.Severity >= 28 & entry.Severity < 25) ? "f4b083"
+                : (entry.Severity >= 11 & entry.Severity < 15) ? "fbe4d5"
+                : (entry.Severity >= 15 & entry.Severity < 20) ? "f7caac"
+                : (entry.Severity >= 20 & entry.Severity < 25) ? "f4b083"
                 : "c45911";
 
             <tr style="background-color: #@style !important">
