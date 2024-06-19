@@ -1,4 +1,7 @@
-﻿namespace Constellation.Core.Models.WorkFlow;
+﻿using Constellation.Core.Errors;
+using System;
+
+namespace Constellation.Core.Models.WorkFlow;
 
 using Attendance;
 using Constellation.Core.Enums;
@@ -7,6 +10,7 @@ using Enums;
 using Errors;
 using Extensions;
 using Identifiers;
+using Newtonsoft.Json.Linq;
 using Shared;
 using Students;
 
@@ -78,7 +82,67 @@ public sealed class AttendanceCaseDetail : CaseDetail
     public override string ToString() => $"Attendance Case for {Name} ({Grade.AsName()}): {PeriodLabel} - {Severity.Name}";
 }
 
-public sealed class NAwardCaseDetail
+public sealed class ComplianceCaseDetail : CaseDetail
 {
+    public string StudentId { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public Grade Grade { get; private set; }
+    public string SchoolCode { get; private set; } = string.Empty;
+    public string SchoolName { get; private set; } = string.Empty;
+    public string IncidentId { get; private set; } = string.Empty;
+    public string IncidentType { get; private set; } = string.Empty;
+    public DateOnly CreatedDate { get; private set; }
+    public string Subject { get; private set; } = string.Empty;
+    public string CreatedById { get; private set; } = string.Empty;
+    public string CreatedBy { get; private set; } = string.Empty;
 
+    public static Result<CaseDetail> Create(
+        Student student,
+        School school,
+        Staff teacher,
+        string incidentId,
+        string incidentType,
+        string subject,
+        DateOnly createdDate)
+    {
+        if (student is null)
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateStudentNull);
+
+        if (school is null)
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateSchoolNull);
+
+        if (teacher is null)
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateTeacherNull);
+
+        if (string.IsNullOrWhiteSpace(incidentId))
+            return Result.Failure<CaseDetail>(ApplicationErrors.ArgumentNull(nameof(incidentId)));
+
+        if (string.IsNullOrWhiteSpace(incidentType))
+            return Result.Failure<CaseDetail>(ApplicationErrors.ArgumentNull(nameof(incidentType)));
+
+        if (string.IsNullOrWhiteSpace(subject))
+            return Result.Failure<CaseDetail>(ApplicationErrors.ArgumentNull(nameof(subject)));
+        
+        if (createdDate == DateOnly.MinValue)
+            return Result.Failure<CaseDetail>(ApplicationErrors.ArgumentNull(nameof(createdDate)));
+
+        ComplianceCaseDetail detail = new()
+        {
+            StudentId = student.StudentId,
+            Name = student.GetName().DisplayName, 
+            Grade = student.CurrentGrade,
+            SchoolCode = student.SchoolCode,
+            SchoolName = school.Name,
+            IncidentId = incidentId,
+            IncidentType = incidentType,
+            Subject = subject,
+            CreatedDate = createdDate,
+            CreatedById = teacher.StaffId,
+            CreatedBy = teacher.GetName().DisplayName
+        };
+
+        return detail;
+    }
+
+    public override string ToString() => $"Compliance Case for {Name} ({Grade.AsName()}): {IncidentType} - {Subject}";
 }

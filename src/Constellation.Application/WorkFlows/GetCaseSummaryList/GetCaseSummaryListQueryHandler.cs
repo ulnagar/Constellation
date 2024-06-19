@@ -44,34 +44,48 @@ internal sealed class GetCaseSummaryListQueryHandler
             if (!request.IsAdmin && item.Actions.All(action => action.AssignedToId != request.CurrentUserId))
                 continue;
 
+            string studentId = string.Empty;
+            string description = string.Empty;
+
             if (item.Type!.Equals(CaseType.Attendance))
             {
                 AttendanceCaseDetail details = item.Detail as AttendanceCaseDetail;
 
-                Student student = await _studentRepository.GetById(details!.StudentId, cancellationToken);
-
-                if (student is null)
-                {
-                    _logger
-                        .ForContext(nameof(Case), item, true)
-                        .ForContext(nameof(Error), StudentErrors.NotFound(details.StudentId), true)
-                        .Warning("Could not generate list of Case Summary");
-
-                    return Result.Failure<List<CaseSummaryResponse>>(StudentErrors.NotFound(details.StudentId));
-                }
-
-                Name name = student.GetName();
-
-                responses.Add(new(
-                    item.Id,
-                    name,
-                    $"Attendance Case for {details.PeriodLabel} - {details.Severity.Value}",
-                    item.Status,
-                    item.CreatedAt,
-                    item.DueDate,
-                    item.Actions.Count,
-                    item.Actions.Count(action => action.Status == ActionStatus.Open)));
+                studentId = details.StudentId;
+                description = $"Attendance Case for {details.PeriodLabel} - {details.Severity.Value}";
             }
+
+            if (item.Type!.Equals(CaseType.Compliance))
+            {
+                ComplianceCaseDetail details = item.Detail as ComplianceCaseDetail;
+
+                studentId = details.StudentId;
+                description = $"Compliance Case for {details.IncidentType} - {details.Subject}";
+            }
+
+            Student student = await _studentRepository.GetById(studentId, cancellationToken);
+
+            if (student is null)
+            {
+                _logger
+                    .ForContext(nameof(Case), item, true)
+                    .ForContext(nameof(Error), StudentErrors.NotFound(studentId), true)
+                    .Warning("Could not generate list of Case Summary");
+
+                return Result.Failure<List<CaseSummaryResponse>>(StudentErrors.NotFound(studentId));
+            }
+
+            Name name = student.GetName();
+
+            responses.Add(new(
+                item.Id,
+                name,
+                description,
+                item.Status,
+                item.CreatedAt,
+                item.DueDate,
+                item.Actions.Count,
+                item.Actions.Count(action => action.Status == ActionStatus.Open)));
         }
 
         return responses;

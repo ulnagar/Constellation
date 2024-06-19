@@ -40,6 +40,8 @@ public interface ISentralAttendancePercentageSyncJob : IHangfireJob { }
 
 public interface ISentralAwardSyncJob : IHangfireJob { }
 
+public interface ISentralComplianceScanJob : IHangfireJob { }
+
 public interface ISentralFamilyDetailsSyncJob : IHangfireJob { }
 
 public interface ISentralPhotoSyncJob : IHangfireJob { }

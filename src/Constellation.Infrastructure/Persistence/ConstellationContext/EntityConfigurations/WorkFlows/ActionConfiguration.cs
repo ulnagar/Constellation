@@ -24,12 +24,6 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
                 id => id.Value,
                 value => ActionId.FromValue(value));
 
-        //builder
-        //    .Property(action => action.CaseId)
-        //    .HasConversion(
-        //        id => id.Value,
-        //        value => CaseId.FromValue(value));
-
         builder
             .Property(action => action.ParentActionId)
             .HasConversion(
@@ -66,7 +60,8 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
             .HasValue<ParentInterviewAction>(nameof(ParentInterviewAction))
             .HasValue<CreateSentralEntryAction>(nameof(CreateSentralEntryAction))
             .HasValue<ConfirmSentralEntryAction>(nameof(ConfirmSentralEntryAction))
-            .HasValue<CaseDetailUpdateAction>(nameof(CaseDetailUpdateAction));
+            .HasValue<CaseDetailUpdateAction>(nameof(CaseDetailUpdateAction))
+            .HasValue<SentralIncidentStatusAction>(nameof(SentralIncidentStatusAction));
     }
 }
 
@@ -173,5 +168,15 @@ internal sealed class CreateSentralEntryActionConfiguration : IEntityTypeConfigu
         builder
             .Property(action => action.IncidentNumber)
             .HasColumnName(nameof(CreateSentralEntryAction.IncidentNumber));
+    }
+}
+
+internal sealed class SentralIncidentStatusActionConfiguration : IEntityTypeConfiguration<SentralIncidentStatusAction>
+{
+    public void Configure(EntityTypeBuilder<SentralIncidentStatusAction> builder)
+    {
+        builder
+            .Property(action => action.IncidentNumber)
+            .HasColumnName(nameof(SentralIncidentStatusAction.IncidentNumber));
     }
 }

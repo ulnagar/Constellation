@@ -67,5 +67,14 @@ internal sealed class CaseRepository : ICaseRepository
                 action.AssignedToId == staffId))
             .CountAsync(cancellationToken);
 
+    public async Task<Case?> GetComplianceCaseForIncident(
+        string incidentId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Case>()
+            .Where(item =>
+                ((ComplianceCaseDetail)item.Detail).IncidentId == incidentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public void Insert(Case item) => _context.Set<Case>().Add(item);
 }

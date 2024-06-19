@@ -143,6 +143,17 @@ public sealed class Case : AggregateRoot, IAuditableEntity
             return Result.Success();
         }
 
+        if (Type!.Equals(CaseType.Compliance))
+        {
+            if (detail is not ComplianceCaseDetail)
+                return Result.Failure(CaseErrors.AttachDetailsDetailMismatch(Type.Name, nameof(ComplianceCaseDetail)));
+
+            Detail = detail;
+            DetailId = detail.Id;
+
+            return Result.Success();
+        }
+
         return Result.Failure(CaseErrors.AttachDetailsUnknownDetails);
     }
 

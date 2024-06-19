@@ -79,5 +79,6 @@ public sealed class AppConfiguration
     public class WorkFlowConfiguration
     {
         public string AttendanceReviewer { get; set; }
+        public string ComplianceReviewer { get; set; }
     }
 }

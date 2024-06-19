@@ -565,3 +565,87 @@ public sealed class CaseDetailUpdateAction : Action
         $"Case detail updated by {AssignedTo}";
 }
 
+public sealed class SentralIncidentStatusAction : Action
+{
+    public override string Description => $"Record of the outcome of a Sentral Incident identified in this case";
+
+    public override string ToString() => 
+        $"Update Sentral Incident status and record details";
+
+    public override string AsStatus() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) =>
+                $"Task assigned to: {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) && MarkedResolved =>
+                $"Sentral incident marked Resolved by {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) && MarkedNotCompleted =>
+                $"Sentral incident marked Not Completed and reissued as Incident {IncidentNumber} completed by {AssignedTo}",
+            _ => $"Unknown Status"
+        };
+
+    public int IncidentNumber { get; private set; }
+    public bool MarkedResolved { get; private set; }
+    public bool MarkedNotCompleted { get; private set; }
+
+    private SentralIncidentStatusAction() { }
+
+    public static Result<SentralIncidentStatusAction> Create(
+        CaseId caseId,
+        Staff assignee,
+        string currentUser)
+    {
+        SentralIncidentStatusAction action = new()
+        {
+            CaseId = caseId
+        };
+
+        Result assignment = action.AssignAction(assignee, currentUser);
+
+        if (assignment.IsFailure)
+            return Result.Failure<SentralIncidentStatusAction>(assignment.Error);
+
+        return action;
+    }
+
+    public Result Update(int followUpIncidentId, string currentUser)
+    {
+        if (followUpIncidentId == 0)
+            return Result.Failure(ActionErrors.UpdateIncidentNumberZero);
+
+        if (IncidentNumber != 0)
+        {
+            Result noteAttempt = AddNote($"MarkedNotCompleted set to true with previous Incident Number changed from {IncidentNumber} to {followUpIncidentId}", currentUser);
+
+            if (noteAttempt.IsFailure)
+                return noteAttempt;
+        }
+        else
+        {
+            Result noteAttempt = AddNote($"MarkedNotCompleted set to true with Incident Number set to {followUpIncidentId}", currentUser);
+
+            if (noteAttempt.IsFailure)
+                return noteAttempt;
+        }
+
+        MarkedResolved = false;
+        MarkedNotCompleted = true;
+        IncidentNumber = followUpIncidentId;
+
+        return Result.Success();
+    }
+
+    public Result Update(string currentUser)
+    {
+        Result noteAttempt = AddNote($"MarkedResolved set to true", currentUser);
+
+        if (noteAttempt.IsFailure)
+            return noteAttempt;
+
+        MarkedResolved = true;
+        MarkedNotCompleted = false;
+        IncidentNumber = 0;
+
+        return Result.Success();
+    }
+}

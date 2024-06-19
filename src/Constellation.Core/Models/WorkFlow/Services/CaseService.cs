@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Models.WorkFlow.Services;
+﻿using System;
+
+namespace Constellation.Core.Models.WorkFlow.Services;
 
 using Abstractions.Clock;
 using Abstractions.Services;
@@ -66,6 +68,63 @@ public sealed class CaseService : ICaseService
         Result<CaseDetail> detail = AttendanceCaseDetail.Create(
             student,
             value);
+
+        if (detail.IsFailure)
+            return Result.Failure<Case>(detail.Error);
+
+        Result attach = item.AttachDetails(detail.Value);
+
+        if (attach.IsFailure)
+            return Result.Failure<Case>(attach.Error);
+
+        Result dueDate = item.SetDueDate(_dateTime);
+
+        if (dueDate.IsFailure)
+            return Result.Failure<Case>(dueDate.Error);
+
+        return item;
+    }
+
+    public async Task<Result<Case>> CreateComplianceCase(
+        string studentId,
+        string teacherId,
+        string incidentId,
+        string incidentType,
+        string subject,
+        DateOnly createdDate,
+        CancellationToken cancellationToken = default)
+    {
+        Staff? teacher = await _staffRepository.GetById(teacherId, cancellationToken);
+
+        if (teacher is null)
+            return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFound(teacherId));
+
+        Student? student = await _studentRepository.GetWithSchoolById(studentId, cancellationToken);
+
+        if (student is null)
+            return Result.Failure<Case>(StudentErrors.NotFound(studentId));
+
+        if (string.IsNullOrWhiteSpace(incidentId))
+            return Result.Failure<Case>(ApplicationErrors.ArgumentNull(nameof(incidentId)));
+
+        if (string.IsNullOrWhiteSpace(incidentType))
+            return Result.Failure<Case>(ApplicationErrors.ArgumentNull(nameof(incidentType)));
+
+        if (string.IsNullOrWhiteSpace(subject))
+            return Result.Failure<Case>(ApplicationErrors.ArgumentNull(nameof(subject)));
+
+        // Create Case
+        Case item = new(CaseType.Compliance);
+
+        // Create and add CaseDetail
+        Result<CaseDetail> detail = ComplianceCaseDetail.Create(
+            student,
+            student.School,
+            teacher,
+            incidentId,
+            incidentType,
+            subject,
+            createdDate);
 
         if (detail.IsFailure)
             return Result.Failure<Case>(detail.Error);

@@ -106,6 +106,7 @@ public static class ServicesRegistration
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
         services.AddScoped<IUserManagerJob, UserManagerJob>();
+        services.AddScoped<ISentralComplianceScanJob, SentralComplianceScanJob>();
 
         services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
 

@@ -1556,10 +1556,10 @@ public class Gateway : ISentralGateway
         return document;
     }
 
-    public async Task<(Stream, Stream)> GetNAwardReport()
+    public async Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default)
     {
-        Stream baseFile = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All", default);
-        Stream detailFile = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All&extra-n-award-details=true", default);
+        Stream baseFile = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All", cancellationToken);
+        Stream detailFile = await GetStreamByGet($"{_settings.ServerUrl}/wellbeing/reports/incidents?report_id=4154&export-xls&victims-witnesses=All&extra-n-award-details=true", cancellationToken);
 
         return (baseFile, detailFile);
     }

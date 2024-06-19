@@ -31,13 +31,13 @@ internal sealed class GetWellbeingReportFromSentralQueryHandler
 
     public async Task<Result<List<SentralIncidentDetails>>> Handle(GetWellbeingReportFromSentralQuery request, CancellationToken cancellationToken)
     {
-        (Stream, Stream) files = await _sentralGateway.GetNAwardReport();
+        (Stream BasicReport, Stream DetailReport) files = await _sentralGateway.GetNAwardReport(cancellationToken);
 
-        if (files.Item1.Length > 0 && files.Item2.Length > 0)
+        if (files.BasicReport.Length > 0 && files.DetailReport.Length > 0)
         {
             List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYear.ToString());
 
-            List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(files.Item1, files.Item2, excludedDates, cancellationToken);
+            List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(files.BasicReport, files.DetailReport, excludedDates, cancellationToken);
 
             return data;
         }

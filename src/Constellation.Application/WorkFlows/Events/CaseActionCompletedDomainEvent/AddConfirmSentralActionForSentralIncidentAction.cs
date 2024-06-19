@@ -10,6 +10,9 @@ using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Events;
 using Constellation.Core.Models.WorkFlow.Repositories;
+using Core.Models.Faculties;
+using Core.Models.Faculties.Repositories;
+using Core.Models.WorkFlow.Enums;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -25,6 +28,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
     private readonly ICurrentUserService _currentUserService;
     private readonly ICourseRepository _courseRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly IFacultyRepository _facultyRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -33,6 +37,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
         ICurrentUserService currentUserService,
         ICourseRepository courseRepository,
         IStaffRepository staffRepository,
+        IFacultyRepository facultyRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -40,6 +45,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
         _currentUserService = currentUserService;
         _courseRepository = courseRepository;
         _staffRepository = staffRepository;
+        _facultyRepository = facultyRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<CaseActionCompletedDomainEvent>();
     }
@@ -70,24 +76,49 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
             return;
         }
 
-        if (action.GetType() != typeof(CreateSentralEntryAction))
-            return;
-        
-        CreateSentralEntryAction sentralAction = action as CreateSentralEntryAction;
+        List<Staff> headTeachers = new();
 
-        Course course = await _courseRepository.GetByOfferingId(sentralAction!.OfferingId, cancellationToken);
-
-        if (course is null)
+        if (action is CreateSentralEntryAction sentralAction)
         {
-            _logger
-                .ForContext(nameof(CaseActionCompletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), ActionErrors.NotFound(notification.ActionId), true)
-                .Warning("Could not create confirm Action for completed Sentral Incident action");
+            Course course = await _courseRepository.GetByOfferingId(sentralAction!.OfferingId, cancellationToken);
 
+            if (course is null)
+            {
+                _logger
+                    .ForContext(nameof(CaseActionCompletedDomainEvent), notification, true)
+                    .ForContext(nameof(Error), ActionErrors.NotFound(notification.ActionId), true)
+                    .Warning("Could not create confirm Action for completed Sentral Incident action");
+
+                return;
+            }
+
+            headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(sentralAction.OfferingId, cancellationToken);
+        } 
+        else if (action is SentralIncidentStatusAction)
+        {
+            var detail = item.Type!.Equals(CaseType.Compliance)
+                ? item.Detail as ComplianceCaseDetail
+                : null;
+
+            if (detail is null)
+                return;
+
+            List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(detail?.CreatedById, cancellationToken);
+
+            foreach (Faculty faculty in faculties)
+            {
+                if (faculty.Name is "Administration" or "Executive" or "Support")
+                    continue;
+                
+                headTeachers.AddRange(await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken));
+            }
+
+            headTeachers = headTeachers.DistinctBy(entry => entry.StaffId).ToList();
+        }
+        else
+        {
             return;
         }
-
-        List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(sentralAction.OfferingId, cancellationToken);
 
         if (headTeachers.Count == 0)
         {
@@ -109,7 +140,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
 
             return;
         }
-        
+
         item.AddAction(confirmAction.Value);
 
         await _unitOfWork.CompleteAsync(cancellationToken);

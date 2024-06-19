@@ -13,6 +13,7 @@ public interface ICaseRepository
     Task<bool> ExistingOpenAttendanceCaseForStudent(string studentId, CancellationToken cancellationToken = default);
     Task<Case?> GetOpenAttendanceCaseForStudent(string studentId, CancellationToken cancellationToken = default);
     Task<int> CountActiveActionsForUser(string staffId, CancellationToken cancellationToken = default);
+    Task<Case?> GetComplianceCaseForIncident(string incidentId, CancellationToken cancellationToken = default);
     void Insert(Case item);
 
 }
