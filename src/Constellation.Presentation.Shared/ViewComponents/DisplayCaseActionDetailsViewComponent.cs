@@ -19,6 +19,7 @@ public class DisplayCaseActionDetailsViewComponent : ViewComponent
             PhoneParentAction phoneAction => View("PhoneParentAction", phoneAction),
             ParentInterviewAction interviewAction => View("ParentInterviewAction", interviewAction),
             CaseDetailUpdateAction updateAction => View("CaseDetailUpdateAction", updateAction),
+            SentralIncidentStatusAction incidentAction => View("SentralIncidentStatusAction", incidentAction),
             _ => Content(string.Empty)
         };
 }

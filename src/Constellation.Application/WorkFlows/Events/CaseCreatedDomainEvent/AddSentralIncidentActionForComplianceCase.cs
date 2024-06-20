@@ -53,7 +53,7 @@ internal sealed class AddSentralIncidentActionForComplianceCase
             return;
         }
 
-        if (!item.Type!.Equals(CaseType.Attendance))
+        if (!item.Type!.Equals(CaseType.Compliance))
             return;
 
         ComplianceCaseDetail caseDetail = item.Detail as ComplianceCaseDetail;

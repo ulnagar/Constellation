@@ -47,6 +47,10 @@ public static class ActionErrors
         "Case.Action.UpdateStatus.StatusNull",
         "Cannot change Status to blank");
 
+    public static Func<string, Error> InvalidOption = option => new(
+        "Case.Action.Update.InvalidOption",
+        $"An invalid option was supplied for {option}");
+
     public static readonly Func<string, string, Error> UpdateTypeMismatch = (expected, provided) => new(
         "Case.Action.Update.TypeMismatch",
         $"Expected {expected}, provided {provided}");

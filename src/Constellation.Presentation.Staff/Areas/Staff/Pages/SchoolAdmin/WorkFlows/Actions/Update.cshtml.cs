@@ -6,9 +6,11 @@ using Application.WorkFlows.UpdateCreateSentralEntryAction;
 using Application.WorkFlows.UpdateParentInterviewAction;
 using Application.WorkFlows.UpdatePhoneParentAction;
 using Application.WorkFlows.UpdateSendEmailAction;
+using Application.WorkFlows.UpdateSentralIncidentStatusAction;
 using Constellation.Application.DTOs;
 using Constellation.Application.WorkFlows.GetCaseById;
 using Core.Models.WorkFlow;
+using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
@@ -46,7 +48,7 @@ public class UpdateModel : BasePageModel
 
     public CaseDetailsResponse Case { get; set; }
 
-    public async Task OnGet()
+    private async Task PreparePage()
     {
         Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(CaseId));
 
@@ -64,6 +66,8 @@ public class UpdateModel : BasePageModel
         Case = request.Value;
     }
 
+    public Task OnGet() => PreparePage();
+
     public async Task<IActionResult> OnPostUpdateSentralEntryAction(CreateSentralEntryActionViewModel viewModel)
     {
         Result attempt = await _mediator.Send(new UpdateCreateSentralEntryActionCommand(CaseId, ActionId, viewModel.NotRequired, viewModel.IncidentNumber));
@@ -75,6 +79,8 @@ public class UpdateModel : BasePageModel
                 Error = attempt.Error,
                 RedirectPath = null
             };
+
+            await PreparePage();
 
             return Page();
         }
@@ -94,6 +100,8 @@ public class UpdateModel : BasePageModel
                 RedirectPath = null
             };
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -112,6 +120,8 @@ public class UpdateModel : BasePageModel
                 RedirectPath = null
             };
 
+            await PreparePage();
+            
             return Page();
         }
 
@@ -134,6 +144,44 @@ public class UpdateModel : BasePageModel
                 Error = attempt.Error,
                 RedirectPath = null
             };
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage("/SchoolAdmin/WorkFlows/Details", new { area = "Staff", Id = CaseId.Value });
+    }
+
+    public async Task<IActionResult> OnPostUpdateIncidentStatusEntryAction(SentralIncidentStatusActionViewModel viewModel)
+    {
+        if (viewModel.Status == "Not Completed" && viewModel.IncidentNumber == 0)
+        {
+            Error = new()
+            {
+                Error = ActionErrors.UpdateIncidentNumberZero,
+                RedirectPath = null
+            };
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        bool markResolved = viewModel.Status == "Resolved";
+        bool markNotCompleted = viewModel.Status == "Not Completed";
+
+        Result attempt = await _mediator.Send(new UpdateSentralIncidentStatusActionCommand(CaseId, ActionId, markResolved, markNotCompleted, viewModel.IncidentNumber));
+
+        if (attempt.IsFailure)
+        {
+            Error = new()
+            {
+                Error = attempt.Error,
+                RedirectPath = null
+            };
+
+            await PreparePage();
 
             return Page();
         }
@@ -168,6 +216,8 @@ public class UpdateModel : BasePageModel
                     RedirectPath = null
                 };
 
+                await PreparePage();
+
                 return Page();
             }
         }
@@ -186,6 +236,8 @@ public class UpdateModel : BasePageModel
                     RedirectPath = null
                 };
 
+                await PreparePage();
+
                 return Page();
             }
 
@@ -201,6 +253,9 @@ public class UpdateModel : BasePageModel
                 Error = new("Email.Sender.Failure", $"Failed to add sender: {viewModel.SenderName} ({viewModel.SenderEmail})"),
                 RedirectPath = null
             };
+
+            await PreparePage();
+
             return Page();
         }
 
@@ -213,6 +268,8 @@ public class UpdateModel : BasePageModel
                 Error = attempt.Error,
                 RedirectPath = null
             };
+
+            await PreparePage();
 
             return Page();
         }

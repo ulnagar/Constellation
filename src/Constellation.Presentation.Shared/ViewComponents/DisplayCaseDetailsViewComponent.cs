@@ -26,6 +26,9 @@ public class DisplayCaseDetailsViewComponent : ViewComponent
         if (item.Detail is AttendanceCaseDetail attendanceDetails)
             return View("AttendanceCaseDetail", attendanceDetails);
 
+        if (item.Detail is ComplianceCaseDetail complianceDetails)
+            return View("ComplianceCaseDetail", complianceDetails);
+
         return Content(string.Empty);
     }
 }

@@ -9,6 +9,7 @@ using Application.WorkFlows.AddParentInterviewAction;
 using Application.WorkFlows.AddPhoneParentAction;
 using Application.WorkFlows.AddSendEmailAction;
 using Application.WorkFlows.AddSentralEntryAction;
+using Application.WorkFlows.AddSentralIncidentStatusAction;
 using Application.WorkFlows.CancelAction;
 using Application.WorkFlows.GetCaseById;
 using Application.WorkFlows.ReassignAction;
@@ -30,6 +31,7 @@ using Presentation.Shared.Pages.Shared.PartialViews.AddCreateSentralEntryAction;
 using Presentation.Shared.Pages.Shared.PartialViews.AddParentInterviewAction;
 using Presentation.Shared.Pages.Shared.PartialViews.AddPhoneParentAction;
 using Presentation.Shared.Pages.Shared.PartialViews.AddSendEmailAction;
+using Presentation.Shared.Pages.Shared.PartialViews.AddSentralIncidentStatusAction;
 using Presentation.Shared.Pages.Shared.PartialViews.ConfirmActionUpdateModal;
 using Presentation.Shared.Pages.Shared.PartialViews.ReassignActionToStaffMemberModal;
 
@@ -252,7 +254,14 @@ public class DetailsModel : BasePageModel
                 AddCaseDetailUpdateActionViewModel detailViewModel = new();
 
                 return Partial("AddCaseDetailUpdateAction", detailViewModel);
+                break;
+            case nameof(SentralIncidentStatusAction):
+                AddSentralIncidentStatusActionViewModel incidentViewModel = new()
+                {
+                    StaffMembers = staffResult
+                };
 
+                return Partial("AddSentralIncidentStatusAction", incidentViewModel);
                 break;
             default:
                 return BadRequest();
@@ -436,6 +445,49 @@ public class DetailsModel : BasePageModel
         }
 
         Result actionRequest = await _mediator.Send(new AddSendEmailActionCommand(Id, viewModel.StaffId));
+
+        if (actionRequest.IsFailure)
+        {
+            Error = new()
+            {
+                Error = actionRequest.Error,
+                RedirectPath = null
+            };
+
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
+
+            if (request.IsFailure)
+                return RedirectToPage();
+
+            Case = request.Value;
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostNewIncidentAction(AddSentralIncidentStatusActionViewModel viewModel)
+    {
+        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        {
+            Error = new()
+            {
+                Error = ActionErrors.AssignStaffNull,
+                RedirectPath = null
+            };
+
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
+
+            if (request.IsFailure)
+                return RedirectToPage();
+
+            Case = request.Value;
+
+            return Page();
+        }
+
+        Result actionRequest = await _mediator.Send(new AddSentralIncidentStatusActionCommand(Id, viewModel.StaffId));
 
         if (actionRequest.IsFailure)
         {

@@ -13,7 +13,7 @@
                 <div class="col-md-5">
                     <input asp-for="Confirmed" class="form-control" />
                     <span asp-validation-for="Confirmed" class="text-danger"></span>
-                    <span class="text-danger">By marking this action as Confirmed you are affirming that the classroom teacher has correctly created a Sentral Incident for outstanding work in the indicated class, or that such an entry was not required.</span>
+                    <span class="text-danger">@Model.Warning</span>
                 </div>
             </div>
         </div>

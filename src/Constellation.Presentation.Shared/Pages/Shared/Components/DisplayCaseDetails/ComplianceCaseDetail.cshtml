@@ -1,0 +1,42 @@
+﻿@model ComplianceCaseDetail
+
+@using Constellation.Application.Interfaces.Configuration
+@using Constellation.Core.Models.WorkFlow
+@using Constellation.Core.Extensions
+@using Microsoft.Extensions.Options
+
+@inject IOptions<SentralGatewayConfiguration> options
+
+<dl>
+    <dt>Case Type</dt>
+    <dd>Compliance</dd>
+
+    <dt>Student</dt>
+    <dd>
+        @Model.Name <br />
+        @Model.Grade.AsName() <br />
+        @Model.SchoolName
+    </dd>
+    
+    <dt>Created At</dt>
+    <dd>@Model.CreatedDate.ToLongDateString()</dd>
+
+    <dt>Teacher</dt>
+    <dd>@Model.CreatedBy</dd>
+
+    <dt>Subject</dt>
+    <dd>@Model.Subject</dd>
+    
+    <dt>Incident Type</dt>
+    <dd>@Model.IncidentType</dd>
+
+    <dt>Incident Link</dt>
+    <dd>
+        @if (!string.IsNullOrWhiteSpace(options.Value.ServerUrl))
+        {
+            var url = $"{options.Value.ServerUrl}/wellbeing/incidents/view?id={Model.IncidentId}";
+
+            <a href="@url" target="_blank">@url</a>
+        }
+    </dd>
+</dl>

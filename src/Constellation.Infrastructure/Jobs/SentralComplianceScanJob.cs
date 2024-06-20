@@ -4,7 +4,6 @@ using Application.Compliance.GetWellbeingReportFromSentral;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
-using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.WorkFlows.AddCaseDetailUpdateAction;
 using Application.WorkFlows.CreateComplianceCase;
@@ -50,7 +49,7 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
         List<SentralIncidentDetails> incidents = await _excelService.ConvertSentralIncidentReport(files.BasicFile, files.DetailFile, excludedDates, cancellationToken);
 
         // Get all entries that are currently 12 days overdue
-        IEnumerable<SentralIncidentDetails> workingIncidents = incidents.Where(entry => entry.Severity == 10); //TODO: R1.15: Update this to 12
+        IEnumerable<SentralIncidentDetails> workingIncidents = incidents.Where(entry => entry.Severity == 12);
         
         foreach (SentralIncidentDetails incident in workingIncidents)
         {
@@ -76,9 +75,11 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
 
         // Get all entries that are (age - 12 % 5 = 0) with open WorkFlows and force a reminder update
 
-        IEnumerable<IGrouping<int, SentralIncidentDetails>> groupedAgeIncidents = incidents.GroupBy(entry => entry.Severity);
+        IEnumerable<IGrouping<int, SentralIncidentDetails>> groupedAgeIncidents = incidents
+            .Where(entry => entry.Severity > 12)
+            .GroupBy(entry => entry.Severity);
 
-        foreach (IGrouping<int, SentralIncidentDetails> group in groupedAgeIncidents.Where(group => group.Key > 12 && group.Key % 5 == 0))
+        foreach (IGrouping<int, SentralIncidentDetails> group in groupedAgeIncidents.Where(group => group.Key > 12 && (group.Key - 12) % 5 == 0))
         {
             foreach (SentralIncidentDetails incident in group)
             {

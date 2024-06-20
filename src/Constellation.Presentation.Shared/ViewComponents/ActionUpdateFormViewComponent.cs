@@ -54,9 +54,10 @@ public class ActionUpdateFormViewComponent : ViewComponent
         if (action.Status.Equals(ActionStatus.Cancelled))
             return View("ActionCancelled", string.Empty);
 
-        string studentId = item.Type!.Equals(CaseType.Attendance) ?
-            ((AttendanceCaseDetail)item.Detail)!.StudentId :
-            null;
+        string? studentId = 
+            item.Type!.Equals(CaseType.Attendance) ? ((AttendanceCaseDetail)item.Detail!).StudentId 
+            : item.Type!.Equals(CaseType.Compliance) ? ((ComplianceCaseDetail)item.Detail!).StudentId
+            : null;
 
         // Limit the datetime-local field precision to minutes 
         DateTime now = _dateTime.Now;
@@ -130,13 +131,18 @@ public class ActionUpdateFormViewComponent : ViewComponent
             case CreateSentralEntryAction sentralAction:
                 CreateSentralEntryActionViewModel sentralViewModel = new();
 
-                if (item.Type!.Equals(CaseType.Attendance) && ((AttendanceCaseDetail)item.Detail)!.Severity.Equals(AttendanceSeverity.BandTwo))
+                if (item.Type!.Equals(CaseType.Attendance) && ((AttendanceCaseDetail)item.Detail!).Severity.Equals(AttendanceSeverity.BandTwo))
                     sentralViewModel.NotRequiredAllowed = true;
 
                 return View("CreateSentralEntryAction", sentralViewModel);
 
             case ConfirmSentralEntryAction confirmAction:
                 ConfirmSentralEntryActionViewModel confirmViewModel = new();
+
+                confirmViewModel.Warning =
+                    item.Type!.Equals(CaseType.Attendance) ? ConfirmSentralEntryActionViewModel.AttendanceWarning
+                    : item.Type!.Equals(CaseType.Compliance) ? ConfirmSentralEntryActionViewModel.ComplianceWarning
+                    : string.Empty;
 
                 return View("ConfirmSentralEntryAction", confirmViewModel);
 
@@ -174,6 +180,11 @@ public class ActionUpdateFormViewComponent : ViewComponent
                 };
 
                 return View("ParentInterviewAction", interviewViewModel);
+
+            case SentralIncidentStatusAction incidentAction:
+                SentralIncidentStatusActionViewModel incidentViewModel = new();
+
+                return View("SentralIncidentStatusAction", incidentViewModel);
 
             default:
                 return Content(string.Empty);
