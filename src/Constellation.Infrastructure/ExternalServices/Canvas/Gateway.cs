@@ -67,6 +67,52 @@ internal sealed class Gateway : ICanvasGateway
         Delete
     }
 
+    private async Task<List<T>> RequestAsync<T>(
+        string path, 
+        CancellationToken cancellationToken = default) 
+        where T : class
+    {
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+
+        List<T> completeResponse = new List<T>();
+
+        bool nextPageExists = true;
+
+        while (nextPageExists)
+        {
+            Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
+            
+            HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return completeResponse;
+
+            string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            completeResponse.AddRange(JsonConvert.DeserializeObject<List<T>>(responseText));
+
+            bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string> linkHeaders);
+
+            if (!responseHeaders)
+                nextPageExists = false;
+
+            string[] links = linkHeaders!.First().Split(',');
+            string nextLinkHeader = links.FirstOrDefault(entry => entry.Contains(@"rel=""next"""));
+
+            if (nextLinkHeader is null)
+            {
+                nextPageExists = false;
+            }
+            else
+            {
+                string[] parts = nextLinkHeader.Split(";");
+                path = parts[0].TrimStart('<').TrimEnd('>');
+            }
+        }
+
+        return completeResponse;
+    }
+
     private async Task<HttpResponseMessage> RequestAsync(string path, HttpVerb action, object payload = null,
         CancellationToken cancellationToken = default)
     {
@@ -300,25 +346,20 @@ internal sealed class Gateway : ICanvasGateway
         CancellationToken cancellationToken = default)
     {
         string path = $"courses/sis_course_id:{courseId}/assignments";
-
+        
+        List<CanvasAssignmentDto> returnData = new();
+        
         if (_logOnly)
         {
             _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
 
             return new List<CanvasAssignmentDto>();
         }
-
-        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
-        if (!response.IsSuccessStatusCode)
-            return null;
-
-        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        List<AssignmentResult> assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
-
-        List<CanvasAssignmentDto> returnData = new();
-
-        assignments = assignments.Where(assignment =>
+        
+        List<AssignmentResult> assignments = await RequestAsync<AssignmentResult>(path, cancellationToken: cancellationToken);
+        
+        assignments = assignments
+            .Where(assignment =>
                 assignment.IsPublished &&
                 assignment.SubmissionTypes.Contains("online_upload"))
             .ToList();
