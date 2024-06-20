@@ -10,10 +10,12 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Core.ValueObjects;
 using Core.Models.Assignments;
 using Core.Models.Subjects;
 using Core.Models.WorkFlow;
+using Org.BouncyCastle.Cms;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,4 +101,5 @@ public interface IEmailService
     Task SendActionAssignedEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
     Task SendActionCancelledEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
     Task SendEnteredEmailForAction(List<EmailRecipient> recipients, EmailRecipient sender, string subject, string body, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendComplianceWorkFlowNotificationEmail(List<EmailRecipient> recipients, CaseId caseId, ComplianceCaseDetail detail, int incidentAge, string incidentLink, CancellationToken cancellationToken = default);
 }

@@ -1,0 +1,16 @@
+@model ComplianceWorkFlowNotificationEmailViewModel
+
+@using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>We have detected that @Model.StudentName (@Model.StudentGrade - @Model.StudentSchool) has an outstanding @Model.IncidentType (<a href="@Model.IncidentLink" target="_blank">@Model.IncidentId</a>) for @Model.Subject.</p>
+<p>This incident is now @Model.Age days old, and should be updated as soon as possible.</p>
+<p>For more details, please see the WorkFlow Case at <a href="@Model.Link">@Model.Link</a></p>

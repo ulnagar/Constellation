@@ -47,9 +47,6 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
             return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
-        if (!item.Type!.Equals(CaseType.Attendance))
-            return Result.Failure(ActionErrors.CreateCaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
-
         Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (teacher is null)

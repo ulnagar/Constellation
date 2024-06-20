@@ -4,10 +4,13 @@ using Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Application.Absences.ConvertResponseToAbsenceExplanation;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
+using Application.Extensions;
 using Application.Helpers;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
+using Core.Abstractions.Clock;
+using Core.Extensions;
 using Core.Models;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Identifiers;
@@ -17,10 +20,12 @@ using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Subjects;
 using Core.Models.WorkFlow;
+using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using System;
 using System.Net.Mail;
 using System.Threading;
 using Templates.Views.Emails.Absences;
@@ -34,22 +39,26 @@ using Templates.Views.Emails.MandatoryTraining;
 using Templates.Views.Emails.Reports;
 using Templates.Views.Emails.RollMarking;
 using Templates.Views.Emails.WorkFlow;
+using Action = Core.Models.WorkFlow.Action;
 
 public sealed class Service : IEmailService
 {
     private readonly IEmailGateway _emailSender;
     private readonly ICalendarService _calendarService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly IRazorViewToStringRenderer _razorService;
     private readonly AppConfiguration _configuration;
 
     public Service(
         IEmailGateway emailSender,
         ICalendarService calendarService,
+        IDateTimeProvider dateTime,
         IRazorViewToStringRenderer razorService,
         IOptions<AppConfiguration> configuration)
     {
         _emailSender = emailSender;
         _calendarService = calendarService;
+        _dateTime = dateTime;
         _razorService = razorService;
         _configuration = configuration.Value;
     }
@@ -1243,6 +1252,36 @@ public sealed class Service : IEmailService
         };
 
         string body = await _razorService.RenderViewToStringAsync(ActionCancelledEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
+
+    public async Task SendComplianceWorkFlowNotificationEmail(
+        List<EmailRecipient> recipients,
+        CaseId caseId,
+        ComplianceCaseDetail detail,
+        int incidentAge,
+        string incidentLink,
+        CancellationToken cancellationToken = default)
+    {
+        ComplianceWorkFlowNotificationEmailViewModel viewModel = new()
+        {
+            Title = $"[WorkFlow] Compliance Case Detected",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            StudentName = detail.Name,
+            StudentGrade = detail.Grade.AsName(),
+            StudentSchool = detail.SchoolName,
+            IncidentType = detail.IncidentType,
+            IncidentId = detail.IncidentId,
+            Subject = detail.Subject,
+            IncidentLink = incidentLink,
+            Age = incidentAge,
+            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Details/{CaseId.Value}"
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
