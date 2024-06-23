@@ -1278,10 +1278,10 @@ public sealed class Service : IEmailService
             Subject = detail.Subject,
             IncidentLink = incidentLink,
             Age = incidentAge,
-            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Details/{CaseId.Value}"
+            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Details/{caseId.Value}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);
+        string body = await _razorService.RenderViewToStringAsync(ComplianceWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
 
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }

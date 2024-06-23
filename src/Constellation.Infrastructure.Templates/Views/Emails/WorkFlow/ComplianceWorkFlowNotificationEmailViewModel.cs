@@ -1,15 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Templates.Views.Emails.WorkFlow;
 
-using Application.DTOs.EmailRequests;
-using Constellation.Core.Models.WorkFlow.Identifiers;
-using Core.Models.WorkFlow;
 using Shared;
 
 public sealed class ComplianceWorkFlowNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
     public const string ViewLocation = "/Views/Emails/WorkFlow/ComplianceWorkFlowNotificationEmail.cshtml";
-
-    public ComplianceCaseDetail Detail { get; set; }
 
     public string StudentName { get; set; }
     public string StudentGrade { get; set; }

@@ -1,23 +1,23 @@
-﻿namespace Constellation.Application.WorkFlows.Events.CaseCreatedDomainEvent;
+﻿namespace Constellation.Application.WorkFlows.Events.CaseActionAddedDomainEvent;
 
-using Abstractions.Messaging;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Extensions;
+using Constellation.Application.Interfaces.Configuration;
+using Constellation.Application.Interfaces.Gateways;
+using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Faculties;
 using Constellation.Core.Models.Faculties.Repositories;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
+using Constellation.Core.Models.WorkFlow.Events;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Constellation.Core.Shared;
-using Core.Abstractions.Clock;
-using Core.Models;
-using Core.Models.Faculties;
-using Core.Models.WorkFlow.Events;
-using Core.ValueObjects;
-using Extensions;
-using Interfaces.Configuration;
-using Interfaces.Gateways;
-using Interfaces.Services;
+using Constellation.Core.ValueObjects;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
@@ -25,9 +25,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Action = Core.Models.WorkFlow.Action;
 
 internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
-: IDomainEventHandler<CaseCreatedDomainEvent>
+: IDomainEventHandler<CaseActionAddedDomainEvent>
 {
     private readonly ICaseRepository _caseRepository;
     private readonly IStaffRepository _staffRepository;
@@ -58,17 +59,17 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         _dateTime = dateTime;
         _configuration = configuration.Value;
         _sentralConfiguration = sentralConfiguration.Value;
-        _logger = logger.ForContext<CaseCreatedDomainEvent>();
+        _logger = logger.ForContext<CaseActionAddedDomainEvent>();
     }
 
-    public async Task Handle(CaseCreatedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(CaseActionAddedDomainEvent notification, CancellationToken cancellationToken)
     {
         Case item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
 
         if (item is null)
         {
             _logger
-                .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                 .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
                 .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -78,6 +79,21 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (!item.Type!.Equals(CaseType.Compliance))
             return;
 
+        Action action = item.Actions.FirstOrDefault(entry => entry.Id == notification.ActionId);
+
+        if (action is null)
+        {
+            _logger
+                .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
+                .ForContext(nameof(Error), CaseErrors.NotFound(notification.CaseId), true)
+                .Warning("Could not send notification to Assignee for new Action");
+
+            return;
+        }
+
+        if (action is not CaseDetailUpdateAction)
+            return;
+
         ComplianceCaseDetail detail = item.Detail as ComplianceCaseDetail;
         
         Staff assignee = await _staffRepository.GetById(detail!.CreatedById, cancellationToken);
@@ -85,7 +101,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (assignee is null)
         {
             _logger
-                .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                 .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
                 .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -98,7 +114,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (teacher.IsFailure)
         {
             _logger
-                .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                 .ForContext(nameof(Staff), assignee, true)
                 .ForContext(nameof(Error), teacher.Error, true)
                 .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
@@ -126,7 +142,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
                 if (headTeacherEmail.IsFailure)
                 {
                     _logger
-                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                        .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                         .ForContext(nameof(Staff), headTeacher, true)
                         .ForContext(nameof(Error), headTeacherEmail.Error, true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
@@ -149,6 +165,9 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
 
         int age = datesBetween.Count - 1;
 
+        if (age < 12 || (age - 12) % 5 != 0)
+            return;
+
         if (age >= 17)
         {
             // Add DP to recipients
@@ -161,7 +180,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
                 if (deputy is null)
                 {
                     _logger
-                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                        .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                         .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -172,7 +191,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
                 if (teacher.IsFailure)
                 {
                     _logger
-                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                        .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                         .ForContext(nameof(Staff), assignee, true)
                         .ForContext(nameof(Error), deputyEmail.Error, true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
@@ -194,7 +213,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
             if (principal is null)
             {
                 _logger
-                    .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                    .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                     .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
                     .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -205,7 +224,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
             if (teacher.IsFailure)
             {
                 _logger
-                    .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                    .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
                     .ForContext(nameof(Staff), assignee, true)
                     .ForContext(nameof(Error), principalEmail.Error, true)
                     .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
