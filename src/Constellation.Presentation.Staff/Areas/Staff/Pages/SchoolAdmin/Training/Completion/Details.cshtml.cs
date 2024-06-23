@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Trainin
 using Application.Common.PresentationModels;
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Training.GetUploadedTrainingCertificateFileById;
 using Constellation.Application.Training.Modules.GetCompletionRecordDetails;
 using Constellation.Application.Training.Modules.GetUploadedTrainingCertificateFileById;
 using Constellation.Application.Training.Modules.MarkTrainingCompletionRecordDeleted;

@@ -3,18 +3,18 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SchoolContacts;
-using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Models.Faculties;
+using Core.Models.Training;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 public class CompletionRecordExtendedDetailsDto
 {
-    public TrainingModuleId ModuleId { get; set; }
+    public TrainingModuleId? ModuleId { get; set; }
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleFrequency { get; set; }
     public List<string> RequiredByRoles { get; set; }
@@ -24,7 +24,7 @@ public class CompletionRecordExtendedDetailsDto
     public List<EmailRecipient> StaffHeadTeachers { get; set; } = new();
     public List<EmailRecipient> PrincipalContacts { get; set; } = new();
 
-    public TrainingCompletionId RecordId { get; set; }
+    public TrainingCompletionId? RecordId { get; set; }
     public DateTime? RecordEffectiveDate { get; set; }
 
     public bool IsLatest { get; set; }
@@ -86,7 +86,7 @@ public class CompletionRecordExtendedDetailsDto
 
     public void CalculateExpiry() 
     {
-        if (ModuleId is null || ModuleId.Value == Guid.Empty || RecordId is null || RecordId.Value == Guid.Empty)
+        if (ModuleId is null || ModuleId.Value.Value == Guid.Empty || RecordId is null || RecordId.Value.Value == Guid.Empty)
         {
             DueDate = DateTime.Today;
             TimeToExpiry = -9999;

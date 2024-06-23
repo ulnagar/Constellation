@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Features.Common.Queries;
 
-using Core.Models.Training.Contexts.Modules;
+using Core.Models.Training;
 using Core.Models.Training.Repositories;
 using MediatR;
 using System;

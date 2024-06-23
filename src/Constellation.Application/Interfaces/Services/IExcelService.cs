@@ -8,9 +8,10 @@ using Attendance.GetAttendanceDataFromSentral;
 using Awards.ExportAwardNominations;
 using Compliance.GetWellbeingReportFromSentral;
 using Constellation.Application.Contacts.Models;
-using Constellation.Core.Models.Training.Contexts.Modules;
+using Constellation.Application.Training.GenerateOverallReport;
 using Constellation.Infrastructure.Jobs;
 using Core.Models.Assets;
+using Core.Models.Training;
 using DTOs;
 using DTOs.CSV;
 using ExternalDataConsistency;
@@ -24,7 +25,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Training.Models;
-using Training.Modules.GenerateOverallReport;
 using WorkFlows.ExportOpenCaseReport;
 
 public interface IExcelService

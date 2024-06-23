@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Core.Models.Training.Contexts.Modules;
+using Core.Models.Training;
 using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;

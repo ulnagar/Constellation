@@ -1,8 +1,8 @@
 ﻿using Constellation.Core.Models.Faculties;
+using Constellation.Core.Models.Training;
 
 namespace Constellation.Core.Models;
 
-using Training.Contexts.Modules;
 using Shared;
 using ValueObjects;
 using System;

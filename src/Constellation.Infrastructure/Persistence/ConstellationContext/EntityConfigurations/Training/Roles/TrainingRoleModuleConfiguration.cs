@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training.Roles;
 
-using Constellation.Core.Models.Training.Contexts.Modules;
 using Constellation.Core.Models.Training.Contexts.Roles;
+using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

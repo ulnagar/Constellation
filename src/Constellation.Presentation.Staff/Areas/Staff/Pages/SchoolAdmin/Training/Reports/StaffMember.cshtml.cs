@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Trainin
 using Application.Models.Auth;
 using Application.StaffMembers.GetStaffById;
 using Application.Training.Modules.GetModuleStatusByStaffMember;
+using Constellation.Application.Training.GetModuleStatusByStaffMember;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

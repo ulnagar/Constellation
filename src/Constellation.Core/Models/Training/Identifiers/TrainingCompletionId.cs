@@ -2,7 +2,7 @@
 
 using System;
 
-public sealed record TrainingCompletionId(Guid Value)
+public record struct TrainingCompletionId(Guid Value)
 {
     public static TrainingCompletionId FromValue(Guid value) =>
         new(value);

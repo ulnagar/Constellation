@@ -2,9 +2,9 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Trainin
 
 using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.Modules.CreateTrainingModule;
-using Constellation.Application.Training.Modules.GetTrainingModuleEditContext;
-using Constellation.Application.Training.Modules.UpdateTrainingModule;
+using Constellation.Application.Training.CreateTrainingModule;
+using Constellation.Application.Training.GetTrainingModuleEditContext;
+using Constellation.Application.Training.UpdateTrainingModule;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Training.Identifiers;
