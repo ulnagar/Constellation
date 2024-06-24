@@ -41,7 +41,7 @@ internal sealed class GetListOfStaffMembersWithoutModuleQueryHandler
 
         foreach (Staff staffMember in staffMembers)
         {
-            int staffModules = modules.Count(module => module.Assignees.All(entry => entry.StaffId != staffMember.StaffId));
+            int staffModules = modules.Count(module => module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId));
 
             if (staffModules == 0)
             {

@@ -36,7 +36,10 @@
     @if (canEditTest.Succeeded)
     {
         <a asp-page="/SchoolAdmin/Training/Modules/Upsert" asp-area="Staff" asp-route-id="@Model.Module.Id" class="btn btn-warning">Edit</a>
-        
+
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addStaffModal">Add Staff</button>
+        <a asp-page="/SchoolAdmin/Training/Modules/BulkAddMembers" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Bulk Add Staff</a>
+
         @if (Model.Module.IsActive)
         {
             <a asp-page-handler="RetireModule" class="btn btn-danger">Retire Module</a>
@@ -90,7 +93,7 @@
         <dd class="col-md-8">
             @foreach (var entry in Model.Module.Assignees.OrderBy(entry => entry.Name.SortOrder))
             {
-                <a asp-page-handler="RemoveAssignee" asp-route-staffId="@entry.StaffId" class="d-block">@entry.Name.DisplayName</a>
+                <button data-staff-id="@entry.StaffId" data-module-name="@Model.Module.Name" data-staff-name="@entry.Name.DisplayName" class="btn btn-link delete-member-button">@entry.Name.DisplayName</button>
             }
         </dd>
     </dl>
@@ -259,3 +262,40 @@
         }
     </div>
 </div>
+
+<vc:add-staff-member-to-training-module module-id="Model.Id" />
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" id="page-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('.delete-member-button').click(function (event) {
+            var staffId = $(this).data("staffId");
+            var moduleName = $(this).data("moduleName");
+            var staffName = $(this).data("staffName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveMember",
+                type: "POST",
+                data: {
+                    staffId: staffId,
+                    staffName: staffName,
+                    moduleName: moduleName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}

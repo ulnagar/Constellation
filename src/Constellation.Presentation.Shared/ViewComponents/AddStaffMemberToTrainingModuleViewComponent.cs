@@ -9,6 +9,7 @@ using Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pages.Shared.Components.AddStaffMemberToTrainingModule;
+using System.Collections.Generic;
 
 public class AddStaffMemberToTrainingModuleViewComponent : ViewComponent
 {
@@ -26,11 +27,12 @@ public class AddStaffMemberToTrainingModuleViewComponent : ViewComponent
         Result<ModuleDetailsDto> module = await _mediator.Send(new GetModuleDetailsQuery(moduleId));
 
         if (module.IsFailure)
-        {
             return Content(string.Empty);
-        }
 
         Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        foreach (ModuleDetailsDto.Assignee assignee in module.Value.Assignees)
+            staffResult.Remove(assignee.StaffId);
 
         AddStaffMemberToTrainingModuleSelection viewModel = new()
         {
