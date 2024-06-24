@@ -39,7 +39,6 @@ public sealed class ActivePage
     public const string SchoolAdmin_Training_Staff = "SchoolAdmin.Training.Staff";
     public const string SchoolAdmin_Training_Modules = "SchoolAdmin.Training.Modules";
     public const string SchoolAdmin_Training_Completions = "SchoolAdmin.Training.Completions";
-    public const string SchoolAdmin_Training_Roles = "SchoolAdmin.Training.Roles";
     public const string SchoolAdmin_Training_Reports = "SchoolAdmin.Training.Reports";
     public const string SchoolAdmin_WorkFlows_Cases = "SchoolAdmin.WorkFlows.Cases";
     public const string SchoolAdmin_WorkFlows_Reports = "SchoolAdmin.WorkFlows.Reports";

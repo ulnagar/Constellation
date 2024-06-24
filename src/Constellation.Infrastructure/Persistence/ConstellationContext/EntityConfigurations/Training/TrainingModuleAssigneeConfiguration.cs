@@ -2,7 +2,6 @@
 
 using Constellation.Core.Models.Training;
 using Core.Models;
-using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,12 +13,6 @@ internal sealed class TrainingModuleAssigneeConfiguration : IEntityTypeConfigura
 
         builder
             .HasKey(member => new { member.ModuleId, member.StaffId });
-
-        builder
-            .Property(member => member.ModuleId)
-            .HasConversion(
-                id => id.Value,
-                value => TrainingModuleId.FromValue(value));
 
         builder
             .HasOne<Staff>()

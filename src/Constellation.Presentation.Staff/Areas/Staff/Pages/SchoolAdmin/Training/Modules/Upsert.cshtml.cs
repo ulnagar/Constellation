@@ -37,7 +37,7 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StrongIdBinder))]
-    public TrainingModuleId? Id { get; set; }
+    public TrainingModuleId Id { get; set; }
 
     [BindProperty]
     [Required]
@@ -52,10 +52,10 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id.HasValue)
+        if (Id != null)
         {
             // Get existing entry from database and populate fields
-            Result<ModuleEditContextDto> entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(Id.Value));
+            Result<ModuleEditContextDto> entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(Id));
 
             if (entityRequest.IsFailure)
             {
@@ -114,7 +114,7 @@ public class UpsertModel : BasePageModel
 
         // Update existing entry
         UpdateTrainingModuleCommand command = new(
-            Id!.Value,
+            Id,
             Name,
             Expiry,
             ModelUrl);

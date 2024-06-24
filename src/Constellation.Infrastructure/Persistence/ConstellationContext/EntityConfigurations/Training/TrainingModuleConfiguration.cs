@@ -27,7 +27,7 @@ internal sealed class TrainingModuleConfiguration : IEntityTypeConfiguration<Tra
             .OnDelete(DeleteBehavior.ClientCascade);
 
         builder
-            .HasMany<TrainingModuleAssignee>()
+            .HasMany(module => module.Assignees)
             .WithOne()
             .HasForeignKey(role => role.ModuleId)
             .OnDelete(DeleteBehavior.ClientCascade);

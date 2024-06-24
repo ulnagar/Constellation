@@ -31,10 +31,5 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
             .WithMany(staff => staff.TrainingCompletionRecords)
             .HasForeignKey(completion => completion.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
-
-        builder
-            .HasOne(completion => completion.Module)
-            .WithMany(module => module.Completions)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

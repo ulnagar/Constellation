@@ -4,7 +4,7 @@
 @using Constellation.Core.Enums
 
 @{
-    var title = Model.Id.HasValue ? "Edit Training Module" : "Create New Training Module";
+    var title = Model.Id != null ? "Edit Training Module" : "Create New Training Module";
 }
 
 <h2>@title</h2>
@@ -47,7 +47,7 @@
 
         <div class="form-group">
             <div class="col-md-3">
-                @if (Model.Id.HasValue)
+                @if (Model.Id != null)
                 {
                     <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
                 }

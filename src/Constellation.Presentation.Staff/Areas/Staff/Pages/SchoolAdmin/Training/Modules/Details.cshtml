@@ -51,34 +51,47 @@
 
 <hr />
 
-<div>
-    <dl class="row">
-        <dt class="col-md-2">
+<div class="row">
+    <dl class="col">
+        <dt class="col-md-4">
             <label asp-for="Module.Id"></label>
         </dt>
-        <dd class="col-md-10">
+        <dd class="col-md-8">
             <span>@Model.Module.Id.Value</span>
         </dd>
 
-        <dt class="col-md-2">
+        <dt class="col-md-4">
             <label asp-for="Module.Name">Module</label>
         </dt>
-        <dd class="col-md-10">
+        <dd class="col-md-8">
             <span>@Model.Module.Name</span>
         </dd>
 
-        <dt class="col-md-2">
+        <dt class="col-md-4">
             <label asp-for="Module.Expiry">Expiry Frequency</label>
         </dt>
-        <dd class="col-md-10">
+        <dd class="col-md-8">
             <span>@Model.Module.Expiry</span>
         </dd>
 
-        <dt class="col-md-2">
+        <dt class="col-md-4">
             <label asp-for="Module.Url">Link</label>
         </dt>
-        <dd class="col-md-10">
+        <dd class="col-md-8">
             <span><a href="@Model.Module.Url" target="_blank">@Model.Module.Url</a></span>
+        </dd>
+    </dl>
+    
+    <dl class="col">
+        <dt class="col-md-4">
+            <label asp-for="Module.Assignees"></label>
+        </dt>
+        
+        <dd class="col-md-8">
+            @foreach (var entry in Model.Module.Assignees.OrderBy(entry => entry.Name.SortOrder))
+            {
+                <a asp-page-handler="RemoveAssignee" asp-route-staffId="@entry.StaffId" class="d-block">@entry.Name.DisplayName</a>
+            }
         </dd>
     </dl>
 </div>

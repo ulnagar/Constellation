@@ -15,14 +15,13 @@ public sealed class TrainingModuleAssignee
     }
 
     public TrainingModuleId ModuleId { get; private set; }
-    public TrainingModule Module { get; private set; }
     public string StaffId { get; private set; }
 
     public static TrainingModuleAssignee Create(
         TrainingModuleId moduleId,
         string staffId)
     {
-        TrainingModuleAssignee member = new TrainingModuleAssignee(moduleId, staffId);
+        TrainingModuleAssignee member = new(moduleId, staffId);
 
         return member;
     }
