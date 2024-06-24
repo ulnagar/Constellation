@@ -1,6 +1,5 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training.Modules;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training;
 
-using Constellation.Core.Models.Training.Contexts.Roles;
 using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,7 @@ internal sealed class TrainingModuleConfiguration : IEntityTypeConfiguration<Tra
 {
     public void Configure(EntityTypeBuilder<TrainingModule> builder)
     {
-        builder.ToTable("Training_Modules_Modules");
+        builder.ToTable("Modules", "Training");
 
         builder
             .HasKey(module => module.Id);
@@ -28,13 +27,17 @@ internal sealed class TrainingModuleConfiguration : IEntityTypeConfiguration<Tra
             .OnDelete(DeleteBehavior.ClientCascade);
 
         builder
-            .HasMany<TrainingRoleModule>()
+            .HasMany<TrainingModuleAssignee>()
             .WithOne()
             .HasForeignKey(role => role.ModuleId)
             .OnDelete(DeleteBehavior.ClientCascade);
 
         builder
             .Navigation(module => module.Completions)
+            .AutoInclude();
+
+        builder
+            .Navigation(module => module.Assignees)
             .AutoInclude();
     }
 }

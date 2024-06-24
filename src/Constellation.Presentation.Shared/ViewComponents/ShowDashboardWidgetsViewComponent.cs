@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Shared.ViewComponents;
 
+using Application.Training.CountStaffWithoutModule;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.CountStudentsWithAbsenceScanDisabled;
 using Constellation.Application.Students.CountStudentsWithAwardOverages;
 using Constellation.Application.Students.CountStudentsWithoutSentralId;
 using Constellation.Application.Students.CountStudentsWithPendingAwards;
-using Constellation.Application.Training.Roles.CountStaffWithoutRole;
 using Constellation.Application.WorkFlows.CountActiveActionsForUser;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Pages.Shared.Components.ShowDashboardWidgets;
@@ -46,7 +46,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
         {
             viewModel.ShowTrainingWidgets = true;
 
-            Result<int> countOfStaffWithoutRoles = await _mediator.Send(new CountStaffWithoutRoleQuery(), cancellationToken);
+            Result<int> countOfStaffWithoutRoles = await _mediator.Send(new CountStaffWithoutModuleQuery(), cancellationToken);
             if (countOfStaffWithoutRoles.IsSuccess)
                 viewModel.WithoutRole = countOfStaffWithoutRoles.Value;
         }

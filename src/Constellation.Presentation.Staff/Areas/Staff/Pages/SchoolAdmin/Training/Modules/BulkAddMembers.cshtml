@@ -1,6 +1,5 @@
-﻿@page "{Id:Guid}"
-@using Constellation.Application.Extensions
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Roles.BulkAddMembersModel
+﻿@page "{Id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules.BulkAddMembersModel
 @{
 }
 
@@ -12,14 +11,14 @@
 
 <hr />
 
-<h4>Select staff members to be added to the @Model.Role.Name Training Role</h4>
+<h4>Select staff members to be added to the @Model.Module.Name Training Module</h4>
 
 <form method="post">
     <div class="row">
         <div class="col">
-            <label class="text-bold">Existing Members:</label>
+            <label class="text-bold">Existing Assignees:</label>
             <div>
-                @foreach (var entry in Model.Role.Members)
+                @foreach (var entry in Model.Module.Assignees)
                 {
                     <button type="button" class="btn btn-outline-success staff-button">@entry.Name.DisplayName</button>
                 }
@@ -68,7 +67,7 @@
                     <div class="col-4 button-list">
                         @foreach (var entry in list)
                 {
-                    if (Model.Role.Members.Any(member => member.StaffId == entry.StaffId))
+                    if (Model.Module.Assignees.Any(member => member.StaffId == entry.StaffId))
                     {
                                 <button type="button" class="btn btn-outline-success staff-button">@entry.Name.DisplayName</button>
                     }

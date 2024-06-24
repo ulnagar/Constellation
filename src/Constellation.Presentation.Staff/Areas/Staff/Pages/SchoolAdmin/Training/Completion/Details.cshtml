@@ -1,11 +1,9 @@
-﻿@page "/SchoolAdmin/Training/Modules/{ModuleId:Guid}/Completions/{CompletionId:Guid}"
+﻿@page "{ModuleId}/{CompletionId}"
 @model DetailsModel
 
 @using Constellation.Application.Helpers
-@using Constellation.Application.Models.Auth
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion
 @using Constellation.Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate
-@using Microsoft.AspNetCore.Authorization
 
 @inject IAuthorizationService AuthorizationService
 
@@ -18,7 +16,7 @@
 <div class="page-menu">
     @if (canManage.Succeeded)
     {
-        <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-id="@Model.Record.Id.Value" asp-route-moduleId="@Model.Record.ModuleId.Value" asp-route-mode="@CompletionPageMode.Full" class="btn btn-warning">Edit</a>
+        <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-id="@Model.Record.Id" asp-route-moduleId="@Model.Record.ModuleId" asp-route-mode="@CompletionPageMode.Full" class="btn btn-warning">Edit</a>
         
         <form asp-page-handler="DeleteRecord" asp-route-completionId="@Model.CompletionId" asp-route-moduleId="@Model.ModuleId" method="post">
             <button type="submit" class="btn btn-danger">Delete Entry</button>
@@ -84,4 +82,4 @@
     </div>
 }
 
-<vc:upload-training-completion-certificate module-id="@Model.ModuleId" completion-id="@Model.CompletionId" completion-date="@Model.Record.CompletedDate!.Value" />
+<vc:upload-training-completion-certificate module-id="@Model.ModuleId.Value" completion-id="@Model.CompletionId.Value" completion-date="@Model.Record.CompletedDate!.Value" />

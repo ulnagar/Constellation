@@ -1,0 +1,30 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Staff.WithoutModuleModel
+@{
+}
+
+<h2>Staff Members without linked Training Module</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.StaffMembers)
+        {
+            <tr>
+                <td data-order="@entry.StaffName.SortOrder">@entry.StaffName.DisplayName</td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>

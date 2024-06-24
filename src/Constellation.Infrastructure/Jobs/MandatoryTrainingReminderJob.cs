@@ -1,24 +1,19 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Training.Models;
 using Application.Helpers;
 using Application.Interfaces.Configuration;
+using Application.Training.Models;
 using Constellation.Application.Interfaces.Jobs;
-using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Faculties.ValueObjects;
-using Core.Models.SchoolContacts;
-using Core.Models.Training.Contexts.Roles;
-using Core.Shared;
-using Core.ValueObjects;
-using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
-using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
+using Core.Shared;
+using Core.ValueObjects;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
@@ -30,33 +25,24 @@ using System.Threading.Tasks;
 internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJob
 {
     private readonly AppConfiguration _configuration;
-    private readonly ITrainingRoleRepository _trainingRoleRepository;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
-    private readonly ISchoolRepository _schoolRepository;
-    private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public MandatoryTrainingReminderJob(
         IOptions<AppConfiguration> configuration,
-        ITrainingRoleRepository trainingRoleRepository,
         ITrainingModuleRepository trainingModuleRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
-        ISchoolRepository schoolRepository,
-        ISchoolContactRepository schoolContactRepository,
         IEmailService emailService,
         ILogger logger)
     {
         _configuration = configuration.Value;
-        _trainingRoleRepository = trainingRoleRepository;
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
-        _schoolRepository = schoolRepository;
-        _schoolContactRepository = schoolContactRepository;
         _emailService = emailService;
         _logger = logger.ForContext<IMandatoryTrainingReminderJob>();
     }
@@ -68,22 +54,20 @@ internal sealed class MandatoryTrainingReminderJob : IMandatoryTrainingReminderJ
         // Get all staff
         List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
+        List<TrainingModule> modules = await _trainingModuleRepository.GetAllModules(cancellationToken);
+
         foreach (Staff staffMember in staff)
         {
             // Get all roles for the staff member
-            List<TrainingRole> roles = await _trainingRoleRepository.GetRolesForStaffMember(staffMember.StaffId, cancellationToken);
-
-            // Get all modules attached to roles
-            List<TrainingModuleId> moduleIds = roles
-                .SelectMany(role => role.Modules)
-                .Select(module => module.ModuleId)
+            List<TrainingModule> staffModules = modules
+                .Where(module => 
+                    module.Assignees.Any(entry => 
+                        entry.StaffId == staffMember.StaffId))
                 .ToList();
             
             // Get all completions for staff member
-            foreach (TrainingModuleId moduleId in moduleIds)
+            foreach (TrainingModule module in staffModules)
             {
-                TrainingModule module = await _trainingModuleRepository.GetModuleById(moduleId, cancellationToken);
-
                 if (module.IsDeleted) continue;
 
                 TrainingCompletion completion = module

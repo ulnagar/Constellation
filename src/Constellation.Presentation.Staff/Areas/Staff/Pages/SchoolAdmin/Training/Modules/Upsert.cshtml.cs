@@ -13,7 +13,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using System;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -31,24 +31,31 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
+    [ViewData] public string PageTitle => "Edit Training Module";
+
+
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public TrainingModuleId? Id { get; set; }
+
     [BindProperty]
     [Required]
     public string Name { get; set; }
+
     [BindProperty]
     public TrainingModuleExpiryFrequency Expiry { get; set; }
+
     [BindProperty]
     public string ModelUrl { get; set; }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
 
     public async Task OnGet()
     {
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
-            Result<ModuleEditContextDto> entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(TrainingModuleId.FromValue(Id.Value)));
+            Result<ModuleEditContextDto> entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(Id.Value));
 
             if (entityRequest.IsFailure)
             {
@@ -106,8 +113,8 @@ public class UpsertModel : BasePageModel
         }
 
         // Update existing entry
-        UpdateTrainingModuleCommand command = new UpdateTrainingModuleCommand(
-            TrainingModuleId.FromValue(Id!.Value),
+        UpdateTrainingModuleCommand command = new(
+            Id!.Value,
             Name,
             Expiry,
             ModelUrl);
@@ -116,7 +123,7 @@ public class UpsertModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = result.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" })

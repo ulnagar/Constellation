@@ -1,15 +1,17 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Roles;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules;
 
-using Application.Models.Auth;
-using Application.StaffMembers.GetStaffList;
-using Application.Training.Roles.GetTrainingRoleDetails;
-using Constellation.Application.Training.Roles.AddStaffMemberToTrainingRole;
-using Core.Models.Training.Identifiers;
-using Core.Shared;
+using Application.Training.AddStaffMemberToTrainingModule;
+using Application.Training.GetModuleDetails;
+using Application.Training.Models;
+using Constellation.Application.Models.Auth;
+using Constellation.Application.StaffMembers.GetStaffList;
+using Constellation.Core.Models.Training.Identifiers;
+using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 
 [Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
 public class BulkAddMembersModel : BasePageModel
@@ -25,37 +27,39 @@ public class BulkAddMembersModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Roles;
+    [ViewData] public string PageTitle => "Training Module Assignees";
 
-    public TrainingRoleDetailResponse Role { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    [ModelBinder(typeof(StrongIdBinder))]
+    public TrainingModuleId Id { get; set; }
+
+    public ModuleDetailsDto Module { get; set; }
     public List<StaffResponse> StaffMembers { get; set; } = new();
 
     [BindProperty]
     public List<string> SelectedStaffIds { get; set; } = new();
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Roles;
    
     public async Task OnGet() => await PreparePage();
 
     public async Task PreparePage()
     {
-        TrainingRoleId roleId = TrainingRoleId.FromValue(Id);
+        Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(Id));
 
-        Result<TrainingRoleDetailResponse> roleRequest = await _mediator.Send(new GetTrainingRoleDetailsQuery(roleId));
-
-        if (roleRequest.IsFailure)
+        if (moduleRequest.IsFailure)
         {
             Error = new()
             {
-                Error = roleRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Roles/Details", values: new { area = "Staff", Id })
+                Error = moduleRequest.Error,
+                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id })
             };
 
             return;
         }
 
-        Role = roleRequest.Value;
+        Module = moduleRequest.Value;
 
         Result<List<StaffResponse>> staffRequest = await _mediator.Send(new GetStaffListQuery());
 
@@ -64,7 +68,7 @@ public class BulkAddMembersModel : BasePageModel
             Error = new()
             {
                 Error = staffRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Roles/Details", values: new { area = "Staff", Id })
+                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id })
             };
 
             return;
@@ -83,10 +87,8 @@ public class BulkAddMembersModel : BasePageModel
 
             return Page();
         }
-
-        TrainingRoleId roleId = TrainingRoleId.FromValue(Id);
-
-        Result request = await _mediator.Send(new AddStaffMemberToTrainingRoleCommand(roleId, SelectedStaffIds));
+        
+        Result request = await _mediator.Send(new AddStaffMemberToTrainingModuleCommand(Id, SelectedStaffIds));
 
         if (request.IsFailure)
         {
@@ -99,6 +101,6 @@ public class BulkAddMembersModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/SchoolAdmin/Training/Roles/Details", new { area = "Staff", Id });
+        return RedirectToPage("/SchoolAdmin/Training/Modules/Details", new { area = "Staff", Id });
     }
 }

@@ -1,26 +1,25 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.DTOs;
-using Constellation.Application.Features.Common.Queries;
-using Constellation.Application.Models.Auth;
+using Application.DTOs;
+using Application.Features.Common.Queries;
+using Application.Models.Auth;
 using Constellation.Application.Training.CreateTrainingCompletion;
 using Constellation.Application.Training.GetCompletionRecordEditContext;
 using Constellation.Application.Training.GetTrainingModuleEditContext;
 using Constellation.Application.Training.GetUploadedTrainingCertificationMetadata;
-using Constellation.Application.Training.Modules.GetCompletionRecordEditContext;
-using Constellation.Application.Training.Modules.GetUploadedTrainingCertificationMetadata;
 using Constellation.Application.Training.UpdateTrainingCompletion;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Models.Attachments.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
+using Presentation.Shared.Helpers.ModelBinders;
 using Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate;
 using System;
 using System.Collections.Generic;
@@ -45,6 +44,9 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string PageTitle => "Edit Training Completion";
+    
     // Allow mode switching for:
     // "FULL" - Editor access with no forced fields
     // "SOLOSTAFF" - Insert access with forced staff field
@@ -54,11 +56,13 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     [Required(ErrorMessage = "You must select a training module")]
+    [ModelBinder(typeof(StrongIdBinder))]
     // Must be nullable to have the default value be null, and therefore trigger required validation rule
-    public Guid? ModuleId { get; set; }
+    public TrainingModuleId? ModuleId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public TrainingCompletionId? Id { get; set; }
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a staff member")]
@@ -74,22 +78,20 @@ public class UpsertModel : BasePageModel
 
     public Dictionary<string, string> StaffOptions { get; set; } = new();
     public Dictionary<Guid, string> ModuleOptions { get; set; } = new();
-    public KeyValuePair<string, string> SoloStaffMember { get; set; } = new();
-    public KeyValuePair<Guid, string> SoloModule { get; set; } = new();
+    public KeyValuePair<string, string> SoloStaffMember { get; set; }
+    public KeyValuePair<Guid, string> SoloModule { get; set; }
 
     public bool CanEditRecords { get; set; }
     public CompletionRecordCertificateDto UploadedCertificate { get; set; } = new();
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
-
     public async Task<IActionResult> OnGet()
     {
-        var staffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         CanEditRecords = canEditTest.Succeeded;
 
-        // Does the current user have permissons for the selected mode?
+        // Does the current user have permissions for the selected mode?
         if (Mode == CompletionPageMode.Full && !CanEditRecords)
         {
             // Editor mode selected without edit access
@@ -108,7 +110,7 @@ public class UpsertModel : BasePageModel
             Error = new ErrorDisplay
             {
                 Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId.Value })
+                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId })
             };
 
             return Page();
@@ -117,7 +119,7 @@ public class UpsertModel : BasePageModel
         if (Id.HasValue)
         {
             // Get existing entry from database and populate fields
-            Result<CompletionRecordEditContextDto> entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(TrainingModuleId.FromValue(ModuleId.Value), TrainingCompletionId.FromValue(Id.Value)));
+            Result<CompletionRecordEditContextDto> entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(ModuleId!.Value, Id!.Value));
             
             if (entityRequest.IsFailure)
             {
@@ -134,7 +136,7 @@ public class UpsertModel : BasePageModel
 
             SelectedStaffId = entity.StaffId;
             CompletedDate = entity.CompletedDate;
-            ModuleId = entity.TrainingModuleId.Value;
+            ModuleId = entity.TrainingModuleId;
 
             Result<CompletionRecordCertificateDto> certificateRequest = await _mediator.Send(new GetUploadedTrainingCertificateMetadataQuery(AttachmentType.TrainingCertificate, Id.Value.ToString()));
 
@@ -158,7 +160,7 @@ public class UpsertModel : BasePageModel
 
         await SetUpForm();
 
-        if (!Id.HasValue && !CanEditRecords && SoloStaffMember.Key == null)
+        if (!Id.HasValue && !CanEditRecords && SoloStaffMember.Key == string.Empty)
         {
             // This staff member is not on the list of staff. Something has gone wrong here.
 
@@ -170,7 +172,7 @@ public class UpsertModel : BasePageModel
 
     private async Task SetUpForm()
     {
-        var staffId = User.Claims.First(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
@@ -185,15 +187,15 @@ public class UpsertModel : BasePageModel
         // Insert only mode allowing editors to pre-select the module
         if (Mode == CompletionPageMode.SoloModule)
         {
-            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
-            ModuleId = SoloModule.Key;
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value.Value);
+            ModuleId = TrainingModuleId.FromValue(SoloModule.Key);
         }
 
         // Edit only mode allowing staff to upload certificate for existing records
         if (Mode == CompletionPageMode.CertUpload)
         {
             SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == staffId);
-            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value.Value);
         }
     }
 
@@ -203,7 +205,7 @@ public class UpsertModel : BasePageModel
         {
             string staffMember = await _mediator.Send(new GetStaffMemberNameByIdQuery { StaffId = SelectedStaffId });
 
-            Result<ModuleEditContextDto> moduleRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(TrainingModuleId.FromValue(ModuleId.Value)));
+            Result<ModuleEditContextDto> moduleRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(ModuleId.Value));
             
             if (moduleRequest.IsFailure)
             {
@@ -251,9 +253,9 @@ public class UpsertModel : BasePageModel
             // Update existing entry
 
             UpdateTrainingCompletionCommand command = new(
-                TrainingCompletionId.FromValue(Id.Value),
+                Id.Value,
                 SelectedStaffId,
-                TrainingModuleId.FromValue(ModuleId.Value),
+                ModuleId.Value,
                 completedDate,
                 await GetUploadedFile());
             
@@ -276,7 +278,7 @@ public class UpsertModel : BasePageModel
 
             CreateTrainingCompletionCommand command = new(
                 SelectedStaffId,
-                TrainingModuleId.FromValue(ModuleId.Value),
+                ModuleId.Value,
                 completedDate,
                 await GetUploadedFile());
 
@@ -296,7 +298,7 @@ public class UpsertModel : BasePageModel
 
         if (Mode == CompletionPageMode.SoloModule)
         {
-            return RedirectToPage("/SchoolAdmin/Training/Modules/Details", new { area = "Staff", Id = ModuleId.Value });
+            return RedirectToPage("/SchoolAdmin/Training/Modules/Details", new { area = "Staff", Id = ModuleId });
         }
 
         return RedirectToPage("Index");

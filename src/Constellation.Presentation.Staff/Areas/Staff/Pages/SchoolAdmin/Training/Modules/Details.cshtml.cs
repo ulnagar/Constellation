@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules;
 
 using Application.Common.PresentationModels;
+using Application.Training.GetModuleDetails;
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.Modules.GetModuleDetails;
 using Constellation.Application.Training.ReinstateTrainingModule;
 using Constellation.Application.Training.RetireTrainingModule;
 using Constellation.Core.Errors;
@@ -13,7 +13,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using System;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.Threading.Tasks;
 
 [Authorize(Policy = AuthPolicies.CanViewTrainingModuleContentDetails)]
@@ -33,16 +33,20 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
+    [ViewData] public string PageTitle => "Training Module Details";
+
+
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public TrainingModuleId Id { get; set; }
 
     public ModuleDetailsDto Module { get; set; }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
 
     public async Task OnGet()
     {
-        Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(TrainingModuleId.FromValue(Id)));
+        Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(Id));
 
         if (moduleRequest.IsFailure)
         {
@@ -56,11 +60,6 @@ public class DetailsModel : BasePageModel
         }
 
         Module = moduleRequest.Value;
-
-        Module.Completions = Module.Completions
-            .OrderByDescending(record => record.CompletedDate)
-            .ThenBy(record => record.StaffLastName)
-            .ToList();
     }
 
     public async Task<IActionResult> OnGetRetireModule()
@@ -78,7 +77,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        RetireTrainingModuleCommand command = new RetireTrainingModuleCommand(TrainingModuleId.FromValue(Id));
+        RetireTrainingModuleCommand command = new(Id);
 
         await _mediator.Send(command);
 
@@ -100,7 +99,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        ReinstateTrainingModuleCommand command = new ReinstateTrainingModuleCommand(TrainingModuleId.FromValue(Id));
+        ReinstateTrainingModuleCommand command = new(Id);
 
         await _mediator.Send(command);
 

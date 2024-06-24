@@ -19,7 +19,6 @@
             <th>Module</th>
             <th>Expiry</th>
             <th>Mandatory?</th>
-            <th>Required By Roles</th>
             <th>Date Last Completed</th>
             <th>Date Next Due</th>
             <th></th>
@@ -42,19 +41,13 @@
                     }
                 </td>
                 <td>
-                    @foreach (var item in entry.Roles)
-                    {
-                        <a asp-page="/SchoolAdmin/Training/Roles/Details" asp-area="Staff" asp-route-id="@item.Key" class="badge badge-info">@item.Value</a>
-                    }
-                </td>
-                <td>
                     @if (entry.IsCompleted)
                     {
                         @entry.DateCompleted!.Value.ToShortDateString()
                     }
                 </td>
                 <td>
-                    @if (entry.IsCompleted && entry.IsRequired)
+                    @if (entry is { IsCompleted: true, IsRequired: true })
                     {
                         if (entry.Expiry != TrainingModuleExpiryFrequency.OnceOff)
                         {
@@ -65,7 +58,7 @@
                 <td>
                     @if (entry.IsCompleted)
                     {
-                        <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@entry.ModuleId.Value" asp-route-completionId="@entry.CompletionId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                        <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@entry.ModuleId" asp-route-completionId="@entry.CompletionId" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                     }
                 </td>
             </tr>

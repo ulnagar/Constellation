@@ -1,11 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Staff;
 
-using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Training.GetModuleStatusByStaffMember;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
-using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,13 +23,14 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Staff;
+    [ViewData] public string PageTitle => "Staff Training Dashboard";
+
+
     [BindProperty(SupportsGet = true)]
-    [ViewData]
     public string StaffId { get; set; }
 
     public List<ModuleStatusResponse> Modules { get; set; }
-
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Staff;
 
     public async Task OnGet()
     {
@@ -39,7 +38,7 @@ public class IndexModel : BasePageModel
 
         if (completionRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = completionRequest.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })

@@ -2,7 +2,6 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Trainin
 
 using Application.Models.Auth;
 using Application.StaffMembers.GetStaffById;
-using Application.Training.Modules.GetModuleStatusByStaffMember;
 using Constellation.Application.Training.GetModuleStatusByStaffMember;
 using Core.Shared;
 using MediatR;
@@ -24,13 +23,16 @@ public class StaffMemberModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
+    [ViewData] public string PageTitle => "Training Module Reports";
+
+
     [BindProperty(SupportsGet = true)]
     public string Id { get; set; }
 
     public List<ModuleStatusResponse> Modules { get; set; } = new();
     public StaffResponse StaffMember { get; set; }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
     
     public async Task OnGet()
     {

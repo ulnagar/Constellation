@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Core.Models.Training;
-using Core.Models.Training.Contexts.Roles;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +37,16 @@ internal sealed class TrainingModuleRepository
             .Set<TrainingModule>()
             .Where(module => module.Id == moduleId)
             .FirstOrDefaultAsync(cancellationToken);
-    
+
+    public async Task<List<TrainingModule>> GetModulesByAssignee(
+        string staffId, 
+        CancellationToken cancellationToken = default) => 
+        await _context
+            .Set<TrainingModule>()
+            .Where(module => 
+                module.Assignees.Any(assignee => 
+                    assignee.StaffId == staffId))
+            .ToListAsync(cancellationToken);
+
     public void Insert(TrainingModule module) => _context.Set<TrainingModule>().Add(module);
 }

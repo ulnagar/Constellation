@@ -1,16 +1,15 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Reports;
 
-using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.DTOs;
-using Constellation.Application.Features.Common.Queries;
-using Constellation.Application.Models.Auth;
+using Application.DTOs;
+using Application.Features.Common.Queries;
+using Application.Models.Auth;
+using Application.Training.GenerateModuleReport;
+using Application.Training.GenerateOverallReport;
+using Application.Training.GenerateStaffReport;
+using Areas;
 using Constellation.Application.Training.Models;
-using Constellation.Application.Training.Modules.GenerateModuleReport;
-using Constellation.Application.Training.Modules.GenerateOverallReport;
-using Constellation.Application.Training.Modules.GenerateStaffReport;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +28,7 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
+    [ViewData] public string PageTitle => "Training Module Reports";
 
     public async Task OnGet() { }
 
@@ -64,7 +64,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = reportRequest.Error,
                 RedirectPath = null
@@ -82,7 +82,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = reportRequest.Error,
                 RedirectPath = null
@@ -113,7 +113,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = reportRequest.Error,
                 RedirectPath = null
@@ -159,7 +159,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = reportRequest.Error,
                 RedirectPath = null
@@ -188,7 +188,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = reportRequest.Error,
                 RedirectPath = null

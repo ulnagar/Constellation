@@ -18,7 +18,6 @@ using Application.Rollover.ImportStudents;
 using Application.SchoolContacts.GetContactsBySchool;
 using Application.SciencePracs.GenerateOverdueReport;
 using Application.Training.Models;
-using Application.Training.Modules.GenerateOverallReport;
 using Application.WorkFlows.ExportOpenCaseReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Training.GenerateOverallReport;
@@ -351,8 +350,16 @@ public class ExcelService : IExcelService
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
-        data ??= new();
+        if (data is null)
+        {
+            MemoryStream failedStream = new();
+            await excel.SaveAsAsync(failedStream);
+            failedStream.Position = 0;
 
+            excel.Dispose();
+            return failedStream;
+        }
+        
         ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);
         nameDetail.Bold = true;
         nameDetail.Size = 16;

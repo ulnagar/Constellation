@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training.Modules;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training;
 
 using Constellation.Core.Models;
 using Core.Models.Training;
@@ -11,7 +11,7 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<TrainingCompletion> builder)
     {
-        builder.ToTable("Training_Modules_Completions");
+        builder.ToTable("Completions", "Training");
 
         builder
             .HasKey(completion => completion.Id);

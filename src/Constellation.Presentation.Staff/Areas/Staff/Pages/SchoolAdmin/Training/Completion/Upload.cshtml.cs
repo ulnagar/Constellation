@@ -1,8 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
-using Application.Common.PresentationModels;
+using Application.Training.ProcessTrainingImportFile;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.Modules.ProcessTrainingImportFile;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -26,11 +25,12 @@ public class UploadModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string PageTitle => "Upload Training Details";
+
     [BindProperty]
     [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
-    public IFormFile UploadFile { get; set; }
-
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    public IFormFile? UploadFile { get; set; }
     
     public async Task OnGetAsync() {}
 
@@ -47,7 +47,7 @@ public class UploadModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new ErrorDisplay
+                    Error = new()
                     {
                         Error = request.Error,
                         RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" })
@@ -58,7 +58,7 @@ public class UploadModel : BasePageModel
             }
             catch (Exception ex)
             {
-                Error = new ErrorDisplay
+                Error = new()
                 {
                     Error = new(ex.Source, ex.Message),
                     RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" })

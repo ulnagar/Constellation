@@ -7,7 +7,7 @@ using System;
 
 public class CompletionRecordDto
 {
-    public TrainingCompletionId Id { get; set; }
+    public TrainingCompletionId? Id { get; set; }
     public TrainingModuleId ModuleId { get; set; }
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleExpiry { get; set; }

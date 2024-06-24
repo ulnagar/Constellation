@@ -1,10 +1,7 @@
 ﻿namespace Constellation.Application.Training.GenerateModuleReport;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Helpers;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
-using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
@@ -15,6 +12,9 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
+using Core.Shared;
+using Helpers;
+using Interfaces.Services;
 using Models;
 using System.Collections.Generic;
 using System.IO;
@@ -52,17 +52,9 @@ internal sealed class GenerateModuleReportCommandHandler
 
     public async Task<Result<ReportDto>> Handle(GenerateModuleReportCommand request, CancellationToken cancellationToken)
     {
-        ModuleDetailsDto data = new();
-
         // Get info from database
         TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
-
-        data.Id = module.Id;
-        data.Name = module.Name;
-        data.Expiry = module.Expiry.GetDisplayName();
-        data.Url = string.IsNullOrWhiteSpace(module.Url) ? string.Empty : module.Url;
-        data.IsActive = !module.IsDeleted;
-
+        
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
         List<string> requiredStaffIds = module.Assignees
@@ -70,8 +62,16 @@ internal sealed class GenerateModuleReportCommandHandler
             .Distinct()
             .ToList();
 
+        List<CompletionRecordDto> completions = new();
+        List<ModuleDetailsDto.Assignee> assignees = new();
+
         foreach (Staff staffMember in staffMembers)
         {
+            if (module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId))
+                assignees.Add(new(
+                    staffMember.StaffId,
+                    staffMember.GetName()));
+
             List<FacultyId> facultyIds = staffMember
                 .Faculties
                 .Where(member => !member.IsDeleted)
@@ -116,10 +116,19 @@ internal sealed class GenerateModuleReportCommandHandler
             if (!requiredStaffIds.Contains(staffMember.StaffId))
                 entry.NotMandatory = true;
 
-            data.Completions.Add(entry);
+            completions.Add(entry);
         }
 
-        data.Completions = data.Completions.OrderBy(record => record.StaffLastName).ToList();
+        completions = completions.OrderBy(record => record.StaffLastName).ToList();
+
+        ModuleDetailsDto data = new(
+            module.Id,
+            module.Name,
+            module.Expiry.GetDisplayName(),
+            string.IsNullOrWhiteSpace(module.Url) ? string.Empty : module.Url,
+            completions,
+            !module.IsDeleted,
+            assignees);
 
         // Generate CSV/XLSX file
         MemoryStream fileData = await _excelService.CreateTrainingModuleReportFile(data);

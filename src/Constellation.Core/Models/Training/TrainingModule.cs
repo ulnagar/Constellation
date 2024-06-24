@@ -81,6 +81,18 @@ public sealed class TrainingModule : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
+    public Result RemoveAssignee(string staffId)
+    {
+        TrainingModuleAssignee? assignee = _assignees.FirstOrDefault(entry => entry.StaffId == staffId);
+
+        if (assignee is null)
+            return Result.Failure(TrainingModuleErrors.AssigneeNotFound(staffId));
+        
+        _assignees.Remove(assignee);
+
+        return Result.Success();
+    }
+
     public void Delete() => IsDeleted = true;
 
     public void Reinstate()

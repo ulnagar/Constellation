@@ -1,11 +1,11 @@
-﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.AddStaffMemberToTrainingRole.AddStaffMemberToTrainingRoleSelection
+﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.AddStaffMemberToTrainingModule.AddStaffMemberToTrainingModuleSelection
 
 <div class="modal fade" tabindex="-1" id="addStaffModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-page="/SchoolAdmin/Training/Roles/Details" asp-area="Staff" asp-route-id="@Model.RoleId.Value" asp-page-handler="AddStaffMember">
+            <form asp-page="/SchoolAdmin/Training/Modules/Details" asp-area="Staff" asp-route-id="@Model.ModuleId" asp-page-handler="AddStaffMember">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Staff Member to Training Role</h5>
+                    <h5 class="modal-title">Add Staff Member to Training Module</h5>
                 </div>
                 <div class="modal-body">
                     <div class="row">
@@ -19,11 +19,12 @@
 
                     <div class="row">
                         <div class="form-group col">
-                            <span>will be added to the <span clas="font-weight-bold">@Model.RoleName</span> Training Role.</span>
+                            <span>will be added to the <span clas="font-weight-bold">@Model.ModuleName</span> Training Module.</span>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
                     <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
                 </div>
             </form>

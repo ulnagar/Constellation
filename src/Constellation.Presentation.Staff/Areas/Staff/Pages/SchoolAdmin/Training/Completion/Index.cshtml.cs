@@ -1,9 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
-using Application.Common.PresentationModels;
+using Application.Training.GetListOfCompletionRecords;
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.Modules.GetListOfCompletionRecords;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Shared;
 using MediatR;
@@ -31,6 +30,9 @@ public class IndexModel : BasePageModel
         _dateTime = dateTime;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string PageTitle => "Training Completions";
+    
     public List<CompletionRecordDto> CompletionRecords { get; set; } = new();
     
     [BindProperty(SupportsGet = true)]
@@ -38,21 +40,19 @@ public class IndexModel : BasePageModel
 
     [BindProperty]
     public StaffTrainingReportSelection Report { get; set; }
-
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
-
+    
     public async Task<IActionResult> OnGet()
     {
-        var staffId = User.FindFirst(AuthClaimType.StaffEmployeeId)?.Value;
+        string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
         
         // If user does not have details view permissions, only show their own records
-        if (User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.MandatoryTrainingDetailsView))
+        if (User.HasClaim(claim => claim is { Type: AuthClaimType.Permission, Value: AuthPermissions.MandatoryTrainingDetailsView }))
         {
             Result<List<CompletionRecordDto>> recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
 
             if (recordsRequest.IsFailure)
             {
-                Error = new ErrorDisplay
+                Error = new()
                 {
                     Error = recordsRequest.Error,
                     RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })

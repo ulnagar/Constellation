@@ -6,12 +6,12 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Training.Contexts.Roles;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Training;
 using Core.Models.Training.Repositories;
 using Core.Shared;
 using Serilog;
@@ -28,7 +28,7 @@ internal sealed class ResignStaffMemberCommandHandler
     private readonly IOperationService _operationsService;
     private readonly IFacultyRepository _facultyRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITrainingRoleRepository _roleRepository;
+    private readonly ITrainingModuleRepository _moduleRepository;
     private readonly IAuthService _authService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
@@ -38,7 +38,7 @@ internal sealed class ResignStaffMemberCommandHandler
         IOperationService operationsService,
         IFacultyRepository facultyRepository,
         IOfferingRepository offeringRepository,
-        ITrainingRoleRepository roleRepository,
+        ITrainingModuleRepository moduleRepository,
         IAuthService authService,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -47,7 +47,7 @@ internal sealed class ResignStaffMemberCommandHandler
         _operationsService = operationsService;
         _facultyRepository = facultyRepository;
         _offeringRepository = offeringRepository;
-        _roleRepository = roleRepository;
+        _moduleRepository = moduleRepository;
         _authService = authService;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ResignStaffMemberCommand>();
@@ -103,11 +103,11 @@ internal sealed class ResignStaffMemberCommandHandler
 
         await _operationsService.DisableCanvasUser(staffMember.StaffId);
 
-        List<TrainingRole> roles = await _roleRepository.GetRolesForStaffMember(request.StaffId, cancellationToken);
+        List<TrainingModule> modules = await _moduleRepository.GetModulesByAssignee(request.StaffId, cancellationToken);
 
-        foreach (TrainingRole role in roles)
+        foreach (TrainingModule module in modules)
         {
-            Result result = role.RemoveMember(request.StaffId);
+            Result result = module.RemoveAssignee(request.StaffId);
 
             if (result.IsFailure)
             {

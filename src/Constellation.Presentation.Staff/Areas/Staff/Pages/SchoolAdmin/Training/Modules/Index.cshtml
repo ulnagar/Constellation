@@ -1,8 +1,8 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules.IndexModel
-@using Constellation.Application.Models.Auth
+
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules
-@using Microsoft.AspNetCore.Authorization
+
 @inject IAuthorizationService AuthorizationService
 
 @{
@@ -77,7 +77,7 @@
             <td>
                 @if (canViewDetailsTest.Succeeded)
                 {
-                    <a asp-page="/SchoolAdmin/Training/Modules/Details" asp-area="Staff" asp-route-id="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                    <a asp-page="/SchoolAdmin/Training/Modules/Details" asp-area="Staff" asp-route-id="@item.Id" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                 }
             </td>
         </tr>

@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules;
 
 using Application.Common.PresentationModels;
+using Application.Training.GetListOfModuleSummary;
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.Modules.GetListOfModuleSummary;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

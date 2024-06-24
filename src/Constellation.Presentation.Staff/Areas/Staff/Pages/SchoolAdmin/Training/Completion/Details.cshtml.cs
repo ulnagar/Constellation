@@ -1,12 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
-using Application.Common.PresentationModels;
+using Application.Training.GetCompletionRecordDetails;
+using Application.Training.MarkTrainingCompletionRecordDeleted;
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Training.GetUploadedTrainingCertificateFileById;
-using Constellation.Application.Training.Modules.GetCompletionRecordDetails;
-using Constellation.Application.Training.Modules.GetUploadedTrainingCertificateFileById;
-using Constellation.Application.Training.Modules.MarkTrainingCompletionRecordDeleted;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
@@ -14,7 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using System;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.Threading.Tasks;
 
 [Authorize(Policy = AuthPolicies.CanViewTrainingCompletionRecord)]
@@ -34,26 +32,32 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
+    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string PageTitle => "Training Completion Details";
+
+
     [BindProperty(SupportsGet = true)]
-    public Guid CompletionId { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public TrainingCompletionId CompletionId { get; set; }
+
     [BindProperty(SupportsGet = true)]
-    public Guid ModuleId { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public TrainingModuleId ModuleId { get; set; }
 
     public CompletionRecordDto Record { get; set; } = new();
-    public CompletionRecordCertificateDetailsDto UploadedCertificate { get; set; } = new();
+    public CompletionRecordCertificateDetailsDto? UploadedCertificate { get; set; } = new();
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
 
     public async Task OnGet()
     {
         Result<CompletionRecordDto> recordRequest = await _mediator.Send(
             new GetCompletionRecordDetailsQuery(
-                TrainingModuleId.FromValue(ModuleId),
-                TrainingCompletionId.FromValue(CompletionId)));
+                ModuleId,
+                CompletionId));
 
         if (recordRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = recordRequest.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
@@ -78,7 +82,7 @@ public class DetailsModel : BasePageModel
 
         if (certificateRequest.IsFailure)
         {
-            Error = new ErrorDisplay
+            Error = new()
             {
                 Error = certificateRequest.Error,
                 RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
@@ -98,7 +102,7 @@ public class DetailsModel : BasePageModel
         
         if (canEditTest.Succeeded)
         {
-            await _mediator.Send(new MarkTrainingCompletionRecordDeletedCommand(TrainingModuleId.FromValue(ModuleId), TrainingCompletionId.FromValue(CompletionId)));
+            await _mediator.Send(new MarkTrainingCompletionRecordDeletedCommand(ModuleId, CompletionId));
         }
 
         return RedirectToPage("Index");

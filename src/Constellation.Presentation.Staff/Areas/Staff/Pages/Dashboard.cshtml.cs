@@ -3,7 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages;
 
 using Application.Affirmations;
 using Application.Stocktake.GetCurrentStocktakeEvents;
-using Application.Training.Modules.GetCountOfExpiringCertificatesForStaffMember;
+using Application.Training.GetCountOfExpiringCertificatesForStaffMember;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Application.StaffMembers.GetStaffByEmail;

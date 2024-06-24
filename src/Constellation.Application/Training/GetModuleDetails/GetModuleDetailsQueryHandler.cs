@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Application.Training.GetModuleDetails;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Helpers;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
-using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
@@ -11,6 +9,8 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
+using Core.Shared;
+using Helpers;
 using Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,21 +39,23 @@ internal sealed class GetModuleDetailsQueryHandler
 
     public async Task<Result<ModuleDetailsDto>> Handle(GetModuleDetailsQuery request, CancellationToken cancellationToken)
     {
-        ModuleDetailsDto data = new();
-
         // Get info from database
         TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
 
-        data.Id = module.Id;
-        data.Name = module.Name;
-        data.Expiry = module.Expiry.GetDisplayName();
-        data.Url = string.IsNullOrWhiteSpace(module.Url) ? string.Empty : module.Url;
-        data.IsActive = !module.IsDeleted;
-
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+
+        List<CompletionRecordDto> completions = new();
+        List<ModuleDetailsDto.Assignee> assignees = new();
 
         foreach (Staff staffMember in staffMembers)
         {
+            if (module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId))
+            {
+                assignees.Add(new(
+                    staffMember.StaffId,
+                    staffMember.GetName()));
+            }
+
             List<FacultyId> facultyIds = staffMember
                 .Faculties
                 .Where(member => !member.IsDeleted)
@@ -69,7 +71,7 @@ internal sealed class GetModuleDetailsQueryHandler
                     .ToList();
 
             TrainingCompletion record = records.MaxBy(record => record.CompletedDate);
-
+            
             if (record is null)
             {
                 CompletionRecordDto entry = new()
@@ -82,7 +84,7 @@ internal sealed class GetModuleDetailsQueryHandler
                     ExpiryCountdown = -9999
                 };
 
-                data.Completions.Add(entry);
+                completions.Add(entry);
             }
             else
             {
@@ -103,9 +105,18 @@ internal sealed class GetModuleDetailsQueryHandler
                 entry.ExpiryCountdown = entry.CalculateExpiry(_dateTime);
                 entry.Status = CompletionRecordDto.ExpiryStatus.Active;
 
-                data.Completions.Add(entry);
+                completions.Add(entry);
             }
         }
+
+        ModuleDetailsDto data = new(
+            module.Id,
+            module.Name,
+            module.Expiry.GetDisplayName(),
+            string.IsNullOrWhiteSpace(module.Url) ? string.Empty : module.Url,
+            completions,
+            !module.IsDeleted,
+            assignees);
 
         return data;
     }
