@@ -6,6 +6,7 @@ public class SelectTrainingModuleForReportModalViewModel
 {
     [Required]
     public Guid ModuleId { get; set; }
-    public Dictionary<Guid, string> Modules { get; set; }
+
+    public Dictionary<Guid, string> Modules { get; set; } = new();
     public bool DetailedReportRequested { get; set; }
 }

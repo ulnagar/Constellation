@@ -374,13 +374,13 @@ public class ExcelService : IExcelService
             opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
             opt.Members = new MemberInfo[]
             {
-                completion.GetProperty("StaffId"),
-                completion.GetProperty("StaffFirstName"),
-                completion.GetProperty("StaffLastName"),
-                completion.GetProperty("StaffFaculty"),
-                completion.GetProperty("NotMandatory"),
-                completion.GetProperty("ExpiryCountdown"),
-                completion.GetProperty("CompletedDate")
+                completion.GetProperty(nameof(CompletionRecordDto.StaffId)),
+                completion.GetProperty(nameof(CompletionRecordDto.StaffFirstName)),
+                completion.GetProperty(nameof(CompletionRecordDto.StaffLastName)),
+                completion.GetProperty(nameof(CompletionRecordDto.StaffFaculty)),
+                completion.GetProperty(nameof(CompletionRecordDto.Mandatory)),
+                completion.GetProperty(nameof(CompletionRecordDto.ExpiryCountdown)),
+                completion.GetProperty(nameof(CompletionRecordDto.CompletedDate))
             };
         });
 
@@ -390,7 +390,7 @@ public class ExcelService : IExcelService
         ExcelAddress dataRange = new(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
         IExcelConditionalFormattingExpression formatNotRequired = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatNotRequired.Formula = "=$E8 = TRUE";
+        formatNotRequired.Formula = "=$E8 = FALSE";
         formatNotRequired.Style.Font.Color.Color = Color.DarkOliveGreen;
         formatNotRequired.Style.Font.Italic = true;
         formatNotRequired.StopIfTrue = true;
@@ -478,34 +478,33 @@ public class ExcelService : IExcelService
             opt.HeaderParsingType = OfficeOpenXml.LoadFunctions.Params.HeaderParsingTypes.CamelCaseToSpace;
             opt.Members = new MemberInfo[]
             {
-                completion.GetProperty("ModuleName"),
-                completion.GetProperty("ModuleFrequency"),
-                completion.GetProperty("RequiredByRoles"),
-                completion.GetProperty("TimeToExpiry"),
-                completion.GetProperty("RecordEffectiveDate"),
-                completion.GetProperty("DueDate")
+                completion.GetProperty(nameof(CompletionRecordExtendedDetailsDto.ModuleName)),
+                completion.GetProperty(nameof(CompletionRecordExtendedDetailsDto.ModuleFrequency)),
+                completion.GetProperty(nameof(CompletionRecordExtendedDetailsDto.TimeToExpiry)),
+                completion.GetProperty(nameof(CompletionRecordExtendedDetailsDto.RecordEffectiveDate)),
+                completion.GetProperty(nameof(CompletionRecordExtendedDetailsDto.DueDate))
             };
         });
 
-        workSheet.Cells[7, 5, workSheet.Dimension.Rows, 6].Style.Numberformat.Format = "dd/MM/yyyy";
+        workSheet.Cells[7, 4, workSheet.Dimension.Rows, 5].Style.Numberformat.Format = "dd/MM/yyyy";
 
         // Highlight overdue entries
         ExcelAddress dataRange = new(8, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns);
 
         IExcelConditionalFormattingExpression formatNeverCompleted = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatNeverCompleted.Formula = "=$D8 = -9999";
+        formatNeverCompleted.Formula = "=$C8 = -9999";
         formatNeverCompleted.Style.Fill.BackgroundColor.Color = Color.Gray;
         formatNeverCompleted.Style.Font.Color.Color = Color.White;
         formatNeverCompleted.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression formatOverdue = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatOverdue.Formula = "=$D8 < 1";
+        formatOverdue.Formula = "=$C8 < 1";
         formatOverdue.Style.Fill.BackgroundColor.Color = Color.Red;
         formatOverdue.Style.Font.Color.Color = Color.White;
         formatOverdue.StopIfTrue = true;
 
         IExcelConditionalFormattingExpression formatSoonExpire = workSheet.ConditionalFormatting.AddExpression(dataRange);
-        formatSoonExpire.Formula = "=$D8 < 14";
+        formatSoonExpire.Formula = "=$C8 < 14";
         formatSoonExpire.Style.Fill.BackgroundColor.Color = Color.Yellow;
         formatSoonExpire.StopIfTrue = true;
 

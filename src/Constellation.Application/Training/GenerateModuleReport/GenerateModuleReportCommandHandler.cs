@@ -57,11 +57,6 @@ internal sealed class GenerateModuleReportCommandHandler
         
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
-        List<string> requiredStaffIds = module.Assignees
-            .Select(member => member.StaffId)
-            .Distinct()
-            .ToList();
-
         List<CompletionRecordDto> completions = new();
         List<ModuleDetailsDto.Assignee> assignees = new();
 
@@ -93,7 +88,8 @@ internal sealed class GenerateModuleReportCommandHandler
                 StaffId = staffMember.StaffId,
                 StaffFirstName = staffMember.FirstName,
                 StaffLastName = staffMember.LastName,
-                StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name))
+                StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
+                Mandatory = module.Assignees.Any(item => item.StaffId == staffMember.StaffId)
             };
 
             if (record is null)
@@ -112,9 +108,6 @@ internal sealed class GenerateModuleReportCommandHandler
                 entry.ExpiryCountdown = entry.CalculateExpiry(_dateTime);
                 entry.Status = CompletionRecordDto.ExpiryStatus.Active;
             }
-
-            if (!requiredStaffIds.Contains(staffMember.StaffId))
-                entry.Mandatory = true;
 
             completions.Add(entry);
         }
