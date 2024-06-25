@@ -10,7 +10,6 @@ public sealed record ModuleStatusResponse(
     string ModuleName,
     TrainingModuleExpiryFrequency Expiry,
     bool IsRequired,
-    Dictionary<TrainingRoleId, string> Roles,
     bool IsCompleted,
     TrainingCompletionId? CompletionId,
     DateOnly? DateCompleted,

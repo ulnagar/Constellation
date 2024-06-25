@@ -58,7 +58,6 @@ internal sealed class GetModuleStatusByStaffMemberQueryHandler
                 module.Name,
                 module.Expiry,
                 required,
-                new(),
                 completedRecord is not null,
                 completedRecord?.Id,
                 completedRecord?.CompletedDate,

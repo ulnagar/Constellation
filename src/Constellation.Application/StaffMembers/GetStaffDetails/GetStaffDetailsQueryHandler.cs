@@ -4,14 +4,11 @@ using Abstractions.Messaging;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
-using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
-using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
-using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
@@ -84,16 +81,6 @@ internal sealed class GetStaffDetailsQueryHandler
 
         List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
 
-        if (faculties.Count == 0)
-        {
-            _logger
-                .ForContext(nameof(GetStaffDetailsQuery), request, true)
-                .ForContext(nameof(Error), FacultyErrors.NotFoundForStaff(request.StaffId), true)
-                .Warning("Failed to retrieve details of staff member");
-
-            return Result.Failure<StaffDetailsResponse>(FacultyErrors.NotFoundForStaff(request.StaffId));
-        }
-
         List<StaffDetailsResponse.FacultyMembershipResponse> facultyMemberships = new();
 
         foreach (Faculty faculty in faculties)
@@ -111,17 +98,7 @@ internal sealed class GetStaffDetailsQueryHandler
         }
 
         List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(request.StaffId, cancellationToken);
-
-        if (offerings.Count == 0)
-        {
-            _logger
-                .ForContext(nameof(GetStaffDetailsQuery), request, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFoundForTeacher(request.StaffId), true)
-                .Warning("Failed to retrieve details of staff member");
-
-            return Result.Failure<StaffDetailsResponse>(OfferingErrors.NotFoundForTeacher(request.StaffId));
-        }
-
+        
         List<TimetablePeriod> periods = await _periodRepository.GetAll(cancellationToken);
         List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 
@@ -166,16 +143,6 @@ internal sealed class GetStaffDetailsQueryHandler
         }
 
         List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(staffMember.SchoolCode, cancellationToken);
-
-        if (contacts.Count == 0)
-        {
-            _logger
-                .ForContext(nameof(GetStaffDetailsQuery), request, true)
-                .ForContext(nameof(Error), SchoolContactRoleErrors.NotFoundForSchool(staffMember.SchoolCode), true)
-                .Warning("Failed to retrieve details of staff member");
-
-            return Result.Failure<StaffDetailsResponse>(SchoolContactRoleErrors.NotFoundForSchool(staffMember.SchoolCode));
-        }
 
         List<StaffDetailsResponse.SchoolContactResponse> schoolContacts = new();
 

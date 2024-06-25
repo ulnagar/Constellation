@@ -114,7 +114,7 @@ internal sealed class GenerateModuleReportCommandHandler
             }
 
             if (!requiredStaffIds.Contains(staffMember.StaffId))
-                entry.NotMandatory = true;
+                entry.Mandatory = true;
 
             completions.Add(entry);
         }
@@ -158,7 +158,7 @@ internal sealed class GenerateModuleReportCommandHandler
             .Completions
             .Where(record =>
                 record.ExpiryCountdown > 0 &&
-                !record.NotMandatory)
+                !record.Mandatory)
             .Select(record => record.Id.ToString())
             .ToList();
 

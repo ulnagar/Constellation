@@ -4,6 +4,8 @@ using System;
 
 public record struct TrainingModuleId(Guid Value)
 {
+    public static readonly TrainingModuleId Empty = new(Guid.Empty);
+
     public static TrainingModuleId FromValue(Guid value) =>
         new(value);
 

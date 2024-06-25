@@ -70,15 +70,16 @@
             <th>Staff Member</th>
             <th>Module</th>
             <th>Date Completed</th>
+            <th>Due Date</th>
             <th></th>
         </tr>
     </thead>
     @foreach (var item in Model.CompletionRecords)
     {
         <tr>
-            <td>
+            <td data-order="@(item is { Mandatory: true, DueDate: not null } ? item.DueDate.Value.ToString("yyyy-MM-dd") : "9999-99-99")">
                 @{
-                    if (item.Status == CompletionRecordDto.ExpiryStatus.Active)
+                    if (item is { Mandatory: true, Status: CompletionRecordDto.ExpiryStatus.Active })
                     {
                         if (item.ExpiryCountdown > 31)
                         {
@@ -99,9 +100,9 @@
                     }
                 }
             </td>
-            <td>@item.StaffFirstName @item.StaffLastName</td>
+            <td data-order="@item.StaffName.SortOrder">@item.StaffName.DisplayName</td>
             <td>@item.ModuleName</td>
-            <td>
+            <td data-order="@(item.CompletedDate?.ToString("yyyy-MM-dd") ?? "9999-99-99")">
                 @{
                     if (!item.CompletedDate.HasValue)
                     {
@@ -113,13 +114,25 @@
                     }
                 }
             </td>
+            <td data-order="@(item is { Mandatory: true, DueDate: not null } ? item.DueDate.Value.ToString("yyyy-MM-dd") : "9999-99-99")">
+                @{
+                    if (!item.Mandatory || !item.DueDate.HasValue)
+                    {
+                        @:N/A
+                    }
+                    else
+                    {
+                        @item.DueDate.Value.ToString("dd/MM/yyyy")
+                    }
+                }
+            </td>
             <td>
                 @{
                     var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, item.Id, AuthPolicies.CanViewTrainingCompletionRecord);
 
                     if (canViewDetailsTest.Succeeded)
                     {
-                            <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                        <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@item.ModuleId.Value" asp-route-completionId="@item.Id.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                     }
                 }
             </td>

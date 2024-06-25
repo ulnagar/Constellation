@@ -86,6 +86,9 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
+
             return Page();
         }
 
@@ -98,6 +101,9 @@ public class DetailsModel : BasePageModel
                 Error = result.Error,
                 RedirectPath = null
             };
+
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
 
             return Page();
         }
@@ -117,6 +123,9 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
+
             return Page();
         }
 
@@ -129,6 +138,9 @@ public class DetailsModel : BasePageModel
                 Error = result.Error,
                 RedirectPath = null
             };
+
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
 
             return Page();
         }
@@ -148,6 +160,9 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
+            
             return Page();
         }
         
@@ -163,6 +178,9 @@ public class DetailsModel : BasePageModel
                 Error = result.Error,
                 RedirectPath = null
             };
+
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
 
             return Page();
         }
@@ -182,6 +200,9 @@ public class DetailsModel : BasePageModel
                 RedirectPath = null
             };
 
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
+
             return Page();
         }
 
@@ -196,6 +217,9 @@ public class DetailsModel : BasePageModel
                 Error = result.Error,
                 RedirectPath = null
             };
+
+            Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
+            StaffMember = staffRequest.Value;
 
             return Page();
         }

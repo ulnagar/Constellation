@@ -18,9 +18,7 @@
     {
         <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-id="@Model.Record.Id" asp-route-moduleId="@Model.Record.ModuleId" asp-route-mode="@CompletionPageMode.Full" class="btn btn-warning">Edit</a>
         
-        <form asp-page-handler="DeleteRecord" asp-route-completionId="@Model.CompletionId" asp-route-moduleId="@Model.ModuleId" method="post">
-            <button type="submit" class="btn btn-danger">Delete Entry</button>
-        </form>
+        <a asp-page-handler="DeleteRecord" class="btn btn-danger">Delete Entry</a>
     }
     else
     {

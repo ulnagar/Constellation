@@ -96,7 +96,7 @@ public class DetailsModel : BasePageModel
         return File(UploadedCertificate.FileData, UploadedCertificate.FileType, UploadedCertificate.Name);
     }
 
-    public async Task<IActionResult> OnPostDeleteRecord()
+    public async Task<IActionResult> OnGetDeleteRecord()
     {
         AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         

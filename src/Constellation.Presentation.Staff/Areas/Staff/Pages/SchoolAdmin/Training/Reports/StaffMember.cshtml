@@ -18,7 +18,6 @@
             <th>Module</th>
             <th>Expiry</th>
             <th>Mandatory?</th>
-            <th>Required By Roles</th>
             <th>Date Last Completed</th>
             <th>Date Next Due</th>
         </tr>
@@ -30,12 +29,6 @@
                 <td>@entry.ModuleName</td>
                 <td>@entry.Expiry.GetDisplayName()</td>
                 <td>@entry.IsRequired</td>
-                <td>
-                    @foreach (var item in entry.Roles)
-                    {
-                        <a asp-page="/SchoolAdmin/Training/Roles/Details" asp-area="Staff" asp-route-id="@item.Key" class="badge badge-info">@item.Value</a>
-                    }
-                </td>
                 <td>
                     @if (entry.IsCompleted)
                     {

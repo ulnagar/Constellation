@@ -49,9 +49,13 @@
     
     <hr />
     
-    <div class="form-group">
-        <div class="col-md-3">
-            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+    <div class="row">
+        <div class="col-md-2">
+            <button type="button" class="btn btn-primary btn-block btn-lg add-all-staff-button">Add All Staff</button>
+        </div>
+
+        <div class="col-md-3 offset-1">
+            <input type="submit" value="Save" class="btn btn-success btn-block btn-lg" />
         </div>
     </div>
 </form>
@@ -64,19 +68,19 @@
 
         foreach (var list in partitionedList)
         {
-                    <div class="col-4 button-list">
-                        @foreach (var entry in list)
+            <div class="col-4 button-list">
+                @foreach (var entry in list)
                 {
                     if (Model.Module.Assignees.Any(member => member.StaffId == entry.StaffId))
                     {
-                                <button type="button" class="btn btn-outline-success staff-button">@entry.Name.DisplayName</button>
+                        <button type="button" class="btn btn-outline-success staff-button">@entry.Name.DisplayName</button>
                     }
                     else
                     {
-                                <button type="button" id="staffSelect-@entry.StaffId" class="btn btn-outline-info staff-button" onClick="toggleStaff(@entry.StaffId)">@entry.Name.DisplayName</button>
+                        <button type="button" id="staffSelect-@entry.StaffId" data-staff-id="@entry.StaffId" class="btn btn-outline-info staff-button" onClick="toggleStaff(@entry.StaffId)">@entry.Name.DisplayName</button>
                     }
                 }
-                    </div>
+            </div>
         }
     }
 </div>
@@ -108,6 +112,19 @@
                 input.val(staffId);
                 pageDisplayDiv.append(input);
             }
-        }
+        };
+
+        $('.add-all-staff-button').click(function (e) {
+            var staffButtons = $('.staff-button.btn-outline-info');
+
+            staffButtons.each(function (index) {
+                var staffId = $(this).data("staffId");
+
+                if (staffId != null)
+                {
+                    toggleStaff(staffId);
+                }
+            });
+        });
     </script>
 }

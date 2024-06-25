@@ -78,11 +78,13 @@ internal sealed class GetListOfCompletionRecordsQueryHandler
                     ModuleName = module.Name,
                     ModuleExpiry = module.Expiry,
                     StaffId = record.StaffId,
+                    StaffName = staffMember.GetName(),
                     StaffFirstName = staffMember.FirstName,
                     StaffLastName = staffMember.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = record.CompletedDate,
-                    CreatedAt = record.CreatedAt
+                    CreatedAt = record.CreatedAt,
+                    Mandatory = module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId)
                 };
 
                 entry.ExpiryCountdown = entry.CalculateExpiry(_dateTime);

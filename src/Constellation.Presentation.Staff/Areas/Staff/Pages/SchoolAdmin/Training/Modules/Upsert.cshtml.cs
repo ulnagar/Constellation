@@ -52,7 +52,7 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id != null)
+        if (!Id.Equals(TrainingModuleId.Empty))
         {
             // Get existing entry from database and populate fields
             Result<ModuleEditContextDto> entityRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(Id));

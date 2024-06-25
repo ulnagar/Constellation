@@ -58,11 +58,11 @@ public class UpsertModel : BasePageModel
     [Required(ErrorMessage = "You must select a training module")]
     [ModelBinder(typeof(StrongIdBinder))]
     // Must be nullable to have the default value be null, and therefore trigger required validation rule
-    public TrainingModuleId? ModuleId { get; set; }
+    public TrainingModuleId ModuleId { get; set; }
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StrongIdBinder))]
-    public TrainingCompletionId? Id { get; set; }
+    public TrainingCompletionId Id { get; set; }
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a staff member")]
@@ -116,10 +116,10 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        if (Id.HasValue)
+        if (!Id.Equals(TrainingCompletionId.Empty))
         {
             // Get existing entry from database and populate fields
-            Result<CompletionRecordEditContextDto> entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(ModuleId!.Value, Id!.Value));
+            Result<CompletionRecordEditContextDto> entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(ModuleId, Id));
             
             if (entityRequest.IsFailure)
             {
@@ -160,7 +160,7 @@ public class UpsertModel : BasePageModel
 
         await SetUpForm();
 
-        if (!Id.HasValue && !CanEditRecords && SoloStaffMember.Key == string.Empty)
+        if (!Id.Equals(TrainingCompletionId.Empty) && !CanEditRecords && SoloStaffMember.Key == string.Empty)
         {
             // This staff member is not on the list of staff. Something has gone wrong here.
 
@@ -187,7 +187,7 @@ public class UpsertModel : BasePageModel
         // Insert only mode allowing editors to pre-select the module
         if (Mode == CompletionPageMode.SoloModule)
         {
-            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value.Value);
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
             ModuleId = TrainingModuleId.FromValue(SoloModule.Key);
         }
 
@@ -195,7 +195,7 @@ public class UpsertModel : BasePageModel
         if (Mode == CompletionPageMode.CertUpload)
         {
             SoloStaffMember = StaffOptions.FirstOrDefault(member => member.Key == staffId);
-            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value.Value);
+            SoloModule = ModuleOptions.FirstOrDefault(member => member.Key == ModuleId.Value);
         }
     }
 
@@ -205,7 +205,7 @@ public class UpsertModel : BasePageModel
         {
             string staffMember = await _mediator.Send(new GetStaffMemberNameByIdQuery { StaffId = SelectedStaffId });
 
-            Result<ModuleEditContextDto> moduleRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(ModuleId.Value));
+            Result<ModuleEditContextDto> moduleRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(ModuleId));
             
             if (moduleRequest.IsFailure)
             {
@@ -248,14 +248,14 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        if (Id.HasValue)
+        if (!Id.Equals(TrainingCompletionId.Empty))
         {
             // Update existing entry
 
             UpdateTrainingCompletionCommand command = new(
-                Id.Value,
+                Id,
                 SelectedStaffId,
-                ModuleId.Value,
+                ModuleId,
                 completedDate,
                 await GetUploadedFile());
             
@@ -278,7 +278,7 @@ public class UpsertModel : BasePageModel
 
             CreateTrainingCompletionCommand command = new(
                 SelectedStaffId,
-                ModuleId.Value,
+                ModuleId,
                 completedDate,
                 await GetUploadedFile());
 
