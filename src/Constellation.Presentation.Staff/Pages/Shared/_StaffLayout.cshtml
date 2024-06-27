@@ -2,6 +2,7 @@
 
 @{
     var activePageAvailable = ViewData.TryGetValue("ActivePage", out var activePage);
+    var pageTitleAvailable = ViewData.TryGetValue("PageTitle", out var pageTitle);
 }
 
 <!DOCTYPE html>
@@ -9,7 +10,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Constellation Staff Portal</title>
+    @if (pageTitleAvailable)
+    {
+        <title>CSTLN: @pageTitle</title>
+    }
+    else
+    {
+        <title>Constellation Staff Portal</title>
+    }
 
     <link rel="icon" type="image/svg" href="~/logo.svg" />
     <link rel="stylesheet" href="~/lib/bootstrap4/css/bootstrap.min.css" />
@@ -63,8 +71,7 @@
 
         @if (Model.Error is not null)
         {
-            <vc:error-display-redirect error="@Model.Error">
-            </vc:error-display-redirect>
+            <vc:error-display-redirect error="@Model.Error" />
         }
     </div>
 

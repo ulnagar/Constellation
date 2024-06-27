@@ -26,11 +26,13 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    public List<ModuleSummaryDto> Modules { get; set; } = new();
-    [BindProperty(SupportsGet = true)]
-    public FilterDto Filter { get; set; }
-
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
+    [ViewData] public string PageTitle => "Training Modules";
+
+    public List<ModuleSummaryDto> Modules { get; set; } = new();
+
+    [BindProperty(SupportsGet = true)] 
+    public FilterDto Filter { get; set; } = FilterDto.Active;
 
     public async Task OnGet()
     {

@@ -47,8 +47,7 @@ public class UpsertModel : BasePageModel
     public TrainingModuleExpiryFrequency Expiry { get; set; }
 
     [BindProperty]
-    public string ModelUrl { get; set; }
-
+    public string? ModelUrl { get; set; }
 
     public async Task OnGet()
     {

@@ -48,7 +48,7 @@
 
         <div class="form-group">
             <div class="col-md-3">
-                @if (Model.Id != null)
+                @if (!Model.Id.Equals(TrainingModuleId.Empty))
                 {
                     <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
                 }
