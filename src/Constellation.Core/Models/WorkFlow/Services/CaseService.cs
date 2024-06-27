@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Constellation.Core.Models.Training;
+using Constellation.Core.Models.Training.Errors;
+using System.Linq;
 
 namespace Constellation.Core.Models.WorkFlow.Services;
 
@@ -8,22 +10,26 @@ using Attendance;
 using Attendance.Errors;
 using Attendance.Repositories;
 using Constellation.Core.Models.Attendance.Identifiers;
-using Constellation.Core.Models.WorkFlow;
-using Constellation.Core.Models.WorkFlow.Enums;
-using Constellation.Core.Shared;
+using Constellation.Core.Models.Training.Identifiers;
+using Constellation.Core.Models.Training.Repositories;
 using Core.Errors;
+using Enums;
+using Shared;
 using StaffMembers.Repositories;
 using Students;
 using Students.Errors;
 using Students.Repositories;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using WorkFlow;
 
 public sealed class CaseService : ICaseService
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAttendanceRepository _attendanceRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly ITrainingModuleRepository _moduleRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
 
@@ -31,12 +37,14 @@ public sealed class CaseService : ICaseService
         IStudentRepository studentRepository,
         IAttendanceRepository attendanceRepository,
         IStaffRepository staffRepository,
+        ITrainingModuleRepository moduleRepository,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime)
     {
         _studentRepository = studentRepository;
         _attendanceRepository = attendanceRepository;
         _staffRepository = staffRepository;
+        _moduleRepository = moduleRepository;
         _currentUserService = currentUserService;
         _dateTime = dateTime;
     }
@@ -138,6 +146,54 @@ public sealed class CaseService : ICaseService
 
         if (dueDate.IsFailure)
             return Result.Failure<Case>(dueDate.Error);
+
+        return item;
+    }
+
+    public async Task<Result<Case>> CreateTrainingCase(
+        string staffId,
+        TrainingModuleId moduleId,
+        TrainingCompletionId? completionId = null,
+        CancellationToken cancellationToken = default)
+    {
+        Staff? teacher = await _staffRepository.GetById(staffId, cancellationToken);
+
+        if (teacher is null)
+            return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFound(staffId));
+
+        TrainingModule module = await _moduleRepository.GetModuleById(moduleId, cancellationToken);
+
+        if (module is null)
+            return Result.Failure<Case>(TrainingModuleErrors.NotFound(moduleId));
+
+        TrainingCompletion completion = completionId != null
+            ? module.Completions.FirstOrDefault(completion => completion.Id == completionId)
+            : null;
+
+        Case item = new(CaseType.Training);
+
+        Result<CaseDetail> detail = TrainingCaseDetail.Create(
+            teacher,
+            module,
+            completion,
+            _dateTime);
+
+        if (detail.IsFailure)
+            return Result.Failure<Case>(detail.Error);
+
+        Result attach = item.AttachDetails(detail.Value);
+
+        if (attach.IsFailure)
+            return Result.Failure<Case>(attach.Error);
+
+        DateOnly dueDate = ((TrainingCaseDetail)detail.Value).DaysUntilDue < 0
+            ? _dateTime.Today
+            : ((TrainingCaseDetail)detail.Value).DueDate;
+
+        Result setDueDate = item.SetDueDate(_dateTime, dueDate);
+
+        if (setDueDate.IsFailure)
+            return Result.Failure<Case>(setDueDate.Error);
 
         return item;
     }

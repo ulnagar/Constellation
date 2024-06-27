@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.WorkFlows;
 
 using Core.Models.Attendance.Identifiers;
+using Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
@@ -26,7 +27,8 @@ internal sealed class CaseDetailConfiguration : IEntityTypeConfiguration<CaseDet
         builder
             .HasDiscriminator<string>("CaseDetailType")
             .HasValue<AttendanceCaseDetail>(nameof(AttendanceCaseDetail))
-            .HasValue<ComplianceCaseDetail>(nameof(ComplianceCaseDetail));
+            .HasValue<ComplianceCaseDetail>(nameof(ComplianceCaseDetail))
+            .HasValue<TrainingCaseDetail>(nameof(TrainingCaseDetail));
     }
 }
 
@@ -94,6 +96,36 @@ internal sealed class ComplianceCaseDetailConfiguration : IEntityTypeConfigurati
 
         builder
             .Property(detail => detail.CreatedDate)
+            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+    }
+}
+
+internal sealed class TrainingCaseDetailConfiguration : IEntityTypeConfiguration<TrainingCaseDetail>
+{
+    public void Configure(EntityTypeBuilder<TrainingCaseDetail> builder)
+    {
+        builder
+            .Property(detail => detail.StaffId)
+            .HasColumnName(nameof(TrainingCaseDetail.StaffId));
+
+        builder
+            .Property(detail => detail.Name)
+            .HasColumnName(nameof(TrainingCaseDetail.Name));
+
+        builder
+            .Property(detail => detail.TrainingModuleId)
+            .HasColumnName(nameof(TrainingCaseDetail.TrainingModuleId))
+            .HasConversion(
+                id => id.Value,
+                value => TrainingModuleId.FromValue(value));
+
+        builder
+            .Property(detail => detail.ModuleName)
+            .HasColumnName(nameof(TrainingCaseDetail.ModuleName));
+
+        builder
+            .Property(detail => detail.DueDate)
+            .HasColumnName(nameof(TrainingCaseDetail.DueDate))
             .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

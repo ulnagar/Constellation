@@ -82,5 +82,6 @@ public sealed class AppConfiguration
     {
         public string AttendanceReviewer { get; set; }
         public string ComplianceReviewer { get; set; }
+        public string TrainingReviewer { get; set; }
     }
 }

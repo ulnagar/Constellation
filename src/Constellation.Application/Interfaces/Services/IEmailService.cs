@@ -102,4 +102,5 @@ public interface IEmailService
     Task SendActionCancelledEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
     Task SendEnteredEmailForAction(List<EmailRecipient> recipients, EmailRecipient sender, string subject, string body, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendComplianceWorkFlowNotificationEmail(List<EmailRecipient> recipients, CaseId caseId, ComplianceCaseDetail detail, int incidentAge, string incidentLink, CancellationToken cancellationToken = default);
+    Task SendTrainingWorkFlowNotificationEmail(List<EmailRecipient> recipients, TrainingCaseDetail detail, string reviewer, CancellationToken cancellationToken = default);
 }

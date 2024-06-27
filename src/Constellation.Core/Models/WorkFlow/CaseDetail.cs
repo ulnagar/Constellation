@@ -1,18 +1,19 @@
-﻿using Constellation.Core.Errors;
-using System;
+﻿namespace Constellation.Core.Models.WorkFlow;
 
-namespace Constellation.Core.Models.WorkFlow;
-
+using Abstractions.Clock;
 using Attendance;
 using Constellation.Core.Enums;
+using Constellation.Core.Errors;
 using Constellation.Core.Models.Attendance.Identifiers;
+using Constellation.Core.Models.Training.Identifiers;
 using Enums;
 using Errors;
 using Extensions;
 using Identifiers;
-using Newtonsoft.Json.Linq;
 using Shared;
 using Students;
+using System;
+using Training;
 
 public abstract class CaseDetail
 {
@@ -145,4 +146,44 @@ public sealed class ComplianceCaseDetail : CaseDetail
     }
 
     public override string ToString() => $"Compliance Case for {Name} ({Grade.AsName()}): {IncidentType} - {Subject}";
+}
+
+public sealed class TrainingCaseDetail : CaseDetail
+{
+    public string StaffId { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public TrainingModuleId TrainingModuleId { get; private set;}
+    public string ModuleName { get; private set; } = string.Empty;
+    public DateOnly DueDate { get; private set; }
+    public int DaysUntilDue => (int)DueDate.ToDateTime(TimeOnly.MinValue).Subtract(DateTime.Today).TotalDays;
+
+    public static Result<CaseDetail> Create(
+        Staff teacher,
+        TrainingModule module,
+        TrainingCompletion? completion,
+        IDateTimeProvider dateTime)
+    {
+        if (teacher is null)
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateTeacherNull);
+
+        if (module is null)
+            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateTrainingModuleNull);
+
+        DateOnly dueDate = (completion is null)
+            ? dateTime.Today
+            : completion.CompletedDate.AddYears((int)module.Expiry);
+
+        TrainingCaseDetail detail = new()
+        {
+            StaffId = teacher.StaffId,
+            Name = teacher.GetName().DisplayName,
+            TrainingModuleId = module.Id,
+            ModuleName = module.Name,
+            DueDate = dueDate
+        };
+
+        return detail;
+    }
+
+    public override string ToString() => $"Training Case for {Name}: {ModuleName} - {DueDate:d}";
 }

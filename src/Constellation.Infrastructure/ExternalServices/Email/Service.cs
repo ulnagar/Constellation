@@ -1286,6 +1286,31 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 
+    public async Task SendTrainingWorkFlowNotificationEmail(
+        List<EmailRecipient> recipients,
+        TrainingCaseDetail detail,
+        string reviewer,
+        CancellationToken cancellationToken = default)
+    {
+        TrainingWorkFlowNotificationEmailViewModel viewModel = new()
+        {
+            Title = $"[WorkFlow] Mandatory Training Due",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            StaffName = detail.Name,
+            ModuleName = detail.ModuleName,
+            DueDate = detail.DueDate,
+            DaysUntilDue = detail.DaysUntilDue,
+            Reviewer = reviewer
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(TrainingWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
+
+
     public async Task SendEnteredEmailForAction(
         List<EmailRecipient> recipients,
         EmailRecipient sender,

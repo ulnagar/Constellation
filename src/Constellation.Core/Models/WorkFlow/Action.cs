@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using Constellation.Core.Models.Training;
+
 namespace Constellation.Core.Models.WorkFlow;
 
 using Enums;
@@ -645,6 +647,56 @@ public sealed class SentralIncidentStatusAction : Action
         MarkedResolved = true;
         MarkedNotCompleted = false;
         IncidentNumber = 0;
+
+        return Result.Success();
+    }
+}
+
+public sealed class UploadTrainingCertificateAction : Action
+{
+    public override string Description => $"";
+    public override string ToString() => $"";
+
+    public override string AsStatus() =>
+        Status switch
+        {
+            { } value when value.Equals(ActionStatus.Open) =>
+                $"Task assigned to: {AssignedTo}",
+            { } value when value.Equals(ActionStatus.Completed) =>
+                $"Training certificate uploaded",
+            _ => $"Unknown Status"
+        };
+
+    public string ModuleName { get; private set; } = string.Empty;
+
+    private UploadTrainingCertificateAction() { }
+
+    public static Result<UploadTrainingCertificateAction> Create(
+        CaseId caseId,
+        TrainingModule module,
+        Staff assignee,
+        string currentUser)
+    {
+        UploadTrainingCertificateAction action = new()
+        {
+            CaseId = caseId,
+            ModuleName = module.Name
+        };
+
+        Result assignment = action.AssignAction(assignee, currentUser);
+
+        if (assignment.IsFailure)
+            return Result.Failure<UploadTrainingCertificateAction>(assignment.Error);
+
+        return action;
+    }
+
+    public Result Update(string currentUser)
+    {
+        Result noteAttempt = AddNote($"Training Certification uploaded", currentUser);
+
+        if (noteAttempt.IsFailure)
+            return noteAttempt;
 
         return Result.Success();
     }

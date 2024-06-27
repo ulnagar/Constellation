@@ -74,7 +74,7 @@ public class UpsertModel : BasePageModel
 
     [AllowExtensions(FileExtensions: "pdf", ErrorMessage = "You can only upload PDF files")]
     [BindProperty]
-    public IFormFile FormFile { get; set; }
+    public IFormFile? FormFile { get; set; }
 
     public Dictionary<string, string> StaffOptions { get; set; } = new();
     public Dictionary<Guid, string> ModuleOptions { get; set; } = new();

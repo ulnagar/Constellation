@@ -23,4 +23,8 @@ public static class CaseDetailErrors
     public static readonly Error CreateSchoolNull = new(
         "Case.Detail.Create.SchoolNull",
         "The school cannot be empty or null");
+
+    public static readonly Error CreateTrainingModuleNull = new(
+        "Case.Detail.Create.TrainingModuleNull",
+        "The training module cannot be empty or null");
 }

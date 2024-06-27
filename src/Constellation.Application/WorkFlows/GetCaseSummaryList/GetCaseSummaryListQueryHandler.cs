@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.WorkFlows.GetCaseSummaryList;
 
 using Abstractions.Messaging;
-using Awards.GetAwardCountsByTypeByGrade;
+using Core.Errors;
+using Core.Models;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -21,15 +23,18 @@ internal sealed class GetCaseSummaryListQueryHandler
 {
     private readonly ICaseRepository _caseRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly ILogger _logger;
 
     public GetCaseSummaryListQueryHandler(
         ICaseRepository caseRepository,
         IStudentRepository studentRepository,
+        IStaffRepository staffRepository,
         ILogger logger)
     {
         _caseRepository = caseRepository;
         _studentRepository = studentRepository;
+        _staffRepository = staffRepository;
         _logger = logger.ForContext<GetCaseSummaryListQuery>();
     }
 
@@ -46,6 +51,37 @@ internal sealed class GetCaseSummaryListQueryHandler
 
             string studentId = string.Empty;
             string description = string.Empty;
+
+            if (item.Type!.Equals(CaseType.Training))
+            {
+                TrainingCaseDetail details = item.Detail as TrainingCaseDetail;
+
+                Staff staffMember = await _staffRepository.GetById(details.StaffId, cancellationToken);
+
+                if (staffMember is null)
+                {
+                    _logger
+                        .ForContext(nameof(Case), item, true)
+                        .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(details.StaffId), true)
+                        .Warning("Could not generate list of Case Summary");
+
+                    return Result.Failure<List<CaseSummaryResponse>>(DomainErrors.Partners.Staff.NotFound(details.StaffId));
+                }
+
+                description = $"Training Case for {details.ModuleName} - {details.DueDate:d}";
+                
+                responses.Add(new(
+                    item.Id,
+                    staffMember.GetName(),
+                    description,
+                    item.Status,
+                    item.CreatedAt,
+                    item.DueDate,
+                    item.Actions.Count,
+                    item.Actions.Count(action => action.Status == ActionStatus.Open)));
+
+                continue;
+            }
 
             if (item.Type!.Equals(CaseType.Attendance))
             {

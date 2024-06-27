@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Services;
 
 using Attendance.Identifiers;
+using Constellation.Core.Models.Training.Identifiers;
 using Shared;
 using System;
 using System.Threading;
@@ -13,4 +14,6 @@ public interface ICaseService
     Task<Result<Case>> CreateAttendanceCase(string studentId, AttendanceValueId attendanceValueId, CancellationToken cancellationToken = default);
 
     Task<Result<Case>> CreateComplianceCase(string studentId, string teacherId, string incidentId, string incidentType, string subject, DateOnly createdDate, CancellationToken cancellationToken = default);
+
+    Task<Result<Case>> CreateTrainingCase(string staffId, TrainingModuleId moduleId, TrainingCompletionId? completionId = null, CancellationToken cancellationToken = default);
 }

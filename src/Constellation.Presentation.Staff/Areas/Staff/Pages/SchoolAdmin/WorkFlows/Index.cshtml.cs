@@ -28,7 +28,7 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Cases;
 
-    public List<CaseSummaryResponse> Cases { get; set; }
+    public List<CaseSummaryResponse> Cases { get; set; } = new();
 
     [BindProperty(SupportsGet=true)]
     public FilterEnum Filter { get; set; } = FilterEnum.Open;

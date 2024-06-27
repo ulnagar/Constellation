@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
@@ -74,6 +75,18 @@ internal sealed class CaseRepository : ICaseRepository
             .Set<Case>()
             .Where(item =>
                 ((ComplianceCaseDetail)item.Detail).IncidentId == incidentId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<Case?> GetTrainingCaseForStaffAndModule(
+        string staffId, 
+        TrainingModuleId moduleId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Case>()
+            .Where(item =>
+                item.Status.Equals(CaseStatus.Open) &&
+                ((TrainingCaseDetail)item.Detail).StaffId == staffId &&
+                ((TrainingCaseDetail)item.Detail).TrainingModuleId == moduleId)
             .FirstOrDefaultAsync(cancellationToken);
 
     public void Insert(Case item) => _context.Set<Case>().Add(item);

@@ -4,7 +4,6 @@ using Abstractions.Messaging;
 using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow;
-using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Errors;

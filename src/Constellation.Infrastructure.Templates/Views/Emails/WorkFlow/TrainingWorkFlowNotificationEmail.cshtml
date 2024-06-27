@@ -1,0 +1,21 @@
+@model TrainingWorkFlowNotificationEmailViewModel
+
+@using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>We have detected that @Model.StaffName is due to complete @Model.ModuleName by @Model.DueDate.</p>
+
+@if (Model.DaysUntilDue < 1){
+    <p>This is now overdue.</p>
+}
+
+<p>Please complete the @Model.ModuleName course and upload the certificate to Constellation.</p>
+<p>If you have any concerns, please contact @Model.Reviewer</p>

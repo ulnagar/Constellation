@@ -154,6 +154,17 @@ public sealed class Case : AggregateRoot, IAuditableEntity
             return Result.Success();
         }
 
+        if (Type!.Equals(CaseType.Training))
+        {
+            if (detail is not TrainingCaseDetail)
+                return Result.Failure(CaseErrors.AttachDetailsDetailMismatch(Type.Name, nameof(TrainingCaseDetail)));
+
+            Detail = detail;
+            DetailId = detail.Id;
+
+            return Result.Success();
+        }
+
         return Result.Failure(CaseErrors.AttachDetailsUnknownDetails);
     }
 

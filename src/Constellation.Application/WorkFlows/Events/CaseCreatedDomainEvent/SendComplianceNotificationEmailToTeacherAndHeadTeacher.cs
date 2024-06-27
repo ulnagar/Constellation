@@ -1,18 +1,18 @@
 ﻿namespace Constellation.Application.WorkFlows.Events.CaseCreatedDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Faculties.Repositories;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.WorkFlow.Events;
+using Core.Shared;
 using Core.ValueObjects;
 using Extensions;
 using Interfaces.Configuration;
@@ -162,18 +162,21 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
                 {
                     _logger
                         .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                        .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
+                        .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(deputyId), true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
                     return;
                 }
 
-                Result<EmailRecipient> deputyEmail = EmailRecipient.Create(assignee.DisplayName, assignee.EmailAddress);
-                if (teacher.IsFailure)
+                if (recipients.Any(entry => entry.Email == deputy.EmailAddress))
+                    continue;
+
+                Result<EmailRecipient> deputyEmail = EmailRecipient.Create(deputy.DisplayName, deputy.EmailAddress);
+                if (deputyEmail.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                        .ForContext(nameof(Staff), assignee, true)
+                        .ForContext(nameof(Staff), deputy, true)
                         .ForContext(nameof(Error), deputyEmail.Error, true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -195,25 +198,29 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
             {
                 _logger
                     .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
+                    .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(principalId), true)
                     .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
                 return;
             }
 
-            Result<EmailRecipient> principalEmail = EmailRecipient.Create(assignee.DisplayName, assignee.EmailAddress);
-            if (teacher.IsFailure)
+
+            if (recipients.All(entry => entry.Email != principal.EmailAddress))
             {
-                _logger
-                    .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                    .ForContext(nameof(Staff), assignee, true)
-                    .ForContext(nameof(Error), principalEmail.Error, true)
-                    .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
+                Result<EmailRecipient> principalEmail = EmailRecipient.Create(principal.DisplayName, principal.EmailAddress);
+                if (principalEmail.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                        .ForContext(nameof(Staff), principal, true)
+                        .ForContext(nameof(Error), principalEmail.Error, true)
+                        .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
-                return;
+                    return;
+                }
+
+                recipients.Add(principalEmail.Value);
             }
-
-            recipients.Add(principalEmail.Value);
         }
 
         string incidentLink = $"{_sentralConfiguration.ServerUrl}/wellbeing/incidents/view?id={detail.IncidentId}";

@@ -61,7 +61,8 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
             .HasValue<CreateSentralEntryAction>(nameof(CreateSentralEntryAction))
             .HasValue<ConfirmSentralEntryAction>(nameof(ConfirmSentralEntryAction))
             .HasValue<CaseDetailUpdateAction>(nameof(CaseDetailUpdateAction))
-            .HasValue<SentralIncidentStatusAction>(nameof(SentralIncidentStatusAction));
+            .HasValue<SentralIncidentStatusAction>(nameof(SentralIncidentStatusAction))
+            .HasValue<UploadTrainingCertificateAction>(nameof(UploadTrainingCertificateAction));
     }
 }
 
@@ -178,5 +179,15 @@ internal sealed class SentralIncidentStatusActionConfiguration : IEntityTypeConf
         builder
             .Property(action => action.IncidentNumber)
             .HasColumnName(nameof(SentralIncidentStatusAction.IncidentNumber));
+    }
+}
+
+internal sealed class UploadTrainingCertificateActionConfiguration : IEntityTypeConfiguration<UploadTrainingCertificateAction>
+{
+    public void Configure(EntityTypeBuilder<UploadTrainingCertificateAction> builder)
+    {
+        builder
+            .Property(action => action.ModuleName)
+            .HasColumnName(nameof(UploadTrainingCertificateAction.ModuleName));
     }
 }

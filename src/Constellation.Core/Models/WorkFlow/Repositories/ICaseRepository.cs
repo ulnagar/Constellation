@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Models.WorkFlow.Repositories;
+﻿using Constellation.Core.Models.Training.Identifiers;
+
+namespace Constellation.Core.Models.WorkFlow.Repositories;
 
 using Identifiers;
 using System.Collections.Generic;
@@ -14,6 +16,7 @@ public interface ICaseRepository
     Task<Case?> GetOpenAttendanceCaseForStudent(string studentId, CancellationToken cancellationToken = default);
     Task<int> CountActiveActionsForUser(string staffId, CancellationToken cancellationToken = default);
     Task<Case?> GetComplianceCaseForIncident(string incidentId, CancellationToken cancellationToken = default);
+    Task<Case?> GetTrainingCaseForStaffAndModule(string staffId, TrainingModuleId moduleId, CancellationToken cancellationToken = default);
     void Insert(Case item);
 
 }
