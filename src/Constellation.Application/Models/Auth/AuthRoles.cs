@@ -17,4 +17,7 @@ public static class AuthRoles
     public const string ComplianceManager = "Compliance Manager";
 
     public const string ExecStaffMember = "Exec Staff Member";
+
+
+    public const string SchoolContact = "Partner School Staff User";
 }

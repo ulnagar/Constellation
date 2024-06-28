@@ -80,6 +80,11 @@
     {
       "library": "jquery-sortablejs@1.6.1",
       "destination": "wwwroot/lib/jquery-sortablejs/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap@5.3.3",
+      "destination": "wwwroot/lib/bootstrap5/"
     }
   ]
 }

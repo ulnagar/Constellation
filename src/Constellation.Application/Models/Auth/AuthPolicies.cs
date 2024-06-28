@@ -31,4 +31,6 @@ public class AuthPolicies
     public const string CanManageSchoolContacts = "CanManageSchoolContacts";
     public const string CanManageAssets = "CanManageAssets";
     public const string CanEditSchools = "CanEditSchools";
+
+    public const string IsSchoolContact = "IsSchoolContact";
 }
