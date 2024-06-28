@@ -38,16 +38,15 @@ public class DetailsModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
-    [ViewData] public string PageTitle => "Training Module Details";
+    [ViewData] public string PageTitle => Module is not null ? $"Training Module - {Module.Name}" : "Training Module Details";
 
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StrongIdBinder))]
     public TrainingModuleId Id { get; set; }
 
-    public ModuleDetailsDto Module { get; set; }
-
-
+    public ModuleDetailsDto? Module { get; set; }
+    
     public async Task OnGet()
     {
         Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(Id));

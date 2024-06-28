@@ -25,6 +25,8 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Locations;
+    [ViewData] public string PageTitle => "Assets by Location";
+
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StringEnumerableBinder))]

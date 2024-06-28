@@ -8,6 +8,7 @@ using System.Collections.Generic;
 public sealed record StudentWithOfferingsResponse(
     string StudentId,
     Name Name,
+    string Gender,
     string SchoolName,
     Grade Grade,
     List<StudentWithOfferingsResponse.OfferingResponse> Offerings)

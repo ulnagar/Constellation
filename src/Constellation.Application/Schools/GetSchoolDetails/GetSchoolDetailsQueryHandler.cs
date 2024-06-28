@@ -1,12 +1,15 @@
 ﻿namespace Constellation.Application.Schools.GetSchoolDetails;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Enrolments.Repositories;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Enrolments;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
+using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
@@ -16,6 +19,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
+using Students.GetCurrentStudentsWithCurrentOfferings;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -30,6 +34,7 @@ internal sealed class GetSchoolDetailsQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ILogger _logger;
 
     public GetSchoolDetailsQueryHandler(
@@ -39,6 +44,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         ISchoolContactRepository contactRepository,
+        IEnrolmentRepository enrolmentRepository,
         ILogger logger)
     {
         _schoolRepository = schoolRepository;
@@ -47,6 +53,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _contactRepository = contactRepository;
+        _enrolmentRepository = enrolmentRepository;
         _logger = logger.ForContext<GetSchoolDetailsQuery>();
     }
 
@@ -65,20 +72,33 @@ internal sealed class GetSchoolDetailsQueryHandler
         }
 
         List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(school.Code, cancellationToken);
-        List<SchoolDetailsResponse.SchoolStudent> studentResponse = new();
+        
+        List<StudentWithOfferingsResponse> studentResponse = new();
 
         foreach (Student student in students)
         {
-            List<Offering> offerings = await _offeringRepository.GetByStudentId(student.StudentId, cancellationToken);
+            List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<string> studentOfferings = offerings
-                .Select(offering => offering.Name.ToString())
-                .ToList();
+            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+
+            foreach (Enrolment enrolment in enrolments)
+            {
+                Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
+
+                if (offering is null)
+                    continue;
+
+                studentOfferings.Add(new(
+                    offering.Id,
+                    offering.Name,
+                    offering.IsCurrent));
+            }
 
             studentResponse.Add(new(
                 student.StudentId,
                 student.GetName(),
                 student.Gender,
+                student.School.Name,
                 student.CurrentGrade,
                 studentOfferings));
         }
@@ -91,8 +111,15 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
 
-            List<string> teacherOfferings = offerings
-                .Select(offering => offering.Name.ToString())
+            List<SchoolDetailsResponse.OfferingResponse> teacherOfferings = offerings
+                .Where(offering => 
+                    offering.Teachers.Any(entry => 
+                        entry.StaffId == teacher.StaffId && 
+                        entry.Type == AssignmentType.ClassroomTeacher))
+                .Select(offering => new SchoolDetailsResponse.OfferingResponse(
+                    offering.Id,
+                    offering.Name,
+                    offering.IsCurrent))
                 .ToList();
 
             Dictionary<string, string> teacherFaculties = faculties

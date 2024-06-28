@@ -64,6 +64,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
             response.Add(new(
                 student.StudentId,
                 student.GetName(),
+                student.Gender,
                 student.School.Name,
                 student.CurrentGrade,
                 studentOfferings));

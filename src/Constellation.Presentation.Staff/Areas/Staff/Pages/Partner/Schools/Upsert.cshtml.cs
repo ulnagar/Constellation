@@ -104,6 +104,19 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        string phoneNumber = PhoneNumber
+            .Replace("(", string.Empty)
+            .Replace(")", string.Empty)
+            .Replace(" ", string.Empty)
+            .Trim();
+
+        string faxNumber = FaxNumber?
+            .Replace("(", string.Empty)
+            .Replace(")", string.Empty)
+            .Replace(" ", string.Empty)
+            .Trim()
+            ?? string.Empty;
+
         UpsertSchoolCommand command = new()
         {
             Code = SchoolCode,
@@ -112,8 +125,8 @@ public class UpsertModel : BasePageModel
             Town = Town,
             State = State,
             PostCode = PostCode,
-            PhoneNumber = PhoneNumber,
-            FaxNumber = FaxNumber,
+            PhoneNumber = phoneNumber,
+            FaxNumber = faxNumber,
             EmailAddress = EmailAddress,
             Division = Division,
             LateOpening = HeatSchool,

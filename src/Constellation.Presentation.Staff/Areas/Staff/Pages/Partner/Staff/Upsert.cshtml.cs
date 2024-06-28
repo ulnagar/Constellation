@@ -30,7 +30,7 @@ public class UpsertModel : BasePageModel
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Staff;
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; } = string.Empty;
 
     [BindProperty]
     public string StaffId { get; set; } = string.Empty;

@@ -33,7 +33,7 @@ public class DetailsModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
-    [ViewData] public string PageTitle => "Training Completion Details";
+    [ViewData] public string PageTitle => Record is not null ? $"Training Completion {Record.ModuleName}" : "Training Completion Details";
 
 
     [BindProperty(SupportsGet = true)]
@@ -44,7 +44,7 @@ public class DetailsModel : BasePageModel
     [ModelBinder(typeof(StrongIdBinder))]
     public TrainingModuleId ModuleId { get; set; }
 
-    public CompletionRecordDto Record { get; set; } = new();
+    public CompletionRecordDto? Record { get; set; } = new();
     public CompletionRecordCertificateDetailsDto? UploadedCertificate { get; set; } = new();
 
 

@@ -30,8 +30,9 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData]
-    public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
+    [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
+    [ViewData] public string PageTitle => Id is null ? "New Asset" : $"Edit Asset - {Id}";
+
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(AssetNumberBinder))]

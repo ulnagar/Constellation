@@ -108,41 +108,21 @@
 <div>
     <ul class="nav nav-pills">
         <li class="nav-item">
-            <a class="nav-link active" href="#schoolStaff" data-toggle="tab">
-                School contacts
-                @if (Model.School.Contacts.Any())
-                {
-                    <span class="badge">@Model.School.Contacts.Count()</span>
-                }
-            </a>
+            <a class="nav-link active" href="#contactTab" data-toggle="tab">School contacts</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#students" data-toggle="tab">
-                Active students
-                @if (Model.School.Students.Any())
-                {
-                    <span class="badge">@Model.School.Students.Count()</span>
-                }
-            </a>
+            <a class="nav-link" href="#studentTab" data-toggle="tab">Active students</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#staff" data-toggle="tab">
-                Active staff
-                @if (Model.School.Staff.Any())
-                {
-                    <span class="badge">@Model.School.Staff.Count()</span>
-                }
-            </a>
+            <a class="nav-link" href="#staffTab" data-toggle="tab">Active staff</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#graph" data-toggle="tab">
-                Bandwidth Graph
-            </a>
+            <a class="nav-link" href="#graphTab" data-toggle="tab">Bandwidth Graph</a>
         </li>
     </ul>
 
     <div class="tab-content">
-        <div id="schoolStaff" class="tab-pane active">
+        <div id="contactTab" class="tab-pane active">
             <h3>School Contacts</h3>
 
             <table class="table-striped table-hover data-table">
@@ -177,7 +157,7 @@
             </table>
         </div>
 
-        <div id="students" class="tab-pane">
+        <div id="studentTab" class="tab-pane">
             <h3>Current Students</h3>
 
             <table class="table-striped table-hover data-table">
@@ -194,10 +174,24 @@
                     @foreach (var item in Model.School.Students)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.StudentId)</td>
-                            <td>@Html.DisplayFor(model => item.Gender, "Gender") @Html.DisplayFor(model => item.Name)</td>
+                            <td>@item.StudentId</td>
+                            <td data-order="@item.Name.SortOrder">@Html.DisplayFor(model => item.Gender, "Gender") @item.Name.DisplayName</td>
                             <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
-                            <td>@Html.DisplayFor(model => item.Offerings, "StringList")</td>
+                            <td>
+                                @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
+                                {
+                                    if (course.Current)
+                                    {
+                                        (string group, string line) details = course.Name.ExtractLine();
+
+                                        <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@course.Id.Value" class="badge @details.group-@details.line">@course.Name</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@course.Id.Value" class="badge badge-secondary">@course.Name</a>
+                                    }
+                                }
+                            </td>
                             <td>
                                 <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
@@ -207,7 +201,7 @@
             </table>
         </div>
 
-        <div id="staff" class="tab-pane">
+        <div id="staffTab" class="tab-pane">
             <h3>Current Staff</h3>
 
             <table class="table-striped table-hover data-table">
@@ -224,15 +218,29 @@
                     @foreach (var item in Model.School.Staff)
                     {
                         <tr>
-                            <td>@Html.DisplayFor(model => item.StaffId)</td>
-                            <td>@Html.DisplayFor(model => item.Name)</td>
+                            <td>@item.StaffId</td>
+                            <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
                             <td>
                                 @foreach (var faculty in item.Faculties)
                                 {
                                     <faculty-label faculty="@new FacultySummaryResponse(new(), faculty.Key, faculty.Value, 0)"></faculty-label>
                                 }
                             </td>
-                            <td>@Html.DisplayFor(model => item.Offerings, "StringList")</td>
+                            <td>
+                                @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
+                                {
+                                    if (course.Current)
+                                    {
+                                        (string group, string line) details = course.Name.ExtractLine();
+
+                                        <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@course.Id.Value" class="badge @details.group-@details.line">@course.Name</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@course.Id.Value" class="badge badge-secondary">@course.Name</a>
+                                    }
+                                }
+                            </td>
                             <td>
                                 <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                             </td>
@@ -242,7 +250,7 @@
             </table>
         </div>
 
-        <div id="graph" class="tab-pane">
+        <div id="graphTab" class="tab-pane">
             <h3>Bandwidth Graph</h3>
 
             <button id="getTGraph" type="button" class="btn btn-info btn-sm">Get Todays Graph</button> <button id="getYGraph" type="button" class="btn btn-info btn-sm">Get Yesterdays Graph</button> <button id="saveGraph" type="button" class="btn btn-warning btn-sm new-group">Save Graph</button>

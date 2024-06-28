@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Application.Schools.GetSchoolDetails;
 
-using Constellation.Core.Enums;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.Offerings.Identifiers;
+using Students.GetCurrentStudentsWithCurrentOfferings;
 using System.Collections.Generic;
 
 public sealed record SchoolDetailsResponse(
@@ -20,21 +21,19 @@ public sealed record SchoolDetailsResponse(
     string PrincipalNetwork,
     string Electorate,
     List<SchoolDetailsResponse.SchoolStaff> Staff,
-    List<SchoolDetailsResponse.SchoolStudent> Students,
+    List<StudentWithOfferingsResponse> Students,
     List<SchoolDetailsResponse.SchoolContact> Contacts)
 {
     public sealed record SchoolStaff(
         string StaffId,
         Name Name,
         Dictionary<string, string> Faculties,
-        List<string> Offerings);
+        List<OfferingResponse> Offerings);
 
-    public sealed record SchoolStudent(
-        string StudentId,
-        Name Name,
-        string Gender,
-        Grade Grade,
-        List<string> Offerings);
+    public sealed record OfferingResponse(
+        OfferingId Id,
+        string Name,
+        bool Current);
 
     public sealed record SchoolContact(
         SchoolContactId ContactId,

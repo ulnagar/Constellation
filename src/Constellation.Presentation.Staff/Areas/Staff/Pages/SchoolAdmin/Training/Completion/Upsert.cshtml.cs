@@ -45,7 +45,7 @@ public class UpsertModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
-    [ViewData] public string PageTitle => "Edit Training Completion";
+    [ViewData] public string PageTitle => Id.Equals(TrainingCompletionId.Empty) ? "New Training Completion" : "Edit Training Completion";
     
     // Allow mode switching for:
     // "FULL" - Editor access with no forced fields
@@ -57,7 +57,6 @@ public class UpsertModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     [Required(ErrorMessage = "You must select a training module")]
     [ModelBinder(typeof(StrongIdBinder))]
-    // Must be nullable to have the default value be null, and therefore trigger required validation rule
     public TrainingModuleId ModuleId { get; set; }
 
     [BindProperty(SupportsGet = true)]

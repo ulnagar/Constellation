@@ -3,6 +3,7 @@
 using Application.Assets.GetAllocationList;
 using Application.Models.Auth;
 using Core.Models.Assets.Enums;
+using Core.Models.Assets.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -25,11 +26,12 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Allocations;
+    [ViewData] public string PageTitle => "Assets by Allocation";
+
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StringEnumerableBinder))]
     public AllocationType AllocationType { get; set; }
-
     public List<AllocationListItem> Allocations { get; set; }
 
     public async Task OnGet()
@@ -41,7 +43,8 @@ public class IndexModel : BasePageModel
             _ when AllocationType.Equals(AllocationType.Student) => await _mediator.Send(new GetStudentAllocationListQuery()),
             _ when AllocationType.Equals(AllocationType.Staff) => await _mediator.Send(new GetStaffAllocationListQuery()),
             _ when AllocationType.Equals(AllocationType.School) => await _mediator.Send(new GetSchoolAllocationListQuery()),
-            _ when AllocationType.Equals(AllocationType.CommunityMember) => await _mediator.Send(new GetCommunityMemberAllocationListQuery())
+            _ when AllocationType.Equals(AllocationType.CommunityMember) => await _mediator.Send(new GetCommunityMemberAllocationListQuery()),
+            _ => Result.Failure<List<AllocationListItem>>(AllocationErrors.UnknownType)
         };
 
         if (result.IsFailure)

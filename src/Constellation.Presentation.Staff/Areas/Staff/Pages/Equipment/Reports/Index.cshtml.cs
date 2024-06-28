@@ -14,7 +14,7 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Reports;
-
+    [ViewData] public string PageTitle => "Asset Reports";
 
     public async Task OnGet()
     {

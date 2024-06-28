@@ -32,7 +32,7 @@ public class UpsertModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
-    [ViewData] public string PageTitle => "Edit Training Module";
+    [ViewData] public string PageTitle => Id.Equals(TrainingModuleId.Empty) ? "New Training Module" : "Edit Training Module";
 
 
     [BindProperty(SupportsGet = true)]

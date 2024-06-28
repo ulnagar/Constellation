@@ -24,15 +24,14 @@ public class StaffMemberModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
-    [ViewData] public string PageTitle => "Training Module Reports";
+    [ViewData] public string PageTitle => StaffMember is null ? "Staff Training Status" : $"Training Status - {StaffMember.Name.DisplayName}";
 
 
     [BindProperty(SupportsGet = true)]
     public string Id { get; set; }
 
     public List<ModuleStatusResponse> Modules { get; set; } = new();
-    public StaffResponse StaffMember { get; set; }
-
+    public StaffResponse? StaffMember { get; set; }
     
     public async Task OnGet()
     {

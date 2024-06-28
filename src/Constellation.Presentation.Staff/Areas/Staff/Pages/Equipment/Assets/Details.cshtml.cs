@@ -40,12 +40,13 @@ public class DetailsModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
+    [ViewData] public string PageTitle => Asset is null ? "Asset Details" : $"Details - {Asset.AssetNumber}";
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(AssetNumberBinder))]
     public AssetNumber AssetNumber { get; set; }
 
-    public AssetResponse Asset { get; set; }
+    public AssetResponse? Asset { get; set; }
 
     public async Task OnGet()
     {
