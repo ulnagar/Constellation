@@ -7,6 +7,7 @@ using Application.WorkFlows.UpdateParentInterviewAction;
 using Application.WorkFlows.UpdatePhoneParentAction;
 using Application.WorkFlows.UpdateSendEmailAction;
 using Application.WorkFlows.UpdateSentralIncidentStatusAction;
+using Application.WorkFlows.UpdateUploadTrainingCertificateAction;
 using Constellation.Application.DTOs;
 using Constellation.Application.WorkFlows.GetCaseById;
 using Core.Models.WorkFlow;
@@ -260,6 +261,26 @@ public class UpdateModel : BasePageModel
         }
 
         Result attempt = await _mediator.Send(new UpdateSendEmailActionCommand(CaseId, ActionId, recipients, sender.Value, viewModel.Subject, viewModel.Body, files));
+
+        if (attempt.IsFailure)
+        {
+            Error = new()
+            {
+                Error = attempt.Error,
+                RedirectPath = null
+            };
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage("/SchoolAdmin/WorkFlows/Details", new { area = "Staff", Id = CaseId.Value });
+    }
+
+    public async Task<IActionResult> OnPostUpdateUploadTrainingCertificateAction()
+    {
+        Result attempt = await _mediator.Send(new UpdateUploadTrainingCertificateActionCommand(CaseId, ActionId));
 
         if (attempt.IsFailure)
         {

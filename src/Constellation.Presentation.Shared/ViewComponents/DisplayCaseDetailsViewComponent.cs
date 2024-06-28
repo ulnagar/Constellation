@@ -18,17 +18,18 @@ public class DisplayCaseDetailsViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync([ModelBinder(typeof(StrongIdBinder))] CaseId caseId)
     {
-        Case item = await _caseRepository.GetById(caseId);
+        Case? item = await _caseRepository.GetById(caseId);
 
         if (item is null)
             return Content(string.Empty);
 
-        if (item.Detail is AttendanceCaseDetail attendanceDetails)
-            return View("AttendanceCaseDetail", attendanceDetails);
-
-        if (item.Detail is ComplianceCaseDetail complianceDetails)
-            return View("ComplianceCaseDetail", complianceDetails);
-
-        return Content(string.Empty);
+        return item.Detail switch
+        {
+            null => Content(string.Empty),
+            AttendanceCaseDetail attendanceDetails => View("AttendanceCaseDetail", attendanceDetails),
+            ComplianceCaseDetail complianceDetails => View("ComplianceCaseDetail", complianceDetails),
+            TrainingCaseDetail trainingDetails => View("TrainingCaseDetail", trainingDetails),
+            _ => Content(string.Empty)
+        };
     }
 }

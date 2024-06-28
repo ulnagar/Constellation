@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 public class DisplayCaseActionDetailsViewComponent : ViewComponent
 {
-    public DisplayCaseActionDetailsViewComponent()
-    {
-    }
-
     public IViewComponentResult Invoke(Action action) =>
         action switch
         {
@@ -20,6 +16,7 @@ public class DisplayCaseActionDetailsViewComponent : ViewComponent
             ParentInterviewAction interviewAction => View("ParentInterviewAction", interviewAction),
             CaseDetailUpdateAction updateAction => View("CaseDetailUpdateAction", updateAction),
             SentralIncidentStatusAction incidentAction => View("SentralIncidentStatusAction", incidentAction),
+            UploadTrainingCertificateAction uploadAction => View("UploadTrainingCertificateAction", uploadAction),
             _ => Content(string.Empty)
         };
 }

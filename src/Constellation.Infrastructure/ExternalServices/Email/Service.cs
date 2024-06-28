@@ -1037,54 +1037,6 @@ public sealed class Service : IEmailService
         await _emailSender.Send(notification.Recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
     }
 
-    public async Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
-    {
-        TrainingExpiringSoonWarningEmailViewModel viewModel = new TrainingExpiringSoonWarningEmailViewModel
-        {
-            Preheader = "This is an automated message. Please do not reply.",
-            SenderName = "",
-            SenderTitle = "",
-            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Name}",
-            Courses = courses
-        };
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
-
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
-    }
-
-    public async Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
-    {
-        TrainingExpiringSoonAlertEmailViewModel viewModel = new TrainingExpiringSoonAlertEmailViewModel
-        {
-            Preheader = "This is an automated message. Please do not reply.",
-            SenderName = "",
-            SenderTitle = "",
-            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Name}",
-            Courses = courses
-        };
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
-
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
-    }
-
-    public async Task SendTrainingExpiredEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients)
-    {
-        TrainingExpiredAlertEmailViewModel viewModel = new TrainingExpiredAlertEmailViewModel
-        {
-            Preheader = "This is an automated message. Please do not reply.",
-            SenderName = "",
-            SenderTitle = "",
-            Title = $"[Aurora College] Mandatory Training Expiry Warning - {recipients.First().Name}",
-            Courses = courses
-        };
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml", viewModel);
-
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
-    }
-
     public async Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default)
     {
         string viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
@@ -1310,6 +1262,25 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 
+    public async Task SendAllActionsCompletedEmail(
+        List<EmailRecipient> recipients,
+        Case item,
+        CancellationToken cancellationToken = default)
+    {
+        CaseActionsCompletedEmailViewModel viewModel = new()
+        {
+            Title = $"[WorkFlow] All Case Actions Completed",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            CaseDescription = item.ToString(),
+            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Details/{item.Id.Value}"
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(CaseActionsCompletedEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+    }
 
     public async Task SendEnteredEmailForAction(
         List<EmailRecipient> recipients,

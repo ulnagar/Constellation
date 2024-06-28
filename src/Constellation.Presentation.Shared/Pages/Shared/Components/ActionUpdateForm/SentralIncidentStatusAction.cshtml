@@ -35,8 +35,6 @@
 
 <script>
     $(document).ready(function () {
-        console.log("Running now");
-
         var statuses = $('input[name="Status"]');
 
         if (statuses[1].checked == true) {
@@ -46,9 +44,6 @@
 
     $('input[name="Status"]').on('change', function (event) {
         var status = $(this).val();
-
-        console.log($(this));
-        console.log(event);
 
         if (status == "Resolved") {
             $('.incident-number').addClass('d-none');

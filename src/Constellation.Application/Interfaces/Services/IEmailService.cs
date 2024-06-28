@@ -85,11 +85,6 @@ public interface IEmailService
     // Auth Emails
     Task SendMagicLinkLoginEmail(MagicLinkEmail notification);
 
-    // Training Module Emails
-    Task SendTrainingExpiryWarningEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients);
-    Task SendTrainingExpiryAlertEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients);
-    Task SendTrainingExpiredEmail(Dictionary<string, string> courses, List<EmailRecipient> recipients);
-        
     // Report Emails
     Task SendAcademicReportToNonResidentialParent(List<EmailRecipient> recipients, Name studentName, string ReportingPeriod, string Year, FileDto file, CancellationToken cancellationToken = default);
 
@@ -103,4 +98,5 @@ public interface IEmailService
     Task SendEnteredEmailForAction(List<EmailRecipient> recipients, EmailRecipient sender, string subject, string body, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendComplianceWorkFlowNotificationEmail(List<EmailRecipient> recipients, CaseId caseId, ComplianceCaseDetail detail, int incidentAge, string incidentLink, CancellationToken cancellationToken = default);
     Task SendTrainingWorkFlowNotificationEmail(List<EmailRecipient> recipients, TrainingCaseDetail detail, string reviewer, CancellationToken cancellationToken = default);
+    Task SendAllActionsCompletedEmail(List<EmailRecipient> recipients, Case item, CancellationToken cancellationToken = default);
 }

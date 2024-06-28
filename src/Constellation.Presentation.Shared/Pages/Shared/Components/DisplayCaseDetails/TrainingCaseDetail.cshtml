@@ -1,0 +1,20 @@
+﻿@model TrainingCaseDetail
+
+@using Constellation.Core.Models.WorkFlow
+
+<dl>
+    <dt>Case Type</dt>
+    <dd>Mandatory Training</dd>
+
+    <dt>Staff Member</dt>
+    <dd>@Model.Name</dd>
+
+    <dt>Training Module</dt>
+    <dd>@Model.ModuleName</dd>
+
+    <dt>Due Date</dt>
+    <dd>@Model.DueDate</dd>
+
+    <dt>Days until Due Date</dt>
+    <dd>@Model.DaysUntilDue days</dd>
+</dl>

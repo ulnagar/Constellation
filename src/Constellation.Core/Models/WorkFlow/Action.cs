@@ -654,8 +654,9 @@ public sealed class SentralIncidentStatusAction : Action
 
 public sealed class UploadTrainingCertificateAction : Action
 {
-    public override string Description => $"";
-    public override string ToString() => $"";
+    public override string Description => $"Complete Training Module and Upload Certificate";
+    public override string ToString() =>
+        $"Complete Training Module and Upload Certificate";
 
     public override string AsStatus() =>
         Status switch

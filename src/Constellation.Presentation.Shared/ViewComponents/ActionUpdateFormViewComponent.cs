@@ -186,10 +186,11 @@ public class ActionUpdateFormViewComponent : ViewComponent
 
                 return View("SentralIncidentStatusAction", incidentViewModel);
 
+            case UploadTrainingCertificateAction uploadAction:
+                return View("UploadTrainingCertificateAction");
+
             default:
                 return Content(string.Empty);
         };
-
-        return Content(string.Empty);
     }
 }
