@@ -1,22 +1,21 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Common.PresentationModels;
 using Application.Families.GetFamilyById;
-using Constellation.Application.Common.PresentationModels;
+using Application.Models.Auth;
+using Areas;
 using Constellation.Application.Families.DeleteFamilyById;
 using Constellation.Application.Families.DeleteParentById;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
-using Constellation.Application.Models.Auth;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.WorkFlow.Identifiers;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.ConfirmActionUpdateModal;
-using Constellation.Presentation.Staff.Areas;
+using Core.Errors;
+using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 using Presentation.Shared.Pages.Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 using Presentation.Shared.Pages.Shared.PartialViews.DeleteFamilySelectionModal;
 using System.Threading;
@@ -39,25 +38,25 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
+    [ViewData] public string PageTitle => "Family List";
 
     public List<FamilyContactResponse> Contacts { get; set; } = new();
 
-    public async Task OnGet(CancellationToken cancellationToken)
-    {
-        await PreparePage(cancellationToken);
-    }
+    public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
-    public async Task<IActionResult> OnPostAjaxDeleteFamily(Guid familyId, Guid parentId)
+    public async Task<IActionResult> OnPostAjaxDeleteFamily(
+        [ModelBinder(typeof(StrongIdBinder))] FamilyId familyId,
+        [ModelBinder(typeof(StrongIdBinder))] ParentId parentId)
     {
-        Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(FamilyId.FromValue(familyId)));
+        Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
-        ParentResponse? parent = family.Value.Parents.FirstOrDefault(parent => parent.ParentId == ParentId.FromValue(parentId));
+        ParentResponse? parent = family.Value.Parents.FirstOrDefault(parent => parent.ParentId == parentId);
 
         DeleteFamilySelectionModalViewModel viewModel = new()
         {
             FamilyName = family.Value?.FamilyName ?? string.Empty,
-            ParentId = ParentId.FromValue(parentId),
-            FamilyId = FamilyId.FromValue(familyId),
+            ParentId = parentId,
+            FamilyId = familyId,
             ParentName = parent?.ParentName ?? string.Empty,
             OtherParentNames = family.Value?.Parents
                 .Except(new List<ParentResponse>{ parent })
@@ -68,9 +67,11 @@ public class IndexModel : BasePageModel
         return Partial("DeleteFamilySelectionModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetDeleteFamily(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetDeleteFamily(
+        [ModelBinder(typeof(StrongIdBinder))] FamilyId id, 
+        CancellationToken cancellationToken)
     {
-        var authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
         if (!authorized.Succeeded)
         {
@@ -83,9 +84,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        var familyId = FamilyId.FromValue(id);
-
-        var result = await _mediator.Send(new DeleteFamilyByIdCommand(familyId), cancellationToken);
+        Result result = await _mediator.Send(new DeleteFamilyByIdCommand(id), cancellationToken);
 
         if (result.IsFailure)
         {
@@ -101,11 +100,13 @@ public class IndexModel : BasePageModel
         return await PreparePage(cancellationToken);
     }
 
-    public async Task<IActionResult> OnPostAjaxDeleteParent(Guid familyId, Guid parentId)
+    public async Task<IActionResult> OnPostAjaxDeleteParent(
+        [ModelBinder(typeof(StrongIdBinder))] FamilyId familyId,
+        [ModelBinder(typeof(StrongIdBinder))] ParentId parentId)
     {
-        Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(FamilyId.FromValue(familyId)));
+        Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
-        ParentResponse? parent = family.Value.Parents.FirstOrDefault(parent => parent.ParentId == ParentId.FromValue(parentId));
+        ParentResponse? parent = family.Value.Parents.FirstOrDefault(parent => parent.ParentId == parentId);
 
         DeleteFamilyMemberConfirmationModalViewModel viewModel = new()
         {
@@ -119,9 +120,12 @@ public class IndexModel : BasePageModel
         return Partial("DeleteFamilyMemberConfirmationModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetDeleteParent(Guid family, Guid parent, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetDeleteParent(
+        [ModelBinder(typeof(StrongIdBinder))] FamilyId family, 
+        [ModelBinder(typeof(StrongIdBinder))] ParentId parent, 
+        CancellationToken cancellationToken)
     {
-        var authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
         if (!authorized.Succeeded)
         {
@@ -134,10 +138,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
         
-        var familyId = FamilyId.FromValue(family);
-        var parentId = ParentId.FromValue(parent);
-
-        var result = await _mediator.Send(new DeleteParentByIdCommand(familyId, parentId), cancellationToken);
+        Result result = await _mediator.Send(new DeleteParentByIdCommand(family, parent), cancellationToken);
         
         if (result.IsFailure)
         {
@@ -155,7 +156,7 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
-        var contactRequest = await _mediator.Send(new GetFamilyContactsQuery(), cancellationToken);
+        Result<List<FamilyContactResponse>> contactRequest = await _mediator.Send(new GetFamilyContactsQuery(), cancellationToken);
 
         if (contactRequest.IsFailure)
         {

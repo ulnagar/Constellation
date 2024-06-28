@@ -2,7 +2,7 @@
 
 using System;
 
-public sealed record FamilyId(Guid Value)
+public record struct FamilyId(Guid Value)
 {
     public static FamilyId FromValue(Guid value) =>
         new(value);

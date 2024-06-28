@@ -3,7 +3,7 @@
 <div class="modal fade" tabindex="-1" id="addStudentModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-page="/Families/Details" asp-area="Partner" asp-route-id="@Model.FamilyId.Value" asp-page-handler="AddStudent">
+            <form asp-page-handler="AddStudent">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Student to Family</h5>
                 </div>

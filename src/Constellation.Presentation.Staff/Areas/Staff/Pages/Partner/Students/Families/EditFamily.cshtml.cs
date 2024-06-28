@@ -1,14 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Models.Auth;
+using Areas;
 using Constellation.Application.Families.GetFamilyEditContext;
 using Constellation.Application.Families.UpdateFamily;
-using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Presentation.Staff.Areas;
+using Core.Models.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -26,26 +28,34 @@ public class EditFamilyModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
+    [ViewData] public string PageTitle => "Edit Family";
+
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public FamilyId Id { get; set; }
 
     [BindProperty]
     [Display(Name = "Family Title")]
     [Required]
     public string FamilyTitle { get; set; } = string.Empty;
+
     [BindProperty]
     [Display(Name = "Address Line 1")]
-    public string AddressLine1 { get; set; } = string.Empty;
+    public string? AddressLine1 { get; set; } = string.Empty;
+
     [BindProperty]
     [Display(Name = "Address Line 2")]
-    public string AddressLine2 { get; set; } = string.Empty;
+    public string? AddressLine2 { get; set; } = string.Empty;
+
     [BindProperty]
     [Display(Name = "Town")]
-    public string AddressTown { get; set; } = string.Empty;
+    public string? AddressTown { get; set; } = string.Empty;
+
     [BindProperty]
     [Display(Name = "Post Code")]
-    public string AddressPostCode { get; set; } = string.Empty;
+    public string? AddressPostCode { get; set; } = string.Empty;
+
     [BindProperty]
     [EmailAddress]
     [Required]
@@ -57,9 +67,7 @@ public class EditFamilyModel : BasePageModel
 
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
-        var familyId = FamilyId.FromValue(Id);
-
-        var familyResult = await _mediator.Send(new GetFamilyEditContextQuery(familyId), cancellationToken);
+        Result<FamilyEditContextResponse> familyResult = await _mediator.Send(new GetFamilyEditContextQuery(Id), cancellationToken);
 
         if (familyResult.IsFailure)
         {
@@ -89,8 +97,8 @@ public class EditFamilyModel : BasePageModel
         if (!ModelState.IsValid)
             return Page();
 
-        var command = new UpdateFamilyCommand(
-            FamilyId.FromValue(Id),
+        UpdateFamilyCommand command = new(
+            Id,
             FamilyTitle,
             AddressLine1,
             AddressLine2,
@@ -98,7 +106,7 @@ public class EditFamilyModel : BasePageModel
             AddressPostCode,
             FamilyEmail);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        Result result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Index", new { area = "Staff" });

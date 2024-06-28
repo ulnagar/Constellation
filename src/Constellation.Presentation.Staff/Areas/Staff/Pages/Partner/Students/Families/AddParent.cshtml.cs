@@ -1,14 +1,17 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Helpers;
+using Application.Models.Auth;
+using Areas;
 using Constellation.Application.Families.CreateParent;
-using Constellation.Application.Helpers;
-using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Presentation.Staff.Areas;
+using Core.Models.Families;
+using Core.Models.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -26,59 +29,61 @@ public class AddParentModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
+    [ViewData] public string PageTitle => "Add New Parent";
+
 
     [BindProperty(SupportsGet = true)]
-    public Guid FamilyIdentifier { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public FamilyId FamilyId { get; set; }
 
     [BindProperty]
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; } = string.Empty;
+
     [BindProperty]
     [Required]
     [Display(Name = DisplayNameDefaults.FirstName)]
     public string FirstName { get; set; } = string.Empty;
+
     [BindProperty]
     [Required]
     [Display(Name = DisplayNameDefaults.LastName)]
     public string LastName { get; set; } = string.Empty;
+
     [BindProperty]
     [Phone]
     [Display(Name = DisplayNameDefaults.MobileNumber)]
-    public string MobileNumber { get; set; } = string.Empty;
+    public string? MobileNumber { get; set; } = string.Empty;
+
     [BindProperty]
     [EmailAddress]
     [Required]
     [Display(Name = DisplayNameDefaults.EmailAddress)]
     public string EmailAddress { get; set; } = string.Empty;
 
-    public async Task<IActionResult> OnGet()
-    {
-        return Page();
-    }
+    public IActionResult OnGet()=> Page();
 
     public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid) 
             return Page();
-
-        var familyId = FamilyId.FromValue(FamilyIdentifier);
-
-        var command = new CreateParentCommand(
-            familyId,
+        
+        CreateParentCommand command = new(
+            FamilyId,
             Title,
             FirstName,
             LastName,
             MobileNumber,
             EmailAddress);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        Result<Parent> result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
-            return RedirectToPage("/Partner/Students/Families/Details", new { area = "Staff", Id = familyId.Value });
+            return RedirectToPage("/Partner/Students/Families/Details", new { area = "Staff", Id = FamilyId.Value });
 
         Error = new()
         {
             Error = result.Error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Details", values: new { area = "Staff", Id = familyId.Value })
+            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Details", values: new { area = "Staff", Id = FamilyId.Value })
         };
 
         return Page();

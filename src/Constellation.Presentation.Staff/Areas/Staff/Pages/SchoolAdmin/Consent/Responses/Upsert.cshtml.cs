@@ -2,10 +2,10 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent
 
 using Application.Families.GetFamilyContactsForStudent;
 using Application.Families.Models;
+using Application.Models.Auth;
 using Application.Students.GetCurrentStudentsAsDictionary;
 using Application.ThirdPartyConsent.CreateTransaction;
 using Application.ThirdPartyConsent.GetApplications;
-using Constellation.Application.Models.Auth;
 using Core.Errors;
 using Core.Models.Identifiers;
 using Core.Models.ThirdPartyConsent.Enums;
@@ -110,7 +110,7 @@ public class UpsertModel : BasePageModel
         {
             Error = new()
             {
-                Error = DomainErrors.Families.Parents.NotFoundInFamily(parentId, family.Value.First().FamilyId),
+                Error = DomainErrors.Families.Parents.NotFoundInFamily(parentId, family.Value.First().FamilyId.Value),
                 RedirectPath = null
             };
 

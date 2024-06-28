@@ -1,4 +1,4 @@
-﻿@page "/Partner/Students/Families/{id:Guid}"
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families.DetailsModel
 
 @inject IAuthorizationService authService;
@@ -8,7 +8,7 @@
 
 @{
     var isAuthorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
-    var isNotResidential = (Model.Family is null ? false : !Model.Family.IsResidential);
+    var isNotResidential = !Model.Family?.IsResidential ?? false;
 
     var canEdit = isAuthorised.Succeeded && isNotResidential;
 }
@@ -88,8 +88,8 @@
                         @if (canEdit)
                         {
                             <div class="card-footer bg-transparent">
-                                <a asp-page="/Partner/Students/Families/EditParent" asp-area="Staff" asp-route-familyIdentifier="@Model.Family.FamilyId.Value" asp-route-parentIdentifier="@parent.ParentId.Value" class="btn btn-success">Edit</a>
-                                <button data-parent-name="@parent.Name.DisplayName" data-parent-id="@parent.ParentId.Value" data-family-name="@Model.Family.FamilyTitle" data-family-id="@Model.Family.FamilyId.Value" class="btn btn-danger btn-pull-right remove-parent-button">Remove</button>
+                                <a asp-page="/Partner/Students/Families/EditParent" asp-area="Staff" asp-route-familyId="@Model.Family.FamilyId" asp-route-parentId="@parent.ParentId" class="btn btn-success">Edit</a>
+                                <button data-parent-name="@parent.Name.DisplayName" data-parent-id="@parent.ParentId" data-family-name="@Model.Family.FamilyTitle" data-family-id="@Model.Family.FamilyId" class="btn btn-danger btn-pull-right remove-parent-button">Remove</button>
                             </div>
                         }
                     </div>
@@ -114,7 +114,7 @@
                         @if (canEdit)
                         {
                             <div class="card-footer bg-transparent">
-                                <button data-student-name="@student.Name.DisplayName" data-student-id="@student.StudentId" data-family-name="@Model.Family.FamilyTitle" data-family-id="@Model.Family.FamilyId.Value" class="btn btn-danger btn-pull-right remove-student-button">Remove</button>
+                                <button data-student-name="@student.Name.DisplayName" data-student-id="@student.StudentId" data-family-name="@Model.Family.FamilyTitle" data-family-id="@Model.Family.FamilyId" class="btn btn-danger btn-pull-right remove-student-button">Remove</button>
                            </div>
                         }
                     </div>
@@ -146,7 +146,7 @@
                 type: "POST",
                 data: {
                     familyId: familyId,
-                    parentId: parentId,
+                    studentId: studentId,
                     __RequestVerificationToken: xsrfHeader
                 }
             }).done(function (data) {

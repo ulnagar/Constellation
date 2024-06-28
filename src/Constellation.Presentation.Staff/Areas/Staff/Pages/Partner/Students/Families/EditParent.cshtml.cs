@@ -1,15 +1,18 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Helpers;
+using Application.Models.Auth;
+using Areas;
 using Constellation.Application.Families.GetParentEditContext;
 using Constellation.Application.Families.UpdateParent;
-using Constellation.Application.Helpers;
-using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Presentation.Staff.Areas;
+using Core.Models.Families;
+using Core.Models.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -27,26 +30,35 @@ public class EditParentModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
+    [ViewData] public string PageTitle => "Edit Parent";
+
 
     [BindProperty(SupportsGet = true)]
-    public Guid ParentIdentifier { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public ParentId ParentId { get; set; }
+
     [BindProperty(SupportsGet = true)]
-    public Guid FamilyIdentifier { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public FamilyId FamilyId { get; set; }
 
     [BindProperty]
-    public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; } = string.Empty;
+
     [BindProperty]
     [Required]
     [Display(Name = DisplayNameDefaults.FirstName)]
     public string FirstName { get; set; } = string.Empty;
+
     [BindProperty]
     [Required]
     [Display(Name = DisplayNameDefaults.LastName)]
     public string LastName { get; set; } = string.Empty;
+
     [BindProperty]
     [Phone]
     [Display(Name = DisplayNameDefaults.MobileNumber)]
-    public string MobileNumber { get; set; } = string.Empty;
+    public string? MobileNumber { get; set; } = string.Empty;
+
     [BindProperty]
     [EmailAddress]
     [Required]
@@ -55,10 +67,7 @@ public class EditParentModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        var parentId = ParentId.FromValue(ParentIdentifier);
-        var familyId = FamilyId.FromValue(FamilyIdentifier);
-
-        var parentResult = await _mediator.Send(new GetParentEditContextQuery(familyId, parentId), cancellationToken);
+        Result<ParentEditContextResponse> parentResult = await _mediator.Send(new GetParentEditContextQuery(FamilyId, ParentId), cancellationToken);
 
         if (parentResult.IsFailure)
         {
@@ -87,19 +96,16 @@ public class EditParentModel : BasePageModel
             return Page();
         }
 
-        var parentId = ParentId.FromValue(ParentIdentifier);
-        var familyId = FamilyId.FromValue(FamilyIdentifier);
-
-        var command = new UpdateParentCommand(
-            parentId,
-            familyId,
+        UpdateParentCommand command = new(
+            ParentId,
+            FamilyId,
             Title,
             FirstName,
             LastName,
             MobileNumber,
             EmailAddress);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        Result<Parent> result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Index", new { area = "Staff" });

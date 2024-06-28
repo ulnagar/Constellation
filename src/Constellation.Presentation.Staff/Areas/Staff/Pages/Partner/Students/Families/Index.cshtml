@@ -72,18 +72,18 @@
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                     <div class="dropdown-menu">
-                        <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@entry.FamilyId.Value" class="dropdown-item">Details</a>
+                        <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@entry.FamilyId" class="dropdown-item">Details</a>
                         @if (canEditStudents.Succeeded && !entry.IsResidentialContact)
                         {
                             @if (entry.ContactType == Parent.SentralReference.Other)
                             {
-                                <a asp-page="/Partner/Students/Families/EditFamily" asp-route-Id="@entry.FamilyId.Value.ToString()" class="dropdown-item">Edit</a>
-                                <a href="#" data-family-id="@entry.FamilyId.Value.ToString()" data-parent-id="@entry.ParentId?.Value.ToString() ?? Guid.Empty" class="dropdown-item delete-family-menu">Delete</a>
+                                <a asp-page="/Partner/Students/Families/EditFamily" asp-route-Id="@entry.FamilyId" class="dropdown-item">Edit</a>
+                                <a href="#" data-family-id="@entry.FamilyId" data-parent-id="@entry.ParentId" class="dropdown-item delete-family-menu">Delete</a>
                             }
                             else
                             {
-                                <a asp-page="/Partner/Students/Families/EditParent" asp-route-familyidentifier="@entry.FamilyId.Value.ToString()" asp-route-parentIdentifier="@entry.ParentId?.Value.ToString()" class="dropdown-item">Edit</a>
-                                <a href="#" data-family-id="@entry.FamilyId.Value.ToString()" data-parent-id="@entry.ParentId?.Value.ToString()" class="dropdown-item delete-parent-menu">Delete</a>
+                                <a asp-page="/Partner/Students/Families/EditParent" asp-route-familyidentifier="@entry.FamilyId" asp-route-parentIdentifier="@entry.ParentId" class="dropdown-item">Edit</a>
+                                <a href="#" data-family-id="@entry.FamilyId" data-parent-id="@entry.ParentId" class="dropdown-item delete-parent-menu">Delete</a>
                             }
                         }
                     </div>
