@@ -9,6 +9,8 @@ public static class IdentityDefaults
 {
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
+        await CreateRole(roleManager, AuthRoles.SchoolContact);
+
         await CreateRoleWithPermission(roleManager, AuthRoles.ExecStaffMember,
             new[]
             {
@@ -167,7 +169,7 @@ public static class IdentityDefaults
 
     private static async Task CreateRole(RoleManager<AppRole> roleManager, string roleName)
     {
-        var existing = await roleManager.FindByNameAsync(roleName);
+        AppRole existing = await roleManager.FindByNameAsync(roleName);
 
         if (existing is null)
         {

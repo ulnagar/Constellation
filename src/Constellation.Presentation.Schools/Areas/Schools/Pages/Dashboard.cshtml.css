@@ -1,0 +1,19 @@
+img {
+    width: 65%;
+    border-radius: 50%;
+    margin: 0 auto;
+    box-shadow: 0 0 10px rgba(0,0,0,.2);
+}
+
+.card {
+    padding: 1.5em .5em .5em;
+    border-radius: 2em;
+    text-align: center;
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    width: 18rem;
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 1.5em;
+}

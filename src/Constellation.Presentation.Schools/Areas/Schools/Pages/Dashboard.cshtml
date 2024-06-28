@@ -1,0 +1,24 @@
+﻿@page
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.DashboardModel
+
+@using Constellation.Core.Extensions
+
+<h1>Aurora College Schools Portal</h1>
+
+@foreach (var group in Model.Students.GroupBy(student => student.CurrentGrade))
+{
+    <h4>@group.Key.AsName()</h4>
+
+    <div class="flex-row">
+        @foreach (var student in group)
+        {
+            <div class="card m-3 float-start">
+                <img class="card-img-top" src="@student.PhotoSrc">
+                <div class="card-body">
+                    <h5 class="card-title">@student.FirstName @student.LastName</h5>
+                    <p class="card-text">Grade: @student.CurrentGrade</p>
+                </div>
+            </div>
+        }
+    </div>
+}

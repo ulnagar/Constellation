@@ -94,6 +94,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanEditSchools, policy =>
             policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
 
+        options.AddPolicy(AuthPolicies.IsSchoolContact, policy =>
+            policy.RequireRole(AuthRoles.SchoolContact, AuthRoles.Admin));
+
         return options;
     }
 }
