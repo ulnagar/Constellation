@@ -85,7 +85,20 @@ builder.Services.AddHangfire((provider, configuration) => configuration
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
 builder.Services.AddRazorPages()
-    .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly);
+    .AddSessionStateTempDataProvider()
+    .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)
+    .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly);
+
+builder.Services.AddSession(options =>
+{
+    options.Cookie.Name = ".Constellation.Session";
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddMemoryCache();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMvc()
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -163,6 +176,8 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.UseSession();
 
 app.Map("/services", hostBuilder => hostBuilder.Run(async context =>
 {
