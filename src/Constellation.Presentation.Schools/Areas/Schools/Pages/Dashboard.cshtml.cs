@@ -6,9 +6,10 @@ using Constellation.Application.Models.Auth;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
+using Microsoft.Extensions.DependencyInjection;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class DashboardModel : BasePageModel
@@ -18,7 +19,10 @@ public class DashboardModel : BasePageModel
 
     public DashboardModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        IHttpContextAccessor httpContextAccessor,
+        IServiceScopeFactory scopeFactory)
+        : base(httpContextAccessor, scopeFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
@@ -28,17 +32,11 @@ public class DashboardModel : BasePageModel
 
     public List<StudentDto> Students { get; set; } = new();
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
         {
-            Error = new()
-            {
-                Error = SchoolPortalErrors.NoSchoolSelected,
-                RedirectPath = null
-            };
-
-            return;
+            return Page();
         }
 
         Result<List<StudentDto>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
@@ -51,7 +49,7 @@ public class DashboardModel : BasePageModel
                 RedirectPath = null
             };
 
-            return;
+            return Page();
         }
 
         Students = studentsRequest.Value
@@ -59,5 +57,7 @@ public class DashboardModel : BasePageModel
             .ThenBy(student => student.LastName)
             .ThenBy(student => student.FirstName)
             .ToList();
+
+        return Page();
     }
 }
