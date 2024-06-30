@@ -25,7 +25,7 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_MasterFile;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_MasterFile;
 
     [BindProperty]
     public IFormFile? FormFile { get; set; }

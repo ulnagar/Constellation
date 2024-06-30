@@ -28,7 +28,7 @@ public class DetailsModel : BasePageModel
         _authService = authService;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_List;
     
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }

@@ -20,7 +20,7 @@ public class DetailsModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
 
     [BindProperty(SupportsGet = true)]
     public Guid FacultyId { get; set; }

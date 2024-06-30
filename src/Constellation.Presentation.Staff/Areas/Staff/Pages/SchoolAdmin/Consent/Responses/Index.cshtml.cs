@@ -1,12 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Responses;
 
 using Application.Common.PresentationModels;
-using Application.DTOs;
 using Application.Models.Auth;
 using Application.Schools.Models;
 using Application.StaffMembers.Models;
 using Application.ThirdPartyConsent.GetTransactionsWithFilter;
-using Constellation.Application.Absences.ExportAbsencesReport;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
@@ -18,7 +16,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Models;
+using Models;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -31,7 +29,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Transactions;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Transactions;
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();

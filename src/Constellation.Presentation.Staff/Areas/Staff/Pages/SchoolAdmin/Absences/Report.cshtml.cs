@@ -22,7 +22,7 @@ public class ReportModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_Report;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_Report;
 
     public async Task OnGet()
     {

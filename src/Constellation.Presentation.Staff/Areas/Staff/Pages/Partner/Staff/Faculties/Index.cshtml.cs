@@ -18,7 +18,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
 
     public List<FacultySummaryResponse> Faculties { get; set; } = new();
 

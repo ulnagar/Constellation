@@ -20,7 +20,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_Wellbeing;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_Wellbeing;
 
     public List<SentralIncidentDetails> Data { get; set; } = new();
 

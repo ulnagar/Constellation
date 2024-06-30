@@ -26,7 +26,7 @@ public class UpsertModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Courses_Courses;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Courses_Courses;
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }

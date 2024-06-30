@@ -14,7 +14,7 @@ public class LocationsModel : BasePageModel
         _schoolRepository = schoolRepository;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Schools;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Schools;
 
     public List<MapLayer> Layers { get; set; } = new();
     public string PageHeading { get; set; } = "Map of Schools";

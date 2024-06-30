@@ -24,7 +24,7 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Periods;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Periods;
 
     [BindProperty(SupportsGet = true)]
     public int? Id { get; set; }

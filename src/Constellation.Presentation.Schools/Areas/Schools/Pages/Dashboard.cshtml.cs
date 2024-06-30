@@ -3,6 +3,7 @@
 using Application.DTOs;
 using Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Application.Models.Auth;
+using Core.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -32,11 +33,17 @@ public class DashboardModel : BasePageModel
 
     public List<StudentDto> Students { get; set; } = new();
 
-    public async Task<IActionResult> OnGet()
+    public async Task OnGet()
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
         {
-            return Page();
+            Error = new()
+            {
+                Error = ApplicationErrors.SchoolInvalid,
+                RedirectPath = null
+            };
+
+            return;
         }
 
         Result<List<StudentDto>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
@@ -49,7 +56,7 @@ public class DashboardModel : BasePageModel
                 RedirectPath = null
             };
 
-            return Page();
+            return;
         }
 
         Students = studentsRequest.Value
@@ -57,7 +64,5 @@ public class DashboardModel : BasePageModel
             .ThenBy(student => student.LastName)
             .ThenBy(student => student.FirstName)
             .ToList();
-
-        return Page();
     }
 }

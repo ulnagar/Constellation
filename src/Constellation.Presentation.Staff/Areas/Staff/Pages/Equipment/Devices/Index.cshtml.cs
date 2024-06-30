@@ -19,7 +19,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Devices_Devices;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Devices_Devices;
     
     public List<DeviceSummaryResponse> Devices { get; set; }
 

@@ -44,7 +44,7 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
     [ViewData] public string PageTitle => Id.Equals(TrainingCompletionId.Empty) ? "New Training Completion" : "Edit Training Completion";
     
     // Allow mode switching for:

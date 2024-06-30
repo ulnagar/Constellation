@@ -21,7 +21,7 @@ public class ChangesModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_Changes;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_Changes;
 
     [BindProperty(SupportsGet = true)]
     public AwardsFilter Filter { get; set; } = AwardsFilter.All;

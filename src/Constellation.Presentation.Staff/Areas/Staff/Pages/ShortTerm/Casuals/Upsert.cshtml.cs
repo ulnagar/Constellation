@@ -28,7 +28,7 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Casuals_Index;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Casuals_Index;
 
 
     [BindProperty(SupportsGet = true)]

@@ -24,7 +24,7 @@ public class AuditModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_Audit;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_Audit;
     
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.All;

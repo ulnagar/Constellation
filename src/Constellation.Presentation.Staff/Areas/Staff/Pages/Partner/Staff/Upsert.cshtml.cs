@@ -27,7 +27,7 @@ public class UpsertModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Staff;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Staff;
 
     [BindProperty(SupportsGet = true)]
     public string? Id { get; set; } = string.Empty;

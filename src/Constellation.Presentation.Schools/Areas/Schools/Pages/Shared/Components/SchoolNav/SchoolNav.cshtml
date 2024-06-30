@@ -37,7 +37,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Awards">
+            <a class="nav-link @(Model == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Schools">
                 <i class="fas fa-medal" aria-hidden="true"></i> Awards
             </a>
         </div>

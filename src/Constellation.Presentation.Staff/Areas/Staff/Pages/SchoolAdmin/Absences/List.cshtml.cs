@@ -15,7 +15,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Shared.Models;
+using Models;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ListModel : BasePageModel
@@ -31,7 +31,7 @@ public class ListModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_List;
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();

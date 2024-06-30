@@ -1,8 +1,8 @@
-﻿namespace Constellation.Presentation.Staff.ViewComponents;
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu;
 
-using Core.Abstractions.Services;
-using Core.Models;
-using Core.Models.StaffMembers.Repositories;
+using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models;
+using Constellation.Core.Models.StaffMembers.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 public class StaffSidebarMenuViewComponent : ViewComponent

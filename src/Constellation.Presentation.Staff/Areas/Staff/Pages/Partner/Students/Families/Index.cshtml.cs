@@ -37,7 +37,7 @@ public class IndexModel : BasePageModel
         _authService = authService;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
     [ViewData] public string PageTitle => "Family List";
 
     public List<FamilyContactResponse> Contacts { get; set; } = new();

@@ -32,7 +32,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
     [ViewData] public string PageTitle => Record is not null ? $"Training Completion {Record.ModuleName}" : "Training Completion Details";
 
 

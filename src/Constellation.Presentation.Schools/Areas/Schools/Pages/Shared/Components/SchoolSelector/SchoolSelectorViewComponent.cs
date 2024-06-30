@@ -9,6 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,6 +47,12 @@ public sealed class SchoolSelectorViewComponent : ViewComponent
         viewModel.CurrentSchool = string.IsNullOrWhiteSpace(selectedSchoolCode)
             ? schoolsRequest.Value.MinBy(school => school.SchoolCode)
             : viewModel.ValidSchools.FirstOrDefault(entry => entry.SchoolCode == selectedSchoolCode);
+
+        viewModel.SchoolsList = new SelectList(
+            viewModel.ValidSchools, 
+            nameof(SchoolResponse.SchoolCode),
+            nameof(SchoolResponse.Name),
+            viewModel.CurrentSchool.SchoolCode);
 
         HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode);
 

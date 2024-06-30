@@ -19,7 +19,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Shared.Models;
+using Models;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -35,7 +35,7 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Contacts_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Contacts_List;
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();

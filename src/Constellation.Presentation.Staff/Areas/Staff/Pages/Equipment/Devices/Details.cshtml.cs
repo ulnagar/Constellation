@@ -23,7 +23,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Devices_Devices;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Devices_Devices;
 
     [BindProperty(SupportsGet = true)]
     public string Id { get; set; }

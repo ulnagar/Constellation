@@ -18,6 +18,8 @@
         <link rel="stylesheet" href="~/Constellation.Presentation.Schools.styles.css" />
         <link rel="stylesheet" href="~/Constellation.Presentation.Shared.styles.css" />
         <link rel="stylesheet" href="~/Constellation.Presentation.Server.styles.css" />
+
+        <script src="~/lib/jquery/jquery.min.js"></script>
     </head>
     <body>
         <div id="app">
@@ -32,14 +34,13 @@
                             <vc:school-selector selected-school-code="@Model.CurrentSchoolCode" />
                         </div>
                         <div class="col">
-                            @if (User is not null && User.Identity is not null && User.Identity.IsAuthenticated)
+                        @if (User?.Identity is not null && User.Identity.IsAuthenticated)
                             {
-                                <span>Welcome!</span>
-                                <a class="btn btn-sm btn-warning ml-4">Log Out</a>
+                                <a class="btn btn-sm btn-warning ml-4" asp-area="Admin" asp-page="/Logout">Log Out</a>
                             }
                             else
                             {
-                                <a class="btn btn-sm btn-success ml-4">Log In</a>
+                                <a class="btn btn-sm btn-success" asp-area="Admin" asp-page="/Login">Log In</a>
                             }
                         </div>
                     </div>
@@ -52,18 +53,17 @@
             
             @if (Model.Error is not null)
             {
-@*                 <vc:error-display-redirect error="@Model.Error" />
+                <vc:error-display-redirect error="@Model.Error" />
 
                 <script>
                     $(document).ready(function () {
                         $('#errorModal').modal('show');
                     });
-                </script> *@
+                </script>
             }
         </div>
 
         <script src="~/lib/bootstrap5/js/bootstrap.min.js"></script>
-        <script src="~/lib/jquery/jquery.min.js"></script>
         <script src="~/js/schools.js"></script>
         @await RenderSectionAsync("Scripts", required: false)
     </body>

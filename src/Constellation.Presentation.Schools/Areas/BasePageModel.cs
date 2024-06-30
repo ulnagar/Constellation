@@ -31,7 +31,7 @@ public class BasePageModel : PageModel, IBaseModel
 
         bool success = httpContextAccessor.HttpContext.Session.TryGetValue(nameof(CurrentSchoolCode), out byte[]? currentSchoolCode);
 
-        if (success)
+        if (success && currentSchoolCode.Length > 0)
             CurrentSchoolCode = System.Text.Encoding.Default.GetString(currentSchoolCode);
         else
             CurrentSchoolCode = SetDefaultSchool();

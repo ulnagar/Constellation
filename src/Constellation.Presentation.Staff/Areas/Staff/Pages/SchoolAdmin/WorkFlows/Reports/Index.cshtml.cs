@@ -23,7 +23,7 @@ public class IndexModel : BasePageModel
         _authService = authService;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Reports;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Reports;
 
     public void OnGet() { }
 

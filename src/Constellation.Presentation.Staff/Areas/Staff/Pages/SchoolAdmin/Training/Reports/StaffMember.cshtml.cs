@@ -23,7 +23,7 @@ public class StaffMemberModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
     [ViewData] public string PageTitle => StaffMember is null ? "Staff Training Status" : $"Training Status - {StaffMember.Name.DisplayName}";
 
 

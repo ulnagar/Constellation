@@ -26,7 +26,7 @@ public class IndexModel : BasePageModel
         _authorizationService = authorizationService;
     }
 
-    [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Casuals_Index;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Casuals_Index;
 
     public List<CasualsListResponse> Casuals = new();
 

@@ -39,7 +39,7 @@ public class IndexModel : BasePageModel
         Recent,
         ThisYear
     }
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_List;
     
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.Recent;
