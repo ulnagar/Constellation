@@ -17,7 +17,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Contacts">
+            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Schools">
                 <i class="fas fa-user-friends" aria-hidden="true"></i> School Contacts
             </a>
         </div>

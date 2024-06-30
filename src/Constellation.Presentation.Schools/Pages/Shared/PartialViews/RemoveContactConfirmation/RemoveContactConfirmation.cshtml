@@ -1,0 +1,49 @@
+@model Constellation.Presentation.Schools.Pages.Shared.PartialViews.RemoveContactConfirmation.RemoveContactConfirmationViewModel
+
+<form asp-page-handler="RemoveContact">
+    <div class="modal-header">
+        <h5 class="modal-title">Remove Contact</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row m-3">
+            <div class="col w-auto">
+                <div class="mb-3 row mt-3">
+                    <label class="col-5">Name</label>
+                    <div class="col font-weight-bold">@Model.Contact.FirstName @Model.Contact.LastName</div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="col-5">Phone Number</label>
+                    <div class="col font-weight-bold"><vc:phone-number number="@Model.Contact.PhoneNumber" /></div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="col-5">Email Address</label>
+                    <div class="col font-weight-bold"><vc:email-address email="@Model.Contact.EmailAddress" /></div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="col-5">Position</label>
+                    <div class="col font-weight-bold">@Model.Contact.Position</div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="col-5">Reason for removing</label>
+                    <div class="col">
+                        <input type="hidden" asp-for="ContactId" />
+                        <input type="hidden" asp-for="AssignmentId" />
+                        <input asp-for="Comment" class="form-control"/>
+                    </div>
+                    <div class="w-100"></div>
+                    <div class="offset-5 col">
+                        <span asp-validation-for="Comment" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary me-3">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
