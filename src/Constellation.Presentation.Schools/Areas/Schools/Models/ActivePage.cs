@@ -6,4 +6,6 @@ public static class ActivePage
     public const string Dashboard = "Dashboard";
 
     public const string Awards = "Awards";
+
+    public const string Contacts = "Contacts";
 }

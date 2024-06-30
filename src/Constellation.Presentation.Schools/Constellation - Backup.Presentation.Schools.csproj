@@ -16,4 +16,17 @@
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Areas\Schools\Pages\_ViewImports.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Pages\NewFolder\" />
+  </ItemGroup>
+
+
+
 </Project>

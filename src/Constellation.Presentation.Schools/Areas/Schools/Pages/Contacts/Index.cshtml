@@ -1,0 +1,121 @@
+﻿@page
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Contacts.IndexModel
+@{
+}
+
+<h2>School Contact Information</h2>
+
+<hr />
+
+<div class="form-horizontal">
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">School Name</label>
+        <div class="col-md-6">(@Model.SchoolDetails.Code) @Model.SchoolDetails.Name</div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">Address</label>
+        <div class="col-md-3">@Model.SchoolDetails.Address</div>
+        <label class="col-md-2 text-bold">Town</label>
+        <div class="col-md-3">@Model.SchoolDetails.Town @Model.SchoolDetails.PostCode</div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">Phone</label>
+        <div class="col-md-3"><vc:phone-number number="@Model.SchoolDetails.PhoneNumber" /></div>
+        <label class="col-md-2 text-bold">Fax</label>
+        <div class="col-md-3"><vc:phone-number number="@Model.SchoolDetails.FaxNumber" /></div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2 text-bold">Email Address</label>
+        <div class="col-md-6"><vc:email-address email="@Model.SchoolDetails.EmailAddress" /></div>
+    </div>
+</div>
+
+<hr />
+
+<div class="form-group row mt-6">
+    <div class="col-md-6"><h4 class="mt-2 mb-0">Contacts:</h4></div>
+    <div class="offset-1 col-md-3"><button class="btn btn-success">Add New Contact</button></div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        @{
+            var items = Model.Contacts.GroupBy(contact => contact.Position).ToList();
+
+            if (items.Count == 0)
+            {
+                <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+            }
+        
+            foreach (var group in items)
+            {
+                var first = group.First();
+
+                <tr class="group">
+                    <td colspan="6">@first.Position</td>
+                </tr>
+
+                @foreach (var item in group)
+                {
+                    <tr>
+                        <td>@item.FirstName @item.LastName</td>
+                        <td>
+                            <vc:phone-number number="@item.PhoneNumber" />
+                        </td>
+                        <td>
+                            <vc:email-address email="@item.EmailAddress" />
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger button-hover remove-contact-button" data-assignment-id="@item.AssignmentId.ToString()">Remove</button>
+                        </td>
+                    </tr>
+                }
+            }
+        }
+        </tbody>
+    </table>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.remove-contact-button').click(function (event) {
+                var assignmentId = $(this).data('assignmentId');
+                var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: "?handler=AjaxRemoveContact",
+                    type: "POST",
+                    data: {
+                        assignmentId: assignmentId,
+                        __RequestVerificationToken: xsrfHeader
+                    }
+                }).done(function (data) {
+                    $('#page-modal .modal-content').html(data);
+                    $('#page-modal').modal('show');
+                });
+            });
+        });
+    </script>
+}
