@@ -22,7 +22,7 @@ public class ReportModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_AttendanceReports;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_AttendanceReports;
 
     public List<string> PeriodNames { get; set; } = new();
 

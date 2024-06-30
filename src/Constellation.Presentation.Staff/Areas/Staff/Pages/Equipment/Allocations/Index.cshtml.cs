@@ -25,7 +25,7 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Allocations;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Allocations;
     [ViewData] public string PageTitle => "Assets by Allocation";
 
 

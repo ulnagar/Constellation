@@ -18,7 +18,7 @@ public class WithoutModuleModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Staff;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Staff;
     [ViewData] public string PageTitle => "Staff Training Dashboard";
 
     public List<StaffResponse> StaffMembers { get; set; } = new();

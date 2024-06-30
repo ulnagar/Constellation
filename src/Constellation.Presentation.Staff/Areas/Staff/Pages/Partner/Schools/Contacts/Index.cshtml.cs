@@ -35,7 +35,7 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Contacts;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Contacts;
 
     [BindProperty(SupportsGet = true)]
     public GetAllContactsQuery.SchoolContactFilter Filter { get; set; } = GetAllContactsQuery.SchoolContactFilter.WithRole;

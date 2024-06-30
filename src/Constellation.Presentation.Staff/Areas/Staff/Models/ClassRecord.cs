@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Shared.Models;
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Models;
 
 using Constellation.Core.Models.Offerings.Identifiers;
 

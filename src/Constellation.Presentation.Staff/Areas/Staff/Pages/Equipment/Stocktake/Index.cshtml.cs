@@ -22,7 +22,7 @@ public class IndexModel : BasePageModel
         _authService = authService;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_List;
 
     public List<StocktakeEventResponse> Events { get; set; }
 

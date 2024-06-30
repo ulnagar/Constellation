@@ -35,7 +35,7 @@ public class ReportsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_ContactReports;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_ContactReports;
 
     public List<SchoolWithContactsResponse> Schools { get; set; } = new();
 

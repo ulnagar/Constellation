@@ -24,7 +24,7 @@ public class SubmitModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Lessons;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Lessons;
 
     [BindProperty(SupportsGet = true)]
     public Guid LessonId { get; set; }

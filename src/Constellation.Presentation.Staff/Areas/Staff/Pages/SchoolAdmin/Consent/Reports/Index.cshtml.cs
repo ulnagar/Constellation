@@ -16,7 +16,7 @@ using Core.Models.ThirdPartyConsent.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Shared.Models;
+using Models;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -30,7 +30,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Reports;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Reports;
 
     [BindProperty] 
     public FilterDefinition Filter { get; set; } = new();

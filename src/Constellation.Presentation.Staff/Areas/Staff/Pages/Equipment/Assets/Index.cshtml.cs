@@ -31,7 +31,7 @@ public class IndexModel : BasePageModel
     {
         _mediator = mediator;
     }
-    [ViewData] public string ActivePage => Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
     [ViewData] public string PageTitle => "Assets List";
 
     [BindProperty(SupportsGet = true)] 

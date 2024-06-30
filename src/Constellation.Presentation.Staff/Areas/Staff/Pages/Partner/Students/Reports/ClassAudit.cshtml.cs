@@ -18,7 +18,7 @@ public sealed class ClassAuditModel : BasePageModel
         _mediator = mediator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Reports;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Reports;
 
     public List<StudentWithOfferingsResponse> Students { get; set; } = new();
 

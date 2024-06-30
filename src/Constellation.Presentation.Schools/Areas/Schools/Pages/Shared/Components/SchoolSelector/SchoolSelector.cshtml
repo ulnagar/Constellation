@@ -1,7 +1,8 @@
-@using Constellation.Application.Schools.GetSchoolsForContact
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.Components.SchoolSelector.SchoolSelectorViewModel
 
-<span>School: @Model.CurrentSchool?.Name</span> <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#school-selector-modal">Change School</button>
+<span>School: @Model.CurrentSchool?.Name</span>
+
+<button class="btn btn-secondary btn-sm ms-4" data-bs-toggle="modal" data-bs-target="#school-selector-modal">Change School</button>
 
 <form asp-page-handler="ChangeSchool">
     <div class="modal fade" tabindex="-1" id="school-selector-modal">
@@ -13,7 +14,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col">
-                            <select asp-for="NewSchoolCode" asp-items="new SelectList(Model.ValidSchools, nameof(SchoolResponse.SchoolCode), nameof(SchoolResponse.Name), Model.ValidSchools.FirstOrDefault(entry => entry.SchoolCode == Model.CurrentSchool.SchoolCode))" class="form-select"></select>
+                            <select asp-for="NewSchoolCode" asp-items="@Model.SchoolsList" class="form-select"></select>
                         </div>
                     </div>
                 </div>

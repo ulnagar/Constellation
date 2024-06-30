@@ -35,7 +35,7 @@ public class ResourceModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }

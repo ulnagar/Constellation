@@ -30,7 +30,7 @@ public class IndexModel : BasePageModel
         _dateTime = dateTime;
     }
 
-    [ViewData] public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
     [ViewData] public string PageTitle => "Training Completions";
     
     public List<CompletionRecordDto> CompletionRecords { get; set; } = new();

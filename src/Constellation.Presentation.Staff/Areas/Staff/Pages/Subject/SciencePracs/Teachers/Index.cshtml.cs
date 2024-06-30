@@ -36,7 +36,7 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
+    public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
 
     public List<ContactResponse> Contacts = new();
 

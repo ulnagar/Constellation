@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Pages.Shared.Components.StaffSidebarMenu;
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu;
 // ReSharper disable InconsistentNaming
 
 public sealed class ActivePage
