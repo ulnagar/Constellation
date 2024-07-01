@@ -1,11 +1,9 @@
 ﻿@page
-@model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Reports.ImportModel
+@{
+}
 
-<h2>Test Page</h2>
-
-<div class="page-menu">
-    <a asp-page-handler="RunCode" class="btn btn-danger">Run Code</a>
-</div>
+<h2>Import Assets from file</h2>
 
 <hr />
 
@@ -24,7 +22,15 @@
     </div>
 </form>
 
-<span>@Model.Message</span>
+@if (Model.Errors.Count > 0)
+{
+    <ul>
+        @foreach (var error in Model.Errors)
+        {
+            <li>@error.Code: @error.Message</li>
+        }
+    </ul>
+}
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -23,7 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class ImportAssetsFromFileCommandHandler
-: ICommandHandler<ImportAssetsFromFileCommand>
+: ICommandHandler<ImportAssetsFromFileCommand, List<Error>>
 {
     private readonly IExcelService _excelService;
     private readonly IAssetRepository _assetRepository;
@@ -54,8 +54,10 @@ internal sealed class ImportAssetsFromFileCommandHandler
         _logger = logger.ForContext<ImportAssetsFromFileCommand>();
     }
 
-    public async Task<Result> Handle(ImportAssetsFromFileCommand request, CancellationToken cancellationToken)
+    public async Task<Result<List<Error>>> Handle(ImportAssetsFromFileCommand request, CancellationToken cancellationToken)
     {
+        List<Error> response = new();
+
         List<ImportAssetDto> importedAssets = await _excelService.ImportAssetsFromFile(request.ImportFile, cancellationToken);
 
         List<School> schools = await _schoolRepository.GetAll(cancellationToken);
@@ -74,6 +76,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     .ForContext(nameof(ImportAssetDto), importAsset, true)
                     .ForContext(nameof(Error), assetNumber.Error, true)
                     .Warning("Failed to import Asset");
+
+                response.Add(assetNumber.Error);
 
                 continue;
             }
@@ -125,17 +129,21 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     .ForContext(nameof(Error), asset.Error, true)
                     .Warning("Failed to import Asset");
 
+                response.Add(asset.Error);
+
                 continue;
             }
 
             Result statusUpdate = asset.Value.UpdateStatus(status);
 
-            if (asset.IsFailure)
+            if (statusUpdate.IsFailure)
             {
                 _logger
                     .ForContext(nameof(ImportAssetDto), importAsset, true)
                     .ForContext(nameof(Error), statusUpdate.Error, true)
                     .Warning("Failed to import Asset");
+
+                response.Add(statusUpdate.Error);
 
                 continue;
             }
@@ -148,6 +156,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     .ForContext(nameof(ImportAssetDto), importAsset, true)
                     .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(""), true)
                     .Warning("Failed to import Asset");
+
+                response.Add(DomainErrors.Partners.School.NotFound(""));
 
                 continue;
             }
@@ -170,6 +180,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     .ForContext(nameof(ImportAssetDto), importAsset, true)
                     .ForContext(nameof(Error), location.Error, true)
                     .Warning("Failed to import Asset");
+
+                response.Add(location.Error);
 
                 continue;
             }
@@ -196,6 +208,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                             .ForContext(nameof(Error), allocation.Error, true)
                             .Warning("Failed to import Asset");
 
+                        response.Add(allocation.Error);
+
                         continue;
                     }
 
@@ -215,6 +229,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                             .ForContext(nameof(ImportAssetDto), importAsset, true)
                             .ForContext(nameof(Error), allocation.Error, true)
                             .Warning("Failed to import Asset");
+
+                        response.Add(allocation.Error);
 
                         continue;
                     }
@@ -236,6 +252,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                             .ForContext(nameof(Error), allocation.Error, true)
                             .Warning("Failed to import Asset");
 
+                        response.Add(allocation.Error);
+
                         continue;
                     }
 
@@ -254,6 +272,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     .ForContext(nameof(Error), note.Error, true)
                     .Warning("Failed to import Asset");
 
+                response.Add(note.Error);
+                
                 continue;
             }
 
@@ -272,6 +292,8 @@ internal sealed class ImportAssetsFromFileCommandHandler
                         .ForContext(nameof(Error), oldNote.Error, true)
                         .Warning("Failed to import Asset");
 
+                    response.Add(oldNote.Error);
+
                     continue;
                 }
 
@@ -282,6 +304,6 @@ internal sealed class ImportAssetsFromFileCommandHandler
             await _unitOfWork.CompleteAsync(cancellationToken);
         }
 
-        return Result.Success();
+        return response;
     }
 }
