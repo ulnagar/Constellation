@@ -39,7 +39,9 @@ public class IndexModel : BasePageModel
 
     public SchoolContactDetailsResponse SchoolDetails { get; set; }
     public List<ContactResponse> Contacts { get; set; } = new();
-    
+
+    public string Message { get; set; } = string.Empty;
+
     public async Task OnGet()
     {
         Result<SchoolContactDetailsResponse> schoolDetailsRequest = await _mediator.Send(new GetSchoolContactDetailsQuery(CurrentSchoolCode));
@@ -116,7 +118,19 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        // TODO: R1.15: Replace this redirect with the confirmation message from the existing portal
-        return RedirectToPage();
+        Message = "A request has been sent to Aurora College for this contact to be removed.";
+
+        Result<SchoolContactDetailsResponse> schoolDetailsRequest = await _mediator.Send(new GetSchoolContactDetailsQuery(CurrentSchoolCode));
+
+        SchoolDetails = schoolDetailsRequest.Value;
+
+        Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
+
+        Contacts = contactsRequest.Value
+            .OrderBy(contact => contact.PositionSort())
+            .ThenBy(contact => contact.LastName)
+            .ToList();
+
+        return Page();
     }
 }
