@@ -48,64 +48,99 @@
 
 <table class="table-striped table-hover data-table">
     <thead>
-        <tr>
-            <th>Asset Number</th>
-            <th>Serial Number</th>
-            <th>Model</th>
-            <th>Status</th>
-            <th>User</th>
-            <th>Location</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Asset Number</th>
+        <th>Serial Number</th>
+        <th>Model</th>
+        <th>Status</th>
+        <th>User</th>
+        <th>Location</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.Assets.OrderBy(item => item.AssetNumber))
-        {
-            <tr>
-                <td>@item.AssetNumber</td>
-                <td data-order="@item.SerialNumber" data-search="@item.SerialNumber">
-                    @if (item.SerialNumber.Length > 10)
+    @foreach (var item in Model.Assets.OrderBy(item => item.AssetNumber))
+    {
+        <tr>
+            <td>@item.AssetNumber</td>
+            <td data-order="@item.SerialNumber" data-search="@item.SerialNumber">
+                @if (item.SerialNumber.Length > 10)
+                {
+                    <span data-toggle="tooltip" data-placement="bottom" title="@item.SerialNumber">@item.SerialNumber[..10] ...</span>
+                }
+                else
+                {
+                    <span>@item.SerialNumber</span>
+                }
+            </td>
+            <td>@item.ModelDescription</td>
+            <td>@item.Status</td>
+            <td>@item.AllocatedTo</td>
+            <td>
+                @if (!string.IsNullOrWhiteSpace(item.LocationType))
+                {
+                    @item.LocationType<br />
+                    @if (item.LocationName.Contains(','))
                     {
-                        <span data-toggle="tooltip" data-placement="bottom" title="@item.SerialNumber">@item.SerialNumber[..10] ...</span>
+                        var lines = item.LocationName.Split(',');
+                        var combined = string.Join("<br />", lines.Select(line => line.Trim()));
+                        <span class="text-nowrap">@Html.Raw(combined)</span>
                     }
                     else
                     {
-                        <span>@item.SerialNumber</span>
+                        @item.LocationName
                     }
-                </td>
-                <td>@item.ModelDescription</td>
-                <td>@item.Status</td>
-                <td>@item.AllocatedTo</td>
-                <td>
-                    @if (!string.IsNullOrWhiteSpace(item.LocationType))
-                    {
-                        @item.LocationType<br />
-                        @if (item.LocationName.Contains(','))
-                        {
-                            var lines = item.LocationName.Split(',');
-                            var combined = string.Join("<br />", lines.Select(line => line.Trim()));
-                            <span class="text-nowrap">@Html.Raw(combined)</span>
-                        }
-                        else
-                        {
-                            @item.LocationName
-                        }
-                    }
-                </td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
-                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                            <a asp-page="/Equipment/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Staff" class="dropdown-item">Details</a>
+                }
+            </td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <a asp-page="/Equipment/Assets/Details" asp-route-assetNumber="@item.AssetNumber" asp-area="Staff" class="dropdown-item">Details</a>
                             
-                            @if (canManageAssets.Succeeded)
-                            {
-                                <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-id="@item.AssetNumber" class="dropdown-item">Update</a>
-                            }
-                        </div>
+                        @if (canManageAssets.Succeeded)
+                        {
+                            <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" asp-route-id="@item.AssetNumber" class="dropdown-item">Update</a>
+                            <button type="button" class="dropdown-item add-sighting-button" data-asset-number="@item.AssetNumber.ToString()">Add Sighting</button>
+                        }
                     </div>
-                </td>
-            </tr>
-        }
+                </div>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('.add-sighting-button').click(function (event) {
+                var assetNumber = $(this).data('assetNumber');
+                var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: "?handler=AjaxAddSighting",
+                    type: "POST",
+                    data: {
+                        assetNumber: assetNumber,
+                        __RequestVerificationToken: xsrfHeader
+                    }
+                }).done(function (data) {
+                    $('#page-modal .modal-content').html(data);
+                    $('#page-modal').modal('show');
+
+                    $('#page-modal .combo').select2({ theme: 'bootstrap' });
+                });
+            });
+        });
+    </script>
+}

@@ -249,7 +249,7 @@
             
             @if (canManageAssets.Succeeded)
             {
-                <button type="button" data-toggle="modal" data-target="#add-asset-sighting-modal" class="btn btn-warning">Add Sighting</button>
+                <button type="button" class="btn btn-warning add-sighting-button">Add Sighting</button>
             }
             
             <hr />
@@ -321,7 +321,6 @@
 <vc:allocate-asset />
 <vc:transfer-asset />
 <vc:add-asset-note />
-<vc:add-asset-sighting />
 
 @section scripts {
     <script>
@@ -342,6 +341,23 @@
                 }).done(function (data) {
                     $('#page-modal .modal-content').html(data);
                     $('#page-modal').modal('show');
+                });
+            });
+
+            $('.add-sighting-button').click(function (event) {
+                var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: "?handler=AjaxAddSighting",
+                    type: "POST",
+                    data: {
+                        __RequestVerificationToken: xsrfHeader
+                    }
+                }).done(function (data) {
+                    $('#page-modal .modal-content').html(data);
+                    $('#page-modal').modal('show');
+
+                    $('#page-modal .combo').select2({ theme: 'bootstrap' });
                 });
             });
 

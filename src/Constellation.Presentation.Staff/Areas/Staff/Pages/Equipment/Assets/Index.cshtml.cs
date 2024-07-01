@@ -6,13 +6,20 @@ using Constellation.Application.Assets.GetAllActiveAssets;
 using Constellation.Application.Assets.GetAllAssets;
 using Constellation.Application.Assets.GetAllDisposedAssets;
 using Constellation.Application.Assets.Models;
+using Constellation.Application.Assets.SightAsset;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.StaffMembers.GetStaffForSelectionList;
+using Constellation.Application.StaffMembers.Models;
+using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Pages.Shared.PartialViews.AddAssetSighting;
 using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Claims;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -71,5 +78,69 @@ public class IndexModel : BasePageModel
         }
 
         return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostAjaxAddSighting(string assetNumber)
+    {
+        AddAssetSightingViewModel viewModel = new();
+
+        viewModel.AssetNumber = AssetNumber.FromValue(assetNumber);
+
+        Result<List<StaffSelectionListResponse>> staff = await _mediator.Send(new GetStaffForSelectionListQuery());
+
+        if (staff.IsFailure)
+        {
+            return Content(string.Empty);
+        }
+
+        string? currentStaffId = (User as ClaimsPrincipal)?.Claims.FirstOrDefault(entry => entry.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        if (currentStaffId is null)
+        {
+            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
+        }
+        else
+        {
+            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == currentStaffId);
+
+            viewModel.StaffList = new(
+                staff.Value.OrderBy(entry => entry.LastName),
+                "StaffId",
+                "DisplayName",
+                currentStaffMember?.StaffId);
+        }
+
+        DateTime currentDateTime = DateTime.Now;
+        currentDateTime = currentDateTime
+            .AddMilliseconds(-currentDateTime.Millisecond)
+            .AddSeconds(-currentDateTime.Second);
+
+        viewModel.SightedAt = currentDateTime;
+
+        return Partial("AddAssetSighting", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostAddSighting(AddAssetSightingViewModel viewModel)
+    {
+        SightAssetCommand command = new(
+            viewModel.AssetNumber,
+            viewModel.StaffId,
+            viewModel.SightedAt,
+            viewModel.Note ?? string.Empty);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            Error = new()
+            {
+                Error = result.Error,
+                RedirectPath = null
+            };
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }
