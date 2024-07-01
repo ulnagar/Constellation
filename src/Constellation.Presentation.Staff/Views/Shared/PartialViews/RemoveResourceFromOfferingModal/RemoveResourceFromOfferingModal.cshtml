@@ -1,0 +1,16 @@
+﻿@model Constellation.Presentation.Staff.Views.Shared.PartialViews.RemoveResourceFromOfferingModal.RemoveResourceFromOfferingModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Remove Resource</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Are you sure you wish to remove the @Model.ResourceType resource "@Model.ResourceName" from the @Model.CourseName offering @Model.OfferingName?</span>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-page-handler="RemoveResource" asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@Model.OfferingId.Value" asp-route-resourceId="@Model.ResourceId.Value" class="btn btn-danger">Remove Resource</a>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>

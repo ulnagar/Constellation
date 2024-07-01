@@ -1,0 +1,90 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ActionUpdateForm.PhoneParentActionViewModel
+
+<style>
+    .select-button {
+        margin: 2.5px;
+    }
+</style>
+
+<form asp-page-handler="UpdatePhoneParentAction" method="post">
+    <div class="border border-success row mt-1 pb-1">
+        <div class="col-12 border-bottom border-dark py-1"><strong>Update Action</strong></div>
+        <div class="col-12 mt-1">
+            <button type="submit" class="btn btn-sm btn-success">Save</button>
+            <a href="javascript:history.go(-1)" class="btn btn-sm btn-danger mr-3">Go Back</a>
+        </div>
+        <div class="col-12 mt-3">
+            <div class="form-group row">
+                <label class="col-md-2">Select Parent</label>
+                <div class="col-md-10">
+                    @foreach (var parent in Model.Parents.Where(parent => parent.ParentId != null))
+                    {
+                        <button type="button" class="btn btn-outline-info select-button parent-toggle-button" data-parent-id="@parent.ParentId?.Value" data-parent-name="@parent.Name" data-parent-number="@parent.MobileNumber">@parent.Name (@parent.MobileNumber)</button>
+                    }
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label asp-for="ParentName" class="col-md-2">Parent Name</label>
+                <div class="col-md-5">
+                    <input asp-for="ParentName" class="form-control" />
+                    <span asp-validation-for="ParentName" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label asp-for="ParentPhoneNumber" class="col-md-2">Parent Phone Number</label>
+                <div class="col-md-5">
+                    <input asp-for="ParentPhoneNumber" class="form-control" />
+                    <span asp-validation-for="ParentPhoneNumber" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label asp-for="DateOccurred" class="col-md-2">Called At</label>
+                <div class="col-md-5">
+                    <input type="datetime-local" step="60" asp-for="DateOccurred" class="form-control" />
+                    <span asp-validation-for="DateOccurred" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label asp-for="IncidentNumber" class="col-md-2">Sentral Incident Number</label>
+                <div class="col-md-5">
+                    <input asp-for="IncidentNumber" class="form-control" />
+                    <span asp-validation-for="IncidentNumber" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    $('.parent-toggle-button').click(function (event) {
+        var parentName = $(this).data('parentName');
+        var parentNumber = $(this).data('parentNumber');
+
+        $('#ParentPhoneNumber').val(parentNumber);
+        $('#ParentName').val(parentName);
+
+        $('.parent-toggle-button.btn-info')
+            .removeClass('btn-info')
+            .addClass('btn-outline-info');
+
+        $(this)
+            .removeClass('btn-outline-info')
+            .addClass('btn-info');
+    });
+
+    $('#ParentName').on("keydown", function() {
+        $('.parent-toggle-button.btn-info')
+            .removeClass('btn-info')
+            .addClass('btn-outline-info');
+    });
+
+    $('#ParentPhoneNumber').on("keydown", function () {
+        $('.parent-toggle-button.btn-info')
+            .removeClass('btn-info')
+            .addClass('btn-outline-info');
+    });
+</script>

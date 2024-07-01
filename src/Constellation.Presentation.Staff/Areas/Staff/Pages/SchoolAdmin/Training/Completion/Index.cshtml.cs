@@ -9,7 +9,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Presentation.Shared.Pages.Shared.Components.StaffTrainingReport;
+using Shared.Components.StaffTrainingReport;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -12,13 +12,13 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.Components.TutorialRollCreate;
-using Constellation.Presentation.Shared.Pages.Shared.Components.TutorialStudentEnrolment;
-using Constellation.Presentation.Shared.Pages.Shared.Components.TutorialTeacherAssignment;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Shared.Components.TutorialRollCreate;
+using Shared.Components.TutorialStudentEnrolment;
+using Shared.Components.TutorialTeacherAssignment;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]

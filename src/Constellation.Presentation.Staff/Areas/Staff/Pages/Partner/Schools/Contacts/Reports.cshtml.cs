@@ -12,14 +12,14 @@ using Constellation.Application.Schools.Models;
 using Constellation.Application.Users.RepairSchoolContactUser;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.AssignRoleModal;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.DeleteRoleModal;
 using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Views.Shared.PartialViews.AssignRoleModal;
+using Views.Shared.PartialViews.DeleteRoleModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ReportsModel : BasePageModel

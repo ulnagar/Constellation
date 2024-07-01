@@ -1,0 +1,19 @@
+﻿@model Constellation.Presentation.Staff.Views.Shared.PartialViews.AddCaseDetailUpdateAction.AddCaseDetailUpdateActionViewModel
+
+<form asp-page-handler="NewDetailAction" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Add Case Update Action</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3">Detail</label>
+            <div class="col-md-9">
+                <textarea asp-for="Details" class="form-control"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Add Action</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>

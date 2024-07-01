@@ -9,11 +9,11 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.Components.UploadAssignmentSubmission;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Shared.Components.UploadAssignmentSubmission;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

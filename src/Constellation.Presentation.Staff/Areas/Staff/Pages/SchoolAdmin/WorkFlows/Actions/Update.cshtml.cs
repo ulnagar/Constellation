@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
-using Presentation.Shared.Pages.Shared.Components.ActionUpdateForm;
+using Shared.Components.ActionUpdateForm;
 
 [Authorize(Policy = AuthPolicies.CanEditWorkFlowAction)]
 public class UpdateModel : BasePageModel

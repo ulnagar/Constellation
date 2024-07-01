@@ -1,0 +1,26 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialRollAddStudent.TutorialRollAddStudentSelection
+
+<div class="modal fade" tabindex="-1" id="rollAddStudentModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page-handler="AddStudent" id="rollAddStudentForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tutorial Roll Add Student</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Student</span>
+                            <select asp-for="StudentId" asp-items="@(new SelectList(Model.StudentList, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" id="rollAddStudentSubmitButton" value="Save" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

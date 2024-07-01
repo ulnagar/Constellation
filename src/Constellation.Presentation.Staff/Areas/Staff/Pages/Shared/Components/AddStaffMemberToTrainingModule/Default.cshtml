@@ -1,0 +1,33 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddStaffMemberToTrainingModule.AddStaffMemberToTrainingModuleSelection
+
+<div class="modal fade" tabindex="-1" id="addStaffModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page-handler="AddStaffMember">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Staff Member to Training Module</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Staff Member</span>
+                            <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffMembers, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <span>will be added to the <span clas="font-weight-bold">@Model.ModuleName</span> Training Module.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary btn-lg"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

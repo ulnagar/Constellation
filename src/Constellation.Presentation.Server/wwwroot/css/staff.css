@@ -24,7 +24,7 @@ a.navbar-brand {
 .sidebar-layout .sidebar-sticky {
     position: sticky;
     top: 0;
-    height: calc(100vh - 121px);
+    height: calc(100vh - 122px);
     overflow-x: hidden;
     overflow-y: auto;
 }

@@ -1,0 +1,46 @@
+@model Constellation.Presentation.Staff.Views.Shared.PartialViews.DeleteFamilySelectionModal.DeleteFamilySelectionModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Delete Family</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Do you want to delete the entire family, or just this parent?</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="card-group w-100 border-0">
+            <div class="card border-0">
+                <div class="card-body">
+                    <span class="font-weight-bold">Family Includes:</span>
+                    <ul>
+                        <li>@Model.ParentName</li>
+                        @foreach (var parent in Model.OtherParentNames)
+                        {
+                            <li>@parent</li>
+                        }
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a asp-page="/Partner/Students/Families/Index" asp-area="Staff" asp-page-handler="DeleteFamily" asp-route-id="@Model.FamilyId.Value" class="btn btn-block btn-danger">Delete Family</a>
+                </div>
+            </div>
+            <div class="card border-0">
+                <div class="card-body">
+                    <span class="font-weight-bold">Single Parent:</span>
+                    <ul>
+                        <li>@Model.ParentName</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a asp-page="/Partner/Students/Families/Index" asp-area="Staff" asp-page-handler="DeleteParent" asp-route-parent="@Model.ParentId.Value" asp-route-family="@Model.FamilyId.Value" class="btn btn-block btn-danger">Delete Parent</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>

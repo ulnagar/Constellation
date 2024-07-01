@@ -12,14 +12,14 @@ using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.AssignRoleModal;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.DeleteRoleModal;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.UpdateRoleNoteModal;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Views.Shared.PartialViews.AssignRoleModal;
+using Views.Shared.PartialViews.DeleteRoleModal;
+using Views.Shared.PartialViews.UpdateRoleNoteModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel

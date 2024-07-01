@@ -20,7 +20,7 @@
     <div class="row">
         <div class="col-12 border-bottom border-dark py-2"><h3>@Model.Case?.CaseDescription</h3></div>
         <div class="col-6 mt-3">
-            <vc:display-case-details case-id="@Model.CaseId"></vc:display-case-details>
+            <vc:display-case-details case-id="@Model.CaseId" />
         </div>
         <div class="col-6 mt-3">
             <dl>
@@ -34,8 +34,8 @@
     </div>
     @if (hasParent && parentId is not null)
     {
-        <vc:display-case-action case-id="Model.CaseId.Value" action-id="parentId.Value" show-menu="false"></vc:display-case-action>
+        <vc:display-case-action case-id="Model.CaseId.Value" action-id="parentId.Value" show-menu="false" />
     }
-    <vc:display-case-action case-id="Model.CaseId.Value" action-id="Model.ActionId.Value" show-menu="false"></vc:display-case-action>
+    <vc:display-case-action case-id="Model.CaseId.Value" action-id="Model.ActionId.Value" show-menu="false" />
     <vc:action-update-form case-id="@Model.CaseId.Value" action-id="@Model.ActionId.Value" />
 </div>

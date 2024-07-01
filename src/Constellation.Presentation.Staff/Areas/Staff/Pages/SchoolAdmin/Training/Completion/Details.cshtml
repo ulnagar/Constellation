@@ -3,7 +3,7 @@
 
 @using Constellation.Application.Helpers
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion
-@using Constellation.Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.UploadTrainingCompletionCertificate
 
 @inject IAuthorizationService AuthorizationService
 
@@ -80,4 +80,4 @@
     </div>
 }
 
-<vc:upload-training-completion-certificate module-id="@Model.ModuleId.Value" completion-id="@Model.CompletionId.Value" completion-date="@Model.Record.CompletedDate!.Value" />
+<UploadTrainingCompletionCertificateViewComponent module-id="@Model.ModuleId.Value" completion-id="@Model.CompletionId.Value" completion-date="@Model.Record.CompletedDate!.Value" />

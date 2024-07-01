@@ -13,20 +13,20 @@ using Constellation.Application.Offerings.RemoveTeacherFromOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.Components.AddSessionToOffering;
-using Constellation.Presentation.Shared.Pages.Shared.Components.AddTeacherToOffering;
-using Constellation.Presentation.Shared.Pages.Shared.Components.EnrolStudentInOffering;
 using Constellation.Presentation.Staff.Areas;
 using Core.Models.Offerings.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Presentation.Shared.Pages.Shared.PartialViews.RemoveAllSessionsModal;
-using Presentation.Shared.Pages.Shared.PartialViews.RemoveResourceFromOfferingModal;
-using Presentation.Shared.Pages.Shared.PartialViews.RemoveSessionModal;
-using Presentation.Shared.Pages.Shared.PartialViews.RemoveTeacherFromOfferingModal;
-using Presentation.Shared.Pages.Shared.PartialViews.UnenrolStudentModal;
+using Shared.Components.AddSessionToOffering;
+using Shared.Components.AddTeacherToOffering;
+using Shared.Components.EnrolStudentInOffering;
+using Views.Shared.PartialViews.RemoveAllSessionsModal;
+using Views.Shared.PartialViews.RemoveResourceFromOfferingModal;
+using Views.Shared.PartialViews.RemoveSessionModal;
+using Views.Shared.PartialViews.RemoveTeacherFromOfferingModal;
+using Views.Shared.PartialViews.UnenrolStudentModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

@@ -12,8 +12,6 @@ using Constellation.Application.Families.Models;
 using Constellation.Application.Families.RemoveStudentFromFamily;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.Components.FamilyAddStudent;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 using Core.Errors;
 using Core.Models.Identifiers;
 using MediatR;
@@ -21,6 +19,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
+using Shared.Components.FamilyAddStudent;
+using Views.Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

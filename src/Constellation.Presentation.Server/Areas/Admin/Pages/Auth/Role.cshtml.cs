@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Presentation.Shared.Pages.Shared.Components.RoleAddUser;
+using Staff.Areas.Staff.Pages.Shared.Components.RoleAddUser;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class RoleModel : BasePageModel

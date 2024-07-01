@@ -1,0 +1,12 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.PageFooter.PageFooterViewModel
+
+<div class="container">
+    <span>
+        Build Version: @Model.VersionLabel 
+        &copy; 
+        @Model.Year
+        - Aurora College, NSW
+    </span>
+
+    <a asp-page="/ChangeLog" class="btn btn-sm btn-warning ml-3">What's new?</a>
+</div>

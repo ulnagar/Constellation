@@ -14,7 +14,6 @@ using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.AddAssetSighting;
 using Constellation.Presentation.Staff.Areas;
 using Core.Models.Assets.Enums;
 using MediatR;
@@ -23,11 +22,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
-using Presentation.Shared.Pages.Shared.Components.AddAssetNote;
-using Presentation.Shared.Pages.Shared.Components.AllocateAsset;
-using Presentation.Shared.Pages.Shared.Components.TransferAsset;
-using Presentation.Shared.Pages.Shared.Components.UpdateAssetStatus;
+using Shared.Components.AddAssetNote;
+using Shared.Components.AllocateAsset;
+using Shared.Components.TransferAsset;
+using Shared.Components.UpdateAssetStatus;
 using System.Security.Claims;
+using Views.Shared.PartialViews.AddAssetSighting;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

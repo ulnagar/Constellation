@@ -1,0 +1,22 @@
+﻿@model Constellation.Presentation.Staff.Views.Shared.PartialViews.ReassignActionToStaffMemberModal.ReassignActionToStaffMemberModalViewModel
+
+<form asp-page-handler="ReassignAction" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Reassign Action</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="form-group col">
+                <span class="control-label">Staff Member</span>
+                @Html.HiddenFor(model => model.ActionId)
+                <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffMembers, "Key", "Value"))" class="combo" style="width:100%">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Reassign</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>

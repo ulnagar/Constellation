@@ -13,13 +13,13 @@ using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.AddAssetSighting;
 using Constellation.Presentation.Staff.Areas;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
+using Views.Shared.PartialViews.AddAssetSighting;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel

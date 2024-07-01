@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.ModelBinders;
-using Presentation.Shared.Pages.Shared.Components.UploadTrainingCompletionCertificate;
+using Shared.Components.UploadTrainingCompletionCertificate;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -1,0 +1,28 @@
+@model Constellation.Presentation.Staff.Views.Shared.PartialViews.DeleteFamilyConfirmationModal.DeleteFamilyConfirmationModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Delete Family</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Deleting this family will also delete all attached parents. Are you sure?</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col">
+            <span class="font-weight-bold">Family Includes:</span>
+            <ul>
+                @foreach (var parent in Model.OtherParentNames)
+                {
+                    <li>@parent</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-page="/Partner/Students/Families/Index" asp-area="Staff" asp-page-handler="DeleteFamily" asp-route-id="@Model.FamilyId.Value" class="btn btn-danger">Delete Family</a>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>

@@ -11,14 +11,14 @@ using Constellation.Application.Training.RetireTrainingModule;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.PartialViews.RemoveStaffMemberFromTrainingModuleModal;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
-using Presentation.Shared.Pages.Shared.Components.AddStaffMemberToTrainingModule;
+using Shared.Components.AddStaffMemberToTrainingModule;
 using System.Threading.Tasks;
+using Views.Shared.PartialViews.RemoveStaffMemberFromTrainingModuleModal;
 
 [Authorize(Policy = AuthPolicies.CanViewTrainingModuleContentDetails)]
 public class DetailsModel : BasePageModel

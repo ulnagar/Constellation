@@ -6,10 +6,10 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.Components.StudentAttendanceReport;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Components.StudentAttendanceReport;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ReportModel : BasePageModel

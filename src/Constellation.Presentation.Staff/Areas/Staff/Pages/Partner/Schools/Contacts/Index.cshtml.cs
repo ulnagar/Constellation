@@ -17,9 +17,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Presentation.Shared.Pages.Shared.PartialViews.AssignRoleModal;
-using Presentation.Shared.Pages.Shared.PartialViews.DeleteRoleModal;
-using Presentation.Shared.Pages.Shared.PartialViews.UpdateRoleNoteModal;
+using Views.Shared.PartialViews.AssignRoleModal;
+using Views.Shared.PartialViews.DeleteRoleModal;
+using Views.Shared.PartialViews.UpdateRoleNoteModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel

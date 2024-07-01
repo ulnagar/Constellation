@@ -1,0 +1,43 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.UploadAssignmentSubmission.AssignmentStudentSelection
+
+<div class="modal fade" tabindex="-1" id="uploadAssignmentModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page-handler="Upload" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Student Assignment</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Student</span>
+                            <select asp-for="StudentId" asp-items="@(new SelectList(Model.StudentList, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <div class="custom-file">
+                                <input asp-for="File" class="custom-file-input" type="file" />
+                                <label class="custom-file-label" asp-for="File">Choose file</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('.custom-file-input').addEventListener('change', function (e) {
+        var fileName = document.getElementById("File").files[0].name;
+        var nextSibling = e.target.nextElementSibling
+        nextSibling.innerText = fileName
+    });
+</script>

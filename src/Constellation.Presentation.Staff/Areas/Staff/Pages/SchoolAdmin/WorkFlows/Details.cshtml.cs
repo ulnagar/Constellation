@@ -25,15 +25,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
-using Presentation.Shared.Pages.Shared.PartialViews.AddActionNoteModal;
-using Presentation.Shared.Pages.Shared.PartialViews.AddCaseDetailUpdateAction;
-using Presentation.Shared.Pages.Shared.PartialViews.AddCreateSentralEntryAction;
-using Presentation.Shared.Pages.Shared.PartialViews.AddParentInterviewAction;
-using Presentation.Shared.Pages.Shared.PartialViews.AddPhoneParentAction;
-using Presentation.Shared.Pages.Shared.PartialViews.AddSendEmailAction;
-using Presentation.Shared.Pages.Shared.PartialViews.AddSentralIncidentStatusAction;
-using Presentation.Shared.Pages.Shared.PartialViews.ConfirmActionUpdateModal;
-using Presentation.Shared.Pages.Shared.PartialViews.ReassignActionToStaffMemberModal;
+using Views.Shared.PartialViews.AddActionNoteModal;
+using Views.Shared.PartialViews.AddCaseDetailUpdateAction;
+using Views.Shared.PartialViews.AddCreateSentralEntryAction;
+using Views.Shared.PartialViews.AddParentInterviewAction;
+using Views.Shared.PartialViews.AddPhoneParentAction;
+using Views.Shared.PartialViews.AddSendEmailAction;
+using Views.Shared.PartialViews.AddSentralIncidentStatusAction;
+using Views.Shared.PartialViews.ConfirmActionUpdateModal;
+using Views.Shared.PartialViews.ReassignActionToStaffMemberModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

@@ -1,0 +1,98 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TransferAsset.TransferAssetSelection
+
+@using Constellation.Core.Models.Assets.Enums
+
+<form asp-page-handler="TransferAsset" method="post">
+    <div class="modal fade" tabindex="-1" id="transfer-asset-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transfer Asset</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label asp-for="LocationCategory" class="col-md-3">Location Category</label>
+                        <div class="col-md-9">
+                            <select asp-for="LocationCategory" asp-items="@Model.LocationCategoryList" id="locationCategory" class="combo">
+                                <option value=""> -- Select Location Category -- </option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="school-entry d-none">
+                        <div class="form-group row">
+                            <label asp-for="SchoolCode" class="col-md-3">Partner School</label>
+                            <div class="col-md-9">
+                                <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="combo">
+                                    <option value=""> -- Select Partner School -- </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="site-entry d-none">
+                        <div class="form-group row">
+                            <label asp-for="Site" class="col-md-3">Site</label>
+                            <div class="col-md-9">
+                                <input asp-for="Site" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="room-entry d-none">
+                        <div class="form-group row">
+                            <label asp-for="Room" class="col-md-3"></label>
+                            <div class="col-md-9">
+                                <input asp-for="Room" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label asp-for="ArrivalDate" class="col-md-3">Arrival Date</label>
+                        <div class="col-md-9">
+                            <input asp-for="ArrivalDate" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Transfer Device</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    $('#locationCategory').on('change', function (event) {
+        var category = $(this).val();
+
+        if (category == "@LocationCategory.CoordinatingOffice.Value"){
+            $('.room-entry').removeClass('d-none');
+
+            $('.site-entry').addClass('d-none');
+            $('.school-entry').addClass('d-none');
+        }
+
+        if (category == "@LocationCategory.PublicSchool.Value"){
+            $('.school-entry').removeClass('d-none'); 
+            
+            $('.room-entry').addClass('d-none');
+            $('.site-entry').addClass('d-none');
+        }
+
+        if (category == "@LocationCategory.CorporateOffice.Value"){
+            $('.site-entry').removeClass('d-none');
+
+            $('.school-entry').addClass('d-none');
+            $('.room-entry').addClass('d-none');
+        }
+
+        if (category == "@LocationCategory.PrivateResidence.Value") {
+            $('.site-entry').addClass('d-none');
+            $('.school-entry').addClass('d-none');
+            $('.room-entry').addClass('d-none');
+        }
+    });
+</script>

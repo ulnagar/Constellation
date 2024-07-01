@@ -1,0 +1,26 @@
+﻿@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.UploadTrainingCompletionCertificate
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.UploadTrainingCompletionCertificate.UploadTrainingCompletionCertificateSelection
+
+<div class="modal fade" tabindex="-1" id="uploadCertificateModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Certificate</h5>
+            </div>
+            <div class="modal-body">
+                <p>
+                    You may only upload a certificate if the completion date on the certificate matches the date supplied: @Model.CompletionDate.ToString("dd/MM/yyyy")
+                </p>
+                
+                <p>
+                    If you have completed this training course an additional time, please instead create a new record.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-id="@Model.CompletionId.Value" asp-route-moduleId="@Model.ModuleId.Value" asp-route-mode="@CompletionPageMode.CertUpload" class="btn btn-success">Continue to upload</a>
+                <a asp-page="/SchoolAdmin/Training/Completion/Upsert" asp-area="Staff" asp-route-moduleId="@Model.ModuleId.Value" asp-route-mode="@CompletionPageMode.SoloStaff" class="btn btn-success">Create new record</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

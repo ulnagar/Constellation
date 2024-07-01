@@ -10,11 +10,11 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Pages.Shared.Components.TutorialRollAddStudent;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Shared.Components.TutorialRollAddStudent;
 
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class RollModel : BasePageModel
