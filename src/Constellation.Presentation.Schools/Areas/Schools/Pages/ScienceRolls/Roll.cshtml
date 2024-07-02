@@ -8,7 +8,7 @@
 <div class="d-flex flex-row mt-3 mb-3 page-menu">
     @if (Model.Editable)
     {
-        <a asp-page="/ScienceRolls/Submit" asp-area="Schools" asp-route-rollId="@Model.RollId" class="btn btn-success">Edit</a>
+        <a asp-page="/ScienceRolls/Submit" asp-area="Schools" asp-route-rollId="@Model.RollId" asp-route-lessonId="@Model.LessonId" class="btn btn-success">Edit</a>
     }
 
     <a href="javascript:history.go(-1);" class="btn btn-danger btn-pull-right">Go Back</a>

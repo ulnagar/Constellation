@@ -7,7 +7,7 @@
 
 <div class="mt-3">
     <div class="form-horizontal">
-        <form>
+        <form method="post">
 
             <div class="mb-3 row">
                 <div class="col-md-8 alert alert-warning">
@@ -24,12 +24,16 @@
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Lesson Name</label>
-                <div class="col-md-6">@Model.LessonName</div>
+                <div class="col-md-6">
+                    <input asp-for="LessonName" class="form-control" readonly="readonly" />
+                </div>
             </div>
 
             <div class="mb-3 row">
                 <label class="form-label col-md-2">Due Date</label>
-                <div class="col-md-6">@Model.LessonDueDate.ToShortDateString()</div>
+                <div class="col-md-6">
+                    <input asp-for="LessonDueDate" class="form-control" readonly="readonly" />
+                </div>
             </div>
 
             <div class="mb-3 row">
@@ -63,6 +67,8 @@
                                 <tr>
                                     @Html.HiddenFor(model => Model.Attendance[i].Id)
                                     @Html.HiddenFor(model => Model.Attendance[i].StudentId)
+                                    @Html.HiddenFor(model => Model.Attendance[i].StudentFirstName)
+                                    @Html.HiddenFor(model => Model.Attendance[i].StudentLastName)
                                     <td>@Model.Attendance[i].StudentName</td>
                                     <td>
                                         <div class="form-check form-switch">

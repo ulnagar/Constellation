@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using System.ComponentModel.DataAnnotations;
-using static Constellation.Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal.ScienceLessonRollForSubmit;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class SubmitModel : BasePageModel
@@ -44,6 +43,9 @@ public class SubmitModel : BasePageModel
     public SciencePracRollId RollId { get; set; }
 
     public string LessonName { get; set; }
+
+    [DataType(DataType.Date)]
+    [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime LessonDueDate { get; set; }
 
     [Required]
@@ -53,8 +55,9 @@ public class SubmitModel : BasePageModel
     public DateTime LessonDate { get; set; } = DateTime.Today;
 
     [BindProperty]
-    public string Comment { get; set; } = string.Empty;
+    public string? Comment { get; set; } = string.Empty;
 
+    [BindProperty]
     public List<StudentAttendance> Attendance { get; set; } = new();
 
     public async Task OnGet()
@@ -70,7 +73,18 @@ public class SubmitModel : BasePageModel
 
         LessonName = rollRequest.Value.LessonName;
         LessonDueDate = rollRequest.Value.LessonDueDate;
-        Attendance = rollRequest.Value.Attendance;
+        LessonDate = rollRequest.Value.LessonDate;
+        Comment = rollRequest.Value.Comment;
+        Attendance = rollRequest.Value.Attendance
+            .Select(entry => new StudentAttendance()
+            {       
+                Id = entry.Id,
+                StudentFirstName = entry.StudentFirstName,
+                StudentLastName = entry.StudentLastName,
+                StudentId = entry.StudentId,
+                Present = entry.Present
+            })
+            .ToList();
     }
 
     public async Task<IActionResult> OnPost()
@@ -114,5 +128,18 @@ public class SubmitModel : BasePageModel
         }
 
         return RedirectToPage("/ScienceRolls/Index", new { area = "Schools" });
+    }
+
+    public class StudentAttendance
+    {
+        [ModelBinder(typeof(StrongIdBinder))]
+        public SciencePracAttendanceId Id { get; set; }
+
+        public string StudentId { get; set; }
+        public string StudentFirstName { get; set; }
+        public string StudentLastName { get; set; }
+        public string StudentName => $"{StudentFirstName} {StudentLastName}";
+
+        public bool Present { get; set; }
     }
 }
