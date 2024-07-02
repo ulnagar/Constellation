@@ -1,0 +1,90 @@
+﻿@page "{lessonId}/{rollId}"
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls.SubmitModel
+@{
+}
+
+<h2>Science Practical Roll</h2>
+
+<div class="mt-3">
+    <div class="form-horizontal">
+        <form>
+
+            <div class="mb-3 row">
+                <div class="col-md-8 alert alert-warning">
+                    Please note that this document:
+                    <ul>
+                        <li>constitutes a class roll under the Education Act 1990, </li>
+                        <li>must be an accurate record of what happened during the lesson, </li>
+                        <li>can be subpoenaed into court records, and</li>
+                        <li>is registered as being submitted by you, with your DoE email address attached.</li>
+                    </ul>
+                    You must ensure that all details you record here are correct and accurately reflect the delivery of the lesson.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Lesson Name</label>
+                <div class="col-md-6">@Model.LessonName</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Due Date</label>
+                <div class="col-md-6">@Model.LessonDueDate.ToShortDateString()</div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Date Delivered</label>
+                <div class="col-md-6">
+                    <input asp-for="LessonDate" class="form-control" />
+                    <span asp-validation-for="LessonDate" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <label class="form-label col-md-2">Comment</label>
+                <div class="col-md-6">
+                    <textarea asp-for="Comment" rows="3" cols="100" class="form-control"></textarea>
+                    <span asp-validation-for="Comment" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td class="col-md-4"><label>Name</label></td>
+                                <td><label>Present?</label></td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Attendance.Count(); i++)
+                            {
+                                <tr>
+                                    @Html.HiddenFor(model => Model.Attendance[i].Id)
+                                    @Html.HiddenFor(model => Model.Attendance[i].StudentId)
+                                    <td>@Model.Attendance[i].StudentName</td>
+                                    <td>
+                                        <div class="form-check form-switch">
+                                            @Html.CheckBoxFor(model => Model.Attendance[i].Present, new { @class = "form-check-input" })
+                                            <label class="form-check-label" asp-for="Attendance[i].Present">&nbsp;</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                    </table>
+                </div>
+                <div class="col-md-3 alert alert-warning ">
+                    Ticking a student in this list indicates the student was <strong>present</strong> for the lesson.
+                </div>
+            </div>
+
+            <div class="mb-3 row">
+                <div class="offset-1 col-md-3">
+                    <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

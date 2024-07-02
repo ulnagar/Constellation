@@ -1,6 +1,7 @@
 ﻿:root {
     --bs-nav-link-padding-x: 1rem;
     --bs-nav-link-padding-y: .5rem;
+    --bs-form-check-bg: red; /* Checkbox slider */
 }
 
 /* Prevent the backdrop from hiding access to Modal from top-bar */
@@ -60,4 +61,19 @@ body {
 tr.group {
     font-weight: bold;
     font-size: 1.2rem;
+}
+
+/* Page Menu div */
+.btn-pull-right {
+    margin-left: auto;
+}
+
+/* Checkbox Slider */
+.form-check-input {
+    font-size: 1.5rem;
+    margin-left: -1.5em !important;
+}
+
+.form-check-input:checked {
+    background-color: green;
 }

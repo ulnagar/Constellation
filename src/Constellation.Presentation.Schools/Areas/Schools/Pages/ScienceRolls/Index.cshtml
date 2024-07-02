@@ -1,0 +1,107 @@
+﻿@page
+@using Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls.IndexModel
+@{
+}
+
+<h2>Science Practical Rolls</h2>
+
+<div>
+    @{
+        var allStyle = "btn-outline-secondary";
+        var pendingStyle = allStyle;
+        var overdueStyle = allStyle;
+        var completedStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterEnum.All:
+                allStyle = "btn-primary";
+                break;
+            case IndexModel.FilterEnum.Pending:
+                pendingStyle = "btn-primary";
+                break;
+            case IndexModel.FilterEnum.Overdue:
+                overdueStyle = "btn-primary";
+                break;
+            case IndexModel.FilterEnum.Complete:
+                completedStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a class="btn @allStyle" asp-route-filter="@IndexModel.FilterEnum.All">All</a>
+        <a class="btn @pendingStyle" asp-route-filter="@IndexModel.FilterEnum.Pending">Pending</a>
+        <a class="btn @overdueStyle" asp-route-filter="@IndexModel.FilterEnum.Overdue">Overdue</a>
+        <a class="btn @completedStyle" asp-route-filter="@IndexModel.FilterEnum.Complete">Completed</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Lesson</th>
+            <th>Due Date</th>
+            <th>Course</th>
+            <th>Attendance</th>
+        </tr>
+        </thead>
+        <tbody>
+            @{
+                var items = Model.Lessons.GroupBy(lesson => lesson.Grade).ToList();
+
+                if (items.Count == 0)
+                {
+                    <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+                }
+                
+                foreach (var group in items)
+                {
+                    var first = group.First();
+
+                    <tr class="group">
+                            <td colspan="6">@first.Grade</td>
+                    </tr>
+
+                    @foreach (var item in group)
+                    {
+                        <tr>
+                            <td>
+                                @if (item.IsSubmitted)
+                                {
+                                    <i class="fas fa-check"></i>
+                                }
+                                else if (item.IsOverdue)
+                                {
+                                    <i class="fas fa-exclamation"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-clock"></i>
+                                }
+                            </td>
+                            <td>@item.LessonName</td>
+                            <td>@item.LessonDueDate.ToShortDateString()</td>
+                            <td>@item.Grade @item.LessonCourseName</td>
+                            <td>
+                                @if (item.IsSubmitted)
+                                {
+                                    <a asp-page="/ScienceRolls/Roll" asp-area="Schools" asp-route-lessonId="@item.LessonId" asp-route-rollId="@item.Id" class="btn btn-success btn-sm">@item.Statistics</a>
+                                }
+                                else
+                                {
+                                    <a asp-page="/ScienceRolls/Submit" asp-area="Schools" asp-route-lessonId="@item.LessonId" asp-route-rollId="@item.Id" class="btn btn-warning btn-sm">Submit Roll</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

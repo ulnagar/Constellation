@@ -12,5 +12,5 @@ public sealed class SchoolSelectorViewModel
 
 
     public SelectList SchoolsList { get; set; }
-    public string NewSchoolCode { get; set; } = string.Empty;
+    public string NewSchoolCode { get; set; }
 }

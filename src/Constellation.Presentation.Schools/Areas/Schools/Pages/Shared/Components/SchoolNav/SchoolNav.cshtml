@@ -27,7 +27,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="ScienceRolls">
+            <a class="nav-link @(Model == ActivePage.ScienceRolls ? "active" : "")" asp-page="/ScienceRolls/Index" asp-area="Schools">
                 <i class="fas fa-flask-potion" aria-hidden="true"></i> Science Rolls
             </a>
         </div>

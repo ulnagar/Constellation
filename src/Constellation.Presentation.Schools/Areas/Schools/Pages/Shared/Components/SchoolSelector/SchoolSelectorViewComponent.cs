@@ -53,8 +53,8 @@ public sealed class SchoolSelectorViewComponent : ViewComponent
             nameof(SchoolResponse.SchoolCode),
             nameof(SchoolResponse.Name),
             viewModel.CurrentSchool.SchoolCode);
-
-        HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode);
+        
+        HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.CurrentSchool.SchoolCode);
 
         return View("SchoolSelector", viewModel);
     }

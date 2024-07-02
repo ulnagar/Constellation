@@ -1,0 +1,76 @@
+﻿@page "{lessonId}/{rollId}"
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls.RollModel
+@{
+}
+
+<h2>Science Practical Roll</h2>
+
+<div class="d-flex flex-row mt-3 mb-3 page-menu">
+    @if (Model.Editable)
+    {
+        <a asp-page="/ScienceRolls/Submit" asp-area="Schools" asp-route-rollId="@Model.RollId" class="btn btn-success">Edit</a>
+    }
+
+    <a href="javascript:history.go(-1);" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="mt-3">
+    <div class="form-horizontal">
+        <div class="row mb-3">
+            <label class="form-label col-md-2">Lesson</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.MarkedRoll.LessonName</span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label class="form-label col-md-2">Due Date</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.MarkedRoll.LessonDueDate.ToShortDateString()</span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label class="form-label col-md-2">Date Delivered</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.MarkedRoll.LessonDate?.ToShortDateString()</span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label class="form-label col-md-2">Delivered By</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.MarkedRoll.SchoolContactName</span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label class="form-label col-md-2">Comment</label>
+            <div class="col-md-6">
+                <span class="control-label text-only">@Model.MarkedRoll.Comment</span>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <td class="col-md-4"><label>Name</label></td>
+                        <td><label>Present?</label></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model.MarkedRoll.Attendance)
+                    {
+                        <tr>
+                            <td><span class="control-label text-only">@student.StudentName</span></td>
+                            <td><span class="control-label text-only">@(student.Present ? "Yes" : "No")</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
