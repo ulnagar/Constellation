@@ -47,7 +47,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Timetables">
+            <a class="nav-link @(Model == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Schools">
                 <i class="fas fa-clock" aria-hidden="true"></i> Timetables
             </a>
         </div>

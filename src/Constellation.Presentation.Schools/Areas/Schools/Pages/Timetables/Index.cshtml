@@ -1,0 +1,51 @@
+﻿@page
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Timetables.IndexModel
+@{
+}
+
+<h2>Student Timetables</h2>
+
+<hr />
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var items = Model.Students.GroupBy(student => student.CurrentGrade).ToList();
+
+                if (items.Count == 0)
+                {
+                    <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+                }
+                
+                foreach (var group in items)
+                {
+                    var first = group.First();
+
+                    <tr class="group">
+                        <td colspan="3">@first.CurrentGrade.AsName()</td>
+                    </tr>
+
+                    @foreach (var item in group)
+                    {
+                        <tr>
+                            <td></td>
+                            <td>@item.Name</td>
+                            <td>
+                                <a asp-page="/Timetables/View" asp-area="Schools" asp-route-studentId="@item.StudentId" class="btn btn-sm btn-primary">View Timetable</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,127 @@
+﻿@page "{studentId}"
+@using Constellation.Application.DTOs
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Timetables.ViewModel
+@{
+}
+
+<h2>Student Timetables</h2>
+
+<div class="d-flex flex-row mt-3 mb-3 page-menu">
+    <a asp-page-handler="Download" class="btn btn-primary" onclick="showLoader(3000)">Download</a>
+
+    <a asp-page="/Timetables/Index" asp-area="Schools" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@Model.StudentTimetableData.StudentName
+<br />
+@Model.StudentTimetableData.StudentGrade
+<br />
+@Model.StudentTimetableData.StudentSchool
+
+<div>
+    @{
+        IEnumerable<IGrouping<string, StudentTimetableDataDto.TimetableData>> timetables = new List<IGrouping<string, StudentTimetableDataDto.TimetableData>>();
+        if (Model.StudentTimetableData.Timetables != null)
+        {
+            timetables = Model.StudentTimetableData.Timetables.OrderBy(data => data.TimetableName).GroupBy(data => data.TimetableName);
+        }
+
+        @foreach (var block in timetables)
+        {
+            var dayList = block.Select(data => data.Day).Distinct().ToList();
+            var weekList = dayList.Max();
+            var numWeeks = weekList / 5;
+            int currentDay = 1;
+            int currentWeek = 1;
+
+            <div>
+                @for (currentWeek = 1; currentWeek <= numWeeks; currentWeek++)
+                {
+                    <div class="Timetable-Week">
+                        <div class="Timetable-Day">
+                            <div class="Timetable-Day-Title"></div>
+                            @foreach (var period in block.Where(data => data.Day == currentDay).OrderBy(data => data.StartTime))
+                            {
+                                var style = "";
+
+                                if (period.Type == "Other")
+                                {
+                                    style += " Other";
+                                }
+
+                                if (period.Type == "Break")
+                                {
+                                    style += " Break";
+                                }
+
+                                <div class="Timetable-Day-Period @style">
+                                    @period.Name<br />
+                                    @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                </div>
+                            }
+                        </div>
+
+                        @for (currentDay = (((currentWeek - 1) * 5) + 1); currentDay <= currentWeek * 5 && currentDay > (currentWeek - 1) * 5; currentDay++)
+                        {
+                            <div class="Timetable-Day">
+                                <div class="Timetable-Day-Title">
+                                    @{
+                                        var weekName = currentWeek switch
+                                        {
+                                            1 => "Week A",
+                                            2 => "Week B",
+                                            3 => "Week C",
+                                            4 => "Week D",
+                                            _ => ""
+                                        };
+
+                                        var dayName = currentDay switch
+                                        {
+                                            1 or 6 or 11 or 16 => "Monday",
+                                            2 or 7 or 12 or 17 => "Tuesday",
+                                            3 or 8 or 13 or 18 => "Wednesday",
+                                            4 or 9 or 14 or 19 => "Thursday",
+                                            5 or 10 or 15 or 20 => "Friday",
+                                            _ => ""
+                                        };
+                                    }
+                                    @weekName - @dayName
+                                </div>
+                                @foreach (var period in block.Where(data => data.Day == currentDay).OrderBy(data => data.StartTime))
+                                {
+                                    var style = "";
+
+                                    if (string.IsNullOrWhiteSpace(period.ClassName))
+                                    {
+                                        style += " Inactive";
+                                    }
+                                    else
+                                    {
+                                        style += " Active";
+                                    }
+
+                                    if (period.Type == "Break")
+                                    {
+                                        style += " Break";
+                                    }
+
+                                    <div class="Timetable-Day-Period @style">
+                                        @if (!string.IsNullOrWhiteSpace(period.ClassName))
+                                        {
+                                            @period.ClassName
+
+                                            <br />
+                                            @period.ClassTeacher
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
