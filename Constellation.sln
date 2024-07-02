@@ -65,7 +65,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Staff", "src\Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj", "{813EF0C5-0C9A-4AAA-9909-863F4CDFAB3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Schools", "src\Constellation.Presentation.Schools\Constellation.Presentation.Schools.csproj", "{39A6B4A4-5595-449C-90BE-46941DBFA232}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Schools", "src\Constellation.Presentation.Schools\Constellation.Presentation.Schools.csproj", "{39A6B4A4-5595-449C-90BE-46941DBFA232}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

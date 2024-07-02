@@ -1,0 +1,88 @@
+﻿@page
+@using Constellation.Core.Models.SchoolContacts
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Contacts.CreateModel
+@{
+}
+
+<h2>New School Contact</h2>
+
+<form method="post" id="contactForm">
+    <div class="form-horizontal">
+        <div class="mb-3 row">
+            <label asp-for="FirstName" class="form-label col-md-2">First Name</label>
+            <div class="col-md-3">
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="LastName" class="form-label col-md-2">Last Name</label>
+            <div class="col-md-3">
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="PhoneNumber" class="form-label col-md-2">Phone Number</label>
+            <div class="col-md-3">
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="EmailAddress" class="form-label col-md-2">Email Address</label>
+            <div class="col-md-3">
+                <input asp-for="EmailAddress" class="form-control" placeholder="john.smith1@det.nsw.edu.au" />
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="Position" class="form-label col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Position" class="form-control">
+                    <option value="">-- Select --</option>
+                    <option value="@SchoolContactRole.Principal">@SchoolContactRole.Principal</option>
+                    <option value="@SchoolContactRole.Coordinator">@SchoolContactRole.Coordinator</option>
+                    <option value="@SchoolContactRole.SciencePrac">@SchoolContactRole.SciencePrac</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="SchoolCode" class="form-label col-md-2">School</label>
+            <div class="col-md-3">
+                <input class="form-control" readonly="readonly" value="@Model.SchoolName" />
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" type="submit" onclick="showLoader()">Submit</button>
+            </div>
+            <div class="col-md-1 ms-3">
+                <button class="btn btn-danger btn-block btn-lg">Cancel</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $(document).ready(function () {
+            var form = $('#contactForm').validate();
+            var originalHighlight = form.settings.Highlight;
+            
+            form.settings.highlight = function (element, errorClass, validClass) {
+                $('.spinner-overlay').addClass('d-none');
+            }
+        });
+    </script>
+}
