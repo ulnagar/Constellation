@@ -32,7 +32,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Reports">
+            <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Schools">
                 <i class="fas fa-tasks" aria-hidden="true"></i> Reports
             </a>
         </div>

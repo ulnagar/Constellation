@@ -1,0 +1,54 @@
+﻿@page
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Reports.IndexModel
+@{
+}
+
+<h2>School Reports</h2>
+
+<div>
+    <div class="mt-3">
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Year</th>
+                    <th>Report</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var items = Model.Reports.GroupBy(report => report.DisplayName).ToList();
+
+                        if (items.Count == 0)
+                        {
+                                <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+                        }
+            
+                        foreach (var group in items)
+                        {
+                            var first = group.First();
+
+                            <tr class="group">
+                                    <td colspan="6">@first.DisplayName @first.Grade.AsName()</td>
+                            </tr>
+
+                            @foreach (var item in group)
+                            {
+                                <tr>
+                                    <td>@item.Year</td>
+                                    <td>@item.ReportingPeriod</td>
+                                    <td>
+                                        <a asp-page-handler="Download" asp-route-reportId="@item.ReportId" class="btn btn-info btn-show-hover">Download</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

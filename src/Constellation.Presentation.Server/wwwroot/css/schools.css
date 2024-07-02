@@ -55,3 +55,9 @@ body {
     padding: 0;
     box-sizing: border-box;
 }
+
+/* Grouped Data Table */
+tr.group {
+    font-weight: bold;
+    font-size: 1.2rem;
+}

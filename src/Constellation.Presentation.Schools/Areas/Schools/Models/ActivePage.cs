@@ -8,4 +8,6 @@ public static class ActivePage
     public const string Awards = "Awards";
 
     public const string Contacts = "Contacts";
+
+    public const string Reports = "Reports";
 }
