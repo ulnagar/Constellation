@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Faculties.CreateFaculty;
 using Constellation.Application.Faculties.GetFaculty;
 using Constellation.Application.Faculties.UpdateFaculty;
@@ -45,11 +46,7 @@ public class UpsertModel : BasePageModel
 
             if (request.IsFailure)
             {
-                Error = new()
-                {
-                    Error = request.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(request.Error);
 
                 return;
             }

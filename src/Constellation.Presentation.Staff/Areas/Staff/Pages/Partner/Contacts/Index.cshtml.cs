@@ -77,11 +77,9 @@ public class IndexModel : BasePageModel
 
         if (file.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = file.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                file.Error,
+                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
             return Page();
         }
@@ -95,11 +93,9 @@ public class IndexModel : BasePageModel
 
         if (classesResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = classesResponse.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                classesResponse.Error,
+                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
             return Page();
         }
@@ -131,11 +127,9 @@ public class IndexModel : BasePageModel
 
         if (schoolsRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = schoolsRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                schoolsRequest.Error,
+                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
             return Page();
         }
@@ -164,11 +158,9 @@ public class IndexModel : BasePageModel
 
             if (contactRequest.IsFailure)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = contactRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" })
-                };
+                ModalContent = new ErrorDisplay(
+                    contactRequest.Error,
+                    _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
                 return Page();
             }

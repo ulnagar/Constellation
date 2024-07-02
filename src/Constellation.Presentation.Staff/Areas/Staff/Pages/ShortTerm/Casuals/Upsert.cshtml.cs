@@ -64,11 +64,9 @@ public class UpsertModel : BasePageModel
 
             if (casualResponse.IsFailure)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = casualResponse.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    casualResponse.Error,
+                    _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -84,11 +82,9 @@ public class UpsertModel : BasePageModel
 
         if (schoolsResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = schoolsResponse.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                schoolsResponse.Error,
+                _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -116,11 +112,9 @@ public class UpsertModel : BasePageModel
 
                 if (result.IsFailure)
                 {
-                    Error = new ErrorDisplay
-                    {
-                        Error = result.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        result.Error,
+                        _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" }));
 
                     return Page();
                 }
@@ -138,11 +132,9 @@ public class UpsertModel : BasePageModel
 
                 if (result.IsFailure)
                 {
-                    Error = new ErrorDisplay
-                    {
-                        Error = result.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        result.Error,
+                        _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" }));
 
                     return Page();
                 }
@@ -155,11 +147,9 @@ public class UpsertModel : BasePageModel
 
         if (schoolsResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = schoolsResponse.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                schoolsResponse.Error,
+                _linkGenerator.GetPathByPage("/ShortTerm/Casuals/Index", values: new { area = "Staff" }));
 
             return Page();
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
@@ -45,11 +46,9 @@ public class ReportsModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            Error = new()
-            {
-                Error = schools.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff"})
-            };
+            ModalContent = new ErrorDisplay(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff"}));
 
             return;
         }
@@ -63,11 +62,7 @@ public class ReportsModel : BasePageModel
 
         if (file.IsFailure)
         {
-            Error = new()
-            {
-                Error = file.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(file.Error);
 
             Result<List<SchoolWithContactsResponse>> schools = await _mediator.Send(new GetContactsBySchoolQuery());
             Schools = schools.Value.OrderBy(entry => entry.SchoolName).ToList();
@@ -107,11 +102,9 @@ public class ReportsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
             return Page();
         }

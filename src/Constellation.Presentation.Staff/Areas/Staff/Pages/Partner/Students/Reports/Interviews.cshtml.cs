@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Helpers;
 using Application.Interfaces.Services;
@@ -53,11 +54,9 @@ public class InterviewsModel : BasePageModel
 
         if (offerings.IsFailure)
         {
-            Error = new()
-            {
-                Error = offerings.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                offerings.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -71,11 +70,7 @@ public class InterviewsModel : BasePageModel
 
         if (data.IsFailure)
         {
-            Error = new()
-            {
-                Error = data.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(data.Error);
 
             return Page();
         }

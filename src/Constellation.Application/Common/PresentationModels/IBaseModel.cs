@@ -2,5 +2,5 @@
 
 public interface IBaseModel
 {
-    public ErrorDisplay Error { get; set; }
+    public ModalContent ModalContent { get; set; }
 }

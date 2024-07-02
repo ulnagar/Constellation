@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Awards.CreateAwardNomination;
 using Constellation.Application.Awards.GetAllNominationPeriods;
 using Constellation.Application.Awards.GetNominationPeriod;
@@ -151,11 +152,7 @@ public class NominateModel : BasePageModel
 
         if (response.IsFailure)
         {
-            Error = new()
-            {
-                Error = response.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(response.Error);
 
             await PreparePage();
             return Page();
@@ -172,11 +169,9 @@ public class NominateModel : BasePageModel
 
         if (periodRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = periodRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-            };
+            ModalContent = new ErrorDisplay(
+                periodRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
             return;
         }
@@ -190,11 +185,9 @@ public class NominateModel : BasePageModel
 
             if (coursesRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = coursesRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    coursesRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }
@@ -208,11 +201,9 @@ public class NominateModel : BasePageModel
 
             if (coursesRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = coursesRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    coursesRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }
@@ -228,11 +219,9 @@ public class NominateModel : BasePageModel
 
             if (offeringRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = offeringRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    offeringRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }
@@ -248,11 +237,9 @@ public class NominateModel : BasePageModel
 
             if (offeringRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = offeringRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    offeringRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }
@@ -268,11 +255,9 @@ public class NominateModel : BasePageModel
 
             if (studentsRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = studentsRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    studentsRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }
@@ -287,11 +272,9 @@ public class NominateModel : BasePageModel
 
             if (studentsRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = studentsRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    studentsRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }
@@ -304,11 +287,9 @@ public class NominateModel : BasePageModel
 
             if (studentsRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = studentsRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId })
-                };
+                ModalContent = new ErrorDisplay(
+                    studentsRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
                 return;
             }

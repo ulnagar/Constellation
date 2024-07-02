@@ -111,11 +111,9 @@ public class RoleModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        Error = new ErrorDisplay
-        {
-            Error = error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Auth/Role", values: new { area = "Admin", RoleId = RoleId })
-        };
+        ModalContent = new ErrorDisplay(
+            error,
+            _linkGenerator.GetPathByPage("/Auth/Role", values: new { area = "Admin", RoleId = RoleId }));
 
         AddUserForm = null;
 

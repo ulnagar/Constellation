@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Reports;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.StaffMembers.GetStaffById;
 using Constellation.Application.Training.GetModuleStatusByStaffMember;
@@ -39,11 +40,9 @@ public class StaffMemberModel : BasePageModel
 
         if (staffRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = staffRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                staffRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -54,11 +53,9 @@ public class StaffMemberModel : BasePageModel
 
         if (moduleRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = moduleRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                moduleRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" }));
 
             return;
         }

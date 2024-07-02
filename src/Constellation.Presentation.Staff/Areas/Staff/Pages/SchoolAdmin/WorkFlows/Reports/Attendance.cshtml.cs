@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Reports;
 
 using Application.Attendance.GetAttendanceTrendValues;
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.WorkFlows.CreateAttendanceCase;
 using Application.WorkFlows.UpdateAttendanceCaseDetails;
@@ -38,11 +39,7 @@ public class AttendanceModel : BasePageModel
 
         if (studentAttendanceTrends.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentAttendanceTrends.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(studentAttendanceTrends.Error);
 
             return;
         }
@@ -60,11 +57,9 @@ public class AttendanceModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.NotAuthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Auth.NotAuthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -80,11 +75,9 @@ public class AttendanceModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    result.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" }));
 
                 return Page();
             }

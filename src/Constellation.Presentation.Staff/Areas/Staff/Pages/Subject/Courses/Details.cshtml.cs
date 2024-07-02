@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCourseDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -38,11 +39,9 @@ public class DetailsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Courses/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/Courses/Index", values: new { area = "Staff" }));
 
             return;
         }

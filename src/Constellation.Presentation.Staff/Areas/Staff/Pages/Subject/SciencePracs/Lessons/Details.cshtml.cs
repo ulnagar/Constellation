@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.CancelLesson;
 using Constellation.Application.SciencePracs.GetLessonDetails;
@@ -39,11 +40,9 @@ public class DetailsModel : BasePageModel
 
         if (lessonRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = lessonRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subjects/SciencePracs/Lessons/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                lessonRequest.Error,
+                _linkGenerator.GetPathByPage("/Subjects/SciencePracs/Lessons/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -59,11 +58,7 @@ public class DetailsModel : BasePageModel
 
         if (cancelRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = cancelRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(cancelRequest.Error);
 
             return Page();
         }

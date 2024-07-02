@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Courses.CreateCourse;
 using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Courses.Models;
@@ -54,11 +55,7 @@ public class UpsertModel : BasePageModel
 
             if (courseRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = courseRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(courseRequest.Error);
 
                 return;
             }
@@ -74,11 +71,7 @@ public class UpsertModel : BasePageModel
 
         if (facultyRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = facultyRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(facultyRequest.Error);
 
             return;
         }
@@ -94,11 +87,7 @@ public class UpsertModel : BasePageModel
 
             if (facultyRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = facultyRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(facultyRequest.Error);
 
                 return Page();
             }
@@ -119,21 +108,13 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             Result<List<FacultySummaryResponse>> facultyRequest = await _mediator.Send(new GetFacultiesForSelectionListQuery());
 
             if (facultyRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = facultyRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(facultyRequest.Error);
 
                 return Page();
             }
@@ -154,11 +135,7 @@ public class UpsertModel : BasePageModel
 
             if (facultyRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = facultyRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(facultyRequest.Error);
 
                 return Page();
             }
@@ -182,21 +159,13 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             Result<List<FacultySummaryResponse>> facultyRequest = await _mediator.Send(new GetFacultiesForSelectionListQuery());
 
             if (facultyRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = facultyRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(facultyRequest.Error);
 
                 return Page();
             }

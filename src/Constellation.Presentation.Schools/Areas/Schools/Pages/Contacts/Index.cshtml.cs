@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Contacts;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.SchoolContacts.GetContactsWithRoleFromSchool;
 using Constellation.Application.SchoolContacts.RequestContactRemoval;
@@ -48,11 +49,7 @@ public class IndexModel : BasePageModel
 
         if (schoolDetailsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = schoolDetailsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(schoolDetailsRequest.Error);
 
             return;
         }
@@ -63,11 +60,7 @@ public class IndexModel : BasePageModel
         
         if (contactsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = contactsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(contactsRequest.Error);
 
             return;
         }
@@ -109,16 +102,16 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }
 
-        Message = "A request has been sent to Aurora College for this contact to be removed.";
+        ModalContent = new FeedbackDisplay(
+            "Schools Portal",
+            "A request has been sent to Aurora College for this contact to be removed.",
+            "Ok",
+            "btn-success");
 
         Result<SchoolContactDetailsResponse> schoolDetailsRequest = await _mediator.Send(new GetSchoolContactDetailsQuery(CurrentSchoolCode));
 

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
+using Application.Common.PresentationModels;
 using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
@@ -184,11 +185,9 @@ public class DetailsModel : BasePageModel
 
     private void GenerateError(Error error)
     {
-        Error = new()
-        {
-            Error = error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" })
-        };
+        ModalContent = new ErrorDisplay(
+            error,
+            _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
         Student = new("", Name.Create("John", "", "Doe").Value, "", Core.Enums.Grade.SpecialProgram, "", "", "", "", false);
     }

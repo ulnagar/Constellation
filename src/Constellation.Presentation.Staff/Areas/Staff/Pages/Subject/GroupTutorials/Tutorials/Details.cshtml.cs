@@ -256,11 +256,9 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
             Tutorial = new(
                 GroupTutorialId.FromValue(Id),
@@ -279,11 +277,9 @@ public class DetailsModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        Error = new ErrorDisplay
-        {
-            Error = error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id })
-        };
+        ModalContent = new ErrorDisplay(
+            error,
+            _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 
         Tutorial = new(
             GroupTutorialId.FromValue(Id),

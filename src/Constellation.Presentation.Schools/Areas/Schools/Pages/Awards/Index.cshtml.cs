@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Awards;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Attachments.GetAttachmentFile;
 using Constellation.Application.Awards.GetSummaryForStudent;
@@ -47,11 +48,7 @@ public class IndexModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
         {
-            Error = new()
-            {
-                Error = ApplicationErrors.SchoolInvalid,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ApplicationErrors.SchoolInvalid);
 
             return;
         }
@@ -66,11 +63,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileResponse.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(fileResponse.Error);
 
             await PreparePage();
 
@@ -86,11 +79,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(studentsRequest.Error);
 
             return;
         }
@@ -107,11 +96,7 @@ public class IndexModel : BasePageModel
 
             if (awardSummaryRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = awardSummaryRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(awardSummaryRequest.Error);
 
                 return;
             }

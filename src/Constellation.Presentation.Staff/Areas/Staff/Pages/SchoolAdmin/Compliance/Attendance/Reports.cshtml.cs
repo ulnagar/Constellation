@@ -36,11 +36,7 @@ public class ReportModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }
@@ -54,11 +50,7 @@ public class ReportModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new ErrorDisplay()
-            {
-                Error = request.Error, 
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return Page();
         }

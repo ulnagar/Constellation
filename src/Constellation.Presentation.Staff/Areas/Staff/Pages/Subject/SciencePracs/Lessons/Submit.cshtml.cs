@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.GetLessonRollDetails;
 using Constellation.Application.SciencePracs.SubmitRoll;
@@ -52,11 +53,9 @@ public class SubmitModel : BasePageModel
 
         if (rollRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = rollRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", lessonId = LessonId, rollId = RollId })
-            };
+            ModalContent = new ErrorDisplay(
+                rollRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", lessonId = LessonId, rollId = RollId }));
 
             return;
         }
@@ -93,11 +92,9 @@ public class SubmitModel : BasePageModel
 
             if (rollRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = rollRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", lessonId = LessonId, rollId = RollId })
-                };
+                ModalContent = new ErrorDisplay(
+                    rollRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", lessonId = LessonId, rollId = RollId }));
 
                 return Page();
             }
@@ -122,21 +119,15 @@ public class SubmitModel : BasePageModel
 
         if (commandRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = commandRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(commandRequest.Error);
 
             Result<LessonRollDetailsResponse> rollRequest = await _mediator.Send(new GetLessonRollDetailsQuery(sciencePracLessonId, sciencePracRollId));
 
             if (rollRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = rollRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", lessonId = LessonId, rollId = RollId })
-                };
+                ModalContent = new ErrorDisplay(
+                    rollRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", lessonId = LessonId, rollId = RollId }));
 
                 return Page();
             }

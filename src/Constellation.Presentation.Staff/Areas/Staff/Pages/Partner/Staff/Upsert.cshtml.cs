@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.StaffMembers.CreateStaffMember;
 using Application.StaffMembers.GetStaffById;
@@ -58,11 +59,10 @@ public class UpsertModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            Error = new()
-            {
-                Error = schools.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
+
             return;
         }
 
@@ -77,11 +77,9 @@ public class UpsertModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            Error = new()
-            {
-                Error = staffMember.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                staffMember.Error,
+                _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -122,11 +120,7 @@ public class UpsertModel : BasePageModel
 
             if (createResult.IsFailure)
             {
-                Error = new()
-                {
-                    Error = createResult.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(createResult.Error);
 
                 Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 
@@ -151,11 +145,7 @@ public class UpsertModel : BasePageModel
 
         if (updateResult.IsFailure)
         {
-            Error = new()
-            {
-                Error = updateResult.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(updateResult.Error);
 
             Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 

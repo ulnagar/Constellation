@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Periods.GetPeriodsForVisualSelection;
 using Core.Shared;
@@ -28,11 +29,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }

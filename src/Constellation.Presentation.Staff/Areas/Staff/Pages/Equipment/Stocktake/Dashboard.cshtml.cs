@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Stocktake.GetStocktakeEvent;
 using Application.Stocktake.GetStocktakeSightingsForStaffMember;
@@ -42,11 +43,9 @@ public class DashboardModel : BasePageModel
 
         if (string.IsNullOrWhiteSpace(staffId))
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.UserNotFound,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Auth.UserNotFound,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -55,11 +54,9 @@ public class DashboardModel : BasePageModel
 
         if (eventRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = eventRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                eventRequest.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -68,11 +65,9 @@ public class DashboardModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return;
         }

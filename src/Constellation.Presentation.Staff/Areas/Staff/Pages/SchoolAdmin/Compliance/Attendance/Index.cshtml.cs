@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Complia
 using Application.Attendance.GetAttendanceDataForYearFromSentral;
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Attendance.GetRecentAttendanceValues;
+using Application.Common.PresentationModels;
 using Constellation.Application.Attendance.GetAttendancePeriodLabels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
@@ -35,11 +36,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }
@@ -50,11 +47,7 @@ public class IndexModel : BasePageModel
 
         if (periodRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = periodRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(periodRequest.Error);
 
             return;
         }
@@ -66,11 +59,7 @@ public class IndexModel : BasePageModel
     {
         if (SelectedPeriod == string.Empty)
         {
-            Error = new()
-            {
-                Error = new("", "You must select an Attendance Period to update"), 
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("", "You must select an Attendance Period to update"));
 
             return;
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules;
 
+using Application.Common.PresentationModels;
 using Application.Training.AddStaffMemberToTrainingModule;
 using Application.Training.GetModuleDetails;
 using Application.Training.Models;
@@ -50,11 +51,9 @@ public class BulkAddMembersModel : BasePageModel
 
         if (moduleRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = moduleRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id })
-            };
+            ModalContent = new ErrorDisplay(
+                moduleRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
 
             return;
         }
@@ -65,11 +64,9 @@ public class BulkAddMembersModel : BasePageModel
 
         if (staffRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = staffRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id })
-            };
+            ModalContent = new ErrorDisplay(
+                staffRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
 
             return;
         }
@@ -92,11 +89,7 @@ public class BulkAddMembersModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return Page();
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Applications;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.ThirdPartyConsent.GetApplications;
 using Core.Shared;
@@ -31,11 +32,7 @@ public class IndexModel : BasePageModel
 
         if (applicationsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = applicationsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(applicationsRequest.Error);
 
             return;
         }

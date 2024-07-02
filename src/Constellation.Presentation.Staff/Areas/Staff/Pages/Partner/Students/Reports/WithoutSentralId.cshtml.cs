@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Students.GetCurrentStudentsWithoutSentralId;
 using Application.Students.Models;
@@ -30,11 +31,7 @@ public class WithoutSentralIdModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }
@@ -48,11 +45,7 @@ public class WithoutSentralIdModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return Page();
         }

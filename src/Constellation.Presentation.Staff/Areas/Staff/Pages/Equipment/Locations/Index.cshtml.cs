@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Locations;
 
 using Application.Assets.GetLocationList;
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Models.Assets.Enums;
@@ -42,11 +43,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return;
         }

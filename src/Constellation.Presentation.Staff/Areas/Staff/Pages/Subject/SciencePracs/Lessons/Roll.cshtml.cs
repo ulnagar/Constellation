@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.CancelLessonRoll;
 using Constellation.Application.SciencePracs.GetLessonRollDetails;
@@ -50,11 +51,7 @@ public class RollModel : BasePageModel
 
         if (cancelRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = cancelRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(cancelRequest.Error);
 
             return await PreparePage();
         }
@@ -71,11 +68,7 @@ public class RollModel : BasePageModel
 
         if (reinstateRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reinstateRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reinstateRequest.Error);
         }
 
         return await PreparePage();
@@ -90,11 +83,7 @@ public class RollModel : BasePageModel
 
         if (notificationRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = notificationRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(notificationRequest.Error);
         }
 
         return await PreparePage();
@@ -109,11 +98,9 @@ public class RollModel : BasePageModel
 
         if (rollRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = rollRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = LessonId })
-            };
+            ModalContent = new ErrorDisplay(
+                rollRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = LessonId }));
 
             return Page();
         }

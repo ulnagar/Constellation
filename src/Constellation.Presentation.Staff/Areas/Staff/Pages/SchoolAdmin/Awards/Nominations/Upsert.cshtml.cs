@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Awards.CreateNominationPeriod;
 using Constellation.Application.Awards.GetNominationPeriod;
 using Constellation.Application.Models.Auth;
@@ -48,11 +49,9 @@ public class UpsertModel : BasePageModel
 
             if (details.IsFailure)
             {
-                Error = new()
-                {
-                    Error = details.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = Id.Value })
-                };
+                ModalContent = new ErrorDisplay(
+                    details.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = Id.Value }));
 
                 return;
             }
@@ -80,11 +79,7 @@ public class UpsertModel : BasePageModel
 
             if (editRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = editRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(editRequest.Error);
 
                 return Page();
             }
@@ -96,11 +91,7 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return Page();
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Responses;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.ThirdPartyConsent.GetTransactionDetails;
 using Core.Models.ThirdPartyConsent.Identifiers;
@@ -38,11 +39,9 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" }));
 
             return;
         }

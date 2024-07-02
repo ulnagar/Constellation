@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards;
 
 using Application.Attachments.GetAttachmentFile;
+using Application.Common.PresentationModels;
 using Constellation.Application.Awards.GetAllAwards;
 using Constellation.Application.Awards.GetRecentAwards;
 using Constellation.Application.Awards.Models;
@@ -58,11 +59,9 @@ public class IndexModel : BasePageModel
 
         if (awardRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = awardRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                awardRequest.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -80,11 +79,9 @@ public class IndexModel : BasePageModel
 
         if (fileRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                fileRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Index", values: new { area = "Staff" }));
 
             return Page();
         }

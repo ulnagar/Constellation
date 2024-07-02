@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Faculties.GetFacultiesAsDictionary;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffList;
@@ -39,11 +40,7 @@ public class IndexModel : BasePageModel
 
         if (facultyRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = facultyRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(facultyRequest.Error);
 
             return;
         }
@@ -54,11 +51,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }

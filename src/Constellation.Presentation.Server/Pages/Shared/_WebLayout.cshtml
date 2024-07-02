@@ -44,10 +44,15 @@
             @RenderBody()
         </div>
 
-        @if (Model.Error is not null)
+        @if (Model.ModalContent is not null)
         {
-            <vc:error-display-redirect error="@Model.Error">
-            </vc:error-display-redirect>
+            <vc:modal-content-display content="@Model.ModalContent" />
+
+            <script>
+                $(document).ready(function () {
+                    $('#ux-modal').modal('show');
+                });
+            </script>
         }
     </div>
 
@@ -55,17 +60,7 @@
         <vc:page-footer />
     </footer>
     
-    @if (Model.Error is not null)
-    {
-        <script>
-            $(document).ready(function () {
-                $('#errorModal').modal('show');
-            });
-        </script>
-    }
-    
     <script src="~/js/staff.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

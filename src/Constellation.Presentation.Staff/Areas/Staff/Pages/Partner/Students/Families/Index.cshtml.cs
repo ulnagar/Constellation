@@ -75,11 +75,9 @@ public class IndexModel : BasePageModel
 
         if (!authorized.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -88,11 +86,9 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -129,11 +125,9 @@ public class IndexModel : BasePageModel
 
         if (!authorized.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -142,11 +136,9 @@ public class IndexModel : BasePageModel
         
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -160,11 +152,9 @@ public class IndexModel : BasePageModel
 
         if (contactRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = contactRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                contactRequest.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return Page();
         }

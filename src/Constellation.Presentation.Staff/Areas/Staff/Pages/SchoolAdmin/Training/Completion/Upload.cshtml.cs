@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
+using Application.Common.PresentationModels;
 using Application.Training.ProcessTrainingImportFile;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
@@ -47,22 +48,18 @@ public class UploadModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" }));
 
                     return Page();
                 }
             }
             catch (Exception ex)
             {
-                Error = new()
-                {
-                    Error = new(ex.Source, ex.Message),
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    new(ex.Source, ex.Message),
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" }));
 
                 return Page();
             }

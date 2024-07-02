@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContact;
@@ -105,11 +106,7 @@ public class CreateModel : BasePageModel
 
             if (request.IsFailure)
             {
-                Error = new()
-                {
-                    Error = request.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(request.Error);
 
                 Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
                 Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
@@ -134,11 +131,7 @@ public class CreateModel : BasePageModel
 
             if (request.IsFailure)
             {
-                Error = new()
-                {
-                    Error = request.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(request.Error);
 
                 Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
                 Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));

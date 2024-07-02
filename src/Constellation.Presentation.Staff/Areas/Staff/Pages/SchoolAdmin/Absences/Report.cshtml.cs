@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.DTOs;
@@ -35,11 +36,7 @@ public class ReportModel : BasePageModel
         if (fileRequest.IsSuccess)
             return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
 
-        Error = new()
-        {
-            Error = fileRequest.Error,
-            RedirectPath = null
-        };
+        ModalContent = new ErrorDisplay(fileRequest.Error);
 
         return Page();
     }
@@ -54,11 +51,7 @@ public class ReportModel : BasePageModel
 
         if (fileRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(fileRequest.Error);
 
             return Page();
         }

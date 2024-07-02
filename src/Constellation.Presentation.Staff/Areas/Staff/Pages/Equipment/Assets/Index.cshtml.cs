@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Assets.Enums;
 using Constellation.Application.Assets.ExportAssetsToExcel;
 using Constellation.Application.Assets.GetAllActiveAssets;
@@ -50,11 +51,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }
@@ -68,11 +65,7 @@ public class IndexModel : BasePageModel
 
         if (file.IsFailure)
         {
-            Error = new()
-            {
-                Error = file.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(file.Error);
 
             return Page();
         }
@@ -132,11 +125,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }

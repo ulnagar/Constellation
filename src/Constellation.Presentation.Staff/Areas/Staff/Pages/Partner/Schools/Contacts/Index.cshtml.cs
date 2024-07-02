@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.SchoolContacts.CreateContactRoleAssignment;
 using Application.SchoolContacts.GetAllContacts;
@@ -48,11 +49,7 @@ public class IndexModel : BasePageModel
 
         if (contacts.IsFailure)
         {
-            Error = new()
-            {
-                Error = contacts.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(contacts.Error);
 
             return;
         }
@@ -90,11 +87,9 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" }));
 
             return Page();
         }
@@ -131,11 +126,9 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" }));
 
             return Page();
         }

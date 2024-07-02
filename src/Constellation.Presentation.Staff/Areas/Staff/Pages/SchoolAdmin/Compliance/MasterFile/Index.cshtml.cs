@@ -60,11 +60,9 @@ public class IndexModel : BasePageModel
 
                 if (outputRequest.IsFailure)
                 {
-                    Error = new ErrorDisplay
-                    {
-                        Error = outputRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        outputRequest.Error,
+                        _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" }));
 
                     return Page();
                 }
@@ -73,11 +71,9 @@ public class IndexModel : BasePageModel
             }
             catch (Exception ex)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = new Error("Exception", ex.Message),
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    new Error("Exception", ex.Message),
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" }));
 
                 return Page();
             }

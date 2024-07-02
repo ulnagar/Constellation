@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.GetContactSummary;
@@ -61,11 +62,9 @@ public class UpdateModel : BasePageModel
 
         if (contact.IsFailure)
         {
-            Error = new()
-            {
-                Error = contact.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                contact.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -95,11 +94,7 @@ public class UpdateModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return Page();
         }

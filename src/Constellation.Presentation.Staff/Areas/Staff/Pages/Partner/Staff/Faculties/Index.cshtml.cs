@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Faculties.GetFacultiesSummary;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
@@ -28,11 +29,7 @@ public class IndexModel : BasePageModel
 
         if (faculties.IsFailure)
         {
-            Error = new()
-            {
-                Error = faculties.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(faculties.Error);
 
             return;
         }

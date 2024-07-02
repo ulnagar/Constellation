@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Stocktake.GetStocktakeEventList;
 using Application.Stocktake.Models;
@@ -32,11 +33,7 @@ public class IndexModel : BasePageModel
 
         if (events.IsFailure)
         {
-            Error = new()
-            {
-                Error = events.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(events.Error);
 
             return Page();
         }

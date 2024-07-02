@@ -68,15 +68,15 @@
             </main>
         </div>
 
-        @if (Model.Error is not null)
+        @if (Model.ModalContent is not null)
         {
-            <vc:error-display-redirect error="@Model.Error"/>
+            <vc:modal-content-display content="@Model.ModalContent" />
 
             <script>
-                    $(document).ready(function () {
-                        $('#errorModal').modal('show');
-                    });
-                </script>
+                $(document).ready(function () {
+                    $('#ux-modal').modal('show');
+                });
+            </script>
         }
     </div>
 

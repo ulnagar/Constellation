@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Schools.GetSchoolById;
 using Application.Schools.GetSchoolForEdit;
@@ -78,11 +79,9 @@ public class UpsertModel : BasePageModel
 
         if (school.IsFailure)
         {
-            Error = new()
-            {
-                Error = school.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                school.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -138,11 +137,7 @@ public class UpsertModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }

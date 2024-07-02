@@ -1,0 +1,24 @@
+﻿@model Constellation.Application.Common.PresentationModels.ModalContent
+
+<div class="modal fade" id="ux-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@Model.Title</h5>
+            </div>
+            <div class="modal-body">
+                @Html.Raw(Model.Content)
+            </div>
+            <div class="modal-footer">
+                @if (Model.ButtonHasLink)
+                {
+                    <a href="@Model.ButtonLink" class="btn @(Model.ButtonColour)">@Model.ButtonText</a>
+                }
+                else
+                {
+                    <button type="button" class="btn @(Model.ButtonColour)" data-bs-dismiss="modal" data-dismiss="modal">@Model.ButtonText</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

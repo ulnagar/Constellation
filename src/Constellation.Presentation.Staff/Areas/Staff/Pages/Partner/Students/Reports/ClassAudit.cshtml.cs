@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Students.GetCurrentStudentsWithCurrentOfferings;
 using Core.Shared;
@@ -28,11 +29,7 @@ public sealed class ClassAuditModel : BasePageModel
 
         if (studentRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(studentRequest.Error);
 
             return;
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.AdminDashboards.VerifySchoolContactAccess;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
@@ -40,11 +41,9 @@ public class AuditModel : BasePageModel
 
         if (auditRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = auditRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                auditRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
 
             return;
         }

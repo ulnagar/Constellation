@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Families.CreateFamily;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.ValueObjects;
@@ -86,11 +87,9 @@ public class AddFamilyModel : BasePageModel
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Details", new { area = "Staff", Id = result.Value.Id.Value });
 
-        Error = new()
-        {
-            Error = result.Error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-        };
+        ModalContent = new ErrorDisplay(
+            result.Error,
+            _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
         return Page();
     }

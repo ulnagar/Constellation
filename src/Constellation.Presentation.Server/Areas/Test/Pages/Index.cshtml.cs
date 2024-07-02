@@ -63,20 +63,12 @@ public class IndexModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new ErrorDisplay
-                    {
-                        Error = request.Error,
-                        RedirectPath = null
-                    };
+                    ModalContent = new ErrorDisplay(request.Error);
                 }
             }
             catch (Exception ex)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = new(ex.Source, ex.Message),
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(new(ex.Source, ex.Message));
             }
         }
     }

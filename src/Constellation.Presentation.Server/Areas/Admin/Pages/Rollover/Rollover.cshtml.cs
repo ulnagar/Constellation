@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Rollover;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Rollover.ProcessRolloverDecisions;
 using Constellation.Application.Students.GetCurrentStudentsFromGrade;
@@ -66,11 +67,7 @@ public class RolloverModel : BasePageModel
 
                 if (registerAttempt.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = registerAttempt.Error,
-                        RedirectPath = null
-                    };
+                    ModalContent = new ErrorDisplay(registerAttempt.Error);
 
                     return Page();
                 }
@@ -100,11 +97,7 @@ public class RolloverModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             return Page();
         }
@@ -129,11 +122,7 @@ public class RolloverModel : BasePageModel
 
         if (results.IsFailure)
         {
-            Error = new()
-            {
-                Error = results.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(results.Error);
 
             return Page();
         }

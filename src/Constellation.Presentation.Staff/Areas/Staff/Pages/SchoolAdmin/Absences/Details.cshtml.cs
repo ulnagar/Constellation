@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Absences.GetAbsenceDetails;
 using Constellation.Application.Absences.SendAbsenceNotificationToParent;
 using Constellation.Application.Models.Auth;
@@ -43,11 +44,9 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = Request.Headers["Referer"].ToString()
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                Request.Headers["Referer"].ToString());
 
             return;
         }

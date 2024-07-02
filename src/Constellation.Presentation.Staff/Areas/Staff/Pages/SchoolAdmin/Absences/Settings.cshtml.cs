@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Absences.SetAbsenceConfigurationForStudent;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
@@ -53,11 +54,9 @@ public class SettingsModel : BasePageModel
 
         if (students.IsFailure)
         {
-            Error = new()
-            {
-                Error = students.Error,
-                RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                students.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -67,12 +66,10 @@ public class SettingsModel : BasePageModel
         var schools = await _mediator.Send(new GetSchoolsForSelectionListQuery(), cancellationToken);
 
         if (schools.IsFailure)
-        { 
-            Error = new()
-            {
-                Error = schools.Error,
-                RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
-            };
+        {
+            ModalContent = new ErrorDisplay(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -88,21 +85,15 @@ public class SettingsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(StudentId) && string.IsNullOrWhiteSpace(SchoolCode))
         {
-            Error = new()
-            {
-                Error = new("Validation.Page.EmptyValues", "You must select a value for either Student or School to continue"),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Validation.Page.EmptyValues", "You must select a value for either Student or School to continue"));
 
             var students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
 
             if (students.IsFailure)
             {
-                Error = new()
-                {
-                    Error = students.Error,
-                    RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
-                };
+                ModalContent = new ErrorDisplay(
+                    students.Error,
+                    _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -113,11 +104,9 @@ public class SettingsModel : BasePageModel
 
             if (schools.IsFailure)
             {
-                Error = new()
-                {
-                    Error = schools.Error,
-                    RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
-                };
+                ModalContent = new ErrorDisplay(
+                    schools.Error,
+                    _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -139,11 +128,9 @@ public class SettingsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage(page: "/SchoolAdmin/Absences/Audit", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage(page: "/SchoolAdmin/Absences/Audit", values: new { area = "Staff" }));
 
             return Page();
         }

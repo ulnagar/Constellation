@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Staff;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Training.GetListOfStaffMembersWithoutModule;
 using Core.Shared;
@@ -29,11 +30,7 @@ public class WithoutModuleModel : BasePageModel
 
         if (response.IsFailure)
         {
-            Error = new()
-            {
-                Error = response.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(response.Error);
 
             return;
         }

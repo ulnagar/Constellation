@@ -11,7 +11,7 @@
 <h2>Roll Details</h2>
 
 <div class="page-menu">
-    @if (canManageTest.Succeeded && Model.Error == null && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Active)
+    @if (canManageTest.Succeeded && Model.ModalContent == null && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Active)
     {
         <a asp-page="/Subject/SciencePracs/Lessons/Submit" asp-area="Staff" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-success">Submit Roll</a>
         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#cancel-roll-modal">Cancel</button>
@@ -21,12 +21,12 @@
             </button>
             <div class="dropdown-menu">
                 <a asp-page-handler="SendNotification" asp-route-increment="false" class="dropdown-item">Resend Previous Notification</a>
-                <a asp-page-handler="SendNotificatoin" asp-route-increment="true" class="dropdown-item">Send Next Notification</a>
+                <a asp-page-handler="SendNotification" asp-route-increment="true" class="dropdown-item">Send Next Notification</a>
             </div>
         </div>
     }
 
-    @if (canManageTest.Succeeded && Model.Error == null && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Cancelled)
+    @if (canManageTest.Succeeded && Model.ModalContent == null && Model.Roll.Status == Constellation.Core.Enums.LessonStatus.Cancelled)
     {
         <a asp-page-handler="Reinstate" asp-route-lessonId="@Model.LessonId" asp-route-rollId="@Model.RollId" class="btn btn-danger">Reinstate</a>
     }

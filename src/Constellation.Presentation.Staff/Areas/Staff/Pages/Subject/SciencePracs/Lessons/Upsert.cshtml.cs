@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.CreateLesson;
@@ -59,22 +60,18 @@ public class UpsertModel : BasePageModel
 
             if (lessonResponse.IsFailure)
             {
-                Error = new()
-                {
-                    Error = lessonResponse.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    lessonResponse.Error,
+                    _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = Id }));
 
                 return;
             }
 
             if (lessonResponse.Value.Rolls.Any(roll => roll.Status == Core.Enums.LessonStatus.Completed))
             {
-                Error = new()
-                {
-                    Error = DomainErrors.SciencePracs.Lesson.CannotEdit,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    DomainErrors.SciencePracs.Lesson.CannotEdit,
+                    _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = Id }));
             }
 
             LessonName = lessonResponse.Value.Name;
@@ -110,11 +107,7 @@ public class UpsertModel : BasePageModel
 
             if (updateRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = updateRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(updateRequest.Error);
 
                 await BuildCourseSelectList();
 
@@ -130,11 +123,7 @@ public class UpsertModel : BasePageModel
 
         if (createRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = createRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(createRequest.Error);
 
             await BuildCourseSelectList();
 
@@ -150,11 +139,7 @@ public class UpsertModel : BasePageModel
 
         if (coursesResponse.IsFailure)
         {
-            Error = new()
-            {
-                Error = coursesResponse.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(coursesResponse.Error);
 
             return;
         }

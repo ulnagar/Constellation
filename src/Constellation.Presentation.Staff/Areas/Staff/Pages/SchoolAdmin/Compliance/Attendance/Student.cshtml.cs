@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance;
 
 using Application.Attendance.GetAttendanceValuesForStudent;
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Students.GetStudentById;
 using Constellation.Application.Students.Models;
@@ -41,11 +42,9 @@ public class StudentModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(StudentId))
         {
-            Error = new()
-            {
-                Error = new("Page.Parameter.Required", "A valid StudentId must be provided"),
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                new("Page.Parameter.Required", "A valid StudentId must be provided"),
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -54,11 +53,9 @@ public class StudentModel : BasePageModel
 
         if (studentRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                studentRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -69,11 +66,9 @@ public class StudentModel : BasePageModel
 
         if (valueRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = valueRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                valueRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 
             return;
         }

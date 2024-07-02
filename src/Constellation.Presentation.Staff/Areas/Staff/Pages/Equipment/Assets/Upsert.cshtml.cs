@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
 using Application.Assets.CreateFullAsset;
 using Application.Assets.UpdateAsset;
+using Application.Common.PresentationModels;
 using Constellation.Application.Assets.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.Enums;
@@ -88,11 +89,7 @@ public class UpsertModel : BasePageModel
 
             if (asset.IsFailure)
             {
-                Error = new()
-                {
-                    Error = asset.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(asset.Error);
 
                 return;
             }
@@ -100,11 +97,9 @@ public class UpsertModel : BasePageModel
             if (!asset.Value.Status.Equals(AssetStatus.Active) &&
                 !asset.Value.Status.Equals(AssetStatus.PendingDisposal))
             {
-                Error = new()
-                {
-                    Error = AssetErrors.CannotUpdateDisposedItem,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Asses/Details", values: new { area = "Staff", AssetNumber = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    AssetErrors.CannotUpdateDisposedItem,
+                    _linkGenerator.GetPathByPage("/Equipment/Asses/Details", values: new { area = "Staff", AssetNumber = Id }));
 
                 return;
             }
@@ -143,11 +138,7 @@ public class UpsertModel : BasePageModel
 
             if (createResult.IsFailure)
             {
-                Error = new()
-                {
-                    Error = createResult.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(createResult.Error);
 
                 return Page();
             }
@@ -170,11 +161,7 @@ public class UpsertModel : BasePageModel
 
         if (updateResult.IsFailure)
         {
-            Error = new()
-            {
-                Error = updateResult.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(updateResult.Error);
 
             return Page();
         }

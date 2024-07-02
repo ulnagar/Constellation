@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Features.API.Schools.Queries;
 using Application.Models.Auth;
@@ -88,11 +89,7 @@ public class SubmitModel : BasePageModel
         {
             await PreparePage();
 
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }
@@ -106,11 +103,9 @@ public class SubmitModel : BasePageModel
 
         if (string.IsNullOrWhiteSpace(staffId))
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.UserNotFound,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Auth.UserNotFound,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -119,11 +114,9 @@ public class SubmitModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            Error = new()
-            {
-                Error = staffMember.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                staffMember.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -132,11 +125,9 @@ public class SubmitModel : BasePageModel
 
         if (students.IsFailure)
         {
-            Error = new()
-            {
-                Error = students.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                students.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -151,11 +142,9 @@ public class SubmitModel : BasePageModel
 
         if (teachers.IsFailure)
         {
-            Error = new()
-            {
-                Error = teachers.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                teachers.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
             return;
         }
@@ -170,11 +159,9 @@ public class SubmitModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            Error = new()
-            {
-                Error = schools.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
             return;
         }

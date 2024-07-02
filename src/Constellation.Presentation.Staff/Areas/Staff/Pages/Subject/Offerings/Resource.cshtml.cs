@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Courses.Models;
 using Constellation.Application.Models.Auth;
@@ -86,11 +87,9 @@ public class ResourceModel : BasePageModel
 
             if (roomRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = roomRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    roomRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
                 return Page();
             }
@@ -120,11 +119,9 @@ public class ResourceModel : BasePageModel
 
             if (teamRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = teamRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    teamRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
                 return Page();
             }
@@ -151,11 +148,9 @@ public class ResourceModel : BasePageModel
 
             if (offeringRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = offeringRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    offeringRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
                 return Page();
             }
@@ -164,11 +159,9 @@ public class ResourceModel : BasePageModel
 
             if (courseRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = courseRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    courseRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
                 return Page();
             }
@@ -205,11 +198,9 @@ public class ResourceModel : BasePageModel
 
                 if (roomRequest.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = roomRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        roomRequest.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }
@@ -218,11 +209,9 @@ public class ResourceModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }
@@ -237,11 +226,9 @@ public class ResourceModel : BasePageModel
 
                 if (roomRequest.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = roomRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        roomRequest.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }
@@ -250,11 +237,9 @@ public class ResourceModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }
@@ -266,11 +251,9 @@ public class ResourceModel : BasePageModel
 
                 if (teamRequest.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = teamRequest.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        teamRequest.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }
@@ -279,11 +262,9 @@ public class ResourceModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }
@@ -295,11 +276,9 @@ public class ResourceModel : BasePageModel
 
                 if (request.IsFailure)
                 {
-                    Error = new()
-                    {
-                        Error = request.Error,
-                        RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id })
-                    };
+                    ModalContent = new ErrorDisplay(
+                        request.Error,
+                        _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
                     return Page();
                 }

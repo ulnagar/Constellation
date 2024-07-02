@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.CreateOffering;
@@ -65,11 +66,9 @@ public class UpsertModel : BasePageModel
 
             if (offering.IsFailure)
             {
-                Error = new()
-                {
-                    Error = offering.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    offering.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
                 return;
             }
@@ -86,8 +85,6 @@ public class UpsertModel : BasePageModel
 
             await BuildCourseSelectList();
         }
-
-        return;
     }
 
     public async Task<IActionResult> OnPostCreate()
@@ -105,11 +102,9 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -134,11 +129,9 @@ public class UpsertModel : BasePageModel
 
             if (offering.IsFailure)
             {
-                Error = new()
-                {
-                    Error = offering.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    offering.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -146,11 +139,9 @@ public class UpsertModel : BasePageModel
             Name = offering.Value.Name;
             CourseName = offering.Value.CourseName;
 
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id.Value })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id.Value }));
 
             return Page();
         }
@@ -164,11 +155,7 @@ public class UpsertModel : BasePageModel
 
         if (coursesResponse.IsFailure)
         {
-            Error = new()
-            {
-                Error = coursesResponse.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(coursesResponse.Error);
 
             return;
         }

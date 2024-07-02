@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Responses;
 
+using Application.Common.PresentationModels;
 using Application.Families.GetFamilyContactsForStudent;
 using Application.Families.Models;
 using Application.Models.Auth;
@@ -80,11 +81,7 @@ public class UpsertModel : BasePageModel
         {
             ModelState.AddModelError("Responses", "You must include at least one valid application");
 
-            Error = new()
-            {
-                Error = new("Consent Required", "No valid consent responses were entered"),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Consent Required", "No valid consent responses were entered"));
 
             return await PreparePage();
         }
@@ -93,11 +90,7 @@ public class UpsertModel : BasePageModel
 
         if (family.IsFailure)
         {
-            Error = new()
-            {
-                Error = family.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(family.Error);
 
             return await PreparePage();
         }
@@ -108,11 +101,7 @@ public class UpsertModel : BasePageModel
 
         if (contact is null)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Families.Parents.NotFoundInFamily(parentId, family.Value.First().FamilyId.Value),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(DomainErrors.Families.Parents.NotFoundInFamily(parentId, family.Value.First().FamilyId.Value));
 
             return await PreparePage();
         }
@@ -128,11 +117,7 @@ public class UpsertModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             return await PreparePage();
         }
@@ -156,11 +141,9 @@ public class UpsertModel : BasePageModel
 
         if (applications.IsFailure)
         {
-            Error = new()
-            {
-                Error = applications.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                applications.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -171,11 +154,9 @@ public class UpsertModel : BasePageModel
 
         if (students.IsFailure)
         {
-            Error = new()
-            {
-                Error = students.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                students.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" }));
 
             return Page();
         }

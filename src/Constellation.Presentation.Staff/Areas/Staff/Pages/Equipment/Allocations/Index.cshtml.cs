@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Allocations;
 
 using Application.Assets.GetAllocationList;
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Core.Models.Assets.Enums;
 using Core.Models.Assets.Errors;
@@ -49,11 +50,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return;
         }

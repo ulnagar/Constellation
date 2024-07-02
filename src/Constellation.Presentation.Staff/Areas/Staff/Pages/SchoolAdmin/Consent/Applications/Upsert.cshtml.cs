@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Applications;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.ThirdPartyConsent.CreateApplication;
 using Application.ThirdPartyConsent.GetApplicationById;
@@ -62,11 +63,9 @@ public class UpsertModel : BasePageModel
 
             if (applicationRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = applicationRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id.Value })
-                };
+                ModalContent = new ErrorDisplay(
+                    applicationRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id.Value }));
 
                 return;
             }
@@ -120,11 +119,7 @@ public class UpsertModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 return Page();
             }
@@ -145,11 +140,7 @@ public class UpsertModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 return Page();
             }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetAllOfferingSummaries;
 using Constellation.Application.Offerings.Models;
@@ -41,11 +42,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }

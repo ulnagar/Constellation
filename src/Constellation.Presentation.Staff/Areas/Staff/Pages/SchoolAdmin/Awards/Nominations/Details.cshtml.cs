@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Awards.DeleteAwardNomination;
 using Constellation.Application.Awards.ExportAwardNominations;
 using Constellation.Application.Awards.GetNominationPeriod;
@@ -42,11 +43,9 @@ public class DetailsModel : BasePageModel
 
         if (periodRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = periodRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                periodRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -66,11 +65,9 @@ public class DetailsModel : BasePageModel
 
             if (periodRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = periodRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    periodRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -92,28 +89,20 @@ public class DetailsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
         }
 
         Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);
 
         if (periodRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = periodRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                periodRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
 
             return;
         }
 
         Period = periodRequest.Value;
-
-        return;
     }
 }

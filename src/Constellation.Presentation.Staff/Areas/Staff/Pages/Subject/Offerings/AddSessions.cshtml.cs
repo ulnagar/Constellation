@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.AddMultipleSessionsToOffering;
 using Constellation.Application.Offerings.GetOfferingSummary;
@@ -55,11 +56,9 @@ public class AddSessionsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
             await PreparePage();
 
@@ -76,11 +75,9 @@ public class AddSessionsModel : BasePageModel
 
         if (periodRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = periodRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-            };
+            ModalContent = new ErrorDisplay(
+                periodRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
             return;
         }
@@ -96,11 +93,9 @@ public class AddSessionsModel : BasePageModel
 
         if (sessionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = sessionRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-            };
+            ModalContent = new ErrorDisplay(
+                sessionRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
             return;
         }
@@ -114,11 +109,9 @@ public class AddSessionsModel : BasePageModel
 
         if (offeringRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = offeringRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id })
-            };
+            ModalContent = new ErrorDisplay(
+                offeringRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
             return;
         }

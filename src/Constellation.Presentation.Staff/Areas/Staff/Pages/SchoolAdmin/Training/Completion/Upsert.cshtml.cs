@@ -94,11 +94,9 @@ public class UpsertModel : BasePageModel
         if (Mode == CompletionPageMode.Full && !CanEditRecords)
         {
             // Editor mode selected without edit access
-            Error = new ErrorDisplay
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
             return Page();
         } 
@@ -106,11 +104,9 @@ public class UpsertModel : BasePageModel
         if (Mode == CompletionPageMode.SoloModule && !CanEditRecords)
         {
             // Editor insert mode selected without edit access
-            Error = new ErrorDisplay
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId }));
 
             return Page();
         }
@@ -122,11 +118,9 @@ public class UpsertModel : BasePageModel
             
             if (entityRequest.IsFailure)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = entityRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId.Value })
-                };
+                ModalContent = new ErrorDisplay(
+                    entityRequest.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId.Value }));
 
                 return Page();
             }
@@ -147,11 +141,9 @@ public class UpsertModel : BasePageModel
             if (!CanEditRecords && staffId != SelectedStaffId)
             {
                 // User is not the staff member listed on the record and does not have permission to edit records
-                Error = new ErrorDisplay
-                {
-                    Error = DomainErrors.Permissions.Unauthorised,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    DomainErrors.Permissions.Unauthorised,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -262,11 +254,9 @@ public class UpsertModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    result.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -285,11 +275,9 @@ public class UpsertModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    result.Error,
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
                 return Page();
             }

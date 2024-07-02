@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.WorkFlows.GetCaseSummaryList;
 using Core.Abstractions.Clock;
@@ -43,11 +44,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }

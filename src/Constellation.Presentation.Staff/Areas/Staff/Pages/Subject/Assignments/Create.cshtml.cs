@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Assignments.CreateAssignment;
 using Constellation.Application.Assignments.GetAssignmentsFromCourse;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
@@ -83,11 +84,9 @@ public class CreateModel : BasePageModel
 
         if (courseRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = courseRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                courseRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -128,11 +127,9 @@ public class CreateModel : BasePageModel
 
         if (courseRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = courseRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                courseRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -143,11 +140,9 @@ public class CreateModel : BasePageModel
 
         if (canvasAssignmentsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = canvasAssignmentsRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                canvasAssignmentsRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -183,11 +178,9 @@ public class CreateModel : BasePageModel
 
         if (courseRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = courseRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                courseRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -198,11 +191,9 @@ public class CreateModel : BasePageModel
 
         if (canvasAssignmentsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = canvasAssignmentsRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                canvasAssignmentsRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -211,11 +202,9 @@ public class CreateModel : BasePageModel
 
         if (assignment is null)
         {
-            Error = new()
-            {
-                Error = new("Assignments.Assignment.NotFoundInCanvas", "Could not find the selected Assignment in Canvas"),
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                new("Assignments.Assignment.NotFoundInCanvas", "Could not find the selected Assignment in Canvas"),
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -254,19 +243,15 @@ public class CreateModel : BasePageModel
         {
             if (result is IValidationResult validationResult)
             {
-                Error = new()
-                {
-                    Error = validationResult.Errors.First(),
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    validationResult.Errors.First(),
+                    _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
             }
             else
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    result.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
             }
 
             return Page();

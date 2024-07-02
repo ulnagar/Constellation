@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Reports;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Features.Common.Queries;
 using Application.Models.Auth;
@@ -49,11 +50,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            Error = new()
-            {
-                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -64,11 +61,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reportRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
         }
@@ -82,11 +75,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reportRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
         }
@@ -98,11 +87,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            Error = new()
-            {
-                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -113,11 +98,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reportRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
         }
@@ -146,11 +127,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            Error = new()
-            {
-                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -159,11 +136,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reportRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
         }
@@ -175,11 +148,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            Error = new()
-            {
-                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -188,11 +157,7 @@ public class IndexModel : BasePageModel
 
         if (reportRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reportRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
         }
@@ -204,11 +169,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            Error = new()
-            {
-                Error = new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }

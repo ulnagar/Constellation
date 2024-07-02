@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Devices;
 
+using Application.Common.PresentationModels;
 using Application.Devices.GetDeviceDetails;
 using Application.Models.Auth;
 using Core.Shared;
@@ -36,11 +37,9 @@ public class DetailsModel : BasePageModel
 
         if (device.IsFailure)
         {
-            Error = new()
-            {
-                Error = device.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Devices/Index", values: new { area = "Staff"})
-            };
+            ModalContent = new ErrorDisplay(
+                device.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Devices/Index", values: new { area = "Staff"}));
 
             return;
         }

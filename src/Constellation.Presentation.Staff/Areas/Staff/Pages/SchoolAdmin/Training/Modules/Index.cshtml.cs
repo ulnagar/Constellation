@@ -40,11 +40,9 @@ public class IndexModel : BasePageModel
 
         if (moduleRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = moduleRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                moduleRequest.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
             return;
         }

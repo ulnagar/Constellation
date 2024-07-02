@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Students.GetFilteredStudents;
 using Core.Shared;
@@ -35,11 +36,7 @@ public sealed class IndexModel : BasePageModel
 
         if (students.IsFailure)
         {
-            Error = new()
-            {
-                Error = students.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(students.Error);
         }
 
         Students = students.Value

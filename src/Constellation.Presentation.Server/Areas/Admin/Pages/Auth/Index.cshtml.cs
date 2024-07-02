@@ -121,11 +121,9 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Auth/Index", values: new { area = "Admin" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Index", values: new { area = "Admin" }));
 
             return Page();
         }

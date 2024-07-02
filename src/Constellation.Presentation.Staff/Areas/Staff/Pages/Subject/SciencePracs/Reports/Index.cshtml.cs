@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Reports;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Schools.GetSchoolById;
@@ -44,11 +45,7 @@ public class IndexModel : BasePageModel
 
             if (request.IsFailure)
             {
-                Error = new()
-                {
-                    Error = request.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(request.Error);
 
                 return;
             }
@@ -68,11 +65,7 @@ public class IndexModel : BasePageModel
 
             if (request.IsFailure)
             {
-                Error = new()
-                {
-                    Error = request.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(request.Error);
 
                 return;
             }
@@ -93,11 +86,7 @@ public class IndexModel : BasePageModel
         if (reportRequest.IsSuccess)
             return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
 
-        Error = new()
-        {
-            Error = reportRequest.Error,
-            RedirectPath = null
-        };
+        ModalContent = new ErrorDisplay(reportRequest.Error);
 
         return Page();
     }

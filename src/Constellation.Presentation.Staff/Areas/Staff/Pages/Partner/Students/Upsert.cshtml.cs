@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Schools.GetSchoolsForSelectionList;
 using Application.Schools.Models;
@@ -72,11 +73,9 @@ public class UpsertModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            Error = new()
-            {
-                Error = schools.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -93,11 +92,9 @@ public class UpsertModel : BasePageModel
 
         if (student.IsFailure)
         {
-            Error = new()
-            {
-                Error = student.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff"})
-            };
+            ModalContent = new ErrorDisplay(
+                student.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff"}));
 
             return;
         }
@@ -148,11 +145,7 @@ public class UpsertModel : BasePageModel
 
             if (createResult.IsFailure)
             {
-                Error = new()
-                {
-                    Error = createResult.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(createResult.Error);
 
                 List<SelectListItem> genders = new()
                 {
@@ -185,11 +178,7 @@ public class UpsertModel : BasePageModel
 
         if (updateResult.IsFailure)
         {
-            Error = new()
-            {
-                Error = updateResult.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(updateResult.Error);
 
             List<SelectListItem> genders = new()
             {

@@ -71,11 +71,9 @@ public class UpdateModel : BasePageModel
 
         if (coverResult.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = coverResult.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                coverResult.Error,
+                _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
             return false;
         }

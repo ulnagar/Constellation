@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingLocationsAsMapLayers;
@@ -43,11 +44,9 @@ public class MapModel : BasePageModel
 
         if (offeringResult.IsFailure)
         {
-            Error = new()
-            {
-                Error = offeringResult.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                offeringResult.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -58,11 +57,9 @@ public class MapModel : BasePageModel
 
         if (layers.IsFailure)
         {
-            Error = new()
-            {
-                Error = layers.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                layers.Error,
+                _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
             return;
         }

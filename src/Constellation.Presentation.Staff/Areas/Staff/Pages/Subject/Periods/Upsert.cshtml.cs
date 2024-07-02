@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Periods.GetPeriodById;
 using Application.Periods.UpsertPeriod;
@@ -48,11 +49,9 @@ public class UpsertModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Periods/Index", values: new { area = "Staff"})
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/Periods/Index", values: new { area = "Staff"}));
 
             return;
         }
@@ -82,11 +81,7 @@ public class UpsertModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }

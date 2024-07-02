@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Enrolments.GetFTETotalByGrade;
 using Constellation.Core.Shared;
@@ -51,11 +52,9 @@ public class FTEBreakdownModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" }));
 
             return;
         }

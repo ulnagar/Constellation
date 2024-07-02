@@ -7,6 +7,7 @@ using Application.Assets.DeallocateAsset;
 using Application.Assets.SightAsset;
 using Application.Assets.TransferAsset;
 using Application.Assets.UpdateAssetStatus;
+using Application.Common.PresentationModels;
 using Constellation.Application.Assets.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
@@ -56,11 +57,9 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(AssetNumber))
         {
-            Error = new()
-            {
-                Error = AssetNumberErrors.Empty,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                AssetNumberErrors.Empty,
+                _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -69,11 +68,9 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -87,11 +84,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.StudentId))
             {
-                Error = new()
-                {
-                    Error = AllocationErrors.StudentEmpty,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(AllocationErrors.StudentEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -107,11 +100,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -126,11 +115,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.StaffId))
             {
-                Error = new()
-                {
-                    Error = AllocationErrors.StaffEmpty,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(AllocationErrors.StaffEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -146,11 +131,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -165,11 +146,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.SchoolCode))
             {
-                Error = new()
-                {
-                    Error = AllocationErrors.SchoolEmpty,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(AllocationErrors.SchoolEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -185,11 +162,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -204,11 +177,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.UserName) || string.IsNullOrWhiteSpace(viewModel.UserEmail))
             {
-                Error = new()
-                {
-                    Error = AllocationErrors.RecipientEmpty,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(AllocationErrors.RecipientEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -225,11 +194,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -240,11 +205,7 @@ public class DetailsModel : BasePageModel
             return RedirectToPage();
         }
 
-        Error = new()
-        {
-            Error = AllocationErrors.UnknownType,
-            RedirectPath = null
-        };
+        ModalContent = new ErrorDisplay(AllocationErrors.UnknownType);
 
         Result<AssetResponse> unknownResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
         Asset = unknownResult.Value;
@@ -262,11 +223,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }
@@ -288,11 +245,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -315,11 +268,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -334,11 +283,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.Site))
             {
-                Error = new()
-                {
-                    Error = LocationErrors.SiteEmpty,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(LocationErrors.SiteEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -356,11 +301,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -382,11 +323,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new()
-                {
-                    Error = result.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -397,11 +334,7 @@ public class DetailsModel : BasePageModel
             return RedirectToPage();
         }
 
-        Error = new()
-        {
-            Error = LocationErrors.UnknownCategory,
-            RedirectPath = null
-        };
+        ModalContent = new ErrorDisplay(LocationErrors.UnknownCategory);
 
         Result<AssetResponse> unknownResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
         Asset = unknownResult.Value;
@@ -419,11 +352,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
             Asset = resetResult.Value;
@@ -486,11 +415,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
             Asset = resetResult.Value;
@@ -511,11 +436,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
             Asset = resetResult.Value;

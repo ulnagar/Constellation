@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Wellbeing;
 
+using Application.Common.PresentationModels;
 using Application.Compliance.ExportWellbeingReport;
 using Application.Compliance.GetWellbeingReportFromSentral;
 using Application.DTOs;
@@ -32,11 +33,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }
@@ -50,11 +47,7 @@ public class IndexModel : BasePageModel
 
         if (dataRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = dataRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(dataRequest.Error);
 
             return Page();
         }
@@ -63,11 +56,7 @@ public class IndexModel : BasePageModel
 
         if (fileRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(fileRequest.Error);
 
             return Page();
         }

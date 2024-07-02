@@ -53,11 +53,9 @@ public class DetailsModel : BasePageModel
 
         if (moduleRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = moduleRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                moduleRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -71,11 +69,9 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            Error = new ErrorDisplay
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -93,11 +89,9 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            Error = new ErrorDisplay
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -128,11 +122,9 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -145,11 +137,7 @@ public class DetailsModel : BasePageModel
 
         if (response.IsFailure)
         {
-            Error = new()
-            {
-                Error = response.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(response.Error);
 
             Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(Id));
             Module = moduleRequest.Value;
@@ -166,11 +154,9 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -183,11 +169,7 @@ public class DetailsModel : BasePageModel
 
         if (response.IsFailure)
         {
-            Error = new()
-            {
-                Error = response.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(response.Error);
 
             Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(Id));
             Module = moduleRequest.Value;

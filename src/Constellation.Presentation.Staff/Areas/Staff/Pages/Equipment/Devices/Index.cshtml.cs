@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Devices;
 
+using Application.Common.PresentationModels;
 using Application.Devices.GetDevices;
 using Application.Models.Auth;
 using Core.Shared;
@@ -29,11 +30,7 @@ public class IndexModel : BasePageModel
 
         if (devices.IsFailure)
         {
-            Error = new()
-            {
-                Error = devices.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(devices.Error);
 
             return;
         }

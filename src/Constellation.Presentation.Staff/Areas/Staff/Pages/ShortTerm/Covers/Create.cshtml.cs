@@ -102,12 +102,10 @@ public class CreateModel : BasePageModel
 
         if (teacherResponse.IsFailure || casualResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = teacherResponse.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" })
-            };
-
+            ModalContent = new ErrorDisplay(
+                teacherResponse.Error,
+                _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
+            
             return false;
         }
 
@@ -142,11 +140,9 @@ public class CreateModel : BasePageModel
 
         if (classesResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = classesResponse.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                classesResponse.Error,
+                _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
             return false;
         }

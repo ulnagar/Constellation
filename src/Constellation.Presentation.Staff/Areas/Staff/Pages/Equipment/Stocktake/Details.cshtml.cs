@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Stocktake.GetStocktakeEventDetails;
 using Core.Shared;
@@ -36,11 +37,9 @@ public class DetailsModel : BasePageModel
 
         if (stocktake.IsFailure)
         {
-            Error = new()
-            {
-                Error = stocktake.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                stocktake.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" }));
 
             return;
         }

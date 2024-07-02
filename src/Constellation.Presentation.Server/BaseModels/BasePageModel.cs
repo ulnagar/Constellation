@@ -6,5 +6,5 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 public class BasePageModel : PageModel, IBaseModel
 {
-    public ErrorDisplay? Error { get; set; }
+    public ModalContent? ModalContent { get; set; }
 }

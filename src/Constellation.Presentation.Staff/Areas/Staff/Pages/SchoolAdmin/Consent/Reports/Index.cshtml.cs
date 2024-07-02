@@ -60,11 +60,7 @@ public class IndexModel : BasePageModel
 
             if (response.IsFailure)
             {
-                Error = new()
-                {
-                    Error = response.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(response.Error);
 
                 return await PreparePage(cancellationToken);
             }
@@ -81,11 +77,7 @@ public class IndexModel : BasePageModel
 
         if (classesResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = classesResponse.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(classesResponse.Error);
 
             return Page();
         }
@@ -134,11 +126,7 @@ public class IndexModel : BasePageModel
 
         if (schoolsRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = schoolsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(schoolsRequest.Error);
 
             return Page();
         }
@@ -149,11 +137,7 @@ public class IndexModel : BasePageModel
 
         if (applicationsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = applicationsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(applicationsRequest.Error);
 
             return Page();
         }

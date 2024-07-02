@@ -73,11 +73,7 @@ public class ListModel : BasePageModel
 
         if (file.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = file.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(file.Error);
 
             return Page();
         }
@@ -91,11 +87,7 @@ public class ListModel : BasePageModel
 
         if (classesResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = classesResponse.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(classesResponse.Error);
 
             return Page();
         }
@@ -135,11 +127,7 @@ public class ListModel : BasePageModel
 
         if (schoolsRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = schoolsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(schoolsRequest.Error);
 
             return Page();
         }
@@ -150,11 +138,7 @@ public class ListModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(studentsRequest.Error);
 
             return Page();
         }
@@ -173,11 +157,7 @@ public class ListModel : BasePageModel
 
         if (absenceRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = absenceRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(absenceRequest.Error);
 
             return Page();
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Students.GetStudentById;
 using Application.Students.Models;
@@ -78,22 +79,18 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
 
         if (string.IsNullOrWhiteSpace(studentId))
         {
-            Error = new()
-            {
-                Error = StudentErrors.InvalidId,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -102,11 +99,9 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -142,11 +137,9 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -155,11 +148,9 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -173,22 +164,18 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Permissions.Unauthorised,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                DomainErrors.Permissions.Unauthorised,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
 
         if (string.IsNullOrWhiteSpace(viewModel.StudentId))
         {
-            Error = new()
-            {
-                Error = StudentErrors.InvalidId,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -200,11 +187,9 @@ public class DetailsModel : BasePageModel
             return await PreparePage(cancellationToken);
         }
 
-        Error = new()
-        {
-            Error = result.Error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-        };
+        ModalContent = new ErrorDisplay(
+            result.Error,
+            _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
         return Page();
     }
@@ -215,11 +200,9 @@ public class DetailsModel : BasePageModel
 
         if (familyRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = familyRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                familyRequest.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }

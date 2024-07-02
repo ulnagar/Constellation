@@ -54,11 +54,7 @@ public class ImportModel : BasePageModel
 
             if (request.IsFailure)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = request.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(request.Error);
 
                 return Page();
             }
@@ -72,11 +68,7 @@ public class ImportModel : BasePageModel
         }
         catch (Exception ex)
         {
-            Error = new()
-            {
-                Error = new(ex.Source, ex.Message),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new(ex.Source, ex.Message));
 
             return Page();
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Rollover;
 
+using Application.Common.PresentationModels;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
 using Application.Rollover.ImportStudents;
@@ -35,11 +36,7 @@ public class ImportModel : BasePageModel
     {
         if (FormFile is null)
         {
-            Error = new()
-            {
-                Error = new("Page.Form.File", "A file must be specified"),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Page.Form.File", "A file must be specified"));
 
             return Page();
         }
@@ -50,11 +47,7 @@ public class ImportModel : BasePageModel
             string[] allowedExtensions = { "xlsx", "xls" };
             if (!allowedExtensions.Contains(FormFile.FileName.Split('.').Last()))
             {
-                Error = new()
-                {
-                    Error = new("Page.Form.File", "You must provide an Excel file (.xls or .xlsx)"),
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(new("Page.Form.File", "You must provide an Excel file (.xls or .xlsx)"));
 
                 return Page();
             }
@@ -66,11 +59,7 @@ public class ImportModel : BasePageModel
 
             if (outputRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = outputRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(outputRequest.Error);
 
                 return Page();
             }
@@ -79,11 +68,7 @@ public class ImportModel : BasePageModel
 
             if (processRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = processRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(processRequest.Error);
 
                 return Page();
             }
@@ -92,11 +77,7 @@ public class ImportModel : BasePageModel
         }
         catch (Exception ex)
         {
-            Error = new()
-            {
-                Error = new("Exception", ex.Message),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Exception", ex.Message));
         }
         
         return Page();

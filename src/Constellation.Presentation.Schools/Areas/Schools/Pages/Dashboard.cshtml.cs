@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Application.Models.Auth;
@@ -37,11 +38,7 @@ public class DashboardModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
         {
-            Error = new()
-            {
-                Error = ApplicationErrors.SchoolInvalid,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ApplicationErrors.SchoolInvalid);
 
             return;
         }
@@ -50,11 +47,7 @@ public class DashboardModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(studentsRequest.Error);
 
             return;
         }

@@ -70,11 +70,7 @@ public class IndexModel : BasePageModel
 
         if (classesResponse.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = classesResponse.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(classesResponse.Error);
 
             return Page();
         }
@@ -114,11 +110,7 @@ public class IndexModel : BasePageModel
 
         if (schoolsRequest.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = schoolsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(schoolsRequest.Error);
 
             return Page();
         }
@@ -129,18 +121,14 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentsRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(studentsRequest.Error);
 
             return Page();
         }
 
         StudentsList = studentsRequest.Value;
 
-        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
         Result<List<TransactionSummaryResponse>> result = await _mediator.Send(new GetTransactionsWithFilterQuery(
             offeringIds,
@@ -150,11 +138,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }

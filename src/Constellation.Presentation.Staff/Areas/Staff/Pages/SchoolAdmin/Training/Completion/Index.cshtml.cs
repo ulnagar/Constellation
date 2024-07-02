@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
+using Application.Common.PresentationModels;
 using Application.Training.GetListOfCompletionRecords;
 using Application.Training.Models;
 using Constellation.Application.Models.Auth;
@@ -52,11 +53,9 @@ public class IndexModel : BasePageModel
 
             if (recordsRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = recordsRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    recordsRequest.Error,
+                    _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
                 return Page();
             }

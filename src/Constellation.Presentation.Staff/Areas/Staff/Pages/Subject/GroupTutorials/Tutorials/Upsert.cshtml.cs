@@ -48,11 +48,9 @@ public class UpsertModel : BasePageModel
 
             if (entry.IsFailure)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = entry.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    entry.Error,
+                    _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -81,11 +79,9 @@ public class UpsertModel : BasePageModel
 
             if (result.IsFailure)
             {
-                Error = new ErrorDisplay
-                {
-                    Error = result.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Upsert", values: new { area = "Staff", Id = Id.Value })
-                };
+                ModalContent = new ErrorDisplay(
+                    result.Error,
+                    _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Upsert", values: new { area = "Staff", Id = Id.Value }));
             }
         }
         else

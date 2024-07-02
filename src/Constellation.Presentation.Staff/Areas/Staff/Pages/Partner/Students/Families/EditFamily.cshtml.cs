@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Areas;
 using Constellation.Application.Families.GetFamilyEditContext;
@@ -71,11 +72,9 @@ public class EditFamilyModel : BasePageModel
 
         if (familyResult.IsFailure)
         {
-            Error = new()
-            {
-                Error = familyResult.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                familyResult.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -111,11 +110,9 @@ public class EditFamilyModel : BasePageModel
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Index", new { area = "Staff" });
 
-        Error = new()
-        {
-            Error = result.Error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/EditFamily", values: new { area = "Staff", Id = Id })
-        };
+        ModalContent = new ErrorDisplay(
+            result.Error,
+            _linkGenerator.GetPathByPage("/Partner/Students/Families/EditFamily", values: new { area = "Staff", Id = Id }));
 
         return Page();
     }

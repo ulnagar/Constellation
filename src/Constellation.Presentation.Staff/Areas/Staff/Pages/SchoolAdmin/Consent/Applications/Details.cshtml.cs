@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Applications;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.ThirdPartyConsent.DisableApplication;
 using Application.ThirdPartyConsent.GetApplicationDetails;
@@ -40,11 +41,9 @@ public class DetailsModel : BasePageModel
 
         if (applicationRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = applicationRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                applicationRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -60,11 +59,9 @@ public class DetailsModel : BasePageModel
 
         if (applicationRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = applicationRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id })
-            };
+            ModalContent = new ErrorDisplay(
+                applicationRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id }));
 
             return Page();
         }
@@ -80,11 +77,9 @@ public class DetailsModel : BasePageModel
 
         if (applicationRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = applicationRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id })
-            };
+            ModalContent = new ErrorDisplay(
+                applicationRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id }));
 
             return Page();
         }

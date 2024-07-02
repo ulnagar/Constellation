@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.StaffMembers.GetLifecycleDetailsForStaffMember;
 using Application.StaffMembers.GetStaffDetails;
@@ -50,11 +51,9 @@ public class DetailsModel : BasePageModel
 
         if (staffRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = staffRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                staffRequest.Error,
+                _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -80,11 +79,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.NotAuthorised,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -96,11 +91,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -117,11 +108,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.NotAuthorised,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -133,11 +120,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -154,11 +137,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.NotAuthorised,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -173,11 +152,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -194,11 +169,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.NotAuthorised,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;
@@ -212,11 +183,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             Result<StaffDetailsResponse> staffRequest = await _mediator.Send(new GetStaffDetailsQuery(Id));
             StaffMember = staffRequest.Value;

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Models.Auth;
 using Application.Schools.GetSchoolDetails;
@@ -38,11 +39,9 @@ public class DetailsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" }));
 
             return;
         }

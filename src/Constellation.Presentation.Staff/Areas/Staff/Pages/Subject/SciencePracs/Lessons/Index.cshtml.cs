@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.GetLessonsFromCurrentYear;
 using Constellation.Core.Shared;
@@ -31,11 +32,7 @@ public class IndexModel : BasePageModel
 
         if (lessonRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = lessonRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(lessonRequest.Error);
 
             return;
         }

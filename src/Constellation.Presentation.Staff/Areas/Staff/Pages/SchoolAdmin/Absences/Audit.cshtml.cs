@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.GetStudentsWithAbsenceSettings;
 using Constellation.Core.Models.Absences;
@@ -37,11 +38,9 @@ public class AuditModel : BasePageModel
 
         if (studentRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = studentRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByAction("Index", "Students", new { area = "Partner" })
-            };
+            ModalContent = new ErrorDisplay(
+                studentRequest.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
             return;
         }

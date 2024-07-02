@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Actions;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.WorkFlows.UpdateConfirmSentralEntryAction;
 using Application.WorkFlows.UpdateCreateSentralEntryAction;
@@ -55,11 +56,9 @@ public class UpdateModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -75,11 +74,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
 
@@ -95,11 +90,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
 
@@ -115,11 +106,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
             
@@ -140,11 +127,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
 
@@ -158,11 +141,7 @@ public class UpdateModel : BasePageModel
     {
         if (viewModel.Status == "Not Completed" && viewModel.IncidentNumber == 0)
         {
-            Error = new()
-            {
-                Error = ActionErrors.UpdateIncidentNumberZero,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ActionErrors.UpdateIncidentNumberZero);
 
             await PreparePage();
 
@@ -176,11 +155,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
 
@@ -211,11 +186,7 @@ public class UpdateModel : BasePageModel
             }
             catch (Exception ex)
             {
-                Error = new()
-                {
-                    Error = new("Email.Attachment.Failure", $"Failed to read attachment: {file.FileName}"),
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(new("Email.Attachment.Failure", $"Failed to read attachment: {file.FileName}"));
 
                 await PreparePage();
 
@@ -231,11 +202,7 @@ public class UpdateModel : BasePageModel
 
             if (entry.IsFailure)
             {
-                Error = new()
-                {
-                    Error = new("Email.Recipient.Failure", $"Failed to add recipient: {recipient.Key} ({recipient.Value})"),
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(new("Email.Recipient.Failure", $"Failed to add recipient: {recipient.Key} ({recipient.Value})"));
 
                 await PreparePage();
 
@@ -249,11 +216,7 @@ public class UpdateModel : BasePageModel
 
         if (sender.IsFailure)
         {
-            Error = new()
-            {
-                Error = new("Email.Sender.Failure", $"Failed to add sender: {viewModel.SenderName} ({viewModel.SenderEmail})"),
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(new("Email.Sender.Failure", $"Failed to add sender: {viewModel.SenderName} ({viewModel.SenderEmail})"));
 
             await PreparePage();
 
@@ -264,11 +227,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
 
@@ -284,11 +243,7 @@ public class UpdateModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            Error = new()
-            {
-                Error = attempt.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(attempt.Error);
 
             await PreparePage();
 

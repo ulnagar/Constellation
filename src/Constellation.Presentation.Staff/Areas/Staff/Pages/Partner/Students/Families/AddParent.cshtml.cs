@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
+using Application.Common.PresentationModels;
 using Application.Helpers;
 using Application.Models.Auth;
 using Areas;
@@ -80,11 +81,9 @@ public class AddParentModel : BasePageModel
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Details", new { area = "Staff", Id = FamilyId.Value });
 
-        Error = new()
-        {
-            Error = result.Error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Families/Details", values: new { area = "Staff", Id = FamilyId.Value })
-        };
+        ModalContent = new ErrorDisplay(
+            result.Error,
+            _linkGenerator.GetPathByPage("/Partner/Students/Families/Details", values: new { area = "Staff", Id = FamilyId.Value }));
 
         return Page();
     }

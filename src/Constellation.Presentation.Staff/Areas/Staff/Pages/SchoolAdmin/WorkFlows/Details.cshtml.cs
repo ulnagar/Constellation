@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows;
 
+using Application.Common.PresentationModels;
 using Application.Features.Common.Queries;
 using Application.Models.Auth;
 using Application.Offerings.GetOfferingsForSelectionList;
@@ -63,11 +64,9 @@ public class DetailsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -83,11 +82,7 @@ public class DetailsModel : BasePageModel
 
         if (action.IsFailure)
         {
-            Error = new()
-            {
-                Error = action.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(action.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -115,11 +110,7 @@ public class DetailsModel : BasePageModel
 
         if (cancelRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = cancelRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(cancelRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -150,11 +141,7 @@ public class DetailsModel : BasePageModel
 
         if (noteRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = noteRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(noteRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -188,11 +175,7 @@ public class DetailsModel : BasePageModel
 
         if (reassignRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = reassignRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(reassignRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -272,11 +255,7 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(viewModel.StaffId))
         {
-            Error = new()
-            {
-                Error = ActionErrors.AssignStaffNull,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -292,11 +271,7 @@ public class DetailsModel : BasePageModel
 
         if (actionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = actionRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -319,11 +294,7 @@ public class DetailsModel : BasePageModel
 
         if (actionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = actionRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -342,11 +313,7 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(viewModel.StaffId))
         {
-            Error = new()
-            {
-                Error = ActionErrors.AssignStaffNull,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -362,11 +329,7 @@ public class DetailsModel : BasePageModel
 
         if (actionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = actionRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -385,11 +348,7 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(viewModel.StaffId))
         {
-            Error = new()
-            {
-                Error = ActionErrors.AssignStaffNull,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -405,11 +364,7 @@ public class DetailsModel : BasePageModel
 
         if (actionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = actionRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -428,11 +383,7 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(viewModel.StaffId))
         {
-            Error = new()
-            {
-                Error = ActionErrors.AssignStaffNull,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -448,11 +399,7 @@ public class DetailsModel : BasePageModel
 
         if (actionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = actionRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -471,11 +418,7 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(viewModel.StaffId))
         {
-            Error = new()
-            {
-                Error = ActionErrors.AssignStaffNull,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -491,11 +434,7 @@ public class DetailsModel : BasePageModel
 
         if (actionRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = actionRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 

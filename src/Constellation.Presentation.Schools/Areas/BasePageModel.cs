@@ -39,7 +39,7 @@ public class BasePageModel : PageModel, IBaseModel
 
     public string? CurrentSchoolCode { get; set; }
 
-    public ErrorDisplay? Error { get; set; }
+    public ModalContent? ModalContent { get; set; }
 
     public async Task<IActionResult> OnPostChangeSchool(SchoolSelectorViewModel viewModel)
     {

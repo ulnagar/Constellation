@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Models.Auth;
@@ -88,11 +89,9 @@ public class BulkEnrolModel : BasePageModel
 
             if (response.IsFailure)
             {
-                Error = new()
-                {
-                    Error = response.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Partner/Students/Details", values: new { area = "Staff", id = Id })
-                };
+                ModalContent = new ErrorDisplay(
+                    response.Error,
+                    _linkGenerator.GetPathByPage("/Partner/Students/Details", values: new { area = "Staff", id = Id }));
 
                 return Page();
             }

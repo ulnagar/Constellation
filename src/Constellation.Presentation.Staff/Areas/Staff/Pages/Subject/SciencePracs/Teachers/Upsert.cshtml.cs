@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactWithRole;
 using Constellation.Application.SchoolContacts.GetContactSummary;
@@ -69,11 +70,9 @@ public class UpsertModel : BasePageModel
             
             if (contactRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = contactRequest.Error,
-                    RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" })
-                };
+                ModalContent = new ErrorDisplay(
+                    contactRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
 
                 return;
             }
@@ -116,11 +115,7 @@ public class UpsertModel : BasePageModel
 
             if (updateRequest.IsFailure)
             {
-                Error = new()
-                {
-                    Error = updateRequest.Error,
-                    RedirectPath = null
-                };
+                ModalContent = new ErrorDisplay(updateRequest.Error);
 
                 return Page();
             }
@@ -142,11 +137,7 @@ public class UpsertModel : BasePageModel
 
         if (createRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = createRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(createRequest.Error);
 
             Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 

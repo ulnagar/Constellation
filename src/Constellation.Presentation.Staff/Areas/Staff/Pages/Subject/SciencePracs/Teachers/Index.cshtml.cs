@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
@@ -46,11 +47,7 @@ public class IndexModel : BasePageModel
 
         if (contactRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = contactRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(contactRequest.Error);
 
             return;
         }
@@ -115,11 +112,9 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -151,11 +146,9 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Partner/SchoolContacts/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Partner/SchoolContacts/Index", values: new { area = "Staff" }));
 
             return Page();
         }

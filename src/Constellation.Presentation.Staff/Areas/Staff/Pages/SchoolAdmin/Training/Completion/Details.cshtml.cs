@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
+using Application.Common.PresentationModels;
 using Application.Training.GetCompletionRecordDetails;
 using Application.Training.MarkTrainingCompletionRecordDeleted;
 using Application.Training.Models;
@@ -57,11 +58,9 @@ public class DetailsModel : BasePageModel
 
         if (recordRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = recordRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                recordRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -82,11 +81,9 @@ public class DetailsModel : BasePageModel
 
         if (certificateRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = certificateRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                certificateRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
             return Page();
         }

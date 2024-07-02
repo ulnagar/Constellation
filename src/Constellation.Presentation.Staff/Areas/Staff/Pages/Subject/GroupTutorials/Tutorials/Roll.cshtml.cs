@@ -147,11 +147,9 @@ public class RollModel : BasePageModel
 
         if (rollResult.IsFailure)
         {
-            Error = new ErrorDisplay
-            {
-                Error = rollResult.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                rollResult.Error,
+                _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
             Roll = new(
                 TutorialRollId.FromValue(RollId),
@@ -172,11 +170,9 @@ public class RollModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        Error = new ErrorDisplay
-        {
-            Error = error,
-            RedirectPath = _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Roll", values: new { area = "Staff", TutorialId, RollId, Mode })
-        };
+        ModalContent = new ErrorDisplay(
+            error,
+            _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Roll", values: new { area = "Staff", TutorialId, RollId, Mode }));
 
         Roll = new(
             TutorialRollId.FromValue(RollId),

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Reports;
 
+using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Models.Auth;
 using Application.WorkFlows.ExportOpenCaseReport;
@@ -33,11 +34,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            Error = new()
-            {
-                Error = DomainErrors.Auth.NotAuthorised,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
 
             return Page();
         }
@@ -46,11 +43,7 @@ public class IndexModel : BasePageModel
 
         if (fileRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileRequest.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(fileRequest.Error);
 
             return Page();
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
+using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Schools.GetSchoolsSummaryList;
 using Core.Shared;
@@ -35,11 +36,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            Error = new()
-            {
-                Error = result.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(result.Error);
 
             return;
         }

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Assignments.GetAllAssignmentSubmissionFiles;
 using Constellation.Application.Assignments.GetAssignmentById;
 using Constellation.Application.Assignments.GetAssignmentSubmissionFile;
@@ -44,11 +45,9 @@ public class DetailsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -66,11 +65,9 @@ public class DetailsModel : BasePageModel
 
         if (fileRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                fileRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -97,11 +94,9 @@ public class DetailsModel : BasePageModel
 
         if (fileRequest.IsFailure)
         {
-            Error = new()
-            {
-                Error = fileRequest.Error,
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" })
-            };
+            ModalContent = new ErrorDisplay(
+                fileRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
             return Page();
         }
@@ -113,22 +108,18 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(viewModel.StudentId))
         {
-            Error = new()
-            {
-                Error = new("Page.Parameter.InvalidValue", "The student Id value is invalid"),
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id })
-            };
+            ModalContent = new ErrorDisplay(
+                new("Page.Parameter.InvalidValue", "The student Id value is invalid"),
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id }));
 
             return Page();
         }
 
         if (viewModel.File is null)
         {
-            Error = new()
-            {
-                Error = new("Page.Parameter.InvalidValue", "You must upload a file to submit to Canvas"),
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id })
-            };
+            ModalContent = new ErrorDisplay(
+                new("Page.Parameter.InvalidValue", "You must upload a file to submit to Canvas"),
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id }));
 
             return Page();
         }
@@ -148,11 +139,9 @@ public class DetailsModel : BasePageModel
         catch (Exception ex)
         {
             //Whats going on here?
-            Error = new()
-            {
-                Error = new("Page.Parameter.ProcessingError", "Could not read the uploaded file"),
-                RedirectPath = _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id })
-            };
+            ModalContent = new ErrorDisplay(
+                new("Page.Parameter.ProcessingError", "Could not read the uploaded file"),
+                _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id }));
 
             return Page();
         }

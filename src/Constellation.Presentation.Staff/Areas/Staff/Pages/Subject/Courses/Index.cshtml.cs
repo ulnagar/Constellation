@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
+using Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCourseSummaryList;
 using Constellation.Application.Courses.Models;
 using Constellation.Application.Models.Auth;
@@ -33,11 +34,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            Error = new()
-            {
-                Error = request.Error,
-                RedirectPath = null
-            };
+            ModalContent = new ErrorDisplay(request.Error);
 
             return;
         }
