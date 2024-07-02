@@ -22,49 +22,74 @@
         <script src="~/lib/jquery/jquery.min.js"></script>
     </head>
     <body>
-        <div id="app">
-            <div class="page">
-                <div class="sidebar">
-                    <vc:school-nav active-page="@activePage.ToString()" />
+    <div id="app">
+        <div class="spinner-overlay">
+            <div class="d-flex justify-content-center h-100">  
+                <div class="spinner-grow text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <div class="spinner-grow text-info spinner-0" role="status"></div>
+                <div class="spinner-grow text-primary spinner-1" role="status"></div>
+                <div class="spinner-grow text-info spinner-2" role="status"></div>
+                <div class="spinner-grow text-primary spinner-3" role="status"></div>
+                <div class="spinner-grow text-info spinner-4" role="status"></div>
+                <div class="spinner-grow text-primary spinner-5" role="status"></div>
+                <div class="spinner-grow text-info spinner-6" role="status"></div>
+                <div class="spinner-grow text-primary spinner-7" role="status"></div>
+                <div class="spinner-grow text-info spinner-8" role="status"></div>
+            </div>
+        </div>
+
+        <div class="page">
+            <div class="sidebar">
+                <vc:school-nav active-page="@activePage.ToString()"/>
+            </div>
+
+            <main>
+                <div class="top-row main px-4 text-right">
+                    <div class="col-md-8">
+                        <vc:school-selector selected-school-code="@Model.CurrentSchoolCode"/>
+                    </div>
+                    <div class="col">
+                        @if (User?.Identity is not null && User.Identity.IsAuthenticated)
+                        {
+                            <a class="btn btn-sm btn-warning ml-4" asp-area="Admin" asp-page="/Logout">Log Out</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-sm btn-success" asp-area="Admin" asp-page="/Login">Log In</a>
+                        }
+                    </div>
                 </div>
 
-                <main>
-                    <div class="top-row main px-4 text-right">
-                        <div class="col-md-8">
-                            <vc:school-selector selected-school-code="@Model.CurrentSchoolCode" />
-                        </div>
-                        <div class="col">
-                        @if (User?.Identity is not null && User.Identity.IsAuthenticated)
-                            {
-                                <a class="btn btn-sm btn-warning ml-4" asp-area="Admin" asp-page="/Logout">Log Out</a>
-                            }
-                            else
-                            {
-                                <a class="btn btn-sm btn-success" asp-area="Admin" asp-page="/Login">Log In</a>
-                            }
-                        </div>
-                    </div>
+                <article class="content px-4">
+                    @RenderBody()
+                </article>
+            </main>
+        </div>
 
-                    <article class="content px-4">
-                        @RenderBody()
-                    </article>
-                </main>
-            </div>
-            
-            @if (Model.Error is not null)
-            {
-                <vc:error-display-redirect error="@Model.Error" />
+        @if (Model.Error is not null)
+        {
+            <vc:error-display-redirect error="@Model.Error"/>
 
-                <script>
+            <script>
                     $(document).ready(function () {
                         $('#errorModal').modal('show');
                     });
                 </script>
-            }
-        </div>
+        }
+    </div>
 
         <script src="~/lib/bootstrap5/js/bootstrap.min.js"></script>
         <script src="~/js/schools.js"></script>
         @await RenderSectionAsync("Scripts", required: false)
+        
+        <script>
+            $(document).ready(function () {
+                setTimeout(function () {
+                    $('.spinner-overlay').addClass('d-none');
+                }, 1000);
+            });
+        </script>
     </body>
 </html>
