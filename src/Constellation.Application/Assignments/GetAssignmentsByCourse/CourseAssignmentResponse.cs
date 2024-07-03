@@ -6,4 +6,5 @@ using System;
 public sealed record CourseAssignmentResponse(
     AssignmentId AssignmentId,
     string Name,
+    string DisplayName,
     DateTime DueDate);

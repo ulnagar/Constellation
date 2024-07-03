@@ -45,6 +45,7 @@ internal sealed class GetAssignmentsByCourseQueryHandler
             var entry = new CourseAssignmentResponse(
                 assignment.Id,
                 assignment.Name,
+                $"{assignment.Name} (Due: {assignment.DueDate.ToShortDateString()})",
                 assignment.DueDate);
 
             result.Add(entry);

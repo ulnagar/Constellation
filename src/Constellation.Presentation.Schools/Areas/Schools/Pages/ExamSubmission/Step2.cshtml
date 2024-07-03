@@ -1,0 +1,55 @@
+﻿@page
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.ExamSubmission.Step2Model
+@{
+}
+
+<h2>Exam Uploads</h2>
+
+<div class="row">
+    <div class="col-6 border border-info">
+        <div class="mb-3 row mt-3">
+            <div class="col-3"><label>Student</label></div>
+            <div class="col font-weight-bold">
+                <select asp-for="StudentId" asp-items="Model.Students" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3 row mt-3">
+            <div class="col-3"><label>Course</label></div>
+            <div class="col font-weight-bold">
+                <select asp-for="CourseId" asp-items="Model.Courses" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="hiddenForm" class="d-none">
+    <form asp-page="/ExamSubmission/Step2" id="step2" method="post"></form>
+    <form asp-page="/ExamSubmission/Step3" id="step3" method="post"></form>
+</div>
+
+@section scripts {
+    <script>
+        $('#StudentId').on('change', function (e) {
+            var studentId = $(this).val();
+
+            $('#step2')
+                .append('<input type="text" name="StudentId" value="' + studentId + '" />')
+                .submit();
+        });
+
+        $('#CourseId').on('change', function (e) {
+            var studentId = $('#StudentId').val();
+            var courseId = $(this).val();
+
+            $('#step3')
+                .append('<input type="text" name="StudentId" value="' + studentId + '" />')
+                .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                .submit();
+        });
+    </script>
+}

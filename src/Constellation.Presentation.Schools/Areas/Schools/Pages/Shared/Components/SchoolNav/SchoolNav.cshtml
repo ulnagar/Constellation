@@ -42,7 +42,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Exams">
+            <a class="nav-link @(Model == ActivePage.Exams ? "active" : "")" asp-page="/ExamSubmission/Step1" asp-area="Schools">
                 <i class="fas fa-file-alt" aria-hidden="true"></i> Exam Uploads
             </a>
         </div>
@@ -57,7 +57,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Help">
+            <a class="nav-link @(Model == ActivePage.Help ? "active" : "")" asp-page="/Help/Index" asp-area="Schools">
                 <i class="fas fa-question" aria-hidden="true"></i> Help
             </a>
         </div>
