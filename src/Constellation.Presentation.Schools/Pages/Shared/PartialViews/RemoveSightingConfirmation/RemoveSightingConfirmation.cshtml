@@ -1,0 +1,51 @@
+@model RemoveSightingConfirmationViewModel
+
+<form asp-page-handler="RemoveSighting">
+    <div class="modal-header">
+        <h5 class="modal-title">Remove Sighting</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row m-3">
+            <div class="col w-auto">
+                <div class="MB-3 row mt-3">
+                    <label class="form-label col-5">Serial / Asset</label>
+                    <div class="col font-weight-bold">@Model.SerialNumber / @Model.AssetNumber</div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="form-label col-5">Description</label>
+                    <div class="col font-weight-bold">@Model.Description</div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="form-label col-5">User</label>
+                    <div class="col font-weight-bold">@Model.UserName</div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="form-label col-5">Sighted</label>
+                    <div class="col font-weight-bold">@Model.SightedBy (@Model.SightedAt.ToShortDateString())</div>
+                </div>
+
+                <div class="mb-3 row mt-3">
+                    <label class="form-label col-5">Reason for cancelling</label>
+                    <div class="col">
+                        <input asp-for="EventId" type="hidden" />
+                        <input asp-for="SightingId" type="hidden" />
+                        <input asp-for="Comment" class="form-control"/>
+                    </div>
+                    <div class="w-100"></div>
+                    <div class="offset-5 col">
+                        <span asp-validation-for="Comment" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary me-3" onclick="showLoader(1000)">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
+
+<partial name="_ValidationScriptsPartial" />

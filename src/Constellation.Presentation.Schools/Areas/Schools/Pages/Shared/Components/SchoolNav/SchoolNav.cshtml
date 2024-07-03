@@ -52,7 +52,7 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Stocktake">
+            <a class="nav-link @(Model == ActivePage.Stocktake ? "active" : "")" asp-page="/Stocktake/Index" asp-area="Schools">
                 <i class="fas fa-inventory" aria-hidden="true"></i> Stocktake
             </a>
         </div>

@@ -17,5 +17,7 @@ public static class ActivePage
 
     public const string ScienceRolls = "ScienceRolls";
 
+    public const string Stocktake = "Stocktake";
+
     public const string Timetables = "Timetables";
 }

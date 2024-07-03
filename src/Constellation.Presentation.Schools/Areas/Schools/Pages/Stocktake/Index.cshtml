@@ -1,0 +1,114 @@
+﻿@page
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.IndexModel
+@{
+}
+
+<h2>Stocktake Data Collection</h2>
+
+@if (Model.EventId != Guid.Empty)
+{
+    <div>
+        <a asp-page="/Stocktake/Submit" asp-area="Schools" asp-route-eventId="@Model.EventId" class="btn btn-primary">Sight Device</a>
+    </div>
+}
+
+<hr />
+
+<div class="form-horizontal">
+    <div class="mb-3 row">
+        <label class="form-label col-md-2">Stocktake</label>
+        <div class="col-md-6">
+            <select asp-for="EventId" asp-items="@Model.StocktakeEvents" class="form-control">
+                <option value=""> -- Select -- </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="mb-3 row">
+        <label class="form-label col-md-2">Start Date</label>
+        <div class="col-md-3">@Model.Stocktake?.StartDate.ToShortDateString()</div>
+        <label class="form-label col-md-2">End Date</label>
+        <div class="col-md-3">@Model.Stocktake?.EndDate.ToShortDateString()</div>
+    </div>
+</div>
+
+<hr />
+
+<div class="mb-3 row mt-6">
+    <div class="col-md-6"><h4 class="mt-2 mb-0">Recorded sightings:</h4></div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Serial / Asset</th>
+        <th>Description</th>
+        <th>User</th>
+        <th>Sighted</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @{
+        var items = Model.Sightings;
+
+        if (items.Count == 0)
+        {
+            <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+        }
+
+        foreach (var entry in items)
+        {
+            <tr>
+                <td>@entry.SerialNumber / @entry.AssetNumber</td>
+                <td>@entry.Description</td>
+                <td>@entry.UserName</td>
+                <td>@entry.SightedBy (@entry.SightedAt.ToShortDateString())</td>
+                <td>
+                    <button data-event-id="@Model.EventId" data-sighting-id="@entry.Id" class="btn btn-sm btn-outline-danger button-hover remove-sighting-button">Delete</button>
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+</table>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog" style="max-width: 600px;">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $('.remove-sighting-button').click(function (event) {
+            var eventId = $(this).data('eventId');
+            var sightingId = $(this).data('sightingId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveSighting",
+                type: "POST",
+                data: {
+                    eventId: eventId,
+                    sightingId: sightingId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $("#EventId").on('change', function (e) {
+            var value = $(this).val();
+
+            var params = new URLSearchParams(location.search);
+            params.set('EventId', value);
+            window.location.search = params.toString();
+        });
+    </script>
+}
