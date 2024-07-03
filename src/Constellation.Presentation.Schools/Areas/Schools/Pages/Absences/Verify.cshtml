@@ -1,11 +1,11 @@
-﻿@page
+﻿@page "{absenceId}/{responseId}"
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.VerifyModel
 @{
 }
 
 <h2>Partial Absence Verification</h2>
 
-<form>
+<form method="post">
     <div>
         <div class="mb-3 row">
             <label class="form-label col-md-2">Absence Date</label>
@@ -47,10 +47,10 @@
 
         <div class="mb-3 row">
             <div class="offset-1 col-md-3">
-                <a class="btn btn-success btn-block btn-lg" asp-page-handler="Verify">Verify</a>
+                <button class="btn btn-success btn-block btn-lg" asp-page-handler="Verify">Verify</button>
             </div>
             <div class="offset-2 col-md-3">
-                <a class="btn btn-warning btn-block btn-lg" asp-page-handler="Reject">Reject</a>
+                <button class="btn btn-warning btn-block btn-lg" asp-page-handler="Reject">Reject</button>
             </div>
         </div>
     </div>

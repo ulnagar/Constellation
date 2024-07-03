@@ -36,7 +36,7 @@ public class Step1Model : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<Step1Model>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;

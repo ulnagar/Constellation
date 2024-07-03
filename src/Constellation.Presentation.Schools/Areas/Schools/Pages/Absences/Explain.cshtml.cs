@@ -38,7 +38,7 @@ public class ExplainModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ExplainModel>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;

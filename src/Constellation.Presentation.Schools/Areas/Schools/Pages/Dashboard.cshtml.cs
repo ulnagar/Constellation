@@ -37,7 +37,7 @@ public class DashboardModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DashboardModel>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;

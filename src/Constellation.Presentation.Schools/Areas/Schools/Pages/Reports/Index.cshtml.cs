@@ -40,7 +40,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Reports;

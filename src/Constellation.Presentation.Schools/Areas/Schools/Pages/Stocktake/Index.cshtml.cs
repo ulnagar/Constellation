@@ -44,7 +44,7 @@ public class IndexModel : BasePageModel
         _dateTime = dateTime;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;

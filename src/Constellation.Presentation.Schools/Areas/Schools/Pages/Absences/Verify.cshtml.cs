@@ -39,7 +39,7 @@ public class VerifyModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<VerifyModel>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;
@@ -60,7 +60,7 @@ public class VerifyModel : BasePageModel
     public string Explanation { get; set; } = string.Empty;
 
     [BindProperty]
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 
     public async Task OnGet() => await PreparePage();
 
@@ -99,7 +99,7 @@ public class VerifyModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(Comment) || Comment.Length < 5)
         {
-            ModelState.AddModelError(nameof(Comment), "You must enter a comment to reject the students explanation for this absence!");
+            ModelState.AddModelError(nameof(Comment), "You must enter a longer comment to reject the students explanation for this absence!");
 
             await PreparePage();
 

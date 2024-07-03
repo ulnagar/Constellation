@@ -45,7 +45,7 @@ public class BasePageModel : PageModel, IBaseModel
     {
         CurrentSchoolCode = viewModel.NewSchoolCode;
 
-        HttpContext.Session.SetString(nameof(CurrentSchoolCode), viewModel.NewSchoolCode);
+        _httpContextAccessor.HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode);
 
         return RedirectToPage();
     }

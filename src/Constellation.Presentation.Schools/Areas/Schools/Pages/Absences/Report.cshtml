@@ -1,0 +1,90 @@
+﻿@page
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.ReportModel
+@{
+}
+
+<h1>Attendance Report</h1>
+
+<span>Reports for a single student will be downloaded as PDF files. Reports for multiple students will be downloaded as a zip file.</span>
+
+<div>
+    <form>
+        <div class="mb-1 row mt-3">
+            <div class="col-3"><label>Student(s)</label></div>
+            <div class="col font-weight-bold">
+                <div id="SelectedStudentsList">
+                    @foreach (var entry in Model.SelectedStudents)
+                    {
+                        var student = Model.Students.FirstOrDefault(student => student.StudentId == entry);
+
+                        if (student is not null)
+                        {
+                            <button type="button" id="studentSelect-@student.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@student.StudentId)">@student.Name (@student.CurrentGrade.AsName())</button>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            @{
+                var partitionedList = Model.Students.Partition(Model.Students.Count / 3);
+
+                foreach (var list in partitionedList)
+                {
+                    <div class="col-4 button-list">
+                        @foreach (var entry in list)
+                        {
+                            <button type="button" id="studentSelect-@entry.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@entry.StudentId)">@entry.Name (@entry.CurrentGrade.AsName())</button>
+                        }
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="mb-3 row mt-3">
+            <div class="col-3"><label>Date to report</label></div>
+            <div class="col-5 font-weight-bold">
+                <input asp-for="StartDate" class="form-control" />
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section scripts {
+    <script>
+        function toggleStudent(studentId) {
+            var selectDiv = $('#studentSelect-' + studentId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-studentSelect-' + studentId).remove();
+                $('#i-studentSelect-' + studentId).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#studentSelect-' + studentId).clone().prop('id', 'pd-studentSelect-' + studentId);
+                pageDisplayDiv.appendTo('#SelectedStudentsList');
+
+                var input = $('<input>').attr('id', 'i-studentSelect-' + studentId)
+                    .attr('name', 'SelectedStudents')
+                    .attr('type', "hidden");
+                input.val(studentId);
+                var classInputDiv = $('#SelectedStudentsList');
+                classInputDiv.append(input);
+            }
+        }
+    </script>
+}

@@ -41,7 +41,7 @@ public class SubmitModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<SubmitModel>()
-            .ForContext("Application", "Schools Portal");
+            .ForContext("APPLICATION", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;
