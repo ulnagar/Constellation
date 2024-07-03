@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class SubmitModel : BasePageModel
@@ -24,11 +25,13 @@ public class SubmitModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public SubmitModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
@@ -36,6 +39,9 @@ public class SubmitModel : BasePageModel
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<SubmitModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;
@@ -58,6 +64,8 @@ public class SubmitModel : BasePageModel
 
     public async Task PreparePage()
     {
+        _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+
         Result<List<StudentDto>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
 
         if (students.IsFailure)
@@ -74,6 +82,9 @@ public class SubmitModel : BasePageModel
             .ThenBy(student => student.LastName)
             .ThenBy(student => student.FirstName)
             .ToList();
+
+        _logger.Information("Requested to retrieve staff list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+
 
         Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffFromSchoolQuery(CurrentSchoolCode));
 
@@ -115,6 +126,8 @@ public class SubmitModel : BasePageModel
             Comment,
             _currentUserService.EmailAddress,
             DateTime.Now);
+
+        _logger.Information("Requested to submit stocktake sighting by user {user} with data {@command}", _currentUserService.UserName, command);
 
         Result result = await _mediator.Send(command);
 

@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,22 +12,31 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class Step1Model : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public Step1Model(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<Step1Model>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;
@@ -37,6 +47,8 @@ public class Step1Model : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+
         Result<List<StudentSelectionResponse>> studentsRequest = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(CurrentSchoolCode));
 
         if (studentsRequest.IsFailure)

@@ -4,28 +4,38 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ILogger logger,
+        ICurrentUserService currentUserService,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext("Application", "Schools Portal");
     }
     [ViewData] public string ActivePage => Models.ActivePage.Absences;
 
@@ -40,6 +50,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve absence data by user {user} of type {type}", _currentUserService.UserName, Type);
+        
         Result<List<OutstandingAbsencesForSchoolResponse>> absencesRequest = await _mediator.Send(new GetOutstandingAbsencesForSchoolQuery(CurrentSchoolCode));
 
         if (absencesRequest.IsFailure)

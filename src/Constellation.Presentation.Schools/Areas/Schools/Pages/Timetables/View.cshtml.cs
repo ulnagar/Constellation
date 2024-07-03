@@ -6,28 +6,38 @@ using Application.Timetables.GetStudentTimetableExport;
 using Constellation.Application.DTOs;
 using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class ViewModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public ViewModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<ViewModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;
@@ -39,6 +49,8 @@ public class ViewModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve timetable data by user {user} for student {student}", _currentUserService.UserName, StudentId);
+
         Result<StudentTimetableDataDto> timetableRequest = await _mediator.Send(new GetStudentTimetableDataQuery(StudentId));
 
         if (timetableRequest.IsFailure)
@@ -53,6 +65,8 @@ public class ViewModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownload()
     {
+        _logger.Information("Requested to download timetable file by user {user} for student {student}", _currentUserService.UserName, StudentId);
+
         Result<FileDto> request = await _mediator.Send(new GetStudentTimetableExportQuery(StudentId));
 
         if (request.IsFailure)

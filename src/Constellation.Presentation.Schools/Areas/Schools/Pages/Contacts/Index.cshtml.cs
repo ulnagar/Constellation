@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Schools.Pages.Shared.PartialViews.RemoveContactConfirmation;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
@@ -22,11 +23,13 @@ public class IndexModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
@@ -34,6 +37,9 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Contacts;
@@ -45,6 +51,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve school data by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+
         Result<SchoolContactDetailsResponse> schoolDetailsRequest = await _mediator.Send(new GetSchoolContactDetailsQuery(CurrentSchoolCode));
 
         if (schoolDetailsRequest.IsFailure)
@@ -56,6 +64,8 @@ public class IndexModel : BasePageModel
 
         SchoolDetails = schoolDetailsRequest.Value;
 
+        _logger.Information("Requested to retrieve contact list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+        
         Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
         
         if (contactsRequest.IsFailure)
@@ -98,6 +108,8 @@ public class IndexModel : BasePageModel
             _currentUserService.UserName,
             string.Empty);
 
+        _logger.Information("Requested to remove school contact by user {user} with record {@command}", _currentUserService.UserName, command);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
@@ -113,10 +125,14 @@ public class IndexModel : BasePageModel
             "Ok",
             "btn-success");
 
+        _logger.Information("Requested to retrieve school data by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+        
         Result<SchoolContactDetailsResponse> schoolDetailsRequest = await _mediator.Send(new GetSchoolContactDetailsQuery(CurrentSchoolCode));
 
         SchoolDetails = schoolDetailsRequest.Value;
 
+        _logger.Information("Requested to retrieve contact list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+        
         Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
 
         Contacts = contactsRequest.Value

@@ -1,0 +1,57 @@
+﻿@page
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.VerifyModel
+@{
+}
+
+<h2>Partial Absence Verification</h2>
+
+<form>
+    <div>
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Absence Date</label>
+            <div class="col-md-6">@Model.AbsenceDate.ToShortDateString()</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Student Name</label>
+            <div class="col-md-6">@Model.StudentName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Class Name</label>
+            <div class="col-md-6">@Model.ClassName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Period Name</label>
+            <div class="col-md-6">@Model.PeriodName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Absence Timeframe</label>
+            <div class="col-md-6">@Model.AbsenceTimeframe</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Explanation</label>
+            <div class="col-md-6">@Model.Explanation</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Comment</label>
+            <div class="col-md-6">
+                <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+                <span asp-validation-for="Comment" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="offset-1 col-md-3">
+                <a class="btn btn-success btn-block btn-lg" asp-page-handler="Verify">Verify</a>
+            </div>
+            <div class="offset-2 col-md-3">
+                <a class="btn btn-warning btn-block btn-lg" asp-page-handler="Reject">Reject</a>
+            </div>
+        </div>
+    </div>
+</form>

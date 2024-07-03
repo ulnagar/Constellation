@@ -9,6 +9,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,22 +18,31 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory)
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Awards;
@@ -75,6 +85,8 @@ public class IndexModel : BasePageModel
 
     public async Task PreparePage()
     {
+        _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+
         Result<List<StudentSelectionResponse>> studentsRequest = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(CurrentSchoolCode));
 
         if (studentsRequest.IsFailure)
@@ -92,6 +104,8 @@ public class IndexModel : BasePageModel
 
         if (!string.IsNullOrWhiteSpace(StudentId))
         {
+            _logger.Information("Requested to retrieve award data by user {user} for student {student}", _currentUserService.UserName, StudentId);
+            
             Result<StudentAwardSummaryResponse> awardSummaryRequest = await _mediator.Send(new GetSummaryForStudentQuery(StudentId));
 
             if (awardSummaryRequest.IsFailure)

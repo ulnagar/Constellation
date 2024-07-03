@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.SciencePracs.GetLessonRollDetailsForSchoolsPortal;
+using Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -12,22 +13,31 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class RollModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public RollModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<RollModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;
@@ -46,6 +56,8 @@ public class RollModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve science roll data by user {user} with Id {rollId}", _currentUserService.UserName, RollId);
+
         Result<ScienceLessonRollDetails> request = await _mediator.Send(new GetLessonRollDetailsForSchoolsPortalQuery(LessonId, RollId));
 
         if (request.IsFailure)

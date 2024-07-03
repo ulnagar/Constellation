@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
@@ -25,12 +26,14 @@ public class IndexModel : BasePageModel
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
@@ -39,6 +42,9 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _dateTime = dateTime;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;
@@ -54,6 +60,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve stocktake event data by user {user}", _currentUserService.UserName);
+
         Result<List<StocktakeEventResponse>> eventsRequest = await _mediator.Send(new GetCurrentStocktakeEventsQuery());
 
         if (!eventsRequest.IsSuccess)
@@ -83,6 +91,8 @@ public class IndexModel : BasePageModel
             EventId);
 
         Stocktake = eventsRequest.Value.First(entry => entry.Id == EventId);
+
+        _logger.Information("Requested to retrieve stocktake sightings by user {user} for event {eventName}", _currentUserService.UserName, Stocktake.Name);
 
         Result<List<StocktakeSightingResponse>> sightingsRequest = await _mediator.Send(new GetStocktakeSightingsForSchoolQuery(CurrentSchoolCode, EventId));
 
@@ -128,6 +138,8 @@ public class IndexModel : BasePageModel
             viewModel.Comment,
             _currentUserService.UserName,
             _dateTime.Now);
+
+        _logger.Information("Requested to remove stocktake sighting by user {user} with data {@command}", _currentUserService.UserName, command);
 
         Result result = await _mediator.Send(command);
         

@@ -1,0 +1,48 @@
+﻿@page "{absenceId}"
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.ExplainModel
+@{
+}
+
+<h2>Whole Absence Explanation</h2>
+
+<div>
+    <form>
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Absence Date</label>
+            <div class="col-md-6">@Model.AbsenceDate.ToShortDateString()</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Student Name</label>
+            <div class="col-md-6">@Model.StudentName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Class Name</label>
+            <div class="col-md-6">@Model.ClassName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Period Name</label>
+            <div class="col-md-6">@Model.PeriodName</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Absence Timeframe</label>
+            <div class="col-md-6">@Model.AbsenceTimeframe</div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Comment</label>
+            <div class="col-md-6">
+                <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="offset-1 col-md-3">
+                <button class="btn btn-success btn-block btn-lg" type="submit">Submit</button>
+            </div>
+        </div>
+    </form>
+</div>

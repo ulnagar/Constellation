@@ -6,6 +6,7 @@ using Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
 using Application.SciencePracs.SubmitRoll;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -20,16 +22,24 @@ public class SubmitModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public SubmitModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<SubmitModel>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;
@@ -62,6 +72,8 @@ public class SubmitModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve science roll data by user {user} with Id {rollId}", _currentUserService.UserName, RollId);
+
         Result<ScienceLessonRollForSubmit> rollRequest = await _mediator.Send(new GetLessonRollSubmitContextForSchoolsPortalQuery(LessonId, RollId));
 
         if (rollRequest.IsFailure)
@@ -117,6 +129,10 @@ public class SubmitModel : BasePageModel
             Comment,
             presentStudents,
             absentStudents);
+
+        _logger
+            .ForContext(nameof(SubmitRollCommand), command, true)
+            .Information("Requested to submit science roll data by user {user}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);
 

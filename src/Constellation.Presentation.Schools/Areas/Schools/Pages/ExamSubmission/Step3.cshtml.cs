@@ -5,36 +5,43 @@ using Constellation.Application.Assignments.GetAssignmentsByCourse;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCoursesForStudent;
 using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
-using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Models.Assignments.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.ModelBinders;
-using static System.Net.WebRequestMethods;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class Step3Model : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public Step3Model(
         ISender mediator,
         LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<Step3Model>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;
@@ -55,6 +62,8 @@ public class Step3Model : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+
         Result<List<StudentSelectionResponse>> studentsRequest = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(CurrentSchoolCode));
 
         if (studentsRequest.IsFailure)
@@ -89,6 +98,8 @@ public class Step3Model : BasePageModel
             return Page();
         }
 
+        _logger.Information("Requested to retrieve course list by user {user} for student {student}", _currentUserService.UserName, StudentId);
+        
         List<StudentCourseResponse> courses = coursesRequest.Value
             .OrderBy(course => course.Name)
             .ToList();
@@ -97,6 +108,8 @@ public class Step3Model : BasePageModel
             nameof(StudentCourseResponse.Id),
             nameof(StudentCourseResponse.DisplayName),
             CourseId);
+
+        _logger.Information("Requested to retrieve assignment list by user {user} for course {course}", _currentUserService.UserName, CourseId);
 
         Result<List<CourseAssignmentResponse>> assignmentsRequest = await _mediator.Send(new GetAssignmentsByCourseQuery(CourseId, StudentId));
 

@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 [RequestSizeLimit(10485760)]
@@ -29,11 +30,13 @@ public class Step4Model : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public Step4Model(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
+        ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
         IServiceScopeFactory serviceFactory) 
         : base(httpContextAccessor, serviceFactory)
@@ -41,6 +44,9 @@ public class Step4Model : BasePageModel
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<Step4Model>()
+            .ForContext("Application", "Schools Portal");
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;
@@ -110,6 +116,8 @@ public class Step4Model : BasePageModel
             SubmittedBy = _currentUserService.UserName
         };
 
+        _logger.Information("Requested to upload assignment submission by user {user} with file {file}", _currentUserService.UserName, file.FileName);
+        
         Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
@@ -133,6 +141,8 @@ public class Step4Model : BasePageModel
 
     private async Task PreparePage()
     {
+        _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
+        
         Result<List<StudentSelectionResponse>> studentsRequest = await _mediator.Send(new GetStudentsFromSchoolForSelectionQuery(CurrentSchoolCode));
 
         if (studentsRequest.IsFailure)
@@ -156,6 +166,8 @@ public class Step4Model : BasePageModel
             StudentId,
             nameof(StudentSelectionResponse.CurrentGrade));
 
+        _logger.Information("Requested to retrieve course list by user {user} for student {student}", _currentUserService.UserName, StudentId);
+        
         Result<List<StudentCourseResponse>> coursesRequest = await _mediator.Send(new GetCoursesForStudentQuery(StudentId));
 
         if (coursesRequest.IsFailure)
@@ -175,6 +187,8 @@ public class Step4Model : BasePageModel
             nameof(StudentCourseResponse.Id),
             nameof(StudentCourseResponse.DisplayName),
             CourseId);
+
+        _logger.Information("Requested to retrieve assignment list by user {user} for course {course}", _currentUserService.UserName, CourseId);
 
         Result<List<CourseAssignmentResponse>> assignmentsRequest = await _mediator.Send(new GetAssignmentsByCourseQuery(CourseId, StudentId));
 
