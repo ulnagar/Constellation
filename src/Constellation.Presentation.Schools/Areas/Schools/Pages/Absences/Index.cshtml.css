@@ -1,0 +1,21 @@
+.selected {
+    /*"bg-info text-white";*/
+    background-color: cornflowerblue;
+    color: white;
+    position: relative;
+}
+
+.unselected {
+    /*"bg-light";*/
+    background-color: white;
+    position: relative;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+    user-select: none;
+}
+
+.mode-explanation {
+    margin-top: 1rem;
+}

@@ -12,52 +12,52 @@
 <div class="collapse navbar-collapse" id="nav-sidebar">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Dashboard ? "active" : "")" asp-page="/Dashboard" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Dashboard ? "active" : "")" asp-page="/Dashboard" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-home-lg" aria-hidden="true"></i> Home
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-user-friends" aria-hidden="true"></i> School Contacts
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link" href="Absences">
+            <a class="nav-link @(Model == ActivePage.Absences ? "active" : "")" asp-page="/Absences/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-poll-people" aria-hidden="true"></i> Absences
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.ScienceRolls ? "active" : "")" asp-page="/ScienceRolls/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.ScienceRolls ? "active" : "")" asp-page="/ScienceRolls/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-flask-potion" aria-hidden="true"></i> Science Rolls
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-tasks" aria-hidden="true"></i> Reports
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-medal" aria-hidden="true"></i> Awards
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Exams ? "active" : "")" asp-page="/ExamSubmission/Step1" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Exams ? "active" : "")" asp-page="/ExamSubmission/Step1" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-file-alt" aria-hidden="true"></i> Exam Uploads
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-clock" aria-hidden="true"></i> Timetables
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Stocktake ? "active" : "")" asp-page="/Stocktake/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Stocktake ? "active" : "")" asp-page="/Stocktake/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-inventory" aria-hidden="true"></i> Stocktake
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Help ? "active" : "")" asp-page="/Help/Index" asp-area="Schools">
+            <a class="nav-link @(Model == ActivePage.Help ? "active" : "")" asp-page="/Help/Index" asp-area="Schools" onclick="showLoader()">
                 <i class="fas fa-question" aria-hidden="true"></i> Help
             </a>
         </div>

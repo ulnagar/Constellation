@@ -1,0 +1,119 @@
+﻿@page
+@using Constellation.Core.Extensions
+@using Constellation.Presentation.Schools.Areas.Schools.Pages.Absences
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.IndexModel
+@{
+}
+
+<h2>Student Absences</h2>
+
+<div class="d-flex flex-row mt-3 mb-3">
+    <a asp-page="/Absences/Reports" asp-area="Schools" class="btn btn-warning">Attendance Reports</a>
+</div>
+
+<hr />
+
+<div class="d-flex flex-row justify-content-around mt-3 mb-3">
+    <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(Model.Type == IndexModel.AbsenceCategory.UnexplainedPartials ? "selected" : "unselected")">
+        <a asp-page="/Absences/Index" asp-area="Schools" asp-route-type="@IndexModel.AbsenceCategory.UnexplainedPartials" class="stretched-link" onclick="showLoader()"></a>
+        <div>Unexplained Partial Absences</div>
+        <div>@Model.UnexplainedPartialsCount</div>
+    </div>
+
+    <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(Model.Type == IndexModel.AbsenceCategory.UnverifiedPartials ? "selected" : "unselected")">
+        <a asp-page="/Absences/Index" asp-area="Schools" asp-route-type="@IndexModel.AbsenceCategory.UnverifiedPartials" class="stretched-link" onclick="showLoader()"></a>
+        <div>Unverified Partial Absences</div>
+        <div>@Model.UnverifiedPartialsCount</div>
+    </div>
+
+    <div class="cursor-pointer border border-secondary rounded p-3 h-100 text-center @(Model.Type == IndexModel.AbsenceCategory.UnexplainedWholes ? "selected" : "unselected")">
+        <a asp-page="/Absences/Index" asp-area="Schools" asp-route-type="@IndexModel.AbsenceCategory.UnexplainedWholes" class="stretched-link" onclick="showLoader()"></a>
+        <div>Unexplained Whole Absences</div>
+        <div>@Model.UnexplainedWholesCount</div>
+    </div>
+</div>
+
+<div class="mode-explanation">
+    @if (Model.Type == IndexModel.AbsenceCategory.UnexplainedPartials)
+    {
+        <h3>Unexplained Partial Absences</h3>
+        <span>
+            These absences are where a student was not present for a portion of a lesson. Students are sent an email requesting a reason for their absence, which is then forwarded to you for verification. You cannot verify these absences yet as the student has not provided the explanation.
+        </span>
+    }
+
+    @if (Model.Type == IndexModel.AbsenceCategory.UnverifiedPartials)
+    {
+        <h3>Unverified Partial Absences</h3>
+        <span>
+            These absences are where a student was not present for a portion of a lesson. Students have provided an reason for their absence, which is then forwarded to you for verification. Please review and verify or reject each explanation as appropriate.
+        </span>
+    }
+
+    @if (Model.Type == IndexModel.AbsenceCategory.UnexplainedWholes)
+    {
+        <h3>Unexplained Whole Absences</h3>
+        <span>
+            These absences are where a student was not present for an entire lesson. Parents are requested to provide an explanation for the absence, however if your school has received an explanation, please submit it here.
+        </span>
+    }
+</div>
+
+<div>
+    <div class="mt-3">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Period</th>
+                        <th>Length</th>
+                        <th>Class</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var items = Model.Absences.GroupBy(student => student.StudentName).ToList();
+
+                        if (items.Count == 0)
+                        {
+                            <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+                        }
+            
+                        foreach (var group in items)
+                        {
+                            var first = group.First();
+
+                            <tr class="group">
+                                <td colspan="6">@first.StudentName @first.StudentGrade.AsName()</td>
+                            </tr>
+
+                            @foreach (var item in group)
+                            {
+                                <tr>
+                                    <td>@item.AbsenceDate.ToShortDateString()</td>
+                                    <td>@item.AbsenceTimeframe</td>
+                                    <td>@item.PeriodName (@item.PeriodTimeframe)</td>
+                                    <td>@item.AbsenceLength</td>
+                                    <td>@item.OfferingName</td>
+                                    <td>
+                                        @if (Model.Type == IndexModel.AbsenceCategory.UnverifiedPartials)
+                                        {
+                                            <a asp-page="/Absences/Verify" asp-area="Schools" asp-route-absenceId="@item.AbsenceId" asp-route-responseId="@item.AbsenceResponseId" class="btn btn-info btn-show-hover">Verify</a>
+                                        }
+                                        @if (Model.Type == IndexModel.AbsenceCategory.UnexplainedWholes)
+                                        {
+                                            <a asp-page="/Absences/Explain" asp-area="Schools" asp-route-absenceId="@item.AbsenceId" class="btn btn-info btn-show-hover">Explain</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
