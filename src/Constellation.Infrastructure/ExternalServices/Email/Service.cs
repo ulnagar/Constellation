@@ -4,7 +4,6 @@ using Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Application.Absences.ConvertResponseToAbsenceExplanation;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
-using Application.Extensions;
 using Application.Helpers;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
@@ -35,7 +34,6 @@ using Templates.Views.Emails.Awards;
 using Templates.Views.Emails.Contacts;
 using Templates.Views.Emails.Covers;
 using Templates.Views.Emails.Lessons;
-using Templates.Views.Emails.MandatoryTraining;
 using Templates.Views.Emails.Reports;
 using Templates.Views.Emails.RollMarking;
 using Templates.Views.Emails.WorkFlow;
@@ -861,7 +859,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Lessons.CoordinatorName,
             SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://acos.aurora.nsw.edu.au/schools",
+            Link = "https://acos.aurora.nsw.edu.au/Schools/Dashboard",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons
         };
@@ -879,7 +877,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Lessons.CoordinatorName,
             SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://acos.aurora.nsw.edu.au/schools",
+            Link = "https://acos.aurora.nsw.edu.au/Schools/Dashboard",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons
         };
@@ -897,7 +895,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Lessons.CoordinatorName,
             SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://acos.aurora.nsw.edu.au/schools",
+            Link = "https://acos.aurora.nsw.edu.au/Schools/Dashboard",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons
         };
@@ -915,7 +913,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Lessons.CoordinatorName,
             SenderTitle = _configuration.Lessons.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
-            Link = "https://acos.aurora.nsw.edu.au/schools",
+            Link = "https://acos.aurora.nsw.edu.au/Schools/Dashboard",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons
         };
