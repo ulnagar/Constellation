@@ -37,8 +37,13 @@ public class DashboardModel : BasePageModel
 
     public List<StocktakeSightingResponse> Sightings { get; set; }
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
+        if (Id == Guid.Empty)
+        {
+            return RedirectToPage("/Dashboard", new { area = "Staff" });
+        }
+
         string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(staffId))
@@ -47,7 +52,7 @@ public class DashboardModel : BasePageModel
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
-            return;
+            return Page();
         }
 
         Result<StocktakeEventResponse> eventRequest = await _mediator.Send(new GetStocktakeEventQuery(Id));
@@ -58,7 +63,7 @@ public class DashboardModel : BasePageModel
                 eventRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
-            return;
+            return Page();
         }
 
         Result<List<StocktakeSightingResponse>> request = await _mediator.Send(new GetStocktakeSightingsForStaffMemberQuery(staffId, Id));
@@ -69,12 +74,14 @@ public class DashboardModel : BasePageModel
                 request.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
-            return;
+            return Page();
         }
 
         Sightings = request.Value;
         Name = eventRequest.Value.Name;
         StartDate = DateOnly.FromDateTime(eventRequest.Value.StartDate);
         EndDate = DateOnly.FromDateTime(eventRequest.Value.EndDate);
+
+        return Page();
     }
 }

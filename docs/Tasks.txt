@@ -12,22 +12,6 @@ FUTURE PLANS
 EMAIL:
 	Update all email actions to use BCC or separate emails to prevent data leaks of private email addresses
 
-ACTIONS:
-		Migrate to AccessRight concept
-		Tickets are created for access to resources, with defined start and end dates
-		Tickets are linked to the object that defines the right: e.g. cover, enrolment, session etc
-		Audit can tally the tickets to determine the ideal current state of access to a resource
-		Removing the source of the ticket (e.g. the cover expires or is cancelled) removes that ticket only, so if there is another ticket
-			that grants access to a resource, access is retained
-		Tickets should not be deletable (soft or hard) but instead the expiry date should be moved if the ticket needs to end earlier
-			than originally intended. This would allow for historic access audits, i.e. being able to tell who should have had access
-			at a particular time.
-		Tickets should include audit functions (e.g. who created it and when) separate from the expiry dates of the ticket itself.
-
-SCHOOL PORTAL:
-	Consolidate the server-side controllers that do not have much use (e.g. put the students and staff into the SCHOOL controller, etc.)
-	Refactor the exam submission flow to make it more wizard-like
-
 APP PERMISSIONS:
 	Implement generic permissions as per https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-6.0#use-a-handler-for-multiple-requirements
 	Permission Structure:
@@ -48,9 +32,6 @@ TRACKITSYNC JOB:
 
 GRADES:
 	Migrate from ENUM to object
-
-SCHOOLS PORTAL LOGIN:
-	Return status from MEDIATR find user action, so that an error message can be displayed as appropriate when an inactive user is detected
 
 ATTENDANCE REPORT JOB:
 	Save generated files to database

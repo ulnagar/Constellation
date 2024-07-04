@@ -28,7 +28,7 @@ public class DetailsModel : BasePageModel
         _linkGenerator = linkGenerator;
     }
 
-    [ViewData] public string ActivePage => "Nominations";
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_Nominations;
 
     [BindProperty(SupportsGet = true)]
     public Guid PeriodId { get; set; }
