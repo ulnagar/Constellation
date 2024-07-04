@@ -1,15 +1,13 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages;
 
-using Constellation.Application.Features.Auth.Queries;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.DirectoryServices.AccountManagement;
 using System.Threading.Tasks;
@@ -18,26 +16,23 @@ using System.Threading.Tasks;
 public class LoginModel : PageModel
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly Serilog.ILogger _logger;
-    private readonly IMediator _mediator;
     private readonly SignInManager<AppUser> _signInManager;
-    
+    private readonly ILogger _logger;
+
     public LoginModel(
-        SignInManager<AppUser> signInManager,
         UserManager<AppUser> userManager,
-        Serilog.ILogger logger,
-        IMediator mediator)
+        SignInManager<AppUser> signInManager,
+        ILogger logger)
     {
         _userManager = userManager;
-        _logger = logger.ForContext<IAuthService>();
-        _mediator = mediator;
         _signInManager = signInManager;
+        _logger = logger.ForContext<IAuthService>();
     }
 
     [BindProperty]
     public InputModel Input { get; set; }
 
-    public string ReturnUrl { get; set; }
+    public string ReturnUrl { get; set; } = string.Empty;
 
     public class InputModel
     {
@@ -49,16 +44,12 @@ public class LoginModel : PageModel
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
-
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
     }
 
-    private class LoginResult
+    public enum LoginType
     {
-        public bool Succeeded { get; set; }
-        public bool RequiresTwoFactor { get; set; }
-        public bool IsLockedOut { get; set; }
+        Local,
+        Debug
     }
 
     public async Task OnGetAsync(string returnUrl = null)
@@ -73,19 +64,20 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync(string returnUrl = null)
     {
+        LoginType loginType = LoginType.Local;
+
         returnUrl ??= Url.Content("~/");
 
         if (!ModelState.IsValid) return Page();
 
         // Allow bypass of authentication when debugging
-        bool localAuth = Input.Email.Contains("~");
+        loginType = Input.Email.StartsWith('~') ? LoginType.Debug : LoginType.Local;
         Input.Email = Input.Email.Replace("~", "");
-
+        
         _logger.Information("Starting Login Attempt by {Email}", Input.Email);
-
         AppUser user = await _userManager.FindByEmailAsync(Input.Email);
 
-        if (user == null)
+        if (user is null)
         {
             _logger.Warning(" - No user found for email {Email}", Input.Email);
 
@@ -95,33 +87,17 @@ public class LoginModel : PageModel
 
         _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
-        bool isAdmin = await _userManager.IsInRoleAsync(user, AuthRoles.Admin);
+        bool result = new();
 
-        // If user is admin, bypass Staff Member check
-        if (!isAdmin)
-        {
-            bool isStaffMember = await _mediator.Send(new IsUserASchoolStaffMemberQuery { EmailAddress = Input.Email });
-
-            // Check both the staff list for matching email, and the user object for correct flag
-            if (!isStaffMember && !user.IsStaffMember)
-            {
-                _logger.Information(" - User is not a staff member - redirecting to Schools Portal");
-                return RedirectToPage("PortalRedirect");
-            }
-        }
-
-        LoginResult result = new();
-
-        if (!localAuth)
+        if (loginType == LoginType.Local)
         {
             _logger.Information(" - Attempting domain login by {Email}", Input.Email);
 
-#pragma warning disable CA1416 // Validate platform compatibility
             PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
-            bool success = context.ValidateCredentials(Input.Email, Input.Password);
-#pragma warning restore CA1416 // Validate platform compatibility
+            result = context.ValidateCredentials(Input.Email, Input.Password);
+            context.Dispose();
 
-            if (!success)
+            if (!result)
             {
                 _logger.Warning(" - Domain login failed for {Email}", Input.Email);
 
@@ -132,31 +108,19 @@ public class LoginModel : PageModel
             _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
 
             await _signInManager.SignInAsync(user, false);
-            result.Succeeded = true;
-        }
-        else
-        {
-            _logger.Information(" - Attempting local login by {Email}", Input.Email);
-#if DEBUG
-            _logger.Information(" - DEBUG code found. Bypass login check.");
-            await _signInManager.SignInAsync(user, false);
-            result.Succeeded = true;
-#else
-            var passwordResult = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-            
-            if (!passwordResult.Succeeded)
-            {
-                _logger.Warning(" - Local login failed for {Email}", Input.Email);
-            }
-            else
-            {
-                result.Succeeded = passwordResult.Succeeded;
-                _logger.Information(" - Local login suceeded for {Email}", Input.Email);
-            }
-#endif
         }
 
-        if (result.Succeeded)
+#if DEBUG
+        if (loginType == LoginType.Debug)
+        {
+            _logger.Information(" - DEBUG code found. Bypass login check.");
+            await _signInManager.SignInAsync(user, false);
+
+            result = true;
+        }
+#endif
+
+        if (result)
         {
             user.LastLoggedIn = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
