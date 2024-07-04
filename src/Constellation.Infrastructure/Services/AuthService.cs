@@ -96,7 +96,7 @@ public class AuthService : IAuthService
         {
             if (user.IsSchoolContact)
             {
-                await AddUserToRole(userDetails, AuthRoles.LessonsUser);
+                await AddUserToRole(userDetails, AuthRoles.SchoolContact);
             }
 
             if (user.IsStaffMember)
@@ -127,14 +127,14 @@ public class AuthService : IAuthService
                 // Remove user from School Contacts!
                 user.IsSchoolContact = newUser.IsSchoolContact.Value;
                 user.SchoolContactId = null;
-                await RemoveUserFromRole(newUser, AuthRoles.LessonsUser);
+                await RemoveUserFromRole(newUser, AuthRoles.SchoolContact);
             }
             else if (!user.IsSchoolContact && newUser.IsSchoolContact.Value)
             {
                 // Add user to School Contacts!
                 user.IsSchoolContact = newUser.IsSchoolContact.Value;
                 user.SchoolContactId = newUser.SchoolContactId;
-                await AddUserToRole(newUser, AuthRoles.LessonsUser);
+                await AddUserToRole(newUser, AuthRoles.SchoolContact);
             }
         }
 
@@ -301,7 +301,7 @@ public class AuthService : IAuthService
         }
 
         List<AppUser> users = await _userManager.Users.ToListAsync();
-        AppRole role = await _roleManager.FindByNameAsync(AuthRoles.LessonsUser);
+        AppRole role = await _roleManager.FindByNameAsync(AuthRoles.SchoolContact);
 
         AppUser matchingUser = users.FirstOrDefault(user => user.Email == contact.EmailAddress);
 
@@ -418,7 +418,7 @@ public class AuthService : IAuthService
                 result.UserContactLinkPresent = true;
             }
 
-            if (await _userManager.IsInRoleAsync(result.User, AuthRoles.LessonsUser))
+            if (await _userManager.IsInRoleAsync(result.User, AuthRoles.SchoolContact))
             {
                 result.UserRolePresent = true;
             }

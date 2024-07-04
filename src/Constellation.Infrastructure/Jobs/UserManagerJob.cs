@@ -51,7 +51,7 @@ internal sealed class UserManagerJob : IUserManagerJob
             if (token.IsCancellationRequested)
                 return;
 
-            await CreateUser(contact.EmailAddress, contact.FirstName, contact.LastName, AuthRoles.LessonsUser);
+            await CreateUser(contact.EmailAddress, contact.FirstName, contact.LastName, AuthRoles.SchoolContact);
         }
     }
 

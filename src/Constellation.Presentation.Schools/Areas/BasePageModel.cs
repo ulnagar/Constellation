@@ -64,12 +64,12 @@ public class BasePageModel : PageModel, IBaseModel
             ? mediator.Send(new GetSchoolsForContactQuery(null, true)).Result
             : mediator.Send(new GetSchoolsForContactQuery(user.SchoolContactId)).Result;
 
-        if (schoolsRequest.IsFailure)
+        if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)
             return string.Empty;
 
-        SchoolResponse school = schoolsRequest.Value.MinBy(school => school.SchoolCode);
+        SchoolResponse school = schoolsRequest.Value.MinBy(school => school.SchoolCode)!;
 
-        _httpContextAccessor.HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), school.SchoolCode);
+        _httpContextAccessor.HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), school!.SchoolCode);
 
         return school.SchoolCode;
     }

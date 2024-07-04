@@ -20,6 +20,9 @@ public class LogoutModel : BasePageModel
     public async Task<IActionResult> OnGet(string returnUrl = null)
     {
         await _signInManager.SignOutAsync();
+
+        HttpContext.Session.Clear();
+
         if (returnUrl is not null)
         {
             return LocalRedirect(returnUrl);
@@ -31,6 +34,9 @@ public class LogoutModel : BasePageModel
     public async Task<IActionResult> OnPost(string returnUrl = null)
     {
         await _signInManager.SignOutAsync();
+
+        HttpContext.Session.Clear();
+        
         if (returnUrl is not null)
         {
             return LocalRedirect(returnUrl);

@@ -68,7 +68,7 @@ internal sealed class AuditUserCommandHandler
             user.IsSchoolContact = true;
             user.SchoolContactId = contact.Id;
 
-            await _userManager.AddToRoleAsync(user, AuthRoles.LessonsUser);
+            await _userManager.AddToRoleAsync(user, AuthRoles.SchoolContact);
         }
 
         bool family = await _studentFamilyRepository.DoesEmailBelongToParentOrFamily(user.Email, cancellationToken);

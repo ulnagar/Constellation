@@ -64,7 +64,7 @@ internal sealed class CreateOrUpdateAppUser
                 return;
             }
                 
-            IdentityResult addRole = await _userManager.AddToRoleAsync(user, AuthRoles.LessonsUser);
+            IdentityResult addRole = await _userManager.AddToRoleAsync(user, AuthRoles.SchoolContact);
 
             if (!addRole.Succeeded)
             {
@@ -99,7 +99,7 @@ internal sealed class CreateOrUpdateAppUser
             .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
             .Warning("Failed to create new School Contact AppUser");
 
-        IdentityResult addNewRole = await _userManager.AddToRoleAsync(user, AuthRoles.LessonsUser);
+        IdentityResult addNewRole = await _userManager.AddToRoleAsync(user, AuthRoles.SchoolContact);
 
         if (!addNewRole.Succeeded)
         {

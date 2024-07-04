@@ -163,7 +163,7 @@ public static class IdentityDefaults
                 AuthPermissions.SchoolAdmin.Awards.Manage,
             });
 
-        await CreateRole(roleManager, AuthRoles.LessonsUser);
+        await CreateRole(roleManager, AuthRoles.SchoolContact);
         await CreateRole(roleManager, AuthRoles.CoverRecipient);
     }
 

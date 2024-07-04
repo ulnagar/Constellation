@@ -37,24 +37,28 @@ public sealed class SchoolSelectorViewComponent : ViewComponent
             ? await _mediator.Send(new GetSchoolsForContactQuery(null, true))
             : await _mediator.Send(new GetSchoolsForContactQuery(user.SchoolContactId));
 
-        if (schoolsRequest.IsFailure)
+        if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)
             return Content(string.Empty);
 
         viewModel.ValidSchools = schoolsRequest.Value
             .OrderBy(entry => entry.Name)
             .ToList();
-
+        
         viewModel.CurrentSchool = string.IsNullOrWhiteSpace(selectedSchoolCode)
             ? schoolsRequest.Value.MinBy(school => school.SchoolCode)
             : viewModel.ValidSchools.FirstOrDefault(entry => entry.SchoolCode == selectedSchoolCode);
+
+        if (viewModel.CurrentSchool is null)
+            if (viewModel.ValidSchools.Count > 0)
+                viewModel.CurrentSchool = schoolsRequest.Value.MinBy(school => school.SchoolCode);
 
         viewModel.SchoolsList = new SelectList(
             viewModel.ValidSchools, 
             nameof(SchoolResponse.SchoolCode),
             nameof(SchoolResponse.Name),
-            viewModel.CurrentSchool.SchoolCode);
+            viewModel.CurrentSchool?.SchoolCode);
         
-        HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.CurrentSchool.SchoolCode);
+        HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.CurrentSchool!.SchoolCode);
 
         return View("SchoolSelector", viewModel);
     }
