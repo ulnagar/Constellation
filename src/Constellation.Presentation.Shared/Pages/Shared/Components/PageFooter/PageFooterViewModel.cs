@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.PageFooter;
+﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.PageFooter;
 
 public class PageFooterViewModel
 {

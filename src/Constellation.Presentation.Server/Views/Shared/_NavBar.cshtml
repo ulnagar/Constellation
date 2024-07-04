@@ -72,7 +72,7 @@
                     var loggedIn = User.Identity.IsAuthenticated;
                     var isAdmin = User.IsInRole(AuthRoles.Admin);
                 }
-                <vc:class-list-nav-bar></vc:class-list-nav-bar>
+                <vc:class-list-nav-bar />
 
                 <li class="nav-item dropdown">
                     <a href="#" id="nav-user-dropdown" class="nav-link glyphicon-dropdown" data-toggle="dropdown" role="button" aria-expanded="false"><i class="glyphicon glyphicon-user glyphicon-dropdown @(loggedIn ? "glyph-color-orange" : "")"></i></a>

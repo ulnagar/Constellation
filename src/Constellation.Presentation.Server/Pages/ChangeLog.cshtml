@@ -6,7 +6,7 @@
 @{
     var file = Assembly.GetExecutingAssembly().Location;
     var lastWriteTime = System.IO.File.GetLastWriteTime(file);
-    var version = $"{lastWriteTime.ToString("yyMM.d")}";
+    var version = $"{lastWriteTime:yyMM.d}";
 }
 
 <style>
@@ -28,7 +28,67 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.14.3 (Build @version)</h3>
+<h3>Current version: Release V1.15.0 (Build @version)</h3>
+
+<div class="changelog">
+    <ul>
+        <li>Constellation Web
+            <ul>
+                <li>Layout
+                    <ul>
+                        <li>Updated name to Constellation Staff Portal</li>
+                        <li>Added sidebar navigation links to all pages</li>
+                        <li>Added /Staff url segment to separate pages from other sections</li>
+                    </ul>
+                </li>
+                <li>Compliance section
+                    <ul>
+                        <li>Updated N-Award compliance scan to retrieve full incident type (e.g. 4th Warning)</li>
+                    </ul>
+                </li>
+                <li>Mandatory Training section
+                    <ul>
+                        <li>Removed Roles</li>
+                        <li>Added ability to link staff directly with Modules</li>
+                    </ul>
+                </li>
+                <li>WorkFlows section
+                    <ul>
+                        <li>Added a Compliance case type for N-Award and LoC tracking</li>
+                        <li>Added SentralComplianceScanJob to check for overdue N-Award and LoC incidents</li>
+                        <li>Added SentralIncidentStatusAction to request update of attached Incident</li>
+                        <li>Added a Training case type for Mandatory Training tracking</li>
+                        <li>Updated the MandatoryTrainingScanJob to create WorkFlow cases instead of sending emails</li>
+                        <li>Added UploadTrainingCertificateAction to request files be uploaded to Constellation</li>
+                    </ul>
+                </li>
+                <li>Assets section
+                    <ul>
+                        <li>Added new Assets section to track all school assets</li>
+                        <li>Moved old Devices data to read-only archive section</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Schools Portal
+            <ul>
+                <li>System-wide
+                    <ul>
+                        <li>Converted project to Razor Pages in preparation for SSO integration</li>
+                        <li>Updated loading spinner</li>
+                    </ul>
+                </li>
+                <li>Science Rolls section
+                    <ul>
+                        <li>Fixed a bug that prevented users from editing Science Rolls that had already been submitted</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3>Previous version: Release V1.14.4 (Build 2406.20)</h3>
 
 <div class="changelog">
     <ul>

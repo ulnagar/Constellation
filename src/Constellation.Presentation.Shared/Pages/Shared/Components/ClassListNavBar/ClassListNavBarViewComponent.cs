@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ClassListNavBar;
+﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.ClassListNavBar;
 
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Shared;
@@ -22,16 +22,16 @@ public class ClassListNavBarViewComponent : ViewComponent
         string username = User.Identity?.Name;
 
         if (username is null)
-            return View(viewModel);
+            return View("Default", viewModel);
 
         Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
 
         if (query.IsFailure)
-            return View(viewModel);
+            return View("Default", viewModel);
 
         foreach (TeacherOfferingResponse entry in query.Value)
             viewModel.Classes.Add(entry.OfferingName, entry.OfferingId);
 
-        return View(viewModel);
+        return View("Default", viewModel);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ClassListNavBar;
+﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.ClassListNavBar;
 
 using Constellation.Core.Models.Offerings.Identifiers;
 

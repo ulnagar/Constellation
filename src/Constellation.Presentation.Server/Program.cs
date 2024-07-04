@@ -17,7 +17,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 LoggingConfiguration.SetupLogging(builder.Configuration, Serilog.Events.LogEventLevel.Debug);
@@ -48,7 +48,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.Cookie.Name = "Constellation.Staff.Identity";
+    options.Cookie.Name = "Constellation.Identity";
     options.ExpireTimeSpan = TimeSpan.FromHours(7);
     options.LoginPath = new PathString("/Admin/Login");
     options.LogoutPath = new PathString("/Admin/Logout");
@@ -86,6 +86,7 @@ GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
 builder.Services.AddRazorPages()
     .AddSessionStateTempDataProvider()
+    .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly);
 
@@ -115,7 +116,7 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
 
 builder.WebHost.UseStaticWebAssets();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (!app.Environment.IsProduction())
 {
@@ -128,27 +129,25 @@ else
     app.UseHsts();
 }
 
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-    var logger = loggerFactory.CreateLogger("app");
+    IServiceProvider services = scope.ServiceProvider;
     try
     {
-        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+        UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
+        RoleManager<AppRole> roleManager = services.GetRequiredService<RoleManager<AppRole>>();
         await IdentityDefaults.SeedRoles(roleManager);
         await IdentityDefaults.SeedUsers(userManager);
 
-        var env = services.GetRequiredService<IWebHostEnvironment>();
+        IWebHostEnvironment env = services.GetRequiredService<IWebHostEnvironment>();
         if (env.IsDevelopment())
         {
             //await IdentityDefaults.SeedTestUsers(userManager);
         }
     }
-    catch (Exception ex)
+    catch
     {
-        logger.LogWarning(ex, "Failed to seed users and roles.");
+        // ignored
     }
 }
 
@@ -181,12 +180,12 @@ app.UseSession();
 
 app.Map("/services", hostBuilder => hostBuilder.Run(async context =>
 {
-    var sb = new StringBuilder();
+    StringBuilder sb = new();
     sb.Append("<h1>Registered Services</h1>");
     sb.Append("<table><thead>");
     sb.Append("<tr><th>Type</th><th>Lifetime</th><th>Instance</th></tr>");
     sb.Append("</thead></tbody>");
-    foreach (var svc in builder.Services)
+    foreach (ServiceDescriptor svc in builder.Services)
     {
         sb.Append("<tr>");
         sb.Append($"<td>{svc.ServiceType.FullName}</td>");
