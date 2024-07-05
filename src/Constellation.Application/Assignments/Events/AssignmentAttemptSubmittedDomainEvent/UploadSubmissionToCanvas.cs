@@ -105,6 +105,7 @@ internal sealed class UploadSubmissionToCanvas
         }
 
         List<CanvasCourseCode> resources = offerings
+            .Where(offering => offering.IsCurrent) // Limit to current offerings only to prevent trying to upload to previous years course
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => ((CanvasCourseResource)resource).CourseId)

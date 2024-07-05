@@ -77,3 +77,16 @@ tr.group {
 .form-check-input:checked {
     background-color: green;
 }
+
+/* Help Documentation */
+img.screenshot {
+    width: 45vw;
+}
+
+dl.help-documentation {
+    margin-left: 3rem;
+}
+
+h3.help-documentation {
+    margin-top: 1.5rem;
+}

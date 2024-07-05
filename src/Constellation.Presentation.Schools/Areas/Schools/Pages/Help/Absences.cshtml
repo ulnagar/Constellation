@@ -1,0 +1,112 @@
+﻿@page
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Help.AbsencesModel
+@{
+}
+
+<h2>Help documentation - Absences</h2>
+
+<div class="d-flex flex-row mt-3 mb-3">
+    <a href="javascript:history.go(-1);" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<h3 class="help-documentation">Module Description</h3>
+
+<p>The Absences module of the Schools Portal allows Partner School staff the ability to check and respond to any absences generated in the Aurora College attendance system for shared students.</p>
+<p>There are two absence types that Aurora College tracks:</p>
+<dl class="help-documentation">
+    <dt>Whole Absences</dt>
+    <dd>Any absence where the student did not attend the lesson at all</dd>
+
+    <dt>Partial Absences</dt>
+    <dd>Absences where the student was present for some of the lesson, indicating their attendance at the Partner School</dd>
+</dl>
+<p>Additionally, Aurora College tracks absences due to identified timetable clashes as explained partials. These absences are treated as Shared Enrollment and do not require explanation from either students or parents.</p>
+
+<p>Absences can be grouped into the following statuses:</p>
+<dl class="help-documentation">
+    <dt>Unexplained Whole Absences</dt>
+    <dd>Correspondence is sent to parents requesting explanation for these absences. If parents do not respond, we may request information from the Partner School</dd>
+
+    <dt>Explained Whole Absences</dt>
+    <dd>These absences have been explained either prior to the event (not generating any correspondence) or after the event</dd>
+
+    <dt>Unexplained Partial Absences</dt>
+    <dd>A request is made to the student to explain their absence for the limited portion of the class</dd>
+
+    <dt>Unverified Partial Absences</dt>
+    <dd>Student explanations for partial absences are sent to Partner School staff for verification or rejection</dd>
+
+    <dt>Explained Partial Absences</dt>
+    <dd>These absences have been explained by the student and verified by a Partner School staff member</dd>
+</dl>
+
+<h3 class="help-documentation">Unexplained Partial Absences</h3>
+
+<img src="~/_content/Constellation.Presentation.Schools/images/schools/help/Absences - Unexplained Partial.png" class="screenshot" />
+
+<p>The Unexplained Partial Absences screen shows a list of students with their pending Partial Absences listed. There is no ability to modify these absences, as they require the student to respond first.</p>
+<p>Students should be encouraged to submit explanations for these absences.</p>
+
+<h3 class="help-documentation">Unverified Partial Absences</h3>
+
+<img src="~/_content/Constellation.Presentation.Schools/images/schools/help/Absences - Unverified Partial.png" class="screenshot" />
+
+<p>The Unverified Partial Absences screen shows a list of absences for Partner School staff to verify. These are absences that are for a portion of a lesson only.</p>
+<p>To verify or reject an absence explanation, click the Verify button next to the absence.</p>
+
+<img src="~/_content/Constellation.Presentation.Schools/images/schools/help/Absences - Partial Verification.png" class="screenshot" />
+
+<p>The details of the Partial Absence are listed here to confirm that the correct absence was selected.</p>
+
+<h4>To verify the absence explanation</h4>
+<ul>
+    <li>(Optional) Enter a comment regarding this absence or explanation</li>
+    <li>Click the Verify button</li>
+</ul>
+
+<p>You will be shown a confirmation box when the system has processed the verification.</p>
+
+<h4>To reject the absence explanation</h4>
+<ul>
+    <li>(Required) Enter a comment regarding this absence or explanation</li>
+    <li>Click the Reject button</li>
+</ul>
+
+<p>You will be shown a confirmation box when the system has processed the rejection.</p>
+
+<h3 class="help-documentation">Unexplained Whole Absences</h3>
+
+<img src="~/_content/Constellation.Presentation.Schools/images/schools/help/Absences - Unexplained Whole.png" class="screenshot" />
+
+<p>The Unexplained Whole Absences screen shows a list of students with their pending Whole Absences listed. These are absences that parents have been requested to explain.</p>
+<p>Partner School staff are encouraged to check their attendance system and forward any valid reason for these absences if possible.</p>
+<p>To explain a whole absence, click the Explain button next to the absence.</p>
+
+<h4>To explain the absence</h4>
+<ul>
+    <li>(Required) Enter a comment regarding this absence</li>
+    <li>Click the Submit button</li>
+</ul>
+
+<p>You will be shown a confirmation box when the system has processed the explanation.</p>
+
+<h3 class="help-documentation">Attendance Reports</h3>
+
+<img src="~/_content/Constellation.Presentation.Schools/images/schools/help/Absences - Reports.png" class="screenshot" />
+
+<p>The attendance data can be exported as a PDF report. This report outlines the selected fortnight, all scheduled Aurora College classes, and any attendance or absence records for each lesson.</p>
+
+<h4>To generate the report</h4>
+<ul>
+    <li>(Required) Click to select the student(s) for whom reports should be generated. Multiple students can be selected at the same time.</li>
+    <li>(Required) Select the date for the report. This date is used to determine the correct fortnight period for the report, and does not need to be the specific start date for the period.</li>
+    <li>Click the Submit button</li>
+</ul>
+
+<p>If a single student is selected, a PDF file will be downloaded by the browser once the report has been generated. In cases where multiple students are selected, reports will be generated individually, then collated into a ZIP file which is then downloaded by the browser.</p>
+
+<h3 class="help-documentation">Further Assistance</h3>
+
+<p>If you require further assistance using the Schools Portal, please contact the Technology Support Team on 1300 610 733 or via <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a>. Please note that support is available during school hours only.</p>

@@ -90,7 +90,7 @@
                                 <td colspan="6">@first.StudentName @first.StudentGrade.AsName()</td>
                             </tr>
 
-                            @foreach (var item in group)
+                            @foreach (var item in group.OrderBy(entry => entry.AbsenceDate))
                             {
                                 <tr>
                                     <td>@item.AbsenceDate.ToShortDateString()</td>

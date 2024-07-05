@@ -15,5 +15,4 @@
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
   </ItemGroup>
-
 </Project>

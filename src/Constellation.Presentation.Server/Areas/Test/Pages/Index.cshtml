@@ -1,38 +1,36 @@
 ﻿@page
+@using Microsoft.AspNetCore.Mvc.RazorPages
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
+
+@inject EndpointDataSource EndpointsDataSource
 
 <h2>Test Page</h2>
 
-<div class="page-menu">
-    <a asp-page-handler="RunCode" class="btn btn-danger">Run Code</a>
-</div>
+<table class="table table-striped data-table">
+    <thead>
+    <tr>
+        <th>Area Name</th>
+        <th>Display Name</th>
+        <th>Relative Path</th>
+        <th>View Engine Path</th>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var endpoint in EndpointsDataSource.Endpoints)
+        {
+            foreach (var metadata in endpoint.Metadata)
+            {
+                if (metadata is PageActionDescriptor descriptor)
+                {
+                    <tr>
+                        <td>@descriptor.AreaName</td>
+                        <td>@descriptor.DisplayName</td>
+                        <td>@descriptor.RelativePath</td>
+                        <td>@descriptor.ViewEnginePath</td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
 
-<hr />
-
-<form method="post" asp-page-handler="ImportFile" enctype="multipart/form-data">
-    <div class="form-group row">
-        <label asp-for="UploadFile" class="col-md-2">Excel File</label>
-        <div class="col-md-6">
-            <div class="custom-file">
-                <input asp-for="UploadFile" type="file" class="custom-file-input" />
-                <label class="custom-file-label" asp-for="UploadFile">Choose file</label>
-            </div>
-        </div>
-        <div class="col-md-2 offset-md-1">
-            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
-        </div>
-    </div>
-</form>
-
-<span>@Model.Message</span>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        $(".custom-file-input").on("change", function () {
-            var fileName = $(this).val().split("\\").pop();
-            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-        });
-    </script>
-}
