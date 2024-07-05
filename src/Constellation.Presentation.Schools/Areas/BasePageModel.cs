@@ -41,7 +41,7 @@ public class BasePageModel : PageModel, IBaseModel
 
     public ModalContent? ModalContent { get; set; }
 
-    public async Task<IActionResult> OnPostChangeSchool(SchoolSelectorViewModel viewModel)
+    public async Task<IActionResult> OnPostChangeSchool(SchoolSelectorModalViewModel viewModel)
     {
         CurrentSchoolCode = viewModel.NewSchoolCode;
 

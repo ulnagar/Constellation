@@ -5,27 +5,4 @@
 @if (Model.ValidSchools.Count > 1)
 {
     <button class="btn btn-secondary btn-sm ms-4" data-bs-toggle="modal" data-bs-target="#school-selector-modal">Change School</button>
-
-    <form asp-page-handler="ChangeSchool">
-        <div class="modal fade" tabindex="-1" id="school-selector-modal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Change Active School</h5>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col">
-                                <select asp-for="NewSchoolCode" asp-items="@Model.SchoolsList" class="form-select"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success" onclick="showLoader()">Change School</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
 }

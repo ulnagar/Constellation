@@ -5,9 +5,9 @@
 }
 
 /* Prevent the backdrop from hiding access to Modal from top-bar */
-.modal-backdrop.show {
+/*.modal-backdrop.show {
     z-index: 0 !important;
-}
+}*/
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;

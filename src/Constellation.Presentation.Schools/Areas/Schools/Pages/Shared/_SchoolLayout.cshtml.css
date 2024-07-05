@@ -120,11 +120,11 @@ main {
         top: 0;
     }
 
-    .top-row {
+/*    .top-row {
         position: sticky;
         top: 0;
         z-index: 1;
-    }
+    }*/
 
         .top-row.auth ::deep a:first-child {
             flex: 1;
