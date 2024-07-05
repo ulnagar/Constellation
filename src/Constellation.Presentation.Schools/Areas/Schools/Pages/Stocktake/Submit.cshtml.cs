@@ -49,8 +49,8 @@ public class SubmitModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public Guid EventId { get; set; }
 
-    [BindProperty] public string SerialNumber { get; set; } = string.Empty;
-    [BindProperty] public string AssetNumber { get; set; } = string.Empty;
+    [BindProperty] public string? SerialNumber { get; set; } = string.Empty;
+    [BindProperty] public string? AssetNumber { get; set; } = string.Empty;
     [BindProperty] public string Description { get; set; } = string.Empty;
     [BindProperty] public string UserType { get; set; } = string.Empty;
     [BindProperty] public string UserName { get; set; } = string.Empty;
@@ -104,6 +104,16 @@ public class SubmitModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        if (string.IsNullOrWhiteSpace(AssetNumber) && string.IsNullOrWhiteSpace(SerialNumber))
+        {
+            ModelState.AddModelError(nameof(AssetNumber), "You must enter either an Asset Number or Serial Number");
+            ModelState.AddModelError(nameof(SerialNumber), "You must enter either an Asset Number or Serial Number");
+
+            await PreparePage();
+
+            return Page();
+        }
+
         Result<SchoolResponse> school = await _mediator.Send(new GetSchoolByIdQuery(CurrentSchoolCode));
 
         if (UserType == StocktakeSighting.UserTypes.School)
