@@ -64,6 +64,7 @@ builder.Services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModule
 builder.Services.AddScoped<IAuthorizationHandler, IsAssignedToActionByResource>();
 builder.Services.AddScoped<IAuthorizationHandler, IsInGroupAllowedToEditWorkFlows>();
 builder.Services.AddScoped<IAuthorizationHandler, IsAssignedToActionByRoute>();
+builder.Services.AddScoped<IAuthorizationHandler, HasActiveParentRecord>();
 
 // Register Current User Service
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -88,7 +89,8 @@ builder.Services.AddRazorPages()
     .AddSessionStateTempDataProvider()
     .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)
-    .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly);
+    .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly)
+    .AddApplicationPart(Constellation.Presentation.Parents.AssemblyReference.Assembly);
 
 builder.Services.AddSession(options =>
 {

@@ -39,6 +39,7 @@
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
     <ProjectReference Include="..\Constellation.Infrastructure.Templates\Constellation.Infrastructure.Templates.csproj" />
     <ProjectReference Include="..\Constellation.Infrastructure\Constellation.Infrastructure.csproj" />
+    <ProjectReference Include="..\Constellation.Presentation.Parents\Constellation.Presentation.Parents.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Schools\Constellation.Presentation.Schools.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj" />

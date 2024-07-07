@@ -33,4 +33,6 @@ public class AuthPolicies
     public const string CanEditSchools = "CanEditSchools";
 
     public const string IsSchoolContact = "IsSchoolContact";
+
+    public const string IsParent = "IsParent";
 }

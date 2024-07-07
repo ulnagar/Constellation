@@ -63,6 +63,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Constellation.Presentation.Schools", "src\Constellation.Presentation.Schools\Constellation.Presentation.Schools.csproj", "{39A6B4A4-5595-449C-90BE-46941DBFA232}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constellation.Presentation.Parents", "src\Constellation.Presentation.Parents\Constellation.Presentation.Parents.csproj", "{BEDC0302-0436-4F99-806D-56629565910E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,10 @@ Global
 		{39A6B4A4-5595-449C-90BE-46941DBFA232}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39A6B4A4-5595-449C-90BE-46941DBFA232}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39A6B4A4-5595-449C-90BE-46941DBFA232}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEDC0302-0436-4F99-806D-56629565910E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEDC0302-0436-4F99-806D-56629565910E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEDC0302-0436-4F99-806D-56629565910E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEDC0302-0436-4F99-806D-56629565910E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,6 +154,7 @@ Global
 		{4F70B670-3617-41EA-B848-8997C91CB831} = {E9022EAD-24FF-4322-8D72-CCD160384F97}
 		{813EF0C5-0C9A-4AAA-9909-863F4CDFAB3D} = {E9022EAD-24FF-4322-8D72-CCD160384F97}
 		{39A6B4A4-5595-449C-90BE-46941DBFA232} = {E9022EAD-24FF-4322-8D72-CCD160384F97}
+		{BEDC0302-0436-4F99-806D-56629565910E} = {E9022EAD-24FF-4322-8D72-CCD160384F97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {266E1BC1-EC70-416D-8B6F-E86CB0C2066C}
