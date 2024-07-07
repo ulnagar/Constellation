@@ -56,3 +56,4 @@ public sealed class HasRequiredGroupTutorialModulePermissions : AuthorizationHan
         return Task.CompletedTask;
     }
 }
+

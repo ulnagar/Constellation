@@ -1,0 +1,92 @@
+﻿:root {
+    --bs-nav-link-padding-x: 1rem;
+    --bs-nav-link-padding-y: .5rem;
+    --bs-form-check-bg: red; /* Checkbox slider */
+}
+
+/* Prevent the backdrop from hiding access to Modal from top-bar */
+/*.modal-backdrop.show {
+    z-index: 0 !important;
+}*/
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+h1:focus {
+    outline: none;
+}
+
+a, .btn-link {
+    color: #0071c1;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+.fas {
+    width: 2rem;
+    font-size: 1.1rem;
+    vertical-align: text-top;
+    top: -2px;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #26b050;
+}
+
+.invalid {
+    outline: 1px solid red;
+}
+
+.validation-message {
+    color: red;
+}
+
+/*Loader*/
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Grouped Data Table */
+tr.group {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Page Menu div */
+.btn-pull-right {
+    margin-left: auto;
+}
+
+/* Checkbox Slider */
+.form-check-input {
+    font-size: 1.5rem;
+    margin-left: -1.5em !important;
+}
+
+.form-check-input:checked {
+    background-color: green;
+}
+
+/* Help Documentation */
+img.screenshot {
+    width: 45vw;
+}
+
+dl.help-documentation {
+    margin-left: 3rem;
+}
+
+h3.help-documentation {
+    margin-top: 1.5rem;
+}

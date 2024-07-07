@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Areas\Parents\Pages\_ViewImports.cshtml" />
+    <None Remove="Areas\Parents\Pages\_ViewStart.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Areas\Parents\Pages\_ViewImports.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Areas\Parents\Pages\_ViewStart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
+    <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Parents\Models\" />
+    <Folder Include="Areas\Parents\Pages\NewFolder\" />
+  </ItemGroup>
+
+</Project>
