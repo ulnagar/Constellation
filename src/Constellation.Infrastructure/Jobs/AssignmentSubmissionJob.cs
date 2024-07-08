@@ -59,6 +59,7 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
             }
 
             List<CanvasCourseCode> resources = offerings
+                .Where(offering => offering.IsCurrent)
                 .SelectMany(offering => offering.Resources)
                 .Where(resource => resource.Type == ResourceType.CanvasCourse)
                 .Select(resource => ((CanvasCourseResource)resource).CourseId)
@@ -81,7 +82,7 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
                 .Where(submission => !submission.Uploaded)
                 .ToList();
 
-            foreach (CanvasAssignmentSubmission submission in assignment.Submissions)
+            foreach (CanvasAssignmentSubmission submission in validSubmissions)
             {
                 Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
 

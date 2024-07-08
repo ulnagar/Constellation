@@ -69,6 +69,7 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
         }
 
         List<CanvasCourseCode> resources = offerings
+            .Where(offering => offering.IsCurrent)
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)
             .Select(resource => ((CanvasCourseResource)resource).CourseId)
