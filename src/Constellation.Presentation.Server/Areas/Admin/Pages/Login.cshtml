@@ -15,36 +15,130 @@
     <link rel="stylesheet" href="~/css/login.css" />
 </head>
 <body style="padding: 0; margin: 0;">
-    <section>
-        <div class="form-box">
-            <div class="form-value">
-                <form method="post">
+    @if (Model.Status == LoginModel.LoginStatus.WaitingUserInput)
+    {
+        <section>
+            <div class="form-box">
+                <div class="form-value">
+                    <form method="post">
+                        <h2>Login</h2>
+                        <div class="login-text">
+                            <p>Sign in for Aurora College Constellation Portals.</p>
+                        </div>
+                        <div class="inputbox">
+                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                            <input asp-for="Input.Email" placeholder=" "/>
+                            <label asp-for="Input.Email">Email</label>
+                        </div>
+                        <button type="submit">Log in</button>
+                        <div class="login-text">
+                            <p></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    }
+
+    @if (Model.Status == LoginModel.LoginStatus.WaitingPasswordInput)
+    {
+        <section>
+            <div class="form-box">
+                <div class="form-value">
+                    <form asp-page-handler="PasswordLogin" method="post">
+                        <h2>Login</h2>
+                        <div class="login-text">
+                            <p>Sign in for Aurora College Constellation Portals.</p>
+                        </div>
+                        <div class="inputbox">
+                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                            <input asp-for="Input.Email" placeholder=" "/>
+                            <label asp-for="Input.Email">Email</label>
+                        </div>
+                        <div class="inputbox">
+                            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                            <input asp-for="Input.Password" placeholder=" "/>
+                            <label asp-for="Input.Password">Password</label>
+                        </div>
+                        <button type="submit">Log in</button>
+                        <div class="login-text">
+                            <p></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    }
+    
+    @if (Model.Status == LoginModel.LoginStatus.InvalidUsername)
+    {
+        <section>
+            <div class="form-box">
+                <div class="form-value">
+                    <form method="post">
+                        <h2>Login</h2>
+                        <div class="login-text">
+                            <p>Sign in for Aurora College Constellation Portals.</p>
+                        </div>
+                        <div class="inputbox">
+                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                            <input asp-for="Input.Email" placeholder=" "/>
+                            <label asp-for="Input.Email">Email</label>
+                        </div>
+                        <button type="submit">Log in</button>
+                        <div class="login-text">
+                            <p>Invalid username! Please try again.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    }
+    
+    @if (Model.Status == LoginModel.LoginStatus.EmailSent)
+    {
+        <section>
+            <div class="form-box">
+                <div class="form-value">
                     <h2>Login</h2>
                     <div class="login-text">
-                        <p>Sign in for Aurora College and Partner School staff only.</p>
+                        <p>Sign in for Aurora College Constellation Portals.</p>
                     </div>
-                    <div class="inputbox">
-                        <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                        <input asp-for="Input.Email" placeholder=" " />
-                        <label asp-for="Input.Email">Email</label>
-                    </div>
-                    <div class="inputbox">
-                        <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                        <input asp-for="Input.Password" placeholder=" " />
-                        <label asp-for="Input.Password">Password</label>
-                    </div>
-                    <button type="submit">Log in</button>
                     <div class="login-text">
-                        <p>
-                            Parent of an Aurora College student? Try the <a href="https://acos.aurora.nsw.edu.au/parents">Parents Portal</a> instead.
-                        </p>
+                        <p>Your login link is on its way to your email!</p>
+                        <p>Please check your email for the link to log in to the Aurora College Parents Portal. Remember that it is only valid for the next 10 minutes.</p>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    }
+    
+    @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
+    {
+        <section>
+            <div class="form-box">
+                <div class="form-value">
+                    <form method="post">
+                        <h2>Login</h2>
+                        <div class="login-text">
+                            <p>Sign in for Aurora College Constellation Portals.</p>
+                        </div>
+                        <div class="inputbox">
+                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                            <input asp-for="Input.Email" placeholder=" "/>
+                            <label asp-for="Input.Email">Email</label>
+                        </div>
+                        <button type="submit">Log in</button>
+                        <div class="login-text">
+                            <p>Sorry, that link has expired. Enter your email address above to generate a new token.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    }
 
     <script src="~/lib/jquery/jquery.min.js"></script>
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
 </body>
 </html>

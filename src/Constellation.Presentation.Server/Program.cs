@@ -3,6 +3,7 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
+using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Infrastructure;
@@ -31,7 +32,8 @@ builder.Services
 builder.Services.AddIdentity<AppUser, AppRole>()
     .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddPasswordlessLoginProvider();
 
 //builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
 
