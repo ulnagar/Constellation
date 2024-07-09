@@ -1,0 +1,8 @@
+.app-theme {
+    --fa-primary-color: #0076A8;
+    --fa-secondary-color: #009B77;
+}
+
+.fa-icon-sizing {
+    width: 60px;
+}

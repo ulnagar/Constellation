@@ -12,7 +12,7 @@ public class PasswordlessLoginProvider<TUser> : TotpSecurityStampBasedTokenProvi
 
     public override async Task<string> GetUserModifierAsync(string purpose, UserManager<TUser> manager, TUser user)
     {
-        var userId = await manager.GetUserIdAsync(user);
+        string userId = await manager.GetUserIdAsync(user);
 
         return "PasswordlessLogin:" + purpose + ":" + userId;
     }
