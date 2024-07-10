@@ -29,13 +29,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development.local"
       }
     },
-    "IIS Express (CONSENT)": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development.local.consent"
-      }
-    },
     "IIS Express (PROD)": {
       "commandName": "IISExpress",
       "launchBrowser": true,

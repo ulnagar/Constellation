@@ -12,6 +12,9 @@ public sealed class AssetNumber : ValueObject, IComparable
 
     private string Number { get; }
 
+    // Required for Newtonsoft.Json deserialization
+    private AssetNumber() { }
+
     private AssetNumber(string number) => Number = number;
 
     public static AssetNumber? FromValue(string number)

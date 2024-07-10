@@ -134,18 +134,21 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 continue;
             }
 
-            Result statusUpdate = asset.Value.UpdateStatus(status);
-
-            if (statusUpdate.IsFailure)
+            if (!status.Equals(AssetStatus.Active))
             {
-                _logger
-                    .ForContext(nameof(ImportAssetDto), importAsset, true)
-                    .ForContext(nameof(Error), statusUpdate.Error, true)
-                    .Warning("Failed to import Asset");
+                Result statusUpdate = asset.Value.UpdateStatus(status);
 
-                response.Add(statusUpdate.Error);
+                if (statusUpdate.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), statusUpdate.Error, true)
+                        .Warning("Failed to import Asset");
 
-                continue;
+                    response.Add(statusUpdate.Error);
+
+                    continue;
+                }
             }
 
             School? locationSchool = schools.FirstOrDefault(entry => entry.Name == importAsset.LocationSite);
