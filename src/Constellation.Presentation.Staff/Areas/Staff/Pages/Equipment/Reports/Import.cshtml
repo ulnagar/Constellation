@@ -22,14 +22,15 @@
     </div>
 </form>
 
-@if (Model.Errors.Count > 0)
+@if (Model.Statuses.Count > 0)
 {
-    <ul>
-        @foreach (var error in Model.Errors)
+    <dl>
+        @foreach (var status in Model.Statuses.Where(status => !status.Succeeded))
         {
-            <li>@error.Code: @error.Message</li>
+            <dt>Line @status.RowNumber</dt>
+            <dd>@status.Error!.Code: @status.Error.Message</dd>
         }
-    </ul>
+    </dl>
 }
 
 @section Scripts {

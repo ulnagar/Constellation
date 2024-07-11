@@ -19,4 +19,5 @@ public sealed record ImportAssetDto(
     string LocationSite,
     string LocationRoom,
     string ResponsibleOfficer,
-    string Notes);
+    string Notes,
+    DateOnly? LastSighted);

@@ -94,8 +94,9 @@ public class ExcelService : IExcelService
                 worksheet.Cells[row, 13].GetCellValue<string>(),
                 worksheet.Cells[row, 14].GetCellValue<string>(),
                 worksheet.Cells[row, 15].GetCellValue<string>(),
-                worksheet.Cells[row, 16].GetCellValue<string>());
-
+                worksheet.Cells[row, 17].GetCellValue<string>(),
+                DateOnly.FromDateTime(worksheet.Cells[row, 16].GetCellValue<DateTime>()));
+            
             assets.Add(entry);
         }
 

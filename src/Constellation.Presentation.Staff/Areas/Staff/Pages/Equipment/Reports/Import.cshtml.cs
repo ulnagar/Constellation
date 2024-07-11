@@ -32,7 +32,7 @@ public class ImportModel : BasePageModel
     [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
     public IFormFile? UploadFile { get; set; }
 
-    public List<Error> Errors { get; set; } = new();
+    public List<ImportAssetStatusDto> Statuses { get; set; } = new();
 
     public void OnGet() { }
 
@@ -50,7 +50,7 @@ public class ImportModel : BasePageModel
             await using MemoryStream target = new();
             await UploadFile.CopyToAsync(target);
 
-            Result<List<Error>> request = await _mediator.Send(new ImportAssetsFromFileCommand(target));
+            Result<List<ImportAssetStatusDto>> request = await _mediator.Send(new ImportAssetsFromFileCommand(target));
 
             if (request.IsFailure)
             {
@@ -61,7 +61,7 @@ public class ImportModel : BasePageModel
 
             if (request.Value.Count > 0)
             {
-                Errors = request.Value;
+                Statuses = request.Value;
 
                 return Page();
             }
