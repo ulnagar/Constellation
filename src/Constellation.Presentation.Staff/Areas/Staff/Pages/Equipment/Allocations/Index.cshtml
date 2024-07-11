@@ -57,10 +57,11 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.Allocations)
+        @foreach (var entry in Model.Allocations.OrderBy(entry => entry.UserGroup).ThenBy(entry => entry.UserName))
         {
             <tr>
-                <td> <!-- data-order="@entry.UserGroup-@entry.UserName" -->
+                <td>
+                    <!-- data-order="@entry.UserGroup-@entry.UserName"> -->
                     @if (string.IsNullOrWhiteSpace(entry.UserGroup))
                     {
                         <span>@entry.UserName</span>

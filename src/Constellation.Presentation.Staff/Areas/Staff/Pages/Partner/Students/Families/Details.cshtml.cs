@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Shared.Components.FamilyAddStudent;
-using Views.Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
+using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

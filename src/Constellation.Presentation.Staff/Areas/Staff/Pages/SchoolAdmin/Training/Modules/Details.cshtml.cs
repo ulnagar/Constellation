@@ -17,8 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Shared.Components.AddStaffMemberToTrainingModule;
+using Shared.PartialViews.RemoveStaffMemberFromTrainingModuleModal;
 using System.Threading.Tasks;
-using Views.Shared.PartialViews.RemoveStaffMemberFromTrainingModuleModal;
 
 [Authorize(Policy = AuthPolicies.CanViewTrainingModuleContentDetails)]
 public class DetailsModel : BasePageModel

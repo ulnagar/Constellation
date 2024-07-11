@@ -14,8 +14,8 @@ using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Views.Shared.PartialViews.SelectStaffMemberForReportModal;
-using Views.Shared.PartialViews.SelectTrainingModuleForReportModal;
+using Shared.PartialViews.SelectStaffMemberForReportModal;
+using Shared.PartialViews.SelectTrainingModuleForReportModal;
 
 [Authorize(Policy = AuthPolicies.CanRunTrainingModuleReports)]
 public class IndexModel : BasePageModel

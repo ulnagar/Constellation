@@ -1,0 +1,36 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddAssetSighting.AddAssetSightingViewModel
+
+<form asp-page-handler="AddSighting" method="post">
+    <input type="hidden" asp-for="AssetNumber" value="@Model.AssetNumber.ToString()" />
+    <div class="modal-header">
+        <h5 class="modal-title">Add Sighting</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3">Sighted By</label>
+            <div class="col-md-9">
+                <select asp-for="StaffId" asp-items="@Model.StaffList" class="combo">
+                    <option value=""> -- Select Staff Member -- </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-3">Sighted At</label>
+            <div class="col-md-9">
+                <input asp-for="SightedAt" class="form-control"/>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-3">Note</label>
+            <div class="col-md-9">
+                <textarea asp-for="Note" class="form-control"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Add Sighting</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>

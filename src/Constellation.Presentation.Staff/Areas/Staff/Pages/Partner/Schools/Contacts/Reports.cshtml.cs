@@ -19,8 +19,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Views.Shared.PartialViews.AssignRoleModal;
-using Views.Shared.PartialViews.DeleteRoleModal;
+using Shared.PartialViews.AssignRoleModal;
+using Shared.PartialViews.DeleteRoleModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ReportsModel : BasePageModel

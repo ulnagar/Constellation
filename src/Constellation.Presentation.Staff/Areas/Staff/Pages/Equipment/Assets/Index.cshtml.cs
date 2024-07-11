@@ -19,8 +19,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Shared.PartialViews.AddAssetSighting;
 using System.Security.Claims;
-using Views.Shared.PartialViews.AddAssetSighting;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel

@@ -112,6 +112,8 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
 {
     options.AreaPageViewLocationFormats.Add("/Pages/Shared/PartialViews/{0}/{0}" + RazorViewEngine.ViewExtension);
     options.AreaPageViewLocationFormats.Add("/Pages/Shared/PartialViews/{1}/{1}" + RazorViewEngine.ViewExtension);
+
+    options.AreaPageViewLocationFormats.Add("/Areas/{2}/Pages/Shared/PartialViews/{0}/{0}" + RazorViewEngine.ViewExtension);
 });
 
 builder.WebHost.UseStaticWebAssets();

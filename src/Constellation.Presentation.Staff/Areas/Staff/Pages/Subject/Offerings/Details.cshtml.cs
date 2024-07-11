@@ -23,11 +23,11 @@ using Microsoft.AspNetCore.Routing;
 using Shared.Components.AddSessionToOffering;
 using Shared.Components.AddTeacherToOffering;
 using Shared.Components.EnrolStudentInOffering;
-using Views.Shared.PartialViews.RemoveAllSessionsModal;
-using Views.Shared.PartialViews.RemoveResourceFromOfferingModal;
-using Views.Shared.PartialViews.RemoveSessionModal;
-using Views.Shared.PartialViews.RemoveTeacherFromOfferingModal;
-using Views.Shared.PartialViews.UnenrolStudentModal;
+using Shared.PartialViews.RemoveAllSessionsModal;
+using Shared.PartialViews.RemoveResourceFromOfferingModal;
+using Shared.PartialViews.RemoveSessionModal;
+using Shared.PartialViews.RemoveTeacherFromOfferingModal;
+using Shared.PartialViews.UnenrolStudentModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

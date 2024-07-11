@@ -16,9 +16,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
+using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
+using Shared.PartialViews.DeleteFamilySelectionModal;
 using System.Threading;
-using Views.Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
-using Views.Shared.PartialViews.DeleteFamilySelectionModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel

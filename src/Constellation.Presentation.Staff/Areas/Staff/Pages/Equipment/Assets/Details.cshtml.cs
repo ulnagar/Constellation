@@ -27,8 +27,8 @@ using Shared.Components.AddAssetNote;
 using Shared.Components.AllocateAsset;
 using Shared.Components.TransferAsset;
 using Shared.Components.UpdateAssetStatus;
+using Shared.PartialViews.AddAssetSighting;
 using System.Security.Claims;
-using Views.Shared.PartialViews.AddAssetSighting;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel

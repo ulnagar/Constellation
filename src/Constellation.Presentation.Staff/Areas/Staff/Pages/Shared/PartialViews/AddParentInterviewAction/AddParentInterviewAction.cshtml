@@ -1,0 +1,19 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddParentInterviewAction.AddParentInterviewActionViewModel
+
+<form asp-page-handler="NewInterviewAction" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Add Parent Interview Action</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group col">
+            <span class="control-label">Assigned To</span>
+            <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffMembers, "Key", "Value"))" class="combo" style="width:100%">
+                <option value="">-- Select --</option>
+            </select>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Add Action</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
