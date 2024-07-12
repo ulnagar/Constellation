@@ -1,0 +1,156 @@
+﻿@page
+@using Constellation.Application.DTOs
+@model Constellation.Presentation.Parents.Areas.Parents.Pages.Timetables.IndexModel
+@{
+}
+
+<h2>Timetables</h2>
+
+@if (Model.SelectedStudent is null)
+{
+    // Show list of students in boxes to allow them to select a different student
+    <h4>Select student to display:</h4>
+    <ul class="list-group mb-2">
+        @foreach (var student in Model.Students)
+        {
+            <button class="list-group-item list-group-item-action student-select-button" data-student-id="@student.StudentId">
+                @student.DisplayName (@student.CurrentGrade)
+            </button>
+        }
+    </ul>
+}
+else
+{
+    <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+        <span class="row d-flex align-items-center">
+            @*Display as flex to enable vertical centering of the button in the second div*@
+            <div class="col-lg">
+                <div class="h4">Timetable for @Model.SelectedStudent?.DisplayName</div>
+                @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                @if (Model.Students.Count > 1)
+                {
+                    <span class="fst-italic">Click or tap to change</span>
+
+                    <div class="d-block">
+                        <a asp-route-studentId="" class="stretched-link"></a>
+                    </div>
+                }
+            </div>
+        </span>
+    </div>
+
+
+    <div class="d-grid gap-2 d-block mb-2">
+        <a class="btn btn-primary" asp-page-handler="Download" asp-route-studentId="@Model.StudentId" onclick="showLoader(2500)">Download Full Timetable</a>
+    </div>
+
+    <div class="w-auto d-flex">
+        <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex flex-column align-items-center">
+                @if (Model.Week is null)
+                {
+                    @foreach (var entry in Model.Weeks)
+                    {
+                        <div class="col w-auto position-relative p-2">
+                            <div class="h4">@entry.Value</div>
+                            <div class="d-block">
+                                <a asp-route-studentId="@Model.StudentId" asp-route-week="@entry.Key" asp-route-day="@Model.Day" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    var selectedWeek = Model.Weeks[@Model.Week.Value];
+
+                    <div class="col">
+                        <div class="h4">Week: @selectedWeek</div>
+                        <span class="fst-italic">Click or tap to change</span>
+
+                        <div class="d-block">
+                            <a asp-route-studentId="@Model.StudentId" asp-route-week="" asp-route-day="@Model.Day" class="stretched-link"></a>
+                        </div>
+                    </div>
+                }
+            </span>
+        </div>
+
+        <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex flex-column align-items-center">
+                @if (Model.Day is null)
+                {
+                    @foreach (IndexModel.SchoolDay day in Enum.GetValues(typeof(IndexModel.SchoolDay)))
+                    {
+                        <div class="col w-auto position-relative p-2 select-item">
+                            <div class="h4">@day</div>
+                            <div class="d-block">
+                                <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week" asp-route-day="@day" class="stretched-link"></a>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col">
+                        <div class="h4">Day: @Model.Day.Value.ToString()</div>
+                        <span class="fst-italic">Click or tap to change</span>
+
+                        <div class="d-block">
+                            <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week" asp-route-day="" class="stretched-link"></a>
+                        </div>
+                    </div>
+                }
+            </span>
+        </div>
+    </div>
+
+    int? currentDay = (Model.Week is not null && Model.Day is not null)
+        ? ((Model.Week.Value - 1) * 5) + (int)Model.Day.Value
+        : null;
+
+    List<TimetableDataDto.TimetableData> entries = currentDay is not null
+        ? Model.TimetableData!.Timetables
+            .Where(entry => entry.Day == currentDay)
+            .OrderBy(entry => entry.StartTime)
+            .ToList()
+        : new();
+
+    <div class="w-auto position-relative mt-3">
+        @foreach(var period in entries)
+        {
+            var style = "";
+
+            if (string.IsNullOrWhiteSpace(period.ClassName))
+            {
+                style += " period-inactive";
+            }
+            else
+            {
+                style += " period-active";
+            }
+
+            if (period.Type == "Break")
+            {
+                style += " period-break";
+            }
+
+            <div class="p-2 ms-1 me-1 border border-2 rounded-3 @style">
+                <span class="h5">@period.Name (@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime())</span>
+                <span class="d-block">&nbsp; @period.ClassName</span>
+                <span class="d-block">&nbsp; @period.ClassTeacher</span>
+            </div>
+        }
+    </div>
+}
+
+@section scripts {
+    <script>
+        $('.student-select-button').on('click', function (e) {
+            var studentId = $(this).data('studentId');
+
+            var params = new URLSearchParams(location.search);
+            params.set('StudentId', studentId);
+            window.location.search = params.toString();
+        })
+    </script>
+}

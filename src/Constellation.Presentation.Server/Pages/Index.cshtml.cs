@@ -32,7 +32,7 @@ public class IndexModel : PageModel
         CanAccessStaffPortal = staffPortal.Succeeded;
 
         if (CanAccessParentPortal && !CanAccessSchoolPortal && !CanAccessStaffPortal)
-            return RedirectToPage("/Dashboard", new { area = "Parents" });
+            return RedirectToPage("/Index", new { area = "Parents" });
 
         if (!CanAccessParentPortal && CanAccessSchoolPortal && !CanAccessStaffPortal)
             return RedirectToPage("/Dashboard", new { area = "Schools" });

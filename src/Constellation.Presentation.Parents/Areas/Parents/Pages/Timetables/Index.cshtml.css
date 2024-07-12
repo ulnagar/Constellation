@@ -1,0 +1,25 @@
+.period-inactive {
+    background-color: azure;
+}
+
+.period-active {
+    background-color: darkseagreen;
+    font-weight: bold;
+}
+
+.period-break {
+    background-color: lightyellow;
+}
+
+.period-other {
+    background-color: lightgray;
+}
+
+.select-item:after {
+    content: "";
+    display: block;
+    width: 75%;
+    margin: 1em auto 0;
+    border-top: 1px solid;
+    border-color: var(--bs-border-color);
+}

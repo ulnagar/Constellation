@@ -9,6 +9,11 @@
     z-index: 0 !important;
 }*/
 
+/* Student Select Buttons */
+.student-select-button {
+    padding: 1rem;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
