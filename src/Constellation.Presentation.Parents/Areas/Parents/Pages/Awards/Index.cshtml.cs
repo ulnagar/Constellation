@@ -45,6 +45,8 @@ public class IndexModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public string StudentId { get; set; } = string.Empty;
 
+    public StudentResponse? SelectedStudent { get; set; }
+
     public List<StudentResponse> Students { get; set; } = new();
 
     public StudentAwardSummaryResponse? AwardSummary { get; set; }
@@ -89,6 +91,9 @@ public class IndexModel : BasePageModel
             .ThenBy(student => student.FirstName)
             .ToList();
 
+        if (Students.Count == 1)
+            StudentId = Students.First().StudentId;
+
         if (!string.IsNullOrWhiteSpace(StudentId))
         {
             _logger.Information("Requested to retrieve award data by user {user} for student {student}", _currentUserService.UserName, StudentId);
@@ -103,6 +108,7 @@ public class IndexModel : BasePageModel
             }
 
             AwardSummary = awardSummaryRequest.Value;
+            SelectedStudent = Students.FirstOrDefault(entry => entry.StudentId == StudentId);
         }
     }
 }
