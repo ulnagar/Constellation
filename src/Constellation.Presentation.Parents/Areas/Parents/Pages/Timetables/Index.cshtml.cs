@@ -5,7 +5,6 @@ using Application.Students.GetStudentsByParentEmail;
 using Application.Timetables.GetStudentTimetableExport;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
-using Constellation.Application.Reports.GetAcademicReportList;
 using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
@@ -60,6 +59,8 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetDownload()
     {
+        _logger.Information("Requested to export timetable by user {user} for student {student}", _currentUserService.UserName, StudentId);
+
         Result<FileDto> fileResponse = await _mediator.Send(new GetStudentTimetableExportQuery(StudentId));
 
         if (fileResponse.IsFailure)
@@ -100,7 +101,7 @@ public class IndexModel : BasePageModel
 
         if (!string.IsNullOrWhiteSpace(StudentId))
         {
-            _logger.Information("Requested to retrieve reports by user {user} for student {student}", _currentUserService.UserName, StudentId);
+            _logger.Information("Requested to retrieve timetable by user {user} for student {student}", _currentUserService.UserName, StudentId);
 
             Result<StudentTimetableDataDto> timetableRequest = await _mediator.Send(new GetStudentTimetableDataQuery(StudentId));
 
