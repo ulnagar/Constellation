@@ -56,17 +56,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = new PathString("/Admin/Logout");
 });
 
-builder.Services.AddAuthorization(opt => opt.AddApplicationPolicies());
-
-builder.Services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
-builder.Services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
-builder.Services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
-builder.Services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
-builder.Services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
-builder.Services.AddScoped<IAuthorizationHandler, IsAssignedToActionByResource>();
-builder.Services.AddScoped<IAuthorizationHandler, IsInGroupAllowedToEditWorkFlows>();
-builder.Services.AddScoped<IAuthorizationHandler, IsAssignedToActionByRoute>();
-builder.Services.AddScoped<IAuthorizationHandler, HasActiveParentRecord>();
+builder.Services
+    .AddAuthorization(opt => opt.AddApplicationPolicies())
+    .AddAuthorizationPolicies();
 
 // Register Current User Service
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

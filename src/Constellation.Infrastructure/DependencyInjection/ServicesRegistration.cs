@@ -1,13 +1,13 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Clock;
-using Constellation.Application.Common.Behaviours;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Infrastructure.Idempotence;
+using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Jobs;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Infrastructure.Persistence.ConstellationContext.Interceptors;
@@ -15,8 +15,8 @@ using Constellation.Infrastructure.Persistence.ConstellationContext.Repositories
 using Constellation.Infrastructure.Persistence.TrackItContext;
 using Constellation.Infrastructure.Services;
 using Constellation.Infrastructure.Templates.Services;
-using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -150,6 +150,24 @@ public static class ServicesRegistration
         // Explicitly register transient IDateTimeProvider
 
         services.AddTransient<IDateTimeProvider, DateTimeProvider>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAuthorizationPolicies(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
+        services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
+        services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
+        services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
+        services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
+        services.AddScoped<IAuthorizationHandler, IsAssignedToActionByResource>();
+        services.AddScoped<IAuthorizationHandler, IsInGroupAllowedToEditWorkFlows>();
+        services.AddScoped<IAuthorizationHandler, IsAssignedToActionByRoute>();
+        services.AddScoped<IAuthorizationHandler, HasActiveParentRecord>();
+        services.AddScoped<IAuthorizationHandler, HasActiveContactAssignmentToCurrentPartnerSchool>();
+        services.AddScoped<IAuthorizationHandler, HasAdminUserPrivileges>();
+        services.AddScoped<IAuthorizationHandler, HasActiveStaffRecord>();
 
         return services;
     }

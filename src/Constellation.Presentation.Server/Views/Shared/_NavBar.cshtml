@@ -2,7 +2,7 @@
 
 <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-dark box-shadow fixed-top">
     <div class="container">
-        <a class="navbar-brand" asp-area="Staff" asp-page="/Dashboard"><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
+        <a class="navbar-brand" asp-page="/Index" asp-area=""><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -63,6 +63,15 @@
                     <div class="dropdown-menu">
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Equipment/Assets/Index">Assets</a>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Equipment/Stocktake/Index">Stocktake</a>
+                    </div>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Portals <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Dashboard">Staff Portal</a>
+                        <a class="dropdown-item" asp-area="Schools" asp-page="/Dashboard">Schools Portal</a>
+                        <a class="dropdown-item" asp-area="Parents" asp-page="/Dashboard">Parents Portal</a>
                     </div>
                 </li>
             </ul>

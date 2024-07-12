@@ -7,6 +7,22 @@ public static class AuthPolicyDefinitions
 {
     public static AuthorizationOptions AddApplicationPolicies(this AuthorizationOptions options)
     {
+
+        // Determines access to the Schools Portal
+        options.AddPolicy(AuthPolicies.IsSchoolContact, policy =>
+            policy.Requirements.Add(new CanAccessSchoolPortalRequirement()));
+
+        // Determines access to the Parent Portal
+        options.AddPolicy(AuthPolicies.IsParent, policy =>
+            policy.Requirements.Add(new IsParentOfCurrentStudentRequirement()));
+
+        // Determines access to the Staff Portal
+        options.AddPolicy(AuthPolicies.IsStaffMember, policy =>
+            policy.Requirements.Add(new IsCurrentStaffMemberRequirement()));
+
+
+
+
         options.AddPolicy(AuthPolicies.CanViewTrainingCompletionRecord, policy =>
             policy.Requirements.Add(new CanViewTrainingCompletionRecordRequirement()));
 
@@ -21,10 +37,7 @@ public static class AuthPolicyDefinitions
 
         options.AddPolicy(AuthPolicies.CanRunTrainingModuleReports, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.MandatoryTrainingReportsRun));
-
-        options.AddPolicy(AuthPolicies.IsStaffMember, policy =>
-            policy.RequireClaim(AuthClaimType.StaffEmployeeId));
-
+        
         options.AddPolicy(AuthPolicies.CanEditFaculties, policy =>
             policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
 
@@ -94,11 +107,7 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanEditSchools, policy =>
             policy.RequireRole(AuthRoles.Editor, AuthRoles.Admin));
 
-        options.AddPolicy(AuthPolicies.IsSchoolContact, policy =>
-            policy.RequireRole(AuthRoles.SchoolContact, AuthRoles.Admin));
 
-        options.AddPolicy(AuthPolicies.IsParent, policy =>
-            policy.Requirements.Add(new IsParentOfCurrentStudentRequirement()));
 
         return options;
     }

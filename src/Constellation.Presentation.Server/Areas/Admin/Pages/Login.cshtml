@@ -18,6 +18,16 @@
     @if (Model.Status == LoginModel.LoginStatus.WaitingUserInput)
     {
         <section>
+            <div class="title-box">
+                <div class="title-container">
+                    <div class="logo">
+                        <img src="~/logo.svg" class="hero-logo" />
+                    </div>
+                    <div class="title">
+                        <h1>Constellation</h1>
+                    </div>
+                </div>
+            </div>
             <div class="form-box">
                 <div class="form-value">
                     <form method="post">
@@ -43,6 +53,16 @@
     @if (Model.Status == LoginModel.LoginStatus.WaitingPasswordInput)
     {
         <section>
+            <div class="title-box">
+                <div class="title-container">
+                    <div class="logo">
+                        <img src="~/logo.svg" class="hero-logo" />
+                    </div>
+                    <div class="title">
+                        <h1>Constellation</h1>
+                    </div>
+                </div>
+            </div>
             <div class="form-box">
                 <div class="form-value">
                     <form asp-page-handler="PasswordLogin" method="post">
@@ -69,10 +89,20 @@
             </div>
         </section>
     }
-    
+
     @if (Model.Status == LoginModel.LoginStatus.InvalidUsername)
     {
         <section>
+            <div class="title-box">
+                <div class="title-container">
+                    <div class="logo">
+                        <img src="~/logo.svg" class="hero-logo" />
+                    </div>
+                    <div class="title">
+                        <h1>Constellation</h1>
+                    </div>
+                </div>
+            </div>
             <div class="form-box">
                 <div class="form-value">
                     <form method="post">
@@ -94,10 +124,20 @@
             </div>
         </section>
     }
-    
+
     @if (Model.Status == LoginModel.LoginStatus.EmailSent)
     {
         <section>
+            <div class="title-box">
+                <div class="title-container">
+                    <div class="logo">
+                        <img src="~/logo.svg" class="hero-logo" />
+                    </div>
+                    <div class="title">
+                        <h1>Constellation</h1>
+                    </div>
+                </div>
+            </div>
             <div class="form-box">
                 <div class="form-value">
                     <h2>Login</h2>
@@ -112,10 +152,20 @@
             </div>
         </section>
     }
-    
+
     @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
     {
         <section>
+            <div class="title-box">
+                <div class="title-container">
+                    <div class="logo">
+                        <img src="~/logo.svg" class="hero-logo" />
+                    </div>
+                    <div class="title">
+                        <h1>Constellation</h1>
+                    </div>
+                </div>
+            </div>
             <div class="form-box">
                 <div class="form-value">
                     <form method="post">
