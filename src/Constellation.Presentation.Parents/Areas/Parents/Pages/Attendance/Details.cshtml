@@ -1,0 +1,163 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance.DetailsModel
+
+@{
+    const string wholeAbsence = "Whole Absence";
+    const string partialAbsence = "Partial Absence";
+    const string pendingResponse = "Pending";
+    const string verifiedResponse = "Verified";
+    const string rejectedResponse = "Rejected";
+    const string notRequiredResponse = "NR";
+}
+
+<div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
+    <a asp-page="/Attendance/Absences" asp-area="Parents" class="btn btn-primary">Go Back</a>
+</div>
+
+<div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
+    <a asp-page="/Attendance/Absences" asp-area="Parents" class="btn btn-primary">Go Back</a>
+</div>
+
+<h2>@Model.Absence.Type for @Model.Absence.Student</h2>
+
+<div class="d-sm-flex flex-column flex-lg-row border-bottom mt-3">
+    <div class="mb-2 col-md-2">
+        <strong>Status</strong>
+    </div>
+    <div class="mb-2 col-md-10">
+        @if (Model.Absence.Type == wholeAbsence)
+        {
+            @if (Model.Absence.Explained)
+            {
+                <span><i class="fas fa-check"></i> Explained Whole Absence</span>
+            }
+            else
+            {
+                <span><i class="fas fa-exclamation"></i> Unexplained Whole Absence</span>
+            }
+        }
+
+        @if (Model.Absence.Type == partialAbsence)
+        {
+            if (Model.Absence.Explained && Model.Absence.Reason != "Absent" && Model.Absence.VerificationStatus != notRequiredResponse)
+            {
+                <span><i class="fas fa-check"></i> Explained Partial Absence via @Model.Absence.AbsenceReason</span>
+            }
+            else if (Model.Absence.Explained && Model.Absence.VerificationStatus == notRequiredResponse)
+            {
+                <span><i class="fas fa-check"></i> Explained Partial Absence</span>
+            }
+            else if (Model.Absence.VerificationStatus == verifiedResponse)
+            {
+                <span><i class="fas fa-check"></i> @Model.Absence.VerificationStatus Partial Absence</span>
+            }
+            else if (Model.Absence.VerificationStatus == rejectedResponse)
+            {
+                <span><i class="fas fa-exclamation"></i> @Model.Absence.VerificationStatus Partial Absence</span>
+            }
+            else if (Model.Absence.VerificationStatus == pendingResponse)
+            {
+                <span><i class="fas fa-question"></i> @Model.Absence.VerificationStatus Partial Absence</span>
+            }
+            else
+            {
+                <span><i class="fas fa-exclamation"></i> Unexplained Partial Absence</span>
+            }
+        }
+    </div>
+</div>
+
+<div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+    <div class="mb-2 col-md-2">
+        <strong>Date</strong>
+    </div>
+    <div class="mb-2 col-md-10">
+    <span>@Model.Absence.Date.ToShortDateString()</span>
+    </div>
+</div>
+
+<div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+    <div class="mb-2 col-md-2">
+        <strong>Class</strong>
+    </div>
+    <div class="mb-2 col-md-10">
+    <span>@Model.Absence.OfferingName</span>
+    </div>
+</div>
+
+<div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+    <div class="mb-2 col-md-2">
+        <strong>Absence</strong>
+    </div>
+    <div class="mb-2 col-md-10">
+    <span>@Model.Absence.AbsenceTimeframe</span>
+    </div>
+</div>
+
+<form method="post">
+<div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
+    <div class="mb-2 col-md-2">
+        <strong>Explanation</strong>
+    </div>
+    <div class="mb-2 col-md-10">
+        @if (Model.Absence.Type == wholeAbsence)
+        {
+            if (Model.Absence.Explained || !Model.Absence.CanBeExplainedByParent)
+            {
+                <span>"@Model.Absence.Reason"</span>
+            }
+            else
+            {
+                <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+                <span asp-validation-for="Comment" class="text-danger"></span>
+            }
+        }
+
+        @if (Model.Absence.Type == partialAbsence)
+        {
+            if (Model.Absence.Explained && Model.Absence.AbsenceReason != "Absent")
+            {
+                <span>
+                @Model.Absence.AbsenceReason
+                </span>
+            }
+            else if (Model.Absence.Explained && Model.Absence.VerificationStatus == notRequiredResponse)
+            {
+                <span>
+                @Model.Absence.Reason<br />
+                @Model.Absence.ValidatedBy
+                </span>
+            }
+            else if (Model.Absence.Explained)
+            {
+                <span>
+                "@Model.Absence.Reason"<br />
+                @Model.Absence.VerificationStatus by @Model.Absence.ValidatedBy
+                </span>
+            }
+            else if (Model.Absence.VerificationStatus == pendingResponse)
+            {
+                <span>
+                "@Model.Absence.Reason"<br />
+                    Pending verification by Aurora College Coordinator
+                </span>
+            }
+            else
+            {
+                <span>Pending explanation by @Model.Absence.Student</span>
+            }
+        }
+    </div>
+</div>
+
+@if (Model.Absence.Type == wholeAbsence && !Model.Absence.Explained && Model.Absence.CanBeExplainedByParent)
+{
+    <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
+        <button class="btn btn-success btn-lg" type="submit">Submit</button>
+    </div>
+
+    <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
+        <button class="btn btn-success btn-lg" type="submit">Submit</button>
+    </div>
+}
+</form>

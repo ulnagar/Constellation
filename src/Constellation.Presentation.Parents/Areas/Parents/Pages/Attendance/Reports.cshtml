@@ -1,0 +1,121 @@
+﻿@page
+@model Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance.ReportsModel
+@{
+}
+
+<h2>Attendance Reports</h2>
+
+<div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
+    <a asp-page="/Attendance/Index" asp-area="Parents" class="btn btn-primary"><i class="fas fa-long-arrow-left"></i> Go Back</a>
+</div>
+
+<div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
+    <a asp-page="/Attendance/Index" asp-area="Parents" class="btn btn-primary"><i class="fas fa-long-arrow-left"></i> Go Back</a>
+</div>
+
+@if (Model.SelectedStudent is null)
+{
+    // Show list of students in boxes to allow them to select a different student
+    <h4>Select student to display:</h4>
+    <ul class="list-group">
+        @foreach (var student in Model.Students)
+        {
+            <button class="list-group-item list-group-item-action student-select-button" data-student-id="@student.StudentId">
+                @student.DisplayName (@student.CurrentGrade)
+            </button>
+        }
+    </ul>
+}
+else
+{
+    <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+        <span class="row d-flex align-items-center">
+            @*Display as flex to enable vertical centering of the button in the second div*@
+            <div class="col-lg">
+                <div class="h4">Reports for @Model.SelectedStudent?.DisplayName</div>
+                @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                @if (Model.Students.Count > 1)
+                {
+                    <span class="fst-italic">Click or tap to change</span>
+
+                    <div class="d-block">
+                        <a asp-page-handler="" asp-route-studentId="" class="stretched-link"></a>
+                    </div>
+                }
+            </div>
+        </span>
+    </div>
+}
+
+<div class="accordion accordion-flush" id="accordion">
+    @if (Model.ValidDates.Any())
+    {
+        foreach (var term in Model.ValidDates.OrderBy(entry => entry.StartDate).GroupBy(entry => entry.TermGroup).ToList())
+        {
+            var termId = term.First().TermGroup.Replace(' ', '-');
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="accordion-header-@termId">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@termId" aria-expanded="false" aria-controls="accordion-item-@termId">
+                        @term.First().TermGroup
+                    </button>
+                </h2>
+                <div id="accordion-item-@termId" class="accordion-collapse collapse" aria-labelledby="accordion-header-@termId" data-bs-parent="#accordion">
+                    <div class="accordion-body">
+                        @foreach (var entry in term)
+                        {
+                            var disabled = entry.EndDate > DateTime.Today;
+
+                            <div class="w-auto p-3 ms-3 me-3 mb-2 shadow position-relative @(disabled ? "disabled" : "")">
+                                <div class="row d-flex align-items-center">
+                                    @*Display as flex to enable vertical centering of the button in the second div*@
+                                    <div class="col-lg-8">
+                                        <div class="h5">@entry.Description</div>
+                                        <div class="mb-1">
+                                            <span>@entry.StartDate.ToShortDateString() - @entry.EndDate.ToShortDateString()</span>
+                                        </div>
+
+                                        @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                                        @if (!disabled)
+                                        {
+                                            var startDate = DateOnly.FromDateTime(entry.StartDate);
+                                            var endDate = DateOnly.FromDateTime(entry.EndDate);
+
+                                            <span class="fst-italic">Click or tap to download</span>
+
+                                            <div class="d-block">
+                                                <a asp-page-handler="Download" asp-route-startDate="@startDate" asp-route-endDate="@endDate" asp-route-studentId="@Model.StudentId" class="stretched-link" onclick="showLoader(5000)"></a>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button">
+                    No Valid Reporting Dates Found
+                </button>
+            </h2>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        $('.student-select-button').on('click', function (e) {
+            var studentId = $(this).data('studentId');
+
+            var params = new URLSearchParams(location.search);
+            params.set('StudentId', studentId);
+            window.location.search = params.toString();
+        })
+    </script>
+}
