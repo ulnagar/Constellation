@@ -1,12 +1,10 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.IndexModel
 
-@using Constellation.Application.Models.Auth
 @using Constellation.Core.Extensions
-@using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards;
-@using Microsoft.AspNetCore.Authorization
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards
 
-@inject IAuthorizationService authService;
+@inject IAuthorizationService authService
 
 @{
     var authorisedTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -35,9 +33,9 @@
     }
 
     <div class="btn-group">
-        <a asp-page="/Awards/Index" asp-area="SchoolAdmin" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
-        <a asp-page="/Awards/Index" asp-area="SchoolAdmin" asp-route-filter="@IndexModel.FilterDto.Recent" class="btn @recent_style">Recent (20)</a>
-        <a asp-page="/Awards/Index" asp-area="SchoolAdmin" asp-route-filter="@IndexModel.FilterDto.ThisYear" class="btn @thisYear_style">This Year</a>
+        <a asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff" asp-route-filter="@IndexModel.FilterDto.Recent" class="btn @recent_style">Recent (20)</a>
+        <a asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff" asp-route-filter="@IndexModel.FilterDto.ThisYear" class="btn @thisYear_style">This Year</a>
     </div>
 
     @if (authorisedTest.Succeeded)

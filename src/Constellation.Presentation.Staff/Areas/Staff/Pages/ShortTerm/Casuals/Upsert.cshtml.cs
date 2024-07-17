@@ -50,10 +50,7 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     [Required]
     public string SchoolCode { get; set; } = string.Empty;
-
-    [BindProperty]
-    public string AdobeConnectId { get; set; } = string.Empty;
-
+    
     public List<SchoolSelectionListResponse> Schools { get; set; } = new();
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
@@ -75,7 +72,6 @@ public class UpsertModel : BasePageModel
             LastName = casualResponse.Value.LastName;
             EmailAddress = casualResponse.Value.EmailAddress;
             SchoolCode = casualResponse.Value.SchoolCode;
-            AdobeConnectId = casualResponse.Value.AdobeConnectId;
         }
 
         var schoolsResponse = await _mediator.Send(new GetSchoolsForSelectionListQuery(), cancellationToken);
@@ -107,7 +103,7 @@ public class UpsertModel : BasePageModel
                         LastName,
                         EmailAddress,
                         SchoolCode,
-                        AdobeConnectId),
+                        string.Empty),
                     cancellationToken);
 
                 if (result.IsFailure)
@@ -127,7 +123,7 @@ public class UpsertModel : BasePageModel
                         LastName,
                         EmailAddress,
                         SchoolCode,
-                        AdobeConnectId),
+                        string.Empty),
                     cancellationToken);
 
                 if (result.IsFailure)

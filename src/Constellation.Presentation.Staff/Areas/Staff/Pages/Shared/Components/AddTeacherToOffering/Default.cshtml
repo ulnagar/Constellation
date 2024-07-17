@@ -3,7 +3,7 @@
 <div class="modal fade" tabindex="-1" id="addTeacherModal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form asp-page="/Offerings/Details" asp-area="Subject" asp-route-id="@Model.OfferingId.Value" asp-page-handler="AddTeacher">
+            <form asp-page="/Subject/Offerings/Details" asp-area="Staff" asp-route-id="@Model.OfferingId.Value" asp-page-handler="AddTeacher">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Teacher to Offering</h5>
                 </div>
