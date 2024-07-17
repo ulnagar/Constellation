@@ -7,9 +7,12 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-public class StaffUserIdClaimsFactory : UserClaimsPrincipalFactory<AppUser, AppRole>
+public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppUser, AppRole>
 {
-    public StaffUserIdClaimsFactory(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, IOptions<IdentityOptions> options) 
+    public CustomUserPropertiesClaimsFactory(
+        UserManager<AppUser> userManager, 
+        RoleManager<AppRole> roleManager, 
+        IOptions<IdentityOptions> options) 
         : base(userManager, roleManager, options)
     {
     }

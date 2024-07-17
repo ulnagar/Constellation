@@ -4,18 +4,15 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ContextExtensions;
-using Duende.IdentityServer.EntityFramework.Options;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 
-public class AppDbContext : KeyApiAuthorizationDbContext<AppUser, AppRole, Guid>, IAppDbContext
+public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
-        : base(options, operationalStoreOptions)
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
     { }
 
     public DbSet<AdobeConnectOperation> AdobeConnectOperations { get; set; }

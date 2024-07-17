@@ -30,12 +30,10 @@ builder.Services
 
 // Configuration Authentication and Authorization
 builder.Services.AddIdentity<AppUser, AppRole>()
-    .AddClaimsPrincipalFactory<StaffUserIdClaimsFactory>()
+    .AddClaimsPrincipalFactory<CustomUserPropertiesClaimsFactory>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders()
     .AddPasswordlessLoginProvider();
-
-//builder.Services.AddTransient<UserClaimsPrincipalFactory<AppUser, AppRole>, StaffUserIdClaimsFactory>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
