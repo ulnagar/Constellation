@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
-//[Authorize(Policy = AuthPolicies.IsParent)]
+[Authorize(Policy = AuthPolicies.IsParent)]
 public class IndexModel : BasePageModel
 {
 

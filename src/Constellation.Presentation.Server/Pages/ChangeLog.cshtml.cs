@@ -1,12 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
+namespace Constellation.Presentation.Server.Pages;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Constellation.Presentation.Server.Pages
+[AllowAnonymous]
+public class ChangeLogModel : PageModel
 {
-    public class ChangeLogModel : PageModel
+    public void OnGet()
     {
-        public void OnGet()
-        {
-        }
     }
 }

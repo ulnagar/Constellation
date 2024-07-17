@@ -22,17 +22,20 @@
     font-family: 'Open Sans', sans-serif;
 }
 
+body {
+    background: url('/images/background-no-logo.png') no-repeat;
+    background-position: center;
+    background-size: cover;
+    min-height: 100vh;
+}
+
 section {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    background: url('/images/background-no-logo.png') no-repeat;
-    background-position: center;
-    background-size: cover;
-    flex-flow: row wrap;
-    flex-direction: column;
+    flex-flow: column wrap;
     align-content: center;
 }
 
@@ -76,21 +79,33 @@ section {
         line-height: 200px;
     }
 
+.content-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-flow: row wrap;
+    align-content: center;
+}
+
 .form-box {
     position: relative;
     width: 400px;
     height: 500px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background: rgba(0,0,0,0.25);
     border: 2px solid rgba(255,255,255,0.5);
     border-radius: 20px;
     backdrop-filter: blur(15px);
+    margin: 5px;
 }
 
 .form-value {
     width: 310px;
+    margin: auto;
 }
 
 h2 {
@@ -185,7 +200,7 @@ button {
 }
 
 .login-text {
-    font-size: 1em;
+    font-size: 1.15em;
     color: #fff;
     text-align: center;
     margin: 25px 0 10px;
@@ -200,3 +215,239 @@ button {
         .login-text p a:hover {
             text-decoration: underline;
         }
+
+.help-box {
+    position: relative;
+    width: 400px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.15);
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 20px;
+    margin: 5px;
+}
+
+.help-box p {
+    margin-top: 2rem;
+    text-align: left;
+    font-size: 1.25rem;
+}
+
+p.warning {
+    color: crimson;
+    font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+    section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        flex-flow: column wrap;
+        align-content: center;
+    }
+
+    .title-box {
+        display: flex;
+        flex: 1 100%;
+        max-height: 20vh;
+        max-width: 600px;
+        width: 600px;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .title-box .logo {
+            height: 20vh;
+        }
+
+    .title-box .title-container {
+        width: 1200px;
+        height: 20vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .title-box .title {
+        height: 20vh;
+        float: right;
+    }
+
+        .title-box .title h1 {
+            display: inline;
+            font-size: 5rem;
+            color: #fff;
+            line-height: 200px;
+        }
+
+}
+
+@media (max-width: 830px) {
+    section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        flex-flow: column wrap;
+        align-content: center;
+    }
+
+    .title-box {
+        display: flex;
+        flex: 1 100%;
+        max-height: 20vh;
+        max-width: 300px;
+        width: 300px;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .title-box .logo {
+            display: none;
+            height: 20vh;
+        }
+
+        .title-box .title-container {
+            width: 1200px;
+            height: 20vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title-box .title {
+            height: 20vh;
+            float: right;
+        }
+
+            .title-box .title h1 {
+                display: inline;
+                font-size: 5rem;
+                color: #fff;
+                line-height: 200px;
+            }
+}
+
+@media (max-width: 520px) {
+    section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        flex-flow: column wrap;
+        align-content: center;
+    }
+
+    .title-box {
+        display: flex;
+        flex: 1 100%;
+        max-height: 20vh;
+        max-width: 300px;
+        width: 300px;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .title-box .logo {
+            display: none;
+            height: 20vh;
+        }
+
+        .title-box .title-container {
+            width: 100%;
+            height: 10vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title-box .title {
+            height: 10vh;
+            float: right;
+        }
+
+            .title-box .title h1 {
+                display: inline;
+                font-size: 3rem;
+                color: #fff;
+                line-height: 100px;
+            }
+}
+
+@media (max-width: 420px) {
+    .form-box {
+        position: relative;
+        width: 300px;
+        height: 400px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0,0,0,0.25);
+        border: 2px solid rgba(255,255,255,0.5);
+        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        margin: 5px;
+    }
+
+    .help-box {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0,0,0,0.15);
+        border: 2px solid rgba(255,255,255,0.5);
+        border-radius: 20px;
+        margin: 5px;
+    }
+
+        .help-box p {
+            margin-top: 2rem;
+            text-align: left;
+            font-size: 1.25rem;
+        }
+
+    .form-value {
+        width: 210px;
+        margin: auto;
+    }
+
+    .inputbox {
+        position: relative;
+        margin: 30px 0;
+        width: 200px;
+        border-bottom: 2px solid #fff;
+        transition: .5s;
+    }
+
+        .inputbox label {
+            position: absolute;
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 1em;
+            pointer-events: none;
+            transition: .5s;
+        }
+
+    .inputbox span.glyphicon {
+        display: none;
+    }
+
+    .title-box .title h1 {
+        display: inline;
+        font-size: 3rem;
+        color: #fff;
+        line-height: 100px;
+    }
+}

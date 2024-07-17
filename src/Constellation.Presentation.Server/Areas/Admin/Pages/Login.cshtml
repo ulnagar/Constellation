@@ -1,4 +1,5 @@
 ﻿@page "/Admin/Login"
+@using Microsoft.AspNetCore.Mvc.ModelBinding
 @model LoginModel
 
 @{
@@ -10,183 +11,137 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg" href="~/logo.svg" />
     <title>Constellation</title>
     <link rel="stylesheet" href="~/css/glyphicon.css" />
     <link rel="stylesheet" href="~/css/login.css" />
 </head>
 <body style="padding: 0; margin: 0;">
-    @if (Model.Status == LoginModel.LoginStatus.WaitingUserInput)
-    {
-        <section>
-            <div class="title-box">
-                <div class="title-container">
-                    <div class="logo">
-                        <img src="~/logo.svg" class="hero-logo" />
-                    </div>
-                    <div class="title">
-                        <h1>Constellation</h1>
-                    </div>
+    <section>
+        <div class="title-box">
+            <div class="title-container">
+                <div class="logo">
+                    <img src="~/logo.svg" class="hero-logo" />
+                </div>
+                <div class="title">
+                    <h1>Constellation</h1>
                 </div>
             </div>
-            <div class="form-box">
-                <div class="form-value">
-                    <form method="post">
+        </div>
+        <div class="content-box">
+
+            @if (Model.Status is LoginModel.LoginStatus.WaitingUserInput 
+                 or LoginModel.LoginStatus.InvalidUsername 
+                 or LoginModel.LoginStatus.TokenInvalid)
+            {
+                <form method="post">
+                    <div class="form-box">
+                        <div class="form-value">
+                            <h2>Login</h2>
+                            <div class="login-text">
+                                <p>Sign in for Aurora College Constellation Portals.</p>
+                            </div>
+                            <div class="inputbox">
+                                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                                <input asp-for="Input.Email" placeholder=" "/>
+                                <label asp-for="Input.Email">Email</label>
+                            </div>
+                        </div>
+                        <div class="form-value bottom">
+                            <button type="submit">Log in</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="help-box">
+                    <div class="form-value">
+                        <div class="login-text">
+                            @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
+                            {
+                                <p class="warning">Sorry, that link has expired. Enter your email address above to generate a new link.</p>
+                            }
+                            @if (Model.ModelState.ErrorCount > 0)
+                            {
+                                var errors = Model.ModelState
+                                .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
+                                .SelectMany(entry => entry.Value.Errors);
+
+                                foreach (var error in errors)
+                                {
+                                    <p class="warning">@error.ErrorMessage</p>
+                                }
+                            }
+                            <p><strong>DoE Staff:</strong> Enter your DoE email address.</p>
+                            <p><strong>Parents:</strong> Enter your email address and an email with a direct login link will be sent to you.</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Status == LoginModel.LoginStatus.WaitingPasswordInput)
+            {
+                <form asp-page-handler="PasswordLogin" method="post">
+                    <div class="form-box">
+                        <div class="form-value">
+                            <h2>Login</h2>
+                            <div class="login-text">
+                                <p>Sign in for Aurora College Constellation Portals.</p>
+                            </div>
+                            <div class="inputbox">
+                                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                                <input asp-for="Input.Email" placeholder=" " readonly="readonly" />
+                                <label asp-for="Input.Email">Email</label>
+                            </div>
+                            <div class="inputbox">
+                                <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                                <input asp-for="Input.Password" placeholder=" " required autofocus class="@(!Model.ModelState.IsValid ? "is-invalid" : "")" />
+                                <label asp-for="Input.Password">Password</label>
+                            </div>
+                        </div>
+                        <div class="form-value">
+                            <button type="submit">Log in</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="help-box">
+                    <div class="form-value">
+                        <div class="login-text">
+                            @if (Model.ModelState.ErrorCount > 0)
+                            {
+                                var errors = Model.ModelState
+                                    .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
+                                    .SelectMany(entry => entry.Value.Errors);
+
+                                foreach (var error in errors)
+                                {
+                                    <p class="warning">@error.ErrorMessage</p>
+                                }
+                            }
+                            <p><strong>DoE Staff:</strong> Enter DoE Portal password.</p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Status == LoginModel.LoginStatus.EmailSent)
+            {
+                <div class="form-box">
+                    <div class="form-value">
                         <h2>Login</h2>
                         <div class="login-text">
                             <p>Sign in for Aurora College Constellation Portals.</p>
                         </div>
-                        <div class="inputbox">
-                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                            <input asp-for="Input.Email" placeholder=" "/>
-                            <label asp-for="Input.Email">Email</label>
-                        </div>
-                        <button type="submit">Log in</button>
                         <div class="login-text">
-                            <p></p>
+                            <p>Your login link is on its way to your email!</p>
+                            <p>Please check your email for the link to log in to the Aurora College Parents Portal. Remember that it is only valid for the next 10 minutes.</p>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </section>
-    }
+            }
 
-    @if (Model.Status == LoginModel.LoginStatus.WaitingPasswordInput)
-    {
-        <section>
-            <div class="title-box">
-                <div class="title-container">
-                    <div class="logo">
-                        <img src="~/logo.svg" class="hero-logo" />
-                    </div>
-                    <div class="title">
-                        <h1>Constellation</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="form-box">
-                <div class="form-value">
-                    <form asp-page-handler="PasswordLogin" method="post">
-                        <h2>Login</h2>
-                        <div class="login-text">
-                            <p>Sign in for Aurora College Constellation Portals.</p>
-                        </div>
-                        <div class="inputbox">
-                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                            <input asp-for="Input.Email" placeholder=" "/>
-                            <label asp-for="Input.Email">Email</label>
-                        </div>
-                        <div class="inputbox">
-                            <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                            <input asp-for="Input.Password" placeholder=" "/>
-                            <label asp-for="Input.Password">Password</label>
-                        </div>
-                        <button type="submit">Log in</button>
-                        <div class="login-text">
-                            <p></p>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-    }
-
-    @if (Model.Status == LoginModel.LoginStatus.InvalidUsername)
-    {
-        <section>
-            <div class="title-box">
-                <div class="title-container">
-                    <div class="logo">
-                        <img src="~/logo.svg" class="hero-logo" />
-                    </div>
-                    <div class="title">
-                        <h1>Constellation</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="form-box">
-                <div class="form-value">
-                    <form method="post">
-                        <h2>Login</h2>
-                        <div class="login-text">
-                            <p>Sign in for Aurora College Constellation Portals.</p>
-                        </div>
-                        <div class="inputbox">
-                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                            <input asp-for="Input.Email" placeholder=" "/>
-                            <label asp-for="Input.Email">Email</label>
-                        </div>
-                        <button type="submit">Log in</button>
-                        <div class="login-text">
-                            <p>Invalid username! Please try again.</p>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-    }
-
-    @if (Model.Status == LoginModel.LoginStatus.EmailSent)
-    {
-        <section>
-            <div class="title-box">
-                <div class="title-container">
-                    <div class="logo">
-                        <img src="~/logo.svg" class="hero-logo" />
-                    </div>
-                    <div class="title">
-                        <h1>Constellation</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="form-box">
-                <div class="form-value">
-                    <h2>Login</h2>
-                    <div class="login-text">
-                        <p>Sign in for Aurora College Constellation Portals.</p>
-                    </div>
-                    <div class="login-text">
-                        <p>Your login link is on its way to your email!</p>
-                        <p>Please check your email for the link to log in to the Aurora College Parents Portal. Remember that it is only valid for the next 10 minutes.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    }
-
-    @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
-    {
-        <section>
-            <div class="title-box">
-                <div class="title-container">
-                    <div class="logo">
-                        <img src="~/logo.svg" class="hero-logo" />
-                    </div>
-                    <div class="title">
-                        <h1>Constellation</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="form-box">
-                <div class="form-value">
-                    <form method="post">
-                        <h2>Login</h2>
-                        <div class="login-text">
-                            <p>Sign in for Aurora College Constellation Portals.</p>
-                        </div>
-                        <div class="inputbox">
-                            <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                            <input asp-for="Input.Email" placeholder=" "/>
-                            <label asp-for="Input.Email">Email</label>
-                        </div>
-                        <button type="submit">Log in</button>
-                        <div class="login-text">
-                            <p>Sorry, that link has expired. Enter your email address above to generate a new token.</p>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-    }
+        </div>
+    </section>
 
     <script src="~/lib/jquery/jquery.min.js"></script>
     <partial name="_ValidationScriptsPartial"/>

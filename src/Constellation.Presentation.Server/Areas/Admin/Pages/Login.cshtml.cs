@@ -100,6 +100,9 @@ public class LoginModel : PageModel
             _logger.Warning(" - No user found for email {Email}", Input.Email);
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+
+            Status = LoginStatus.InvalidUsername;
+
             return Page();
         } 
 
@@ -120,7 +123,7 @@ public class LoginModel : PageModel
             _logger.Information(" - DEBUG code found. Bypass login check.");
             await _signInManager.SignInAsync(user, false);
 
-            result = true;
+            return LocalRedirect(returnUrl);
         }
 #endif
 
@@ -191,7 +194,11 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPostPasswordLogin(string returnUrl = null)
     {
         if (string.IsNullOrWhiteSpace(Input.Password))
+        {
             ModelState.TryAddModelError(nameof(Input.Password), "You must specify a password!");
+
+            Status = LoginStatus.WaitingPasswordInput;
+        }
 
         if (!ModelState.IsValid) return Page();
 
@@ -202,24 +209,14 @@ public class LoginModel : PageModel
         _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
         AppUser user = await _userManager.FindByEmailAsync(Input.Email);
 
-        if (user is null)
-        {
-            _logger.Warning(" - No user found for email {Email}", Input.Email);
-
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            return Page();
-        }
-
         _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
-
-        bool result = new();
 
         if (loginType == LoginType.Domain)
         {
             _logger.Information(" - Attempting domain login by {Email}", Input.Email);
 
             PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
-            result = context.ValidateCredentials(Input.Email, Input.Password);
+            bool result = context.ValidateCredentials(Input.Email, Input.Password);
             context.Dispose();
 
             if (!result)
@@ -227,23 +224,26 @@ public class LoginModel : PageModel
                 _logger.Warning(" - Domain login failed for {Email}", Input.Email);
 
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+
+                Status = LoginStatus.WaitingPasswordInput;
+
                 return Page();
             }
 
             _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
 
             await _signInManager.SignInAsync(user, false);
-        }
 
-        if (result)
-        {
             user.LastLoggedIn = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
 
             return LocalRedirect(returnUrl);
         }
-
+        
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+
+        Status = LoginStatus.InvalidUsername;
+
         return Page();
     }
 
@@ -267,10 +267,7 @@ public class LoginModel : PageModel
 
             return Page();
         }
-
-        // Log out all other sessions
-        //await _userManager.UpdateSecurityStampAsync(user);
-
+        
         // Log user in
         await _signInManager.SignInAsync(user, false);
 
