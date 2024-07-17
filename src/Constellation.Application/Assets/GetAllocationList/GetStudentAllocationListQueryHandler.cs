@@ -36,7 +36,7 @@ internal sealed class GetStudentAllocationListQueryHandler
     {
         List<AllocationListItem> response = new();
 
-        List<Asset> assets = await _assetRepository.GetAllActive(cancellationToken);
+        List<Asset> assets = await _assetRepository.GetAllActiveAllocatedToStudents(cancellationToken);
 
         List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
 

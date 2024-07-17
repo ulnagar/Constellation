@@ -14,6 +14,10 @@ public interface IAssetRepository
     Task<Asset?> GetByAssetNumber(AssetNumber assetNumber, CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllActive(CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllActiveAllocatedToStudents(CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllActiveAllocatedToSchools(CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllActiveAllocatedToStaff(CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetAllActiveAllocatedToCommunity(CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllByStatus(AssetStatus status, CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllByLocationCategory(LocationCategory category, CancellationToken cancellationToken = default);
     Task<bool> IsAssetNumberTaken(AssetNumber assetNumber, CancellationToken cancellationToken = default);

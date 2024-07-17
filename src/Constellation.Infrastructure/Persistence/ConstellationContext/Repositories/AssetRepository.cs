@@ -47,6 +47,50 @@ internal sealed class AssetRepository : IAssetRepository
             .Where(asset => asset.Status.Equals(AssetStatus.Active))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Asset>> GetAllActiveAllocatedToStudents(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .Where(asset =>
+                asset.Status.Equals(AssetStatus.Active) &&
+                asset.Allocations.Any(allocation => 
+                    allocation.AllocationType.Equals(AllocationType.Student) &&
+                    !allocation.IsDeleted))
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Asset>> GetAllActiveAllocatedToSchools(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .Where(asset =>
+                asset.Status.Equals(AssetStatus.Active) &&
+                asset.Allocations.Any(allocation =>
+                    allocation.AllocationType.Equals(AllocationType.School) &&
+                    !allocation.IsDeleted))
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Asset>> GetAllActiveAllocatedToStaff(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .Where(asset =>
+                asset.Status.Equals(AssetStatus.Active) &&
+                asset.Allocations.Any(allocation =>
+                    allocation.AllocationType.Equals(AllocationType.Staff) &&
+                    !allocation.IsDeleted))
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Asset>> GetAllActiveAllocatedToCommunity(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .Where(asset =>
+                asset.Status.Equals(AssetStatus.Active) &&
+                asset.Allocations.Any(allocation =>
+                    allocation.AllocationType.Equals(AllocationType.CommunityMember) &&
+                    !allocation.IsDeleted))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Asset>> GetAllByStatus(
         AssetStatus status,
         CancellationToken cancellationToken = default) =>

@@ -29,13 +29,9 @@ internal sealed class GetCommunityMemberAllocationListQueryHandler
     {
         List<AllocationListItem> response = new();
 
-        List<Asset> assets = await _assetRepository.GetAllActive(cancellationToken);
+        List<Asset> assets = await _assetRepository.GetAllActiveAllocatedToCommunity(cancellationToken);
 
-        List<Asset> communityAssets = assets
-            .Where(entry => entry.CurrentAllocation?.AllocationType.Equals(AllocationType.CommunityMember) ?? false)
-            .ToList();
-
-        foreach (Asset asset in communityAssets)
+        foreach (Asset asset in assets)
         {
             response.Add(new(
                 asset.CurrentAllocation!.UserId,

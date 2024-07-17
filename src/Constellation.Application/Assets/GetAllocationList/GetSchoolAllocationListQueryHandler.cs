@@ -37,7 +37,7 @@ internal sealed class GetSchoolAllocationListQueryHandler
 
         List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
 
-        List<Asset> assets = await _assetRepository.GetAllActive(cancellationToken);
+        List<Asset> assets = await _assetRepository.GetAllActiveAllocatedToSchools(cancellationToken);
 
         foreach (School school in schools)
         {

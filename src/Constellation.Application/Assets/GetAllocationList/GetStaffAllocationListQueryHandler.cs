@@ -37,7 +37,7 @@ internal sealed class GetStaffAllocationListQueryHandler
 
         List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
-        List<Asset> assets = await _assetRepository.GetAllActive(cancellationToken);
+        List<Asset> assets = await _assetRepository.GetAllActiveAllocatedToStaff(cancellationToken);
 
         foreach (Staff staffMember in staffMembers)
         {
