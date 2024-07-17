@@ -6,7 +6,6 @@ using Core.Models.Assets.Identifiers;
 using Core.Models.Assets.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ValueConverters;
 
 internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
 {
@@ -40,14 +39,6 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
             .HasConversion(
                 category => category.Value,
                 value => AssetCategory.FromValue(value));
-
-        builder
-            .Property(asset => asset.PurchaseDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(asset => asset.WarrantyEndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasMany(asset => asset.Allocations)

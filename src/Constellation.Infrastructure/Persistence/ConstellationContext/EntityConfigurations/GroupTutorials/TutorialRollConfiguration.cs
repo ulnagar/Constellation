@@ -3,7 +3,6 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -36,11 +35,7 @@ internal sealed class TutorialRollConfiguration : IEntityTypeConfiguration<Tutor
 
         builder
             .HasMany(roll => roll.Students);
-
-        builder
-            .Property(roll => roll.SessionDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
+        
         builder
             .Navigation(roll => roll.Students)
             .AutoInclude();

@@ -22,7 +22,7 @@ internal sealed class RegisterParentContactAsUserCommandHandler
         _logger = logger;
     }
 
-    public async Task<Unit> Handle(RegisterParentContactAsUserCommand request, CancellationToken cancellationToken)
+    public async Task Handle(RegisterParentContactAsUserCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Requested to create new user for email {email}", request.EmailAddress);
 
@@ -67,7 +67,5 @@ internal sealed class RegisterParentContactAsUserCommandHandler
                     _logger.LogInformation("New user creation failed for {email} because {error}", request.EmailAddress, error.Description);
             }
         }
-
-        return Unit.Value;
     }
 }

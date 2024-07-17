@@ -5,7 +5,6 @@ using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ValueConverters;
 
 internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration<TrainingCompletion>
 {
@@ -21,10 +20,6 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
             .HasConversion(
                 recordId => recordId.Value,
                 value => TrainingCompletionId.FromValue(value));
-
-        builder
-            .Property(completion => completion.CompletedDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<Staff>()

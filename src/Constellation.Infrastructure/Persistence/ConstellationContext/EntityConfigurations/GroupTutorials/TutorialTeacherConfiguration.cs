@@ -3,7 +3,6 @@
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,13 +32,5 @@ internal sealed class TutorialTeacherConfiguration : IEntityTypeConfiguration<Tu
             .WithMany(tutorial => tutorial.Teachers)
             .HasForeignKey(teacher => teacher.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder
-            .Property(teacher => teacher.EffectiveFrom)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(teacher => teacher.EffectiveTo)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

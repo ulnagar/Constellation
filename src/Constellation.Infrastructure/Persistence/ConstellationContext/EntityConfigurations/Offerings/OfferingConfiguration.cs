@@ -1,11 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Offerings;
 
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Core.Models.Offerings.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -30,14 +28,6 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .HasConversion(
                 name => name.Value,
                 value => OfferingName.FromValue(value).Value);
-
-        builder
-            .Property(offering => offering.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(offering => offering.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasOne<Course>()

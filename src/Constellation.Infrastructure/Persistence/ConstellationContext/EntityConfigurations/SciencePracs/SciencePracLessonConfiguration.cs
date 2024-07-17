@@ -2,7 +2,6 @@
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.SciencePracs;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -20,10 +19,6 @@ public class SciencePracLessonConfiguration : IEntityTypeConfiguration<SciencePr
             .HasConversion(
                 id => id.Value,
                 value => SciencePracLessonId.FromValue(value));
-
-        builder
-            .Property(lesson => lesson.DueDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .HasMany(lesson => lesson.Offerings)

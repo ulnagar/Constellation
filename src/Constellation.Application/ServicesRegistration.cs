@@ -7,7 +7,6 @@ using Constellation.Core.Models.Attachments.Services;
 using Constellation.Core.Models.Rollover.Repositories;
 using Constellation.Core.Models.WorkFlow.Services;
 using FluentValidation;
-using MediatR;
 
 public static class ServicesRegistration
 {
@@ -18,15 +17,21 @@ public static class ServicesRegistration
         services.AddValidatorsFromAssembly(Constellation.Application.AssemblyReference.Assembly);
 
         // Add Mediatr
-        services.AddMediatR(new[]
+        services.AddMediatR(config =>
         {
-            Constellation.Application.AssemblyReference.Assembly,
-            Constellation.Core.AssemblyReference.Assembly
+            config.RegisterServicesFromAssemblies(new[]
+            {
+                Constellation.Application.AssemblyReference.Assembly, Constellation.Core.AssemblyReference.Assembly
+            });
+
+            config.AddOpenBehavior(typeof(ExceptionHandlingPipelineBehaviour<,>));
+            //config.AddOpenBehavior(typeof(RequestLoggingPipelineBehaviour<,>));
+            config.AddOpenBehavior(typeof(RequestValidationPipelineBehaviour<,>));
         });
 
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingPipelineBehaviour<,>));
+        //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ExceptionHandlingPipelineBehaviour<,>));
         //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestLoggingPipelineBehaviour<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationPipelineBehaviour<,>));
+        //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestValidationPipelineBehaviour<,>));
 
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddSingleton<IRolloverRepository, RolloverRepository>();

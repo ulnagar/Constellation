@@ -100,8 +100,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddMvc()
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-builder.Services.AddDateOnlyTimeOnlyStringConverters();
-
 builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
 
 builder.Services.Configure<RazorViewEngineOptions>(options =>

@@ -4,9 +4,7 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -42,13 +40,5 @@ internal sealed class ClassCoverConfiguration : IEntityTypeConfiguration<ClassCo
             .HasConversion(
                 teacherType => teacherType.Value, 
                 value => CoverTeacherType.ByValue(value));
-
-        builder
-            .Property(cover => cover.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(cover => cover.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

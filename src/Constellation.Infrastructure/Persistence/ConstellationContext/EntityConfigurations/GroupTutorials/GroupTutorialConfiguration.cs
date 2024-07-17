@@ -2,7 +2,6 @@
 
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -50,14 +49,6 @@ internal sealed class GroupTutorialConfiguration : IEntityTypeConfiguration<Grou
         builder
             .Navigation(tutorial => tutorial.Enrolments)
             .AutoInclude();
-
-        builder
-            .Property(tutorial => tutorial.StartDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(tutorial => tutorial.EndDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
 
         builder
             .Ignore(tutorial => tutorial.CurrentEnrolments);

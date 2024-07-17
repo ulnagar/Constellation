@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 internal sealed class ExceptionHandlingPipelineBehaviour<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : class, IRequest<TResponse>
+    where TRequest : notnull
 {
     private readonly ILogger _logger;
 
@@ -20,8 +20,8 @@ internal sealed class ExceptionHandlingPipelineBehaviour<TRequest, TResponse>
 
     public async Task<TResponse> Handle(
         TRequest request,
-        CancellationToken cancellationToken,
-        RequestHandlerDelegate<TResponse> next)
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
     {
         try
         {

@@ -33,7 +33,7 @@ internal sealed class UpdateUserSchoolsClaimCommandHandler
         _adService = adService;
     }
 
-    public async Task<Unit> Handle(UpdateUserSchoolsClaimCommand request, CancellationToken cancellationToken)
+    public async Task Handle(UpdateUserSchoolsClaimCommand request, CancellationToken cancellationToken)
     {
         AppUser idUser = await _userManager.FindByEmailAsync(request.EmailAddress);
 
@@ -75,12 +75,10 @@ internal sealed class UpdateUserSchoolsClaimCommandHandler
         else
         {
             if (dbClaim.Value == claim.Value) 
-                return Unit.Value;
+                return;
 
             await _userManager.RemoveClaimAsync(idUser, dbClaim);
             await _userManager.AddClaimAsync(idUser, claim);
         }
-
-        return Unit.Value;
     }
 }

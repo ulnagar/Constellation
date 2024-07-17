@@ -5,7 +5,6 @@ using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Subjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ValueConverters;
 
 internal sealed class CanvasAssignmentConfiguration : IEntityTypeConfiguration<CanvasAssignment>
 {
@@ -37,9 +36,5 @@ internal sealed class CanvasAssignmentConfiguration : IEntityTypeConfiguration<C
             .WithMany()
             .HasForeignKey(assignment => assignment.CourseId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder
-            .Property(assignment => assignment.ForwardingDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

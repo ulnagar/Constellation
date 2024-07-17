@@ -5,8 +5,6 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,19 +22,7 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
             .HasConversion(
                 id => id.Value,
                 value => AbsenceId.FromValue(value));
-
-        builder
-            .Property(absence => absence.Date)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(absence => absence.StartTime)
-            .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
-
-        builder
-            .Property(absence => absence.EndTime)
-            .HasConversion<TimeOnlyConverter, TimeOnlyComparer>();
-
+        
         builder
             .Property(absence => absence.Type)
             .HasConversion(

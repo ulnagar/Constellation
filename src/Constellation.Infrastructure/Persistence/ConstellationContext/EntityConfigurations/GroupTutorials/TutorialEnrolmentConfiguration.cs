@@ -3,7 +3,6 @@
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students;
-using Constellation.Infrastructure.Persistence.ConstellationContext.ValueConverters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,13 +32,5 @@ internal sealed class TutorialEnrolmentConfiguration : IEntityTypeConfiguration<
             .WithMany(t => t.Enrolments)
             .HasForeignKey(e => e.TutorialId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder
-            .Property(e => e.EffectiveFrom)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(e => e.EffectiveTo)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }

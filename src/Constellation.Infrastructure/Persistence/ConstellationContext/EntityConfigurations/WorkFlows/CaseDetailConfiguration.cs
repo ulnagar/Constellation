@@ -7,7 +7,6 @@ using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ValueConverters;
 
 internal sealed class CaseDetailConfiguration : IEntityTypeConfiguration<CaseDetail>
 {
@@ -93,10 +92,6 @@ internal sealed class ComplianceCaseDetailConfiguration : IEntityTypeConfigurati
         builder
             .Property(detail => detail.SchoolName)
             .HasColumnName(nameof(ComplianceCaseDetail.SchoolName));
-
-        builder
-            .Property(detail => detail.CreatedDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }
 
@@ -125,7 +120,6 @@ internal sealed class TrainingCaseDetailConfiguration : IEntityTypeConfiguration
 
         builder
             .Property(detail => detail.DueDate)
-            .HasColumnName(nameof(TrainingCaseDetail.DueDate))
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
+            .HasColumnName(nameof(TrainingCaseDetail.DueDate));
     }
 }

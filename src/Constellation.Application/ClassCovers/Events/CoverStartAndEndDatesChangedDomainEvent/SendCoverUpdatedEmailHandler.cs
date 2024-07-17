@@ -193,7 +193,9 @@ internal sealed class SendCoverUpdatedEmailHandler
         }
 
         string teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
-        TimeOnly startTime, endTime;
+
+        TimeOnly startTime = TimeOnly.MinValue;
+        TimeOnly endTime = TimeOnly.MinValue;
         List<Attachment> attachments = new();
 
         if (cover.TeacherType == CoverTeacherType.Casual)

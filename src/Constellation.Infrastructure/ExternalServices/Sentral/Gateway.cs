@@ -840,8 +840,8 @@ public class Gateway : ISentralGateway
             return (_dateTime.Today, _dateTime.Today.AddDays(12));
         }
 
-        DateOnly startDate;
-        DateOnly endDate;
+        DateOnly startDate = DateOnly.MinValue;
+        DateOnly endDate = DateOnly.MinValue;
 
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 

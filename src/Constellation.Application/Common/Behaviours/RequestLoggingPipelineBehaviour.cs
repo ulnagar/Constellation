@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 internal sealed class RequestLoggingPipelineBehaviour<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : class, IRequest<TResponse>
+    where TRequest : notnull
     where TResponse : Result
 {
     private readonly ILogger _logger;
@@ -21,8 +21,8 @@ internal sealed class RequestLoggingPipelineBehaviour<TRequest, TResponse>
 
     public async Task<TResponse> Handle(
         TRequest request,
-        CancellationToken cancellationToken,
-        RequestHandlerDelegate<TResponse> next)
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
     {
         string requestName = typeof(TRequest).Name;
 

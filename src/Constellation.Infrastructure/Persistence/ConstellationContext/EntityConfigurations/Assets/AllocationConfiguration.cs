@@ -5,7 +5,6 @@ using Core.Models.Assets.Enums;
 using Core.Models.Assets.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ValueConverters;
 
 internal sealed class AllocationConfiguration : IEntityTypeConfiguration<Allocation>
 {
@@ -27,13 +26,5 @@ internal sealed class AllocationConfiguration : IEntityTypeConfiguration<Allocat
             .HasConversion(
                 entry => entry.Value,
                 value => AllocationType.FromValue(value));
-
-        builder
-            .Property(allocation => allocation.AllocationDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
-
-        builder
-            .Property(allocation => allocation.ReturnDate)
-            .HasConversion<DateOnlyConverter, DateOnlyComparer>();
     }
 }
