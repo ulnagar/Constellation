@@ -41,7 +41,9 @@ public interface IEmailService
     Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendParentAbsenceDigest(string familyName, List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
-    
+    Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
+
+
     /// <summary>
     /// Send an email to a student requesting they catch up on missed work for the day
     /// </summary>

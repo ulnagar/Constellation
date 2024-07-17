@@ -13,4 +13,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Constellation.Application\Constellation.Application.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\Emails\Absences\NonResidentialParentAbsenceExplanationToSchoolAdminEmail.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

@@ -48,6 +48,8 @@ public class DetailsModel : BasePageModel
 
     [BindProperty]
     public string Comment { get; set; } = string.Empty;
+    [BindProperty]
+    public bool CanBeExplainedByParent { get; set; }
 
 
     public async Task OnGet() => await PreparePage();
@@ -79,6 +81,20 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
+        if (!CanBeExplainedByParent)
+        {
+            ModalContent = new FeedbackDisplay(
+                "Absence Explanation Forwarded",
+                "Your explanation for this absence has been forwarded to the school office for entry.",
+                "Ok",
+                "btn-success",
+                _linkGenerator.GetPathByPage("/Attendance/Absences", values: new { area = "Parents" }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
         return RedirectToPage("/Attendance/Absences", new { area = "Parents" });
     }
 
@@ -96,5 +112,6 @@ public class DetailsModel : BasePageModel
         }
 
         Absence = absenceRequest.Value;
+        CanBeExplainedByParent = Absence.CanBeExplainedByParent;
     }
 }

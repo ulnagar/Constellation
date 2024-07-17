@@ -102,13 +102,14 @@
     <div class="mb-2 col-md-10">
         @if (Model.Absence.Type == wholeAbsence)
         {
-            if (Model.Absence.Explained || !Model.Absence.CanBeExplainedByParent)
+            if (Model.Absence.Explained)
             {
                 <span>"@Model.Absence.Reason"</span>
             }
             else
             {
                 <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+                <input type="hidden" asp-for="CanBeExplainedByParent" />
                 <span asp-validation-for="Comment" class="text-danger"></span>
             }
         }
@@ -150,14 +151,14 @@
     </div>
 </div>
 
-@if (Model.Absence.Type == wholeAbsence && !Model.Absence.Explained && Model.Absence.CanBeExplainedByParent)
+@if (Model.Absence.Type == wholeAbsence && !Model.Absence.Explained)
 {
     <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
-        <button class="btn btn-success btn-lg" type="submit">Submit</button>
+        <button class="btn btn-success btn-lg" type="submit" onclick="showLoader()">Submit</button>
     </div>
 
     <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
-        <button class="btn btn-success btn-lg" type="submit">Submit</button>
+            <button class="btn btn-success btn-lg" type="submit" onclick="showLoader()">Submit</button>
     </div>
 }
 </form>

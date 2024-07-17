@@ -1,0 +1,29 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.Absences
+@model NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayoutSansHeader.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The following absence explanation has been received via our online system from a Non-Residential Parent.</p>
+<p>Please check if the parent is responsible for absence explanations and update Sentral accordingly.</p>
+<dl>
+    @foreach (var absence in Model.Absences)
+    {
+        <dt>@Model.StudentName - @absence.AbsenceDate.ToLongDateString():</dt>
+        <dd>@absence.Type<br />
+            @absence.ClassName (@absence.PeriodName)<br />
+            @if (absence.Type == "Partial")
+            {
+                @absence.AbsenceTime<br />
+            }
+            @absence.Explanation<br />
+            @Html.Raw(absence.Source)
+        </dd>
+    }
+</dl>

@@ -49,8 +49,8 @@
     <Folder Include="wwwroot\private\" />
   </ItemGroup>
 
-	<ItemGroup>
-		<Using Remove="Microsoft.Extensions.Logging" />
-	</ItemGroup>
+  <ItemGroup>
+	<Using Remove="Microsoft.Extensions.Logging" />
+  </ItemGroup>
 
 </Project>

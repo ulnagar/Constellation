@@ -42,7 +42,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Constellation.Infrastructure\Constellation.Infrastructure.csproj" />
-    <ProjectReference Include="..\Constellation.Portal.Parents.Client\Constellation.Portal.Parents.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -57,6 +57,18 @@ public partial class EmailDtos
                 AbsenceType = absence.Type;
                 AbsenceTimeframe = absence.AbsenceTimeframe;
             }
+
+            public AbsenceDto(Absence absence, Offering offering, string email, string explanation)
+            {
+                ReportedBy = $"Reported by Parent ({email})";
+
+                AbsenceDate = absence.Date.ToDateTime(TimeOnly.MinValue);
+                PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})";
+                ClassName = offering.Name;
+                Explanation = explanation;
+                AbsenceType = absence.Type;
+                AbsenceTimeframe = absence.AbsenceTimeframe;
+            }
         }
     }
 

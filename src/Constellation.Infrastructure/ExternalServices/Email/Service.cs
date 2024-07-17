@@ -553,6 +553,41 @@ public sealed class Service : IEmailService
         await _emailSender.Send(toRecipients, null, $"Absence Explanation Received - {viewModel.StudentName}", body);
     }
 
+    public async Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
+    {
+        NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = _configuration.Absences.AbsenceCoordinatorName,
+            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            Title = "Absence Explanation Received",
+            StudentName = notificationEmail.StudentName
+        };
+
+        foreach (EmailDtos.AbsenceResponseEmail.AbsenceDto absence in notificationEmail.WholeAbsences)
+        {
+            viewModel.Absences.Add(new()
+            {
+                AbsenceDate = absence.AbsenceDate,
+                PeriodName = absence.PeriodName,
+                ClassName = absence.ClassName,
+                Explanation = absence.Explanation,
+                Source = absence.ReportedBy,
+                Type = absence.AbsenceType.Value,
+                AbsenceTime = absence.AbsenceTimeframe
+            });
+        }
+
+        string body = await _razorService.RenderViewToStringAsync(NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel.ViewLocation, viewModel);
+
+        Dictionary<string, string> toRecipients = new();
+        foreach (string entry in notificationEmail.Recipients)
+            if (toRecipients.All(recipient => recipient.Value != entry))
+                toRecipients.Add(entry, entry);
+
+        await _emailSender.Send(toRecipients, null, $"Non-Residential Parent Absence Explanation Received - {viewModel.StudentName}", body);
+    }
+
     public async Task SendNewCoverEmail(
         ClassCover cover,
         Offering offering,
