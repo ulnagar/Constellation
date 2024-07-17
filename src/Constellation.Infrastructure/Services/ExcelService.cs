@@ -206,8 +206,8 @@ public class ExcelService : IExcelService
 
         worksheet.Columns[18].Width = 80;
         worksheet.View.FreezePanes(2, 1);
-        worksheet.Cells[1, 1, row, 17].AutoFilter = true;
-        worksheet.Cells[1, 1, row, 16].AutoFitColumns();
+        worksheet.Cells[1, 1, row, 18].AutoFilter = true;
+        worksheet.Cells[1, 1, row, 17].AutoFitColumns();
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
