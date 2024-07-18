@@ -9,7 +9,7 @@ public class CoordinatorAbsenceDigestEmailViewModel : EmailLayoutBaseViewModel
 {
     public Name StudentName { get; set; }
     public string SchoolName { get; set; }
-    public static string Link => $"https://acos.aurora.nsw.edu.au/schools/";
+    public static string Link => $"https://acos.aurora.nsw.edu.au/Schools/";
     public List<AbsenceEntry> WholeAbsences { get; set; } = new();
     public List<AbsenceEntry> PartialAbsences { get; set; } = new();
 }

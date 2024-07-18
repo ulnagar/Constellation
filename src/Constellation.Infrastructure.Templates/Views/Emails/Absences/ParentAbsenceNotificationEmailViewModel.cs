@@ -7,6 +7,6 @@ using System.Collections.Generic;
 public class ParentAbsenceNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
     public string StudentFirstName { get; set; }
-    public static string Link => "https://acos.aurora.nsw.edu.au/parents";
+    public static string Link => "https://acos.aurora.nsw.edu.au/Parents";
     public List<AbsenceEntry> Absences { get; set; } = new();
 }

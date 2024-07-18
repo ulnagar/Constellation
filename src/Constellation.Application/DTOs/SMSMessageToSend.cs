@@ -7,7 +7,7 @@ namespace Constellation.Application.DTOs
         public string origin { get; set; }
         public string message { get; set; }
         public ICollection<string> destinations { get; set; }
-        public string notifyUrl { get; set; }
+        //public string notifyUrl { get; set; }
 
         public SMSMessageToSend()
         {

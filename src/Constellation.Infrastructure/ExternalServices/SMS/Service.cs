@@ -28,7 +28,7 @@ public class Service : ISMSService
         foreach (string offering in absences.Select(absence => absence.OfferingName).OrderBy(c => c))
             classListString += $"{offering}\r\n";
 
-        string link = $"https://acos.aurora.nsw.edu.au/parents";
+        string link = $"https://acos.aurora.nsw.edu.au/Parents";
         link = await _linkShortenerService.ShortenURL(link);
 
         string messageText = $"{student.FirstName} was reported absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
@@ -39,8 +39,7 @@ public class Service : ISMSService
         {
             origin = "Aurora",
             destinations = phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.None)).ToList(),
-            message = messageText,
-            notifyUrl = notifyUri
+            message = messageText
         };
 
         return await _service.SendSmsAsync(messageContent);
