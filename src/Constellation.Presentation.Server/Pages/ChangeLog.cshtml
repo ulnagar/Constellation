@@ -28,10 +28,22 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.15.0 (Build @version)</h3>
+<h3>Current version: Release V1.15.1 (Build @version)</h3>
 
 <div class="changelog">
     <ul>
+        <li>System-wide
+            <ul>
+                <li>Authentication
+                    <ul>
+                        <li>Updated login page to handle all three user types: Staff, Partner School Staff, and Parents</li>
+                        <li>Include extensibility options for students</li>
+                        <li>Modify flow to ask for email address first, then determine next steps based on detected user</li>
+                        <li>Include extensibility options for SSO</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
         <li>Constellation Web
             <ul>
                 <li>Layout
@@ -66,6 +78,8 @@
                     <ul>
                         <li>Added new Assets section to track all school assets</li>
                         <li>Moved old Devices data to read-only archive section</li>
+                        <li>Fixed bug in the Assets export file where the autofilter was not being applied to the last column</li>
+                        <li>Fixed bug in the Allocation view where Community allocated items would throw an error</li>
                     </ul>
                 </li>
             </ul>
@@ -81,6 +95,21 @@
                 <li>Science Rolls section
                     <ul>
                         <li>Fixed a bug that prevented users from editing Science Rolls that had already been submitted</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Parent Portal
+            <ul>
+                <li>System-wide
+                    <ul>
+                        <li>Converted project to Razor Pages in preparation for SSO integration</li>
+                        <li>Updated loading spinner</li>
+                    </ul>
+                </li>
+                <li>Absences section
+                    <ul>
+                        <li>Provided non-residential parents the opportunity to supply an explanation for whole absences. The explanation is not registered immediately, but sent to the school admin office for manual checking and entry</li>
                     </ul>
                 </li>
             </ul>
