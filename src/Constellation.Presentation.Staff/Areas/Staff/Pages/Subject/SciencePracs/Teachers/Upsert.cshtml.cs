@@ -50,7 +50,7 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     [DataType(DataType.PhoneNumber)]
-    public string PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
 
     [BindProperty]
     public string SchoolCode { get; set; }
