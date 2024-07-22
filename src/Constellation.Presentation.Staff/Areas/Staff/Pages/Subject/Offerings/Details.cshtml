@@ -391,9 +391,11 @@
     </div>
 </div>
 
-<EnrolStudentInOfferingViewComponent Id="@Model.Id"></EnrolStudentInOfferingViewComponent>
-<AddTeacherToOfferingViewComponent Id="@Model.Id"></AddTeacherToOfferingViewComponent>
-<AddSessionToOfferingViewComponent Id="@Model.Id"></AddSessionToOfferingViewComponent>
+<vc:enrol-student-in-offering Id="@Model.Id" />
+
+<vc:add-teacher-to-offering Id="@Model.Id" />
+
+<vc:add-session-to-offering Id="@Model.Id" />
 
 @section scripts
 {
