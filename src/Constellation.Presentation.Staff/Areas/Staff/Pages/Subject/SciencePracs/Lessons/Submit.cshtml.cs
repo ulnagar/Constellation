@@ -42,7 +42,7 @@ public class SubmitModel : BasePageModel
     public List<AttendanceRecord> Attendance { get; set; } = new();
 
     [BindProperty]
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 
     public async Task OnGet()
     {
@@ -103,6 +103,15 @@ public class SubmitModel : BasePageModel
 
             LessonName = roll.Name;
             DueDate = roll.DueDate;
+            foreach (LessonRollDetailsResponse.AttendanceRecord entry in roll.Attendance)
+            {
+                Attendance.Add(new()
+                {
+                    Id = entry.AttendanceId,
+                    StudentId = entry.StudentId,
+                    Name = entry.StudentName.DisplayName
+                });
+            }
 
             return Page();
         }
@@ -136,6 +145,15 @@ public class SubmitModel : BasePageModel
 
             LessonName = roll.Name;
             DueDate = roll.DueDate;
+            foreach (LessonRollDetailsResponse.AttendanceRecord entry in roll.Attendance)
+            {
+                Attendance.Add(new()
+                {
+                    Id = entry.AttendanceId,
+                    StudentId = entry.StudentId,
+                    Name = entry.StudentName.DisplayName
+                });
+            }
 
             return Page();
         }
@@ -145,9 +163,9 @@ public class SubmitModel : BasePageModel
 
     public class AttendanceRecord
     {
-        public SciencePracAttendanceId Id { get; set; }
+        public SciencePracAttendanceId? Id { get; set; }
         public string StudentId { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public bool Present { get; set; }
     }
 }

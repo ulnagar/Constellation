@@ -230,10 +230,9 @@
         <div id="sessions" class="tab-pane">
             <h3>Current Sessions</h3>
 
-            <table class="table-striped table-hover hidden-sort-data-table">
+            <table class="table-striped table-hover data-table">
                 <thead>
                 <tr>
-                    <th></th>
                     <th>Period</th>
                     <th>Class</th>
                     <th>Teacher</th>
@@ -244,8 +243,7 @@
                 @foreach (var item in Model.Sessions)
                 {
                     <tr>
-                        <td>@item.PeriodSortOrder</td>
-                        <td>@item.PeriodName</td>
+                        <td data-order="@item.PeriodSortOrder">@item.PeriodName</td>
                         <td>@item.OfferingName</td>
                         <td>
                             @foreach (var teacher in item.Teachers)

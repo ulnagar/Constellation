@@ -115,7 +115,7 @@ internal sealed class GetOfferingDetailsQueryHandler
                 session.Id,
                 session.PeriodId,
                 period.ToString(),
-                $"{period.Timetable}{period.Day}{period.Period}",
+                period.SortOrder,
                 period.Duration));
         }
 

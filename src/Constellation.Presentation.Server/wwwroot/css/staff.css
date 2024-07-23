@@ -386,18 +386,9 @@ main {
     /* min-height: 100vh; */
 }
 
-
 /* Custom sort data table styles */
-table.hidden-sort-data-table {
-    width: 100% !important;
-}
-
 table.grouped-data-table {
     width: 100% !important;
-}
-
-table.hidden-sort-data-table th {
-    width: unset !important;
 }
 
 table.grouped-data-table th {
@@ -501,4 +492,9 @@ a.Senior-5:focus, a.Senior-5.focus {
 /* Consent Upsert Dynamic Select2 Style */
 .input-group .select2-container--bootstrap .select2-selection--single {
     width: 100%;
+}
+
+/* Custom modal width */
+.modal-dialog.wide {
+    max-width: 750px;
 }
