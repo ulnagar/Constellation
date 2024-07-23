@@ -26,7 +26,7 @@ public class StudentAward : AggregateRoot
 
     public StudentAwardId Id { get; private set; } = new();
     public string StudentId { get; private set; }
-    public string TeacherId { get; private set; } = string.Empty;
+    public string? TeacherId { get; private set; }
     public DateTime AwardedOn { get; private set; }
     public string Category { get; private set; }
     public string Type { get; private set; }
