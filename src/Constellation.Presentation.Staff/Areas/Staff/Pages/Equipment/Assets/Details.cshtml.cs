@@ -16,6 +16,7 @@ using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +24,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.Components.AddAssetNote;
 using Shared.Components.AllocateAsset;
 using Shared.Components.TransferAsset;
@@ -35,13 +37,21 @@ public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext("APPLICATION", "Staff Portal");
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
@@ -57,6 +67,10 @@ public class DetailsModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(AssetNumber))
         {
+            _logger
+                .ForContext(nameof(Error), AssetNumberErrors.Empty, true)
+                .Warning("Failed to convert provided Asset Number into object");
+
             ModalContent = new ErrorDisplay(
                 AssetNumberErrors.Empty,
                 _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" }));
@@ -64,10 +78,16 @@ public class DetailsModel : BasePageModel
             return;
         }
 
+        _logger.Information("Requested to retrieve Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result<AssetResponse> result = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to retrieve Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" }));
@@ -80,6 +100,8 @@ public class DetailsModel : BasePageModel
     
     public async Task<IActionResult> OnPostAllocateDevice(AllocateDeviceSelection viewModel)
     {
+        //TODO: R1.15.1: Finish adding logging to rest of methods
+
         if (viewModel.AllocationType.Equals(AllocationType.Student))
         {
             if (string.IsNullOrWhiteSpace(viewModel.StudentId))
