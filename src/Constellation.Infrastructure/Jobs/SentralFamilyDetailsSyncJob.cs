@@ -60,40 +60,42 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         // Get the CSV file from Sentral
         // Convert to temporary objects
         //ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
-        List<FamilyDetailsDto> families = new();
+        //List<FamilyDetailsDto> families = new();
 
-        Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
+        //Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
 
         List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(token);
 
-        foreach (KeyValuePair<string, List<string>> family in familyGroups)
-        {
-            Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
+        //foreach (KeyValuePair<string, List<string>> family in familyGroups)
+        //{
+        //    Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
 
-            if (firstStudent is null)
-                continue;
+        //    if (firstStudent is null)
+        //        continue;
 
-            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(firstStudent.SentralStudentId);
+        //    FamilyDetailsDto entry = await _gateway.GetParentContactEntry(firstStudent.SentralStudentId);
 
-            entry.StudentIds = family.Value;
-            entry.FamilyId = family.Key;
+        //    entry.StudentIds = family.Value;
+        //    entry.FamilyId = family.Key;
 
-            foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
-            {
-                string name = contact.FirstName.Contains(' ')
-                    ? contact.FirstName.Split(' ')[0]
-                    : contact.FirstName;
+        //    foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
+        //    {
+        //        string name = contact.FirstName.Contains(' ')
+        //            ? contact.FirstName.Split(' ')[0]
+        //            : contact.FirstName;
 
-                name = name.Length > 8 ? name[..8] : name;
+        //        name = name.Length > 8 ? name[..8] : name;
 
-                contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
-            }
+        //        contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
+        //    }
 
-            families.Add(entry);
-        }
+        //    families.Add(entry);
+        //}
 
+        ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
+        
         _logger
-            .Information("Found {count} families", familyGroups.Count);
+            .Information("Found {count} families", families.Count);
 
         List<Family> dbFamilies = await _familyRepository.GetAll(token);
 

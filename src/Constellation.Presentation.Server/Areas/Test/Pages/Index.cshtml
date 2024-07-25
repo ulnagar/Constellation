@@ -1,36 +1,7 @@
 ﻿@page
-@using Microsoft.AspNetCore.Mvc.RazorPages
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
-
-@inject EndpointDataSource EndpointsDataSource
 
 <h2>Test Page</h2>
 
-<table class="table table-striped data-table">
-    <thead>
-    <tr>
-        <th>Area Name</th>
-        <th>Display Name</th>
-        <th>Relative Path</th>
-        <th>View Engine Path</th>
-    </tr>
-    </thead>
-    <tbody>
-        @foreach (var endpoint in EndpointsDataSource.Endpoints)
-        {
-            foreach (var metadata in endpoint.Metadata)
-            {
-                if (metadata is PageActionDescriptor descriptor)
-                {
-                    <tr>
-                        <td>@descriptor.AreaName</td>
-                        <td>@descriptor.DisplayName</td>
-                        <td>@descriptor.RelativePath</td>
-                        <td>@descriptor.ViewEnginePath</td>
-                    </tr>
-                }
-            }
-        }
-    </tbody>
-</table>
+
 

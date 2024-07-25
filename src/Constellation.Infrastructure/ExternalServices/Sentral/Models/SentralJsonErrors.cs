@@ -1,0 +1,10 @@
+﻿namespace Constellation.Infrastructure.ExternalServices.Sentral.Models;
+
+using Core.Shared;
+
+public static class SentralJsonErrors
+{
+    public static readonly Func<string, string, Error> IncorrectObject = (expected, provided) => new(
+        "Sentral.JsonConversion.IncorrectObject",
+        $"Expected object of type {expected} but received {provided}");
+}

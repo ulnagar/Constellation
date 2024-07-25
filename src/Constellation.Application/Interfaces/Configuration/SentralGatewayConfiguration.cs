@@ -9,6 +9,10 @@ public class SentralGatewayConfiguration
     public string Username { get; set; }
     public string Password { get; set; }
     public string ServerUrl { get; set; }
+
+    public string ApiKey { get; set; }
+    public string ApiTenant { get; set; }
+
     public ContactPreferenceOptions ContactPreference { get; set; }
     public SentralXPathLocations XPaths { get; set; }
 

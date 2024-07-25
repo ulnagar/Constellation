@@ -22,7 +22,8 @@ public static class SentralServicesRegistration
         services.AddOptions<SentralGatewayConfiguration>();
         services.Configure<SentralGatewayConfiguration>(configuration.GetSection(SentralGatewayConfiguration.Section));
 
-        services.AddScoped<ISentralGateway, Gateway>();
+        //services.AddScoped<ISentralGateway, Gateway>();
+        services.AddScoped<ISentralGateway, ApiGateway>();
         services.AddScoped<ISentralService, Service>();
 
         return services;

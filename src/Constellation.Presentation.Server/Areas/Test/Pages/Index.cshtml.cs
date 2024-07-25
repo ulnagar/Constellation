@@ -1,75 +1,127 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.DTOs;
+using Application.Interfaces.Gateways;
 using BaseModels;
-using Constellation.Application.Assets.ImportAssetsFromFile;
-using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models.Assets.Enums;
-using Constellation.Core.Models.Assets.Repositories;
-using Constellation.Core.Models.Assets.ValueObjects;
-using Constellation.Core.Models.Assets;
-using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Attributes;
-using Core.Models;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using Constellation.Core.Models.Students.Repositories;
+using Constellation.Infrastructure.ExternalServices.Sentral;
+using Microsoft.Extensions.Options;
+using Serilog;
+using System.Diagnostics;
 
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
-    private readonly IAssetRepository _assetRepository;
-    private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly IDateTimeProvider _dateTime;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IOptions<SentralGatewayConfiguration> _settings;
+    private readonly IHttpClientFactory _factory;
+    private readonly ILogger _logger;
+    private readonly IStudentRepository _studentRepository;
 
     public IndexModel(
-        IMediator mediator,
-        IAssetRepository assetRepository,
-        IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         IDateTimeProvider dateTime,
-        IUnitOfWork unitOfWork)
+        IOptions<SentralGatewayConfiguration> settings,
+        IHttpClientFactory factory,
+        ILogger logger,
+        IStudentRepository studentRepository)
     {
-        _mediator = mediator;
-        _assetRepository = assetRepository;
-        _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _dateTime = dateTime;
-        _unitOfWork = unitOfWork;
+        _settings = settings;
+        _factory = factory;
+        _logger = logger;
+        _studentRepository = studentRepository;
     }
-
-    [BindProperty]
-    [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
-    public IFormFile UploadFile { get; set; }
 
     public string Message { get; set; } = string.Empty;
 
-    public void OnGet() { }
+    public async Task OnGet() => await OnGetAllFamiliesComparison();
 
-    public async Task OnPostImportFile()
+    public async Task OnGetAllFamiliesComparison()
     {
-        if (UploadFile is not null)
+        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool();
+        
+        Stopwatch watch = Stopwatch.StartNew();
+        ISentralGateway oldGateway = new Gateway(
+            _dateTime,
+            _settings,
+            _factory,
+            _logger);
+
+        List<FamilyDetailsDto> families = new();
+
+        Dictionary<string, List<string>> familyGroups = await oldGateway.GetFamilyGroupings();
+        
+        foreach (KeyValuePair<string, List<string>> family in familyGroups)
         {
-            try
-            {
-                await using MemoryStream target = new();
-                await UploadFile.CopyToAsync(target);
+            Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
 
-                Result request = await _mediator.Send(new ImportAssetsFromFileCommand(target));
+            if (firstStudent is null)
+                continue;
 
-                if (request.IsFailure)
-                {
-                    ModalContent = new ErrorDisplay(request.Error);
-                }
-            }
-            catch (Exception ex)
+            FamilyDetailsDto entry = await oldGateway.GetParentContactEntry(firstStudent.SentralStudentId);
+
+            entry.StudentIds = family.Value;
+            entry.FamilyId = family.Key;
+
+            foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
             {
-                ModalContent = new ErrorDisplay(new(ex.Source, ex.Message));
+                string name = contact.FirstName.Contains(' ')
+                    ? contact.FirstName.Split(' ')[0]
+                    : contact.FirstName;
+
+                name = name.Length > 8 ? name[..8] : name;
+
+                contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
             }
+
+            families.Add(entry);
         }
+
+        watch.Stop();
+
+        long oldGatewayTime = watch.ElapsedMilliseconds;
+
+        watch.Reset();
+        watch.Start();
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        ICollection<FamilyDetailsDto> newObject = await newGateway.GetFamilyDetailsReport(_logger);
+        watch.Stop();
+
+        long newGatewayTime = watch.ElapsedMilliseconds;
+    }
+
+    public async Task OnGetSingleFamilyComparison()
+    {
+        string sentralId = "2443";
+
+        Stopwatch watch = Stopwatch.StartNew();
+        ISentralGateway oldGateway = new Gateway(
+            _dateTime,
+            _settings,
+            _factory,
+            _logger);
+
+        FamilyDetailsDto oldObject = await oldGateway.GetParentContactEntry(sentralId);
+        watch.Stop();
+
+        long oldGatewayTime = watch.ElapsedMilliseconds;
+
+        watch.Reset();
+        watch.Start();
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        FamilyDetailsDto newObject = await newGateway.GetParentContactEntry(sentralId);
+        watch.Stop();
+
+        long newGatewayTime = watch.ElapsedMilliseconds;
     }
 }
