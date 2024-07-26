@@ -1,26 +1,33 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral.Models;
 
 using Core.Shared;
+using Extensions;
+using System.Text.Json;
 
 public sealed class CoreFamily
 {
-    public static Result<CoreFamily> ConvertFromJson(dynamic jsonEntry)
+    public static Result<CoreFamily> ConvertFromJson(JsonElement jsonEntry)
     {
-        if (jsonEntry["type"].ToString() != "coreFamily")
-            return Result.Failure<CoreFamily>(SentralJsonErrors.IncorrectObject("CoreFamily", jsonEntry["type"].ToString()));
+        bool typeExists = jsonEntry.TryGetProperty("type", out JsonElement type);
 
-        CoreFamily family = new()
+        if (!typeExists || type.GetString() != "coreFamily")
+            return Result.Failure<CoreFamily>(SentralJsonErrors.IncorrectObject("CoreFamily", typeExists ? type.GetString() : string.Empty));
+
+        CoreFamily family = new();
+        family.FamilyId = jsonEntry.ExtractString("id");
+
+        bool attributesExists = jsonEntry.TryGetProperty("attributes", out JsonElement attributes);
+        if (attributesExists)
         {
-            FamilyId = jsonEntry["id"].ToString(),
-            AddressTitle = jsonEntry["attributes"]["addressTitle"].ToString(),
-            AddressStreetNo = jsonEntry["attributes"]["addressStreetNo"].ToString(),
-            AddressStreet = jsonEntry["attributes"]["addressStreet"].ToString(),
-            AddressSuburb = jsonEntry["attributes"]["addressSuburb"].ToString(),
-            AddressState = jsonEntry["attributes"]["addressState"].ToString(),
-            AddressPostCode = jsonEntry["attributes"]["addressPostCode"].ToString(),
-            PhoneNumber = jsonEntry["attributes"]["phone"].ToString(),
-            EmailAddress = jsonEntry["attributes"]["emailAddress"].ToString()
-        };
+            family.AddressTitle = attributes.ExtractString("addressTitle");
+            family.AddressStreetNo = attributes.ExtractString("addressStreetNo");
+            family.AddressStreet = attributes.ExtractString("addressStreet");
+            family.AddressSuburb = attributes.ExtractString("addressSuburb");
+            family.AddressState = attributes.ExtractString("addressState");
+            family.AddressPostCode = attributes.ExtractString("addressPostCode");
+            family.PhoneNumber = attributes.ExtractString("phone");
+            family.EmailAddress = attributes.ExtractString("emailAddress");
+        }
 
         return family;
     }

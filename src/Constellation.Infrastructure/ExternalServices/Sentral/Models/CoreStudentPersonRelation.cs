@@ -1,75 +1,52 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral.Models;
 
 using Core.Shared;
+using Extensions;
+using System.Text.Json;
 
 public sealed class CoreStudentPersonRelation
 {
-    public static Result<CoreStudentPersonRelation> ConvertFromJson(dynamic jsonEntry)
+    public static Result<CoreStudentPersonRelation> ConvertFromJson(JsonElement jsonEntry)
     {
-        if (jsonEntry["type"].ToString() != "coreStudent")
-            return Result.Failure<CoreStudentPersonRelation>(SentralJsonErrors.IncorrectObject("CoreStudentPersonRelation", jsonEntry["type"].ToString()));
+        bool typeExists = jsonEntry.TryGetProperty("type", out JsonElement type);
 
-        CoreStudentPersonRelation relationship = new()
+        if (!typeExists || type.GetString() != "coreStudentPersonRelation")
+            return Result.Failure<CoreStudentPersonRelation>(SentralJsonErrors.IncorrectObject("CoreStudentPersonRelation", typeExists ? type.GetString() : string.Empty));
+
+        CoreStudentPersonRelation relationship = new();
+        relationship.RelationshipId = jsonEntry.ExtractString("id");
+
+        bool attributesExists = jsonEntry.TryGetProperty("attributes", out JsonElement attributes);
+        if (attributesExists)
         {
-            RelationshipId = jsonEntry["id"].ToString(),
-            PersonId = jsonEntry["relationships"]["corePerson"]["data"]["id"].ToString(),
-            StudentId = jsonEntry["relationships"]["coreStudent"]["data"]["id"].ToString(),
-            Relationship = jsonEntry["attributes"]["relationship"].ToString()
-        };
+            relationship.Relationship = attributes.ExtractString("relationship");
+            relationship.IsResidentialGuardian = attributes.ExtractBool("isResidentialGuardian") ?? false;
+            relationship.IsEmergencyContact = attributes.ExtractBool("isEmergencyContact") ?? false;
+            relationship.CanContactViaSms = attributes.ExtractBool("canContactViaSms") ?? false;
+            relationship.CanContactViaEmail = attributes.ExtractBool("canContactViaEmail") ?? false;
+            relationship.CanContactViaPhone = attributes.ExtractBool("canContactViaPhone") ?? false;
+            relationship.CanContactViaLetter = attributes.ExtractBool("canContactViaLetter") ?? false;
+            relationship.CanReceiveCorrespondence = attributes.ExtractBool("canReceiveCorrespondence") ?? false;
+            relationship.CanReceivePortalAccess = attributes.ExtractBool("canReceivePortalAccess") ?? false;
+            relationship.CanReceiveReports = attributes.ExtractBool("canReceiveReports") ?? false;
+            relationship.CanReceiveAbsences = attributes.ExtractBool("canReceiveAbsences") ?? false;
+            relationship.CanReceiveSms = attributes.ExtractBool("canReceiveSms") ?? false;
+            relationship.DoNotContact = attributes.ExtractBool("doNotContact") ?? false;
+            relationship.Sequence = attributes.ExtractInt("sequence");
+        }
 
-        bool guardianSuccess = bool.TryParse(jsonEntry["attributes"]["isResidentialGuardian"].ToString(), out bool isResidentialGuardian);
-        if (guardianSuccess)
-            relationship.IsResidentialGuardian = isResidentialGuardian;
+        bool relationshipsExists = jsonEntry.TryGetProperty("relationship", out JsonElement relationships);
+        if (!relationshipsExists)
+            return relationship;
 
-        bool emergencyContactSuccess = bool.TryParse(jsonEntry["attributes"]["isEmergencyContact"].ToString(), out bool isEmergencyContact);
-        if (emergencyContactSuccess)
-            relationship.IsEmergencyContact = isEmergencyContact;
-
-        bool contactSmsSuccess = bool.TryParse(jsonEntry["attributes"]["canContactViaSms"].ToString(), out bool canContactViaSms);
-        if (contactSmsSuccess)
-            relationship.CanContactViaSms = canContactViaSms;
-
-        bool contactEmailSuccess = bool.TryParse(jsonEntry["attributes"]["canContactViaEmail"].ToString(), out bool canContactViaEmail);
-        if (contactEmailSuccess)
-            relationship.CanContactViaEmail = canContactViaEmail;
-
-        bool contactPhoneSuccess = bool.TryParse(jsonEntry["attributes"]["canContactViaPhone"].ToString(), out bool canContactViaPhone);
-        if (contactPhoneSuccess)
-            relationship.CanContactViaPhone = canContactViaPhone;
-
-        bool contactLetterSuccess = bool.TryParse(jsonEntry["attributes"]["canContactViaLetter"].ToString(), out bool canContactViaLetter);
-        if (contactLetterSuccess)
-            relationship.CanContactViaLetter = canContactViaLetter;
-
-        bool correspondenceSuccess = bool.TryParse(jsonEntry["attributes"]["canReceiveCorrespondence"].ToString(), out bool canReceiveCorrespondence);
-        if (correspondenceSuccess)
-            relationship.CanReceiveCorrespondence = canReceiveCorrespondence;
-
-        bool portalAccessSuccess = bool.TryParse(jsonEntry["attributes"]["canReceivePortalAccess"].ToString(), out bool canReceivePortalAccess);
-        if (portalAccessSuccess)
-            relationship.CanReceivePortalAccess = canReceivePortalAccess;
-
-        bool reportSuccess = bool.TryParse(jsonEntry["attributes"]["canReceiveReports"].ToString(), out bool canReceiveReports);
-        if (reportSuccess)
-            relationship.CanReceiveReports = canReceiveReports;
-
-        bool absencesSuccess = bool.TryParse(jsonEntry["attributes"]["canReceiveAbsences"].ToString(), out bool canReceiveAbsences);
-        if (absencesSuccess)
-            relationship.CanReceiveAbsences = canReceiveAbsences;
-
-        bool smsSuccess = bool.TryParse(jsonEntry["attributes"]["canReceiveSms"].ToString(), out bool canReceiveSms);
-        if (smsSuccess)
-            relationship.CanReceiveSms = canReceiveSms;
-
-        bool contactSuccess = bool.TryParse(jsonEntry["attributes"]["doNotContact"].ToString(), out bool doNotContact);
-        if (contactSuccess)
-            relationship.DoNotContact = doNotContact;
-
-        bool sequenceSuccess = Int32.TryParse(jsonEntry["attributes"]["sequence"].ToString(), out int sequence);
-        if (sequenceSuccess)
-            relationship.Sequence = sequence;
-
-
+        bool personExists = relationships.TryGetProperty("corePerson", out JsonElement person);
+        if (personExists)
+            relationship.PersonId = person.GetProperty("data").GetProperty("id").GetString();
+    
+        bool studentExists = relationships.TryGetProperty("coreStudent", out JsonElement student);
+        if (studentExists)
+            relationship.StudentId = student.GetProperty("data").GetProperty("id").GetString();
+    
         return relationship;
     }
 

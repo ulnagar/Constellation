@@ -89,7 +89,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
     public Result UpdateFamilyEmail(string email)
     {
-        var familyEmail = EmailAddress.Create(email);
+        Result<EmailAddress> familyEmail = EmailAddress.Create(email);
 
         if (familyEmail.IsFailure)
         {
@@ -111,21 +111,21 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         string emailAddress,
         Parent.SentralReference sentralLink)
     {
-        var parentEmail = EmailAddress.Create(emailAddress);
+        Result<EmailAddress> parentEmail = EmailAddress.Create(emailAddress);
 
         if (parentEmail.IsFailure)
         {
             return Result.Failure<Parent>(parentEmail.Error);
         }
 
-        var parentMobile = PhoneNumber.Create(mobileNumber);
+        Result<PhoneNumber> parentMobile = PhoneNumber.Create(mobileNumber);
 
-        var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email && parent.SentralLink == sentralLink);
+        Parent? existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email && parent.SentralLink == sentralLink);
 
         if (existingParent is not null)
             return Result.Failure<Parent>(DomainErrors.Families.Parents.AlreadyExists);
 
-        var parent = Parent.Create(
+        Parent parent = Parent.Create(
             new ParentId(),
             Id,
             title,
@@ -151,14 +151,14 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         string emailAddress,
         Parent.SentralReference sentralLink)
     {
-        var parentEmail = EmailAddress.Create(emailAddress);
+        Result<EmailAddress> parentEmail = EmailAddress.Create(emailAddress);
 
         if (parentEmail.IsFailure)
             return Result.Failure<Parent>(parentEmail.Error);
 
-        var parentMobile = PhoneNumber.Create(mobileNumber);
+        Result<PhoneNumber> parentMobile = PhoneNumber.Create(mobileNumber);
 
-        var existingParent = _parents.FirstOrDefault(parent => parent.Id == parentId);
+        Parent? existingParent = _parents.FirstOrDefault(parent => parent.Id == parentId);
 
         if (existingParent is null)
             return Result.Failure<Parent>(DomainErrors.Families.Parents.NotFoundInFamily(parentId, Id));
@@ -180,7 +180,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     public Result RemoveParent(
         ParentId parentId)
     {
-        var existingParent = _parents.FirstOrDefault(entry => entry.Id == parentId);
+        Parent? existingParent = _parents.FirstOrDefault(entry => entry.Id == parentId);
 
         if (existingParent is null)
         {
@@ -198,11 +198,11 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         string studentId,
         bool isResidential)
     {
-        var existingMembership = _studentMemberships.FirstOrDefault(entry => entry.StudentId == studentId);
+        StudentFamilyMembership? existingMembership = _studentMemberships.FirstOrDefault(entry => entry.StudentId == studentId);
 
         if (existingMembership is null)
         {
-            var membership = StudentFamilyMembership.Create(studentId, Id, isResidential);
+            StudentFamilyMembership membership = StudentFamilyMembership.Create(studentId, Id, isResidential);
 
             RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new DomainEventId(), membership));
 
@@ -227,7 +227,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     public Result RemoveStudent(
         string studentId)
     {
-        var existingMembership = _studentMemberships.FirstOrDefault(entry => entry.StudentId == studentId);
+        StudentFamilyMembership? existingMembership = _studentMemberships.FirstOrDefault(entry => entry.StudentId == studentId);
 
         if (existingMembership is null)
         {

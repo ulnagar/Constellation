@@ -1,51 +1,55 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral.Models;
 
-using Constellation.Core.Models.Students;
 using Core.Shared;
+using Extensions;
+using System.Text.Json;
 
 public sealed class CoreStudentRelationship
 {
-    public static Result<CoreStudentRelationship> ConvertFromJson(dynamic jsonEntry)
+    public static Result<CoreStudentRelationship> ConvertFromJson(JsonElement jsonEntry)
     {
-        if (jsonEntry["type"].ToString() != "coreStudentRelationship")
-            return Result.Failure<CoreStudentRelationship>(SentralJsonErrors.IncorrectObject("CoreStudentRelationship", jsonEntry["type"].ToString()));
+        bool typeExists = jsonEntry.TryGetProperty("type", out JsonElement type);
 
-        CoreStudentRelationship relationship = new()
+        if (!typeExists || type.GetString() != "coreStudentRelationship")
+            return Result.Failure<CoreStudentRelationship>(SentralJsonErrors.IncorrectObject("CoreStudentRelationship", typeExists ? type.GetString() : string.Empty));
+
+        CoreStudentRelationship relationship = new();
+        relationship.Relationship = jsonEntry.ExtractString("id");
+
+        bool attributesExists = jsonEntry.TryGetProperty("attributes", out JsonElement attributes);
+        if (attributesExists)
         {
-            RelationshipId = jsonEntry["id"].ToString(),
-            PersonId = jsonEntry["attributes"]["corePerson"]["id"].ToString(),
-            StudentId = jsonEntry["relationships"]["coreStudent"]["data"]["id"].ToString(),
-            Relationship = jsonEntry["attributes"]["relationship"].ToString(),
-            FirstName = jsonEntry["attributes"]["corePerson"]["firstName"].ToString(),
-            LastName = jsonEntry["attributes"]["corePerson"]["lastName"].ToString(),
-            PreferredName = jsonEntry["attributes"]["corePerson"]["preferredName"].ToString(),
-            Title = jsonEntry["attributes"]["corePerson"]["title"].ToString(),
-            Gender = jsonEntry["attributes"]["corePerson"]["gender"].ToString(),
-            Mobile = jsonEntry["attributes"]["corePerson"]["mobile"].ToString(),
-            EmailAddress = jsonEntry["attributes"]["corePerson"]["email"].ToString()
-        };
+            relationship.Relationship = attributes.ExtractString("relationship");
 
-        bool externalIdSuccess = Guid.TryParse(jsonEntry["attributes"]["corePerson"]["externalId"].ToString(), out Guid externalId);
-        if (externalIdSuccess)
-            relationship.ExternalId = externalId;
+            bool personExists = attributes.TryGetProperty("corePerson", out JsonElement person);
+            if (personExists)
+            {
+                relationship.PersonId = person.ExtractString("id");
+                relationship.FirstName = person.ExtractString("firstName");
+                relationship.LastName = person.ExtractString("lastName");
+                relationship.PreferredName = person.ExtractString("preferredName");
+                relationship.Title = person.ExtractString("title");
+                relationship.Gender = person.ExtractString("gender");
+                relationship.Mobile = person.ExtractString("mobile");
+                relationship.EmailAddress = person.ExtractString("email");
+                relationship.ExternalId = person.ExtractGuid("externalId");
+                relationship.IsResidentialGuardian = person.ExtractBool("isResidentialGuardian") ?? false;
+                relationship.IsEmergencyContact = person.ExtractBool("isEmergencyContact") ?? false;
+                relationship.IsActive = person.ExtractBool("isActive") ?? false;
+                relationship.Sequence = person.ExtractInt("sequence");
+            }
+        }
 
+        bool relationshipsExists = jsonEntry.TryGetProperty("relationships", out JsonElement relationships);
+        if (!relationshipsExists)
+            return relationship;
 
-        bool guardianSuccess = bool.TryParse(jsonEntry["attributes"]["isResidentialGuardian"].ToString(), out bool isResidentialGuardian);
-        if (guardianSuccess)
-            relationship.IsResidentialGuardian = isResidentialGuardian;
+        bool studentExists = relationships.TryGetProperty("coreStudent", out JsonElement student);
+        if (!studentExists) 
+            return relationship;
 
-        bool emergencyContactSuccess = bool.TryParse(jsonEntry["attributes"]["isEmergencyContact"].ToString(), out bool isEmergencyContact);
-        if (emergencyContactSuccess)
-            relationship.IsEmergencyContact = isEmergencyContact;
-
-        bool sequenceSuccess = Int32.TryParse(jsonEntry["attributes"]["sequence"].ToString(), out int sequence);
-        if (sequenceSuccess)
-            relationship.Sequence = sequence;
-
-        bool activeSuccess = bool.TryParse(jsonEntry["attributes"]["isActive"].ToString(), out bool isActive);
-        if (activeSuccess)
-            relationship.IsActive = isActive;
-
+        relationship.StudentId = student.GetProperty("data").GetProperty("id").GetString();
+        
         return relationship;
     }
 

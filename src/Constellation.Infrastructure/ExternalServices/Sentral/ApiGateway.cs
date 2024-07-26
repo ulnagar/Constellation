@@ -5,11 +5,15 @@ using Application.Attendance.GetValidAttendanceReportDates;
 using Application.DTOs;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
+using Constellation.Core.Models;
+using Core.Models.Families;
 using Core.Shared;
+using Extensions;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Models;
-using Newtonsoft.Json;
+using System.Text.Json;
+using static Constellation.Core.Errors.DomainErrors.Families;
 
 public sealed class ApiGateway : ISentralGateway
 {
@@ -39,9 +43,9 @@ public sealed class ApiGateway : ISentralGateway
         Links
     }
 
-    private async Task<Dictionary<JsonSection, List<dynamic>>> GetSingleResponse(Uri path, CancellationToken cancallationToken = default)
+    private async Task<Dictionary<JsonSection, List<JsonElement>>> GetResponse(Uri path, CancellationToken cancellationToken = default)
     {
-        Dictionary<JsonSection, List<dynamic>> completeResponse = new();
+        Dictionary<JsonSection, List<JsonElement>> completeResponse = new();
         completeResponse.Add(JsonSection.Data, new());
         completeResponse.Add(JsonSection.Includes, new());
         
@@ -49,104 +53,71 @@ public sealed class ApiGateway : ISentralGateway
 
         while (nextPageExists)
         {
-            HttpResponseMessage response = await _client.GetAsync(path, cancallationToken);
+            HttpResponseMessage response = await _client.GetAsync(path, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
                 return completeResponse;
             }
 
-            string responseText = await response.Content.ReadAsStringAsync(cancallationToken);
+            string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            dynamic item = JsonConvert.DeserializeObject(responseText);
+            using JsonDocument document = JsonDocument.Parse(responseText);
+            JsonElement root = document.RootElement;
+            bool errorsExist = root.TryGetProperty("errors", out JsonElement errors);
 
-            if (item is null || item["errors"] is not null)
+            if (errorsExist)
             {
+                // do something with the errors
+                foreach (JsonElement item in errors.EnumerateArray())
+                    completeResponse[JsonSection.Error].Add(item.Clone());
+
                 return completeResponse;
             }
 
-            completeResponse[JsonSection.Data].Add(item["data"]);
+            bool linksExist = root.TryGetProperty("links", out JsonElement links);
 
-            if (item["included"] is not null)
-                completeResponse[JsonSection.Includes].AddRange(item["included"]);
-        
-            dynamic links = item["links"];
-
-            if (links is null)
-            {
-                nextPageExists = false;
-                continue;
-            }
-
-            dynamic nextLink = links["next"];
-
-            if (nextLink is null)
+            if (!linksExist)
             {
                 nextPageExists = false;
             }
             else
             {
-                path = new Uri(nextLink.ToString());
+                // do something with the links
+                bool nextLinkExists = links.TryGetProperty("next", out JsonElement nextLink);
+
+                if (nextLinkExists)
+                    path = new Uri(nextLink.GetString()!);
+                else
+                    nextPageExists = false;
+            }
+
+            bool dataExists = root.TryGetProperty("data", out JsonElement data);
+
+            switch (dataExists)
+            {
+                case true when data.ValueKind == JsonValueKind.Array:
+                    {
+                        foreach (JsonElement item in data.EnumerateArray())
+                            completeResponse[JsonSection.Data].Add(item.Clone());
+                        break;
+                    }
+                case true when data.ValueKind == JsonValueKind.Object:
+                    completeResponse[JsonSection.Data].Add(data.Clone());
+                    break;
+            }
+
+            bool includesExists = root.TryGetProperty("included", out JsonElement includes);
+
+            if (includesExists)
+            {
+                foreach (JsonElement item in includes.EnumerateArray())
+                    completeResponse[JsonSection.Includes].Add(item.Clone());
             }
         }
 
         return completeResponse;
     }
-
-    private async Task<Dictionary<JsonSection, List<dynamic>>> GetManyResponses(Uri path, CancellationToken cancallationToken = default)
-    {
-        Dictionary<JsonSection, List<dynamic>> completeResponse = new();
-        completeResponse.Add(JsonSection.Data, new());
-        completeResponse.Add(JsonSection.Includes, new());
-
-        bool nextPageExists = true;
-
-        while (nextPageExists)
-        {
-            HttpResponseMessage response = await _client.GetAsync(path, cancallationToken);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                return completeResponse;
-            }
-
-            string responseText = await response.Content.ReadAsStringAsync(cancallationToken);
-
-            dynamic item = JsonConvert.DeserializeObject(responseText);
-
-            if (item is null || item["errors"] is not null)
-            {
-                return completeResponse;
-            }
-
-            completeResponse[JsonSection.Data].AddRange(item["data"]);
-
-            if (item["included"] is not null)
-                completeResponse[JsonSection.Includes].AddRange(item["included"]);
-
-            dynamic links = item["links"];
-
-            if (links is null)
-            {
-                nextPageExists = false;
-                continue;
-            }
-
-            dynamic nextLink = links["next"];
-
-            if (nextLink is null)
-            {
-                nextPageExists = false;
-            }
-            else
-            {
-                path = new Uri(nextLink.ToString());
-            }
-        }
-
-        return completeResponse;
-    }
-
 
     public Task<string> GetSentralStudentIdAsync(string studentName) => throw new NotImplementedException();
 
@@ -162,20 +133,20 @@ public sealed class ApiGateway : ISentralGateway
     {
         Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
 
-        Dictionary<JsonSection, List<dynamic>> studentResponse = await GetSingleResponse(path);
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetResponse(path);
         
         List<CoreStudent> students = new();
         List<CoreStudentRelationship> people = new();
         List<CoreStudentPersonRelation> relationships = new();
         CoreFamily family = new();
 
-        foreach (KeyValuePair<JsonSection, List<dynamic>> section in studentResponse)
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
         {
             switch (section.Key)
             {
                 case JsonSection.Data:
                     {
-                        foreach (dynamic entry in section.Value)
+                        foreach (JsonElement entry in section.Value)
                         {
                             Result<CoreStudent> student = CoreStudent.ConvertFromJson(entry);
 
@@ -189,24 +160,30 @@ public sealed class ApiGateway : ISentralGateway
                     }
                 case JsonSection.Includes:
                     {
-                        foreach (dynamic entry in section.Value)
+                        foreach (JsonElement entry in section.Value)
                         {
-                            if (entry["type"].ToString() == "coreStudentRelationship")
+                            string type = entry.ExtractString("type");
+
+                            switch (type)
                             {
-                                Result<CoreStudentRelationship> relationship = CoreStudentRelationship.ConvertFromJson(entry);
-                                if (relationship.IsFailure)
-                                    continue;
+                                case "coreStudentRelationship":
+                                    {
+                                        Result<CoreStudentRelationship> relationship = CoreStudentRelationship.ConvertFromJson(entry);
+                                        if (relationship.IsFailure)
+                                            continue;
 
-                                people.Add(relationship.Value);
-                            }
+                                        people.Add(relationship.Value);
+                                        break;
+                                    }
+                                case "coreStudentPersonRelation":
+                                    {
+                                        Result<CoreStudentPersonRelation> relationship = CoreStudentPersonRelation.ConvertFromJson(entry);
+                                        if (relationship.IsFailure)
+                                            continue;
 
-                            if (entry["type"].ToString() == "coreStudentPersonRelation")
-                            {
-                                Result<CoreStudentPersonRelation> relationship = CoreStudentPersonRelation.ConvertFromJson(entry);
-                                if (relationship.IsFailure)
-                                    continue;
-
-                                relationships.Add(relationship.Value);
+                                        relationships.Add(relationship.Value);
+                                        break;
+                                    }
                             }
                         }
 
@@ -222,9 +199,9 @@ public sealed class ApiGateway : ISentralGateway
 
         path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-family/{familyId}");
 
-        Dictionary<JsonSection, List<dynamic>> familyResponse = await GetSingleResponse(path);
+        Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetResponse(path);
 
-        foreach (dynamic entry in familyResponse.Where(entry => entry.Key == JsonSection.Data).SelectMany(entry => entry.Value))
+        foreach (JsonElement entry in familyResponse.Where(entry => entry.Key == JsonSection.Data).SelectMany(entry => entry.Value))
         {
             Result<CoreFamily> familyResult = CoreFamily.ConvertFromJson(entry);
 
@@ -259,7 +236,13 @@ public sealed class ApiGateway : ISentralGateway
                 SentralId = person.PersonId,
                 Email = person.EmailAddress,
                 Mobile = person.Mobile,
-                Sequence = person.Sequence
+                Sequence = person.Sequence,
+                SentralReference = person.Gender switch
+                {
+                    "M" => Parent.SentralReference.Father,
+                    "F" => Parent.SentralReference.Mother,
+                    _ => Parent.SentralReference.Other
+                }
             });
         }
 
@@ -271,23 +254,207 @@ public sealed class ApiGateway : ISentralGateway
         return familyDetails;
     }
 
-    public Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year) => throw new NotImplementedException();
+    public async Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/date");
 
-    public Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year) => throw new NotImplementedException();
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetResponse(path);
 
-    public Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date) => throw new NotImplementedException();
+        List<CoreDate> dates = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+
+                            if (date.IsFailure)
+                                continue;
+
+                            dates.Add(date.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        IEnumerable<CoreDate> excludedDates = dates.Where(entry => entry.Code != "W" && entry.Code != "S");
+
+        return excludedDates.Select(entry => entry.Date).ToList();
+    }
+
+    public async Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/date");
+
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetResponse(path);
+
+        List<CoreDate> dates = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+
+                            if (date.IsFailure)
+                                continue;
+
+                            dates.Add(date.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        List<ValidAttendenceReportDate> response = new();
+
+        for (int i = 1; i < 5; i++)
+        {
+            IEnumerable<CoreDate> datesFromTerm = dates.Where(entry => entry.Code != "W").Where(entry => entry.Term == i.ToString());
+
+            IEnumerable<IGrouping<int, CoreDate>> groupedDates = datesFromTerm.GroupBy(entry =>
+                int.Parse(entry.Week) % 2 == 0 
+                    ? int.Parse(entry.Week) - 1 
+                    : int.Parse(entry.Week));
+
+            foreach (IGrouping<int, CoreDate> group in groupedDates)
+            {
+                if (group.Key == 11)
+                {
+                    response.Add(new(
+                        $"Term {i}",
+                        group.MinBy(entry => entry.Date).Date.ToDateTime(TimeOnly.MinValue),
+                        group.MaxBy(entry => entry.Date).Date.ToDateTime(TimeOnly.MinValue),
+                        $"Term {i} Week 11"));
+                }
+                else
+                {
+                    response.Add(new(
+                        $"Term {i}",
+                        group.MinBy(entry => entry.Date).Date.ToDateTime(TimeOnly.MinValue),
+                        group.MaxBy(entry => entry.Date).Date.ToDateTime(TimeOnly.MinValue),
+                        $"Term {i} Week {group.Key} - Week {group.Key + 1}"));
+                }
+            }
+        }
+
+        return response;
+    }
+
+    public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/attendance/period-roll?date={date.ToString("yyyy-MM-dd")}");
+
+        Dictionary<JsonSection, List<JsonElement>> response = await GetResponse(path);
+
+        List<PeriodRoll> rolls = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in response)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<PeriodRoll> roll = PeriodRoll.ConvertFromJson(entry);
+
+                            if (roll.IsFailure)
+                                continue;
+
+                            rolls.Add(roll.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-classes?include=assignedStaff");
+
+        Dictionary<JsonSection, List<JsonElement>> classResponse = await GetResponse(path);
+
+        List<CoreClass> classes = new();
+        List<CoreStaff> staffMembers = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in classResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreClass> item = CoreClass.ConvertFromJson(entry);
+
+                            if (item.IsFailure)
+                                continue;
+
+                            classes.Add(item.Value);
+                        }
+
+                        break;
+                    }
+                case JsonSection.Includes:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            string type = entry.ExtractString("type");
+
+                            switch (type)
+                            {
+                                case "coreStaff":
+                                    {
+                                        Result<CoreStaff> staff = CoreStaff.ConvertFromJson(entry);
+                                        if (staff.IsFailure)
+                                            continue;
+
+                                        staffMembers.Add(staff.Value);
+                                        break;
+                                    }
+                            }
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        IEnumerable<PeriodRoll> unsubmittedRolls = rolls.Where(entry => entry.IsSubmitted == false);
+
+        foreach (PeriodRoll entry in unsubmittedRolls)
+        {
+            string classId = new Uri(entry.RollMarkingUrl).Segments[^3].Replace("/", string.Empty);
+
+            CoreClass matchingClass = classes.FirstOrDefault(item => item.Id == classId);
+
+        }
+
+        return new List<RollMarkReportDto>();
+    }
 
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
     {
         Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student?includeInactive=0");
 
-        Dictionary<JsonSection, List<dynamic>> studentResponse = await GetManyResponses(path);
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetResponse(path);
 
         List<FamilyDetailsDto> familyDetails = new();
 
-        foreach (dynamic entry in studentResponse[JsonSection.Data])
+        foreach (JsonElement entry in studentResponse[JsonSection.Data])
         {
-            string sentralId = entry["id"].ToString();
+            string sentralId = entry.ExtractString("id");
 
             FamilyDetailsDto response = await GetParentContactEntry(sentralId);
 
@@ -322,9 +489,74 @@ public sealed class ApiGateway : ISentralGateway
 
     public Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate) => throw new NotImplementedException();
 
-    public Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week) => throw new NotImplementedException();
+    public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/date");
 
-    public Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date) => throw new NotImplementedException();
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetResponse(path);
+
+        List<CoreDate> dates = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+
+                            if (date.IsFailure)
+                                continue;
+
+                            dates.Add(date.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        IEnumerable<CoreDate> correctDates = dates.Where(entry => entry.Term == term && entry.Week == week);
+
+        return (correctDates.MinBy(entry => entry.Date).Date, correctDates.MaxBy(entry => entry.Date).Date);
+    }
+
+    public async Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/date/{date.ToString("yyyy-MM-dd")}");
+
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetResponse(path);
+
+        List<CoreDate> dates = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreDate> dateEntry = CoreDate.ConvertFromJson(entry);
+
+                            if (dateEntry.IsFailure)
+                                continue;
+
+                            dates.Add(dateEntry.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        if (!dates.Any() || dates.Count > 1)
+            return Result.Failure<(string Week, string Term)>(SentralJsonErrors.TooManyResponses);
+
+        return (dates.First().Week, dates.First().Term);
+    }
 
     public Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

@@ -11,6 +11,7 @@ using Constellation.Infrastructure.ExternalServices.Sentral;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics;
+using static Constellation.Core.Errors.DomainErrors.LinkedSystems;
 
 public class IndexModel : BasePageModel
 {
@@ -36,12 +37,130 @@ public class IndexModel : BasePageModel
 
     public string Message { get; set; } = string.Empty;
 
-    public async Task OnGet() => await OnGetAllFamiliesComparison();
+    public async Task OnGet()
+    {
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        var newObject = await newGateway.GetRollMarkingReportAsync(new (2024, 7, 26));
+    }
+
+    public async Task OnGetWeekForDateComparison()
+    {
+        DateOnly date = new DateOnly(2024, 5, 3);
+
+        Stopwatch watch = Stopwatch.StartNew();
+        ISentralGateway oldGateway = new Gateway(
+            _dateTime,
+            _settings,
+            _factory,
+            _logger);
+
+        var oldObject = await oldGateway.GetWeekForDate(date);
+        watch.Stop();
+
+        long oldGatewayTime = watch.ElapsedMilliseconds;
+
+        watch.Reset();
+        watch.Start();
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        var newObject = await newGateway.GetWeekForDate(date);
+        watch.Stop();
+
+        long newGatewayTime = watch.ElapsedMilliseconds;
+    }
+
+    public async Task OnGetDatesForWeekComparison()
+    {
+        Stopwatch watch = Stopwatch.StartNew();
+        ISentralGateway oldGateway = new Gateway(
+            _dateTime,
+            _settings,
+            _factory,
+            _logger);
+
+        var oldObject = await oldGateway.GetDatesForWeek("2024", "1", "4");
+        watch.Stop();
+
+        long oldGatewayTime = watch.ElapsedMilliseconds;
+
+        watch.Reset();
+        watch.Start();
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        var newObject = await newGateway.GetDatesForWeek("2024", "1", "4");
+        watch.Stop();
+
+        long newGatewayTime = watch.ElapsedMilliseconds;
+    }
+
+    public async Task OnGetValidReportDatesComparison()
+    {
+        Stopwatch watch = Stopwatch.StartNew();
+        ISentralGateway oldGateway = new Gateway(
+            _dateTime,
+            _settings,
+            _factory,
+            _logger);
+
+        var oldObject = await oldGateway.GetValidAttendanceReportDatesFromCalendar("2024");
+        watch.Stop();
+
+        long oldGatewayTime = watch.ElapsedMilliseconds;
+
+        watch.Reset();
+        watch.Start();
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        var newObject = await newGateway.GetValidAttendanceReportDatesFromCalendar("2024");
+        watch.Stop();
+
+        long newGatewayTime = watch.ElapsedMilliseconds;
+    }
+
+    public async Task OnGetExcludedDatesComparison()
+    {
+        Stopwatch watch = Stopwatch.StartNew();
+        ISentralGateway oldGateway = new Gateway(
+            _dateTime,
+            _settings,
+            _factory,
+            _logger);
+
+        List<DateOnly> oldObject = await oldGateway.GetExcludedDatesFromCalendar("2024");
+        watch.Stop();
+
+        long oldGatewayTime = watch.ElapsedMilliseconds;
+
+        watch.Reset();
+        watch.Start();
+        ISentralGateway newGateway = new ApiGateway(
+            _settings,
+            _factory,
+            _logger);
+
+        List<DateOnly> newObject = await newGateway.GetExcludedDatesFromCalendar("2024");
+        watch.Stop();
+
+        long newGatewayTime = watch.ElapsedMilliseconds;
+    }
 
     public async Task OnGetAllFamiliesComparison()
     {
         List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool();
-        
+
         Stopwatch watch = Stopwatch.StartNew();
         ISentralGateway oldGateway = new Gateway(
             _dateTime,
@@ -52,7 +171,7 @@ public class IndexModel : BasePageModel
         List<FamilyDetailsDto> families = new();
 
         Dictionary<string, List<string>> familyGroups = await oldGateway.GetFamilyGroupings();
-        
+
         foreach (KeyValuePair<string, List<string>> family in familyGroups)
         {
             Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());

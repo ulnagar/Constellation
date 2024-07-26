@@ -2,46 +2,51 @@
 
 using Core.Enums;
 using Core.Shared;
+using Extensions;
 using System;
+using System.Text.Json;
 
 public sealed class CoreStudent
 {
-    public static Result<CoreStudent> ConvertFromJson(dynamic jsonEntry)
+    public static Result<CoreStudent> ConvertFromJson(JsonElement jsonEntry)
     {
-        if (jsonEntry["type"].ToString() != "coreStudent")
-            return Result.Failure<CoreStudent>(SentralJsonErrors.IncorrectObject("CoreStudent", jsonEntry["type"].ToString()));
+        bool typeExists = jsonEntry.TryGetProperty("type", out JsonElement type);
 
-        CoreStudent student = new()
+        if (!typeExists || type.GetString() != "coreStudent")
+            return Result.Failure<CoreStudent>(SentralJsonErrors.IncorrectObject("CoreStudent", typeExists ? type.GetString() : string.Empty));
+
+        CoreStudent student = new();
+
+        student.StudentId = jsonEntry.ExtractString("id");
+
+        bool attributesExists = jsonEntry.TryGetProperty("attributes", out JsonElement attributes);
+        if (attributesExists)
         {
-            StudentId = jsonEntry["id"].ToString(),
-            FirstName = jsonEntry["attributes"]["firstName"].ToString(),
-            LastName = jsonEntry["attributes"]["lastName"].ToString(),
-            PreferredName = jsonEntry["attributes"]["preferredName"].ToString(),
-            Gender = jsonEntry["attributes"]["gender"].ToString(),
-            StudentReferenceNumber = jsonEntry["attributes"]["externalId"].ToString(),
-            EmailAddress = jsonEntry["attributes"]["email"].ToString(),
-            FamilyId = jsonEntry["relationships"]["family"]["data"]["id"].ToString()
-        };
+            student.FirstName = attributes.ExtractString("firstName");
+            student.LastName = attributes.ExtractString("lastName");
+            student.PreferredName = attributes.ExtractString("preferredName");
+            student.Gender = attributes.ExtractString("gender");
+            student.StudentReferenceNumber = attributes.ExtractString("externalId");
+            student.EmailAddress = attributes.ExtractString("email");
+            student.ExternalId = attributes.ExtractGuid("refId");
+            student.DateOfBirth = attributes.ExtractDateOnly("dateOfBirth") ?? DateOnly.MinValue;
+            student.EnrolDate = attributes.ExtractDateOnly("enrolDate") ?? DateOnly.MinValue;
+            student.IsActive = attributes.ExtractBool("isActive") ?? false;
+        }
 
-        bool externalIdSuccess = Guid.TryParse(jsonEntry["attributes"]["refId"].ToString(), out Guid externalId);
-        if (externalIdSuccess)
-            student.ExternalId = externalId;
+        string grade = attributes.ExtractString("schoolYear");
+        if (!string.IsNullOrWhiteSpace(grade))
+            student.SchoolYear = Enum.Parse<Grade>(grade);
 
-        bool gradeSuccess = Enum.TryParse<Grade>(jsonEntry["attributes"]["schoolYear"].ToString(), out Grade schoolYear);
-        if (gradeSuccess)
-            student.SchoolYear = schoolYear;
+        bool relationshipsExists = jsonEntry.TryGetProperty("relationships", out JsonElement relationships);
+        if (!relationshipsExists)
+            return student;
+        
+        bool familyExists = relationships.TryGetProperty("family", out JsonElement family);
+        if (!familyExists)
+            return student;
 
-        bool dobSuccess = DateOnly.TryParse(jsonEntry["attributes"]["dateOfBirth"].ToString(), out DateOnly dateOfBirth);
-        if (dobSuccess)
-            student.DateOfBirth = dateOfBirth;
-
-        bool enrolDateSuccess = DateOnly.TryParse(jsonEntry["attributes"]["enrolDate"].ToString(), out DateOnly enrolDate);
-        if (enrolDateSuccess)
-            student.EnrolDate = enrolDate;
-
-        bool activeSuccess = bool.TryParse(jsonEntry["attributes"]["isActive"].ToString(), out bool isActive);
-        if (activeSuccess)
-            student.IsActive = isActive;
+        student.FamilyId = family.GetProperty("data").GetProperty("id").GetString();
 
         return student;
     }
