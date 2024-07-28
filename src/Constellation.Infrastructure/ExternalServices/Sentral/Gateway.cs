@@ -1275,7 +1275,7 @@ public class Gateway : ISentralGateway
 
             list.Add(new RollMarkReportDto
             {
-                Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
+                Date = DateOnly.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
                 Period = splitString[1].TrimStart('"').TrimEnd('"'),
                 ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
                 Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
@@ -1294,7 +1294,7 @@ public class Gateway : ISentralGateway
 
             list.Add(new RollMarkReportDto
             {
-                Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
+                Date = DateOnly.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
                 Period = splitString[1].TrimStart('"').TrimEnd('"'),
                 ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
                 Teacher = splitString[3].TrimStart('"').TrimEnd('"'),

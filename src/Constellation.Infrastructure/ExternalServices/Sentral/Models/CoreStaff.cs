@@ -37,4 +37,6 @@ public sealed class CoreStaff
     public string Gender { get; private set; }
     public string EmailAddress { get; private set; }
     public string ExternalId { get; private set; }
+
+    public string Name => $"{Title} {FirstName} {LastName}";
 }

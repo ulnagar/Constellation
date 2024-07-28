@@ -11,7 +11,6 @@ using Constellation.Infrastructure.ExternalServices.Sentral;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Diagnostics;
-using static Constellation.Core.Errors.DomainErrors.LinkedSystems;
 
 public class IndexModel : BasePageModel
 {
@@ -37,6 +36,8 @@ public class IndexModel : BasePageModel
 
     public string Message { get; set; } = string.Empty;
 
+    public List<RollMarkReportDto> Items { get; set; }
+
     public async Task OnGet()
     {
         ISentralGateway newGateway = new ApiGateway(
@@ -45,6 +46,8 @@ public class IndexModel : BasePageModel
             _logger);
 
         var newObject = await newGateway.GetRollMarkingReportAsync(new (2024, 7, 26));
+
+        Items = newObject.ToList();
     }
 
     public async Task OnGetWeekForDateComparison()

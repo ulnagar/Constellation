@@ -6,12 +6,15 @@ namespace Constellation.Application.DTOs
     public class RollMarkReportDto
     {
         // Imported from API
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public string Period { get; set; }
         public string ClassName { get; set; }
+        public string ClassDescription { get; set; }
         public string Teacher { get; set; }
+        public string TeacherEmail { get; set; }
         public string Year { get; set; }
         public string Room { get; set; }
+        public string Link { get; set; }
         public bool Submitted { get; set; }
     }
 

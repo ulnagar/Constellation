@@ -5,7 +5,6 @@ using Application.Attendance.GetValidAttendanceReportDates;
 using Application.DTOs;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
-using Constellation.Core.Models;
 using Core.Models.Families;
 using Core.Shared;
 using Extensions;
@@ -13,7 +12,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using Models;
 using System.Text.Json;
-using static Constellation.Core.Errors.DomainErrors.Families;
 
 public sealed class ApiGateway : ISentralGateway
 {
@@ -97,11 +95,11 @@ public sealed class ApiGateway : ISentralGateway
             switch (dataExists)
             {
                 case true when data.ValueKind == JsonValueKind.Array:
-                    {
-                        foreach (JsonElement item in data.EnumerateArray())
-                            completeResponse[JsonSection.Data].Add(item.Clone());
-                        break;
-                    }
+                {
+                    foreach (JsonElement item in data.EnumerateArray())
+                        completeResponse[JsonSection.Data].Add(item.Clone());
+                    break;
+                }
                 case true when data.ValueKind == JsonValueKind.Object:
                     completeResponse[JsonSection.Data].Add(data.Clone());
                     break;
@@ -127,6 +125,11 @@ public sealed class ApiGateway : ISentralGateway
 
     public Task<string> GetSentralStudentIdFromSRN(string srn, string grade) => throw new NotImplementedException();
 
+    /// <summary>
+    /// Not used/required
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public Task<Dictionary<string, List<string>>> GetFamilyGroupings() => throw new NotImplementedException();
 
     public async Task<FamilyDetailsDto> GetParentContactEntry(string sentralStudentId)
@@ -145,50 +148,50 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<CoreStudent> student = CoreStudent.ConvertFromJson(entry);
+                        Result<CoreStudent> student = CoreStudent.ConvertFromJson(entry);
 
-                            if (student.IsFailure)
-                                continue;
+                        if (student.IsFailure)
+                            continue;
 
-                            students.Add(student.Value);
-                        }
-
-                        break;
+                        students.Add(student.Value);
                     }
+
+                    break;
+                }
                 case JsonSection.Includes:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
+                        string type = entry.ExtractString("type");
+
+                        switch (type)
                         {
-                            string type = entry.ExtractString("type");
-
-                            switch (type)
+                            case "coreStudentRelationship":
                             {
-                                case "coreStudentRelationship":
-                                    {
-                                        Result<CoreStudentRelationship> relationship = CoreStudentRelationship.ConvertFromJson(entry);
-                                        if (relationship.IsFailure)
-                                            continue;
+                                Result<CoreStudentRelationship> relationship = CoreStudentRelationship.ConvertFromJson(entry);
+                                if (relationship.IsFailure)
+                                    continue;
 
-                                        people.Add(relationship.Value);
-                                        break;
-                                    }
-                                case "coreStudentPersonRelation":
-                                    {
-                                        Result<CoreStudentPersonRelation> relationship = CoreStudentPersonRelation.ConvertFromJson(entry);
-                                        if (relationship.IsFailure)
-                                            continue;
+                                people.Add(relationship.Value);
+                                break;
+                            }
+                            case "coreStudentPersonRelation":
+                            {
+                                Result<CoreStudentPersonRelation> relationship = CoreStudentPersonRelation.ConvertFromJson(entry);
+                                if (relationship.IsFailure)
+                                    continue;
 
-                                        relationships.Add(relationship.Value);
-                                        break;
-                                    }
+                                relationships.Add(relationship.Value);
+                                break;
                             }
                         }
-
-                        break;
                     }
+
+                    break;
+                }
             }
         }
 
@@ -267,19 +270,19 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+                        Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
 
-                            if (date.IsFailure)
-                                continue;
+                        if (date.IsFailure)
+                            continue;
 
-                            dates.Add(date.Value);
-                        }
-
-                        break;
+                        dates.Add(date.Value);
                     }
+
+                    break;
+                }
             }
         }
 
@@ -301,19 +304,19 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+                        Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
 
-                            if (date.IsFailure)
-                                continue;
+                        if (date.IsFailure)
+                            continue;
 
-                            dates.Add(date.Value);
-                        }
-
-                        break;
+                        dates.Add(date.Value);
                     }
+
+                    break;
+                }
             }
         }
 
@@ -352,6 +355,11 @@ public sealed class ApiGateway : ISentralGateway
         return response;
     }
 
+    /// <summary>
+    /// Not suitable for use yet, as there is no way to identify unmarked rolls for cancelled lessons
+    /// </summary>
+    /// <param name="date"></param>
+    /// <returns></returns>
     public async Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date)
     {
         Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/attendance/period-roll?date={date.ToString("yyyy-MM-dd")}");
@@ -365,19 +373,19 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<PeriodRoll> roll = PeriodRoll.ConvertFromJson(entry);
+                        Result<PeriodRoll> roll = PeriodRoll.ConvertFromJson(entry);
 
-                            if (roll.IsFailure)
-                                continue;
+                        if (roll.IsFailure)
+                            continue;
 
-                            rolls.Add(roll.Value);
-                        }
-
-                        break;
+                        rolls.Add(roll.Value);
                     }
+
+                    break;
+                }
             }
         }
 
@@ -393,55 +401,82 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<CoreClass> item = CoreClass.ConvertFromJson(entry);
+                        Result<CoreClass> item = CoreClass.ConvertFromJson(entry);
 
-                            if (item.IsFailure)
-                                continue;
+                        if (item.IsFailure)
+                            continue;
 
-                            classes.Add(item.Value);
-                        }
-
-                        break;
+                        classes.Add(item.Value);
                     }
+
+                    break;
+                }
                 case JsonSection.Includes:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
+                        string type = entry.ExtractString("type");
+
+                        switch (type)
                         {
-                            string type = entry.ExtractString("type");
+                            case "coreStaff":
+                                {
+                                    Result<CoreStaff> staff = CoreStaff.ConvertFromJson(entry);
+                                    if (staff.IsFailure)
+                                        continue;
 
-                            switch (type)
-                            {
-                                case "coreStaff":
-                                    {
-                                        Result<CoreStaff> staff = CoreStaff.ConvertFromJson(entry);
-                                        if (staff.IsFailure)
-                                            continue;
-
+                                    if (staffMembers.All(item => item.Id != staff.Value.Id))
                                         staffMembers.Add(staff.Value);
-                                        break;
-                                    }
-                            }
-                        }
 
-                        break;
+                                    break;
+                                }
+                        }
                     }
+
+                    break;
+                }
             }
         }
 
-        IEnumerable<PeriodRoll> unsubmittedRolls = rolls.Where(entry => entry.IsSubmitted == false);
+        //IEnumerable<PeriodRoll> unsubmittedRolls = rolls.Where(entry => entry.IsSubmitted == false);
 
-        foreach (PeriodRoll entry in unsubmittedRolls)
+        List<RollMarkReportDto> result = new();
+
+        foreach (PeriodRoll entry in rolls)
         {
+            RollMarkReportDto reportEntry = new()
+            {
+                Date = date,
+                Period = entry.PeriodName,
+                Room = string.Empty,
+                Link = entry.RollMarkingUrl,
+                Submitted = entry.IsSubmitted
+            };
+            
             string classId = new Uri(entry.RollMarkingUrl).Segments[^3].Replace("/", string.Empty);
 
             CoreClass matchingClass = classes.FirstOrDefault(item => item.Id == classId);
 
+            if (matchingClass is not null)
+            {
+                CoreStaff matchingTeacher = staffMembers.FirstOrDefault(item => item.Id == matchingClass.TeacherId);
+
+                if (matchingTeacher is not null)
+                {
+                    reportEntry.ClassName = matchingClass.Name;
+                    reportEntry.ClassDescription = matchingClass.Description;
+                    reportEntry.Teacher = matchingTeacher.Name;
+                    reportEntry.TeacherEmail = matchingTeacher.EmailAddress;
+                }
+            }
+
+            result.Add(reportEntry);
         }
 
-        return new List<RollMarkReportDto>();
+        return result;
     }
 
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
@@ -502,19 +537,19 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+                        Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
 
-                            if (date.IsFailure)
-                                continue;
+                        if (date.IsFailure)
+                            continue;
 
-                            dates.Add(date.Value);
-                        }
-
-                        break;
+                        dates.Add(date.Value);
                     }
+
+                    break;
+                }
             }
         }
 
@@ -536,19 +571,19 @@ public sealed class ApiGateway : ISentralGateway
             switch (section.Key)
             {
                 case JsonSection.Data:
+                {
+                    foreach (JsonElement entry in section.Value)
                     {
-                        foreach (JsonElement entry in section.Value)
-                        {
-                            Result<CoreDate> dateEntry = CoreDate.ConvertFromJson(entry);
+                        Result<CoreDate> dateEntry = CoreDate.ConvertFromJson(entry);
 
-                            if (dateEntry.IsFailure)
-                                continue;
+                        if (dateEntry.IsFailure)
+                            continue;
 
-                            dates.Add(dateEntry.Value);
-                        }
-
-                        break;
+                        dates.Add(dateEntry.Value);
                     }
+
+                    break;
+                }
             }
         }
 

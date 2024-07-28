@@ -4,4 +4,27 @@
 <h2>Test Page</h2>
 
 
-
+@if (Model.Items.Any())
+{
+    <table>
+        <thead>
+        <tr>
+            <th>Class</th>
+            <th>Teacher</th>
+            <th>Period</th>
+            <th>Submitted?</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in Model.Items.OrderBy(entry => entry.TeacherEmail).ThenBy(entry => entry.Period))
+        {
+            <tr>
+                <td>@row.ClassName (@row.ClassDescription)</td>
+                <td>@row.Teacher</td>
+                <td>@row.Period</td>
+                <td>@row.Submitted</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

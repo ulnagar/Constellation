@@ -105,10 +105,12 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             Staff teacher = null;
 
-            if (!string.IsNullOrWhiteSpace(entry.Teacher))
+            teacher = entry switch
             {
-                teacher = await _staffRepository.GetFromName(entry.Teacher);
-            }
+                _ when !string.IsNullOrWhiteSpace(entry.TeacherEmail) => await _staffRepository.GetCurrentByEmailAddress(entry.TeacherEmail, token),
+                _ when !string.IsNullOrWhiteSpace(entry.Teacher) => await _staffRepository.GetFromName(entry.Teacher),
+                _ => null
+            };
 
             if (offering is not null && teacher is null)
             {
