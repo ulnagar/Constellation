@@ -1375,6 +1375,7 @@ public class ExcelService : IExcelService
                     Name = entry.StudentFirstName,
                     Year = entry.Grade.AsName()
                 })
+            .OrderBy(entry => entry.Age)
             .ToList();
 
         ExcelPackage excel = new();
@@ -1383,6 +1384,7 @@ public class ExcelService : IExcelService
 
         ExcelRangeBase table = worksheet.Cells[1, 1].LoadFromCollection(rows, true);
         worksheet.Cells[1, 1, 1, worksheet.Dimension.Columns].Style.Font.Bold = true;
+        worksheet.Cells[2, 2, worksheet.Dimension.Rows, worksheet.Dimension.Columns].Style.Numberformat.Format = "dd/MM/yyyy";
 
         ExcelRangeBase data = worksheet.Cells[2, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns];
 
