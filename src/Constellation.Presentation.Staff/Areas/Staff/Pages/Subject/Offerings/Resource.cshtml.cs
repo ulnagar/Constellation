@@ -50,9 +50,9 @@ public class ResourceModel : BasePageModel
     [BindProperty]
     public string Type { get; set; }
     [BindProperty]
-    public string ResourceId { get; set; }
+    public string? ResourceId { get; set; }
     [BindProperty]
-    public string Name { get; set; }
+    public string? Name { get; set; }
     [BindProperty]
     public bool CreateNew { get; set; }
     public string ResourceName { get; set; }
@@ -67,6 +67,11 @@ public class ResourceModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        //TODO: R1.15.2: Add model state checks here
+        // Now that the fields must be nullable (to prevent erroneous model state errors during the process)
+        // we need to perform manual model state checks to ensure that there is correct data in the required
+        // fields at the start of each round.
+
         if (CurrentStep == Phase.StartEntry)
         {
             if (Type == ResourceType.AdobeConnectRoom.Value)
