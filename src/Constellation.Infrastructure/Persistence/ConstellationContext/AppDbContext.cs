@@ -15,14 +15,12 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbCon
         : base(options)
     { }
 
-    public DbSet<AdobeConnectOperation> AdobeConnectOperations { get; set; }
     public DbSet<MSTeamOperation> MSTeamOperations { get; set; }
     public DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
     public DbSet<School> Schools { get; set; }
     public DbSet<Student> Students { get; set; }
     public DbSet<Staff> Staff { get; set; }
     public DbSet<TimetablePeriod> Periods { get; set; }
-    public DbSet<AdobeConnectRoom> Rooms { get; set; }
     public DbSet<JobActivation> JobActivations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

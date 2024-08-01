@@ -112,7 +112,6 @@ public static class ServicesRegistration
 
         // Add External Service gateways
 
-        services.AddAdobeConnectExternalService(configuration);
         services.AddCanvasExternalService(configuration);
         services.AddDoEDataServicesGateway(configuration);
         services.AddEmailExternalService(configuration);

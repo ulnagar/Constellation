@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Courses.GetCoursesForSelectionList;
+﻿namespace Constellation.Application.Courses.Models;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Subjects.Identifiers;

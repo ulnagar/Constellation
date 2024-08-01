@@ -15,18 +15,15 @@ internal sealed class ClassMonitorJob : IClassMonitorJob
     private readonly SemaphoreSlim _semaphore = new(5, 5);
     private ClassMonitorDtos _cache;
     private readonly IClassMonitorCacheService _monitorCacheService;
-    private readonly IAdobeConnectService _adobeConnectService;
     private readonly ILogger _logger;
 
     private Guid JobId { get; set; }
 
     public ClassMonitorJob(
-        IClassMonitorCacheService monitorCacheService, 
-        IAdobeConnectService adobeConnectService,
+        IClassMonitorCacheService monitorCacheService,
         ILogger logger)
     {
         _monitorCacheService = monitorCacheService;
-        _adobeConnectService = adobeConnectService;
         _logger = logger.ForContext<IClassMonitorJob>();
     }
 
@@ -117,8 +114,7 @@ internal sealed class ClassMonitorJob : IClassMonitorJob
             return course;
         }
 
-        string assetId = await _adobeConnectService
-            .GetCurrentSessionAsync(course.RoomScoId);
+        string assetId = string.Empty;
 
         if (string.IsNullOrWhiteSpace(assetId))
         {
@@ -136,10 +132,9 @@ internal sealed class ClassMonitorJob : IClassMonitorJob
             return course;
         }
 
-        ICollection<string> attendees = await _adobeConnectService
-            .GetCurrentSessionUsersAsync(course.RoomScoId, assetId);
+        List<string> attendees = new();
 
-        if (attendees == null)
+        if (attendees.Count == 0)
         {
             _logger
                 .Information("{id}: {course} - Stopping scan - No attendees detected", JobId, course.Name);

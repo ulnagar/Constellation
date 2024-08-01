@@ -2,10 +2,12 @@
 
 using System;
 
-public sealed record AwardNominationPeriodId(Guid Value)
+public record struct AwardNominationPeriodId(Guid Value)
 {
-    public static AwardNominationPeriodId FromValue(Guid Value) =>
-        new(Value);
+    public static AwardNominationPeriodId Empty => new(Guid.Empty);
+
+    public static AwardNominationPeriodId FromValue(Guid value) =>
+        new(value);
 
     public AwardNominationPeriodId()
         : this(Guid.NewGuid()) { }

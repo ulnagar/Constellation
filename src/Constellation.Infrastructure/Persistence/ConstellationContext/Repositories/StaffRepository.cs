@@ -1,7 +1,5 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -28,9 +26,6 @@ public class StaffRepository : IStaffRepository
     private IQueryable<Staff> Collection()
     {
         return _context.Staff
-            .Include(s => s.AdobeConnectOperations)
-            .ThenInclude(operation => operation.Room)
-            .Include(s => s.AdobeConnectGroupOperations)
             .Include(s => s.School)
             .Include(staff => staff.Faculties);
     }
@@ -273,7 +268,6 @@ public class StaffRepository : IStaffRepository
     {
         return await _context.Staff
             .Include(staff => staff.Faculties)
-            .Include(staff => staff.AdobeConnectGroupOperations)
             .SingleOrDefaultAsync(staff => staff.StaffId == id);
     }
 }

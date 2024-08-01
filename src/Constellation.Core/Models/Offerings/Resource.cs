@@ -17,27 +17,6 @@ public abstract class Resource
     public string Url { get; protected set; }
 }
 
-public sealed class AdobeConnectRoomResource : Resource
-{
-    private AdobeConnectRoomResource() { } // Required by EF Core
-
-    internal AdobeConnectRoomResource(
-        OfferingId offeringId,
-        string scoId,
-        string name,
-        string url)
-    {
-        Id = new();
-        Type = ResourceType.AdobeConnectRoom;
-        OfferingId = offeringId;
-        ResourceId = scoId;
-        Name = name;
-        Url = url;
-    }
-
-    public string ScoId => ResourceId;
-}
-
 public sealed class MicrosoftTeamResource : Resource
 {
     private MicrosoftTeamResource() { } // Required by EF Core

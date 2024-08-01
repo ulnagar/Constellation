@@ -33,7 +33,6 @@ internal sealed class GetOfferingDetailsQueryHandler
     private readonly ILessonRepository _lessonRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IAdobeConnectRoomRepository _roomRepository;
     private readonly ILogger _logger;
 
     public GetOfferingDetailsQueryHandler(
@@ -44,7 +43,6 @@ internal sealed class GetOfferingDetailsQueryHandler
         ILessonRepository lessonRepository,
         ITimetablePeriodRepository periodRepository,
         IStaffRepository staffRepository,
-        IAdobeConnectRoomRepository roomRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
@@ -54,7 +52,6 @@ internal sealed class GetOfferingDetailsQueryHandler
         _lessonRepository = lessonRepository;
         _periodRepository = periodRepository;
         _staffRepository = staffRepository;
-        _roomRepository = roomRepository;
         _logger = logger;
     }
 

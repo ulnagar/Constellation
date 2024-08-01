@@ -1,12 +1,11 @@
 ﻿namespace Constellation.Core.Models.Offerings.ValueObjects;
 
-using Primitives;
 using Newtonsoft.Json;
+using Primitives;
 using System.Collections.Generic;
 
 public sealed class ResourceType : ValueObject
 {
-    public static readonly ResourceType AdobeConnectRoom = new("Adobe Connect Room");
     public static readonly ResourceType MicrosoftTeam = new("Microsoft Team");
     public static readonly ResourceType CanvasCourse = new("Canvas Course");
 

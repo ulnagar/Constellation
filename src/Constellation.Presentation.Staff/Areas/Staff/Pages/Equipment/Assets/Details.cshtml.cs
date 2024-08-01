@@ -100,8 +100,6 @@ public class DetailsModel : BasePageModel
     
     public async Task<IActionResult> OnPostAllocateDevice(AllocateDeviceSelection viewModel)
     {
-        //TODO: R1.15.1: Finish adding logging to rest of methods
-
         if (viewModel.AllocationType.Equals(AllocationType.Student))
         {
             if (string.IsNullOrWhiteSpace(viewModel.StudentId))
@@ -117,6 +115,10 @@ public class DetailsModel : BasePageModel
             AllocateAssetToStudentCommand command = new(
                 AssetNumber,
                 viewModel.StudentId);
+
+            _logger
+                .ForContext(nameof(AllocateAssetToStudentCommand), command, true)
+                .Information("Requested to allocate Asset with AssetNumber {AssetNumber} to student by user {User}", AssetNumber, _currentUserService.UserName);
 
             Result result = await _mediator.Send(command);
 
@@ -148,6 +150,10 @@ public class DetailsModel : BasePageModel
             AllocateAssetToStaffMemberCommand command = new(
                 AssetNumber,
                 viewModel.StaffId);
+            
+            _logger
+                .ForContext(nameof(AllocateAssetToStaffMemberCommand), command, true)
+                .Information("Requested to allocate Asset with AssetNumber {AssetNumber} to staff member by user {User}", AssetNumber, _currentUserService.UserName);
 
             Result result = await _mediator.Send(command);
 
@@ -179,6 +185,10 @@ public class DetailsModel : BasePageModel
             AllocateAssetToSchoolCommand command = new(
                 AssetNumber,
                 viewModel.SchoolCode);
+
+            _logger
+                .ForContext(nameof(AllocateAssetToSchoolCommand), command, true)
+                .Information("Requested to allocate Asset with AssetNumber {AssetNumber} to school by user {User}", AssetNumber, _currentUserService.UserName);
 
             Result result = await _mediator.Send(command);
 
@@ -212,6 +222,10 @@ public class DetailsModel : BasePageModel
                 viewModel.UserName,
                 viewModel.UserEmail);
 
+            _logger
+                .ForContext(nameof(AllocateAssetToCommunityMemberCommand), command, true)
+                .Information("Requested to allocate Asset with AssetNumber {AssetNumber} to community member by user {User}", AssetNumber, _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
@@ -229,6 +243,10 @@ public class DetailsModel : BasePageModel
 
         ModalContent = new ErrorDisplay(AllocationErrors.UnknownType);
 
+        _logger
+            .ForContext(nameof(Error), AllocationErrors.UnknownType, true)
+            .Warning("Failed to determine allocation type for Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result<AssetResponse> unknownResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
         Asset = unknownResult.Value;
 
@@ -241,11 +259,19 @@ public class DetailsModel : BasePageModel
     {
         DeallocateAssetCommand command = new(AssetNumber);
 
+        _logger
+            .ForContext(nameof(DeallocateAssetCommand), command, true)
+            .Information("Requested to deallocate Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to deallocate Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
             return Page();
         }
@@ -263,11 +289,19 @@ public class DetailsModel : BasePageModel
                 true,
                 viewModel.ArrivalDate);
 
+            _logger
+                .ForContext(nameof(TransferAssetToCoordinatingOfficeCommand), command, true)
+                .Information("Requested to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
                 ModalContent = new ErrorDisplay(result.Error);
+
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -286,11 +320,19 @@ public class DetailsModel : BasePageModel
                 true,
                 viewModel.ArrivalDate);
 
+            _logger
+                .ForContext(nameof(TransferAssetToPublicSchoolCommand), command, true)
+                .Information("Requested to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
                 ModalContent = new ErrorDisplay(result.Error);
+
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -319,11 +361,19 @@ public class DetailsModel : BasePageModel
                 true,
                 viewModel.ArrivalDate);
 
+            _logger
+                .ForContext(nameof(TransferAssetToCorporateOfficeCommand), command, true)
+                .Information("Requested to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
                 ModalContent = new ErrorDisplay(result.Error);
+
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -341,11 +391,19 @@ public class DetailsModel : BasePageModel
                 true,
                 viewModel.ArrivalDate);
 
+            _logger
+                .ForContext(nameof(TransferAssetToPrivateResidenceCommand), command, true)
+                .Information("Requested to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
                 ModalContent = new ErrorDisplay(result.Error);
+
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to transfer Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -358,6 +416,10 @@ public class DetailsModel : BasePageModel
 
         ModalContent = new ErrorDisplay(LocationErrors.UnknownCategory);
 
+        _logger
+            .ForContext(nameof(Error), LocationErrors.UnknownCategory, true)
+            .Warning("Failed to determine location type for Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result<AssetResponse> unknownResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
         Asset = unknownResult.Value;
 
@@ -366,6 +428,8 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddNote(AddAssetNoteSelection viewModel)
     {
+        //TODO: R1.15.1: Continue with logging here
+
         AddAssetNoteCommand command = new(
             AssetNumber,
             viewModel.Note);

@@ -10,12 +10,10 @@ using System.Threading.Tasks;
 
 public interface IAppDbContext
 {
-    DbSet<AdobeConnectOperation> AdobeConnectOperations { get; set; }
     DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
     DbSet<JobActivation> JobActivations { get; set; }
     DbSet<MSTeamOperation> MSTeamOperations { get; set; }
     DbSet<TimetablePeriod> Periods { get; set; }
-    DbSet<AdobeConnectRoom> Rooms { get; set; }
     DbSet<School> Schools { get; set; }
     DbSet<Staff> Staff { get; set; }
     DbSet<Student> Students { get; set; }

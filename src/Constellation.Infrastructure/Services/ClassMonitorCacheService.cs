@@ -1,16 +1,7 @@
 ﻿using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Rooms.GetRoomById;
-using Constellation.Application.Rooms.Models;
-using Constellation.Core.Comparators;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Casuals;
-using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
@@ -161,127 +152,7 @@ namespace Constellation.Infrastructure.Services
 
         private async Task GetCourses()
         {
-            using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var offerings = await context.Set<Offering>()
-                .AsNoTracking()
-                .ToListAsync();
-
-            foreach (var offering in offerings.Where(course => course.IsCurrent))
-            {
-                List<AdobeConnectRoomResource> resources = offering
-                    .Resources
-                    .Where(resource => resource.Type == ResourceType.AdobeConnectRoom)
-                    .Select(resource => resource as AdobeConnectRoomResource)
-                    .ToList();
-                
-                foreach (AdobeConnectRoomResource resource in resources)
-                {
-                    AdobeConnectRoom room = await context
-                        .Set<AdobeConnectRoom>()
-                        .FirstOrDefaultAsync(room => room.ScoId == resource.ScoId);
-
-                    Course course = await context
-                        .Set<Course>()
-                        .FirstOrDefaultAsync(course => course.Id == offering.CourseId);
-
-                    var dto = new ClassMonitorDtos.MonitorCourse
-                    {
-                        Id = offering.Id,
-                        Name = offering.Name,
-                        StartDate = offering.StartDate,
-                        EndDate = offering.EndDate,
-                        IsCurrent = offering.IsCurrent,
-                        GradeName = $"Year {course.Grade.ToString().Substring(1, 2)}",
-                        GradeShortCode = course.Grade.ToString(),
-                        RoomScoId = room.ScoId,
-                        RoomName = room.Name,
-                        RoomUrlPath = room.UrlPath
-                    };
-
-                    List<Enrolment> enrolments = await context
-                        .Set<Enrolment>()
-                        .Where(enrolment => !enrolment.IsDeleted && enrolment.OfferingId == offering.Id)
-                        .ToListAsync();
-
-                    foreach (Enrolment enrol in enrolments)
-                    {
-                        Student student = await context
-                            .Set<Student>()
-                            .FirstOrDefaultAsync(student => student.StudentId == enrol.StudentId);
-
-                        dto.Enrolments.Add(new ClassMonitorDtos.MonitorCourseEnrolment
-                        {
-                            Id = enrol.Id,
-                            StudentId = enrol.StudentId,
-                            StudentDisplayName = student.DisplayName,
-                            StudentLastName = student.LastName,
-                            StudentGender = student.Gender,
-                            IsDeleted = enrol.IsDeleted
-                        });
-                    }
-
-                    foreach (var session in offering.Sessions.Where(session => !session.IsDeleted))
-                    {
-                        dto.Sessions.Add(new ClassMonitorDtos.MonitorCourseSession
-                        {
-                            Id = session.Id,
-                            PeriodId = session.PeriodId,
-                            IsDeleted = session.IsDeleted
-                        });
-                    }
-
-                    //foreach (var cover in course.ClassCovers)
-                    //{
-                    //    var entry = new ClassMonitorDtos.MonitorCourseCover
-                    //    {
-                    //        Id = cover.Id,
-                    //        StartDate = cover.StartDate,
-                    //        EndDate = cover.EndDate,
-                    //        PersonId = cover.TeacherId,
-                    //        IsCurrent = cover.StartDate <= DateOnly.FromDateTime(DateTime.Today) && DateOnly.FromDateTime(DateTime.Today) <= cover.EndDate
-                    //    };
-
-                    //    // TODO: retrieve teacher name and add to dto
-                    //    if (cover.TeacherType == CoverTeacherType.Casual)
-                    //    {
-                    //        entry.PersonName = string.Empty;
-                    //    }
-                    //    else
-                    //    {
-                    //        entry.PersonName = string.Empty;
-                    //    }
-
-                    //    dto.Covers.Add(entry);
-                    //}
-
-                    List<TeacherAssignment> assignments = offering
-                        .Teachers
-                        .Where(assignment => 
-                            assignment.Type == AssignmentType.ClassroomTeacher && 
-                            !assignment.IsDeleted)
-                        .ToList();
-
-                    List<Staff> teachers = await context
-                        .Set<Staff>()
-                        .Where(staff => assignments.Select(assignment => assignment.StaffId).ToList().Contains(staff.StaffId))
-                        .ToListAsync();
-
-                    foreach (var teacher in teachers)
-                    {
-                        dto.Teachers.Add(new ClassMonitorDtos.MonitorCourseTeacher
-                        {
-                            Id = teacher.StaffId,
-                            DisplayName = teacher.DisplayName,
-                            LastName = teacher.LastName,
-                            IsDeleted = teacher.IsDeleted
-                        });
-                    }
-
-                    Cache.Courses.Add(dto);
-                }
-            }
         }
     }
 }

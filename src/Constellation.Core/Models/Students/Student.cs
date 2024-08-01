@@ -1,18 +1,18 @@
 namespace Constellation.Core.Models.Students;
 
-using Abstractions.Clock;
-using Enums;
 using Absences;
+using Abstractions.Clock;
 using Enrolments;
-using Families;
-using Shared;
-using ValueObjects;
+using Enums;
 using Errors;
 using Events;
+using Families;
 using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ValueObjects;
 
 public class Student : AggregateRoot
 {
@@ -46,7 +46,6 @@ public class Student : AggregateRoot
 
         Enrolments = new List<Enrolment>();
         Devices = new List<DeviceAllocation>();
-        AdobeConnectOperations = new List<StudentAdobeConnectOperation>();
         MSTeamOperations = new List<StudentMSTeamOperation>();
 
         Absences = new List<Absence>();
@@ -76,7 +75,6 @@ public class Student : AggregateRoot
     public List<StudentFamilyMembership> FamilyMemberships { get; set; } = new();
     public ICollection<Enrolment> Enrolments { get; set; }
     public ICollection<DeviceAllocation> Devices { get; set; }
-    public ICollection<StudentAdobeConnectOperation> AdobeConnectOperations { get; set; }
     public ICollection<StudentMSTeamOperation> MSTeamOperations { get; set; }
     public ICollection<Absence> Absences { get; set; }
     public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;

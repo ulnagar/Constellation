@@ -9,8 +9,6 @@ public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
     
-    public IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
-    public IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     public IMSTeamOperationsRepository MSTeamOperations { get; set; }
     public ISchoolRepository Schools { get; set; }
     public IStaffRepository Staff { get; set; }
@@ -23,8 +21,6 @@ public class UnitOfWork : IUnitOfWork
     {
         _context = context;
 
-        AdobeConnectOperations = new AdobeConnectOperationsRepository(context);
-        AdobeConnectRooms = new AdobeConnectRoomRepository(context, dateTime);
         MSTeamOperations = new MSTeamOperationsRepository(context);
         Schools = new SchoolRepository(context);
         Staff = new StaffRepository(context);

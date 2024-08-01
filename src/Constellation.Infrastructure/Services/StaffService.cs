@@ -85,12 +85,6 @@ namespace Constellation.Infrastructure.Services
             // Remove teacher from offerings
             await _mediator.Send(new RemoveTeacherFromAllOfferingsCommand(staffId));
 
-            // Process operations
-            foreach (var operation in staff.AdobeConnectOperations.Where(a => !a.IsCompleted && !a.IsDeleted))
-            {
-                _operationService.CancelAdobeConnectOperation(operation);
-            }
-
             staff.IsDeleted = true;
             staff.DateDeleted = DateTime.Now;
 

@@ -36,7 +36,6 @@ internal sealed class ResourceConfiguration : IEntityTypeConfiguration<Resource>
 
         builder
             .HasDiscriminator(resource => resource.Type)
-            .HasValue<AdobeConnectRoomResource>(ResourceType.AdobeConnectRoom)
             .HasValue<MicrosoftTeamResource>(ResourceType.MicrosoftTeam)
             .HasValue<CanvasCourseResource>(ResourceType.CanvasCourse);
     }

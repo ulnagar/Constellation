@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePrac
 
 using Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
+using Constellation.Application.Courses.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SciencePracs.CreateLesson;
 using Constellation.Application.SciencePracs.GetLessonDetails;

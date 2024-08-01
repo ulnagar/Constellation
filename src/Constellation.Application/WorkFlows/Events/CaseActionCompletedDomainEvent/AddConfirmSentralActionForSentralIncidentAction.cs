@@ -80,7 +80,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
 
         if (action is CreateSentralEntryAction sentralAction)
         {
-            Course course = await _courseRepository.GetByOfferingId(sentralAction!.OfferingId, cancellationToken);
+            Course course = await _courseRepository.GetByOfferingId(sentralAction!.OfferingId!.Value, cancellationToken);
 
             if (course is null)
             {
@@ -92,7 +92,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
                 return;
             }
 
-            headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(sentralAction.OfferingId, cancellationToken);
+            headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(sentralAction!.OfferingId!.Value, cancellationToken);
         } 
         else if (action is SentralIncidentStatusAction)
         {

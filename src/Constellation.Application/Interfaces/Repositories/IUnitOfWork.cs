@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 
 public interface IUnitOfWork
 {
-    IAdobeConnectOperationsRepository AdobeConnectOperations { get; set; }
-    IAdobeConnectRoomRepository AdobeConnectRooms { get; set; }
     IMSTeamOperationsRepository MSTeamOperations { get; set; }
     ISchoolRepository Schools { get; set; }
     IStaffRepository Staff { get; set; }

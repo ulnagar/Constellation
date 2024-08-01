@@ -1,12 +1,11 @@
-﻿using Constellation.Core.Models.Faculties;
-using Constellation.Core.Models.Training;
+﻿namespace Constellation.Core.Models;
 
-namespace Constellation.Core.Models;
-
+using Faculties;
 using Shared;
-using ValueObjects;
 using System;
 using System.Collections.Generic;
+using Training;
+using ValueObjects;
 
 public class Staff
 {
@@ -24,8 +23,6 @@ public class Staff
     public string DisplayName => FirstName + " " + LastName;
     public string EmailAddress => PortalUsername + "@det.nsw.edu.au";
     public bool IsShared { get; set; }
-    public virtual List<TeacherAdobeConnectOperation> AdobeConnectOperations { get; set; } = new();
-    public virtual List<TeacherAdobeConnectGroupOperation> AdobeConnectGroupOperations { get; set; } = new();
     public virtual List<TeacherMSTeamOperation> MSTeamOperations { get; set; } = new();
     public virtual List<TrainingCompletion> TrainingCompletionRecords { get; set; } = new();
 

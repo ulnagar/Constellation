@@ -182,9 +182,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     // The PxP absence is for a different class than the courseEnrolment
                     // therefore it should not be processed here.
                     
-                    _logger
-                        .ForContext("Absences", group, true)
-                        .Warning($"-- Enrolment Class {enrolledOffering.Name} does not match PxP Absence Class {group.First().ClassName}");
+                    //_logger
+                    //    .ForContext("Absences", group, true)
+                    //    .Warning($"-- Enrolment Class {enrolledOffering.Name} does not match PxP Absence Class {group.First().ClassName}");
                     continue;
                 }
 

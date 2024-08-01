@@ -28,7 +28,7 @@ public class AddMemberModel : BasePageModel
     {
         [Required]
         public Guid? FacultyId { get; set; }
-        public string FacultyName { get; set; }
+        public string? FacultyName { get; set; }
         [Required]
         public string StaffId { get; set; }
         [Required]
