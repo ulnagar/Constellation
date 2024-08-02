@@ -10,11 +10,14 @@ using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using Core.Models.Assets.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanManageAssets)]
@@ -22,13 +25,21 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
@@ -85,11 +96,18 @@ public class UpsertModel : BasePageModel
         {
             AssetNumber = Id;
 
+            _logger
+                .Information("Requested to retrieve Asset with AssetNumber {AssetNumber} for edit by user {User}", Id, _currentUserService.UserName);
+
             Result<AssetResponse> asset = await _mediator.Send(new GetAssetByAssetNumberQuery(Id));
 
             if (asset.IsFailure)
             {
                 ModalContent = new ErrorDisplay(asset.Error);
+
+                _logger
+                    .ForContext(nameof(Error), asset.Error, true)
+                    .Warning("Failed ot retrieve Asset with AssetNumber {AssetNumber} for edit by user {User}", Id, _currentUserService.UserName);
 
                 return;
             }
@@ -134,11 +152,19 @@ public class UpsertModel : BasePageModel
                 PurchaseCost,
                 WarrantyEndDate ?? default);
 
+            _logger
+                .ForContext(nameof(CreateFullAssetCommand), createCommand, true)
+                .Information("Requested to create new Asset by user {User}", _currentUserService.UserName);
+
             Result createResult = await _mediator.Send(createCommand);
 
             if (createResult.IsFailure)
             {
                 ModalContent = new ErrorDisplay(createResult.Error);
+
+                _logger
+                    .ForContext(nameof(Error), createResult.Error, true)
+                    .Warning("Failed to create new Asset by user {User}", _currentUserService.UserName);
 
                 return Page();
             }
@@ -157,12 +183,20 @@ public class UpsertModel : BasePageModel
             PurchaseCost,
             WarrantyEndDate ?? default);
 
+        _logger
+            .ForContext(nameof(UpdateAssetCommand), updateCommand, true)
+            .Information("Requested to update Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result updateResult = await _mediator.Send(updateCommand);
 
         if (updateResult.IsFailure)
         {
             ModalContent = new ErrorDisplay(updateResult.Error);
 
+            _logger
+                .ForContext(nameof(Error), updateResult.Error, true)
+                .Warning("Failed to update Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+            
             return Page();
         }
 

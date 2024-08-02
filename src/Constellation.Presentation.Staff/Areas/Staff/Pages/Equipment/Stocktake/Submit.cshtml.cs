@@ -17,6 +17,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class SubmitModel : BasePageModel
@@ -24,18 +26,24 @@ public class SubmitModel : BasePageModel
     private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ILogger _logger;
 
     public SubmitModel(
         ISender mediator,
         ICurrentUserService currentUserService,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ILogger logger)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;
         _linkGenerator = linkGenerator;
+        _logger = logger
+            .ForContext<SubmitModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_Dashboard;
+    [ViewData] public string PageTitle => "Stocktake Sighting Submission";
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -83,6 +91,10 @@ public class SubmitModel : BasePageModel
             _currentUserService.EmailAddress,
             DateTime.Now);
 
+        _logger
+            .ForContext(nameof(RegisterSightingCommand), command, true)
+            .Information("Requested to add stocktake sighting by user {User}", _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
@@ -90,6 +102,10 @@ public class SubmitModel : BasePageModel
             await PreparePage();
 
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add stocktake sighting by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -106,7 +122,7 @@ public class SubmitModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
-
+            
             return;
         }
 

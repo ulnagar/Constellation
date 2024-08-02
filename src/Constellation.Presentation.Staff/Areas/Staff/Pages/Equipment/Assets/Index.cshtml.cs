@@ -15,10 +15,13 @@ using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Models;
+using Serilog;
 using Shared.PartialViews.AddAssetSighting;
 using System.Security.Claims;
 
@@ -26,11 +29,19 @@ using System.Security.Claims;
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator)
+        ISender mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
     [ViewData] public string PageTitle => "Assets List";
@@ -42,6 +53,9 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger
+            .Information("Requested to retrieve list of Assets with filter {Filter} by user {User}", Filter, _currentUserService.UserName);
+
         Result<List<AssetListItem>> request = Filter switch
         {
             AssetFilter.All => await _mediator.Send(new GetAllAssetsQuery()),
@@ -53,6 +67,10 @@ public class IndexModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(request.Error);
 
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve list of Assets with filter {Filter} by user {User}", Filter, _currentUserService.UserName);
+
             return;
         }
 
@@ -61,11 +79,18 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetExport()
     {
+        _logger
+            .Information("Requested to export list of Assets with filter {Filter} by user {User}", Filter, _currentUserService.UserName);
+
         Result<FileDto> file = await _mediator.Send(new ExportAssetsToExcelQuery(Filter));
 
         if (file.IsFailure)
         {
             ModalContent = new ErrorDisplay(file.Error);
+
+            _logger
+                .ForContext(nameof(Error), file.Error, true)
+                .Warning("Failed to export list of Assets with filter {Filter} by user {User}", Filter, _currentUserService.UserName);
 
             return Page();
         }
@@ -121,11 +146,19 @@ public class IndexModel : BasePageModel
             viewModel.SightedAt,
             viewModel.Note ?? string.Empty);
 
+        _logger
+            .ForContext(nameof(SightAssetCommand), command, true)
+            .Warning("Requested to add sighting to Asset with AssetNumber {AssetNumber} by user {User}", viewModel.AssetNumber, _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add sighting to Asset with AssetNumber {AssetNumber} by user {User}", viewModel.AssetNumber, _currentUserService.UserName);
 
             return Page();
         }

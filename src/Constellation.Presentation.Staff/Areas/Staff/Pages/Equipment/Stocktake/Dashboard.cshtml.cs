@@ -5,28 +5,41 @@ using Application.Models.Auth;
 using Application.Stocktake.GetStocktakeEvent;
 using Application.Stocktake.GetStocktakeSightingsForStaffMember;
 using Application.Stocktake.Models;
+using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DashboardModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DashboardModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_Dashboard;
+    [ViewData] public string PageTitle => "Stocktake Dashboard";
+
 
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
@@ -44,6 +57,9 @@ public class DashboardModel : BasePageModel
             return RedirectToPage("/Dashboard", new { area = "Staff" });
         }
 
+        _logger
+            .Information("Requested to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
+        
         string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(staffId))
@@ -51,6 +67,10 @@ public class DashboardModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .Warning("Failed to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -63,6 +83,10 @@ public class DashboardModel : BasePageModel
                 eventRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
+            _logger
+                .ForContext(nameof(Error), eventRequest.Error, true)
+                .Warning("Failed to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
+
             return Page();
         }
 
@@ -73,6 +97,10 @@ public class DashboardModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
 
             return Page();
         }

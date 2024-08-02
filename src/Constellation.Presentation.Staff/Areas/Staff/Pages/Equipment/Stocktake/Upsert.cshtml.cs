@@ -6,11 +6,14 @@ using Application.Stocktake.GetStocktakeEvent;
 using Application.Stocktake.Models;
 using Application.Stocktake.UpsertStocktakeEvent;
 using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
@@ -21,18 +24,27 @@ public class UpsertModel : BasePageModel
     private readonly ISender _mediator;
     private readonly IDateTimeProvider _dateTime;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
         IDateTimeProvider dateTime,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _dateTime = dateTime;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_List;
+    [ViewData] public string PageTitle => Id is null ? "New Stocktake Event" : "Edit Stocktake Event";
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
@@ -61,6 +73,9 @@ public class UpsertModel : BasePageModel
         if (!Id.HasValue)
             return;
 
+        _logger
+            .Information("Requested to retrieve Stocktake Event with Id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
         Result<StocktakeEventResponse> stocktake = await _mediator.Send(new GetStocktakeEventQuery(Id.Value));
 
         if (stocktake.IsFailure)
@@ -69,6 +84,10 @@ public class UpsertModel : BasePageModel
                 stocktake.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" }));
 
+            _logger
+                .ForContext(nameof(Error), stocktake.Error, true)
+                .Warning("Failed to retrieve Stocktake Event with Id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+            
             return;
         }
 
@@ -95,6 +114,10 @@ public class UpsertModel : BasePageModel
             StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate.ToDateTime(TimeOnly.MinValue),
             AcceptLateResponses);
+
+        _logger
+            .ForContext(nameof(UpsertStocktakeEventCommand), command, true)
+            .Information("Requested to submit Stocktake Event by user {User}", _currentUserService.UserName);
 
         await _mediator.Send(command);
 

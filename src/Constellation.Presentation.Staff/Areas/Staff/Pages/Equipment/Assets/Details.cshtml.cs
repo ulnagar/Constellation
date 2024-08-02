@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.AddAssetNote;
@@ -51,7 +52,7 @@ public class DetailsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DetailsModel>()
-            .ForContext("APPLICATION", "Staff Portal");
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Assets_Assets;
@@ -428,17 +429,23 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddNote(AddAssetNoteSelection viewModel)
     {
-        //TODO: R1.15.1: Continue with logging here
-
         AddAssetNoteCommand command = new(
             AssetNumber,
             viewModel.Note);
+
+        _logger
+            .ForContext(nameof(AddAssetNoteCommand), command, true)
+            .Information("Requested to add note to Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add note to Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
             Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
             Asset = resetResult.Value;
@@ -497,11 +504,19 @@ public class DetailsModel : BasePageModel
             viewModel.SightedAt,
             viewModel.Note ?? string.Empty);
 
+        _logger
+            .ForContext(nameof(SightAssetCommand), command, true)
+            .Information("Requested to add sighting to Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add sighting to Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
             Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
             Asset = resetResult.Value;
@@ -518,11 +533,19 @@ public class DetailsModel : BasePageModel
             AssetNumber,
             viewModel.SelectedStatus);
 
+        _logger
+            .ForContext(nameof(UpdateAssetStatusCommand), command, true)
+            .Information("Requested to update status of Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update status of Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
             Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
             Asset = resetResult.Value;
