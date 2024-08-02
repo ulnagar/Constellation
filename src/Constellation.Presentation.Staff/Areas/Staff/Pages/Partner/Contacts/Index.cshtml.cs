@@ -13,6 +13,7 @@ using Constellation.Application.Contacts.Models;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
 using Constellation.Application.Schools.Models;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Enums;
 using Core.Models.Offerings.Identifiers;
 using MediatR;
@@ -20,22 +21,32 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Contacts_List;
+    [ViewData] public string PageTitle => "Contacts List";
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();
@@ -68,18 +79,27 @@ public class IndexModel : BasePageModel
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
-        Result<FileDto> file = await _mediator.Send(new ExportContactListCommand(
+        ExportContactListCommand command = new(
             offeringIds,
             Filter.Grades,
             Filter.Schools,
-            filterCategories),
-            cancellationToken);
+            filterCategories);
 
+        _logger
+            .ForContext(nameof(ExportContactListCommand), command, true)
+            .Information("Requested to export contact list by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> file = await _mediator.Send(command, cancellationToken);
+        
         if (file.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 file.Error,
                 _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+
+            _logger
+                .ForContext(nameof(Error), file.Error, true)
+                .Warning("Failed to export contact list by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -96,6 +116,10 @@ public class IndexModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 classesResponse.Error,
                 _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+
+            _logger
+                .ForContext(nameof(Error), classesResponse.Error, true)
+                .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -131,6 +155,11 @@ public class IndexModel : BasePageModel
                 schoolsRequest.Error,
                 _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
+
+            _logger
+                .ForContext(nameof(Error), schoolsRequest.Error, true)
+                .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
+
             return Page();
         }
 
@@ -161,6 +190,10 @@ public class IndexModel : BasePageModel
                 ModalContent = new ErrorDisplay(
                     contactRequest.Error,
                     _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+
+                _logger
+                    .ForContext(nameof(Error), contactRequest.Error, true)
+                    .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
 
                 return Page();
             }

@@ -11,11 +11,14 @@ using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanManageSchoolContacts)]
@@ -23,16 +26,25 @@ public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public CreateModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<CreateModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Contacts;
+    [ViewData] public string PageTitle => "Create School Contact";
 
     [BindProperty]
     [Required]
@@ -68,10 +80,34 @@ public class CreateModel : BasePageModel
     public async Task OnGet()
     {
         Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
-        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+        if (rolesRequest.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                rolesRequest.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
-        SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
+            _logger
+                .ForContext(nameof(Error), rolesRequest.Error, true)
+                .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+            return;
+        }
         RolesList = new SelectList(rolesRequest.Value);
+        
+        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+        if (schoolsRequest.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                schoolsRequest.Error,
+                _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), schoolsRequest.Error, true)
+                .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+            return;
+        }
+        SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
     }
 
     public async Task<IActionResult> OnPost()
@@ -79,10 +115,34 @@ public class CreateModel : BasePageModel
         if (!ModelState.IsValid)
         {
             Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
-            Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+            if (rolesRequest.IsFailure)
+            {
+                ModalContent = new ErrorDisplay(
+                    rolesRequest.Error,
+                    _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
-            SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
+                _logger
+                    .ForContext(nameof(Error), rolesRequest.Error, true)
+                    .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+                return Page();
+            }
             RolesList = new SelectList(rolesRequest.Value);
+
+            Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+            if (schoolsRequest.IsFailure)
+            {
+                ModalContent = new ErrorDisplay(
+                    schoolsRequest.Error,
+                    _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+                _logger
+                    .ForContext(nameof(Error), schoolsRequest.Error, true)
+                    .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+                return Page();
+            }
+            SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
 
             return Page();
         }
@@ -97,29 +157,63 @@ public class CreateModel : BasePageModel
         
         if (string.IsNullOrWhiteSpace(SchoolCode))
         {
-            Result<SchoolContactId> request = await _mediator.Send(new CreateContactCommand(
+            CreateContactCommand createCommand = new(
                 FirstName,
                 LastName,
                 EmailAddress,
                 PhoneNumber,
-                false));
+                false);
+
+            _logger
+                .ForContext(nameof(CreateContactCommand), createCommand, true)
+                .Information("Requested to create School Contact by user {User}", _currentUserService.UserName);
+
+            Result<SchoolContactId> request = await _mediator.Send(createCommand);
 
             if (request.IsFailure)
             {
                 ModalContent = new ErrorDisplay(request.Error);
 
-                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
-                Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+                _logger
+                    .ForContext(nameof(Error), request.Error, true)
+                    .Warning("Failed to create School Contact by user {User}", _currentUserService.UserName);
 
-                SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
+                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+                if (rolesRequest.IsFailure)
+                {
+                    ModalContent = new ErrorDisplay(
+                        rolesRequest.Error,
+                        _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+                    _logger
+                        .ForContext(nameof(Error), rolesRequest.Error, true)
+                        .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+                    return Page();
+                }
                 RolesList = new SelectList(rolesRequest.Value);
+
+                Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+                if (schoolsRequest.IsFailure)
+                {
+                    ModalContent = new ErrorDisplay(
+                        schoolsRequest.Error,
+                        _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+                    _logger
+                        .ForContext(nameof(Error), schoolsRequest.Error, true)
+                        .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+                    return Page();
+                }
+                SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
 
                 return Page();
             }
         }
         else
         {
-            Result request = await _mediator.Send(new CreateContactWithRoleCommand(
+            CreateContactWithRoleCommand createWithRoleCommand = new(
                 FirstName,
                 LastName,
                 EmailAddress,
@@ -127,17 +221,51 @@ public class CreateModel : BasePageModel
                 Role,
                 SchoolCode,
                 Note,
-                false));
+                false);
+
+            _logger
+                .ForContext(nameof(CreateContactWithRoleCommand), createWithRoleCommand, true)
+                .Information("Requested to create new School Contact by user {User}", _currentUserService.UserName);
+
+            Result request = await _mediator.Send(createWithRoleCommand);
 
             if (request.IsFailure)
             {
                 ModalContent = new ErrorDisplay(request.Error);
 
-                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
-                Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+                _logger
+                    .ForContext(nameof(Error), request.Error, true)
+                    .Warning("Failed to create new School Contact by user {User}", _currentUserService);
 
-                SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
+                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+                if (rolesRequest.IsFailure)
+                {
+                    ModalContent = new ErrorDisplay(
+                        rolesRequest.Error,
+                        _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+                    _logger
+                        .ForContext(nameof(Error), rolesRequest.Error, true)
+                        .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+                    return Page();
+                }
                 RolesList = new SelectList(rolesRequest.Value);
+
+                Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
+                if (schoolsRequest.IsFailure)
+                {
+                    ModalContent = new ErrorDisplay(
+                        schoolsRequest.Error,
+                        _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+                    _logger
+                        .ForContext(nameof(Error), schoolsRequest.Error, true)
+                        .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
+
+                    return Page();
+                }
+                SchoolsList = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
 
                 return Page();
             }

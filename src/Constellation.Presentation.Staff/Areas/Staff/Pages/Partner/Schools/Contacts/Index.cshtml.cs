@@ -12,12 +12,15 @@ using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using Shared.PartialViews.AssignRoleModal;
 using Shared.PartialViews.DeleteRoleModal;
 using Shared.PartialViews.UpdateRoleNoteModal;
@@ -27,17 +30,26 @@ public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Contacts;
-
+    [ViewData] public string PageTitle => "School Contacts List";
+    
     [BindProperty(SupportsGet = true)]
     public GetAllContactsQuery.SchoolContactFilter Filter { get; set; } = GetAllContactsQuery.SchoolContactFilter.WithRole;
 
@@ -45,11 +57,17 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve list of school contacts by user {User}", _currentUserService.UserName);
+
         Result<List<SchoolContactResponse>> contacts = await _mediator.Send(new GetAllContactsQuery(Filter));
 
         if (contacts.IsFailure)
         {
             ModalContent = new ErrorDisplay(contacts.Error);
+
+            _logger
+                .ForContext(nameof(Error), contacts.Error, true)
+                .Warning("Failed to retrieve list of school contacts by user {User}", _currentUserService.UserName);
 
             return;
         }
@@ -64,14 +82,14 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxUpdateNote(
-        Guid contactId,
-        Guid roleId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
         string note)
     {
         UpdateRoleNoteModalViewModel viewModel = new()
         {
-            ContactId = SchoolContactId.FromValue(contactId),
-            RoleId = SchoolContactRoleId.FromValue(roleId),
+            ContactId = contactId,
+            RoleId = roleId,
             Note = note
         };
 
@@ -83,13 +101,23 @@ public class IndexModel : BasePageModel
         [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
         string note)
     {
-        Result request = await _mediator.Send(new UpdateRoleNoteCommand(contactId, roleId, note));
+        UpdateRoleNoteCommand command = new(contactId, roleId, note);
+
+        _logger
+            .ForContext(nameof(UpdateRoleNoteCommand), command, true)
+            .Information("Requested to update note of School Contact by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" }));
+
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to update note of School Contact by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -98,7 +126,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(
-        Guid contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
         string name)
     {
         AssignRoleModalViewModel viewModel = new();
@@ -108,7 +136,7 @@ public class IndexModel : BasePageModel
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
         viewModel.Roles = new SelectList(rolesRequest.Value);
-        viewModel.ContactGuid = contactId;
+        viewModel.ContactId = contactId;
         viewModel.ContactName = name;
 
         return Partial("AssignRoleModal", viewModel);
@@ -118,17 +146,25 @@ public class IndexModel : BasePageModel
         string schoolCode,
         string roleName,
         string note,
-        Guid contactGuid)
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId)
     {
-        SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
+        CreateContactRoleAssignmentCommand command = new(contactId, schoolCode, roleName, note);
 
-        Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, note));
+        _logger
+            .ForContext(nameof(CreateContactRoleAssignmentCommand), command, true)
+            .Information("Requested to create assignment for School Contact by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" }));
+
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to create assignment for School Contact by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -137,8 +173,8 @@ public class IndexModel : BasePageModel
     }
 
     public IActionResult OnPostAjaxDelete(
-        Guid contactId,
-        Guid roleId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
         string name,
         string role,
         string school)
@@ -153,21 +189,30 @@ public class IndexModel : BasePageModel
         return Partial("DeleteRoleModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetDeleteAssignment(Guid contactGuid, Guid roleGuid)
+    public async Task<IActionResult> OnGetDeleteAssignment(
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId)
     {
-        SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
-        SchoolContactRoleId roleId = SchoolContactRoleId.FromValue(roleGuid);
+        RemoveContactRoleCommand command = new(contactId, roleId);
 
-        await _mediator.Send(new RemoveContactRoleCommand(contactId, roleId));
+        _logger
+            .ForContext(nameof(RemoveContactRoleCommand), command, true)
+            .Information("Requested to remove assignment for School Contact by user {User}", _currentUserService.UserName);
+
+        await _mediator.Send(command);
 
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetRepairUser(Guid id)
+    public async Task<IActionResult> OnGetRepairUser([ModelBinder(typeof(StrongIdBinder))] SchoolContactId id)
     {
-        SchoolContactId contactId = SchoolContactId.FromValue(id);
+        RepairSchoolContactUserCommand command = new(id);
 
-        await _mediator.Send(new RepairSchoolContactUserCommand(contactId));
+        _logger
+            .ForContext(nameof(RepairSchoolContactUserCommand), command, true)
+            .Information("Requested to repair user account for School Contact by user {User}", _currentUserService.UserName);
+
+        await _mediator.Send(command);
 
         return RedirectToPage();
     }

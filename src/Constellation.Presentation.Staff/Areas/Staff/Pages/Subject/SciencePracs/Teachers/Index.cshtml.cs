@@ -56,8 +56,8 @@ public class IndexModel : BasePageModel
     }
 
     public IActionResult OnPostAjaxDelete(
-        Guid contactId,
-        Guid roleId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
         string name,
         string role,
         string school)
@@ -73,7 +73,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(
-        Guid contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
         string name)
     {
         AssignRoleModalViewModel viewModel = new();
@@ -84,17 +84,16 @@ public class IndexModel : BasePageModel
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
         viewModel.Roles = new SelectList(rolesRequest.Value, SchoolContactRole.SciencePrac);
         viewModel.RoleName = SchoolContactRole.SciencePrac;
-        viewModel.ContactGuid = contactId;
+        viewModel.ContactId = contactId;
         viewModel.ContactName = name;
 
         return Partial("AssignRoleModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetDeleteAssignment(Guid contactGuid, Guid roleGuid)
+    public async Task<IActionResult> OnGetDeleteAssignment(
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId)
     {
-        SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
-        SchoolContactRoleId roleId = SchoolContactRoleId.FromValue(roleGuid);
-
         await _mediator.Send(new RemoveContactRoleCommand(contactId, roleId));
 
         return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
@@ -104,10 +103,8 @@ public class IndexModel : BasePageModel
         string schoolCode,
         string roleName,
         string note,
-        Guid contactGuid)
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId)
     {
-        SchoolContactId contactId = SchoolContactId.FromValue(contactGuid);
-        
         Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, note));
 
         if (request.IsFailure)
@@ -119,18 +116,18 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("Index", new { area = "Subject" });
+        return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
     }
 
     public async Task<IActionResult> OnPostAjaxUpdateNote(
-        Guid contactId,
-        Guid roleId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
         string note)
     {
         UpdateRoleNoteModalViewModel viewModel = new()
         {
-            ContactId = SchoolContactId.FromValue(contactId),
-            RoleId = SchoolContactRoleId.FromValue(roleId),
+            ContactId = contactId,
+            RoleId = roleId,
             Note = note
         };
 

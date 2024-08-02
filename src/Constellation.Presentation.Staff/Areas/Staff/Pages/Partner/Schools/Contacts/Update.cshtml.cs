@@ -9,10 +9,13 @@ using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanManageSchoolContacts)]
@@ -20,16 +23,26 @@ public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpdateModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpdateModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Contacts;
+    [ViewData] public string PageTitle => "Update School Contact";
+
 
     [ModelBinder(typeof(StrongIdBinder))]
     [BindProperty(SupportsGet = true)]
@@ -58,6 +71,9 @@ public class UpdateModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger
+            .Information("Requested to retrieve School Contact with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
         Result<ContactSummaryResponse> contact = await _mediator.Send(new GetContactSummaryQuery(Id));
 
         if (contact.IsFailure)
@@ -65,6 +81,10 @@ public class UpdateModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 contact.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), contact.Error, true)
+                .Warning("Failed to retrieve School Contact with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
             return;
         }
@@ -85,16 +105,26 @@ public class UpdateModel : BasePageModel
         PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber) ? PhoneNumber : PhoneNumber.Trim();
         EmailAddress = EmailAddress.Trim();
 
-        Result request = await _mediator.Send(new UpdateContactCommand(
+        UpdateContactCommand command = new(
             Id,
             FirstName,
             LastName,
             EmailAddress,
-            PhoneNumber));
+            PhoneNumber);
+
+        _logger
+            .ForContext(nameof(UpdateContactCommand), command, true)
+            .Information("Requested to update School Contact with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
             ModalContent = new ErrorDisplay(request.Error);
+
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to update School Contact with id {Id} by user {User}", Id, _currentUserService.UserName);
 
             return Page();
         }
