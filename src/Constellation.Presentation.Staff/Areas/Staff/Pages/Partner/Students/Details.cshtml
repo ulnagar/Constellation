@@ -319,7 +319,7 @@
                 @foreach (var item in Model.Absences.OrderBy(a => a.AbsenceDate).ThenBy(a => a.Timeframe))
                 {
                     <tr>
-                        <td>
+                        <td data-order="@item.AbsenceDate.ToString("yyyy-MM-dd")">
                             @if (item.IsExplained)
                             {
                                 <i class="fal fa-comment-check" />

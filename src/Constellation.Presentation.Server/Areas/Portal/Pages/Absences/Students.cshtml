@@ -45,14 +45,14 @@
         @foreach (var entry in Model.Absences)
         {
             <tr>
-                <td>@Html.DisplayFor(model => entry.IsExplained, "BooleanTick")</td>
+                <td data-order="@entry.AbsenceDate.ToString("yyyy-MM-dd")">@Html.DisplayFor(model => entry.IsExplained, "BooleanTick")</td>
                 <td>@entry.AbsenceType</td>
                 <td>@entry.AbsenceDate.ToShortDateString()</td>
                 <td>@entry.PeriodName</td>
                 <td>@entry.Timeframe</td>
                 <td>@entry.OfferingName</td>
                 <td class="text-center">
-                    @if (!entry.IsExplained && entry.AbsenceType == AbsenceType.Partial)
+                    @if (!entry.IsExplained && entry.AbsenceType == AbsenceType.Partial && !entry.PendingVerification)
                     {
                         <a asp-page="StudentExplanation" asp-area="Portal" asp-route-id="@entry.AbsenceId" class="btn btn-sm btn-primary btn-show-hover">Explain</a>
                     }

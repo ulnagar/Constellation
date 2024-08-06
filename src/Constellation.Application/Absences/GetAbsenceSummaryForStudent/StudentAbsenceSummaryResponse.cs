@@ -11,4 +11,5 @@ public sealed record StudentAbsenceSummaryResponse(
     DateOnly AbsenceDate,
     string Timeframe,
     string PeriodName,
-    string OfferingName);
+    string OfferingName,
+    bool PendingVerification);

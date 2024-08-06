@@ -1,7 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 
+using Application.Students.Models;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Students.GetStudentById;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +39,7 @@ public class StudentsModel : PageModel
             throw new ArgumentOutOfRangeException(nameof(StudentId));
 
         // Get Student details
-        var studentRequest = await _mediator.Send(new GetStudentByIdQuery(StudentId), cancellationToken);
+        Result<StudentResponse> studentRequest = await _mediator.Send(new GetStudentByIdQuery(StudentId), cancellationToken);
 
         if (studentRequest.IsFailure)
             throw new InvalidDataException(studentRequest.Error.Message);
@@ -45,17 +47,16 @@ public class StudentsModel : PageModel
         StudentName = studentRequest.Value.Name.DisplayName;
 
         // Get all absences for this student from this year.
-        var absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(StudentId), cancellationToken);
+        Result<List<StudentAbsenceSummaryResponse>> absencesRequest = ShowAll switch
+        {
+            true => await _mediator.Send(new GetAbsenceSummaryForStudentQuery(StudentId, false), cancellationToken),
+            false => await _mediator.Send(new GetAbsenceSummaryForStudentQuery(StudentId, true), cancellationToken)
+        };
 
         if (absencesRequest.IsFailure)
             throw new InvalidDataException(absencesRequest.Error.Message);
 
         Absences = absencesRequest.Value;
-
-        if (!ShowAll)
-            Absences = Absences
-                .Where(entry => !entry.IsExplained)
-                .ToList();
 
         return Page();
     }

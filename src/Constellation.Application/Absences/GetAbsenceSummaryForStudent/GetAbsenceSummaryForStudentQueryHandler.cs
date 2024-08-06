@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Absences;
+using Core.Models.Offerings;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -27,17 +29,17 @@ internal sealed class GetAbsenceSummaryForStudentQueryHandler
     {
         List<StudentAbsenceSummaryResponse> returnData = new();
 
-        var absences = await _absenceRepository.GetForStudentFromCurrentYear(request.StudentId, cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetForStudentFromCurrentYear(request.StudentId, cancellationToken);
 
         if (absences is null)
             return returnData;
 
-        foreach (var absence in absences)
+        foreach (Absence absence in absences)
         {
-            if (absence.Responses.Any())
+            if (request.OutstandingOnly && absence.Responses.Any())
                 continue;
 
-            var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             if (offering is null) 
                 continue;
@@ -49,7 +51,8 @@ internal sealed class GetAbsenceSummaryForStudentQueryHandler
                 absence.Date,
                 absence.AbsenceTimeframe,
                 absence.PeriodName,
-                offering.Name));
+                offering.Name,
+                absence.Responses.Any() && !absence.Explained));
         }
 
         return returnData;
