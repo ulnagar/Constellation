@@ -5,28 +5,40 @@ using Application.Models.Auth;
 using Application.Schools.GetSchoolById;
 using Application.Schools.GetSchoolForEdit;
 using Application.Schools.UpsertSchool;
+using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditSchools)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Schools;
+    [ViewData] public string PageTitle { get; set; } = "New School";
 
     [BindProperty(SupportsGet = true)]
     public string? Id { get; set; } = null;
@@ -75,6 +87,9 @@ public class UpsertModel : BasePageModel
         if (Id is null)
             return;
 
+        _logger
+            .Information("Requested to retrieve School with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
         Result<SchoolEditResponse> school = await _mediator.Send(new GetSchoolForEditQuery(Id));
 
         if (school.IsFailure)
@@ -83,6 +98,10 @@ public class UpsertModel : BasePageModel
                 school.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" }));
 
+            _logger
+                .ForContext(nameof(Error), school.Error, true)
+                .Information("Failed to retrieve School with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+            
             return;
         }
 
@@ -99,6 +118,8 @@ public class UpsertModel : BasePageModel
         HeatSchool = school.Value.HeatSchool;
         Electorate = school.Value.Electorate;
         PrincipalNetwork = school.Value.PrincipalNetwork;
+
+        PageTitle = $"Editing {school.Value.Name}";
     }
 
     public async Task<IActionResult> OnPost()
@@ -133,11 +154,19 @@ public class UpsertModel : BasePageModel
             PrincipalNetwork = PrincipalNetwork
         };
 
+        _logger
+            .ForContext(nameof(UpsertSchoolCommand), command, true)
+            .Information("Requested to upsert School by user {User}", _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(result.Error);
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Information("Failed to upsert School by user {User}", _currentUserService.UserName);
 
             return Page();
         }

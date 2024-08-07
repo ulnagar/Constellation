@@ -7,23 +7,36 @@ using Constellation.Application.Faculties.UpdateFaculty;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditFaculties)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
-    public UpsertModel(ISender mediator)
+    public UpsertModel(
+        ISender mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
+    [ViewData] public string PageTitle { get; set; } = "New Faculty";
 
     [BindProperty(SupportsGet = true)]
     public Guid? Id { get; set; }
@@ -39,6 +52,8 @@ public class UpsertModel : BasePageModel
     {
         if (Id.HasValue)
         {
+            _logger.Information("Requested to retrieve Faculty with id {FacultyId} for edit by user {User}", Id, _currentUserService.UserName);
+
             FacultyId facultyId = FacultyId.FromValue(Id.Value);
             
             // Get values from database
@@ -48,11 +63,17 @@ public class UpsertModel : BasePageModel
             {
                 ModalContent = new ErrorDisplay(request.Error);
 
+                _logger
+                    .ForContext(nameof(Error), request.Error, true)
+                    .Warning("Failed to retrieve Faculty with id {FacultyId} for edit by user {User}", Id, _currentUserService.UserName);
+
                 return;
             }
 
             Name = request.Value.Name;
             Colour = request.Value.Colour;
+
+            PageTitle = $"Editing {request.Value.Name}";
         }
     }
 
@@ -73,7 +94,16 @@ public class UpsertModel : BasePageModel
                 Name,
                 Colour);
 
-            await _mediator.Send(command);
+            _logger
+                .ForContext(nameof(UpdateFacultyCommand), command, true)
+                .Information("Requested to update Faculty with Id {FacultyId} by user {User}", Id, _currentUserService.UserName);
+
+            Result result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to update Faculty with Id {FacultyId} by user {User}", Id, _currentUserService.UserName);
         }
         else
         {
@@ -82,8 +112,17 @@ public class UpsertModel : BasePageModel
             CreateFacultyCommand command = new(
                 Name,
                 Colour);
+            
+            _logger
+                .ForContext(nameof(CreateFacultyCommand), command, true)
+                .Information("Requested to create Faculty by user {User}", _currentUserService.UserName);
 
-            await _mediator.Send(command);
+            Result result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to create Faculty by user {User}", _currentUserService.UserName);
         }
 
         return RedirectToPage("/Partner/Staff/Faculties/Index", new { area = "Staff"});

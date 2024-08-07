@@ -8,27 +8,39 @@ using Application.StaffMembers.UpdateStaffMember;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditSchools)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Staff;
+    [ViewData] public string PageTitle { get; set; } = "New Staff Member";
 
     [BindProperty(SupportsGet = true)]
     public string? Id { get; set; } = string.Empty;
@@ -73,6 +85,9 @@ public class UpsertModel : BasePageModel
             return;
         }
 
+        _logger
+            .Information("Requested to retrieve Staff Member with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
         Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(Id));
 
         if (staffMember.IsFailure)
@@ -80,6 +95,10 @@ public class UpsertModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), staffMember.Error, true)
+                .Information("Failed to retrieve Staff Member with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
             return;
         }
@@ -92,6 +111,8 @@ public class UpsertModel : BasePageModel
         IsShared = staffMember.Value.IsShared;
 
         SchoolList = new(schools.Value, "Code", "Name", staffMember.Value.SchoolCode);
+
+        PageTitle = $"Editing {staffMember.Value.Name.DisplayName}";
     }
 
     public async Task<IActionResult> OnPost()
@@ -116,11 +137,19 @@ public class UpsertModel : BasePageModel
                 SchoolCode,
                 IsShared);
 
+            _logger
+                .ForContext(nameof(CreateStaffMemberCommand), createCommand, true)
+                .Information("Requested to create new Staff Member by user {User}", _currentUserService.UserName);
+
             Result createResult = await _mediator.Send(createCommand);
 
             if (createResult.IsFailure)
             {
                 ModalContent = new ErrorDisplay(createResult.Error);
+
+                _logger
+                    .ForContext(nameof(Error), createResult.Error, true)
+                    .Warning("Failed to create new Staff Member by user {User}", _currentUserService.UserName);
 
                 Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 
@@ -141,11 +170,19 @@ public class UpsertModel : BasePageModel
             SchoolCode,
             IsShared);
 
+        _logger
+            .ForContext(nameof(UpdateStaffMemberCommand), updateCommand, true)
+            .Information("Requested to update Staff Member with id {Id} by user {User}", StaffId, _currentUserService.UserName);
+
         Result updateResult = await _mediator.Send(updateCommand);
 
         if (updateResult.IsFailure)
         {
             ModalContent = new ErrorDisplay(updateResult.Error);
+
+            _logger
+                .ForContext(nameof(Error), updateResult.Error, true)
+                .Warning("Failed to update Staff Member with id {Id} by user {User}", StaffId, _currentUserService.UserName);
 
             Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 

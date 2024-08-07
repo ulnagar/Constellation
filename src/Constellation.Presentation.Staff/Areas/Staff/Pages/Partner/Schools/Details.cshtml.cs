@@ -5,28 +5,39 @@ using Application.DTOs;
 using Application.Models.Auth;
 using Application.Schools.GetSchoolDetails;
 using Constellation.Application.Features.API.Schools.Queries;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using System.Net.Http.Json;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Schools;
+    [ViewData] public string PageTitle { get; set; } = "School Details";
 
     [BindProperty(SupportsGet = true)]
     public string Id { get; set; }
@@ -35,6 +46,9 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger
+            .Information("Requested to retrieve details for School with id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result<SchoolDetailsResponse> request = await _mediator.Send(new GetSchoolDetailsQuery(Id));
 
         if (request.IsFailure)
@@ -43,10 +57,15 @@ public class DetailsModel : BasePageModel
                 request.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" }));
 
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve details for School with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             return;
         }
 
         School = request.Value;
+        PageTitle = $"Details - {request.Value.Name}";
     }
 
     public async Task<IActionResult> OnGetAjaxGetGraphData(string id, int day)

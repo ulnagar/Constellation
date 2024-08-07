@@ -5,22 +5,35 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.RemoveStaffFromFaculty;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanViewFacultyDetails)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
-    public DetailsModel(IMediator mediator)
+    public DetailsModel(
+        IMediator mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
+    [ViewData] public string PageTitle { get; set; } = "Faculty Details";
 
     [BindProperty(SupportsGet = true)]
     public Guid FacultyId { get; set; }
@@ -29,6 +42,9 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger
+            .Information("Requested to retrieve details of Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
+
         FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
 
         Result<FacultyDetailsResponse> facultyRequest = await _mediator.Send(new GetFacultyDetailsQuery(facultyId));
@@ -41,7 +57,18 @@ public class DetailsModel : BasePageModel
     {
         FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
 
-        await _mediator.Send(new RemoveStaffFromFacultyCommand(staffId, facultyId));
+        RemoveStaffFromFacultyCommand command = new(staffId, facultyId);
+
+        _logger
+            .ForContext(nameof(RemoveStaffFromFacultyCommand), command, true)
+            .Information("Requested to remove member from Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove member from Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
         return RedirectToPage("/Partner/Staff/Faculties/Details", routeValues: new { FacultyId, area = "Staff" });
     }

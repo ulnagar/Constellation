@@ -6,22 +6,34 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.AddStaffToFaculty;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditFaculties)]
 public class AddMemberModel : BasePageModel
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
-    public AddMemberModel(IMediator mediator)
+    public AddMemberModel(
+        IMediator mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<AddMemberModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     public class AddMemberDto
@@ -36,6 +48,7 @@ public class AddMemberModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Faculties;
+    [ViewData] public string PageTitle => "Add Member to Faculty";
 
     [BindProperty(SupportsGet = true)]
     public Guid FacultyId { get; set; }
@@ -49,6 +62,8 @@ public class AddMemberModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to add member to Faculty with Id {FaultyId} by user {User}", FacultyId, _currentUserService.UserName);
+
         StaffList = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
         MemberDefinition.FacultyId = FacultyId;
         
@@ -74,10 +89,24 @@ public class AddMemberModel : BasePageModel
             FacultyMembershipRole role = FacultyMembershipRole.FromValue(MemberDefinition.Role);
 
             FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(MemberDefinition.FacultyId.Value);
-            await _mediator.Send(new AddStaffToFacultyCommand(
+
+            AddStaffToFacultyCommand command = new(
                 MemberDefinition.StaffId,
                 facultyId,
-                role));
+                role);
+
+            _logger
+                .ForContext(nameof(AddStaffToFacultyCommand), command, true)
+                .Information("Requested to add member to Faculty with Id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
+
+            Result result = await _mediator.Send(command);
+
+            if (result.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to add member to Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
+            }
         }
         
         return RedirectToPage("/Partner/Staff/Faculties/Details", new { FacultyId = MemberDefinition.FacultyId, area="Staff"});
