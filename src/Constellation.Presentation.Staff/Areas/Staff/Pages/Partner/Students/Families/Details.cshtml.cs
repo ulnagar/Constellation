@@ -13,13 +13,16 @@ using Constellation.Application.Families.Models;
 using Constellation.Application.Families.RemoveStudentFromFamily;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.Components.FamilyAddStudent;
 using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 
@@ -29,21 +32,28 @@ public class DetailsModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         IMediator mediator,
         LinkGenerator linkGenerator,
-        IAuthorizationService authService)
+        IAuthorizationService authService,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _authService = authService;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
-    [ViewData] public string PageTitle => Family is not null ? $"Family Details - {Family.FamilyTitle}" : "Family Details";
-
-
+    [ViewData] public string PageTitle { get; set; } = "Family Details";
+    
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StrongIdBinder))]
     public FamilyId Id { get; set; }
@@ -95,13 +105,23 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result result = await _mediator.Send(new RemoveStudentFromFamilyCommand(Id, studentId), cancellationToken);
+        RemoveStudentFromFamilyCommand command = new(Id, studentId);
+
+        _logger
+            .ForContext(nameof(RemoveStudentFromFamilyCommand), command, true)
+            .Information("Requested to remove Student from Family by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove Student from Family by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -144,13 +164,23 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result result = await _mediator.Send(new DeleteParentByIdCommand(Id, parentId), cancellationToken);
+        DeleteParentByIdCommand command = new(Id, parentId);
+
+        _logger
+            .ForContext(nameof(DeleteParentByIdCommand), command, true)
+            .Information("Requested to remove Parent from Family by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove Parent from Family by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -180,7 +210,13 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result result = await _mediator.Send(new AddStudentToFamilyCommand(Id, viewModel.StudentId), cancellationToken);
+        AddStudentToFamilyCommand command = new(Id, viewModel.StudentId);
+
+        _logger
+            .ForContext(nameof(AddStudentToFamilyCommand), command, true)
+            .Information("Requested to add Student to Family by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
         {
@@ -191,11 +227,18 @@ public class DetailsModel : BasePageModel
             result.Error,
             _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
+        _logger
+            .ForContext(nameof(Error), result.Error, true)
+            .Warning("Failed to add Student to Family by user {User}", _currentUserService.UserName);
+
         return Page();
     }
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
+        _logger
+            .Information("Requested to retrieve details of Family with id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result<FamilyDetailsResponse> familyRequest = await _mediator.Send(new GetFamilyDetailsByIdQuery(Id), cancellationToken);
 
         if (familyRequest.IsFailure)
@@ -204,10 +247,16 @@ public class DetailsModel : BasePageModel
                 familyRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
+            _logger
+                .ForContext(nameof(Error), familyRequest.Error, true)
+                .Warning("Failed to retrieve details of Family with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             return Page();
         }
 
         Family = familyRequest.Value;
+
+        PageTitle = $"Details - {Family.FamilyTitle}";
 
         return Page();
     }
