@@ -4,27 +4,39 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Enrolments.GetFTETotalByGrade;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class FTEBreakdownModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public FTEBreakdownModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<FTEBreakdownModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Reports;
+    [ViewData] public string PageTitle => "FTE Breakdown Report";
 
     public List<GradeEntry> Grades { get; set; } = new();
     public int TotalMaleEnrolments { get; set; }
@@ -48,6 +60,8 @@ public class FTEBreakdownModel : BasePageModel
 
     public async Task OnGet()
     {
+        
+
         Result<List<GradeFTESummaryResponse>> request = await _mediator.Send(new GetFTETotalByGradeQuery());
 
         if (request.IsFailure)
@@ -55,6 +69,10 @@ public class FTEBreakdownModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve FTE Breakdown report of Students by user {User}", _currentUserService.UserName);
 
             return;
         }

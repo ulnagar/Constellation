@@ -5,13 +5,16 @@ using Application.Models.Auth;
 using Areas;
 using Constellation.Application.Families.GetFamilyEditContext;
 using Constellation.Application.Families.UpdateFamily;
+using Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -19,18 +22,25 @@ public class EditFamilyModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public EditFamilyModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<EditFamilyModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
-    [ViewData] public string PageTitle => "Edit Family";
-    // TODO: R1.15.2: Continue with logging updates
+    [ViewData] public string PageTitle { get; set; } = "Edit Family";
 
     [BindProperty(SupportsGet = true)]
     [ModelBinder(typeof(StrongIdBinder))]
@@ -68,6 +78,8 @@ public class EditFamilyModel : BasePageModel
 
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
+        _logger.Information("Requested to retrieve Family with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
         Result<FamilyEditContextResponse> familyResult = await _mediator.Send(new GetFamilyEditContextQuery(Id), cancellationToken);
 
         if (familyResult.IsFailure)
@@ -76,6 +88,10 @@ public class EditFamilyModel : BasePageModel
                 familyResult.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
+            _logger
+                .ForContext(nameof(Error), familyResult.Error, true)
+                .Warning("Failed to retrieve Family with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+            
             return Page();
         }
 
@@ -87,6 +103,8 @@ public class EditFamilyModel : BasePageModel
         FamilyEmail = familyResult.Value.FamilyEmail;
         Students = familyResult.Value.Students;
         Parents = familyResult.Value.Parents;
+
+        PageTitle = $"Edit - {FamilyTitle}";
 
         return Page();
     }
@@ -105,6 +123,10 @@ public class EditFamilyModel : BasePageModel
             AddressPostCode,
             FamilyEmail);
 
+        _logger
+            .ForContext(nameof(UpdateFamilyCommand), command, true)
+            .Information("Requested to update Family with id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsSuccess)
@@ -113,6 +135,11 @@ public class EditFamilyModel : BasePageModel
         ModalContent = new ErrorDisplay(
             result.Error,
             _linkGenerator.GetPathByPage("/Partner/Students/Families/EditFamily", values: new { area = "Staff", Id = Id }));
+
+
+        _logger
+            .ForContext(nameof(Error), result.Error, true)
+            .Warning("Failed to update Family with id {Id} by user {User}", Id, _currentUserService.UserName);
 
         return Page();
     }

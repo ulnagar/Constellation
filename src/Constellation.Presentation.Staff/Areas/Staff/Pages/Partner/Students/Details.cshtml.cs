@@ -18,12 +18,16 @@ using Constellation.Application.Students.WithdrawStudent;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -32,18 +36,27 @@ public class DetailsModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         IMediator mediator,
         LinkGenerator linkGenerator,
-        IAuthorizationService authorizationService)
+        IAuthorizationService authorizationService,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _authorizationService = authorizationService;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Students;
+    [ViewData] public string PageTitle { get; set; } = "Student Details";
 
     [BindProperty(SupportsGet = true)]
     public string Id { get; set; }
@@ -76,15 +89,23 @@ public class DetailsModel : BasePageModel
 
     private async Task<bool> PreparePage(CancellationToken cancellationToken)
     {
+        _logger.Information("Requested to retrieve details of Student with id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result<StudentResponse>? studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
 
         if (studentRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), studentRequest.Error, true)
+                .Warning("Failed to retrieve details of Student with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             GenerateError(studentRequest.Error);
             return false;
         }
 
         Student = studentRequest.Value;
+
+        PageTitle = $"Details - {Student.Name.DisplayName}";
 
         Result<List<FamilyContactResponse>>? familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
@@ -117,13 +138,32 @@ public class DetailsModel : BasePageModel
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
-        if (authorised.Succeeded)
+        if (!authorised.Succeeded)
         {
-            await _mediator.Send(new WithdrawStudentCommand(Id), cancellationToken);
-        }
-        else
-        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to withdraw Student by user {User}", _currentUserService);
+
             GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return;
+        }
+
+        WithdrawStudentCommand command = new(Id);
+
+        _logger
+            .ForContext(nameof(WithdrawStudentCommand), command, true)
+            .Information("Requested to withdraw Student by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to withdraw Student by user {User}", _currentUserService);
+
+            GenerateError(result.Error);
         }
 
         await PreparePage(cancellationToken);
@@ -133,32 +173,71 @@ public class DetailsModel : BasePageModel
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
-        if (authorised.Succeeded)
+        if (!authorised.Succeeded)
         {
-            await _mediator.Send(new ReinstateStudentCommand(Id), cancellationToken);
-        }
-        else
-        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to reinstate Student by user {User}", _currentUserService);
+
             GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return;
+        }
+
+        ReinstateStudentCommand command = new(Id);
+
+        _logger
+            .ForContext(nameof(ReinstateStudentCommand), command, true)
+            .Information("Requested to reinstate Student by user {User}", _currentUserService);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to reinstate Student by user {User}", _currentUserService);
+
+            GenerateError(result.Error);
+            await PreparePage(cancellationToken);
+            return;
         }
 
         await PreparePage(cancellationToken);
     }
 
-    public async Task OnGetUnenrol(Guid offeringId, CancellationToken cancellationToken)
+    public async Task OnGetUnenrol(
+        [ModelBinder(typeof(StrongIdBinder))] OfferingId offeringId, 
+        CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
-        if (authorised.Succeeded)
+        if (!authorised.Succeeded)
         {
-            Result? result = await _mediator.Send(new UnenrolStudentCommand(Id, OfferingId.FromValue(offeringId)), cancellationToken);
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to unenrol Student from Offering by user {User}", _currentUserService.UserName);
 
-            if (result.IsFailure)
-                GenerateError(result.Error);
-        }
-        else
-        {
             GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return;
+        }
+
+        UnenrolStudentCommand command = new(Id, offeringId);
+
+        _logger
+            .ForContext(nameof(UnenrolStudentCommand), command, true)
+            .Information("Requested to unenrol Student from Offering by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to unenrol Student from Offering by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
         }
 
         await PreparePage(cancellationToken);
@@ -170,14 +249,30 @@ public class DetailsModel : BasePageModel
 
         if (authorised.Succeeded)
         {
-            Result? result = await _mediator.Send(new UnenrolStudentFromAllOfferingsCommand(Id), cancellationToken);
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to bulk unenrol Student from Offerings by user {User}", _currentUserService.UserName);
 
-            if (result.IsFailure)
-                GenerateError(result.Error);
-        }
-        else
-        {
             GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return;
+        }
+
+        UnenrolStudentFromAllOfferingsCommand command = new(Id);
+
+        _logger
+            .ForContext(nameof(UnenrolStudentCommand), command, true)
+            .Information("Requested to bulk unenrol Student from Offerings by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to bulk unenrol Student from Offerings by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
         }
 
         await PreparePage(cancellationToken);
@@ -188,7 +283,7 @@ public class DetailsModel : BasePageModel
         ModalContent = new ErrorDisplay(
             error,
             _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
-
+        
         Student = new("", Name.Create("John", "", "Doe").Value, "", Core.Enums.Grade.SpecialProgram, "", "", "", "", false);
     }
 

@@ -10,26 +10,38 @@ using Constellation.Application.Students.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
 public class BulkEnrolModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public BulkEnrolModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<BulkEnrolModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Students;
+    [ViewData] public string PageTitle { get; set; } = "Bulk Enrol";
 
     [BindProperty(SupportsGet = true)]
     public string Id { get; set; }
@@ -43,19 +55,31 @@ public class BulkEnrolModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve bulk enrol data for Student with id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result<StudentResponse> studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id));
 
         if (studentRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), studentRequest.Error, true)
+                .Warning("Failed to retrieve bulk enrol data for Student with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             return;
         }
 
         Student = studentRequest.Value;
 
+        PageTitle = $"Enrol {Student.Name.DisplayName}";
+
         Result<List<BulkEnrolOfferingResponse>> offeringRequest = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(Student.CurrentGrade));
 
         if (offeringRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), offeringRequest.Error, true)
+                .Warning("Failed to retrieve bulk enrol data for Student with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             return;
         }
 
@@ -65,6 +89,10 @@ public class BulkEnrolModel : BasePageModel
 
         if (enrolmentRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), enrolmentRequest.Error, true)
+                .Warning("Failed to retrieve bulk enrol data for Student with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             return;
         }
 
@@ -85,13 +113,23 @@ public class BulkEnrolModel : BasePageModel
         {
             OfferingId offeringId = OfferingId.FromValue(offeringGuid);
 
-            Result response = await _mediator.Send(new EnrolStudentCommand(Id, offeringId));
+            EnrolStudentCommand command = new(Id, offeringId);
+
+            _logger
+                .ForContext(nameof(EnrolStudentCommand), command, true)
+                .Information("Requested to enrol Student into Offering by user {User}", _currentUserService.UserName);
+
+            Result response = await _mediator.Send(command);
 
             if (response.IsFailure)
             {
                 ModalContent = new ErrorDisplay(
                     response.Error,
                     _linkGenerator.GetPathByPage("/Partner/Students/Details", values: new { area = "Staff", id = Id }));
+
+                _logger
+                    .ForContext(nameof(Error), response.Error, true)
+                    .Warning("Failed to enrol Student into Offering by user {User}", _currentUserService.UserName);
 
                 return Page();
             }

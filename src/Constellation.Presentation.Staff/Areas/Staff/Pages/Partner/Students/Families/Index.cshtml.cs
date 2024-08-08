@@ -8,6 +8,7 @@ using Constellation.Application.Families.DeleteFamilyById;
 using Constellation.Application.Families.DeleteParentById;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
+using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
 using Core.Shared;
@@ -15,7 +16,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 using Shared.PartialViews.DeleteFamilySelectionModal;
 using System.Threading;
@@ -26,15 +29,23 @@ public class IndexModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
         LinkGenerator linkGenerator,
-        IAuthorizationService authService)
+        IAuthorizationService authService,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _authService = authService;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Students_Families;
@@ -82,13 +93,23 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        Result result = await _mediator.Send(new DeleteFamilyByIdCommand(id), cancellationToken);
+        DeleteFamilyByIdCommand command = new(id);
+
+        _logger
+            .ForContext(nameof(DeleteFamilyByIdCommand), command, true)
+            .Information("Requested to delete Family by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to delete Family by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -131,14 +152,24 @@ public class IndexModel : BasePageModel
 
             return Page();
         }
+
+        DeleteParentByIdCommand command = new(family, parent);
+
+        _logger
+            .ForContext(nameof(DeleteParentByIdCommand), command, true)
+            .Information("Requested to delete Parent by user {User}", _currentUserService.UserName);
         
-        Result result = await _mediator.Send(new DeleteParentByIdCommand(family, parent), cancellationToken);
+        Result result = await _mediator.Send(command, cancellationToken);
         
         if (result.IsFailure)
         {
             ModalContent = new ErrorDisplay(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to delete Parent by user {User}", _currentUserService.UserName);
 
             return Page();
         }
@@ -148,6 +179,8 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
+        _logger.Information("Requested to retrieve list of Families by user {User}", _currentUserService.UserName);
+
         Result<List<FamilyContactResponse>> contactRequest = await _mediator.Send(new GetFamilyContactsQuery(), cancellationToken);
 
         if (contactRequest.IsFailure)
@@ -155,6 +188,10 @@ public class IndexModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 contactRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), contactRequest.Error, true)
+                .Warning("Failed to retrieve list of Families by user {User}", _currentUserService.UserName);
 
             return Page();
         }
