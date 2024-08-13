@@ -9,70 +9,68 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
+using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_Nominations;
+    [ViewData] public string PageTitle { get; set; } = "Award Nomination Details";
 
     [BindProperty(SupportsGet = true)]
-    public Guid PeriodId { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public AwardNominationPeriodId PeriodId { get; set; }
 
     public NominationPeriodDetailResponse Period { get; set; }
 
-    public async Task OnGet(CancellationToken cancellationToken = default)
-    {
-        AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
-
-        Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);
-
-        if (periodRequest.IsFailure)
-        {
-            ModalContent = new ErrorDisplay(
-                periodRequest.Error,
-                _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
-
-            return;
-        }
-
-        Period = periodRequest.Value;
-    }
+    public async Task OnGet(CancellationToken cancellationToken = default) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnGetExport(CancellationToken cancellationToken = default)
     {
-        AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
+        ExportAwardNominationsCommand command = new(PeriodId);
 
-        Result<FileDto> fileRequest = await _mediator.Send(new ExportAwardNominationsCommand(awardNominationPeriodId), cancellationToken);
+        _logger
+            .ForContext(nameof(ExportAwardNominationsCommand), command, true)
+            .Information("Requested to export Award Nominations by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> fileRequest = await _mediator.Send(command, cancellationToken);
 
         if (fileRequest.IsFailure)
         {
-            Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);
+            _logger
+                .ForContext(nameof(Error), fileRequest.Error, true)
+                .Warning("Failed to export Award Nominations by user {User}", _currentUserService.UserName);
 
-            if (periodRequest.IsFailure)
-            {
-                ModalContent = new ErrorDisplay(
-                    periodRequest.Error,
-                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
+            ModalContent = new ErrorDisplay(fileRequest.Error);
 
-                return Page();
-            }
-
-            Period = periodRequest.Value;
+            await PreparePage(cancellationToken);
 
             return Page();
         }
@@ -80,22 +78,46 @@ public class DetailsModel : BasePageModel
         return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 
-    public async Task OnGetDelete(Guid entryId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnGetDelete(
+        [ModelBinder(typeof(StrongIdBinder))] AwardNominationId entryId, 
+        CancellationToken cancellationToken = default)
     {
-        AwardNominationPeriodId awardNominationPeriodId = AwardNominationPeriodId.FromValue(PeriodId);
-        AwardNominationId awardNominationId = AwardNominationId.FromValue(entryId);
+        DeleteAwardNominationCommand command = new(PeriodId, entryId);
 
-        Result request = await _mediator.Send(new DeleteAwardNominationCommand(awardNominationPeriodId, awardNominationId), cancellationToken);
+        _logger
+            .ForContext(nameof(DeleteAwardNominationCommand), command, true)
+            .Information("Requested to remove Award Nomination by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command, cancellationToken);
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to remove Award Nomination by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage(cancellationToken);
+
+            return Page();
         }
 
-        Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(awardNominationPeriodId), cancellationToken);
+        return RedirectToPage();
+    }
+
+    private async Task PreparePage(CancellationToken cancellationToken)
+    {
+        _logger.Information("Requested to retrieve details of Award Nomination Period with id {Id} by user {User}", PeriodId, _currentUserService.UserName);
+
+        Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(PeriodId), cancellationToken);
 
         if (periodRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), periodRequest.Error, true)
+                .Warning("Failed to retrieve details of Award Nomination Period with id {Id} by user {User}", PeriodId, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 periodRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
@@ -104,5 +126,6 @@ public class DetailsModel : BasePageModel
         }
 
         Period = periodRequest.Value;
+        PageTitle = $"Details - {Period.Name}";
     }
 }

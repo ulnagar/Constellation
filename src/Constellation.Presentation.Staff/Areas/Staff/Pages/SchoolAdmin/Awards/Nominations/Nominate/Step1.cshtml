@@ -1,0 +1,55 @@
+﻿@page "{periodId}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate.Step1Model
+
+@using Constellation.Core.ValueObjects
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Award Nomination</h2>
+
+<div class="page-menu">
+    <a asp-page="/SchoolAdmin/Awards/Nominations/Details" asp-area="Staff" asp-route-periodId="@Model.PeriodId" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="form-horizontal">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+
+    <div class="form-group row">
+        <label asp-for="Type" class="col-md-2">Award Type</label>
+        <div class="col-md-8">
+            <select asp-for="Type" class="form-control combo custom-select">
+                <option selected="selected" value=""> -- Please Select -- </option>
+                <option value="@AwardType.FirstInSubject.Value">@AwardType.FirstInSubject.Value</option>
+                <option value="@AwardType.AcademicExcellence.Value">@AwardType.AcademicExcellence.Value</option>
+                <option value="@AwardType.AcademicExcellenceMathematics.Value">@AwardType.AcademicExcellenceMathematics.Value</option>
+                <option value="@AwardType.AcademicExcellenceScienceTechnology.Value">@AwardType.AcademicExcellenceScienceTechnology.Value</option>
+
+                <option value="@AwardType.AcademicAchievement.Value">@AwardType.AcademicAchievement.Value</option>
+                <option value="@AwardType.AcademicAchievementMathematics.Value">@AwardType.AcademicAchievementMathematics.Value</option>
+                <option value="@AwardType.AcademicAchievementScienceTechnology.Value">@AwardType.AcademicAchievementScienceTechnology.Value</option>
+
+                <option value="@AwardType.PrincipalsAward.Value">@AwardType.PrincipalsAward.Value</option>
+                <option value="@AwardType.GalaxyMedal.Value">@AwardType.GalaxyMedal.Value</option>
+                <option value="@AwardType.UniversalAchiever.Value">@AwardType.UniversalAchiever.Value</option>
+            </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div id="hiddenForm" class="d-none">
+    <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step2" id="step2" method="post"></form>
+</div>
+
+@section scripts {
+    <script>
+        $('#Type').on('change', function (e) {
+            var value = $(this).val();
+
+            $('#step2')
+                .append('<input type="text" name="Type" value="' + value + '" />')
+                .submit();
+        });
+    </script>
+}
