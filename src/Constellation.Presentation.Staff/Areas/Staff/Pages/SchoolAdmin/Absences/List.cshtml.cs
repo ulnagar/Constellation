@@ -1,5 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences;
 
+using Application.DTOs;
+using Application.StaffMembers.Models;
 using Constellation.Application.Absences.ExportAbsencesReport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 using Constellation.Application.Common.PresentationModels;
@@ -11,27 +13,39 @@ using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Abstractions.Services;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ListModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public ListModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<ListModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Absences_List;
+    [ViewData] public string PageTitle => "Absence Lists";
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();
@@ -64,15 +78,24 @@ public class ListModel : BasePageModel
     {
         List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
 
-        var file = await _mediator.Send(new ExportAbsencesReportCommand(
-                offeringIds,
-                Filter.Grades,
-                Filter.Schools,
-                Filter.Students),
-            cancellationToken);
+        ExportAbsencesReportCommand command = new(
+            offeringIds,
+            Filter.Grades,
+            Filter.Schools,
+            Filter.Students);
 
+        _logger
+            .ForContext(nameof(ExportAbsencesReportCommand), command, true)
+            .Information("Requested to export list of Absences by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> file = await _mediator.Send(command, cancellationToken);
+        
         if (file.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), file.Error, true)
+                .Information("Failed to export list of Absences by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(file.Error);
 
             return Page();
@@ -83,18 +106,24 @@ public class ListModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
-        var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
+        _logger.Information("Requested to retrieve list of Absences by user {User}", _currentUserService.UserName);
+
+        Result<List<OfferingSelectionListResponse>> classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), classesResponse.Error, true)
+                .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(classesResponse.Error);
 
             return Page();
         }
 
-        foreach (var course in classesResponse.Value)
+        foreach (OfferingSelectionListResponse course in classesResponse.Value)
         {
-            var teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
+            Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
 
             if (teachers.IsFailure || teachers.Value.Count == 0)
             {
@@ -114,7 +143,7 @@ public class ListModel : BasePageModel
                 .OrderByDescending(x => x.Count)
                 .First();
 
-            var primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
+            StaffSelectionListResponse primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
 
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
@@ -123,10 +152,14 @@ public class ListModel : BasePageModel
                 $"Year {course.Name[..2]}"));
         }
 
-        var schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
+        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
 
         if (schoolsRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), schoolsRequest.Error, true)
+                .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(schoolsRequest.Error);
 
             return Page();
@@ -134,10 +167,14 @@ public class ListModel : BasePageModel
 
         SchoolsList = schoolsRequest.Value;
 
-        var studentsRequest = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
+        Result<Dictionary<string, string>> studentsRequest = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
 
         if (studentsRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), studentsRequest.Error, true)
+                .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(studentsRequest.Error);
 
             return Page();
@@ -145,9 +182,9 @@ public class ListModel : BasePageModel
 
         StudentsList = studentsRequest.Value;
 
-        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
-        var absenceRequest = await _mediator.Send(
+        Result<List<FilteredAbsenceResponse>> absenceRequest = await _mediator.Send(
             new GetAbsencesWithFilterForReportQuery(
                     offeringIds,
                     Filter.Grades,
@@ -157,6 +194,10 @@ public class ListModel : BasePageModel
 
         if (absenceRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), absenceRequest.Error, true)
+                .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(absenceRequest.Error);
 
             return Page();

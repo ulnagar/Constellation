@@ -1,10 +1,8 @@
 ﻿@page "{Id:guid}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences.DetailsModel
 
-@using Constellation.Application.Models.Auth
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Absences;
-@using Microsoft.AspNetCore.Authorization
 
 @inject IAuthorizationService authorizationService;
 
@@ -142,7 +140,7 @@
                                 }
                                 else
                                 {
-                                    <a asp-page="ViewEmail" asp-area="Staff" asp-route-absenceGuid="@Model.Absence.AbsenceId" asp-route-notificationGuid="@item.NotificationId" target="_blank" class="btn btn-secondary">Click to view</a>
+                                    <a asp-page="ViewEmail" asp-area="Staff" asp-route-absenceId="@Model.Absence.AbsenceId" asp-route-notificationId="@item.NotificationId" target="_blank" class="btn btn-secondary">Click to view</a>
                                 }
                             </td>
                             <td>@item.SentAt.ToShortDateString()</td>
