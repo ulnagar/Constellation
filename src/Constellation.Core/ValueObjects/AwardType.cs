@@ -1,7 +1,10 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
 using Primitives;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 public sealed class AwardType : ValueObject
 {
@@ -34,5 +37,28 @@ public sealed class AwardType : ValueObject
     public override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
+    }
+
+    public override string ToString() => Value;
+
+    public static IEnumerable<AwardType> Options = CreateEnumerations()
+        .Select(entry => entry.Value)
+        .AsEnumerable();
+
+    private static Dictionary<string, AwardType> CreateEnumerations()
+    {
+        Type enumerationType = typeof(AwardType);
+
+        IEnumerable<AwardType> fieldsForType = enumerationType
+            .GetFields(
+                BindingFlags.Public |
+                BindingFlags.Static |
+                BindingFlags.FlattenHierarchy)
+            .Where(fieldInfo =>
+                enumerationType.IsAssignableFrom(fieldInfo.FieldType))
+            .Select(fieldInfo =>
+                (AwardType)fieldInfo.GetValue(default)!);
+
+        return fieldsForType.ToDictionary(x => x.Value);
     }
 }

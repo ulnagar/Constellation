@@ -4,11 +4,13 @@ using Application.Models.Auth;
 using Constellation.Application.Awards.GetNominationPeriod;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Shared;
+using Constellation.Core.ValueObjects;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.ModelBinders;
@@ -44,9 +46,13 @@ public class Step1Model : BasePageModel
     public AwardNominationPeriodId PeriodId { get; set; }
     public string? Type { get; set; }
 
+    public SelectList AwardTypes { get; set; }
+    
     public async Task OnGet()
     {
         _logger.Information("Requested to create new Award Nomination by user {User}", _currentUserService.UserName);
+
+        AwardTypes = new SelectList(AwardType.Options, "Value", "Value");
 
         Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(PeriodId));
 
@@ -67,3 +73,5 @@ public class Step1Model : BasePageModel
 // Step 2 - Select Course
 // Step 3 - Select Offering
 // Step 4 - Select Student
+
+// TODO: R1.15.2: Forward pages is GET not POST. Need to adjust JS to use correct next step instead of relying on pages to forward users to the correct step.

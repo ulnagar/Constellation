@@ -15,7 +15,7 @@
 <div class="page-menu">
     @if (canAddTest.Succeeded && Model.Period.LockoutDate >= DateOnly.FromDateTime(DateTime.Today))
     {
-        <a asp-page="/SchoolAdmin/Awards/Nominations/Nominate" asp-area="Staff" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
+        <a asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step1" asp-area="Staff" asp-route-periodId="@Model.PeriodId" class="btn btn-primary">Add Nomination</a>
     }
 
     @if (canManageTest.Succeeded)

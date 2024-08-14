@@ -1,5 +1,5 @@
 ﻿@page "{periodId}"
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate.Step2Model
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate.Step3Model
 
 @using Constellation.Core.ValueObjects
 @using Microsoft.AspNetCore.Mvc.TagHelpers
@@ -24,7 +24,7 @@
             <span asp-validation-for="Type" class="text-danger"></span>
         </div>
     </div>
-    
+
     <div id="CourseSelect" class="form-group row">
         <label asp-for="CourseId" class="col-md-2">Course</label>
         <div class="col-md-8">
@@ -34,12 +34,23 @@
             <span asp-validation-for="CourseId" class="text-danger"></span>
         </div>
     </div>
+    
+    <div id="ClassSelect" class="form-group row">
+        <label asp-for="OfferingId" class="col-md-2">Class</label>
+        <div class="col-md-5">
+            <select asp-for="OfferingId" asp-items="@Model.Offerings" class="form-control combo">
+                <option value="">-- Select --</option>
+            </select>
+            <span asp-validation-for="OfferingId" class="text-danger"></span>
+        </div>
+    </div>
 
 </div>
 
 <div id="hiddenForm" class="d-none">
     <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step2" asp-route-periodId="@Model.PeriodId" id="step2" method="post"></form>
     <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step3" asp-route-periodId="@Model.PeriodId" id="step3" method="post"></form>
+    <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step4" asp-route-periodId="@Model.PeriodId" id="step4" method="post"></form>
 </div>
 
 @section scripts {
@@ -59,6 +70,18 @@
             $('#step3')
                 .append('<input type="text" name="Type" value="' + type + '" />')
                 .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                .submit();
+        });
+
+        $('#OfferingId').on('change', function (e) {
+            var type = $('#Type').val();
+            var courseId = $('#CourseId').val();
+            var offeringId = $(this).val();
+
+            $('#step4')
+                .append('<input type="text" name="Type" value="' + type + '" />')
+                .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                .append('<input type="text" name="OfferingId" value="' + offeringId + '" />')
                 .submit();
         });
     </script>

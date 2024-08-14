@@ -18,20 +18,8 @@
     <div class="form-group row">
         <label asp-for="Type" class="col-md-2">Award Type</label>
         <div class="col-md-8">
-            <select asp-for="Type" class="form-control combo custom-select">
-                <option selected="selected" value=""> -- Please Select -- </option>
-                <option value="@AwardType.FirstInSubject.Value">@AwardType.FirstInSubject.Value</option>
-                <option value="@AwardType.AcademicExcellence.Value">@AwardType.AcademicExcellence.Value</option>
-                <option value="@AwardType.AcademicExcellenceMathematics.Value">@AwardType.AcademicExcellenceMathematics.Value</option>
-                <option value="@AwardType.AcademicExcellenceScienceTechnology.Value">@AwardType.AcademicExcellenceScienceTechnology.Value</option>
-
-                <option value="@AwardType.AcademicAchievement.Value">@AwardType.AcademicAchievement.Value</option>
-                <option value="@AwardType.AcademicAchievementMathematics.Value">@AwardType.AcademicAchievementMathematics.Value</option>
-                <option value="@AwardType.AcademicAchievementScienceTechnology.Value">@AwardType.AcademicAchievementScienceTechnology.Value</option>
-
-                <option value="@AwardType.PrincipalsAward.Value">@AwardType.PrincipalsAward.Value</option>
-                <option value="@AwardType.GalaxyMedal.Value">@AwardType.GalaxyMedal.Value</option>
-                <option value="@AwardType.UniversalAchiever.Value">@AwardType.UniversalAchiever.Value</option>
+            <select asp-for="Type" asp-items="Model.AwardTypes" class="form-control combo custom-select">
+                <option value=""> -- Select -- </option>
             </select>
             <span asp-validation-for="Type" class="text-danger"></span>
         </div>
@@ -39,7 +27,7 @@
 </div>
 
 <div id="hiddenForm" class="d-none">
-    <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step2" id="step2" method="post"></form>
+    <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step2" asp-route-periodId="@Model.PeriodId" id="step2" method="post"></form>
 </div>
 
 @section scripts {

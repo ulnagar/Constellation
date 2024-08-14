@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Threading;
@@ -50,85 +51,42 @@ internal sealed class CreateAwardNominationCommandHandler
 
             return Result.Failure(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId));
         }
+        
+        Course? course = request.CourseId is not null ? await _courseRepository.GetById(request.CourseId, cancellationToken) : null;
+        Offering? offering = request.OfferingId != OfferingId.Empty ? await _offeringRepository.GetById(request.OfferingId, cancellationToken) : null;
 
-        Nomination nomination = null;
-
-        if (request.AwardType.Equals(AwardType.FirstInSubject))
+        if (course is null)
         {
-            Course course = await _courseRepository.GetById(request.CourseId);
-
-            nomination = new FirstInSubjectNomination(request.PeriodId, request.StudentId, request.CourseId, course.Grade, course.Name);
+            if (request.AwardType != AwardType.PrincipalsAward &&
+                request.AwardType != AwardType.GalaxyMedal &&
+                request.AwardType != AwardType.UniversalAchiever)
+                return Result.Failure(DomainErrors.Awards.Nomination.InvalidCourseId);
         }
 
-        if (request.AwardType.Equals(AwardType.AcademicExcellence))
+        if (offering is null)
         {
-            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
-
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-
-            nomination = new AcademicExcellenceNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
+            if (request.AwardType != AwardType.FirstInSubject &&
+                request.AwardType != AwardType.PrincipalsAward &&
+                request.AwardType != AwardType.GalaxyMedal &&
+                request.AwardType != AwardType.UniversalAchiever)
+                return Result.Failure(DomainErrors.Awards.Nomination.InvalidOfferingId);
         }
 
-        if (request.AwardType.Equals(AwardType.AcademicExcellenceMathematics))
+        Nomination? nomination = request.AwardType switch
         {
-            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
-
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-
-            nomination = new AcademicExcellenceMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
-        }
-
-        if (request.AwardType.Equals(AwardType.AcademicExcellenceScienceTechnology))
-        {
-            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
-
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-
-            nomination = new AcademicExcellenceScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name);
-        }
-
-        if (request.AwardType.Equals(AwardType.AcademicAchievement))
-        {
-            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
-
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-
-            nomination = new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name.Value);
-        }
-
-        if (request.AwardType.Equals(AwardType.AcademicAchievementMathematics))
-        {
-            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
-
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-
-            nomination = new AcademicAchievementMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name.Value);
-        }
-
-        if (request.AwardType.Equals(AwardType.AcademicAchievementScienceTechnology))
-        {
-            Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
-
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-
-            nomination = new AcademicAchievementScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course.Name, request.OfferingId, offering.Name.Value);
-        }
-
-        if (request.AwardType.Equals(AwardType.PrincipalsAward))
-        {
-            nomination = new PrincipalsAwardNomination(request.PeriodId, request.StudentId);
-        }
-
-        if (request.AwardType.Equals(AwardType.GalaxyMedal))
-        {
-            nomination = new GalaxyMedalNomination(request.PeriodId, request.StudentId);
-        }
-
-        if (request.AwardType.Equals(AwardType.UniversalAchiever))
-        {
-            nomination = new UniversalAchieverNomination(request.PeriodId, request.StudentId);
-        }
-
+            _ when request.AwardType == AwardType.FirstInSubject => new FirstInSubjectNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Grade, course.Name),
+            _ when request.AwardType == AwardType.AcademicExcellence => new AcademicExcellenceNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name),
+            _ when request.AwardType == AwardType.AcademicExcellenceMathematics => new AcademicExcellenceMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name),
+            _ when request.AwardType == AwardType.AcademicExcellenceScienceTechnology => new AcademicExcellenceScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name),
+            _ when request.AwardType == AwardType.AcademicAchievement => new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name.Value),
+            _ when request.AwardType == AwardType.AcademicAchievementMathematics => new AcademicAchievementMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name.Value),
+            _ when request.AwardType == AwardType.AcademicAchievementScienceTechnology => new AcademicAchievementScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name.Value),
+            _ when request.AwardType == AwardType.PrincipalsAward => new PrincipalsAwardNomination(request.PeriodId, request.StudentId),
+            _ when request.AwardType == AwardType.GalaxyMedal => new GalaxyMedalNomination(request.PeriodId, request.StudentId),
+            _ when request.AwardType == AwardType.UniversalAchiever => new UniversalAchieverNomination(request.PeriodId, request.StudentId),
+            _ => null
+        };
+        
         if (nomination is null)
         {
             _logger

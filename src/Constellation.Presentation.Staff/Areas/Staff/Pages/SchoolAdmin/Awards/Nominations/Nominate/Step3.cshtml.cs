@@ -1,17 +1,17 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate;
 
-using Application.Models.Auth;
-using Constellation.Application.Awards.GetNominationPeriod;
-using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Courses.GetActiveCoursesList;
-using Constellation.Application.Courses.Models;
-using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Shared;
+using Application.Awards.GetNominationPeriod;
+using Application.Common.PresentationModels;
+using Application.Courses.GetActiveCoursesList;
+using Application.Courses.Models;
+using Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;
+using Core.Models.Subjects.Identifiers;
+using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -19,15 +19,14 @@ using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanAddAwards)]
-public class Step2Model : BasePageModel
+public class Step3Model : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
-    public Step2Model(
+    public Step3Model(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
@@ -52,23 +51,33 @@ public class Step2Model : BasePageModel
     [ModelBinder(typeof(ValueObjectBinder))]
     public AwardType Type { get; set; }
 
-    public CourseId? CourseId { get; set; }
+    [BindProperty]
+    [ModelBinder(typeof(StrongIdBinder))]
+    public CourseId CourseId { get; set; }
+    public OfferingId? OfferingId { get; set; }
+
 
     public SelectList Courses { get; set; }
+    public SelectList Offerings { get; set; }
     public SelectList AwardTypes { get; set; }
 
-    public async Task<IActionResult> OnGet() 
+
+    public async Task<IActionResult> OnGet()
         => RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step1", new { area = "Staff", PeriodId });
+
 
     public async Task<IActionResult> OnPost()
     {
         if (Type == AwardType.GalaxyMedal || Type == AwardType.PrincipalsAward || Type == AwardType.UniversalAchiever)
             return RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step4", new { area = "Staff", PeriodId, Type });
 
+        if (Type == AwardType.FirstInSubject)
+            return RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step4", new { area = "Staff", PeriodId, Type, CourseId });
+
         _logger.Information("Requested to create new Award Nomination by user {User}", _currentUserService.UserName);
 
         AwardTypes = new SelectList(AwardType.Options, "Value", "Value", Type);
-
+        
         Result<NominationPeriodDetailResponse> periodRequest = await _mediator.Send(new GetNominationPeriodRequest(PeriodId));
 
         if (periodRequest.IsFailure)
@@ -95,7 +104,20 @@ public class Step2Model : BasePageModel
             return Page();
         }
 
-        Courses = new SelectList(coursesRequest.Value.Where(course => periodRequest.Value.IncludedGrades.Contains(course.Grade)), "Id", "DisplayName", null, "FacultyName");
+        Courses = new SelectList(coursesRequest.Value.Where(course => periodRequest.Value.IncludedGrades.Contains(course.Grade)), "Id", "DisplayName", CourseId.Value, "FacultyName");
+
+        Result<List<OfferingForSelectionList>> offeringRequest = await _mediator.Send(new GetFilteredOfferingsForSelectionListQuery(new List<CourseId> { CourseId }));
+
+        if (offeringRequest.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                offeringRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
+
+            return Page();
+        }
+
+        Offerings = new SelectList(offeringRequest.Value, "Id", "Name");
 
         return Page();
     }
