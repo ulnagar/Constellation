@@ -57,22 +57,27 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
                     .ForContext(nameof(Attachment.FilePath), attachment.FilePath)
                     .Information("Successfully moved file {filename} from Database to Disk", attachment.Name);
             }
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
-
-        List<Attachment> invalidItems = await _attachmentRepository.GetEmptyArrayItems(10, cancellationToken);
+        List<Attachment> invalidItems = await _attachmentRepository.GetEmptyArrayItems(100, cancellationToken);
 
         foreach (Attachment attachment in invalidItems)
         {
+            _logger
+                .Information("Remediating file {filename} from attachment {id}", attachment.Name, attachment.Id.Value);
+
             Result attempt = await _attachmentService.RemediateEntry(attachment, cancellationToken);
 
             if (attempt.IsFailure)
             {
-                _logger.Warning("Failed to remediate existing attachment \"{attachment}\"", attachment.Name);
+                _logger
+                    .ForContext(nameof(Error), attempt.Error, true)
+                    .Warning("Failed to remediate existing attachment \"{attachment}\"", attachment.Name);
             }
-        }
 
-        await _unitOfWork.CompleteAsync(cancellationToken);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+        }
     }
 }

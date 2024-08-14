@@ -28,6 +28,7 @@ internal class AttachmentRepository : IAttachmentRepository
             .Set<Attachment>()
             .Where(attachment =>
                 attachment.FileData != null &&
+                attachment.FileData != Array.Empty<byte>() &&
                 attachment.FileSize > maxSize)
             .OrderBy(attachment => attachment.CreatedAt)
             .Take(count)
