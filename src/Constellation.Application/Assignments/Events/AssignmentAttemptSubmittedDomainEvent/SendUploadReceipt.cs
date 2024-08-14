@@ -11,6 +11,9 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.DomainEvents;
 using Core.Models.Assignments.Errors;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Errors;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
@@ -25,6 +28,7 @@ internal sealed class SendUploadReceipt
     private readonly IAssignmentRepository _assignmentRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
@@ -33,6 +37,7 @@ internal sealed class SendUploadReceipt
         IAssignmentRepository assignmentRepository,
         ICourseRepository courseRepository,
         IStudentRepository studentRepository,
+        ISchoolContactRepository contactRepository,
         IEmailService emailService,
         IDateTimeProvider dateTime,
         ILogger logger)
@@ -40,6 +45,7 @@ internal sealed class SendUploadReceipt
         _assignmentRepository = assignmentRepository;
         _courseRepository = courseRepository;
         _studentRepository = studentRepository;
+        _contactRepository = contactRepository;
         _emailService = emailService;
         _dateTime = dateTime;
         _logger = logger.ForContext<AssignmentAttemptSubmittedDomainEvent>();
@@ -94,6 +100,18 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        await _emailService.SendAssignmentUploadReceipt(assignment, submission, course, student, cancellationToken);
+        SchoolContact contact = await _contactRepository.GetByName(submission.SubmittedBy, cancellationToken);
+
+        if (contact is null)
+        {
+            _logger
+                .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
+                .ForContext(nameof(Error), SchoolContactErrors.NotFoundByName(submission.SubmittedBy), true)
+                .Error("Failed to send Assignment Submission receipt to uploader");
+
+            return;
+        }
+
+        await _emailService.SendAssignmentUploadReceipt(assignment, submission, course, student, contact, cancellationToken);
     }
 }

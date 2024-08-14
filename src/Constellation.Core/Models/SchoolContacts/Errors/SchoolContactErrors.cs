@@ -10,6 +10,10 @@ public static class SchoolContactErrors
         "SchoolContact.NotFound",
         $"Could not find a School Contact with the Id {id}");
 
+    public static readonly Func<string, Error> NotFoundByName = name => new(
+        "SchoolContact.NotFound",
+        $"Could not find a School Contact with the name {name}");
+
     public static class Validation
     {
         public static readonly Error FirstNameEmpty = new(

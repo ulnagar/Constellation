@@ -13,6 +13,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Core.ValueObjects;
 using Core.Models.Assignments;
+using Core.Models.SchoolContacts;
 using Core.Models.Subjects;
 using Core.Models.WorkFlow;
 using Org.BouncyCastle.Cms;
@@ -54,7 +55,7 @@ public interface IEmailService
     Task SendMissedWorkEmail(Student student, string subjectName, string className, DateOnly absenceDate, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
 
     // Assignment Emails
-    Task<bool> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, CancellationToken cancellationToken = default);
+    Task<bool> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, SchoolContact contact, CancellationToken cancellationToken = default);
 
 
     // Attendance Emails

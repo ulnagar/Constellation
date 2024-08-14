@@ -38,6 +38,9 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
 
         foreach (Attachment attachment in attachments)
         {
+            if (attachment.FileData == Array.Empty<byte>())
+                continue;
+
             _logger
                 .Information("Processing file {filename} from attachment {id}", attachment.Name, attachment.Id.Value);
 
@@ -53,6 +56,20 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
                 _logger
                     .ForContext(nameof(Attachment.FilePath), attachment.FilePath)
                     .Information("Successfully moved file {filename} from Database to Disk", attachment.Name);
+            }
+        }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
+        List<Attachment> invalidItems = await _attachmentRepository.GetEmptyArrayItems(10, cancellationToken);
+
+        foreach (Attachment attachment in invalidItems)
+        {
+            Result attempt = await _attachmentService.RemediateEntry(attachment, cancellationToken);
+
+            if (attempt.IsFailure)
+            {
+                _logger.Warning("Failed to remediate existing attachment \"{attachment}\"", attachment.Name);
             }
         }
 

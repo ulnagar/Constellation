@@ -27,7 +27,7 @@ public sealed class Attachment
     public AttachmentId Id { get; private set; } = new();
     public string Name { get; private set; } = string.Empty;
     public string FileType { get; private set; } = string.Empty;
-    public byte[] FileData { get; private set; } = Array.Empty<byte>();
+    public byte[] FileData { get; private set; }
     public string FilePath { get; private set; } = string.Empty;
     public int FileSize { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -147,7 +147,7 @@ public sealed class Attachment
 
         FilePath = filePath;
         FileSize = fileSize;
-        FileData = Array.Empty<byte>();
+        FileData = null;
 
         return Result.Success();
     }

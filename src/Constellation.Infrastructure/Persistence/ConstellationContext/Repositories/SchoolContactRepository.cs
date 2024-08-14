@@ -46,8 +46,15 @@ public class SchoolContactRepository : ISchoolContactRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
-            .SingleOrDefaultAsync(entry => entry.Id == contactId, cancellationToken);        
-            
+            .SingleOrDefaultAsync(entry => entry.Id == contactId, cancellationToken);
+
+    public async Task<SchoolContact> GetByName(
+        string name,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .SingleOrDefaultAsync(entry => name.Contains(entry.FirstName) && name.Contains(entry.LastName), cancellationToken);
+    
     public async Task<List<SchoolContact>> GetPrincipalsForSchool(
         string schoolCode,
         CancellationToken cancellationToken = default) =>

@@ -37,7 +37,8 @@ internal sealed class UploadAssignmentSubmissionCommandHandler
         _attachmentService = attachmentService;
         _unitOfWork = unitOfWork;
         _dateTime = dateTime;
-        _logger = logger;
+        _logger = logger
+            .ForContext<UploadAssignmentSubmissionCommand>();
     }
 
     public async Task<Result> Handle(UploadAssignmentSubmissionCommand request, CancellationToken cancellationToken)

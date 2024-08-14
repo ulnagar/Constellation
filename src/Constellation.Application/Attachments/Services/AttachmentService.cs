@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Attachments.Services;
 
+using Constellation.Application.DTOs;
 using Constellation.Core.Models.Attachments.Errors;
 using Constellation.Core.Models.Attachments.Repository;
 using Core.Models.Attachments;
@@ -10,6 +11,7 @@ using Core.Shared;
 using Interfaces.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
+using System;
 using System.IO;
 using System.Net.Mime;
 using System.Threading;
@@ -122,6 +124,42 @@ internal sealed class AttachmentService : IAttachmentService
 
             return attempt;
         }
+    }
+
+    public async Task<Result> RemediateEntry(
+        Attachment attachment,
+        CancellationToken cancellationToken = default)
+    {
+        if (!string.IsNullOrWhiteSpace(attachment.FilePath) && attachment.FileData != Array.Empty<byte>())
+            return Result.Failure(new("Invalid Attachment", "Attachment is not eligible for remediation"));
+        
+        if (_configuration is null)
+            return Result.Failure(new("Invalid Configuration", "Attachment configuration options could not be found"));
+
+        string basePath = _configuration.BaseFilePath;
+
+        // Get file extension
+        string extension = attachment.FileType switch
+        {
+            MediaTypeNames.Application.Pdf => "pdf",
+            MediaTypeNames.Image.Jpeg => "jpg",
+            _ => "txt"
+        };
+
+        // Check file exists on disk
+        string filePath = $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
+
+        if (Path.Exists(filePath))
+        {
+            byte[] fileContents = await File.ReadAllBytesAsync(filePath, cancellationToken);
+            int fileSize = fileContents.Length;
+
+            Result attempt = attachment.AttachPath(filePath, fileSize, true);
+
+            return attempt;
+        }
+
+        return Result.Failure(new("Invalid File", "Could not locate Attachment on disk"));
     }
 
     public void DeleteAttachment(Attachment attachment)

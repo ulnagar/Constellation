@@ -33,7 +33,19 @@ internal class AttachmentRepository : IAttachmentRepository
             .Take(count)
             .ToListAsync(cancellationToken);
 
-   public async Task<Attachment?> GetByTypeAndLinkId(
+    public async Task<List<Attachment>> GetEmptyArrayItems(
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Attachment>()
+            .Where(attachment => 
+                attachment.FileData == Array.Empty<byte>() &&
+                string.IsNullOrWhiteSpace(attachment.FilePath))
+            .OrderBy(attachment => attachment.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
+
+    public async Task<Attachment?> GetByTypeAndLinkId(
         AttachmentType type,
         string linkId,
         CancellationToken cancellationToken = default) =>

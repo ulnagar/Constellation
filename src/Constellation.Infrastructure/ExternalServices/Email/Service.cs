@@ -16,6 +16,7 @@ using Core.Models.Assignments.Identifiers;
 using Core.Models.Awards;
 using Core.Models.Covers;
 using Core.Models.Offerings;
+using Core.Models.SchoolContacts;
 using Core.Models.Students;
 using Core.Models.Subjects;
 using Core.Models.WorkFlow;
@@ -45,6 +46,7 @@ public sealed class Service : IEmailService
     private readonly ICalendarService _calendarService;
     private readonly IDateTimeProvider _dateTime;
     private readonly IRazorViewToStringRenderer _razorService;
+    private readonly ILogger _logger;
     private readonly AppConfiguration _configuration;
 
     public Service(
@@ -52,12 +54,14 @@ public sealed class Service : IEmailService
         ICalendarService calendarService,
         IDateTimeProvider dateTime,
         IRazorViewToStringRenderer razorService,
-        IOptions<AppConfiguration> configuration)
+        IOptions<AppConfiguration> configuration,
+        ILogger logger)
     {
         _emailSender = emailSender;
         _calendarService = calendarService;
         _dateTime = dateTime;
         _razorService = razorService;
+        _logger = logger.ForContext<IEmailService>();
         _configuration = configuration.Value;
     }
 
@@ -1123,6 +1127,7 @@ public sealed class Service : IEmailService
         CanvasAssignmentSubmission submission,
         Course course,
         Student student,
+        SchoolContact contact,
         CancellationToken cancellationToken = default)
     {
         AssignmentSubmissionUploadReceiptEmailViewModel viewModel = new()
@@ -1140,11 +1145,16 @@ public sealed class Service : IEmailService
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Assignments/AssignmentSubmissionUploadReceiptEmail.cshtml", viewModel);
 
         List<EmailRecipient> recipients = new();
-
-        Result<EmailRecipient> recipient = EmailRecipient.Create(submission.SubmittedBy, submission.SubmittedBy);
+        
+        Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
 
         if (recipient.IsFailure)
         {
+            _logger
+                .ForContext(nameof(AssignmentSubmissionUploadReceiptEmailViewModel), viewModel, true)
+                .ForContext(nameof(Error), recipient.Error, true)
+                .Warning("Failed to send Assignment Upload Receipt");
+
             return false;
         }
 
