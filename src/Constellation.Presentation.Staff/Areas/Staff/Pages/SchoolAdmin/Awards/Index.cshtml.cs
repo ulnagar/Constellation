@@ -24,14 +24,14 @@ using Serilog;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IRecurringJobManager _jobManager;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator,
         IRecurringJobManager jobManager,
         ICurrentUserService currentUserService,

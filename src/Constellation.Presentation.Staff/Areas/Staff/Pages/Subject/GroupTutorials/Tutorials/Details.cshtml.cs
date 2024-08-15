@@ -24,12 +24,12 @@ using System.Threading;
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class DetailsModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authorizationService;
 
     public DetailsModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator,
         IAuthorizationService authorizationService)
     {

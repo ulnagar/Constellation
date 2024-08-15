@@ -15,11 +15,11 @@ using Presentation.Shared.Helpers.Attributes;
 [RequestSizeLimit(10485760)]
 public class UploadModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public UploadModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

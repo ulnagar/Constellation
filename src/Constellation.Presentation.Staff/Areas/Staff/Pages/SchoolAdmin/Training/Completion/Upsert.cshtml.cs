@@ -30,12 +30,12 @@ using System.Threading.Tasks;
 [RequestSizeLimit(10485760)]
 public class UpsertModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly IAuthorizationService _authorizationService;
     private readonly LinkGenerator _linkGenerator;
 
     public UpsertModel(
-        IMediator mediator, 
+        ISender mediator, 
         IAuthorizationService authorizationService,
         LinkGenerator linkGenerator)
     {

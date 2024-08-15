@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 
 public class EnrolStudentInOfferingViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
     public EnrolStudentInOfferingViewComponent(
-        IMediator mediator)
+        ISender mediator)
     {
         _mediator = mediator;
     }

@@ -19,12 +19,12 @@ using System.Threading.Tasks;
 [Authorize(Policy = AuthPolicies.CanViewTrainingCompletionRecord)]
 public class DetailsModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly IAuthorizationService _authorizationService;
     private readonly LinkGenerator _linkGenerator;
 
     public DetailsModel(
-        IMediator mediator, 
+        ISender mediator, 
         IAuthorizationService authorizationService,
         LinkGenerator linkGenerator)
     {

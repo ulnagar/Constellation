@@ -18,9 +18,9 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
-    public DashboardModel(IMediator mediator)
+    public DashboardModel(ISender mediator)
     {
         _mediator = mediator;
     }

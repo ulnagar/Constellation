@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
-    public IndexModel(IMediator mediator)
+    public IndexModel(ISender mediator)
     {
         _mediator = mediator;
     }

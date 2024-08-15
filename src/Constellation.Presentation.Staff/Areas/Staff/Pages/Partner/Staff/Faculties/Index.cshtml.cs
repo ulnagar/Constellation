@@ -15,12 +15,12 @@ using Serilog;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
-        IMediator mediator,
+        ISender mediator,
         ICurrentUserService currentUserService,
         ILogger logger)
     {

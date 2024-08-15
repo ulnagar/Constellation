@@ -19,13 +19,13 @@ using Serilog;
 [Authorize(Policy = AuthPolicies.CanAddAwards)]
 public class UpsertModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public UpsertModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)

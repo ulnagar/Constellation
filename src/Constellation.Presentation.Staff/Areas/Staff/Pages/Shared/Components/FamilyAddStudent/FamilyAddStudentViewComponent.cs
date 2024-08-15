@@ -10,10 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 
 public class FamilyAddStudentViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
     public FamilyAddStudentViewComponent(
-        IMediator mediator)
+        ISender mediator)
     {
         _mediator = mediator;
     }

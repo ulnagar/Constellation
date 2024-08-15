@@ -20,14 +20,14 @@ using Serilog;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public DetailsModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator,
         IAuthorizationService authService,
         ICurrentUserService currentUserService,

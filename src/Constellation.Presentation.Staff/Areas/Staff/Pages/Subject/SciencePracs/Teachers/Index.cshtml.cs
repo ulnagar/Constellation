@@ -25,11 +25,11 @@ using Shared.PartialViews.UpdateRoleNoteModal;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public IndexModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

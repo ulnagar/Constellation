@@ -11,10 +11,10 @@ using Microsoft.AspNetCore.Mvc;
 
 public class AddTeacherToOfferingViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
     public AddTeacherToOfferingViewComponent(
-        IMediator mediator)
+        ISender mediator)
     {
         _mediator = mediator;
     }

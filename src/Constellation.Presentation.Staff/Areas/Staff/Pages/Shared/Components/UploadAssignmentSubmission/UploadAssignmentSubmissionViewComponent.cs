@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 public class UploadAssignmentSubmissionViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
-    public UploadAssignmentSubmissionViewComponent(IMediator mediator)
+    public UploadAssignmentSubmissionViewComponent(ISender mediator)
     {
         _mediator = mediator;
     }

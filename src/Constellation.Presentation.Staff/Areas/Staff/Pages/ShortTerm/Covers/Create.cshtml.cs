@@ -20,11 +20,11 @@ using System.Threading;
 [Authorize(Policy = AuthPolicies.CanEditCovers)]
 public class CreateModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public CreateModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

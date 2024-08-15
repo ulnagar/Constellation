@@ -33,14 +33,14 @@ using System.Threading;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authorizationService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public DetailsModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator,
         IAuthorizationService authorizationService,
         ICurrentUserService currentUserService,

@@ -20,13 +20,13 @@ using System.ComponentModel.DataAnnotations;
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
 public class EditFamilyModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public EditFamilyModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)

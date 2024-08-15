@@ -16,11 +16,11 @@ using Microsoft.AspNetCore.Routing;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class RollModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public RollModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

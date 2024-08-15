@@ -16,12 +16,12 @@ using Serilog;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class ViewEmailModel : PageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public ViewEmailModel(
-        IMediator mediator,
+        ISender mediator,
         ICurrentUserService currentUserService,
         ILogger logger)
     {

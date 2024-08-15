@@ -14,11 +14,11 @@ using Microsoft.AspNetCore.Routing;
 [Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
 public class SubmitModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public SubmitModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

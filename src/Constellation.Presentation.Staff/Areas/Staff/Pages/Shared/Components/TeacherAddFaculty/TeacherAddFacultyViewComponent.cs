@@ -12,11 +12,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class TeacherAddFacultyViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly IStaffRepository _staffRepository;
 
     public TeacherAddFacultyViewComponent(
-        IMediator mediator,
+        ISender mediator,
         IStaffRepository staffRepository)
     {
         _mediator = mediator;

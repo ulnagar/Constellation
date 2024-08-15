@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 public class StaffTrainingReportViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
-    public StaffTrainingReportViewComponent(IMediator mediator)
+    public StaffTrainingReportViewComponent(ISender mediator)
     {
         _mediator = mediator;
     }

@@ -15,11 +15,11 @@ using System.Threading;
 [Authorize(Policy = AuthPolicies.CanEditCovers)]
 public class UpdateModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public UpdateModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

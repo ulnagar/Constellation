@@ -19,13 +19,13 @@ using Shared.Components.TutorialRollAddStudent;
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
 public class RollModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authorizationService;
 
     public RollModel(
-        IMediator mediator,
+        ISender mediator,
         ICurrentUserService currentUserService,
         LinkGenerator linkGenerator,
         IAuthorizationService authorizationService)

@@ -15,11 +15,11 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly IAuthorizationService _authorizationService;
 
     public IndexModel(
-        IMediator mediator,
+        ISender mediator,
         IAuthorizationService authorizationService)
     {
         _mediator = mediator;

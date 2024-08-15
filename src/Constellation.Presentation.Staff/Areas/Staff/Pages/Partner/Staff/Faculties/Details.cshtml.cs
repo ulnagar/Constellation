@@ -16,12 +16,12 @@ using Serilog;
 [Authorize(Policy = AuthPolicies.CanViewFacultyDetails)]
 public class DetailsModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public DetailsModel(
-        IMediator mediator,
+        ISender mediator,
         ICurrentUserService currentUserService,
         ILogger logger)
     {

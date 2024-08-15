@@ -10,10 +10,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class AddSessionToOfferingViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
     public AddSessionToOfferingViewComponent(
-        IMediator mediator)
+        ISender mediator)
     {
         _mediator = mediator;
     }

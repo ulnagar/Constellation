@@ -15,11 +15,11 @@ using Microsoft.AspNetCore.Routing;
 [Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
 public class AuditModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public AuditModel(
-        IMediator mediator,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;

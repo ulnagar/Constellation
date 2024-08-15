@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 public class TutorialTeacherAssignmentViewComponent : ViewComponent
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
 
-    public TutorialTeacherAssignmentViewComponent(IMediator mediator)
+    public TutorialTeacherAssignmentViewComponent(ISender mediator)
     {
         _mediator = mediator;
     }

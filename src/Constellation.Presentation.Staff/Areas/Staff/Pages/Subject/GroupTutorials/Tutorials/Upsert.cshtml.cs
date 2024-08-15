@@ -15,10 +15,10 @@ using Microsoft.AspNetCore.Routing;
 [Authorize(Policy = AuthPolicies.CanEditGroupTutorials)]
 public class UpsertModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
-    public UpsertModel(IMediator mediator, LinkGenerator linkGenerator)
+    public UpsertModel(ISender mediator, LinkGenerator linkGenerator)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

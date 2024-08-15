@@ -17,12 +17,12 @@ using System.Threading.Tasks;
 [Authorize(Policy = AuthPolicies.CanViewTrainingModuleContent)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IDateTimeProvider _dateTime;
 
     public IndexModel(
-        IMediator mediator, 
+        ISender mediator, 
         LinkGenerator linkGenerator,
         IDateTimeProvider dateTime)
     {
