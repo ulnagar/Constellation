@@ -1,19 +1,7 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.LeaderboardModel
 
-@using Constellation.Application.Models.Auth
 @using Constellation.Core.Extensions
-@using Microsoft.AspNetCore.Authorization
-
-@inject IAuthorizationService authService
-
-@{
-    var authorisedTest = await authService.AuthorizeAsync(User, AuthPolicies.IsStaffMember);
-
-    var groups = Model.Leaders
-        .GroupBy(award => award.Grade)
-        .OrderBy(item => item.Key);
-}
 
 <h2>Awards Leaderboards</h2>
 
@@ -22,19 +10,19 @@
 <div>
     <ul class="nav nav-pills" data-tabs="tabs" role="tablist">
         @{
-            var first = groups.First();
+            var first = Model.Entries.First();
         }
 
         <li class="nav-item">
-            <a class="nav-link active" href="#@first.Key" data-toggle="pill">
+            <a class="nav-link active" href="#@first.Key" data-toggle="pill" role="tab">
                 @first.Key.AsName()
             </a>
         </li>
 
-        @foreach (var group in groups.Skip(1))
+        @foreach (var group in Model.Entries.Skip(1))
         {
             <li class="nav-item">
-                <a class="nav-link" href="#@group.Key" data-toggle="pill">
+                <a class="nav-link" href="#@group.Key" data-toggle="pill" role="tab">
                     @group.Key.AsName()
                 </a>
             </li>
@@ -42,13 +30,14 @@
     </ul>
 
     <div class="tab-content mt-3">
-        @foreach (var group in groups)
+        @foreach (var group in Model.Entries)
         {
             var positionedAwards = group
                 .GroupBy(award => award.AwardedAstras)
-                .OrderByDescending(award => award.Key);
+                .OrderByDescending(award => award.Key)
+                .ToList();
 
-            var active = group.Key == groups.First().Key;
+            var active = group.Key == Model.Entries.First().Key;
 
             <div id="@group.Key" class="tab-pane @(active ? "active" : "")" role="tabpanel">
                 <h4>@group.Key.AsName()</h4>

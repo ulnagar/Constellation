@@ -2,10 +2,12 @@
 
 using System;
 
-public sealed record StudentAwardId(Guid Value)
+public record struct StudentAwardId(Guid Value)
 {
-    public static StudentAwardId FromValue(Guid Value) =>
-        new(Value);
+    public static StudentAwardId Empty => new(Guid.Empty);
+
+    public static StudentAwardId FromValue(Guid value) =>
+        new(value);
 
     public StudentAwardId()
         : this(Guid.NewGuid()) { }

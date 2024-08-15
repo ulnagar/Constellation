@@ -4,6 +4,7 @@ using Application.Awards.GetNominationPeriod;
 using Application.Common.PresentationModels;
 using Application.Courses.GetActiveCoursesList;
 using Application.Courses.Models;
+using Application.Models.Auth;
 using Constellation.Application.Offerings.GetFilteredOfferingsForSelectionList;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Abstractions.Services;
@@ -12,6 +13,7 @@ using Core.Models.Subjects.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -19,6 +21,7 @@ using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
+[Authorize(Policy = AuthPolicies.CanAddAwards)]
 public class Step3Model : BasePageModel
 {
     private readonly ISender _mediator;

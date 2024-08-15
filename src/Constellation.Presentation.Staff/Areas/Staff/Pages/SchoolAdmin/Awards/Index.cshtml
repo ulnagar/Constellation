@@ -69,7 +69,7 @@
                 <td>
                     @if (item.HasCertificate)
                     {
-                        <a asp-page-handler="AttemptDownload" asp-route-id="@item.AwardId.ToString()" class="btn btn-sm btn-warning btn-show-hover">Download</a>
+                        <a asp-page-handler="AttemptDownload" asp-route-id="@item.AwardId" class="btn btn-sm btn-warning btn-show-hover">Download</a>
                     }
                 </td>
             </tr>

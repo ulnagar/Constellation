@@ -9,6 +9,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
 using Hangfire;
@@ -16,6 +17,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -23,15 +27,23 @@ public class IndexModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IRecurringJobManager _jobManager;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
         LinkGenerator linkGenerator,
-        IRecurringJobManager jobManager)
+        IRecurringJobManager jobManager,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _jobManager = jobManager;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     public enum FilterDto
@@ -41,6 +53,7 @@ public class IndexModel : BasePageModel
         ThisYear
     }
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_List;
+    [ViewData] public string PageTitle => "Awards List";
     
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.Recent;
@@ -49,6 +62,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
+        _logger.Information("Requested to retrieve list of Awards by user {User}", _currentUserService.UserName);
+
         Result<List<AwardResponse>> awardRequest = Filter switch
         {
             FilterDto.All => await _mediator.Send(new GetAllAwardsQuery(false), cancellationToken),
@@ -59,6 +74,10 @@ public class IndexModel : BasePageModel
 
         if (awardRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), awardRequest.Error, true)
+                .Warning("Failed to retrieve list of Awards by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 awardRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
@@ -67,18 +86,22 @@ public class IndexModel : BasePageModel
         }
 
         Awards = awardRequest.Value;
-
-        return;
     }
 
-    public async Task<IActionResult> OnGetAttemptDownload(string Id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnGetAttemptDownload(
+        [ModelBinder(typeof(StrongIdBinder))] StudentAwardId id, 
+        CancellationToken cancellationToken = default)
     {
-        StudentAwardId awardId = StudentAwardId.FromValue(Guid.Parse(Id));
+        _logger.Information("Requested to retrieve Award Certificate with id {Id} by user {User}", id, _currentUserService.UserName);
 
-        Result<AttachmentResponse> fileRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId.ToString()), cancellationToken);
+        Result<AttachmentResponse> fileRequest = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, id.ToString()), cancellationToken);
 
         if (fileRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), fileRequest.Error, true)
+                .Warning("Failed to retrieve Award Certificate with id {Id} by user {User}", id, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 fileRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Index", values: new { area = "Staff" }));
@@ -91,8 +114,10 @@ public class IndexModel : BasePageModel
 
     public IActionResult OnGetRefreshAwards()
     {
-        _jobManager.Trigger(nameof(ISentralAwardSyncJob));
+        _logger.Information("Requested to trigger Award Sync by user {User}", _currentUserService.UserName);
 
+        _jobManager.Trigger(nameof(ISentralAwardSyncJob));
+        
         return RedirectToPage("/SchoolAdmin/Awards/Index", new { area = "Staff" });
     }
 }
