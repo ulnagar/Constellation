@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record ApplicationId(Guid Value)
+public record struct ApplicationId(Guid Value)
 {
+    public static ApplicationId Empty => new(Guid.Empty);
+
     public static ApplicationId FromValue(Guid value) =>
         new(value);
 

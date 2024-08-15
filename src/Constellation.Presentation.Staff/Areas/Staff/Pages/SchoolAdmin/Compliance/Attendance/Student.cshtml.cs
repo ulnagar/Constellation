@@ -8,10 +8,13 @@ using Constellation.Application.Students.Models;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class StudentModel : BasePageModel
@@ -19,18 +22,27 @@ public class StudentModel : BasePageModel
     private readonly ISender _mediator;
     private readonly IDateTimeProvider _dateTime;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public StudentModel(
         ISender mediator,
         IDateTimeProvider dateTime,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _dateTime = dateTime;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<StudentModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_Attendance;
+    [ViewData] public string PageTitle { get; set; } = "Student Attendance Details";
 
     [BindProperty(SupportsGet = true)]
     public string StudentId { get; set; }
@@ -40,10 +52,18 @@ public class StudentModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
+
         if (string.IsNullOrWhiteSpace(StudentId))
         {
+            Error error = new("Page.Parameter.Required", "A valid StudentId must be provided");
+
+            _logger
+                .ForContext(nameof(Error), error, true)
+                .Warning("Failed to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
-                new("Page.Parameter.Required", "A valid StudentId must be provided"),
+                error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 
             return;
@@ -53,6 +73,10 @@ public class StudentModel : BasePageModel
 
         if (studentRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), studentRequest.Error, true)
+                .Warning("Failed to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 studentRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
@@ -66,6 +90,10 @@ public class StudentModel : BasePageModel
 
         if (valueRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), valueRequest.Error, true)
+                .Warning("Failed to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 valueRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));

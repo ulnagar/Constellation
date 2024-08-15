@@ -7,22 +7,35 @@ using Application.Common.PresentationModels;
 using Constellation.Application.Attendance.GetAttendancePeriodLabels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
+using Core.Models.Attendance;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator)
+        ISender mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_Attendance;
+    [ViewData] public string PageTitle => "Compliance Attendance Records";
 
     public List<AttendanceValueResponse> StudentData { get; set; } = new();
 
@@ -32,10 +45,16 @@ public class IndexModel : BasePageModel
 
     public async Task OnGetAsync()
     {
+        _logger.Information("Requested to retrieve Compliance Attendance Percentages by user {User}", _currentUserService.UserName);
+
         Result<List<AttendanceValueResponse>> request = await _mediator.Send(new GetRecentAttendanceValuesQuery());
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve Compliance Attendance Percentages by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(request.Error);
 
             return;
@@ -47,6 +66,10 @@ public class IndexModel : BasePageModel
 
         if (periodRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), periodRequest.Error, true)
+                .Warning("Failed to retrieve Compliance Attendance Percentages by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(periodRequest.Error);
 
             return;
@@ -55,14 +78,16 @@ public class IndexModel : BasePageModel
         PeriodNames = periodRequest.Value.ToList();
     }
 
-    public async Task OnPostSyncAttendancePeriod()
+    public async Task<IActionResult> OnPostSyncAttendancePeriod()
     {
-        if (SelectedPeriod == string.Empty)
+        if (string.IsNullOrWhiteSpace(SelectedPeriod))
         {
             ModalContent = new ErrorDisplay(new("", "You must select an Attendance Period to update"));
 
-            return;
+            return Page();
         }
+
+        _logger.Information("Requested to update Attendance Percentage for period {Period} by user {User}", SelectedPeriod, _currentUserService.UserName);
 
         string term = string.Empty;
         string week = string.Empty;
@@ -81,12 +106,38 @@ public class IndexModel : BasePageModel
                 year = microBlocks[0];
         }
 
-        await _mediator.Send(new GetAttendanceDataFromSentralQuery(year, term, week));
+        Result<List<AttendanceValue>> result = await _mediator.Send(new GetAttendanceDataFromSentralQuery(year, term, week));
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Attendance Percentage for period {Period} by user {User}", SelectedPeriod, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnGetSyncAllAttendance()
     {
-        await _mediator.Send(new GetAttendanceDataForYearFromSentralCommand());
+        _logger.Information("Requested to update all Attendance Percentage periods by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(new GetAttendanceDataForYearFromSentralCommand());
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update all Attendance Percentage periods by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
 
         return RedirectToPage();
     }

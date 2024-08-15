@@ -5,12 +5,16 @@ using Application.Models.Auth;
 using Application.ThirdPartyConsent.CreateApplication;
 using Application.ThirdPartyConsent.GetApplicationById;
 using Application.ThirdPartyConsent.UpdateApplication;
+using Core.Abstractions.Services;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -18,19 +22,30 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Applications;
+    [ViewData] public string PageTitle { get; set; } = "New Consent Application";
 
+    
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public ApplicationId Id { get; set; } = ApplicationId.Empty;
 
     [BindProperty]
     [Required]
@@ -55,14 +70,18 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id.HasValue)
+        if (Id != ApplicationId.Empty)
         {
-            ApplicationId applicationId = ApplicationId.FromValue(Id.Value);
+            _logger.Information("Requested to retrieve Consent Application with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-            Result<ApplicationResponse> applicationRequest = await _mediator.Send(new GetApplicationByIdQuery(applicationId));
+            Result<ApplicationResponse> applicationRequest = await _mediator.Send(new GetApplicationByIdQuery(Id));
 
             if (applicationRequest.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), applicationRequest.Error, true)
+                    .Warning("Failed to retrieve Consent Application with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+                
                 ModalContent = new ErrorDisplay(
                     applicationRequest.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id.Value }));
@@ -76,6 +95,8 @@ public class UpsertModel : BasePageModel
             StoredCountry = applicationRequest.Value.StoredCountry;
             SharedWith = applicationRequest.Value.SharedWith.ToList();
             ConsentRequired = applicationRequest.Value.ConsentRequired;
+
+            PageTitle = $"Editing - {Name}";
         }
     }
 
@@ -102,12 +123,10 @@ public class UpsertModel : BasePageModel
         if (!ModelState.IsValid)
             return Page();
 
-        if (Id.HasValue)
+        if (Id != ApplicationId.Empty)
         {
-            ApplicationId applicationId = ApplicationId.FromValue(Id.Value);
-
             UpdateApplicationCommand command = new(
-                applicationId,
+                Id,
                 Name,
                 Purpose,
                 informationCollected,
@@ -115,10 +134,18 @@ public class UpsertModel : BasePageModel
                 sharedWith,
                 ConsentRequired);
 
+            _logger
+                .ForContext(nameof(UpdateApplicationCommand), command, true)
+                .Information("Requested to update Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to update Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(result.Error);
 
                 return Page();
@@ -136,10 +163,18 @@ public class UpsertModel : BasePageModel
                 sharedWith,
                 ConsentRequired);
 
+            _logger
+                .ForContext(nameof(CreateApplicationCommand), command, true)
+                .Information("Requested to create Consent Application by user {User}", _currentUserService.UserName);
+
             Result<ApplicationId> result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to create Consent Application by user {User}", _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(result.Error);
 
                 return Page();
