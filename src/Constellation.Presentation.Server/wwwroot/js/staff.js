@@ -1,9 +1,4 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
-$(document).ready(function () {
+﻿$(document).ready(function () {
     // Activate any comboboxes
     $(".combo").select2({ theme: 'bootstrap' });
 
@@ -49,4 +44,19 @@ $(document).ready(function () {
                 { "orderData": 0, "targets": 1 }
             ]
         });
+
+    // Add the showLoader function to any nav links
+    $('a.showLoader').on('click', showLoader);
+    $('a.nav-link:not(.dropdown-toggle):not([role="tab"])').on('click', showLoader);
+    $('a.dropdown-item').on('click', showLoader);
+    $('a.btn').on('click', showLoader);
 });
+
+function showLoader() {
+    if ($('.spinner-overlay').length > 0) {
+        $('.spinner-overlay').removeClass('d-none');
+        setTimeout(function () {
+            $('.spinner-overlay').addClass('d-none');
+        }, 10000);
+    }
+};

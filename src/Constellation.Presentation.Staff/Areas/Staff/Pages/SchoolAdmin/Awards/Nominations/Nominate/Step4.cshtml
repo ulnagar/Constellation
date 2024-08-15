@@ -1,6 +1,7 @@
 ﻿@page "{periodId}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate.Step4Model
 
+@using Constellation.Core.Models.Offerings.Identifiers
 @using Constellation.Core.ValueObjects
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -39,7 +40,7 @@
             </div>
         }
     
-        @if (Model.OfferingId is not null)
+        @if (Model.OfferingId != OfferingId.Empty)
         {
             <div id="ClassSelect" class="form-group row">
                 <label asp-for="OfferingId" class="col-md-2">Class</label>
@@ -79,21 +80,40 @@
 @section scripts {
     <script>
         $('#Type').on('change', function (e) {
-            var value = $(this).val();
+            var type = $(this).val();
 
-            $('#step2')
-                .append('<input type="text" name="Type" value="' + value + '" />')
-                .submit();
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value') {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step4')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .submit();
+            }
+            else {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step2')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .submit();
+            }
         });
 
         $('#CourseId').on('change', function (e) {
             var type = $('#Type').val();
             var courseId = $(this).val();
 
-            $('#step3')
-                .append('<input type="text" name="Type" value="' + type + '" />')
-                .append('<input type="text" name="CourseId" value="' + courseId + '" />')
-                .submit();
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value' || type == '@AwardType.FirstInSubject.Value') {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step4')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                    .submit();
+            }
+            else {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step3')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                    .submit();
+            }
         });
 
         $('#OfferingId').on('change', function (e) {
@@ -101,6 +121,7 @@
             var courseId = $('#CourseId').val();
             var offeringId = $(this).val();
 
+            $('.spinner-overlay').removeClass('d-none');
             $('#step4')
                 .append('<input type="text" name="Type" value="' + type + '" />')
                 .append('<input type="text" name="CourseId" value="' + courseId + '" />')

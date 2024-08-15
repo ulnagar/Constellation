@@ -68,10 +68,3 @@ public class Step1Model : BasePageModel
         }
     }
 }
-
-// Step 1 - Select Award
-// Step 2 - Select Course
-// Step 3 - Select Offering
-// Step 4 - Select Student
-
-// TODO: R1.15.2: Forward pages is GET not POST. Need to adjust JS to use correct next step instead of relying on pages to forward users to the correct step.

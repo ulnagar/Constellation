@@ -56,21 +56,40 @@
 @section scripts {
     <script>
         $('#Type').on('change', function (e) {
-            var value = $(this).val();
+            var type = $(this).val();
 
-            $('#step2')
-                .append('<input type="text" name="Type" value="' + value + '" />')
-                .submit();
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value') {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step4')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .submit();
+            }
+            else {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step2')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .submit();
+            }
         });
 
         $('#CourseId').on('change', function (e) {
             var type = $('#Type').val();
             var courseId = $(this).val();
 
-            $('#step3')
-                .append('<input type="text" name="Type" value="' + type + '" />')
-                .append('<input type="text" name="CourseId" value="' + courseId + '" />')
-                .submit();
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value' || type == '@AwardType.FirstInSubject.Value') {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step4')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                    .submit();
+            }
+            else {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step3')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .append('<input type="text" name="CourseId" value="' + courseId + '" />')
+                    .submit();
+            }
         });
 
         $('#OfferingId').on('change', function (e) {
@@ -78,6 +97,7 @@
             var courseId = $('#CourseId').val();
             var offeringId = $(this).val();
 
+            $('.spinner-overlay').removeClass('d-none');
             $('#step4')
                 .append('<input type="text" name="Type" value="' + type + '" />')
                 .append('<input type="text" name="CourseId" value="' + courseId + '" />')

@@ -417,11 +417,13 @@
         });
 
         $('#SubmitFormAsFilter').on('click', function() {
+            showLoader();
             $('#filterAction').val(0);
             $('#filterForm').submit();
         });
 
         $('#SubmitFormAsExport').on('click', function () {
+            showLoader();
             $('#filterAction').val(1);
             $('#filterForm').submit();
         });

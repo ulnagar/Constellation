@@ -7,29 +7,43 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanAddAwards)]
 public class UpsertModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         IMediator mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Awards_Nominations;
+    [ViewData] public string PageTitle { get; set; } = "New Award Period";
 
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [ModelBinder(typeof(StrongIdBinder))]
+    public AwardNominationPeriodId Id { get; set; } = AwardNominationPeriodId.Empty;
 
     [BindProperty]
     public string Name { get; set; } = string.Empty;
@@ -40,18 +54,21 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default)
     {
-        if (Id.HasValue)
+        if (Id != AwardNominationPeriodId.Empty)
         {
-            // This is an edit action
-            AwardNominationPeriodId periodId = AwardNominationPeriodId.FromValue(Id.Value);
+            _logger.Information("Requested to retrieve Award Nomination Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-            Result<NominationPeriodDetailResponse> details = await _mediator.Send(new GetNominationPeriodRequest(periodId), cancellationToken);
+            Result<NominationPeriodDetailResponse> details = await _mediator.Send(new GetNominationPeriodRequest(Id), cancellationToken);
 
             if (details.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), details.Error, true)
+                    .Warning("Failed to retrieve Award Nomination Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(
                     details.Error,
-                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = Id.Value }));
+                    _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = Id }));
 
                 return;
             }
@@ -59,43 +76,66 @@ public class UpsertModel : BasePageModel
             Name = details.Value.Name;
             LockoutDate = details.Value.LockoutDate;
             Grades = details.Value.IncludedGrades;
+
+            PageTitle = $"Award Period - {Name}";
         }
     }
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
-        if (!Id.HasValue && !Grades.Any())
+        if (Id == AwardNominationPeriodId.Empty && !Grades.Any())
             ModelState.AddModelError("Grades", "You must select at least one grade");
 
         if (!ModelState.IsValid) 
             return Page();
 
-        if (Id.HasValue)
+        if (Id != AwardNominationPeriodId.Empty)
         {
-            // This is an edit action
-            AwardNominationPeriodId periodId = AwardNominationPeriodId.FromValue(Id.Value);
+            UpdateNominationPeriodCommand command = new(Id, Name, LockoutDate);
 
-            Result editRequest = await _mediator.Send(new UpdateNominationPeriodCommand(periodId, Name, LockoutDate), cancellationToken);
+            _logger
+                .ForContext(nameof(UpdateNominationPeriodCommand), command, true)
+                .Information("Requested to update Award Nomination Period by user {User}", _currentUserService.UserName);
+            
+            Result editRequest = await _mediator.Send(command, cancellationToken);
 
             if (editRequest.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), editRequest.Error, true)
+                    .Warning("Failed to update Award Nomination Period by user {User}", _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(editRequest.Error);
+
+                PageTitle = $"Award Period - {Name}";
+                
+                return Page();
+            }
+        }
+        else
+        {
+            CreateNominationPeriodCommand command = new(Name, LockoutDate, Grades);
+
+            _logger
+                .ForContext(nameof(CreateNominationPeriodCommand), command, true)
+                .Information("Requested to create new Award Nomination Period by user {User}", _currentUserService.UserName);
+
+            Result<AwardNominationPeriodId> request = await _mediator.Send(command, cancellationToken);
+
+            if (request.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), request.Error, true)
+                    .Warning("Failed to create new Award Nomination Period by user {User}", _currentUserService.UserName);
+                
+                ModalContent = new ErrorDisplay(request.Error);
 
                 return Page();
             }
 
-            return RedirectToPage("/SchoolAdmin/Awards/Nominations/Details", new { area = "Staff", PeriodId = Id.Value });
+            Id = request.Value;
         }
-
-        Result request = await _mediator.Send(new CreateNominationPeriodCommand(Name, LockoutDate, Grades), cancellationToken);
-
-        if (request.IsFailure)
-        {
-            ModalContent = new ErrorDisplay(request.Error);
-
-            return Page();
-        }
-
-        return RedirectToPage("/SchoolAdmin/Awards/Nominations/Index", new { area = "Staff" });
+        
+        return RedirectToPage("/SchoolAdmin/Awards/Nominations/Details", new { area = "Staff", PeriodId = Id.Value });
     }
 }

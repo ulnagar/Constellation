@@ -31,7 +31,7 @@
 
             foreach (var timetable in timetables)
             {
-                <a class="nav-link @(firstTab ? "active" : "")" href="#@timetable.Key" data-toggle="tab">@timetable.Key</a>
+                <a class="nav-link @(firstTab ? "active" : "")" href="#@timetable.Key" data-toggle="tab" role="tab">@timetable.Key</a>
                 firstTab = false;
             }
         }

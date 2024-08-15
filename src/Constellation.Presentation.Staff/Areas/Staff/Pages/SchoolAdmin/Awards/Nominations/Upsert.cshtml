@@ -3,9 +3,10 @@
 
 @using Constellation.Core.Enums;
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Identifiers
 
 @{
-    string Title = Model.Id.HasValue ? "Edit Nomination Period" : "Create new Nomination Period";
+    string Title = Model.Id != AwardNominationPeriodId.Empty ? "Edit Nomination Period" : "Create new Nomination Period";
 }
 
 <h2>@Title</h2>
@@ -40,7 +41,7 @@
         
         <div class="form-group row">
             <label asp-for="Grades" class="col-md-2">Included Grades</label>
-            @if (Model.Id.HasValue)
+            @if (Model.Id != AwardNominationPeriodId.Empty)
             {
                 <div class="col-md-8">
                     <div class="row">

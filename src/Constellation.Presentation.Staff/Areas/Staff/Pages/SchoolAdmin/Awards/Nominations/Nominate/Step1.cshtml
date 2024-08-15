@@ -28,16 +28,27 @@
 
 <div id="hiddenForm" class="d-none">
     <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step2" asp-route-periodId="@Model.PeriodId" id="step2" method="post"></form>
+    <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step3" asp-route-periodId="@Model.PeriodId" id="step3" method="post"></form>
+    <form asp-page="/SchoolAdmin/Awards/Nominations/Nominate/Step4" asp-route-periodId="@Model.PeriodId" id="step4" method="post"></form>
 </div>
 
 @section scripts {
     <script>
         $('#Type').on('change', function (e) {
-            var value = $(this).val();
+            var type = $(this).val();
 
-            $('#step2')
-                .append('<input type="text" name="Type" value="' + value + '" />')
-                .submit();
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value') {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step4')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .submit();
+            }
+            else {
+                $('.spinner-overlay').removeClass('d-none');
+                $('#step2')
+                    .append('<input type="text" name="Type" value="' + type + '" />')
+                    .submit();
+            }
         });
     </script>
 }
