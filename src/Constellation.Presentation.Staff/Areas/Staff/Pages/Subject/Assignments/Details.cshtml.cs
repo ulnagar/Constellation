@@ -9,7 +9,6 @@ using Constellation.Application.Assignments.UploadAssignmentSubmission;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
@@ -20,7 +19,6 @@ using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.UploadAssignmentSubmission;
-using static Constellation.Application.Assignments.GetAssignmentById.AssignmentResponse;
 using AssignmentId = Core.Models.Assignments.Identifiers.AssignmentId;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
