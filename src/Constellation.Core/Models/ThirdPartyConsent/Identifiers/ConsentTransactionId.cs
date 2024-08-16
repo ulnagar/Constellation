@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record ConsentTransactionId(Guid Value)
+public record struct ConsentTransactionId(Guid Value)
 {
+    public static ConsentTransactionId Empty => new(Guid.Empty);
+
     public static ConsentTransactionId FromValue(Guid value) =>
         new(value);
 

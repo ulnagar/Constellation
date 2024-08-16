@@ -43,7 +43,7 @@ public class EditFamilyModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Edit Family";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public FamilyId Id { get; set; }
 
     [BindProperty]

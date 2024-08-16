@@ -54,7 +54,7 @@ public class IndexModel : BasePageModel
     public async Task OnGet() => await PreparePage();
 
     public async Task<IActionResult> OnGetDownload(
-        [ModelBinder(typeof(StrongIdBinder))] AcademicReportId reportId)
+        [ModelBinder(typeof(ConstructorBinder))] AcademicReportId reportId)
     {
         Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, reportId.ToString()));
 

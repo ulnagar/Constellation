@@ -12,24 +12,35 @@ using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Application.ThirdPartyConsent.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator)
+        ISender mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Transactions;
+    [ViewData] public string PageTitle => "Consent Responses List";
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();
@@ -66,10 +77,16 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
+        _logger.Information("Requested to retrieve list of Consent Responses by user {User}", _currentUserService.UserName);
+
         Result<List<OfferingSelectionListResponse>> classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), classesResponse.Error, true)
+                .Warning("Failed to retrieve list of Consent Responses by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(classesResponse.Error);
 
             return Page();
@@ -110,6 +127,10 @@ public class IndexModel : BasePageModel
 
         if (schoolsRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), schoolsRequest.Error, true)
+                .Warning("Failed to retrieve list of Consent Responses by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(schoolsRequest.Error);
 
             return Page();
@@ -121,6 +142,10 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), studentsRequest.Error, true)
+                .Warning("Failed to retrieve list of Consent Responses by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(studentsRequest.Error);
 
             return Page();
@@ -138,6 +163,10 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to retrieve list of Consent Responses by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(result.Error);
 
             return Page();

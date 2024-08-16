@@ -44,7 +44,7 @@ public class UpsertModel : BasePageModel
 
     
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public ApplicationId Id { get; set; } = ApplicationId.Empty;
 
     [BindProperty]

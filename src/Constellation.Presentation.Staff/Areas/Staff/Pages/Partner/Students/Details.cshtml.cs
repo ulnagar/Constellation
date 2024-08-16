@@ -207,7 +207,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task OnGetUnenrol(
-        [ModelBinder(typeof(StrongIdBinder))] OfferingId offeringId, 
+        [ModelBinder(typeof(ConstructorBinder))] OfferingId offeringId, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);

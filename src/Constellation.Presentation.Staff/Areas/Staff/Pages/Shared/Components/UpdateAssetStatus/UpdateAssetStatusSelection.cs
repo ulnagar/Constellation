@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 public sealed class UpdateAssetStatusSelection
 {
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public AssetStatus CurrentStatus { get; set; }
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public AssetStatus SelectedStatus { get; set; }
 
     public SelectList StatusList => new(AssetStatus.GetOptions, "Value", "Name");

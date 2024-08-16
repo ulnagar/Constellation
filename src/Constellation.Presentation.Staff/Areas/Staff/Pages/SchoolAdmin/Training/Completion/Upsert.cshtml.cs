@@ -11,6 +11,7 @@ using Constellation.Application.Training.GetUploadedTrainingCertificationMetadat
 using Constellation.Application.Training.UpdateTrainingCompletion;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Attachments.ValueObjects;
 using MediatR;
@@ -18,8 +19,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.Components.UploadTrainingCompletionCertificate;
 using System;
 using System.Collections.Generic;
@@ -33,15 +36,23 @@ public class UpsertModel : BasePageModel
     private readonly ISender _mediator;
     private readonly IAuthorizationService _authorizationService;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator, 
         IAuthorizationService authorizationService,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _authorizationService = authorizationService;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
@@ -56,11 +67,11 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     [Required(ErrorMessage = "You must select a training module")]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingModuleId ModuleId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingCompletionId Id { get; set; }
 
     [BindProperty]
@@ -113,11 +124,17 @@ public class UpsertModel : BasePageModel
 
         if (!Id.Equals(TrainingCompletionId.Empty))
         {
+            _logger.Information("Requested to retrieve details of Training Completion for edit by user {User}", _currentUserService.UserName);
+
             // Get existing entry from database and populate fields
             Result<CompletionRecordEditContextDto> entityRequest = await _mediator.Send(new GetCompletionRecordEditContextQuery(ModuleId, Id));
             
             if (entityRequest.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), entityRequest.Error, true)
+                    .Warning("Failed to retrieve details of Training Completion for edit by user {User}", _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(
                     entityRequest.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId.Value }));
@@ -141,6 +158,10 @@ public class UpsertModel : BasePageModel
             if (!CanEditRecords && staffId != SelectedStaffId)
             {
                 // User is not the staff member listed on the record and does not have permission to edit records
+                _logger
+                    .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                    .Warning("Failed to retrieve details of Training Completion for edit by user {User}", _currentUserService.UserName);
+                
                 ModalContent = new ErrorDisplay(
                     DomainErrors.Permissions.Unauthorised,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
@@ -151,7 +172,7 @@ public class UpsertModel : BasePageModel
 
         await SetUpForm();
 
-        if (!Id.Equals(TrainingCompletionId.Empty) && !CanEditRecords && SoloStaffMember.Key == string.Empty)
+        if (Id != TrainingCompletionId.Empty && !CanEditRecords && SoloStaffMember.Key == string.Empty)
         {
             // This staff member is not on the list of staff. Something has gone wrong here.
 
@@ -190,7 +211,7 @@ public class UpsertModel : BasePageModel
         }
     }
 
-    private async Task<FileDto> GetUploadedFile()
+    private async Task<FileDto?> GetUploadedFile()
     {
         if (FormFile is not null)
         {
@@ -242,18 +263,25 @@ public class UpsertModel : BasePageModel
         if (!Id.Equals(TrainingCompletionId.Empty))
         {
             // Update existing entry
-
             UpdateTrainingCompletionCommand command = new(
                 Id,
                 SelectedStaffId,
                 ModuleId,
                 completedDate,
                 await GetUploadedFile());
+
+            _logger
+                .ForContext(nameof(UpdateTrainingCompletionCommand), command, true)
+                .Information("Requested to update Training Completion with id {Id} by user {User}", Id, _currentUserService.UserName);
             
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to update Training Completion with id {Id} by user {User}", Id, _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(
                     result.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
@@ -264,17 +292,24 @@ public class UpsertModel : BasePageModel
         else
         {
             // Create new entry
-
             CreateTrainingCompletionCommand command = new(
                 SelectedStaffId,
                 ModuleId,
                 completedDate,
                 await GetUploadedFile());
 
+            _logger
+                .ForContext(nameof(CreateTrainingCompletionCommand), command, true)
+                .Information("Requested to create new Training Completion by user {User}", _currentUserService.UserName);
+
             Result result = await _mediator.Send(command);
 
             if (result.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), result.Error, true)
+                    .Warning("Failed to create new Training Completion by user {User}", _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(
                     result.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
@@ -290,6 +325,4 @@ public class UpsertModel : BasePageModel
 
         return RedirectToPage("Index");
     }
-
-
 }

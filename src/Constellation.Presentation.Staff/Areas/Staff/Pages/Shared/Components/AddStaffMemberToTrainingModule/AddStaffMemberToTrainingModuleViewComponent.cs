@@ -21,7 +21,7 @@ public class AddStaffMemberToTrainingModuleViewComponent : ViewComponent
     }
 
     public async Task<IViewComponentResult> InvokeAsync(
-        [ModelBinder(typeof(StrongIdBinder))] TrainingModuleId moduleId)
+        [ModelBinder(typeof(ConstructorBinder))] TrainingModuleId moduleId)
     {
         Result<ModuleDetailsDto> module = await _mediator.Send(new GetModuleDetailsQuery(moduleId));
 

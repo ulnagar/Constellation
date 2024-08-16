@@ -43,11 +43,11 @@ public class RollModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracLessonId LessonId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracRollId RollId { get; set; }
 
 

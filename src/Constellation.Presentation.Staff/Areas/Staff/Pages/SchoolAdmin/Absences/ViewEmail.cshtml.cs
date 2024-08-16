@@ -33,11 +33,11 @@ public class ViewEmailModel : PageModel
     }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceNotificationId NotificationId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceId AbsenceId { get; set; }
 
     public string Source { get; set; }

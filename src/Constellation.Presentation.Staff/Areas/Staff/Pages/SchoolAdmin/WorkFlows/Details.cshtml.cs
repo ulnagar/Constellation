@@ -15,6 +15,7 @@ using Application.WorkFlows.CancelAction;
 using Application.WorkFlows.GetCaseById;
 using Application.WorkFlows.ReassignAction;
 using Application.WorkFlows.UpdateCaseStatus;
+using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -25,7 +26,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.PartialViews.AddActionNoteModal;
 using Shared.PartialViews.AddCaseDetailUpdateAction;
 using Shared.PartialViews.AddCreateSentralEntryAction;
@@ -41,18 +44,27 @@ public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Cases;
+    [ViewData] public string PageTitle => "WorkFlow Case Details";
 
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     [BindProperty(SupportsGet = true)]
     public CaseId Id { get; set; }
 
@@ -60,10 +72,16 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve details of Case with Id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve details of Case with Id {Id} by user {User}", Id, _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" }));
@@ -74,14 +92,23 @@ public class DetailsModel : BasePageModel
         Case = request.Value;
     }
 
-    public async Task<IActionResult> OnPostUpdateStatus(string status)
+    public async Task<IActionResult> OnPostUpdateStatus(
+        [ModelBinder(typeof(BaseFromValueBinder))] CaseStatus status)
     {
-        CaseStatus newStatus = CaseStatus.FromValue(status);
+        UpdateCaseStatusCommand command = new(Id, status);
 
-        Result action = await _mediator.Send(new UpdateCaseStatusCommand(Id, newStatus));
+        _logger
+            .ForContext(nameof(UpdateCaseStatusCommand), command, true)
+            .Information("Requested to update status of Case with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+        Result action = await _mediator.Send(command);
 
         if (action.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), action.Error, true)
+                .Warning("Failed to update status of Case with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(action.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -104,12 +131,23 @@ public class DetailsModel : BasePageModel
         return Partial("ConfirmActionUpdateModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetCancelAction(Guid actionId)
+    public async Task<IActionResult> OnGetCancelAction(
+        [ModelBinder(typeof(FromValueBinder))] ActionId actionId)
     {
-        Result cancelRequest = await _mediator.Send(new CancelActionCommand(Id, ActionId.FromValue(actionId)));
+        CancelActionCommand command = new(Id, actionId);
+
+        _logger
+            .ForContext(nameof(CancelActionCommand), command, true)
+            .Information("Requested to cancel Action in Case by user {User}", _currentUserService.UserName);
+
+        Result cancelRequest = await _mediator.Send(command);
 
         if (cancelRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), cancelRequest, true)
+                .Warning("Failed to cancel Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(cancelRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -135,12 +173,24 @@ public class DetailsModel : BasePageModel
         return Partial("AddActionNoteModal", viewModel);
     }
 
-    public async Task<IActionResult> OnPostAddActionNote(Guid actionId, string note)
+    public async Task<IActionResult> OnPostAddActionNote(
+        [ModelBinder(typeof(FromValueBinder))] ActionId actionId, 
+        string note)
     {
-        Result noteRequest = await _mediator.Send(new AddActionNoteCommand(Id, ActionId.FromValue(actionId), note));
+        AddActionNoteCommand command = new(Id, actionId, note);
+
+        _logger
+            .ForContext(nameof(AddActionNoteCommand), command, true)
+            .Information("Requested to cancel Action in Case by user {User}", _currentUserService.UserName);
+
+        Result noteRequest = await _mediator.Send(command);
 
         if (noteRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), noteRequest.Error, true)
+                .Warning("Failed to cancel Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(noteRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -169,12 +219,24 @@ public class DetailsModel : BasePageModel
         return Partial("ReassignActionToStaffMemberModal", viewModel);
     }
 
-    public async Task<IActionResult> OnPostReassignAction(Guid actionId, string staffId)
+    public async Task<IActionResult> OnPostReassignAction(
+        [ModelBinder(typeof(FromValueBinder))] ActionId actionId, 
+        string staffId)
     {
-        Result reassignRequest = await _mediator.Send(new ReassignActionCommand(Id, ActionId.FromValue(actionId), staffId));
+        ReassignActionCommand command = new(Id, actionId, staffId);
+
+        _logger
+            .ForContext(nameof(ReassignActionCommand), command, true)
+            .Information("Requested to reassign Action in Case by user {User}", _currentUserService.UserName);
+
+        Result reassignRequest = await _mediator.Send(command);
 
         if (reassignRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reassignRequest.Error, true)
+                .Warning("Failed to reassign Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(reassignRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -267,10 +329,20 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddSentralEntryActionCommand(Id, OfferingId.FromValue(viewModel.OfferingId), viewModel.StaffId));
+        AddSentralEntryActionCommand command = new(Id, OfferingId.FromValue(viewModel.OfferingId), viewModel.StaffId);
+
+        _logger
+            .ForContext(nameof(AddSentralEntryActionCommand), command, true)
+            .Information("Requested to add Action in Case by user {User}", _currentUserService.UserName);
+
+        Result actionRequest = await _mediator.Send(command);
 
         if (actionRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), actionRequest.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -290,10 +362,20 @@ public class DetailsModel : BasePageModel
     {
         string staffMemberId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        Result actionRequest = await _mediator.Send(new AddCaseDetailUpdateActionCommand(Id, staffMemberId, viewModel.Details));
+        AddCaseDetailUpdateActionCommand command = new(Id, staffMemberId, viewModel.Details);
+
+        _logger
+            .ForContext(nameof(AddCaseDetailUpdateActionCommand), command, true)
+            .Information("Requested to add Action in Case by user {User}", _currentUserService.UserName);
+
+        Result actionRequest = await _mediator.Send(command);
 
         if (actionRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), actionRequest.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -325,10 +407,20 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddParentInterviewActionCommand(Id, viewModel.StaffId));
+        AddParentInterviewActionCommand command = new(Id, viewModel.StaffId);
+
+        _logger
+            .ForContext(nameof(AddParentInterviewActionCommand), command, true)
+            .Information("Requested to add Action in Case by user {User}", _currentUserService.UserName);
+
+        Result actionRequest = await _mediator.Send(command);
 
         if (actionRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), actionRequest.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -360,10 +452,20 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddPhoneParentActionCommand(Id, viewModel.StaffId));
+        AddPhoneParentActionCommand command = new(Id, viewModel.StaffId);
+
+        _logger
+            .ForContext(nameof(AddPhoneParentActionCommand), command, true)
+            .Information("Requested to add Action in Case by user {User}", _currentUserService.UserName);
+
+        Result actionRequest = await _mediator.Send(command);
 
         if (actionRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), actionRequest.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -395,10 +497,20 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddSendEmailActionCommand(Id, viewModel.StaffId));
+        AddSendEmailActionCommand command = new(Id, viewModel.StaffId);
+
+        _logger
+            .ForContext(nameof(AddSendEmailActionCommand), command, true)
+            .Information("Requested to add Action in Case by user {User}", _currentUserService.UserName);
+
+        Result actionRequest = await _mediator.Send(command);
 
         if (actionRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), actionRequest.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
@@ -430,10 +542,20 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        Result actionRequest = await _mediator.Send(new AddSentralIncidentStatusActionCommand(Id, viewModel.StaffId));
+        AddSentralIncidentStatusActionCommand command = new(Id, viewModel.StaffId);
+
+        _logger
+            .ForContext(nameof(AddSentralIncidentStatusActionCommand), command, true)
+            .Information("Requested to add Action in Case by user {User}", _currentUserService.UserName);
+
+        Result actionRequest = await _mediator.Send(command);
 
         if (actionRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), actionRequest.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));

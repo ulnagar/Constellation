@@ -44,7 +44,7 @@ public class UpdateModel : BasePageModel
     [ViewData] public string PageTitle => "Update School Contact";
 
 
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     [BindProperty(SupportsGet = true)]
     public SchoolContactId Id { get; set; }
 

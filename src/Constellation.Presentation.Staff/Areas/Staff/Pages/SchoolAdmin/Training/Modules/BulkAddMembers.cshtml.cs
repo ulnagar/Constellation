@@ -8,24 +8,35 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffList;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
 using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
 public class BulkAddMembersModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public BulkAddMembersModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<BulkAddMembersModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Modules;
@@ -33,7 +44,7 @@ public class BulkAddMembersModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingModuleId Id { get; set; }
 
     public ModuleDetailsDto Module { get; set; }
@@ -47,10 +58,16 @@ public class BulkAddMembersModel : BasePageModel
 
     public async Task PreparePage()
     {
+        _logger.Information("Requested to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
+
         Result<ModuleDetailsDto> moduleRequest = await _mediator.Send(new GetModuleDetailsQuery(Id));
 
         if (moduleRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), moduleRequest.Error, true)
+                .Warning("Failed to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
@@ -64,6 +81,10 @@ public class BulkAddMembersModel : BasePageModel
 
         if (staffRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), staffRequest.Error, true)
+                .Warning("Failed to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
@@ -84,11 +105,21 @@ public class BulkAddMembersModel : BasePageModel
 
             return Page();
         }
-        
-        Result request = await _mediator.Send(new AddStaffMemberToTrainingModuleCommand(Id, SelectedStaffIds));
+
+        AddStaffMemberToTrainingModuleCommand command = new(Id, SelectedStaffIds);
+
+        _logger
+            .ForContext(nameof(AddStaffMemberToTrainingModuleCommand), command, true)
+            .Information("Requested to add Members to Training Module by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to add Members to Training Module by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(request.Error);
 
             return Page();

@@ -1,8 +1,9 @@
-﻿namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
+﻿#nullable enable
+namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-public sealed class ValueObjectBinder : IModelBinder
+public sealed class BaseFromValueBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
@@ -24,15 +25,17 @@ public sealed class ValueObjectBinder : IModelBinder
         if (enumerable is not null)
             bindingContext.Result = ModelBindingResult.Success(enumerable);
         else
-            bindingContext.ModelState.TryAddModelError(modelName, "Invalid Value");
+            bindingContext.ModelState.TryAddModelError(modelName, "Invalid Enumerable Value");
     }
 
-    private object? TryParse(Type valueObjectType, string? rawValue)
+    private object? TryParse(Type enumerableType, string? rawValue)
     {
         if (rawValue is null)
             return null;
-        
-        object? typedValue = valueObjectType.GetMethod("FromValue")?.Invoke(null, new object?[] { rawValue });
+
+        Type? baseType = enumerableType.BaseType;
+
+        object? typedValue = baseType!.GetMethod("FromValue")?.Invoke(null, new object?[] { rawValue });
 
         return typedValue;
     }

@@ -6,10 +6,13 @@ using Application.Training.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using Shared.Components.StaffTrainingReport;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,15 +23,26 @@ public class IndexModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IDateTimeProvider _dateTime;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator, 
         LinkGenerator linkGenerator,
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        IAuthorizationService authorizationService,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _dateTime = dateTime;
+        _authorizationService = authorizationService;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Completions;
@@ -47,25 +61,31 @@ public class IndexModel : BasePageModel
         string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
         
         // If user does not have details view permissions, only show their own records
-        if (User.HasClaim(claim => claim is { Type: AuthClaimType.Permission, Value: AuthPermissions.MandatoryTrainingDetailsView }))
-        {
-            Result<List<CompletionRecordDto>> recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
+        AuthorizationResult authCheck = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanViewTrainingModuleContentDetails);
 
-            if (recordsRequest.IsFailure)
-            {
-                ModalContent = new ErrorDisplay(
-                    recordsRequest.Error,
-                    _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
-
-                return Page();
-            }
-
-            CompletionRecords = recordsRequest.Value;
-        }
-        else
+        if (!authCheck.Succeeded)
         {
             return RedirectToPage("/SchoolAdmin/Training/Staff/Index", new { area = "Staff", StaffId = staffId });
         }
+
+        _logger.Information("Requested to retrieve list of Training Completion records by user {User}", _currentUserService.UserName);
+
+        Result<List<CompletionRecordDto>> recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
+
+        if (recordsRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), recordsRequest.Error, true)
+                .Warning("Failed to retrieve list of Training Completion records by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                recordsRequest.Error,
+                _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        CompletionRecords = recordsRequest.Value;
 
         foreach (CompletionRecordDto record in CompletionRecords)
         {
@@ -82,7 +102,7 @@ public class IndexModel : BasePageModel
         {
             FilterDto.Current => CompletionRecords.Where(record => record.Status == CompletionRecordDto.ExpiryStatus.Active).ToList(),
             FilterDto.All => CompletionRecords,
-            FilterDto.Expiring => CompletionRecords.Where(record => record.Status == CompletionRecordDto.ExpiryStatus.Active && record.ExpiryCountdown < 31).ToList(),
+            FilterDto.Expiring => CompletionRecords.Where(record => record is { Status: CompletionRecordDto.ExpiryStatus.Active, ExpiryCountdown: < 31 }).ToList(),
             _ => CompletionRecords
         };
 

@@ -8,9 +8,9 @@ using System.ComponentModel.DataAnnotations;
 
 public sealed class RemoveContactConfirmationViewModel
 {
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public SchoolContactId ContactId { get; set; }
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public SchoolContactRoleId AssignmentId { get; set; }
     public ContactResponse Contact { get; set; }
     [Required]

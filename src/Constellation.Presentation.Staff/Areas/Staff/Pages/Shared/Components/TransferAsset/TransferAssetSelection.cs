@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 
 public sealed class TransferAssetSelection
 {
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public LocationCategory LocationCategory { get; set; }
 
     public string Site { get; set; } = string.Empty;

@@ -68,7 +68,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDownload(
-        [ModelBinder(typeof(StrongIdBinder))] AcademicReportId reportId)
+        [ModelBinder(typeof(ConstructorBinder))] AcademicReportId reportId)
     {
         _logger.Information("Requested to download report data by user {user} for Id {reportId}", _currentUserService.UserName, reportId);
 

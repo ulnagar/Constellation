@@ -41,7 +41,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceId Id { get; set; }
 
     public ParentAbsenceDetailsResponse? Absence { get; set; }

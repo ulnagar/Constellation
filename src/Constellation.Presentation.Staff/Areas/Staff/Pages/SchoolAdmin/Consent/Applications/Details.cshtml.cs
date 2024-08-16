@@ -42,7 +42,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Consent Application Details";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public ApplicationId Id { get; set; }
 
     public ApplicationDetailsResponse Application { get; set; }

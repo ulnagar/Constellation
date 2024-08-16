@@ -41,7 +41,7 @@ public class IndexModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public LocationCategory Category { get; set; }
 
     public List<LocationListItem> Locations { get; set; } = new();

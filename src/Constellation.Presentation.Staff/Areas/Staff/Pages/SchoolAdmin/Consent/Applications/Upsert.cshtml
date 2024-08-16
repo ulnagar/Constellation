@@ -1,9 +1,10 @@
 ﻿@page "{id:Guid?}"
-
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Applications.UpsertModel
 
+@using ApplicationId = Constellation.Core.Models.ThirdPartyConsent.Identifiers.ApplicationId
+
 @{
-    var title = Model.Id.HasValue ? "Edit Application Record" : "Create New Application Record";
+    var title = Model.Id != ApplicationId.Empty ? "Edit Application Record" : "Create New Application Record";
 }
 
 <h2>@title</h2>

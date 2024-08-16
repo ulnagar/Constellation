@@ -56,8 +56,8 @@ public class IndexModel : BasePageModel
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnPostAjaxDeleteFamily(
-        [ModelBinder(typeof(StrongIdBinder))] FamilyId familyId,
-        [ModelBinder(typeof(StrongIdBinder))] ParentId parentId)
+        [ModelBinder(typeof(ConstructorBinder))] FamilyId familyId,
+        [ModelBinder(typeof(ConstructorBinder))] ParentId parentId)
     {
         Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
@@ -79,7 +79,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDeleteFamily(
-        [ModelBinder(typeof(StrongIdBinder))] FamilyId id, 
+        [ModelBinder(typeof(ConstructorBinder))] FamilyId id, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -118,8 +118,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxDeleteParent(
-        [ModelBinder(typeof(StrongIdBinder))] FamilyId familyId,
-        [ModelBinder(typeof(StrongIdBinder))] ParentId parentId)
+        [ModelBinder(typeof(ConstructorBinder))] FamilyId familyId,
+        [ModelBinder(typeof(ConstructorBinder))] ParentId parentId)
     {
         Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
@@ -138,8 +138,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDeleteParent(
-        [ModelBinder(typeof(StrongIdBinder))] FamilyId family, 
-        [ModelBinder(typeof(StrongIdBinder))] ParentId parent, 
+        [ModelBinder(typeof(ConstructorBinder))] FamilyId family, 
+        [ModelBinder(typeof(ConstructorBinder))] ParentId parent, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);

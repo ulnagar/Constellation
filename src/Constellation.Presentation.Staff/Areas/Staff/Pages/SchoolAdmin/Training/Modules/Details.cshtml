@@ -146,14 +146,14 @@
                         }
                     </td>
                     <td>
-                        @if (assignee is not null && !item.ModuleId.Equals(TrainingModuleId.Empty) && !item.Id.Equals(TrainingCompletionId.Empty))
+                        @if (assignee is not null || (item.ModuleId != TrainingModuleId.Empty && item.Id != TrainingCompletionId.Empty))
                         {
                             <div class="dropdown">
                                 <button class="btn btn-secondary dropdown-toggle btn-show-hover" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Actions
                                 </button>
                                 <div class="dropdown-menu">
-                                    @if (!item.ModuleId.Equals(TrainingModuleId.Empty) && !item.Id.Equals(TrainingCompletionId.Empty))
+                                    @if (item.ModuleId != TrainingModuleId.Empty && item.Id != TrainingCompletionId.Empty)
                                     {
                                         <a asp-page="/SchoolAdmin/Training/Completion/Details" asp-area="Staff" asp-route-moduleId="@item.ModuleId" asp-route-completionId="@item.Id.Value" class="dropdown-item">View Record</a>
                                     }

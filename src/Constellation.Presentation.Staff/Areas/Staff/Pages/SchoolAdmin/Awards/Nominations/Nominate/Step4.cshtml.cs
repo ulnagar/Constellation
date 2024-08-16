@@ -50,19 +50,19 @@ public class Step4Model : BasePageModel
     [ViewData] public string PageTitle => "New Award Nomination";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId PeriodId { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(ValueObjectBinder))]
+    [ModelBinder(typeof(FromValueBinder))]
     public AwardType Type { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId? CourseId { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId OfferingId { get; set; } = OfferingId.Empty;
 
     [BindProperty]

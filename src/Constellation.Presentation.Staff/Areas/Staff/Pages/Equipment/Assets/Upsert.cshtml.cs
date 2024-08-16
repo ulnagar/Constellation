@@ -72,7 +72,7 @@ public class UpsertModel : BasePageModel
     public string ModelDescription { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public AssetCategory Category { get; set; } = AssetCategory.Student;
 
     [BindProperty]

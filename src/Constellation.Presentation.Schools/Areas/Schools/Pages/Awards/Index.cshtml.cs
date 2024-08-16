@@ -67,7 +67,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDownloadCertificate(
-        [ModelBinder(typeof(StrongIdBinder))] StudentAwardId awardId)
+        [ModelBinder(typeof(ConstructorBinder))] StudentAwardId awardId)
     {
         Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId.ToString()));
 

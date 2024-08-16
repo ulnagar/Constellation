@@ -4,24 +4,35 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.StaffMembers.GetStaffById;
 using Constellation.Application.Training.GetModuleStatusByStaffMember;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanRunTrainingModuleReports)]
 public class StaffMemberModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public StaffMemberModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<StaffMemberModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
@@ -36,10 +47,16 @@ public class StaffMemberModel : BasePageModel
     
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve Training report for staff member with id {Id} by user {User}", Id, _currentUserService.UserName);
+
         Result<StaffResponse> staffRequest = await _mediator.Send(new GetStaffByIdQuery(Id));
 
         if (staffRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), staffRequest.Error, true)
+                .Warning("Failed to retrieve Training report for staff member with id {Id} by user {User}", Id, _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" }));
@@ -53,6 +70,10 @@ public class StaffMemberModel : BasePageModel
 
         if (moduleRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), moduleRequest.Error, true)
+                .Warning("Failed to retrieve Training report for staff member with id {Id} by user {User}", Id, _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" }));

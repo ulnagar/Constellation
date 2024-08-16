@@ -56,8 +56,8 @@ public class IndexModel : BasePageModel
     }
 
     public IActionResult OnPostAjaxDelete(
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
         string name,
         string role,
         string school)
@@ -73,7 +73,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
         string name)
     {
         AssignRoleModalViewModel viewModel = new();
@@ -91,8 +91,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDeleteAssignment(
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId)
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId)
     {
         await _mediator.Send(new RemoveContactRoleCommand(contactId, roleId));
 
@@ -103,7 +103,7 @@ public class IndexModel : BasePageModel
         string schoolCode,
         string roleName,
         string note,
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId)
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId)
     {
         Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, note));
 
@@ -120,8 +120,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxUpdateNote(
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
         string note)
     {
         UpdateRoleNoteModalViewModel viewModel = new()
@@ -135,8 +135,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostUpdateNote(
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(StrongIdBinder))] SchoolContactRoleId roleId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
         string note)
     {
         Result request = await _mediator.Send(new UpdateRoleNoteCommand(contactId, roleId, note));

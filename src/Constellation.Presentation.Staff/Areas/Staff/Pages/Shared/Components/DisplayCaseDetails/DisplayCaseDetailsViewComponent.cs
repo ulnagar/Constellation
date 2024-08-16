@@ -16,7 +16,7 @@ public class DisplayCaseDetailsViewComponent : ViewComponent
         _caseRepository = caseRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync([ModelBinder(typeof(StrongIdBinder))] CaseId caseId)
+    public async Task<IViewComponentResult> InvokeAsync([ModelBinder(typeof(ConstructorBinder))] CaseId caseId)
     {
         Case? item = await _caseRepository.GetById(caseId);
 

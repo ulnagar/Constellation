@@ -7,6 +7,7 @@ using Application.Models.Auth;
 using Application.Students.GetCurrentStudentsAsDictionary;
 using Application.ThirdPartyConsent.CreateTransaction;
 using Application.ThirdPartyConsent.GetApplications;
+using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
 using Core.Models.ThirdPartyConsent.Enums;
@@ -16,6 +17,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
@@ -24,16 +27,26 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Transactions;
+    [ViewData] public string PageTitle { get; set; } = "New Consent Response";
+
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a student")]
@@ -58,13 +71,12 @@ public class UpsertModel : BasePageModel
 
     public Dictionary<string, string> Students { get; set; }
 
-    public async Task<IActionResult> OnGet()
-    {
-        return await PreparePage();
-    }
+    public async Task<IActionResult> OnGet() => await PreparePage();
 
     public async Task<IActionResult> OnPost()
     {
+        _logger.Information("Requested to create new Consent Response by user {User}", _currentUserService.UserName);
+
         Dictionary<ApplicationId, bool> responses = new();
 
         foreach (ConsentResponse entry in Responses)
@@ -79,9 +91,15 @@ public class UpsertModel : BasePageModel
 
         if (!responses.Any())
         {
+            Error error = new("Consent Required", "No valid consent responses were entered");
+
+            _logger
+                .ForContext(nameof(Error), error, true)
+                .Warning("Failed to create new Consent Response by user {User}", _currentUserService.UserName);
+
             ModelState.AddModelError("Responses", "You must include at least one valid application");
 
-            ModalContent = new ErrorDisplay(new("Consent Required", "No valid consent responses were entered"));
+            ModalContent = new ErrorDisplay(error);
 
             return await PreparePage();
         }
@@ -90,6 +108,10 @@ public class UpsertModel : BasePageModel
 
         if (family.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), family.Error, true)
+                .Warning("Failed to create new Consent Response by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(family.Error);
 
             return await PreparePage();
@@ -97,10 +119,14 @@ public class UpsertModel : BasePageModel
 
         ParentId parentId = ParentId.FromValue(Submitter);
 
-        FamilyContactResponse contact = family.Value.FirstOrDefault(entry => entry.ParentId == parentId);
+        FamilyContactResponse? contact = family.Value.FirstOrDefault(entry => entry.ParentId == parentId);
 
         if (contact is null)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Families.Parents.NotFoundInFamily(parentId, family.Value.First().FamilyId.Value), true)
+                .Warning("Failed to create new Consent Response by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(DomainErrors.Families.Parents.NotFoundInFamily(parentId, family.Value.First().FamilyId.Value));
 
             return await PreparePage();
@@ -108,15 +134,25 @@ public class UpsertModel : BasePageModel
 
         string contactName = $"{contact.Name} ({contact.EmailAddress})";
 
-        Result attempt = await _mediator.Send(new CreateTransactionCommand(
+        CreateTransactionCommand command = new(
             StudentId,
             contactName,
             ConsentMethod.FromValue(Method),
             Notes,
-            responses));
+            responses);
+        
+        _logger
+            .ForContext(nameof(CreateTransactionCommand), command, true)
+            .Information("Requested to create new Content Response by user {User}", _currentUserService.UserName);
+
+        Result attempt = await _mediator.Send(command);
 
         if (attempt.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), attempt.Error, true)
+                .Warning("Failed to create new Content Response by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(attempt.Error);
 
             return await PreparePage();
@@ -137,10 +173,16 @@ public class UpsertModel : BasePageModel
 
     private async Task<IActionResult> PreparePage()
     {
+        _logger.Information("Requested to retrieve options for new Consent Response by user {User}", _currentUserService.UserName);
+
         Result<List<ApplicationSummaryResponse>> applications = await _mediator.Send(new GetApplicationsQuery());
 
         if (applications.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), applications.Error, true)
+                .Warning("Failed to retrieve options for new Consent Response by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 applications.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" }));
@@ -154,6 +196,10 @@ public class UpsertModel : BasePageModel
 
         if (students.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), students.Error, true)
+                .Warning("Failed to retrieve options for new Consent Response by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 students.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Responses/Index", values: new { area = "Staff" }));

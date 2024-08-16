@@ -42,7 +42,7 @@ public class IndexModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public AllocationType AllocationType { get; set; }
     public List<AllocationListItem> Allocations { get; set; }
 

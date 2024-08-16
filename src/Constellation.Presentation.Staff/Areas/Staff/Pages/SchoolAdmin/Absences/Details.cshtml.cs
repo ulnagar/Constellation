@@ -46,7 +46,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Absence Details";
     
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceId Id { get; set; }
 
     public AbsenceDetailsResponse Absence;

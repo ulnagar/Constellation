@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 public sealed class AllocateDeviceSelection
 {
-    [ModelBinder(typeof(StringEnumerableBinder))]
+    [ModelBinder(typeof(BaseFromValueBinder))]
     public AllocationType AllocationType { get; set; }
 
     public string StudentId { get; set; } = string.Empty;

@@ -57,12 +57,12 @@ public class Step4Model : BasePageModel
 
     public SelectList Courses { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; }
 
     public SelectList Assignments { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AssignmentId AssignmentId { get; set; }
 
     [BindProperty]

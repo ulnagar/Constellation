@@ -52,7 +52,7 @@ public class Step3Model : BasePageModel
 
     public SelectList Courses { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; }
 
     public SelectList Assignments { get; set; }

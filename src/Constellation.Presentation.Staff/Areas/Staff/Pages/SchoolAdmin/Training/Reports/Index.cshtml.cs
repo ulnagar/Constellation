@@ -11,9 +11,12 @@ using Areas;
 using Constellation.Application.Training.Models;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Serilog;
 using Shared.PartialViews.SelectStaffMemberForReportModal;
 using Shared.PartialViews.SelectTrainingModuleForReportModal;
 
@@ -21,11 +24,19 @@ using Shared.PartialViews.SelectTrainingModuleForReportModal;
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator)
+        ISender mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Training_Reports;
@@ -57,10 +68,16 @@ public class IndexModel : BasePageModel
 
         TrainingModuleId moduleId = TrainingModuleId.FromValue(viewModel.ModuleId);
 
+        _logger.Information("Requested to generate Training Module report by user {User}", _currentUserService.UserName);
+
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(moduleId, false));
 
         if (reportRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reportRequest.Error, true)
+                .Warning("Failed to generate Training Module report by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
@@ -71,10 +88,16 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetOverviewReport()
     {
+        _logger.Information("Requested to generate Training overview report by user {User}", _currentUserService.UserName);
+
         Result<FileDto> reportRequest = await _mediator.Send(new GenerateOverviewReportCommand());
 
         if (reportRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reportRequest.Error, true)
+                .Warning("Requested to generate Training overview report by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
@@ -94,10 +117,16 @@ public class IndexModel : BasePageModel
 
         TrainingModuleId moduleId = TrainingModuleId.FromValue(viewModel.ModuleId);
 
+        _logger.Information("Requested to generate Training Module detail report by user {User}", _currentUserService.UserName);
+        
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(moduleId, true));
 
         if (reportRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reportRequest.Error, true)
+                .Warning("Failed to generate Training Module detail report by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
@@ -132,10 +161,16 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
+        _logger.Information("Requested to generate staff Training report by user {User}", _currentUserService.UserName);
+
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(viewModel.StaffId, false));
 
         if (reportRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reportRequest.Error, true)
+                .Warning("Failed to generate staff Training report by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();
@@ -153,10 +188,16 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
+        _logger.Information("Requested to generate staff Training detail report by user {User}", _currentUserService.UserName);
+        
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(viewModel.StaffId, true));
 
         if (reportRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reportRequest.Error, true)
+                .Warning("Failed to generate staff Training detail report by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(reportRequest.Error);
 
             return Page();

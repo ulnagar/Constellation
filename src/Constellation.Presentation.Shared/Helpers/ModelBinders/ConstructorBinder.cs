@@ -4,7 +4,7 @@ namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.ComponentModel;
 
-public sealed class StrongIdBinder : IModelBinder
+public sealed class ConstructorBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {

@@ -4,11 +4,14 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.WorkFlows.GetCaseSummaryList;
 using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Models.WorkFlow.Enums;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
@@ -16,18 +19,27 @@ public class IndexModel : BasePageModel
     private readonly ISender _mediator;
     private readonly IAuthorizationService _authorizationService;
     private readonly IDateTimeProvider _dateTime;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         IAuthorizationService authorizationService,
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _authorizationService = authorizationService;
         _dateTime = dateTime;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Cases;
+    [ViewData] public string PageTitle => "WorkFlow Cases";
 
     public List<CaseSummaryResponse> Cases { get; set; } = new();
 
@@ -36,6 +48,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve list of WorkFlow Cases by user {User}", _currentUserService.UserName);
+
         AuthorizationResult isAdmin = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
 
         string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
@@ -44,6 +58,10 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve list of WorkFlow Cases by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(request.Error);
 
             return;

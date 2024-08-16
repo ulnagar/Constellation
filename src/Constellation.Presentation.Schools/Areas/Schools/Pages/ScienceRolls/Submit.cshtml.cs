@@ -45,11 +45,11 @@ public class SubmitModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracLessonId LessonId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StrongIdBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracRollId RollId { get; set; }
 
     public string LessonName { get; set; }
@@ -148,7 +148,7 @@ public class SubmitModel : BasePageModel
 
     public class StudentAttendance
     {
-        [ModelBinder(typeof(StrongIdBinder))]
+        [ModelBinder(typeof(ConstructorBinder))]
         public SciencePracAttendanceId Id { get; set; }
 
         public string StudentId { get; set; }
