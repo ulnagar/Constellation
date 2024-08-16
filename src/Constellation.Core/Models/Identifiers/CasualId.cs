@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record CasualId(Guid Value)
+public record struct CasualId(Guid Value)
 {
+    public static CasualId Empty => new(Guid.Empty);
+
     public static CasualId FromValue(Guid value) =>
         new(value);
 

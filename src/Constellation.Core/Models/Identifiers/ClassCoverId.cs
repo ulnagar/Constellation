@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record ClassCoverId(Guid Value)
+public record struct ClassCoverId(Guid Value)
 {
+    public static ClassCoverId Empty => new(Guid.Empty);
+
     public static ClassCoverId FromValue(Guid value) =>
         new(value);
 

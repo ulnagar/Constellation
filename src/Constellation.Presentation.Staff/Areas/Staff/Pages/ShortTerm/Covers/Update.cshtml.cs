@@ -5,10 +5,15 @@ using Constellation.Application.ClassCovers.UpdateCover;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
+using Core.Abstractions.Services;
+using Core.Models.Covers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
@@ -17,19 +22,28 @@ public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpdateModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpdateModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Covers_Index;
-
+    [ViewData] public string PageTitle { get; set; } = "New Class Cover";
+    
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public ClassCoverId Id { get; set; } = ClassCoverId.Empty;
     public string OfferingName { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
@@ -42,40 +56,51 @@ public class UpdateModel : BasePageModel
     public string TeacherSchool { get; set; }
     public string TeacherName { get; set; }
 
-    public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
-    {
-        await PreparePage(cancellationToken);
-
-        return Page();
-    }
+    public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnPostUpdate(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new UpdateCoverCommand(ClassCoverId.FromValue(Id), StartDate, EndDate), cancellationToken);
+        UpdateCoverCommand command = new(Id, StartDate, EndDate);
+
+        _logger
+            .ForContext(nameof(UpdateCoverCommand), command, true)
+            .Information("Requested to update Class Cover with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+        Result<ClassCover> result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Class Cover with id {Id} by user {User}", Id, _currentUserService.UserName);
+            
             await PreparePage(cancellationToken);
 
-            ModelState.AddModelError("", result.Error.Message);
+            ModalContent = new ErrorDisplay(result.Error);
 
             return Page();
         }
 
-        return RedirectToPage("Index");
+        return RedirectToPage("/ShortTerm/Covers/Index", new { area = "Staff" });
     }
 
-    private async Task<bool> PreparePage(CancellationToken cancellationToken = default)
+    private async Task PreparePage(CancellationToken cancellationToken = default)
     {
-        var coverResult = await _mediator.Send(new GetCoverWithDetailsQuery(ClassCoverId.FromValue(Id)), cancellationToken);
+        _logger.Information("Requested to retrieve Class Cover with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
+        Result<CoverWithDetailsResponse> coverResult = await _mediator.Send(new GetCoverWithDetailsQuery(Id), cancellationToken);
 
         if (coverResult.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), coverResult.Error, true)
+                .Warning("Failed to retrieve Class Cover with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 coverResult.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
-            return false;
+            return;
         }
 
         OfferingName = coverResult.Value.OfferingName;
@@ -83,7 +108,5 @@ public class UpdateModel : BasePageModel
         EndDate = coverResult.Value.EndDate;
         TeacherName = coverResult.Value.UserName;
         TeacherSchool = coverResult.Value.UserSchool;
-
-        return true;
     }
 }

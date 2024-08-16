@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
+using Application.StaffMembers.Models;
 using Constellation.Application.Casuals.GetCasualsForSelectionList;
 using Constellation.Application.ClassCovers.BulkCreateCovers;
 using Constellation.Application.Common.PresentationModels;
@@ -10,10 +11,14 @@ using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
+using Core.Abstractions.Services;
+using Core.Models.Covers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
@@ -22,16 +27,25 @@ public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public CreateModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<CreateModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Covers_Index;
+    [ViewData] public string PageTitle => "New Class Cover";
 
 
     [BindProperty]
@@ -49,33 +63,22 @@ public class CreateModel : BasePageModel
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
 
-    public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
-    {
-        await PreparePage(cancellationToken);
-
-        return Page();
-    }
+    public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
     {
-        var pageReady = await PreparePage(cancellationToken);
+        CoveringTeacherRecord teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
 
-        if (!pageReady)
-        {
-            return Page();
-        }
-
-        var teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
-
-        var teacherType = teacher.Category switch
+        CoverTeacherType? teacherType = teacher.Category switch
         {
             "Casuals" => CoverTeacherType.Casual,
-            "Teachers" => CoverTeacherType.Staff
+            "Teachers" => CoverTeacherType.Staff,
+            _ => null
         };
 
-        List<OfferingId> offeringIds = CoveredClasses.Select(id => OfferingId.FromValue(id)).ToList();
+        List<OfferingId> offeringIds = CoveredClasses.Select(OfferingId.FromValue).ToList();
 
-        var command = new BulkCreateCoversCommand(
+        BulkCreateCoversCommand command = new(
             Guid.NewGuid(),
             offeringIds,
             StartDate,
@@ -83,30 +86,60 @@ public class CreateModel : BasePageModel
             teacherType,
             teacher.Id);
 
-        var result = await _mediator.Send(command, cancellationToken);
+        _logger
+            .ForContext(nameof(BulkCreateCoversCommand), command, true)
+            .Information("Requested to create Class Covers by user {User}", _currentUserService.UserName);
+
+        Result<List<ClassCover>> result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {
-            ModelState.AddModelError("", result.Error.Message);
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to create Class Covers by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+        
+            await PreparePage(cancellationToken);
 
             return Page();
         }
 
-        return RedirectToPage("Index");
+        return RedirectToPage("/ShortTerm/Covers/Index", new { area = "Staff" });
     }
 
-    private async Task<bool> PreparePage(CancellationToken cancellationToken = default)
+    private async Task PreparePage(CancellationToken cancellationToken = default)
     {
-        var teacherResponse = await _mediator.Send(new GetStaffForSelectionListQuery(), cancellationToken);
-        var casualResponse = await _mediator.Send(new GetCasualsForSelectionListQuery(), cancellationToken);
+        _logger.Information("Requested to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-        if (teacherResponse.IsFailure || casualResponse.IsFailure)
+        Result<List<StaffSelectionListResponse>> teacherResponse = await _mediator.Send(new GetStaffForSelectionListQuery(), cancellationToken);
+
+        if (teacherResponse.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), teacherResponse.Error, true)
+                .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 teacherResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        Result<List<CasualsSelectionListResponse>> casualResponse = await _mediator.Send(new GetCasualsForSelectionListQuery(), cancellationToken);
+
+        if (casualResponse.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), casualResponse.Error, true)
+                .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                casualResponse.Error,
+                _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
             
-            return false;
+            return;
         }
 
         CoveringTeacherSelectionList.AddRange(teacherResponse
@@ -136,20 +169,24 @@ public class CreateModel : BasePageModel
             .ThenBy(entry => entry.SortName)
             .ToList();
 
-        var classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
+        Result<List<OfferingSelectionListResponse>> classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), classesResponse.Error, true)
+                .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 classesResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
-            return false;
+            return;
         }
 
-        foreach (var course in classesResponse.Value)
+        foreach (OfferingSelectionListResponse course in classesResponse.Value)
         {
-            var teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
+            Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
 
             if (teachers.Value.Count == 0)
                 continue;
@@ -160,8 +197,6 @@ public class CreateModel : BasePageModel
                 $"{teachers.Value.First().FirstName[..1]} {teachers.Value.First().LastName}",
                 $"Year {course.Name[..2]}"));
         }
-
-        return true;
     }
     
     public sealed record CoveringTeacherRecord(

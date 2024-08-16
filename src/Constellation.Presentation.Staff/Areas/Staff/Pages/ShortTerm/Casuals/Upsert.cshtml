@@ -1,9 +1,10 @@
 ﻿@page "{id:guid?}"
+@using Constellation.Core.Models.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Casuals.UpsertModel
 
 @{
-    var title = (Model.Id.HasValue ? "Edit Casual" : "Create Casual");
-    var editing = Model.Id.HasValue;
+    var title = (Model.Id != CasualId.Empty ? "Edit Casual" : "Create Casual");
+    var editing = Model.Id != CasualId.Empty;
 }
 
 <h2>@title</h2>
@@ -14,7 +15,7 @@
 
 <hr />
 
-<form asp-page-handler="Update" method="post">
+<form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
@@ -63,7 +64,14 @@
 
         <div class="form-group">
             <div class="col-md-3">
-                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                @if (editing)
+                {
+                    <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                }
+                else
+                {
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                }
             </div>
         </div>
     </div>
