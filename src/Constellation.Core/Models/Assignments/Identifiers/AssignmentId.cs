@@ -2,10 +2,11 @@
 
 using System;
 
-public sealed record AssignmentId(Guid Value)
+public record struct AssignmentId(Guid Value)
 {
-    public static AssignmentId FromValue(Guid Value) =>
-        new(Value);
+    public static AssignmentId Empty => new(Guid.Empty);
+    public static AssignmentId FromValue(Guid value) =>
+        new(value);
 
     public AssignmentId()
         : this(Guid.NewGuid()) { }

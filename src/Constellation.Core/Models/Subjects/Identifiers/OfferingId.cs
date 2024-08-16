@@ -2,7 +2,7 @@
 
 using System;
 
-public sealed record CourseId(Guid Value)
+public record struct CourseId(Guid Value)
 {
     public static readonly CourseId Empty = new(Guid.Empty);
 

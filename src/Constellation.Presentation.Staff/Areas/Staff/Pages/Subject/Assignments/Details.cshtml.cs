@@ -9,62 +9,87 @@ using Constellation.Application.Assignments.UploadAssignmentSubmission;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.Components.UploadAssignmentSubmission;
+using static Constellation.Application.Assignments.GetAssignmentById.AssignmentResponse;
+using AssignmentId = Core.Models.Assignments.Identifiers.AssignmentId;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Assignments_Assignments;
+    [ViewData] public string PageTitle { get; set; } = "Assignment Details";
+
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public AssignmentId Id { get; set; } = AssignmentId.Empty;
 
     public AssignmentResponse Assignment { get; set; }
 
-    public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
+    public async Task OnGet(CancellationToken cancellationToken)
     {
-        AssignmentId assignmentId = AssignmentId.FromValue(Id);
-
-        Result<AssignmentResponse> request = await _mediator.Send(new GetAssignmentByIdQuery(assignmentId), cancellationToken);
+        _logger.Information("Requested to retrieve details of Assignment with id {Id} by user {User}", Id, _currentUserService.UserName);
+        
+        Result<AssignmentResponse> request = await _mediator.Send(new GetAssignmentByIdQuery(Id), cancellationToken);
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve details of Assignment with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
-            return Page();
+            return;
         }
 
         Assignment = request.Value;
-
-        return Page();
+        PageTitle = $"Details - {Assignment.AssignmentName}";
     }
 
     public async Task<IActionResult> OnGetDownloadAll(CancellationToken cancellationToken)
     {
-        AssignmentId assignmentId = AssignmentId.FromValue(Id);
+        _logger.Information("Requested to download Assignment Submissions by user {User}", _currentUserService.UserName);
 
-        Result<FileDto> fileRequest = await _mediator.Send(new GetAllAssignmentSubmissionFilesQuery(assignmentId), cancellationToken);
+        Result<FileDto> fileRequest = await _mediator.Send(new GetAllAssignmentSubmissionFilesQuery(Id), cancellationToken);
 
         if (fileRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), fileRequest.Error, true)
+                .Warning("Failed to download Assignment Submissions by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 fileRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -75,25 +100,50 @@ public class DetailsModel : BasePageModel
         return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 
-    public async Task<IActionResult> OnGetResubmit(Guid submission, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetResubmit(
+        [ModelBinder(typeof(FromValueBinder))] AssignmentSubmissionId submission, 
+        CancellationToken cancellationToken)
     {
-        AssignmentId assignmentId = AssignmentId.FromValue(Id);
-        AssignmentSubmissionId submissionId = AssignmentSubmissionId.FromValue(submission);
+        ResendAssignmentSubmissionToCanvasCommand command = new(Id, submission);
 
-        await _mediator.Send(new ResendAssignmentSubmissionToCanvasCommand(assignmentId, submissionId), cancellationToken);
+        _logger
+            .ForContext(nameof(ResendAssignmentSubmissionToCanvasCommand), command, true)
+            .Information("Requested to resend Assignment Submission to Canvas by user {User}", _currentUserService.UserName);
 
-        return RedirectToPage("/Subject/Assignments/Details", new { area = "Staff", Id });
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to resend Assignment Submission to Canvas by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
+        
+        return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetDownload(Guid submission, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetDownload(
+    [ModelBinder(typeof(FromValueBinder))] AssignmentSubmissionId submission, 
+        CancellationToken cancellationToken)
     {
-        AssignmentId assignmentId = AssignmentId.FromValue(Id);
-        AssignmentSubmissionId submissionId = AssignmentSubmissionId.FromValue(submission);
+        GetAssignmentSubmissionFileQuery command = new(Id, submission);
 
-        Result<FileDto> fileRequest = await _mediator.Send(new GetAssignmentSubmissionFileQuery(assignmentId, submissionId), cancellationToken);
+        _logger
+            .ForContext(nameof(GetAssignmentSubmissionFileQuery), command, true)
+            .Information("Requested to download Assignment Submission by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> fileRequest = await _mediator.Send(command, cancellationToken);
 
         if (fileRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), fileRequest.Error, true)
+                .Warning("Failed to download Assignment Submission by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 fileRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -146,9 +196,24 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        AssignmentId assignmentId = AssignmentId.FromValue(Id);
+        UploadAssignmentSubmissionCommand command = new(Id, viewModel.StudentId, file);
 
-        await _mediator.Send(new UploadAssignmentSubmissionCommand(assignmentId, viewModel.StudentId, file), cancellationToken);
+        _logger
+            .ForContext(nameof(UploadAssignmentSubmissionCommand), command, true)
+            .Information("Requested to upload new Assignment Submission by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to upload new Assignment Submission by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
 
         return RedirectToPage("/Subject/Assignments/Details", new { area = "Staff", Id });
     }

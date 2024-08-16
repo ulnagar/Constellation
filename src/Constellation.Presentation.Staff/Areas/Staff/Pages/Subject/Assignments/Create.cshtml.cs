@@ -10,11 +10,14 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Extensions;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -22,22 +25,31 @@ public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public CreateModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<CreateModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Assignments_Assignments;
+    [ViewData] public string PageTitle => "New Assignment";
 
     public Phase ProgressPhase { get; set; }
 
     public SelectList Courses { get; set; }
     [BindProperty]
-    public Guid Id { get; set; }
+    public CourseId Id { get; set; } = CourseId.Empty;
     public string CourseName { get; set; }
 
 
@@ -50,15 +62,12 @@ public class CreateModel : BasePageModel
     public string Name { get; set; }
     [BindProperty]
     [DataType(DataType.DateTime)]
-    //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime DueDate { get; set; }
     [BindProperty]
     [DataType(DataType.DateTime)]
-    //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? UnlockDate { get; set; }
     [BindProperty]
     [DataType(DataType.DateTime)]
-    //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime? LockDate { get; set; }
     [BindProperty]
     public int AllowedAttempts { get; set; }
@@ -79,11 +88,16 @@ public class CreateModel : BasePageModel
 
     private async Task SetupCourseList()
     {
-        Result<List<CourseSelectListItemResponse>> courseRequest =
-            await _mediator.Send(new GetCoursesForSelectionListQuery());
+        _logger.Information("Requested to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
+
+        Result<List<CourseSelectListItemResponse>> courseRequest = await _mediator.Send(new GetCoursesForSelectionListQuery());
 
         if (courseRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), courseRequest.Error, true)
+                .Warning("Failed to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 courseRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -103,7 +117,7 @@ public class CreateModel : BasePageModel
     {
         await SetupCourseList();
 
-        if (Id == Guid.Empty)
+        if (Id == CourseId.Empty)
         {
             ModelState.AddModelError(nameof(CourseId), "You must select a valid course");
 
@@ -121,12 +135,16 @@ public class CreateModel : BasePageModel
 
     private async Task SetupAssignmentList()
     {
-        CourseId courseId = CourseId.FromValue(Id);
+        _logger.Information("Requested to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
 
-        Result<CourseSummaryResponse> courseRequest = await _mediator.Send(new GetCourseSummaryQuery(courseId));
+        Result<CourseSummaryResponse> courseRequest = await _mediator.Send(new GetCourseSummaryQuery(Id));
 
         if (courseRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), courseRequest.Error, true)
+                .Warning("Failed to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 courseRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -136,10 +154,16 @@ public class CreateModel : BasePageModel
 
         CourseName = $"{courseRequest.Value.Grade.AsName()} {courseRequest.Value.Name}";
 
-        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(courseId));
+        _logger.Information("Requested to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
+
+        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(Id));
 
         if (canvasAssignmentsRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), canvasAssignmentsRequest.Error, true)
+                .Warning("Failed to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 canvasAssignmentsRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -160,8 +184,6 @@ public class CreateModel : BasePageModel
 
     public async Task OnPostStepTwo()
     {
-        CourseId courseId = CourseId.FromValue(Id);
-
         if (CanvasAssignmentId == 0)
         {
             ModelState.AddModelError(nameof(CanvasAssignmentId), "You must select a valid Canvas Assignment");
@@ -173,11 +195,17 @@ public class CreateModel : BasePageModel
             ProgressPhase = Phase.SelectAssignment;
             return;
         }
-        
-        Result<CourseSummaryResponse> courseRequest = await _mediator.Send(new GetCourseSummaryQuery(courseId));
+
+        _logger.Information("Requested to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
+
+        Result<CourseSummaryResponse> courseRequest = await _mediator.Send(new GetCourseSummaryQuery(Id));
 
         if (courseRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), courseRequest.Error, true)
+                .Warning("Failed to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 courseRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -187,10 +215,16 @@ public class CreateModel : BasePageModel
 
         CourseName = $"{courseRequest.Value.Grade.AsName()} {courseRequest.Value.Name}";
 
-        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(courseId));
+        _logger.Information("Requested to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
+        
+        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(Id));
 
         if (canvasAssignmentsRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), canvasAssignmentsRequest.Error, true)
+                .Warning("Failed to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 canvasAssignmentsRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
@@ -224,10 +258,8 @@ public class CreateModel : BasePageModel
     
     public async Task<IActionResult> OnPostSubmit()
     {
-        CourseId courseId = CourseId.FromValue(Id);
-
         CreateAssignmentCommand command = new(
-            courseId,
+            Id,
             Name,
             CanvasAssignmentId,
             DueDate,
@@ -237,10 +269,18 @@ public class CreateModel : BasePageModel
             DelayForwarding,
             ForwardingDate);
 
+        _logger
+            .ForContext(nameof(CreateAssignmentCommand), command, true)
+            .Information("Requested to create new Assignment by user {User}", _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to create new Assignment by user {User}", _currentUserService.UserName);
+
             if (result is IValidationResult validationResult)
             {
                 ModalContent = new ErrorDisplay(
