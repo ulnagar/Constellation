@@ -9,7 +9,7 @@ using Constellation.Core.ValueObjects;
 public sealed record CreateAwardNominationCommand(
     AwardNominationPeriodId PeriodId,
     AwardType AwardType,
-    CourseId? CourseId,
+    CourseId CourseId,
     OfferingId OfferingId,
     string StudentId)
     : ICommand;

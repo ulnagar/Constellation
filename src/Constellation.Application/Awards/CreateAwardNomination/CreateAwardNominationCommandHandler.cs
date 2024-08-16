@@ -11,6 +11,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Threading;
@@ -52,7 +53,7 @@ internal sealed class CreateAwardNominationCommandHandler
             return Result.Failure(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId));
         }
         
-        Course? course = request.CourseId is not null ? await _courseRepository.GetById(request.CourseId, cancellationToken) : null;
+        Course? course = request.CourseId != CourseId.Empty ? await _courseRepository.GetById(request.CourseId, cancellationToken) : null;
         Offering? offering = request.OfferingId != OfferingId.Empty ? await _offeringRepository.GetById(request.OfferingId, cancellationToken) : null;
 
         if (course is null)

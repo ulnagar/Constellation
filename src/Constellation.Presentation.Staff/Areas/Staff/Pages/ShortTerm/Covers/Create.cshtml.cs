@@ -67,6 +67,8 @@ public class CreateModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreate(CancellationToken cancellationToken)
     {
+        await PreparePage(cancellationToken);
+        
         CoveringTeacherRecord teacher = CoveringTeacherSelectionList.First(entry => entry.Id == CoveringTeacherId);
 
         CoverTeacherType? teacherType = teacher.Category switch
@@ -100,8 +102,6 @@ public class CreateModel : BasePageModel
 
             ModalContent = new ErrorDisplay(result.Error);
         
-            await PreparePage(cancellationToken);
-
             return Page();
         }
 

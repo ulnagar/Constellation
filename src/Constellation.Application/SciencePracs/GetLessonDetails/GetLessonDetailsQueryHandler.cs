@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
 using System;
@@ -94,7 +95,7 @@ internal sealed class GetLessonDetailsQueryHandler
 
         LessonDetailsResponse response = new(
             lesson.Id,
-            course?.Id,
+            course?.Id ?? CourseId.Empty,
             courseName,
             lesson.Name,
             lesson.DueDate,

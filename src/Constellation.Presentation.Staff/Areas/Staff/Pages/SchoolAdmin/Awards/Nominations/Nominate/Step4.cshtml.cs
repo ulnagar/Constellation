@@ -59,7 +59,7 @@ public class Step4Model : BasePageModel
 
     [BindProperty]
     [ModelBinder(typeof(ConstructorBinder))]
-    public CourseId? CourseId { get; set; }
+    public CourseId CourseId { get; set; } = CourseId.Empty;
 
     [BindProperty]
     [ModelBinder(typeof(ConstructorBinder))]
@@ -127,7 +127,7 @@ public class Step4Model : BasePageModel
             return Page();
         }
 
-        if (CourseId is not null)
+        if (CourseId != CourseId.Empty)
         {
             Result<List<CourseSelectListItemResponse>> coursesRequest = await _mediator.Send(new GetActiveCoursesListQuery());
 
@@ -145,8 +145,7 @@ public class Step4Model : BasePageModel
 
         if (OfferingId != OfferingId.Empty)
         {
-            Result<List<OfferingForSelectionList>> offeringRequest =
-                await _mediator.Send(new GetFilteredOfferingsForSelectionListQuery(new List<CourseId> { CourseId }));
+            Result<List<OfferingForSelectionList>> offeringRequest = await _mediator.Send(new GetFilteredOfferingsForSelectionListQuery(new List<CourseId> { CourseId }));
 
             if (offeringRequest.IsFailure)
             {
@@ -176,7 +175,7 @@ public class Step4Model : BasePageModel
 
             StudentsList = studentsRequest.Value.OrderBy(entry => entry.StudentName.SortOrder).ToList();
         }
-        else if (CourseId is not null && CourseId != CourseId.Empty)
+        else if (CourseId != CourseId.Empty)
         {
             Result<List<StudentForSelectionList>> studentsRequest = await _mediator.Send(new GetFilteredStudentsForSelectionListQuery(new List<Grade>(), new List<OfferingId>(), new List<CourseId> { CourseId }));
 

@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate.Step4Model
 
 @using Constellation.Core.Models.Offerings.Identifiers
+@using Constellation.Core.Models.Subjects.Identifiers
 @using Constellation.Core.ValueObjects
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -27,7 +28,7 @@
             </div>
         </div>
     
-        @if (Model.CourseId is not null)
+        @if (Model.CourseId != CourseId.Empty)
         {
             <div id="CourseSelect" class="form-group row">
                 <label asp-for="CourseId" class="col-md-2">Course</label>
