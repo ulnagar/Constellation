@@ -52,7 +52,7 @@ public class IndexModel : BasePageModel
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
     
     public async Task<IActionResult> OnGetCancel(
-        [ModelBinder(typeof(FromValueBinder))] ClassCoverId id, 
+        [ModelBinder(typeof(ConstructorBinder))] ClassCoverId id, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCovers);

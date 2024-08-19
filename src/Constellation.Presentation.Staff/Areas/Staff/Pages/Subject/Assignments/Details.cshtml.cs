@@ -99,7 +99,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetResubmit(
-        [ModelBinder(typeof(FromValueBinder))] AssignmentSubmissionId submission, 
+        [ModelBinder(typeof(ConstructorBinder))] AssignmentSubmissionId submission, 
         CancellationToken cancellationToken)
     {
         ResendAssignmentSubmissionToCanvasCommand command = new(Id, submission);
@@ -125,7 +125,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDownload(
-    [ModelBinder(typeof(FromValueBinder))] AssignmentSubmissionId submission, 
+    [ModelBinder(typeof(ConstructorBinder))] AssignmentSubmissionId submission, 
         CancellationToken cancellationToken)
     {
         GetAssignmentSubmissionFileQuery command = new(Id, submission);

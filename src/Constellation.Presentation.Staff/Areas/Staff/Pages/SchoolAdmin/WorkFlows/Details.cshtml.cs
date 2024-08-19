@@ -132,7 +132,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetCancelAction(
-        [ModelBinder(typeof(FromValueBinder))] ActionId actionId)
+        [ModelBinder(typeof(ConstructorBinder))] ActionId actionId)
     {
         CancelActionCommand command = new(Id, actionId);
 
@@ -174,7 +174,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAddActionNote(
-        [ModelBinder(typeof(FromValueBinder))] ActionId actionId, 
+        [ModelBinder(typeof(ConstructorBinder))] ActionId actionId, 
         string note)
     {
         AddActionNoteCommand command = new(Id, actionId, note);
@@ -220,7 +220,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostReassignAction(
-        [ModelBinder(typeof(FromValueBinder))] ActionId actionId, 
+        [ModelBinder(typeof(ConstructorBinder))] ActionId actionId, 
         string staffId)
     {
         ReassignActionCommand command = new(Id, actionId, staffId);
