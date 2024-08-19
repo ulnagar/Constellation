@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -46,6 +47,7 @@ public class UpsertModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
+    [ModelBinder(typeof(ConstructorBinder))]
     public CasualId Id { get; set; } = CasualId.Empty;
     
     [BindProperty]

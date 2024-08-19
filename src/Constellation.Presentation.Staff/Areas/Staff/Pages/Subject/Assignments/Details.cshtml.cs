@@ -48,7 +48,7 @@ public class DetailsModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(FromValueBinder))]
+    [ModelBinder(typeof(ConstructorBinder))]
     public AssignmentId Id { get; set; } = AssignmentId.Empty;
 
     public AssignmentResponse Assignment { get; set; }

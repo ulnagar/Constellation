@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -43,6 +44,7 @@ public class UpdateModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Class Cover";
     
     [BindProperty(SupportsGet = true)]
+    [ModelBinder(typeof(ConstructorBinder))]
     public ClassCoverId Id { get; set; } = ClassCoverId.Empty;
     public string OfferingName { get; set; }
     [BindProperty]
