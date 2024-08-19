@@ -14,62 +14,28 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Models;
+using Core.Models.SchoolContacts.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
-    private readonly IAssetRepository _assetRepository;
-    private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
-    private readonly IDateTimeProvider _dateTime;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ISchoolContactRepository _contactRepository;
+
 
     public IndexModel(
-        IMediator mediator,
-        IAssetRepository assetRepository,
-        IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
-        IDateTimeProvider dateTime,
-        IUnitOfWork unitOfWork)
+        ISchoolContactRepository contactRepository)
     {
-        _mediator = mediator;
-        _assetRepository = assetRepository;
-        _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
-        _dateTime = dateTime;
-        _unitOfWork = unitOfWork;
+        _contactRepository = contactRepository;
     }
 
-    [BindProperty]
-    [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
-    public IFormFile UploadFile { get; set; }
 
     public string Message { get; set; } = string.Empty;
 
-    public void OnGet() { }
-
-    public async Task OnPostImportFile()
+    public async Task OnGet()
     {
-        if (UploadFile is not null)
-        {
-            try
-            {
-                await using MemoryStream target = new();
-                await UploadFile.CopyToAsync(target);
+        var contact = await _contactRepository.GetByNameAndSchool("Timothy Lloyd", "2114", default);
 
-                Result request = await _mediator.Send(new ImportAssetsFromFileCommand(target));
-
-                if (request.IsFailure)
-                {
-                    ModalContent = new ErrorDisplay(request.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                ModalContent = new ErrorDisplay(new(ex.Source, ex.Message));
-            }
-        }
+        Message = contact?.EmailAddress;
     }
 }

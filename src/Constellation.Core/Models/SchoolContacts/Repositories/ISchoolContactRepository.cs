@@ -19,7 +19,7 @@ public interface ISchoolContactRepository
     Task<List<SchoolContact>> GetByGrade(Grade grade, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetBySchoolAndRole(string schoolCode, string selectedRole, CancellationToken cancellationToken = default);
     Task<SchoolContact> GetById(SchoolContactId contactId, CancellationToken cancellationToken = default);
-    Task<SchoolContact> GetByName(string name, CancellationToken cancellationToken = default);
+    Task<SchoolContact> GetByNameAndSchool(string name, string schoolCode, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetAllByRole(string selectedRole, CancellationToken cancellationToken = default);
     Task<List<string>> GetAvailableRoleList(CancellationToken cancellationToken = default);
     void Insert(SchoolContact schoolContact);

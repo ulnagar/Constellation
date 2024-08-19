@@ -100,7 +100,7 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        SchoolContact contact = await _contactRepository.GetByName(submission.SubmittedBy, cancellationToken);
+        SchoolContact contact = await _contactRepository.GetByNameAndSchool(submission.SubmittedBy, student.SchoolCode, cancellationToken);
 
         if (contact is null)
         {

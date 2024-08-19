@@ -48,12 +48,19 @@ public class SchoolContactRepository : ISchoolContactRepository
             .Set<SchoolContact>()
             .SingleOrDefaultAsync(entry => entry.Id == contactId, cancellationToken);
 
-    public async Task<SchoolContact> GetByName(
+    public async Task<SchoolContact> GetByNameAndSchool(
         string name,
+        string schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
-            .SingleOrDefaultAsync(entry => name.Contains(entry.FirstName) && name.Contains(entry.LastName), cancellationToken);
+            .Where(entry => 
+                name.Contains(entry.FirstName) && 
+                name.Contains(entry.LastName) &&
+                entry.Assignments.Any(role =>
+                    !role.IsDeleted &&
+                    role.SchoolCode == schoolCode))
+            .SingleOrDefaultAsync(cancellationToken);
     
     public async Task<List<SchoolContact>> GetPrincipalsForSchool(
         string schoolCode,
