@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Canvas.Models;
 
 using Newtonsoft.Json;
+using Persistence.ConstellationContext.Migrations;
 using System.Collections.Generic;
 
 internal class AssignmentResult

@@ -380,6 +380,99 @@ internal sealed class Gateway : ICanvasGateway
         return returnData;
     }
 
+    public async Task<RubricEntry> GetCourseAssignmentDetails(
+        CanvasCourseCode courseId,
+        int assignmentId,
+        CancellationToken cancellationToken = default)
+    {
+        string path = $"courses/sis_course_id:{courseId}/assignments/{assignmentId}";
+
+        if (_logOnly)
+        {
+            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
+
+            return null;
+        }
+
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        AssignmentSettingsResult assessmentSettings = JsonConvert.DeserializeObject<AssignmentSettingsResult>(responseText);
+
+        List<RubricEntry.RubricCriterion> criteria = new();
+
+        foreach (AssignmentSettingsResult.RubricItem criterion in assessmentSettings.Rubric)
+        {
+            List<RubricEntry.RubricCriterionRating> ratings = new();
+
+            foreach (AssignmentSettingsResult.RubricItem rating in criterion.Ratings)
+            {
+                ratings.Add(new(
+                    rating.Id,
+                    rating.Points,
+                    rating.Description,
+                    rating.LongDescription));
+            }
+
+            criteria.Add(new(
+                criterion.Id,
+                criterion.Points,
+                criterion.Description,
+                criterion.LongDescription,
+                ratings));
+        }
+
+        return new RubricEntry(
+            assessmentSettings.Settings.Id,
+            assessmentSettings.Settings.Title,
+            assessmentSettings.Settings.PointsPossible,
+            criteria);
+    }
+
+    public async Task<List<AssignmentResultEntry>> GetCourseAssignmentSubmissions(
+        CanvasCourseCode courseId,
+        int assignmentId,
+        CancellationToken cancellationToken = default)
+    {
+        List<AssignmentResultEntry> results = new();
+        
+        string path = $"courses/sis_course_id:{courseId}/assignments/{assignmentId}/submissions?include[]=rubric_assessment";
+
+        if (_logOnly)
+        {
+            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
+
+            return results;
+        }
+
+        List<AssignmentSubmission> submissions = await RequestAsync<AssignmentSubmission>(path, cancellationToken: cancellationToken);
+        
+        foreach (AssignmentSubmission submission in submissions)
+        {
+            List<AssignmentResultEntry.AssignmentRubricResult> marks = new();
+
+            foreach (KeyValuePair<string, AssignmentSubmission.RubricValue> mark in submission.RubricAssessment)
+            {
+                marks.Add(new(
+                    mark.Key,
+                    mark.Value.RatingId,
+                    mark.Value.Comments,
+                    mark.Value.Points));
+            }
+            
+            results.Add(new(
+                submission.AssignmentId,
+                courseId,
+                submission.UserId,
+                marks));
+        }
+
+        return results;
+    } 
+
     public async Task<bool> CreateUser(
         string userId,
         string firstName,
@@ -797,6 +890,7 @@ internal sealed class Gateway : ICanvasGateway
                 courseId,
                 enrolment.SectionId is null ? CanvasSectionCode.Empty : CanvasSectionCode.FromValue(enrolment.SectionId),
                 enrolment.SISId,
+                enrolment.User.CanvasUserId,
                 userType,
                 role));
         }

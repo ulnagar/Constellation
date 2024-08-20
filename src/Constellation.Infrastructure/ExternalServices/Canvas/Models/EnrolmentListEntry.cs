@@ -24,6 +24,9 @@ internal sealed class EnrolmentListEntry
 
     internal class EnrolmentResultUser
     {
+        [JsonProperty("id")]
+        public int CanvasUserId { get; set; }
+
         [JsonProperty("login_id")]
         public string EmailAddress { get; set; }
     }

@@ -7,6 +7,7 @@ public sealed record CourseEnrolmentEntry(
     CanvasCourseCode CourseCode,
     CanvasSectionCode SectionCode,
     string UserId,
+    int CanvasUserId,
     CourseEnrolmentEntry.UserType Type,
     CourseEnrolmentEntry.EnrolmentRole Role)
 {

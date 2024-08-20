@@ -35,7 +35,9 @@ public interface ICanvasGateway
     Task<bool> UnenrolUser(int enrollmentId, CanvasCourseCode courseId, CancellationToken cancellationToken = default);
     Task<bool> DeleteUser(string userId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
+    Task<RubricEntry> GetCourseAssignmentDetails(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
     Task<bool> UploadAssignmentSubmission(CanvasCourseCode courseId, int canvasAssignmentId, string studentId, AttachmentResponse file, CancellationToken cancellationToken = default);
+    Task<List<AssignmentResultEntry>> GetCourseAssignmentSubmissions(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
 
     Task<List<CourseListEntry>> GetAllCourses(string year, CancellationToken cancellationToken = default);
     Task<List<CourseEnrolmentEntry>> GetEnrolmentsForCourse(CanvasCourseCode courseId, CancellationToken cancellationToken = default);

@@ -1,41 +1,39 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.DTOs.Canvas;
+using Application.Interfaces.Gateways;
 using BaseModels;
-using Constellation.Application.Assets.ImportAssetsFromFile;
-using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models.Assets.Enums;
-using Constellation.Core.Models.Assets.Repositories;
-using Constellation.Core.Models.Assets.ValueObjects;
-using Constellation.Core.Models.Assets;
-using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.Attributes;
-using Core.Models;
-using Core.Models.SchoolContacts.Repositories;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using Core.Models.Canvas.Models;
 
 public class IndexModel : BasePageModel
 {
-    private readonly ISchoolContactRepository _contactRepository;
+    private readonly ICanvasGateway _gateway;
 
 
     public IndexModel(
-        ISchoolContactRepository contactRepository)
+        ICanvasGateway gateway)
     {
-        _contactRepository = contactRepository;
+        _gateway = gateway;
     }
 
-
-    public string Message { get; set; } = string.Empty;
-
+    public RubricEntry Rubric { get; set; }
+    public List<CourseEnrolmentEntry> Enrolments { get; set; } = new();
+    public List<AssignmentResultEntry> Submissions { get; set; } = new();
+    
     public async Task OnGet()
     {
-        var contact = await _contactRepository.GetByNameAndSchool("Timothy Lloyd", "2114", default);
+    }
 
-        Message = contact?.EmailAddress;
+    public async Task OnGetGetAssignment()
+    {
+        CanvasCourseCode courseCode = CanvasCourseCode.FromValue("2024-08ENG");
+        int assignmentId = 1154;
+
+        Rubric = await _gateway.GetCourseAssignmentDetails(courseCode, assignmentId, default);
+
+        Enrolments = await _gateway.GetEnrolmentsForCourse(courseCode, default);
+
+        Submissions = await _gateway.GetCourseAssignmentSubmissions(courseCode, assignmentId, default);
+        
     }
 }

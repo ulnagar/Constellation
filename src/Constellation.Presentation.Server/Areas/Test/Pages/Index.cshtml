@@ -1,5 +1,5 @@
 ﻿@page
-@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Constellation.Application.DTOs.Canvas
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 @inject EndpointDataSource EndpointsDataSource
@@ -7,35 +7,60 @@
 <h2>Test Page</h2>
 
 <div>
-    @Model.Message
+    <a asp-page-handler="GetAssignment" class="btn btn-primary">Get Assignment</a>
 </div>
 
+<hr />
 
-<table class="table table-striped data-table">
-    <thead>
-    <tr>
-        <th>Area Name</th>
-        <th>Display Name</th>
-        <th>Relative Path</th>
-        <th>View Engine Path</th>
-    </tr>
-    </thead>
-    <tbody>
-        @foreach (var endpoint in EndpointsDataSource.Endpoints)
-        {
-            foreach (var metadata in endpoint.Metadata)
+@if (Model.Rubric is not null)
+{
+    <table class="table data-table">
+        <thead>
+        <tr>
+            <th>Student</th>
+            @foreach (var entry in Model.Rubric.Criteria)
             {
-                if (metadata is PageActionDescriptor descriptor)
-                {
-                    <tr>
-                        <td>@descriptor.AreaName</td>
-                        <td>@descriptor.DisplayName</td>
-                        <td>@descriptor.RelativePath</td>
-                        <td>@descriptor.ViewEnginePath</td>
-                    </tr>
-                }
+                <th>
+                    @entry.CriterionId <br />
+                    @entry.Name <br />
+                    @entry.Description <br />
+                    @entry.MaxPoints
+                </th>
             }
-        }
-    </tbody>
-</table>
+            <th>Total Mark</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var student in Model.Enrolments.Where(entry => entry.Role == CourseEnrolmentEntry.EnrolmentRole.Student))
+        {
+            var submission = Model.Submissions.FirstOrDefault(entry => entry.UserId == student.CanvasUserId);
+            double score = 0f;
 
+            <tr>
+                <td>@student.UserId</td>
+                @foreach (var entry in Model.Rubric.Criteria)
+                {
+                    var mark = submission?.Marks.FirstOrDefault(mark => mark.CriterionId == entry.CriterionId);
+                    var rating = mark is not null ? entry.Ratings.FirstOrDefault(rating => rating.RatingId == mark.RatingId) : null;
+
+                    if (submission is null || mark is null || rating is null)
+                    {
+                        <td></td>
+                    }
+                    else
+                    {
+                        score += mark.Points ?? 0f;
+
+                        <td>
+                            @rating.Name <br />
+                            @rating.Description <br />
+                            @rating.Points
+                        </td>
+                    }
+                }
+                <td>@score</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
