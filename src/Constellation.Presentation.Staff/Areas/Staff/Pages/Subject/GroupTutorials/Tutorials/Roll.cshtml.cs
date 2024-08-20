@@ -14,6 +14,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.Components.TutorialRollAddStudent;
 
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
@@ -23,26 +26,35 @@ public class RollModel : BasePageModel
     private readonly ICurrentUserService _currentUserService;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authorizationService;
+    private readonly ILogger _logger;
 
     public RollModel(
         ISender mediator,
         ICurrentUserService currentUserService,
         LinkGenerator linkGenerator,
-        IAuthorizationService authorizationService)
+        IAuthorizationService authorizationService,
+        ILogger logger)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;
         _linkGenerator = linkGenerator;
         _authorizationService = authorizationService;
+        _logger = logger
+            .ForContext<RollModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_GroupTutorials_Tutorials;
+    [ViewData] public string PageTitle { get; set; } = "Group Tutorial Roll";
+
 
     [BindProperty(SupportsGet = true)]
-    public Guid TutorialId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public GroupTutorialId TutorialId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Guid RollId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public TutorialRollId RollId { get; set; }
 
     [BindProperty(SupportsGet = true)]
     public string Mode { get; set; }
@@ -59,7 +71,7 @@ public class RollModel : BasePageModel
     {
         if (Mode == "Edit")
         {
-            var isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
+            AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
 
             if (!isAuthorised.Succeeded)
             {
@@ -67,93 +79,149 @@ public class RollModel : BasePageModel
             }
         }
 
-        await GetPageInformation();
+        await PreparePage();
 
         return Page();
     }
 
     public async Task<IActionResult> OnPostSubmit()
     {
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
-
-        if (!isAuthorised.Succeeded)
-            return ShowError(DomainErrors.Permissions.Unauthorised);
-
         string emailAddress = _currentUserService.EmailAddress;
 
         Dictionary<string, bool> studentData = Students.ToDictionary(k => k.StudentId, k => k.Present);
 
-        Result result = await _mediator.Send(new SubmitRollCommand(
-            GroupTutorialId.FromValue(TutorialId),
-            TutorialRollId.FromValue(RollId),
+        SubmitRollCommand command = new(
+            TutorialId,
+            RollId,
             emailAddress,
-            studentData));
+            studentData);
+
+        _logger
+            .ForContext(nameof(SubmitRollCommand), command, true)
+            .Information("Requested to submit Group Tutorial Roll by user {User}", _currentUserService.UserName);
+        
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
+
+        if (!isAuthorised.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to submit Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
+            return ShowError(DomainErrors.Permissions.Unauthorised);
+        }
+
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to submit Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
+        }
 
         return RedirectToPage("/Subject/GroupTutorials/Tutorials/Details", new { area = "Staff", Id = TutorialId });
     }
 
     public async Task<IActionResult> OnPostAddStudent()
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
+        AddStudentToTutorialRollCommand command = new(TutorialId, RollId, AddStudentSelection.StudentId);
+
+        _logger
+            .ForContext(nameof(AddStudentToTutorialRollCommand), command, true)
+            .Information("Requested to add student to Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
 
         if (!isAuthorised.Succeeded)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to add student to Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
         if (string.IsNullOrWhiteSpace(AddStudentSelection.StudentId))
         {
-            await GetPageInformation();
+            _logger
+                .ForContext(nameof(Error), DomainErrors.GroupTutorials.TutorialRoll.StudentNotFound(AddStudentSelection.StudentId), true)
+                .Warning("Failed to add student to Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
             return Page();
         }
 
-        var result = await _mediator.Send(new AddStudentToTutorialRollCommand(GroupTutorialId.FromValue(TutorialId), TutorialRollId.FromValue(RollId), AddStudentSelection.StudentId));
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add student to Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
 
         AddStudentSelection = new();
 
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Roll", new { area = "Staff", TutorialId, RollId, Mode });
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnGetRemoveStudent(string studentId)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
+        RemoveStudentFromTutorialRollCommand command = new(TutorialId, RollId, studentId);
+
+        _logger
+            .ForContext(nameof(RemoveStudentFromTutorialRollCommand), command, true)
+            .Information("Requested to remove student from Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, TutorialId, AuthPolicies.CanSubmitGroupTutorialRolls);
 
         if (!isAuthorised.Succeeded)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to remove student from Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        var result = await _mediator.Send(new RemoveStudentFromTutorialRollCommand(GroupTutorialId.FromValue(TutorialId), TutorialRollId.FromValue(RollId), studentId));
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove student from Group Tutorial Roll by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
 
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Roll", new { area = "Staff", TutorialId, RollId, Mode });
+        return RedirectToPage();
     }
 
-    private async Task GetPageInformation()
+    private async Task PreparePage()
     {
-        var rollResult = await _mediator.Send(new GetTutorialRollWithDetailsByIdQuery(GroupTutorialId.FromValue(TutorialId), TutorialRollId.FromValue(RollId)));
+        _logger.Information("Requested to retrieve Group Tutorial Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
+
+        Result<TutorialRollDetailResponse> rollResult = await _mediator.Send(new GetTutorialRollWithDetailsByIdQuery(TutorialId, RollId));
 
         if (rollResult.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), rollResult.Error, true)
+                .Warning("Failed to retrieve Group Tutorial Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
+            
             ModalContent = new ErrorDisplay(
                 rollResult.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
             Roll = new(
-                TutorialRollId.FromValue(RollId),
-                GroupTutorialId.FromValue(TutorialId),
+                RollId,
+                TutorialId,
                 string.Empty,
                 DateOnly.MinValue,
                 string.Empty,
@@ -175,8 +243,8 @@ public class RollModel : BasePageModel
             _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Roll", values: new { area = "Staff", TutorialId, RollId, Mode }));
 
         Roll = new(
-            TutorialRollId.FromValue(RollId),
-            GroupTutorialId.FromValue(TutorialId),
+            RollId,
+            TutorialId,
             string.Empty,
             DateOnly.MinValue,
             string.Empty,

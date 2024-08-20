@@ -77,18 +77,19 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             IsDeleted;
 
         if (hasEndedOrBeenDeleted)
-        {
             return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired);
-        }
+
+        if (effectiveTo.HasValue && effectiveTo.Value < DateOnly.FromDateTime(DateTime.Today))
+            return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.TutorialTeacher.TimeExpired);
 
         if (_teachers.Any(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted))
         {
-            var existingEntry = _teachers.FirstOrDefault(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted);
+            TutorialTeacher existingEntry = _teachers.FirstOrDefault(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted);
 
             return existingEntry;
         }
 
-        var entry = new TutorialTeacher(new TutorialTeacherId(), teacher.StaffId, effectiveTo);
+        TutorialTeacher entry = new TutorialTeacher(new TutorialTeacherId(), teacher.StaffId, effectiveTo);
 
         RaiseDomainEvent(new TeacherAddedToGroupTutorialDomainEvent(new DomainEventId(), Id, entry.Id));
 
@@ -130,18 +131,19 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
             IsDeleted;
 
         if (hasEndedOrBeenDeleted)
-        {
             return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.GroupTutorial.TutorialHasExpired);
-        }
+
+        if (effectiveTo.HasValue && effectiveTo.Value < DateOnly.FromDateTime(DateTime.Today))
+            return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.TutorialEnrolment.TimeExpired);
 
         if (_enrolments.Any(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted))
         {
-            var existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted);
+            TutorialEnrolment existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted);
 
             return existingEntry;
         }
 
-        var enrolment = new TutorialEnrolment(new TutorialEnrolmentId(), student, effectiveTo);
+        TutorialEnrolment enrolment = new TutorialEnrolment(new TutorialEnrolmentId(), student, effectiveTo);
 
         RaiseDomainEvent(new StudentAddedToGroupTutorialDomainEvent(new DomainEventId(), Id, enrolment.Id));
 

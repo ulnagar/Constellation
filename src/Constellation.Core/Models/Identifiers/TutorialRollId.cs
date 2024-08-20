@@ -2,8 +2,10 @@
 
 using System;
 
-public sealed record TutorialRollId(Guid Value)
+public record struct TutorialRollId(Guid Value)
 {
+    public static TutorialRollId Empty => new(Guid.Empty);
+
     public static TutorialRollId FromValue(Guid value) =>
         new(value);
 

@@ -12,7 +12,7 @@
 
 <div class="page-menu">
     @if (canSubmitTest.Succeeded && 
-        Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted && 
+        Model.Roll.Status == TutorialRollStatus.Unsubmitted && 
         Model.Mode == "View")
     {
         <a asp-page="/Subject/GroupTutorials/Tutorials/Roll" asp-area="Staff" asp-route-tutorialId="@Model.TutorialId" asp-route-rollId="@Model.RollId" asp-route-mode="Edit" class="btn btn-warning">Submit Roll</a>
@@ -53,7 +53,7 @@
             <h3>Students</h3>
 
             @if (canSubmitTest.Succeeded &&
-                 Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted &&
+                 Model.Roll.Status == TutorialRollStatus.Unsubmitted &&
                  Model.Mode == "View")
             {
                 <div>
@@ -115,7 +115,7 @@
                                 </td>
                                 <td>
                                     @if (canSubmitTest.Succeeded &&
-                                         Model.Roll.Status == Constellation.Core.Enums.TutorialRollStatus.Unsubmitted &&
+                                         Model.Roll.Status == TutorialRollStatus.Unsubmitted &&
                                          Model.Mode == "View" &&
                                          !details.Enrolled)
                                     {
@@ -146,12 +146,6 @@
 @section scripts
 {
     <script>
-        $('#rollAddStudentSubmitButton').click(function (e) {
-            e.preventDefault();
-            $('#rollAddStudentModal').modal('hide');
-            $('#rollAddStudentForm').submit();
-        });
-
         var table = $('.data-table-no-page')
             .DataTable({
                 "order": [],

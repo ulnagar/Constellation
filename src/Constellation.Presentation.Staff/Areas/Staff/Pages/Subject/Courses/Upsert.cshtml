@@ -1,10 +1,11 @@
-﻿@page "{id:guid?}"
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses.UpsertModel
 
 @using Constellation.Core.Enums;
+@using Constellation.Core.Models.Subjects.Identifiers
 
 @{
-    var title = Model.Id.HasValue ? "Edit Course" : "Create New Course";
+    var title = Model.Id != CourseId.Empty ? "Edit Course" : "Create New Course";
 }
 
 <h2>@title</h2>
@@ -49,7 +50,7 @@
         <div class="form-group row">
             <label asp-for="FacultyId" class="col-md-2">Faculty</label>
             <div class="col-md-5">
-                @if (Model.Id.HasValue)
+                @if (Model.Id != CourseId.Empty)
                 {
                     <select asp-for="FacultyId" asp-items="@(new SelectList(Model.Faculties, "FacultyId", "Name", Model.FacultyId))" class="form-control combo">
                         <option value="">-- Select --</option>
@@ -76,7 +77,7 @@
 
         <div class="form-group">
             <div class="col-md-3">
-                @if (Model.Id.HasValue)
+                @if (Model.Id != CourseId.Empty)
                 {
                     <input asp-page-handler="Update" type="submit" value="Update" class="btn btn-primary btn-block btn-lg" />
                 }

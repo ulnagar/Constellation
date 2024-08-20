@@ -232,6 +232,10 @@ public static class DomainErrors
             public static readonly Error NotFound = new(
                 "GroupTutorials.TutorialTeacher.EntryNotFound",
                 "There is no corresponding teacher record for that tutorial");
+
+            public static readonly Error TimeExpired = new(
+                "GroupTutorials.TutorialTeacher.TimeExpired",
+                "The limited access window for this teacher has expired");
         }
 
         public static class TutorialEnrolment
@@ -243,6 +247,10 @@ public static class DomainErrors
             public static readonly Error StudentAlreadyEnrolled = new(
                 "GroupTutorials.TutorialEnrolment.StudentAlreadyEnrolled",
                 "The student is already actively enrolled in this tutorial");
+
+            public static readonly Error TimeExpired = new(
+                "GroupTutorials.TutorialEnrolment.TimeExpired",
+                "The limited access window for this student has expired");
         }
 
         public static class TutorialRoll

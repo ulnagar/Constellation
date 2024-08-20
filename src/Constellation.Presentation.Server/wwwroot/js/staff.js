@@ -47,6 +47,7 @@
 
     // Add the showLoader function to any nav links
     $('a.showLoader').on('click', showLoader);
+    $('input.showLoader').on('click', showLoader);
     $('a.nav-link:not(.dropdown-toggle):not([role="tab"])').on('click', showLoader);
     $('a.dropdown-item').on('click', showLoader);
     $('a.btn').on('click', showLoader);

@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials;
 
+using Application.DTOs;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.GroupTutorials.AddStudentToTutorial;
 using Constellation.Application.GroupTutorials.AddTeacherToTutorial;
@@ -12,13 +13,19 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using Shared.Components.TutorialRollCreate;
 using Shared.Components.TutorialStudentEnrolment;
 using Shared.Components.TutorialTeacherAssignment;
+using Shared.PartialViews.RemoveStudentFromTutorialModal;
+using Shared.PartialViews.RemoveTeacherFromTutorialModal;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
@@ -27,241 +34,298 @@ public class DetailsModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IAuthorizationService _authorizationService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public DetailsModel(
         ISender mediator,
         LinkGenerator linkGenerator,
-        IAuthorizationService authorizationService)
+        IAuthorizationService authorizationService,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _authorizationService = authorizationService;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DetailsModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_GroupTutorials_Tutorials;
+    [ViewData] public string PageTitle { get; set; } = "Tutorial Details";
+
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
-
-    [BindProperty]
-    public TutorialStudentEnrolmentSelection StudentEnrolment { get; set; }
-
-    [BindProperty]
-    public TutorialStudentRemovalSelection? StudentRemoval { get; set; }
-
-    [BindProperty]
-    public TutorialTeacherAssignmentSelection TeacherAssignment { get; set; }
-
-    [BindProperty]
-    public TutorialTeacherRemovalSelection? TeacherRemoval { get; set; }
-
-    [BindProperty]
-    public TutorialRollCreateSelection RollCreate { get; set; }
-
+    [ModelBinder(typeof(ConstructorBinder))]
+    public GroupTutorialId Id { get; set; } = GroupTutorialId.Empty;
+    
     public GroupTutorialDetailResponse Tutorial { get; set; }
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
     {
-        await GetPageInformation(cancellationToken);
+        await PreparePage(cancellationToken);
 
         return Page();
     }
 
-    public async Task<IActionResult> OnPostEnrolStudent()
+    public async Task<IActionResult> OnPostEnrolStudent(
+        TutorialStudentEnrolmentSelection viewModel)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        DateOnly? effectiveDate = (viewModel.LimitedTime) ? DateOnly.FromDateTime(viewModel.EffectiveTo) : null;
+
+        AddStudentToTutorialCommand command = new(Id, viewModel.StudentId, effectiveDate);
+
+        _logger
+            .ForContext(nameof(AddStudentToTutorialCommand), command, true)
+            .Information("Requested to enrol student in Group Tutorial by user {User}", _currentUserService.UserName);
+
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
 
         if (!isAuthorised.Succeeded)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to enrol student in Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        if (string.IsNullOrWhiteSpace(StudentEnrolment.StudentId))
+        if (string.IsNullOrWhiteSpace(viewModel.StudentId))
         {
-            await GetPageInformation();
+            _logger
+                .ForContext(nameof(Error), ValidationErrors.String.RequiredIsNull(nameof(viewModel.StudentId)), true)
+                .Warning("Failed to enrol student in Group Tutorial by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
             return Page();
         }
-
-        DateOnly? effectiveDate = (StudentEnrolment.LimitedTime) ? DateOnly.FromDateTime(StudentEnrolment.EffectiveTo) : null;
-
-        var result = await _mediator.Send(new AddStudentToTutorialCommand(GroupTutorialId.FromValue(Id), StudentEnrolment.StudentId, effectiveDate));
+        
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to enrol student in Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
-
-        StudentEnrolment = new();
-
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Details", new { area = "Staff", Id });
+        
+        return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostAssignTeacher()
+    public async Task<IActionResult> OnPostAssignTeacher(
+        TutorialTeacherAssignmentSelection viewModel)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        DateOnly? effectiveDate = (viewModel.LimitedTime) ? DateOnly.FromDateTime(viewModel.EffectiveTo) : null;
+
+        AddTeacherToTutorialCommand command = new(Id, viewModel.StaffId, effectiveDate);
+
+        _logger
+            .ForContext(nameof(AddTeacherToTutorialCommand), command, true)
+            .Information("Requested to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
+
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
 
         if (!isAuthorised.Succeeded)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        if (string.IsNullOrWhiteSpace(TeacherAssignment.StaffId))
+        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
         {
-            await GetPageInformation();
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
             return Page();
         }
-
-        DateOnly? effectiveDate = (TeacherAssignment.LimitedTime) ? DateOnly.FromDateTime(TeacherAssignment.EffectiveTo) : null;
-
-        var result = await _mediator.Send(new AddTeacherToTutorialCommand(GroupTutorialId.FromValue(Id), TeacherAssignment.StaffId, effectiveDate));
+        
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
 
-        TeacherAssignment = new();
-
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Details", new { area = "Staff", Id });
+        return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetRemoveTeacher(Guid teacherId)
+    public async Task<IActionResult> OnPostAjaxRemoveTeacher(
+        [ModelBinder(typeof(ConstructorBinder))] TutorialTeacherId teacherId)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        Result<GroupTutorialDetailResponse> result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(Id));
 
-        if (!isAuthorised.Succeeded)
+        if (result.IsFailure)
+            return Content(string.Empty);
+
+        TutorialTeacherResponse? teacherRecord = result.Value.Teachers.FirstOrDefault(teacher => teacher.Id == teacherId);
+
+        if (teacherRecord is null)
+            return Content(string.Empty);
+
+        RemoveTeacherFromTutorialModalViewModel viewModel = new()
         {
-            return ShowError(DomainErrors.Permissions.Unauthorised);
-        }
-
-        await GetPageInformation();
-
-        var teacherIdObject = TutorialTeacherId.FromValue(teacherId);
-
-        var teacherRecord = Tutorial.Teachers.FirstOrDefault(teacher => teacher.Id == teacherIdObject);
-
-        if (teacherRecord == null)
-        {
-            return ShowError(DomainErrors.GroupTutorials.TutorialTeacher.NotFound);
-        }
-
-        TeacherRemoval = new()
-        {
-            Id = teacherId,
+            Id = teacherRecord.Id, 
             Name = teacherRecord.Name
         };
 
-        return Page();
+        return Partial("RemoveTeacherFromTutorialModal", viewModel);
     }
 
-    public async Task<IActionResult> OnPostRemoveTeacher()
+    public async Task<IActionResult> OnPostRemoveTeacher(
+        RemoveTeacherFromTutorialModalViewModel viewModel)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        DateOnly? effectiveDate = (!viewModel.Immediate) ? DateOnly.FromDateTime(viewModel.EffectiveOn) : null;
 
-        if (!isAuthorised.Succeeded)
-        {
-            return ShowError(DomainErrors.Permissions.Unauthorised);
-        }
+        RemoveTeacherFromTutorialCommand command = new(Id, viewModel.Id, effectiveDate);
 
-        DateOnly? effectiveDate = (!TeacherRemoval.Immediate) ? DateOnly.FromDateTime(TeacherRemoval.EffectiveOn) : null;
+        _logger
+            .ForContext(nameof(RemoveTeacherFromTutorialCommand), command, true)
+            .Information("Requested to remove teacher from Group Tutorial by user {User}", _currentUserService.UserName);
 
-        var result = await _mediator.Send(new RemoveTeacherFromTutorialCommand(GroupTutorialId.FromValue(Id), TutorialTeacherId.FromValue(TeacherRemoval.Id), effectiveDate));
-
-        TeacherRemoval = null;
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove teacher from Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
 
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Details", new { area = "Staff", Id = Id });
+        return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetRemoveStudent(Guid enrolmentId)
+    public async Task<IActionResult> OnPostAjaxRemoveStudent(
+        [ModelBinder(typeof(ConstructorBinder))] TutorialEnrolmentId enrolmentId)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        Result<GroupTutorialDetailResponse> result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(Id));
 
-        if (!isAuthorised.Succeeded)
-        {
-            return ShowError(DomainErrors.Permissions.Unauthorised);
-        }
+        if (result.IsFailure)
+            return Content(string.Empty);
 
-        await GetPageInformation();
+        TutorialEnrolmentResponse? enrolmentRecord = result.Value.Students.FirstOrDefault(enrolment => enrolment.Id == enrolmentId);
 
-        var enrolmentIdObject = TutorialEnrolmentId.FromValue(enrolmentId);
+        if (enrolmentRecord is null)
+            return Content(string.Empty);
 
-        var enrolmentRecord = Tutorial.Students.FirstOrDefault(enrolment => enrolment.Id == enrolmentIdObject);
-
-        if (enrolmentRecord == null)
-        {
-            return ShowError(DomainErrors.GroupTutorials.TutorialEnrolment.NotFound);
-        }
-
-        StudentRemoval = new()
+        RemoveStudentFromTutorialModalViewModel viewModel = new()
         {
             Id = enrolmentId,
             Name = enrolmentRecord.Name
         };
 
-        return Page();
+        return Partial("RemoveStudentFromTutorialModal", viewModel);
     }
 
-    public async Task<IActionResult> OnPostRemoveStudent()
+    public async Task<IActionResult> OnPostRemoveStudent(
+        RemoveStudentFromTutorialModalViewModel viewModel)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        DateOnly? effectiveDate = (!viewModel.Immediate) ? DateOnly.FromDateTime(viewModel.EffectiveOn) : null;
 
-        if (!isAuthorised.Succeeded)
-        {
-            return ShowError(DomainErrors.Permissions.Unauthorised);
-        }
+        RemoveStudentFromTutorialCommand command = new(Id, viewModel.Id, effectiveDate);
 
-        DateOnly? effectiveDate = (!StudentRemoval.Immediate) ? DateOnly.FromDateTime(StudentRemoval.EffectiveOn) : null;
+        _logger
+            .ForContext(nameof(RemoveStudentFromTutorialCommand), command, true)
+            .Information("Requested to remove student from Group Tutorial by user {User}", _currentUserService.UserName);
 
-        var result = await _mediator.Send(new RemoveStudentFromTutorialCommand(GroupTutorialId.FromValue(Id), TutorialEnrolmentId.FromValue(StudentRemoval.Id), effectiveDate));
-
-        StudentRemoval = null;
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove student from Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
 
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Details", new { area = "Staff", Id = Id });
+        return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostCreateRoll()
+    public async Task<IActionResult> OnPostCreateRoll(
+        TutorialRollCreateSelection viewModel)
     {
-        var isAuthorised = await _authorizationService.AuthorizeAsync(User, Id, AuthPolicies.CanSubmitGroupTutorialRolls);
+        CreateRollCommand command = new(Id, DateOnly.FromDateTime(viewModel.RollDate));
+
+        _logger
+            .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+            .Warning("Failed to create roll for Group Tutorial by user {User}", _currentUserService.UserName);
+
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, Id, AuthPolicies.CanSubmitGroupTutorialRolls);
 
         if (!isAuthorised.Succeeded)
         {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
+                .Warning("Failed to create roll for Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        var result = await _mediator.Send(new CreateRollCommand(GroupTutorialId.FromValue(Id), DateOnly.FromDateTime(RollCreate.RollDate)));
+        Result<TutorialRollId> result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to create roll for Group Tutorial by user {User}", _currentUserService.UserName);
+
             return ShowError(result.Error);
         }
 
-        RollCreate = new();
-
-        return RedirectToPage("/Subject/GroupTutorials/Tutorials/Details", new { area = "Staff", Id });
+        return RedirectToPage();
     }
 
-    private async Task GetPageInformation(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnGetDownloadReport()
     {
-        var result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(GroupTutorialId.FromValue(Id)), cancellationToken);
+        _logger.Information("Requested to download Attendance Report for Group Tutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+        Result<FileDto> fileDto = await _mediator.Send(new GenerateTutorialAttendanceReportQuery(Id));
+
+        if (fileDto.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), fileDto.Error, true)
+                .Warning("Failed to download Attendance Report for Group Tutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+            ShowError(fileDto.Error);
+        }
+
+        return File(fileDto.Value.FileData, fileDto.Value.FileType, fileDto.Value.FileName);
+    }
+
+    private async Task PreparePage(CancellationToken cancellationToken = default)
+    {
+        _logger.Information("Requested to retrieve details of GroupTutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+        Result<GroupTutorialDetailResponse> result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(Id), cancellationToken);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to retrieve details of GroupTutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
             Tutorial = new(
-                GroupTutorialId.FromValue(Id),
+                Id,
                 null,
                 DateOnly.MinValue,
                 DateOnly.MinValue,
@@ -272,6 +336,7 @@ public class DetailsModel : BasePageModel
         else
         {
             Tutorial = result.Value;
+            PageTitle = $"Details - {Tutorial.Name}";
         }
     }
 
@@ -282,45 +347,14 @@ public class DetailsModel : BasePageModel
             _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 
         Tutorial = new(
-            GroupTutorialId.FromValue(Id),
+            Id,
             null,
             DateOnly.MinValue,
             DateOnly.MinValue,
             new List<TutorialTeacherResponse>(),
             new List<TutorialEnrolmentResponse>(),
             new List<TutorialRollResponse>());
-
-        TeacherRemoval = null;
-        StudentRemoval = null;
-
+        
         return Page();
-    }
-
-    public async Task<IActionResult> OnGetDownloadReport()
-    {
-        var fileDto = await _mediator.Send(new GenerateTutorialAttendanceReportQuery(GroupTutorialId.FromValue(Id)));
-
-        if (fileDto.IsFailure)
-        {
-            ShowError(fileDto.Error);
-        }
-
-        return File(fileDto.Value.FileData, fileDto.Value.FileType, fileDto.Value.FileName);
-    }
-
-    public sealed class TutorialStudentRemovalSelection
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public bool Immediate { get; set; } = true;
-        public DateTime EffectiveOn { get; set; } = DateTime.Today;
-    }
-
-    public sealed class TutorialTeacherRemovalSelection
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public bool Immediate { get; set; } = true;
-        public DateTime EffectiveOn { get; set; } = DateTime.Today;
     }
 }
