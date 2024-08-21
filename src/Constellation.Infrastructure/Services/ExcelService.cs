@@ -9,6 +9,7 @@ using Application.Awards.ExportAwardNominations;
 using Application.Compliance.GetWellbeingReportFromSentral;
 using Application.Contacts.Models;
 using Application.DTOs;
+using Application.DTOs.Canvas;
 using Application.DTOs.CSV;
 using Application.Extensions;
 using Application.ExternalDataConsistency;
@@ -25,6 +26,7 @@ using Constellation.Core.Models.Assets;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
+using Core.Models.Students;
 using Core.Models.Training;
 using ExcelDataReader;
 using Jobs;
@@ -1684,6 +1686,76 @@ public class ExcelService : IExcelService
         ExcelPivotTableDataField countDataField = pivotTable.DataFields.Add(pivotTable.Fields["Contact Name"]);
         countDataField.Function = DataFieldFunctions.Count;
         countDataField.Name = "Number of Contacts per School by Role";
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateCanvasRubricResultExport(
+        RubricEntry rubric,
+        List<CourseEnrolmentEntry> enrolments,
+        List<AssignmentResultEntry> results,
+        List<Student> students,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Results");
+
+        worksheet.Cells[1, 1].Value = "Student Id";
+        worksheet.Cells[1, 2].Value = "School First Name";
+        worksheet.Cells[1, 3].Value = "Student Last Name";
+
+        Dictionary<string, int> criteriaOrder = new();
+        int column = 4;
+
+        foreach (RubricEntry.RubricCriterion entry in rubric.Criteria)
+        {
+            criteriaOrder.Add(entry.CriterionId, column);
+
+            worksheet.Cells[1, column].Value = entry.Name;
+
+            column++;
+        }
+
+        int row = 2;
+
+        foreach (CourseEnrolmentEntry enrolment in enrolments)
+        {
+            if (enrolment.Role != CourseEnrolmentEntry.EnrolmentRole.Student)
+                continue;
+
+            worksheet.Cells[row, 1].Value = enrolment.UserId;
+
+            Student student = students.FirstOrDefault(entry => entry.StudentId == enrolment.UserId);
+
+            if (student is not null)
+            {
+                worksheet.Cells[row, 2].Value = student.FirstName;
+                worksheet.Cells[row, 3].Value = student.LastName;
+            }
+
+            AssignmentResultEntry resultEntry = results.FirstOrDefault(entry => entry.UserId == enrolment.CanvasUserId);
+
+            if (resultEntry is not null)
+            {
+                foreach (KeyValuePair<string, int> item in criteriaOrder)
+                {
+                    AssignmentResultEntry.AssignmentRubricResult result = resultEntry.Marks.FirstOrDefault(entry => entry.CriterionId == item.Key);
+
+                    if (result is not null)
+                    {
+                        worksheet.Cells[row, item.Value].Value = result.Points;
+                    }
+                }
+            }
+
+            row++;
+        }
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);

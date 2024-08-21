@@ -8,7 +8,9 @@ using Attendance.GetAttendanceDataFromSentral;
 using Awards.ExportAwardNominations;
 using Compliance.GetWellbeingReportFromSentral;
 using Constellation.Application.Contacts.Models;
+using Constellation.Application.DTOs.Canvas;
 using Constellation.Application.Training.GenerateOverallReport;
+using Constellation.Core.Models.Students;
 using Constellation.Infrastructure.Jobs;
 using Core.Models.Assets;
 using Core.Models.Training;
@@ -56,4 +58,5 @@ public interface IExcelService
     Task<MemoryStream> CreateSchoolContactExport(List<SchoolWithContactsResponse> records, CancellationToken cancellationToken = default);
     Task<List<ImportAssetDto>> ImportAssetsFromFile(MemoryStream stream, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAssetExportFile(List<Asset> assets, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateCanvasRubricResultExport(RubricEntry rubric, List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, List<Student> students, CancellationToken cancellationToken = default);
 }

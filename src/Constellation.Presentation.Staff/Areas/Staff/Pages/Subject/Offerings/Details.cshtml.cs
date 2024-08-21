@@ -1,6 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Canvas.ExportCanvasRubricResults;
 using Application.Common.PresentationModels;
+using Application.DTOs;
+using Constellation.Application.Assignments.GetAssignmentsFromCourse;
 using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Models.Auth;
@@ -49,8 +52,11 @@ public class DetailsModel : BasePageModel
     public Guid Id { get; set; }
 
     public OfferingDetailsResponse Offering { get; set; }
+    public List<AssignmentFromCourseResponse> Assignments { get; set; } = new();
 
-    public async Task OnGet()
+    public async Task OnGet() => await PreparePage();
+
+    private async Task PreparePage()
     {
         OfferingId offeringId = OfferingId.FromValue(Id);
 
@@ -66,6 +72,17 @@ public class DetailsModel : BasePageModel
         }
 
         Offering = query.Value;
+
+        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetAssignmentsFromCourseQuery(Offering.CourseId));
+
+        if (assignments.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(assignments.Error);
+
+            return;
+        }
+
+        Assignments = assignments.Value.OrderBy(entry => entry.DueDate).ToList();
     }
 
     public IActionResult OnPostAjaxUnenrolConfirmation(
@@ -98,6 +115,8 @@ public class DetailsModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
+
+            await PreparePage();
 
             return Page();
         }
@@ -138,6 +157,8 @@ public class DetailsModel : BasePageModel
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -170,6 +191,8 @@ public class DetailsModel : BasePageModel
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -196,6 +219,8 @@ public class DetailsModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(request.Error);
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -212,6 +237,8 @@ public class DetailsModel : BasePageModel
         if (request.IsFailure)
         {
             ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage();
 
             return Page();
         }
@@ -254,6 +281,8 @@ public class DetailsModel : BasePageModel
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -295,6 +324,8 @@ public class DetailsModel : BasePageModel
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
+            await PreparePage();
+            
             return Page();
         }
 
@@ -312,9 +343,30 @@ public class DetailsModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(request.Error);
 
+            await PreparePage();
+            
             return Page();
         }
 
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetDownloadRubricResults(
+        int assignmentId)
+    {
+        OfferingId offeringId = OfferingId.FromValue(Id);
+
+        Result<FileDto> request = await _sender.Send(new ExportCanvasRubricResultsQuery(offeringId, assignmentId));
+
+        if (request.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return File(request.Value.FileData, request.Value.FileType, request.Value.FileName);
     }
 }

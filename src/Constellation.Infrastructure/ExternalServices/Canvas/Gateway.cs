@@ -404,6 +404,8 @@ internal sealed class Gateway : ICanvasGateway
 
         List<RubricEntry.RubricCriterion> criteria = new();
 
+        if (assessmentSettings.Rubric is null) return null;
+
         foreach (AssignmentSettingsResult.RubricItem criterion in assessmentSettings.Rubric)
         {
             List<RubricEntry.RubricCriterionRating> ratings = new();
