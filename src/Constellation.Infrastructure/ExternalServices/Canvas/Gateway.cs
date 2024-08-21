@@ -380,6 +380,45 @@ internal sealed class Gateway : ICanvasGateway
         return returnData;
     }
 
+    public async Task<List<CanvasAssignmentDto>> GetAllUploadCourseAssignments(
+        CanvasCourseCode courseId,
+        CancellationToken cancellationToken = default)
+    {
+        string path = $"courses/sis_course_id:{courseId}/assignments";
+
+        List<CanvasAssignmentDto> returnData = new();
+
+        if (_logOnly)
+        {
+            _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
+
+            return new List<CanvasAssignmentDto>();
+        }
+
+        List<AssignmentResult> assignments = await RequestAsync<AssignmentResult>(path, cancellationToken: cancellationToken);
+
+        assignments = assignments
+            .Where(assignment =>
+                assignment.IsPublished &&
+                assignment.SubmissionTypes.Contains("online_upload"))
+            .ToList();
+
+        foreach (AssignmentResult assignment in assignments)
+        {
+            returnData.Add(new()
+            {
+                CanvasId = assignment.Id,
+                Name = assignment.Name,
+                DueDate = assignment.DueDate ?? DateTime.Today,
+                LockDate = assignment.LockDate,
+                UnlockDate = assignment.UnlockDate,
+                AllowedAttempts = assignment.AllowedAttempts
+            });
+        }
+
+        return returnData;
+    }
+
     public async Task<RubricEntry> GetCourseAssignmentDetails(
         CanvasCourseCode courseId,
         int assignmentId,
@@ -469,7 +508,9 @@ internal sealed class Gateway : ICanvasGateway
                 submission.AssignmentId,
                 courseId,
                 submission.UserId,
-                marks));
+                marks,
+                submission.Mark,
+                submission.Grade));
         }
 
         return results;

@@ -92,7 +92,7 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
         FileDto result = new FileDto()
         {
             FileData = stream.ToArray(),
-            FileName = $"Canvas Results - {offering.Name}.xlsx",
+            FileName = $"Canvas Results - {request.CanvasAssignmentName}.xlsx",
             FileType = FileContentTypes.ExcelModernFile
         };
 

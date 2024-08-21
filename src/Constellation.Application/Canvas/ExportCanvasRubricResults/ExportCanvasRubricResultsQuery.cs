@@ -6,5 +6,6 @@ using DTOs;
 
 public sealed record ExportCanvasRubricResultsQuery(
     OfferingId OfferingId,
-    int CanvasAssignmentId)
+    int CanvasAssignmentId,
+    string CanvasAssignmentName)
     : IQuery<FileDto>;

@@ -1,9 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Assignments.GetUploadAssignmentsFromCourse;
 using Application.Canvas.ExportCanvasRubricResults;
 using Application.Common.PresentationModels;
 using Application.DTOs;
-using Constellation.Application.Assignments.GetAssignmentsFromCourse;
+using Constellation.Application.Assignments.Models;
 using Constellation.Application.Enrolments.EnrolStudent;
 using Constellation.Application.Enrolments.UnenrolStudent;
 using Constellation.Application.Models.Auth;
@@ -73,7 +74,7 @@ public class DetailsModel : BasePageModel
 
         Offering = query.Value;
 
-        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetAssignmentsFromCourseQuery(Offering.CourseId));
+        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetUploadAssignmentsFromCourseQuery(Offering.CourseId));
 
         if (assignments.IsFailure)
         {
@@ -352,11 +353,12 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDownloadRubricResults(
-        int assignmentId)
+        int assignmentId,
+        string assignmentName)
     {
         OfferingId offeringId = OfferingId.FromValue(Id);
 
-        Result<FileDto> request = await _sender.Send(new ExportCanvasRubricResultsQuery(offeringId, assignmentId));
+        Result<FileDto> request = await _sender.Send(new ExportCanvasRubricResultsQuery(offeringId, assignmentId, assignmentName));
 
         if (request.IsFailure)
         {

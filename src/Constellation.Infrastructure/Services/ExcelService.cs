@@ -1707,7 +1707,7 @@ public class ExcelService : IExcelService
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Results");
 
         worksheet.Cells[1, 1].Value = "Student Id";
-        worksheet.Cells[1, 2].Value = "School First Name";
+        worksheet.Cells[1, 2].Value = "Student First Name";
         worksheet.Cells[1, 3].Value = "Student Last Name";
 
         Dictionary<string, int> criteriaOrder = new();
@@ -1717,10 +1717,15 @@ public class ExcelService : IExcelService
         {
             criteriaOrder.Add(entry.CriterionId, column);
 
-            worksheet.Cells[1, column].Value = entry.Name;
+            worksheet.Cells[1, column].Value = $"{entry.Name} (Mark)";
+            worksheet.Cells[1, column + 1].Value = $"{entry.Name} (Grade)";
 
-            column++;
+            column += 2;
         }
+        
+        worksheet.Cells[1, column].Value = "Overall Mark";
+        worksheet.Cells[1, column + 1].Value = "Overall Grade";
+        int gradeColumn = column;
 
         int row = 2;
 
@@ -1750,9 +1755,16 @@ public class ExcelService : IExcelService
                     if (result is not null)
                     {
                         worksheet.Cells[row, item.Value].Value = result.Points;
+                        
+                        RubricEntry.RubricCriterionRating rating = rubric.Criteria.SelectMany(entry => entry.Ratings).FirstOrDefault(entry => entry.RatingId == result.RatingId);
+
+                        worksheet.Cells[row, item.Value + 1].Value = rating.Name;
                     }
                 }
             }
+
+            worksheet.Cells[row, gradeColumn].Value = resultEntry.OverallPoints;
+            worksheet.Cells[row, gradeColumn + 1].Value = resultEntry.OverallGrade;
 
             row++;
         }

@@ -7,7 +7,9 @@ public sealed record AssignmentResultEntry(
     int AssignmentId,
     CanvasCourseCode CourseCode,
     int UserId,
-    List<AssignmentResultEntry.AssignmentRubricResult> Marks)
+    List<AssignmentResultEntry.AssignmentRubricResult> Marks,
+    double? OverallPoints,
+    string OverallGrade)
 {
     public sealed record AssignmentRubricResult(
         string CriterionId,

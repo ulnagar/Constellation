@@ -1,8 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments;
 
+using Application.Assignments.GetUploadAssignmentsFromCourse;
 using Application.Common.PresentationModels;
 using Constellation.Application.Assignments.CreateAssignment;
-using Constellation.Application.Assignments.GetAssignmentsFromCourse;
+using Constellation.Application.Assignments.Models;
 using Constellation.Application.Courses.GetCoursesForSelectionList;
 using Constellation.Application.Courses.GetCourseSummary;
 using Constellation.Application.Courses.Models;
@@ -158,7 +159,7 @@ public class CreateModel : BasePageModel
 
         _logger.Information("Requested to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
 
-        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(Id));
+        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetUploadAssignmentsFromCourseQuery(Id));
 
         if (canvasAssignmentsRequest.IsFailure)
         {
@@ -219,7 +220,7 @@ public class CreateModel : BasePageModel
 
         _logger.Information("Requested to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
         
-        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetAssignmentsFromCourseQuery(Id));
+        Result<List<AssignmentFromCourseResponse>> canvasAssignmentsRequest = await _mediator.Send(new GetUploadAssignmentsFromCourseQuery(Id));
 
         if (canvasAssignmentsRequest.IsFailure)
         {

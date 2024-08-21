@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Assignments.GetAssignmentsFromCourse;
+﻿namespace Constellation.Application.Assignments.Models;
 
 using System;
 

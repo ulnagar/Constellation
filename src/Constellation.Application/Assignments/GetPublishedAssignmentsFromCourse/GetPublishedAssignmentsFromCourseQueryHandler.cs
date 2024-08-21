@@ -1,31 +1,32 @@
-﻿namespace Constellation.Application.Assignments.GetAssignmentsFromCourse;
+﻿namespace Constellation.Application.Assignments.GetPublishedAssignmentsFromCourse;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Gateways;
-using Constellation.Core.Models.Assignments;
-using Constellation.Core.Models.Assignments.Repositories;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Errors;
-using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Shared;
+using Abstractions.Messaging;
+using Core.Models.Assignments;
+using Core.Models.Assignments.Repositories;
 using Core.Models.Canvas.Models;
+using Core.Models.Offerings;
+using Core.Models.Offerings.Errors;
+using Core.Models.Offerings.Repositories;
+using Core.Models.Offerings.ValueObjects;
+using Core.Shared;
+using DTOs;
+using Interfaces.Gateways;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class GetAssignmentsFromCourseQueryHandler
-    : IQueryHandler<GetAssignmentsFromCourseQuery, List<AssignmentFromCourseResponse>>
+internal sealed class GetPublishedAssignmentsFromCourseQueryHandler
+    : IQueryHandler<GetPublishedAssignmentsFromCourseQuery, List<AssignmentFromCourseResponse>>
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IAssignmentRepository _assignmentRepository;
     private readonly ILogger _logger;
 
-    public GetAssignmentsFromCourseQueryHandler(
+    public GetPublishedAssignmentsFromCourseQueryHandler(
         IOfferingRepository offeringRepository,
         ICanvasGateway canvasGateway,
         IAssignmentRepository assignmentRepository,
@@ -34,19 +35,19 @@ internal sealed class GetAssignmentsFromCourseQueryHandler
         _offeringRepository = offeringRepository;
         _canvasGateway = canvasGateway;
         _assignmentRepository = assignmentRepository;
-        _logger = logger.ForContext<GetAssignmentsFromCourseQuery>();
+        _logger = logger.ForContext<GetPublishedAssignmentsFromCourseQuery>();
     }
 
-    public async Task<Result<List<AssignmentFromCourseResponse>>> Handle(GetAssignmentsFromCourseQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<AssignmentFromCourseResponse>>> Handle(GetPublishedAssignmentsFromCourseQuery request, CancellationToken cancellationToken)
     {
         List<AssignmentFromCourseResponse> response = new();
-        
+
         List<Offering> offerings = await _offeringRepository.GetActiveByCourseId(request.CourseId, cancellationToken);
-        
+
         if (offerings.Count == 0)
         {
             _logger
-                .ForContext(nameof(GetAssignmentsFromCourseQuery), request, true)
+                .ForContext(nameof(GetPublishedAssignmentsFromCourseQuery), request, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFoundInCourse(request.CourseId), true)
                 .Warning("Failed to retrieve Assignments linked to Course");
 

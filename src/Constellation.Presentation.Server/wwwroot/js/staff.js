@@ -1,4 +1,11 @@
 ﻿$(document).ready(function () {
+    // Add the showLoader function to any nav links
+    $('a.showLoader').on('click', showLoader);
+    $('input.showLoader').on('click', showLoader);
+    $('a.nav-link:not(.dropdown-toggle):not([role="tab"])').on('click', showLoader);
+    $('a.dropdown-item').on('click', showLoader);
+    $('a.btn').on('click', showLoader);
+
     // Activate any comboboxes
     $(".combo").select2({ theme: 'bootstrap' });
 
@@ -44,13 +51,6 @@
                 { "orderData": 0, "targets": 1 }
             ]
         });
-
-    // Add the showLoader function to any nav links
-    $('a.showLoader').on('click', showLoader);
-    $('input.showLoader').on('click', showLoader);
-    $('a.nav-link:not(.dropdown-toggle):not([role="tab"])').on('click', showLoader);
-    $('a.dropdown-item').on('click', showLoader);
-    $('a.btn').on('click', showLoader);
 });
 
 function showLoader() {
