@@ -2,10 +2,12 @@
 
 using System;
 
-public sealed record SciencePracRollId(Guid Value)
+public readonly record struct SciencePracRollId(Guid Value)
 {
-    public static SciencePracRollId FromValue(Guid Value) =>
-        new(Value);
+    public static SciencePracRollId Empty => new(Guid.Empty);
+
+    public static SciencePracRollId FromValue(Guid value) =>
+        new(value);
 
     public SciencePracRollId()
         : this(Guid.NewGuid()) { }

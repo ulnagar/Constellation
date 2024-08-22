@@ -48,6 +48,7 @@
                         <tr>
                             @Html.HiddenFor(model => Model.Attendance[i].Id)
                             @Html.HiddenFor(model => Model.Attendance[i].StudentId)
+                            @Html.HiddenFor(model => Model.Attendance[i].Name)
                             <td>@Model.Attendance[i].Name</td>
                             <td>
                                 <div class="custom-control custom-switch">

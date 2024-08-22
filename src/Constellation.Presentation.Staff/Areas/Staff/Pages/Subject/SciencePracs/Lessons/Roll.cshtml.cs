@@ -8,32 +8,47 @@ using Constellation.Application.SciencePracs.ReinstateLessonRoll;
 using Constellation.Application.SciencePracs.SendLessonNotification;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class RollModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public RollModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<RollModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Lessons;
+    [ViewData] public string PageTitle { get; set; } = "Lesson Roll";
 
     [BindProperty(SupportsGet = true)]
-    public Guid LessonId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public SciencePracLessonId LessonId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Guid RollId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public SciencePracRollId RollId { get; set; }
 
     public LessonRollDetailsResponse Roll { get; set; }
 
@@ -44,13 +59,20 @@ public class RollModel : BasePageModel
 
     public async Task<IActionResult> OnGetCancel()
     {
-        SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
-        SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
+        CancelLessonRollCommand command = new(LessonId, RollId);
 
-        Result cancelRequest = await _mediator.Send(new CancelLessonRollCommand(sciencePracLessonId, sciencePracRollId));
+        _logger
+            .ForContext(nameof(CancelLessonRollCommand), command, true)
+            .Information("Requested to cancel Lesson Roll by user {User}", _currentUserService);
+
+        Result cancelRequest = await _mediator.Send(command);
 
         if (cancelRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), cancelRequest.Error, true)
+                .Warning("Failed to cancel Lesson Roll by user {User}", _currentUserService);
+
             ModalContent = new ErrorDisplay(cancelRequest.Error);
 
             return await PreparePage();
@@ -61,43 +83,67 @@ public class RollModel : BasePageModel
 
     public async Task<IActionResult> OnGetReinstate()
     {
-        SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
-        SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
+        ReinstateLessonRollCommand command = new(LessonId, RollId);
 
-        Result reinstateRequest = await _mediator.Send(new ReinstateLessonRollCommand(sciencePracLessonId, sciencePracRollId));
+        _logger
+            .ForContext(nameof(ReinstateLessonRollCommand), command, true)
+            .Information("Requested to reinstate Lesson Roll by user {User}", _currentUserService);
+
+        Result reinstateRequest = await _mediator.Send(command);
 
         if (reinstateRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), reinstateRequest.Error, true)
+                .Warning("Failed to reinstate Lesson Roll by user {User}", _currentUserService);
+
             ModalContent = new ErrorDisplay(reinstateRequest.Error);
+
+            await PreparePage();
+
+            return Page();
         }
 
-        return await PreparePage();
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnGetSendNotification(bool increment)
     {
-        SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
-        SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
+        SendLessonNotificationCommand command = new(LessonId, RollId, increment);
 
-        Result notificationRequest = await _mediator.Send(new SendLessonNotificationCommand(sciencePracLessonId, sciencePracRollId, increment));
+        _logger
+            .ForContext(nameof(SendLessonNotificationCommand), command, true)
+            .Information("Requested to send notification for Lesson Roll by user {User}", _currentUserService.UserName);
+
+        Result notificationRequest = await _mediator.Send(command);
 
         if (notificationRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), notificationRequest.Error, true)
+                .Warning("Failed to send notification for Lesson Roll by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(notificationRequest.Error);
+
+            await PreparePage();
+            return Page();
         }
 
-        return await PreparePage();
+        return RedirectToPage();
     }
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken = default)
     {
-        SciencePracLessonId sciencePracLessonId = SciencePracLessonId.FromValue(LessonId);
-        SciencePracRollId sciencePracRollId = SciencePracRollId.FromValue(RollId);
-
-        Result<LessonRollDetailsResponse> rollRequest = await _mediator.Send(new GetLessonRollDetailsQuery(sciencePracLessonId, sciencePracRollId));
+        _logger.Information("Requested to retrieve details of Lesson Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
+        
+        Result<LessonRollDetailsResponse> rollRequest = await _mediator.Send(new GetLessonRollDetailsQuery(LessonId, RollId), cancellationToken);
 
         if (rollRequest.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), rollRequest.Error, true)
+                .Warning("Failed to retrieve details of Lesson Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 rollRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = LessonId }));
@@ -106,6 +152,7 @@ public class RollModel : BasePageModel
         }
 
         Roll = rollRequest.Value;
+        PageTitle = $"Details - {Roll.Name}";
 
         return Page();
     }

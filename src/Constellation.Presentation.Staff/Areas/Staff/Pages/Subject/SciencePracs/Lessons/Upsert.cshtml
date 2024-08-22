@@ -1,8 +1,9 @@
 ﻿@page "{id:guid?}"
+@using Constellation.Core.Models.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons.UpsertModel
 
 @{
-    string Title = (Model.Id.HasValue) ? "Edit Lesson" : "Create New Lesson";
+    string Title = (Model.Id != SciencePracLessonId.Empty) ? "Edit Lesson" : "Create New Lesson";
 }
 
 <h2>@Title</h2>
@@ -13,7 +14,7 @@
 
 <hr />
 
-<form asp-page-handler="Submit" method="post">
+<form method="post">
     <div class="form-horizontal">
 
         <div class="form-group row">
@@ -35,7 +36,7 @@
         <div class="form-group row">
             <label asp-for="CourseId" class="col-md-2">Course</label>
             <div class="col-md-5">
-                @if (Model.Id.HasValue)
+                @if (Model.Id != SciencePracLessonId.Empty)
                 {
                     SelectListItem? course = Model.CourseList.FirstOrDefault(entry => entry.Value == Model.CourseId.ToString());
                     <span>@course.Text</span>
@@ -50,7 +51,7 @@
             </div>
         </div>
 
-        @if (!Model.Id.HasValue)
+        @if (Model.Id == SciencePracLessonId.Empty)
         {
             <div class="form-group row">
                 <label asp-for="DoNotGenerateRolls" class="col-md-2">Skip Creating Rolls</label>
@@ -63,7 +64,14 @@
 
         <div class="form-group">
             <div class="col-md-3">
-                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                @if (Model.Id == SciencePracLessonId.Empty)
+                {
+                    <input type="submit" asp-page-handler="Create" value="Save" class="btn btn-primary btn-block btn-lg"/>
+                }
+                else
+                {
+                    <input type="submit" asp-page-handler="Update" value="Save" class="btn btn-primary btn-block btn-lg"/>
+                }
             </div>
         </div>
     </div>
