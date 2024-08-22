@@ -102,6 +102,29 @@
                     </div>
                 </div>
             }
+            
+            @if (Model.CanAccessStudentPortal)
+            {
+                <div class="option-box">
+                    <div class="form-value">
+                        <div class="header">
+                            <h2>Student Portal</h2>
+                        </div>
+                        <div class="text">
+                            <p>Constellation Student Portal provides Aurora College students with access to information on</p>
+                            <ul>
+                                <li>Classes, and Timetables</li>
+                                <li>Absences</li>
+                                <li>Support contacts</li>
+                            </ul>
+                            <p>Access is restricted to current Aurora College Students only.</p>
+                        </div>
+                        <div class="cta-button">
+                            <a asp-page="/Index" asp-area="Students" class="button">Go</a>
+                        </div>
+                    </div>
+                </div>
+            }
 
         </div>
     </section>

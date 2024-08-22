@@ -20,7 +20,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.IsStaffMember, policy =>
             policy.Requirements.Add(new IsCurrentStaffMemberRequirement()));
 
-
+        // Determines access to the Student Portal
+        options.AddPolicy(AuthPolicies.IsStudent, policy =>
+            policy.Requirements.Add(new IsCurrentStudentRequirement()));
 
 
         options.AddPolicy(AuthPolicies.CanViewTrainingCompletionRecord, policy =>

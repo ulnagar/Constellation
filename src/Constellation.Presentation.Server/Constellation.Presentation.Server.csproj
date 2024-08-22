@@ -46,6 +46,7 @@
     <ProjectReference Include="..\Constellation.Presentation.Schools\Constellation.Presentation.Schools.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
     <ProjectReference Include="..\Constellation.Presentation.Staff\Constellation.Presentation.Staff.csproj" />
+    <ProjectReference Include="..\Constellation.Presentation.Students\Constellation.Presentation.Students.csproj" />
   </ItemGroup>
 
   <ItemGroup>

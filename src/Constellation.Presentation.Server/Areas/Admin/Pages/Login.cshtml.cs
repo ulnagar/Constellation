@@ -216,7 +216,10 @@ public class LoginModel : PageModel
             _logger.Information(" - Attempting domain login by {Email}", Input.Email);
 
             PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
-            bool result = context.ValidateCredentials(Input.Email, Input.Password);
+
+            bool result = Input.Email.Contains("@education.nsw.gov.au")
+                ? context.ValidateCredentials(Input.Email.Replace("education.nsw.gov.au", "detnsw"), Input.Password)
+                : context.ValidateCredentials(Input.Email, Input.Password);
             context.Dispose();
 
             if (!result)

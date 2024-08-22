@@ -85,7 +85,8 @@ builder.Services.AddRazorPages()
     .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Staff.AssemblyReference.Assembly)
     .AddApplicationPart(Constellation.Presentation.Schools.AssemblyReference.Assembly)
-    .AddApplicationPart(Constellation.Presentation.Parents.AssemblyReference.Assembly);
+    .AddApplicationPart(Constellation.Presentation.Parents.AssemblyReference.Assembly)
+    .AddApplicationPart(Constellation.Presentation.Students.AssemblyReference.Assembly);
 
 builder.Services.AddSession(options =>
 {

@@ -1,0 +1,45 @@
+﻿@model string
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-page="/Index" asp-area="">Student Portal</a>
+        <button title="Navigation menu" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav-sidebar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="collapse navbar-collapse" id="nav-sidebar">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Dashboard ? "active" : "")" asp-page="/Index" asp-area="Students" onclick="showLoader()">
+                <i class="fas fa-home-lg" aria-hidden="true"></i> Home
+            </a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Attendance ? "active" : "")" asp-page="/Attendance/Index" asp-area="Students">
+                <i class="fas fa-calendar-day" aria-hidden="true"></i> Attendance
+            </a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Students">
+                <i class="fas fa-award" aria-hidden="true"></i> Awards
+            </a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Students">
+                <i class="fas fa-file-chart-line" aria-hidden="true"></i> Reports
+            </a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Students">
+                <i class="fas fa-clock" aria-hidden="true"></i> Timetable
+            </a>
+        </div>
+        <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Students">
+                <i class="fas fa-mail-bulk" aria-hidden="true"></i> Contacts
+            </a>
+        </div>
+    </nav>
+</div>

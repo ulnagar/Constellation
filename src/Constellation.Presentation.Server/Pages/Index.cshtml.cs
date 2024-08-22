@@ -26,19 +26,24 @@ public class IndexModel : PageModel
         AuthorizationResult parentPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsParent);
         AuthorizationResult schoolPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsSchoolContact);
         AuthorizationResult staffPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsStaffMember);
+        AuthorizationResult studentPortal = await _authService.AuthorizeAsync(User, AuthPolicies.IsStudent);
 
         CanAccessParentPortal = parentPortal.Succeeded;
         CanAccessSchoolPortal = schoolPortal.Succeeded;
         CanAccessStaffPortal = staffPortal.Succeeded;
+        CanAccessStudentPortal = studentPortal.Succeeded;
 
-        if (CanAccessParentPortal && !CanAccessSchoolPortal && !CanAccessStaffPortal)
+        if (CanAccessParentPortal && !CanAccessSchoolPortal && !CanAccessStaffPortal && !CanAccessStudentPortal)
             return RedirectToPage("/Index", new { area = "Parents" });
 
-        if (!CanAccessParentPortal && CanAccessSchoolPortal && !CanAccessStaffPortal)
+        if (!CanAccessParentPortal && CanAccessSchoolPortal && !CanAccessStaffPortal && !CanAccessStudentPortal)
             return RedirectToPage("/Dashboard", new { area = "Schools" });
 
-        if (!CanAccessParentPortal && !CanAccessSchoolPortal && CanAccessStaffPortal)
+        if (!CanAccessParentPortal && !CanAccessSchoolPortal && CanAccessStaffPortal && !CanAccessStudentPortal)
             return RedirectToPage("/Dashboard", new { area = "Staff" });
+
+        if (!CanAccessParentPortal && !CanAccessSchoolPortal && !CanAccessStaffPortal && CanAccessStudentPortal)
+            return RedirectToPage("/Index", new { area = "Students" });
 
         return Page();
     }

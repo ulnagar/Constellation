@@ -167,6 +167,7 @@ public static class ServicesRegistration
         services.AddScoped<IAuthorizationHandler, HasActiveContactAssignmentToCurrentPartnerSchool>();
         services.AddScoped<IAuthorizationHandler, HasAdminUserPrivileges>();
         services.AddScoped<IAuthorizationHandler, HasActiveStaffRecord>();
+        services.AddScoped<IAuthorizationHandler, IsActiveStudent>();
 
         return services;
     }

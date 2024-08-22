@@ -35,4 +35,6 @@ public class AuthPolicies
     public const string IsSchoolContact = "IsSchoolContact";
 
     public const string IsParent = "IsParent";
+
+    public const string IsStudent = "IsStudent";
 }
