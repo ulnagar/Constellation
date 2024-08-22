@@ -9,11 +9,15 @@ using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
@@ -21,19 +25,29 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
+    [ViewData] public string PageTitle { get; set; } = "New Science Prac Teacher";
 
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public SchoolContactId Id { get; set; } = SchoolContactId.Empty;
 
     [BindProperty]
     [Required]
@@ -62,14 +76,18 @@ public class UpsertModel : BasePageModel
     
     public async Task OnGet()
     {
-        if (Id.HasValue)
+        if (Id != SchoolContactId.Empty)
         {
-            SchoolContactId contactId = SchoolContactId.FromValue(Id.Value);
-            
-            Result<ContactSummaryResponse> contactRequest = await _mediator.Send(new GetContactSummaryQuery(contactId));
+            _logger.Information("Requested to retrieve details of School Contact with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
+            Result<ContactSummaryResponse> contactRequest = await _mediator.Send(new GetContactSummaryQuery(Id));
             
             if (contactRequest.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), contactRequest.Error, true)
+                    .Warning("Failed to retrieve details of School Contact with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(
                     contactRequest.Error,
                     _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
@@ -81,46 +99,23 @@ public class UpsertModel : BasePageModel
             LastName = contactRequest.Value.LastName;
             EmailAddress = contactRequest.Value.EmailAddress;
             PhoneNumber = contactRequest.Value.PhoneNumber;
+
+            PageTitle = $"Edit - {FirstName} {LastName}";
         }
 
-        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery());
-
-        SchoolList = new SelectList(schoolsRequest.Value, "Code", "Name");
+        await PreparePage();
     }
 
-    public async Task<IActionResult> OnPostUpdate()
+    public async Task<IActionResult> OnPostCreate()
     {
-        if (!Id.HasValue && string.IsNullOrWhiteSpace(SchoolCode))
+        if (string.IsNullOrWhiteSpace(SchoolCode))
             ModelState.AddModelError("SchoolCode", "You must select a school");
 
         if (!ModelState.IsValid)
         {
-            Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery());
-
-            SchoolList = new SelectList(schoolsRequest.Value, "Code", "Name");
+            await PreparePage();
 
             return Page();
-        }
-
-        if (Id.HasValue)
-        {
-            SchoolContactId contactId = SchoolContactId.FromValue(Id.Value);
-            
-            Result updateRequest = await _mediator.Send(new UpdateContactCommand(
-                contactId,
-                FirstName,
-                LastName,
-                EmailAddress,
-                PhoneNumber));
-
-            if (updateRequest.IsFailure)
-            {
-                ModalContent = new ErrorDisplay(updateRequest.Error);
-
-                return Page();
-            }
-
-            return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
         }
 
         CreateContactWithRoleCommand command = new(
@@ -133,19 +128,81 @@ public class UpsertModel : BasePageModel
             string.Empty,
             false);
 
-        Result createRequest = await _mediator.Send(command);
+        _logger
+            .ForContext(nameof(CreateContactWithRoleCommand), command, true)
+            .Information("Requested to create School Contact by user {User}", _currentUserService.UserName);
 
-        if (createRequest.IsFailure)
+        Result request = await _mediator.Send(command);
+
+        if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(createRequest.Error);
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to create School Contact by user {User}", _currentUserService.UserName);
 
-            Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery());
+            ModalContent = new ErrorDisplay(request.Error);
 
-            SchoolList = new SelectList(schoolsRequest.Value, "Code", "Name");
-                
+            await PreparePage();
+
             return Page();
         }
 
         return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
+    }
+
+    public async Task<IActionResult> OnPostUpdate()
+    {
+        if (!ModelState.IsValid)
+        {
+            await PreparePage();
+
+            return Page();
+        }
+
+        UpdateContactCommand command = new(
+            Id,
+            FirstName,
+            LastName,
+            EmailAddress,
+            PhoneNumber);
+
+        _logger
+            .ForContext(nameof(UpdateContactCommand), command, true)
+            .Information("Requested to update School Contact by user {User}", _currentUserService);
+
+        Result request = await _mediator.Send(command);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to update School Contact by user {User}", _currentUserService);
+
+            ModalContent = new ErrorDisplay(request.Error);
+
+            return Page();
+        }
+
+        return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
+    }
+
+    private async Task PreparePage()
+    {
+        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery());
+
+        if (schoolsRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), schoolsRequest.Error, true)
+                .Warning("Failed to retrieve defaults for School Contact by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                schoolsRequest.Error,
+                _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        SchoolList = new SelectList(schoolsRequest.Value, "Code", "Name");
     }
 }

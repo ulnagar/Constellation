@@ -13,11 +13,14 @@ using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using Shared.PartialViews.AssignRoleModal;
 using Shared.PartialViews.DeleteRoleModal;
 using Shared.PartialViews.UpdateRoleNoteModal;
@@ -27,33 +30,29 @@ public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData]
-    public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
+    [ViewData] public string PageTitle => "Science Prac Teacher List";
 
     public List<ContactResponse> Contacts = new();
 
-    public async Task OnGet()
-    {
-        Result<List<ContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
-
-        if (contactRequest.IsFailure)
-        {
-            ModalContent = new ErrorDisplay(contactRequest.Error);
-
-            return;
-        }
-
-        Contacts = contactRequest.Value.OrderBy(contact => contact.ContactName.SortOrder).ToList();
-    }
+    public async Task OnGet() => await PreparePage();
 
     public IActionResult OnPostAjaxDelete(
         [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
@@ -94,9 +93,28 @@ public class IndexModel : BasePageModel
         [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
         [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId)
     {
-        await _mediator.Send(new RemoveContactRoleCommand(contactId, roleId));
+        RemoveContactRoleCommand command = new(contactId, roleId);
 
-        return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
+        _logger
+            .ForContext(nameof(RemoveContactRoleCommand), command, true)
+            .Information("Requested to remove role from Contact by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to remove role from Contact by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostCreateAssignment(
@@ -105,18 +123,28 @@ public class IndexModel : BasePageModel
         string note,
         [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId)
     {
-        Result request = await _mediator.Send(new CreateContactRoleAssignmentCommand(contactId, schoolCode, roleName, note));
+        CreateContactRoleAssignmentCommand command = new(contactId, schoolCode, roleName, note);
+
+        _logger
+            .ForContext(nameof(CreateContactRoleAssignmentCommand), command, true)
+            .Information("Requested to assign role to Contact by user {User}", _currentUserService);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
-                request.Error,
-                _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Information("Requested to assign role to Contact by user {User}", _currentUserService);
+
+            ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage();
 
             return Page();
         }
 
-        return RedirectToPage("/Subject/SciencePracs/Teachers/Index", new { area = "Staff" });
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAjaxUpdateNote(
@@ -139,17 +167,47 @@ public class IndexModel : BasePageModel
         [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
         string note)
     {
-        Result request = await _mediator.Send(new UpdateRoleNoteCommand(contactId, roleId, note));
+        UpdateRoleNoteCommand command = new(contactId, roleId, note);
+
+        _logger
+            .ForContext(nameof(UpdateRoleNoteCommand), command, true)
+            .Information("Requested to update Note for Contact by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
-                request.Error,
-                _linkGenerator.GetPathByPage("/Partner/SchoolContacts/Index", values: new { area = "Staff" }));
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to update Note for Contact by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage();
 
             return Page();
         }
 
         return RedirectToPage();
+    }
+
+    private async Task PreparePage()
+    {
+        _logger.Information("Requested to retrieve list of Science Prac Teachers by user {User}", _currentUserService.UserName);
+
+        Result<List<ContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
+
+        if (contactRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), contactRequest.Error, true)
+                .Warning("Failed to retrieve list of Science Prac Teachers by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(contactRequest.Error);
+
+            return;
+        }
+
+        Contacts = contactRequest.Value.OrderBy(contact => contact.ContactName.SortOrder).ToList();
     }
 }

@@ -2,9 +2,10 @@
 
 using System;
 
-public sealed record SchoolContactId(Guid Value)
+public readonly record struct SchoolContactId(Guid Value)
 {
     public static SchoolContactId Empty => new(Guid.Empty);
+
     public static SchoolContactId FromValue(Guid value) =>
         new(value);
 
