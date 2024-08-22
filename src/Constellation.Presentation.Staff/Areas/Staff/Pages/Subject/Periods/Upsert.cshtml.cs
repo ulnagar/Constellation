@@ -4,11 +4,14 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Periods.GetPeriodById;
 using Application.Periods.UpsertPeriod;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
@@ -16,16 +19,25 @@ public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
-        LinkGenerator linkGenerator)
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Periods;
+    [ViewData] public string PageTitle { get; set; } = "New Period";
 
     [BindProperty(SupportsGet = true)]
     public int? Id { get; set; }
@@ -45,10 +57,16 @@ public class UpsertModel : BasePageModel
         if (Id is null)
             return;
 
+        _logger.Information("Requested to retrieve details of Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
         Result<PeriodResponse> request = await _mediator.Send(new GetPeriodByIdQuery(Id.Value));
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to retrieve details of Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Periods/Index", values: new { area = "Staff"}));
@@ -63,6 +81,8 @@ public class UpsertModel : BasePageModel
         EndTime = request.Value.EndTime;
         Name = request.Value.Name;
         Type = request.Value.Type;
+
+        PageTitle = $"Edit - {Name}";
     }
 
     public async Task<IActionResult> OnPost()
@@ -77,10 +97,18 @@ public class UpsertModel : BasePageModel
             Name,
             Type);
 
+        _logger
+            .ForContext(nameof(UpsertPeriodCommand), command, true)
+            .Information("Requested to update Period by user {User}", _currentUserService.UserName);
+
         Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Requested to update Period by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(result.Error);
 
             return Page();

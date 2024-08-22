@@ -10,20 +10,34 @@ using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Application.Stocktake.Models;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
-    public DashboardModel(ISender mediator)
+    public DashboardModel(
+        ISender mediator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<DashboardModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
+
+    [ViewData] public string PageTitle => "Staff Dashboard";
 
     public string UserName { get; set; } = string.Empty;
     public bool IsAdmin { get; set; }
@@ -40,11 +54,13 @@ public class DashboardModel : BasePageModel
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
+        _logger.Information("Requested to load Staff Dashboard for user {User}", _currentUserService.UserName);
+
         string? username = User.Identity?.Name;
 
         if (username is not null)
         {
-            Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+            Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username), cancellationToken);
 
             if (query.IsSuccess)
                 Classes = query.Value.ToDictionary(k => k.OfferingName.Value, k => k.OfferingId);
