@@ -2,7 +2,7 @@
 
 using System;
 
-public record struct OfferingId(Guid Value)
+public readonly record struct OfferingId(Guid Value)
 {
     public static OfferingId Empty => new(Guid.Empty);
 

@@ -7,6 +7,7 @@ using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Presentation.Shared.Helpers.ModelBinders;
 
 public class AddSessionToOfferingViewComponent : ViewComponent
 {
@@ -18,14 +19,14 @@ public class AddSessionToOfferingViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid Id)
+    public async Task<IViewComponentResult> InvokeAsync(
+        [ModelBinder(typeof(ConstructorBinder))] OfferingId id)
     {
-        OfferingId offeringId = OfferingId.FromValue(Id);
-        Result<OfferingDetailsResponse> offering = await _mediator.Send(new GetOfferingDetailsQuery(offeringId));
+        Result<OfferingDetailsResponse> offering = await _mediator.Send(new GetOfferingDetailsQuery(id));
 
-        var viewModel = new AddSessionToOfferingSelection
+        AddSessionToOfferingSelection viewModel = new()
         {
-            OfferingId = offeringId,
+            OfferingId = id,
             CourseName = offering.Value.CourseName,
             OfferingName = offering.Value.Name
         };

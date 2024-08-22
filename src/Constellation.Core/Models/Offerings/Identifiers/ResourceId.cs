@@ -2,10 +2,12 @@
 
 using System;
 
-public sealed record ResourceId(Guid Value)
+public readonly record struct ResourceId(Guid Value)
 {
-    public static ResourceId FromValue(Guid Value) =>
-        new(Value);
+    public static ResourceId Empty => new(Guid.Empty);
+
+    public static ResourceId FromValue(Guid value) =>
+        new(value);
 
     public ResourceId()
         : this(Guid.NewGuid()) { }

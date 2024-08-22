@@ -2,10 +2,12 @@
 
 using System;
 
-public sealed record SessionId(Guid Value)
+public readonly record struct SessionId(Guid Value)
 {
-    public static SessionId FromValue(Guid Value) =>
-        new(Value);
+    public static SessionId Empty => new(Guid.Empty);
+
+    public static SessionId FromValue(Guid value) =>
+        new(value);
 
     public SessionId()
         : this(Guid.NewGuid()) { }

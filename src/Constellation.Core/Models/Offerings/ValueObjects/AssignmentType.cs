@@ -18,8 +18,12 @@ public sealed class AssignmentType : ValueObject
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
+        
+        // Only return the object if it is an existing, defined value above
+        if (Enumerations().Any(entry => ((AssignmentType)entry).Value == value))
+            return new(value);
 
-        return new(value);
+        return null;
     }
 
     private AssignmentType(string value)

@@ -65,7 +65,8 @@
             <div class="form-group row">
                 <label asp-for="ResourceId" class="col-md-2">Canvas Course</label>
                 <div class="col-md-8">
-                    <input asp-for="ResourceId" class="form-control" />
+                    <input asp-for="Name" type="hidden" class="form-control" />
+                    <input asp-for="ResourceId" class="form-control"/>
                     <span asp-validation-for="ResourceId" class="text-danger"></span>
                 </div>
             </div>

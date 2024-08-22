@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Helpers.ModelBinders;
 
 public class EnrolStudentInOfferingViewComponent : ViewComponent
 {
@@ -17,15 +18,15 @@ public class EnrolStudentInOfferingViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid Id)
+    public async Task<IViewComponentResult> InvokeAsync(
+        [ModelBinder(typeof(ConstructorBinder))] OfferingId id)
     {
-        OfferingId offeringId = OfferingId.FromValue(Id);
-        Result<OfferingDetailsResponse> offering = await _mediator.Send(new GetOfferingDetailsQuery(offeringId));
+        Result<OfferingDetailsResponse> offering = await _mediator.Send(new GetOfferingDetailsQuery(id));
         Result<Dictionary<string, string>> studentResult = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
 
-        var viewModel = new EnrolStudentInOfferingSelection
+        EnrolStudentInOfferingSelection viewModel = new()
         {
-            OfferingId = offeringId,
+            OfferingId = id,
             CourseName = offering.Value.CourseName,
             OfferingName = offering.Value.Name,
             Students = studentResult.Value

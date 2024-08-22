@@ -13,11 +13,15 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
+using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Models;
+using Presentation.Shared.Helpers.ModelBinders;
+using Serilog;
 using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
@@ -26,26 +30,37 @@ public class UpsertModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly IDateTimeProvider _dateTime;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public UpsertModel(
         ISender mediator,
         LinkGenerator linkGenerator,
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _dateTime = dateTime;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<UpsertModel>()
+            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Offerings_Offerings;
+    [ViewData] public string PageTitle { get; set; } = "New Offering";
 
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public OfferingId Id { get; set; } = OfferingId.Empty;
 
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
-    public Guid CourseId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public CourseId CourseId { get; set; } = CourseId.Empty;
     public string CourseName { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
@@ -59,14 +74,18 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id.HasValue)
+        if (Id != OfferingId.Empty)
         {
-            OfferingId offeringId = OfferingId.FromValue(Id.Value);
+            _logger.Information("Requested to retrieve details of Offering with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-            Result<OfferingSummaryResponse> offering = await _mediator.Send(new GetOfferingSummaryQuery(offeringId));
+            Result<OfferingSummaryResponse> offering = await _mediator.Send(new GetOfferingSummaryQuery(Id));
 
             if (offering.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), offering.Error, true)
+                    .Warning("Failed to retrieve details of Offering with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(
                     offering.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
@@ -78,6 +97,8 @@ public class UpsertModel : BasePageModel
             CourseName = offering.Value.CourseName;
             StartDate = offering.Value.StartDate;
             EndDate = offering.Value.EndDate;
+
+            PageTitle = $"Edit - {Name}";
         }
         else
         {
@@ -97,12 +118,20 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        CourseId courseId = Core.Models.Subjects.Identifiers.CourseId.FromValue(CourseId);
+        CreateOfferingCommand command = new(Name, CourseId, StartDate, EndDate);
 
-        Result<OfferingId> request = await _mediator.Send(new CreateOfferingCommand(Name, courseId, StartDate, EndDate));
+        _logger
+            .ForContext(nameof(CreateOfferingCommand), command, true)
+            .Information("Requested to create new Offering by user {User}", _currentUserService.UserName);
+
+        Result<OfferingId> request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to create new Offering by user {User}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
@@ -116,29 +145,21 @@ public class UpsertModel : BasePageModel
     public async Task<IActionResult> OnPostUpdate()
     {
         if (!ModelState.IsValid)
-        {
             return Page();
-        }
 
-        OfferingId offeringId = OfferingId.FromValue(Id.Value);
+        UpdateOfferingCommand command = new(Id, StartDate, EndDate);
 
-        Result request = await _mediator.Send(new UpdateOfferingCommand(offeringId, StartDate, EndDate));
+        _logger
+            .ForContext(nameof(UpdateOfferingCommand), command, true)
+            .Information("Requested to update Offering by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
 
         if (request.IsFailure)
         {
-            Result<OfferingSummaryResponse> offering = await _mediator.Send(new GetOfferingSummaryQuery(offeringId));
-
-            if (offering.IsFailure)
-            {
-                ModalContent = new ErrorDisplay(
-                    offering.Error,
-                    _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
-
-                return Page();
-            }
-
-            Name = offering.Value.Name;
-            CourseName = offering.Value.CourseName;
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to update Offering by user {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(
                 request.Error,
