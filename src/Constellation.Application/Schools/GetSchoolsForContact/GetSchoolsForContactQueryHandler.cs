@@ -5,6 +5,7 @@ using Core.Errors;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
+using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -33,7 +34,7 @@ internal sealed class GetSchoolsForContactQueryHandler
 
     public async Task<Result<List<SchoolResponse>>> Handle(GetSchoolsForContactQuery request, CancellationToken cancellationToken)
     {
-        if (!request.IsAdmin && request.ContactId is null)
+        if (!request.IsAdmin && request.ContactId == SchoolContactId.Empty)
         {
             _logger
                 .ForContext(nameof(GetSchoolsForContactQuery), request, true)
@@ -45,7 +46,7 @@ internal sealed class GetSchoolsForContactQueryHandler
 
         List<SchoolResponse> response = new();
 
-        if (request.ContactId is null)
+        if (request.ContactId == SchoolContactId.Empty)
         {
             List<School> schools = await _schoolRepository.GetAllActiveWithStudents(cancellationToken);
 

@@ -5,6 +5,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Schools.GetSchoolsForContact;
 using Constellation.Core.Shared;
+using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -61,7 +62,7 @@ public class BasePageModel : PageModel, IBaseModel
         AppUser user = userManager.FindByNameAsync(User.Identity?.Name).Result;
 
         Result<List<SchoolResponse>> schoolsRequest = User.IsInRole(AuthRoles.Admin)
-            ? mediator.Send(new GetSchoolsForContactQuery(null, true)).Result
+            ? mediator.Send(new GetSchoolsForContactQuery(SchoolContactId.Empty, true)).Result
             : mediator.Send(new GetSchoolsForContactQuery(user.SchoolContactId)).Result;
 
         if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)

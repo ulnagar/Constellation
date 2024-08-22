@@ -8,6 +8,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Core.Models;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -62,6 +63,7 @@ internal sealed class AuditUserCommandHandler
         if (contact is null)
         {
             user.IsSchoolContact = false;
+            user.SchoolContactId = SchoolContactId.Empty;
         }
         else
         {

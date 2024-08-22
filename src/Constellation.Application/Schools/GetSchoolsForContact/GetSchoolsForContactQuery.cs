@@ -5,6 +5,6 @@ using Core.Models.SchoolContacts.Identifiers;
 using System.Collections.Generic;
 
 public sealed record GetSchoolsForContactQuery(
-    SchoolContactId? ContactId,
+    SchoolContactId ContactId,
     bool IsAdmin = false)
     : IQuery<List<SchoolResponse>>;

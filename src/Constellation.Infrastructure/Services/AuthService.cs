@@ -126,7 +126,7 @@ public class AuthService : IAuthService
             {
                 // Remove user from School Contacts!
                 user.IsSchoolContact = newUser.IsSchoolContact.Value;
-                user.SchoolContactId = null;
+                user.SchoolContactId = SchoolContactId.Empty;
                 await RemoveUserFromRole(newUser, AuthRoles.SchoolContact);
             }
             else if (!user.IsSchoolContact && newUser.IsSchoolContact.Value)
@@ -413,7 +413,7 @@ public class AuthService : IAuthService
                 result.UserPropertiesPresent = true;
             }
 
-            if (result.User.SchoolContactId is not null && result.User.SchoolContactId == result.Contact.Id)
+            if (result.User.SchoolContactId == result.Contact.Id)
             {
                 result.UserContactLinkPresent = true;
             }

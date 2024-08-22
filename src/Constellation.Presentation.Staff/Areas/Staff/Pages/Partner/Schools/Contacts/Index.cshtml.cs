@@ -75,8 +75,8 @@ public class IndexModel : BasePageModel
         Contacts = Filter switch
         {
             GetAllContactsQuery.SchoolContactFilter.All => contacts.Value.OrderBy(entry => entry.SchoolName).ToList(),
-            GetAllContactsQuery.SchoolContactFilter.WithRole => contacts.Value.Where(entry => entry.AssignmentId is not null).OrderBy(entry => entry.SchoolName).ToList(),
-            GetAllContactsQuery.SchoolContactFilter.WithoutRole => contacts.Value.Where(entry => entry.AssignmentId is null).OrderBy(entry => entry.Name).ToList(),
+            GetAllContactsQuery.SchoolContactFilter.WithRole => contacts.Value.Where(entry => entry.AssignmentId != SchoolContactRoleId.Empty).OrderBy(entry => entry.SchoolName).ToList(),
+            GetAllContactsQuery.SchoolContactFilter.WithoutRole => contacts.Value.Where(entry => entry.AssignmentId != SchoolContactRoleId.Empty).OrderBy(entry => entry.Name).ToList(),
             _ => contacts.Value.OrderBy(entry => entry.SchoolName).ToList()
         };
     }

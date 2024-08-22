@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Core.Models;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using GroupTutorials.GenerateTutorialAttendanceReport;
@@ -54,7 +55,7 @@ internal sealed class GetAllContactsQueryHandler
             {
                 response.Add(new SchoolContactResponse(
                     contact.Id,
-                    null,
+                    SchoolContactRoleId.Empty, 
                     contact.DisplayName,
                     contact.EmailAddress,
                     contact.PhoneNumber,

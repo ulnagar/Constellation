@@ -4,6 +4,7 @@ using Application.Models.Auth;
 using Application.Models.Identity;
 using Application.Schools.GetSchoolsForContact;
 using Areas;
+using Core.Models.SchoolContacts.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -34,7 +35,7 @@ public sealed class SchoolSelectorModalViewComponent : ViewComponent
         AppUser user = await _userManager.FindByNameAsync(User.Identity?.Name);
 
         Result<List<SchoolResponse>> schoolsRequest = User.IsInRole(AuthRoles.Admin)
-            ? await _mediator.Send(new GetSchoolsForContactQuery(null, true))
+            ? await _mediator.Send(new GetSchoolsForContactQuery(SchoolContactId.Empty, true))
             : await _mediator.Send(new GetSchoolsForContactQuery(user.SchoolContactId));
 
         if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)
