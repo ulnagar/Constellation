@@ -32,7 +32,8 @@ public class LoginModel : PageModel
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
-        _logger = logger.ForContext<IAuthService>();
+        _logger = logger
+            .ForContext<LoginModel>();
     }
 
     [BindProperty]

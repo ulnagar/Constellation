@@ -8,4 +8,11 @@ public sealed record StudentEnrolmentResponse(
     string OfferingName,
     string CourseName,
     List<string> Teachers,
-    bool IsDeleted);
+    List<StudentEnrolmentResponse.Resource> Resources,
+    bool IsDeleted)
+{
+    public sealed record Resource(
+        string Type,
+        string Name,
+        string Url);
+}

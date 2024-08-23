@@ -4,6 +4,8 @@ using Abstractions.Messaging;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
+using Constellation.Application.Models.Identity;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Core.Errors;
@@ -14,6 +16,7 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
 using Core.Shared;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -29,7 +32,7 @@ internal sealed class ResignStaffMemberCommandHandler
     private readonly IFacultyRepository _facultyRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ITrainingModuleRepository _moduleRepository;
-    private readonly IAuthService _authService;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -39,7 +42,7 @@ internal sealed class ResignStaffMemberCommandHandler
         IFacultyRepository facultyRepository,
         IOfferingRepository offeringRepository,
         ITrainingModuleRepository moduleRepository,
-        IAuthService authService,
+        UserManager<AppUser> userManager,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -48,7 +51,7 @@ internal sealed class ResignStaffMemberCommandHandler
         _facultyRepository = facultyRepository;
         _offeringRepository = offeringRepository;
         _moduleRepository = moduleRepository;
-        _authService = authService;
+        _userManager = userManager;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ResignStaffMemberCommand>();
     }
@@ -121,7 +124,7 @@ internal sealed class ResignStaffMemberCommandHandler
         }
 
         // Remove user access
-        UserTemplateDto newUser = new()
+        UserTemplateDto userDetails = new()
         {
             FirstName = staffMember.FirstName,
             LastName = staffMember.LastName,
@@ -130,8 +133,18 @@ internal sealed class ResignStaffMemberCommandHandler
             IsStaffMember = false
         };
 
-        await _authService.UpdateUser(staffMember.EmailAddress, newUser);
-        
+        if (_userManager.Users.Any(u => u.UserName == userDetails.Username))
+        {
+            AppUser user = await _userManager.FindByEmailAsync(userDetails.Email);
+
+            user!.IsStaffMember = false;
+            user.StaffId = string.Empty;
+
+            await _userManager.RemoveFromRoleAsync(user, AuthRoles.StaffMember);
+
+            await _userManager.UpdateAsync(user);
+        }
+
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

@@ -1,2 +1,63 @@
 @page
 @model Constellation.Presentation.Students.Areas.Students.Pages.IndexModel
+
+<h2>Links</h2>
+
+<div class="flex-row hero">
+    <div class="card m-3 float-start">
+        <div class="card-body">
+            <h5 class="card-title">Student Info Hub</h5> 
+            <h6 class="card-subtitle mb-3 text-muted">All about Aurora College as a student</h6>
+             
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <a href="https://sites.google.com/education.nsw.gov.au/aurorastudentlst/welcome" class="stretched-link"></a>
+                    <i class="fas fa-link"></i> 
+                    Google Site: Student Info Hub
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="card m-3 float-start">
+        <div class="card-body">
+            <h5 class="card-title">Aurora College Students Team</h5> 
+            <h6 class="card-subtitle mb-3 text-muted">Chat to teachers and students at Aurora College</h6>
+            
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <a href="https://teams.microsoft.com/l/team/19%3A6ba422c37a2540d5add4220c43657414%40thread.tacv2/conversations?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991" class="stretched-link"></a>
+                    <i class="fas fa-link"></i> 
+                    Aurora College Students on Microsoft Teams
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="flex-row">
+    @foreach (var offering in Model.Offerings.OrderBy(entry => entry.OfferingName))
+    {
+        <div class="card m-3 float-start">
+            <div class="card-body">
+                <h5 class="card-title">@offering.OfferingName</h5> 
+                <h6 class="card-subtitle mb-3 text-muted">@offering.CourseName</h6>
+                
+                    @foreach (var teacher in offering.Teachers)
+                    {
+                        <ul class="list-group">
+                            <li class="list-group-item"><a href="mailto:@teacher.EmailAddress" class="stretched-link"></a><i class="fas fa-user"></i> @teacher.Name.DisplayName</li>
+                        </ul>
+                    }
+                    @foreach (var resource in offering.Resources.OrderBy(entry => entry.Type))
+                    {
+                        <ul class="list-group">
+                            <li class="list-group-item"><a href="@resource.Url" class="stretched-link"></a><i class="fas fa-link"></i> @resource.Type<br />@resource.Name</li>
+                        </ul>
+                    }
+            </div>
+        </div>
+    }
+</div>

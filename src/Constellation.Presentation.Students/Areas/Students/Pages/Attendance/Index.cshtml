@@ -1,0 +1,134 @@
+@page
+@model Constellation.Presentation.Students.Areas.Students.Pages.Attendance.IndexModel
+
+<h2>Absences</h2>
+
+<div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mb-1">
+    <a asp-page="/Index" asp-area="Students" class="btn btn-primary">Go Back</a>
+</div>
+
+<div class="d-none d-lg-block d-xl-block d-xxl-block mb-1">
+    <a asp-page="/Index" asp-area="Students" class="btn btn-primary">Go Back</a>
+</div>
+
+<div class="d-flex flex-column flex-lg-row justify-content-around mt-3">
+    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.AbsencesType == IndexModel.AbsenceCategory.VerifiedPartials ? "selected" : "unselected")">
+        <a asp-page="/Attendance/Index" asp-area="Students" asp-route-absencesType="@IndexModel.AbsenceCategory.VerifiedPartials" class="stretched-link" onclick="showLoader()"></a>
+        <div>Verified Partial Absences</div>
+        <div>@Model.VerifiedPartialsCount</div>
+    </div>
+
+    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.AbsencesType == IndexModel.AbsenceCategory.ExplainedWholes ? "selected" : "unselected")">
+        <a asp-page="/Attendance/Index" asp-area="Students" asp-route-absencesType="@IndexModel.AbsenceCategory.ExplainedWholes" class="stretched-link" onclick="showLoader()"></a>
+        <div>Explained Whole Absences</div>
+        <div>@Model.ExplainedWholesCount</div>
+    </div>
+</div>
+
+<div class="d-flex flex-column flex-lg-row justify-content-around mb-3">
+    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.AbsencesType == IndexModel.AbsenceCategory.UnexplainedPartials ? "selected" : "unselected")">
+        <a asp-page="/Attendance/Index" asp-area="Students" asp-route-absencesType="@IndexModel.AbsenceCategory.UnexplainedPartials" class="stretched-link" onclick="showLoader()"></a>
+        <div>Unexplained Partial Absences</div>
+        <div>@Model.UnexplainedPartialsCount</div>
+    </div>
+
+    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.AbsencesType == IndexModel.AbsenceCategory.UnverifiedPartials ? "selected" : "unselected")">
+        <a asp-page="/Attendance/Index" asp-area="Students" asp-route-absencesType="@IndexModel.AbsenceCategory.UnverifiedPartials" class="stretched-link" onclick="showLoader()"></a>
+        <div>Unverified Partial Absences</div>
+        <div>@Model.UnverifiedPartialsCount</div>
+    </div>
+
+    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.AbsencesType == IndexModel.AbsenceCategory.UnexplainedWholes ? "selected" : "unselected")">
+        <a asp-page="/Attendance/Index" asp-area="Students" asp-route-absencesType="@IndexModel.AbsenceCategory.UnexplainedWholes" class="stretched-link" onclick="showLoader()"></a>
+        <div>Unexplained Whole Absences</div>
+        <div>@Model.UnexplainedWholesCount</div>
+    </div>
+</div>
+
+<div class="m-3">
+    @if (Model.AbsencesType == IndexModel.AbsenceCategory.VerifiedPartials)
+    {
+        <h3>Verified Partial Absences</h3>
+        <span>
+            These absences are where you were not present for a portion of a lesson. You have provided a reason for the absence, and the Aurora College Coordinator at your school has verified the reason.
+        </span>
+    }
+
+    @if (Model.AbsencesType == IndexModel.AbsenceCategory.ExplainedWholes)
+    {
+        <h3>Explained Whole Absences</h3>
+        <span>
+            These absences are where you were not present for an entire lesson. An explanation for the absence has been provided either by a parent, or by the Aurora College Coordinator at the school.
+        </span>
+    }
+
+    @if (Model.AbsencesType == IndexModel.AbsenceCategory.UnexplainedPartials)
+    {
+        <h3>Unexplained Partial Absences</h3>
+        <span>
+            These absences are where you were not present for a portion of a lesson. You are required to provide reason for their absence, which is then forwarded to your Aurora College Coordinator for verification. Please provide one here.
+        </span>
+    }
+
+    @if (Model.AbsencesType == IndexModel.AbsenceCategory.UnverifiedPartials)
+    {
+        <h3>Unverified Partial Absences</h3>
+        <span>
+            These absences are where you were not present for a portion of a lesson. You have provided a reason for the absence, which was then forwarded to your Aurora College Coordinator for verification. The Aurora College Coordinator has not yet verified the explanation.
+        </span>
+    }
+
+    @if (Model.AbsencesType == IndexModel.AbsenceCategory.UnexplainedWholes)
+    {
+        <h3>Unexplained Whole Absences</h3>
+        <span>
+            These absences are where you were not present for an entire lesson. Parents are requested to provide an explanation for the absence.
+        </span>
+    }
+</div>
+
+<div class="d-flex flex-column justify-content-around">
+    <div class="accordion" id="accordion">
+        @foreach (var month in Model.Absences.GroupBy(absence => absence.AbsenceDate.Month))
+        {
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="accordion-header-@month.Key">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@month.Key" aria-expanded="false" aria-controls="accordion-item-@month.Key">
+                        <span>@month.First().AbsenceDate.ToString("MMMM")</span>
+                        <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                    </button>
+                </h2>
+                <div id="accordion-item-@month.Key" class="accordion-collapse collapse" aria-labelledby="accordion-header-@month.Key" data-bs-parent="#accordion">
+                    <div class="accordion-body">
+                        @foreach (var entry in month)
+                        {
+                            <div class="w-auto p-3 mb-2 shadow position-relative">
+                                <div class="row d-flex align-items-center">
+                                    @*Display as flex to enable vertical centering of the button in the second div*@
+                                    <div class="col-lg-8">
+                                        <div class="h5">@entry.StudentName (@entry.StudentGrade) - @entry.AbsenceReason</div>
+                                        @*<div><span class="me-2">@entry.Status.ToString()</span> <span class="me-2">@entry.Id</span></div>*@
+                                        <div><span class="me-2">@entry.AbsenceDate.ToString("dd/MM")</span> <span class="me-2">@entry.OfferingName</span> @entry.AbsenceLength min (@entry.AbsenceTimeframe)</div>
+
+                                        @*If this is a unverified partial absence, include the student explanation in the view*@
+                                        @if (!string.IsNullOrWhiteSpace(entry.Explanation))
+                                        {
+                                            <div class="mt-2">"@entry.Explanation"</div>
+                                        }
+
+                                        @*Turn the entire entry into a clickable element*@
+                                        <span class="fst-italic">Click or tap for details</span>
+
+                                        <div class="d-block">
+                                            <a asp-page="/Attendance/Details" asp-area="Students" asp-route-id="@entry.Id" class="stretched-link"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

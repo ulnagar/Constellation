@@ -1,15 +1,16 @@
-﻿namespace Constellation.Presentation.Students.Areas.Students.Pages;
+﻿namespace Constellation.Presentation.Students.Areas.Students.Pages.Contacts;
 
-using Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Application.Models.Auth;
-using Application.Offerings.GetCurrentOfferingsForStudent;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Contacts.GetContactListForParentPortal;
+using Constellation.Application.Students.GetStudentsByParentEmail;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 
@@ -17,26 +18,31 @@ using Serilog;
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
+        LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
+        _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
             .ForContext(StudentLogDefaults.Application, StudentLogDefaults.StudentPortal);
     }
+    
+    [ViewData] public string ActivePage => Models.ActivePage.Contacts;
 
-    [ViewData] public string ActivePage => Models.ActivePage.Dashboard;
+    public List<StudentSupportContactResponse> Contacts { get; set; } = new();
 
-    public List<OfferingDetailResponse> Offerings { get; set; } = new();
+    public async Task OnGet() => await PreparePage();
 
-    public async Task OnGet()
+    public async Task PreparePage()
     {
         string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
@@ -44,26 +50,24 @@ public class IndexModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
-                .Warning("Failed to retrieve enrolled classes by user {user}", _currentUserService.UserName);
+                .Warning("Failed to retrieve award summary by user {user}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
 
             return;
         }
 
-        Result<List<OfferingDetailResponse>> request = await _mediator.Send(new GetCurrentOfferingsForStudentQuery(studentId));
+        _logger.Information("Requested to retrieve contacts by user {user} for student {student}", _currentUserService.UserName, studentId);
 
-        if (request.IsFailure)
+        Result<List<StudentSupportContactResponse>> contactsRequest = await _mediator.Send(new GetContactListForParentPortalQuery(studentId));
+
+        if (contactsRequest.IsFailure)
         {
-            _logger
-                .ForContext(nameof(Error), request.Error, true)
-                .Warning("Failed to retrieve enrolled classes by user {user}", _currentUserService.UserName);
-
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = new ErrorDisplay(contactsRequest.Error);
 
             return;
         }
 
-        Offerings = request.Value;
+        Contacts = contactsRequest.Value;
     }
 }

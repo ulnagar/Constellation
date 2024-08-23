@@ -10,6 +10,8 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Errors;
+using Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
@@ -22,6 +24,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly ILogger _logger;
     private readonly AppConfiguration _configuration;
 
@@ -29,12 +32,14 @@ internal sealed class GetContactListForParentPortalQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _logger = logger.ForContext<GetContactListForParentPortalQuery>();
         _configuration = configuration.Value;
     }
@@ -121,6 +126,8 @@ internal sealed class GetContactListForParentPortalQueryHandler
                 continue;
             }
 
+            Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
             foreach (Staff member in members)
             {
                 response.Add(new(
@@ -130,7 +137,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
                     member.EmailAddress,
                     string.Empty,
                     "Teacher",
-                    offering.Name));
+                    course is not null ? $"{offering.Name} - {course.Name}" : offering.Name));
             }
         }
 

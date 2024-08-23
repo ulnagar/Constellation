@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
 
 using Application.Common.PresentationModels;
+using Application.Users.AuditAllUsers;
 using Constellation.Application.AdminDashboards.AuditUser;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
@@ -19,26 +19,23 @@ public class IndexModel : BasePageModel
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly LinkGenerator _linkGenerator;
-    private readonly IAuthService _authService;
 
     public IndexModel(
         IMediator mediator,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
-        LinkGenerator linkGenerator,
-        IAuthService authService)
-        : base()
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
         _userManager = userManager;
         _roleManager = roleManager;
         _linkGenerator = linkGenerator;
-        _authService = authService;
     }
 
     public int StaffUserCount { get; set; }
     public int SchoolContactUserCount { get; set; }
     public int ParentUserCount { get; set; }
+    public int StudentUserCount { get; set; }
 
     public List<UserRoleDetailsDto> Roles { get; set; } = new();
 
@@ -65,13 +62,13 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        var users = await _userManager.Users.ToListAsync();
+        List<AppUser> users = await _userManager.Users.ToListAsync();
 
-        var roles = await _roleManager.Roles.ToListAsync();
+        List<AppRole> roles = await _roleManager.Roles.ToListAsync();
 
-        foreach (var role in roles)
+        foreach (AppRole role in roles)
         {
-            var members = await _userManager.GetUsersInRoleAsync(role.Name);
+            IList<AppUser> members = await _userManager.GetUsersInRoleAsync(role!.Name);
 
             Roles.Add(new UserRoleDetailsDto
             {
@@ -81,9 +78,9 @@ public class IndexModel : BasePageModel
             });
         }
 
-        foreach (var user in users)
+        foreach (AppUser user in users)
         {
-            var memberRoles = new List<string>();
+            List<string> memberRoles = new();
 
             if (user.IsStaffMember)
                 memberRoles.Add("Staff");
@@ -94,7 +91,10 @@ public class IndexModel : BasePageModel
             if (user.IsParent)
                 memberRoles.Add("Parent");
 
-            var locked = await _userManager.GetLockoutEnabledAsync(user);
+            if (user.IsStudent)
+                memberRoles.Add("Student");
+
+            bool locked = await _userManager.GetLockoutEnabledAsync(user);
 
             Users.Add(new UserDetailsDto
             {
@@ -111,6 +111,7 @@ public class IndexModel : BasePageModel
         StaffUserCount = users.Count(user => user.IsStaffMember);
         SchoolContactUserCount = users.Count(user => user.IsSchoolContact);
         ParentUserCount = users.Count(user => user.IsParent);
+        StudentUserCount = users.Count(user => user.IsStudent);
 
         return Page();
     }
@@ -131,8 +132,5 @@ public class IndexModel : BasePageModel
         return RedirectToPage("Index");
     }
 
-    public async Task OnGetAuditAllUsers(CancellationToken cancellationToken = default)
-    {
-        await _authService.AuditAllUsers(cancellationToken);
-    }
+    public async Task OnGetAuditAllUsers(CancellationToken cancellationToken = default) => await _mediator.Send(new AuditAllUsersCommand(), cancellationToken);
 }

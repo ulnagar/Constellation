@@ -19,9 +19,6 @@ public sealed class IsActiveStudent : AuthorizationHandler<IsCurrentStudentRequi
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, IsCurrentStudentRequirement requirement)
     {
-        context.Succeed(requirement);
-        return;
-
         Claim emailClaim = context.User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email);
 
         if (emailClaim is null)

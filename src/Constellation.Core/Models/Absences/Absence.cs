@@ -149,8 +149,8 @@ public class Absence : AggregateRoot
         if (_responses.Count == 0)
             return null;
 
-        if (!Explained)
-            return null;
+        //if (!Explained)
+        //    return null;
 
         Response? explainedResponse = _responses
             .FirstOrDefault(response => 

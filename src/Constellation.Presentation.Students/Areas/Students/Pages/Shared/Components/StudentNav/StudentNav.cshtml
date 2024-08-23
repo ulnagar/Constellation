@@ -17,6 +17,11 @@
             </a>
         </div>
         <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Students">
+                <i class="fas fa-mail-bulk" aria-hidden="true"></i> Contacts
+            </a>
+        </div>
+        <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.Attendance ? "active" : "")" asp-page="/Attendance/Index" asp-area="Students">
                 <i class="fas fa-calendar-day" aria-hidden="true"></i> Attendance
             </a>
@@ -27,18 +32,8 @@
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Students">
-                <i class="fas fa-file-chart-line" aria-hidden="true"></i> Reports
-            </a>
-        </div>
-        <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Students">
                 <i class="fas fa-clock" aria-hidden="true"></i> Timetable
-            </a>
-        </div>
-        <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Students">
-                <i class="fas fa-mail-bulk" aria-hidden="true"></i> Contacts
             </a>
         </div>
     </nav>

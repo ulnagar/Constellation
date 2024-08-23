@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 
+using Application.Absences.GetAbsenceDetailsForStudent;
 using Constellation.Application.Absences.CreateAbsenceResponseFromStudent;
-using Constellation.Application.Absences.GetAbsenceForStudentResponse;
 using Constellation.Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -34,7 +34,7 @@ public class StudentExplanationModel : PageModel
     {
         var absenceId = AbsenceId.FromValue(Id);
 
-        var absenceRequest = await _mediator.Send(new GetAbsenceForStudentResponseQuery(absenceId), cancellationToken);
+        var absenceRequest = await _mediator.Send(new GetAbsenceDetailsForStudentQuery(absenceId), cancellationToken);
 
         if (absenceRequest.IsFailure)
             throw new InvalidDataException(absenceRequest.Error.Message);

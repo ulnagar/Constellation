@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Absences.GetAbsenceForStudentResponse;
+﻿namespace Constellation.Application.Absences.GetAbsenceDetailsForStudent;
 
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
@@ -17,4 +17,11 @@ public sealed record AbsenceForStudentResponse(
     string PeriodName,
     string PeriodTimeframe,
     string AbsenceTimeframe,
-    int AbsenceLength);
+    int AbsenceLength,
+    string AbsenceReason,
+    string Reason,
+    string VerificationStatus,
+    string ValidatedBy,
+    bool Explained);
+
+

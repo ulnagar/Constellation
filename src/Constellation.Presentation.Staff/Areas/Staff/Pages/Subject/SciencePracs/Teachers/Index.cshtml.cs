@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
 using Application.Common.PresentationModels;
+using Application.Users.RepairSchoolContactUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
@@ -53,6 +54,25 @@ public class IndexModel : BasePageModel
     public List<ContactResponse> Contacts = new();
 
     public async Task OnGet() => await PreparePage();
+
+    public async Task OnGetAudit(
+        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId id)
+    {
+        _logger.Information("Requested to audit user details for School Contact with id {Id} by user {User}", id, _currentUserService.UserName);
+
+        Result auditRequest = await _mediator.Send(new RepairSchoolContactUserCommand(id));
+
+        if (auditRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), auditRequest.Error, true)
+                .Warning("Failed to audit user details for School Contact with id {Id} by user {User}", id, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(auditRequest.Error);
+
+            await PreparePage();
+        }
+    }
 
     public IActionResult OnPostAjaxDelete(
         [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,

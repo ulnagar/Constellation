@@ -1,1 +1,13 @@
-﻿
+﻿:root {
+    /* Layout the vertical menu buttons nicely */
+    --bs-nav-link-padding-x: 1rem;
+    --bs-nav-link-padding-y: .5rem;
+}
+
+.btn-show-hover {
+    visibility: hidden;
+}
+
+button:hover .btn-show-hover {
+    visibility: visible;
+}
