@@ -9,7 +9,7 @@ public static class ActivePage
 
     public const string Awards = "Awards";
 
-    public const string Reports = "Reports";
+    public const string Wellbeing = "Wellbeing";
 
     public const string Timetables = "Timetables";
 

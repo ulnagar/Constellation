@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages;
 
-using Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Application.Models.Auth;
 using Application.Offerings.GetCurrentOfferingsForStudent;
 using Constellation.Application.Common.PresentationModels;
@@ -38,13 +37,15 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        _logger.Information("Requested to retrieve Student Dashboard by user {User}", _currentUserService.UserName);
+
         string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
         if (string.IsNullOrWhiteSpace(studentId))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
-                .Warning("Failed to retrieve enrolled classes by user {user}", _currentUserService.UserName);
+                .Warning("Failed to retrieve Student Dashboard by user {user}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
 
@@ -57,7 +58,7 @@ public class IndexModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), request.Error, true)
-                .Warning("Failed to retrieve enrolled classes by user {user}", _currentUserService.UserName);
+                .Warning("Failed to retrieve Student Dashboard by user {user}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(request.Error);
 

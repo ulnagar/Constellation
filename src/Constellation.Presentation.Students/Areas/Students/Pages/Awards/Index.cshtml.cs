@@ -54,13 +54,23 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnGetDownloadCertificate(
         [ModelBinder(typeof(ConstructorBinder))] StudentAwardId awardId)
     {
-        Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.AwardCertificate, awardId.ToString()));
+        GetAttachmentFileQuery command = new(AttachmentType.AwardCertificate, awardId.ToString());
+
+        _logger
+            .ForContext(nameof(GetAttachmentFileQuery), command, true)
+            .Information("Requested to retrieve award certificate by user {user}", _currentUserService.UserName);
+
+        Result<AttachmentResponse> fileResponse = await _mediator.Send(command);
 
         if (fileResponse.IsFailure)
         {
+            _logger
+                .ForContext(nameof(Error), fileResponse.Error, true)
+                .Warning("Failed to retrieve award certificate by user {user}", _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(
                 fileResponse.Error,
-                _linkGenerator.GetPathByPage("/Awards/Index", values: new { area = "Parents" }));
+                _linkGenerator.GetPathByPage("/Awards/Index", values: new { area = "Students" }));
 
             await PreparePage();
 
