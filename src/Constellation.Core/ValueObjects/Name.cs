@@ -37,20 +37,7 @@ public sealed class Name : ValueObject, IComparable
             preferredName.Trim(),
             lastName.Trim());
     }
-
-    public static Result<Name> CreateMononym(string name)
-    {
-        if (string.IsNullOrEmpty(name))
-        {
-            return Result.Failure<Name>(DomainErrors.ValueObjects.Name.FirstNameEmpty);
-        }
-
-        return new Name(
-            string.Empty,
-            name,
-            string.Empty);
-    }
-
+    
     public string FirstName { get; }
     public string PreferredName { get; }
     public string LastName { get; }

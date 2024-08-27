@@ -1,12 +1,12 @@
 namespace Constellation.Core.Models.Students;
 
-using Absences;
 using Abstractions.Clock;
-using Enrolments;
+using Constellation.Core.Enums;
+using Constellation.Core.ValueObjects;
 using Enums;
 using Errors;
 using Events;
-using Families;
+using Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -14,76 +14,38 @@ using System.Collections.Generic;
 using System.Linq;
 using ValueObjects;
 
-public class Student : AggregateRoot
+public class Student : AggregateRoot, IAuditableEntity
 {
     private readonly List<AbsenceConfiguration> _absenceConfigurations = new();
+    private readonly List<SchoolEnrollment> _schoolEnrollments = new();
+    private readonly List<SystemLink> _systemLinks = new();
 
-    private Student(
-        string studentId,
-        string firstName,
-        string lastName,
-        string portalUsername,
-        Grade grade,
-        string schoolCode,
-        string gender)
-    {
-        StudentId = studentId;
-        FirstName = firstName;
-        LastName = lastName;
-        PortalUsername = portalUsername;
-        CurrentGrade = grade;
-        EnrolledGrade = grade;
-        Gender = gender;
-        SchoolCode = schoolCode;
+    public StudentId StudentId { get; private set; }
+    public StudentReferenceNumber StudentReferenceNumber { get; private set; }
+    public Name Name { get; private set; }
+    public EmailAddress EmailAddress { get; private set; }
+    public Gender Gender { get; private set; }
+    public Gender PreferredGender { get; private set; }
 
-        DateEntered = DateTime.Now;
-    }
-
-    public Student()
-    {
-        IsDeleted = false;
-        DateEntered = DateTime.Now;
-
-        Enrolments = new List<Enrolment>();
-        Devices = new List<DeviceAllocation>();
-        MSTeamOperations = new List<StudentMSTeamOperation>();
-
-        Absences = new List<Absence>();
-    }
-
-    public string StudentId { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string PortalUsername { get; set; }
-    public string AdobeConnectPrincipalId { get; set; }
-    public string SentralStudentId { get; set; }
-    public Grade CurrentGrade { get; set; }
-    public Grade EnrolledGrade { get; set; }
-    public string Gender { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime? DateDeleted { get; set; }
-    public DateTime? DateEntered { get; set; }
-    public string SchoolCode { get; set; }
-    public School School { get; set; }
-    public bool IncludeInAbsenceNotifications { get; set; }
-    public DateTime? AbsenceNotificationStartDate { get; set; }
-    public string DisplayName => FirstName.Trim() + " " + LastName.Trim();
-    public string EmailAddress => PortalUsername + "@education.nsw.gov.au";
-    public byte[] Photo { get; set; }
-
+    public string CreatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string ModifiedBy { get; set; }
+    public DateTime ModifiedAt { get; set; }
+    public bool IsDeleted { get; private set; }
+    public string DeletedBy { get; set; }
+    public DateTime DeletedAt { get; set; }
+    
     public readonly AwardTally AwardTally = new ();
-    public List<StudentFamilyMembership> FamilyMemberships { get; set; } = new();
-    public ICollection<Enrolment> Enrolments { get; set; }
-    public ICollection<DeviceAllocation> Devices { get; set; }
-    public ICollection<StudentMSTeamOperation> MSTeamOperations { get; set; }
-    public ICollection<Absence> Absences { get; set; }
-    public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;
+    public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations.AsReadOnly();
+    public IReadOnlyCollection<SchoolEnrollment> SchoolEnrollments => _schoolEnrollments.AsReadOnly();
+    public IReadOnlyCollection<SystemLink> SystemLinks => _systemLinks.AsReadOnly();
 
     public static Student Create(
-        string studentId,
+        string srn,
         string firstName,
+        string preferredName,
         string lastName,
-        string portalUsername,
+        string emailAddress,
         Grade grade,
         string schoolCode,
         string gender)
@@ -117,15 +79,7 @@ public class Student : AggregateRoot
         return Result.Success();
     }
 
-    public Name GetName()
-    {
-        Result<Name> request = Name.Create(FirstName, string.Empty, LastName);
 
-        if (request.IsSuccess)
-            return request.Value;
-
-        return null;
-    }
 
     /// <summary>
     /// Compare two sets of dates, and determine whether there is any overlap between the ranges
@@ -169,10 +123,15 @@ public class Student : AggregateRoot
         return false;
     }
 
-    public void Withdraw()
+    public void Withdraw(
+        IDateTimeProvider dateTime)
     {
         IsDeleted = true;
-        DateDeleted = DateTime.Now;
+
+        foreach (SchoolEnrollment entry in _schoolEnrollments.Where(entry => !entry.IsDeleted))
+        {
+            entry.Delete(dateTime);
+        }
 
         RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), StudentId));
     }
