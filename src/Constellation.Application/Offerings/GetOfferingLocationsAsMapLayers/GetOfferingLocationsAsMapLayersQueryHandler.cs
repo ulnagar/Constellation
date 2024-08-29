@@ -53,7 +53,7 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
 
         foreach (Enrolment enrolment in enrolments)
         {
-            Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(enrolment.StudentId, cancellationToken);
 
             if (!SchoolCodes.Contains(student.SchoolCode))
                 SchoolCodes.Add(student.SchoolCode);

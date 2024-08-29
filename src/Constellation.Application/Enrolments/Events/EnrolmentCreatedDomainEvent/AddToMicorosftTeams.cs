@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Enrolments.Events.EnrolmentCreatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
@@ -11,8 +10,9 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System;
 using System.Threading;
@@ -75,7 +75,7 @@ internal sealed class AddToMicorosftTeams
 
         StudentMSTeamOperation operation = new()
         {
-            StudentId = student.StudentId,
+            StudentId = student.Id,
             OfferingId = offering.Id,
             DateScheduled = offering.IsCurrent ? _dateTime.Now : offering.StartDate.ToDateTime(TimeOnly.MinValue),
             Action = MSTeamOperationAction.Add,

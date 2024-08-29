@@ -39,7 +39,7 @@ internal sealed class GetApplicationDetailsQueryHandler
 
         foreach (Consent consent in currentConsents)
         {
-            Student student = await _studentRepository.GetWithSchoolById(consent.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetWithSchoolBySRN(consent.StudentId, cancellationToken);
 
             if (student is null)
             {

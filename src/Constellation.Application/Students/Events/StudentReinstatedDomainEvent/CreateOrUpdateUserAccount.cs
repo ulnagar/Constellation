@@ -31,7 +31,7 @@ internal sealed class CreateOrUpdateUserAccount
 
     public async Task Handle(StudentReinstatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
 
         if (student is null)
         {

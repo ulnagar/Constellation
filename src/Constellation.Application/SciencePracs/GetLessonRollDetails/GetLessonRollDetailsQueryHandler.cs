@@ -64,7 +64,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         foreach (SciencePracAttendance entry in roll.Attendance)
         {
-            Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(entry.StudentId, cancellationToken);
 
             if (student is null)
                 continue;

@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
+using Constellation.Core.Models.Students.Identifiers;
 using DomainEvents;
 using Errors;
 using Identifiers;
-using Students;
 using Primitives;
 using Shared;
+using Students;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,9 +137,9 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         if (effectiveTo.HasValue && effectiveTo.Value < DateOnly.FromDateTime(DateTime.Today))
             return Result.Failure<TutorialEnrolment>(DomainErrors.GroupTutorials.TutorialEnrolment.TimeExpired);
 
-        if (_enrolments.Any(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted))
+        if (_enrolments.Any(enrol => enrol.StudentId == student.Id && !enrol.IsDeleted))
         {
-            TutorialEnrolment existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted);
+            TutorialEnrolment existingEntry = _enrolments.FirstOrDefault(enrol => enrol.StudentId == student.Id && !enrol.IsDeleted);
 
             return existingEntry;
         }
@@ -154,12 +155,12 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
 
     public Result UnenrolStudent(Student student, DateOnly? takesEffectOn = null)
     {
-        if (_enrolments.Where(enrol => enrol.StudentId == student.StudentId).All(enrol => enrol.IsDeleted))
+        if (_enrolments.Where(enrol => enrol.StudentId == student.Id).All(enrol => enrol.IsDeleted))
         {
             return Result.Success();
         }
 
-        var enrolments = _enrolments.Where(enrol => enrol.StudentId == student.StudentId && !enrol.IsDeleted).ToList();
+        var enrolments = _enrolments.Where(enrol => enrol.StudentId == student.Id && !enrol.IsDeleted).ToList();
 
         foreach (var enrolment in enrolments)
         {
@@ -204,7 +205,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return roll;
     }
 
-    public Result SubmitRoll(TutorialRoll roll, Staff staffMember, Dictionary<string, bool> studentPresence)
+    public Result SubmitRoll(TutorialRoll roll, Staff staffMember, Dictionary<StudentId, bool> studentPresence)
     {
         if (roll.Status != Enums.TutorialRollStatus.Unsubmitted)
         {

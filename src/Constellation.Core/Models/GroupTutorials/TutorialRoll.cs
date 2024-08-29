@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.GroupTutorials;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Enums;
 using Identifiers;
 using Primitives;
@@ -38,7 +39,7 @@ public sealed class TutorialRoll : IAuditableEntity
     public string DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
-    public void AddStudent(string studentId, bool enrolled)
+    public void AddStudent(StudentId studentId, bool enrolled)
     {
         var existingEntry = _students.FirstOrDefault(student => student.StudentId == studentId);
 
@@ -59,7 +60,7 @@ public sealed class TutorialRoll : IAuditableEntity
         }
     }
 
-    public void RemoveStudent(string studentId)
+    public void RemoveStudent(StudentId studentId)
     {
         var existingEntry = _students.FirstOrDefault(student => student.StudentId == studentId);
 
@@ -69,7 +70,7 @@ public sealed class TutorialRoll : IAuditableEntity
         }
     }
 
-    public void Submit(string staffId, Dictionary<string, bool> students)
+    public void Submit(string staffId, Dictionary<StudentId, bool> students)
     {
         StaffId = staffId;
 

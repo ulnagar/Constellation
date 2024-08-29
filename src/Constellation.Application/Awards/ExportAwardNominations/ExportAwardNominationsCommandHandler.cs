@@ -1,18 +1,17 @@
 ﻿namespace Constellation.Application.Awards.ExportAwardNominations;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Extensions;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
+using DTOs;
 using Helpers;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.IO;
@@ -25,20 +24,17 @@ internal sealed class ExportAwardNominationsCommandHandler
 {
     private readonly IAwardNominationRepository _nominationRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
     public ExportAwardNominationsCommandHandler(
         IAwardNominationRepository nominationRepository,
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         IExcelService excelService,
         ILogger logger)
     {
         _nominationRepository = nominationRepository;
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _excelService = excelService;
         _logger = logger.ForContext<ExportAwardNominationsCommand>();
     }
@@ -56,12 +52,16 @@ internal sealed class ExportAwardNominationsCommandHandler
 
         List<AwardNominationExportDto> exportDtos = new();
 
-        var groupedNominations = period.Nominations.Where(nomination => !nomination.IsDeleted).GroupBy(nomination => nomination.StudentId);
+        IEnumerable<IGrouping<StudentId, Nomination>> groupedNominations = period.Nominations.Where(nomination => !nomination.IsDeleted).GroupBy(nomination => nomination.StudentId);
 
-        foreach (var student in groupedNominations)
+        foreach (IGrouping<StudentId, Nomination> student in groupedNominations)
         {
             Student studentEntry = await _studentRepository.GetById(student.Key, cancellationToken);
-            School school = await _schoolRepository.GetById(studentEntry.SchoolCode, cancellationToken);
+
+            SchoolEnrolment? enrolment = studentEntry.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
 
             List<string> awardDescriptions = student.Select(entry => entry.GetDescription()).ToList();
             var countOfAwardDescriptions = awardDescriptions.Select(entry => new { Name = entry, Count = awardDescriptions.Count(value => value == entry) });
@@ -69,12 +69,12 @@ internal sealed class ExportAwardNominationsCommandHandler
             string awards = string.Join("; ", countOfAwardDescriptions.Select(entry => entry.Count > 1 ? $"{entry.Name} x{entry.Count}" : entry.Name));
 
             exportDtos.Add(new(
-                studentEntry.StudentId,
-                studentEntry.FirstName,
-                studentEntry.LastName,
-                studentEntry.DisplayName,
-                studentEntry.CurrentGrade.AsName(),
-                school.Name,
+                studentEntry.StudentReferenceNumber.Number,
+                studentEntry.Name.FirstName,
+                studentEntry.Name.LastName,
+                studentEntry.Name.DisplayName,
+                enrolment.Grade.AsName(),
+                enrolment.SchoolName,
                 awards));
         }
 

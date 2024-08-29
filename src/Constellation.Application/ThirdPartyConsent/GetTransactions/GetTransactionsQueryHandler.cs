@@ -47,7 +47,7 @@ internal sealed class GetTransactionsQueryHandler
         foreach (IGrouping<string, Transaction> transactionList in transactionsByStudent)
         {
 
-            Student student = await _studentRepository.GetWithSchoolById(transactionList.Key, cancellationToken);
+            Student student = await _studentRepository.GetWithSchoolBySRN(transactionList.Key, cancellationToken);
 
             if (student is null)
             {

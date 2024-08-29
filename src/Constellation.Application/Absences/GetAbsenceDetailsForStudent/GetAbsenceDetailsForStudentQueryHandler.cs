@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceDetailsForStudent;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
@@ -10,8 +9,8 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Shared;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,16 +54,7 @@ internal sealed class GetAbsenceDetailsForStudentQueryHandler
 
             return Result.Failure<AbsenceForStudentResponse>(StudentErrors.NotFound(absence.StudentId));
         }
-
-        Name? studentName = student.GetName();
-
-        if (studentName is null)
-        {
-            _logger.Warning("Could not create student name from {@student}", student);
-
-            return Result.Failure<AbsenceForStudentResponse>(new("ValueObjects.Name.NotCreated", "Could not create name object"));
-        }
-
+        
         Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
@@ -78,8 +68,8 @@ internal sealed class GetAbsenceDetailsForStudentQueryHandler
         
         AbsenceForStudentResponse result = new(
             absence.Id,
-            studentName,
-            student.StudentId,
+            student.Name,
+            student.Id,
             offering.Id,
             offering.Name,
             absence.Date,

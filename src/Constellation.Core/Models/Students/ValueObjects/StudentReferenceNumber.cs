@@ -1,10 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿namespace Constellation.Core.Models.Students.ValueObjects;
 
-namespace Constellation.Core.Models.Students.ValueObjects;
-
-using Constellation.Core.Models.Students.Errors;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Errors;
+using Primitives;
+using Shared;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 

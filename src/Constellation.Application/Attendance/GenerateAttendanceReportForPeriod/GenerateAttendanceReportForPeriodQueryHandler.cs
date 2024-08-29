@@ -50,7 +50,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         List<AttendanceRecord> records = new();
         List<AbsenceRecord> absenceRecords = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
         List<Offering> offerings = await _offeringRepository.GetAllActive(cancellationToken);
 
         List<AttendanceValue> values = await _attendanceRepository.GetForReportWithTitle(request.PeriodLabel, cancellationToken);
@@ -64,16 +64,16 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         
         foreach (AttendanceValue value in values)
         {
-            Student student = students.FirstOrDefault(student => student.StudentId == value.StudentId);
+            Student student = students.FirstOrDefault(student => student.Id == value.StudentId);
 
             if (student is null)
                 continue;
 
-            List<AttendanceValue> recentHistory = await _attendanceRepository.GetForStudentBetweenDates(student.StudentId, historyBoundary, endDate, cancellationToken);
+            List<AttendanceValue> recentHistory = await _attendanceRepository.GetForStudentBetweenDates(student.Id, historyBoundary, endDate, cancellationToken);
 
             records.Add(new(
                 value.StudentId,
-                student.GetName(),
+                student.Name,
                 value.Grade,
                 value.PerMinuteYearToDatePercentage,
                 value.PerMinuteYearToDatePercentage >= 90 ? "90% - 100% Attendance" :

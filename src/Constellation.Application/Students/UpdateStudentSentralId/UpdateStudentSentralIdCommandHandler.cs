@@ -33,7 +33,7 @@ internal sealed class UpdateStudentSentralIdCommandHandler
 
     public async Task<Result> Handle(UpdateStudentSentralIdCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
 
         if (student is null)
         {

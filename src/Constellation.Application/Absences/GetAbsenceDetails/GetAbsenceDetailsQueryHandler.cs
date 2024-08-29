@@ -58,22 +58,13 @@ internal sealed class GetAbsenceDetailsQueryHandler
             return Result.Failure<AbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));        
         }
 
-        Result<Name> studentNameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-        if (studentNameRequest.IsFailure)
+        if (enrolment is null)
         {
-            _logger.Warning("Could not create Name object from student with Id {id}", absence.StudentId);
+            _logger.Warning("Could not retrieve current School Enrolment for student with id {Id}", absence.StudentId);
 
-            return Result.Failure<AbsenceDetailsResponse>(studentNameRequest.Error);
-        }
-
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
-
-        if (school is null)
-        {
-            _logger.Warning("Could not locate school with Id {id}", student.SchoolCode);
-
-            return Result.Failure<AbsenceDetailsResponse>(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+            return Result.Failure<AbsenceDetailsResponse>(SchoolEnrolmentErrors.NotFound);
         }
 
         List<AbsenceDetailsResponse.AbsenceResponseDetails> convertedResponses = new();

@@ -1,10 +1,10 @@
-﻿using Constellation.Core.Models.Faculties;
+﻿namespace Constellation.Core.Models;
+
 using Constellation.Core.Models.Faculties.Identifiers;
-
-namespace Constellation.Core.Models;
-
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Enums;
+using Faculties;
 using GroupTutorials;
 using Identifiers;
 using Offerings;
@@ -43,7 +43,7 @@ public abstract class OfferingMSTeamOperation : MSTeamOperation
 
 public class StudentMSTeamOperation : OfferingMSTeamOperation
 {
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
     public Student Student { get; set; }
 }
 
@@ -71,7 +71,7 @@ public abstract class EventMSTeamOperation : MSTeamOperation
 
 public class StudentEnrolledMSTeamOperation : EventMSTeamOperation
 {
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
     public Student Student { get; set; }
 }
 
@@ -100,5 +100,5 @@ public sealed class TeacherAssignmentMSTeamOperation : EventMSTeamOperation
 
 public sealed class StudentOfferingMSTeamOperation : EventMSTeamOperation
 {
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
 }

@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Application.Contacts.GetContactListForParentPortal;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 
 public sealed record GetContactListForParentPortalQuery(
-    string StudentId)
+    StudentId StudentId)
     : IQuery<List<StudentSupportContactResponse>>;

@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Application.Absences.GetAbsencesForFamily;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models.Offerings;
+using Core.Models.Students;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -41,23 +43,26 @@ internal sealed class GetAbsencesForFamilyQueryHandler
     {
         List<AbsenceForFamilyResponse> results = new();
 
-        var studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+        Dictionary<StudentId, bool> studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
-        var students = await _studentRepository.GetListFromIds(studentIds.Select(entry => entry.Key).ToList(), cancellationToken);
+        List<Student> students = await _studentRepository.GetListFromIds(studentIds.Select(entry => entry.Key).ToList(), cancellationToken);
 
-        foreach (var student in students)
+        foreach (Student student in students)
         {
-            var nameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            var absences = await _absenceRepository.GetForStudentFromCurrentYear(student.StudentId, cancellationToken);
+            if (enrolment is null)
+                continue;
 
-            foreach (var absence in absences)
+            List<Absence> absences = await _absenceRepository.GetForStudentFromCurrentYear(student.Id, cancellationToken);
+
+            foreach (Absence absence in absences)
             {
-                var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+                Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-                var response = absence.GetExplainedResponse();
+                Response response = absence.GetExplainedResponse();
 
-                AbsenceForFamilyResponse.AbsenceStatus status = AbsenceForFamilyResponse.AbsenceStatus.VerifiedPartial;
+                AbsenceForFamilyResponse.AbsenceStatus status;
 
                 if (absence.Type == AbsenceType.Whole)
                 {
@@ -75,11 +80,11 @@ internal sealed class GetAbsencesForFamilyQueryHandler
                             AbsenceForFamilyResponse.AbsenceStatus.UnverifiedPartial;
                 }
 
-                var entry = new AbsenceForFamilyResponse(
+                AbsenceForFamilyResponse entry = new(
                     absence.Id,
-                    student.StudentId,
-                    nameRequest.Value.DisplayName,
-                    student.CurrentGrade,
+                    student.Id,
+                    student.Name.DisplayName,
+                    enrolment.Grade,
                     absence.Type.Value,
                     absence.Date.ToDateTime(TimeOnly.MinValue),
                     absence.PeriodName,

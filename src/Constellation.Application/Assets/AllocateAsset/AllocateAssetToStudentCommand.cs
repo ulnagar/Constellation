@@ -2,8 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Models.Assets.ValueObjects;
+using Core.Models.Students.Identifiers;
 
 public sealed record AllocateAssetToStudentCommand(
     AssetNumber AssetNumber,
-    string StudentId)
+    StudentId StudentId)
     : ICommand;

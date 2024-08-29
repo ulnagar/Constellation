@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Configuration;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Shared;
+using Core.ValueObjects;
+using Interfaces.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
 
     public GetResidentialFamilyMobileNumbersQueryHandler(
         IFamilyRepository familyRepository,
-        Serilog.ILogger logger,
+        ILogger logger,
         IOptions<SentralGatewayConfiguration> settings)
     {
         _familyRepository = familyRepository;

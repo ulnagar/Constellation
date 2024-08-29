@@ -29,7 +29,7 @@ internal sealed class CreateStudentCommandHandler
 
     public async Task<Result> Handle(CreateStudentCommand request, CancellationToken cancellationToken)
     {
-        Student? existing = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? existing = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
 
         if (existing is not null)
         {

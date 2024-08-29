@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Assignments.UploadAssignmentSubmission;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Assignments.Identifiers;
+using Core.Models.Students.Identifiers;
+using DTOs;
 
 public sealed record UploadAssignmentSubmissionCommand(
         AssignmentId AssignmentId,
-        string StudentId,
+        StudentId StudentId,
         FileDto File)
     : ICommand
 {

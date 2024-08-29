@@ -99,7 +99,7 @@ internal sealed class GetCaseSummaryListQueryHandler
                 description = $"Compliance Case for {details.IncidentType} - {details.Subject}";
             }
 
-            Student student = await _studentRepository.GetById(studentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(studentId, cancellationToken);
 
             if (student is null)
             {

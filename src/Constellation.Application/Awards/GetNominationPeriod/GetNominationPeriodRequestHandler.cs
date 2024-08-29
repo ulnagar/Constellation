@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Awards.GetNominationPeriod;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -61,7 +61,7 @@ internal sealed class GetNominationPeriodRequestHandler
 
             NominationPeriodDetailResponse.NominationResponse entry = new(
                 nomination.Id,
-                student.GetName(),
+                student.Name,
                 nomination.AwardType,
                 nomination.GetDescription(),
                 nomination.CreatedBy);

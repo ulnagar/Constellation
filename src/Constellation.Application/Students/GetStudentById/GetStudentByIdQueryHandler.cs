@@ -20,7 +20,7 @@ internal sealed class GetStudentByIdQueryHandler
 
     public async Task<Result<StudentResponse>> Handle(GetStudentByIdQuery request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepository.GetWithSchoolById(request.StudentId, cancellationToken);
+        var student = await _studentRepository.GetWithSchoolBySRN(request.StudentId, cancellationToken);
 
         if (student is null)
         {

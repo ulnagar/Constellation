@@ -17,6 +17,7 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Helpers;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,27 +70,27 @@ internal sealed class ExportAbsencesReportCommandHandler
             .Distinct()
             .ToList();
 
-        List<Absence> absences = await _absenceRepository.GetForStudents(students.Select(student => student.StudentId).ToList(), cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetForStudents(students.Select(student => student.Id).ToList(), cancellationToken);
 
         foreach (var absence in absences)
         {
-            var student = students.First(student => student.StudentId == absence.StudentId);
+            Student student = students.First(student => student.Id == absence.StudentId);
 
-            Name? studentName = student.GetName();
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (studentName is null)
+            if (enrolment is null)
                 continue;
 
             Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             string offeringName = offering?.Name;
 
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
             result.Add(new(
-                studentName,
+                student.Name,
                 school.Name,
-                student.CurrentGrade,
+                enrolment.Grade,
                 offeringName,
                 absence.Id,
                 absence.Explained,
@@ -101,9 +102,9 @@ internal sealed class ExportAbsencesReportCommandHandler
                 absence.Responses.Count()));
         }
 
-        var stream = await _excelService.CreateAbsencesReportFile(result, cancellationToken);
+        MemoryStream stream = await _excelService.CreateAbsencesReportFile(result, cancellationToken);
 
-        var file = new FileDto
+        FileDto file = new()
         {
             FileData = stream.ToArray(),
             FileName = "Absences Report.xlsx",

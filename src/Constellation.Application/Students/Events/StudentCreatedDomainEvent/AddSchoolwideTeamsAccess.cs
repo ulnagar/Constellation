@@ -37,7 +37,7 @@ internal sealed class AddSchoolwideTeamsAccess
     {
         _logger.Information("Attempting to add student ({studentId}) from school wide teams", notification.StudentId);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
 
         if (student == null)
         {

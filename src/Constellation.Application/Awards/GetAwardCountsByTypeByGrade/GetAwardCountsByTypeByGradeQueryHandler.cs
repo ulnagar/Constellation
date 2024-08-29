@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Awards.GetAwardCountsByTypeByGrade;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.Students;
+using Core.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,34 +32,38 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
     {
         List<AwardCountByTypeByGradeResponse> result = new();
 
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
-        var awards = await _awardRepository.GetFromYear(request.Year, cancellationToken);
+        List<StudentAward> awards = await _awardRepository.GetFromYear(request.Year, cancellationToken);
 
         List<AwardWithGrade> awardsWithGrade = new();
 
-        foreach (var award in awards)
+        foreach (StudentAward award in awards)
         {
-            var student = students.FirstOrDefault(student => student.StudentId == award.StudentId);
-
-            if (student is not null)
-            {
-                awardsWithGrade.Add(new()
-                {
-                    Type = award.Type,
-                    Grade = student.CurrentGrade,
-                    Month = award.AwardedOn.Month
-                });
-            }
+            Student student = students.FirstOrDefault(student => student.Id == award.StudentId);
 
             // If Student is null, they have likely withdrawn and therefore is not included in the "Current Students" retrieved above
+            if (student is null)
+                continue;
+
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
+            awardsWithGrade.Add(new()
+            {
+                Type = award.Type,
+                Grade = enrolment.Grade,
+                Month = award.AwardedOn.Month
+            });
         }
 
         foreach (Grade grade in Enum.GetValues(typeof(Grade)))
         {
             for (int j = 0; j <= 3; j++)
             {
-                var awardType = j switch
+                string awardType = j switch
                 {
                     0 => StudentAward.Astra,
                     1 => StudentAward.Stellar,
@@ -67,7 +72,7 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
                     _ => string.Empty
                 };
 
-                var entry = new AwardCountByTypeByGradeResponse(
+                AwardCountByTypeByGradeResponse entry = new AwardCountByTypeByGradeResponse(
                     "YTD",
                     grade.AsName(),
                     awardType,
@@ -81,7 +86,7 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
         {
             for (int j = 0; j <= 3; j++)
             {
-                var awardType = j switch
+                string awardType = j switch
                 {
                     0 => StudentAward.Astra,
                     1 => StudentAward.Stellar,
@@ -90,7 +95,7 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
                     _ => string.Empty
                 };
 
-                var entry = new AwardCountByTypeByGradeResponse(
+                AwardCountByTypeByGradeResponse entry = new AwardCountByTypeByGradeResponse(
                     "This Month",
                     grade.AsName(),
                     awardType,
@@ -105,8 +110,8 @@ internal sealed class GetAwardCountsByTypeByGradeQueryHandler
 
     private class AwardWithGrade
     {
-        public string Type { get; set; }
-        public Grade Grade { get; set; }
-        public int Month { get; set; }
+        public string Type { get; init; }
+        public Grade Grade { get; init; }
+        public int Month { get; init; }
     }
 }

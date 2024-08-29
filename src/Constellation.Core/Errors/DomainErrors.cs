@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Errors;
+﻿using Constellation.Core.Models.Students.Identifiers;
+
+namespace Constellation.Core.Errors;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
@@ -271,11 +273,11 @@ public static class DomainErrors
                 "GroupTutorials.TutorialRoll.SubmitInvalidStatus",
                 "Cannot submit a roll that has been cancelled or previously submitted");
 
-            public static readonly Func<string, Error> StudentNotFound = student => new Error(
+            public static readonly Func<StudentId, Error> StudentNotFound = student => new Error(
                 "GroupTutorials.TutorialRoll.StudentNotFound",
                 $"Cannot find an attendance record for student with Id {student} attached to the roll");
 
-            public static readonly Func<string, Error> RemoveEnrolledStudent = student => new Error(
+            public static readonly Func<StudentId, Error> RemoveEnrolledStudent = student => new Error(
                 "GroupTutorials.TutorialRoll.RemoveEnrolledStudent",
                 $"Cannot remove student with Id {student} from the roll as they are enrolled in the tutorial");
         }

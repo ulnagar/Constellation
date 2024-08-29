@@ -43,7 +43,7 @@ internal sealed class UpdateOutstandingLessonRolls
     {
         _logger.Information("Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
 
         if (student is null)
         {

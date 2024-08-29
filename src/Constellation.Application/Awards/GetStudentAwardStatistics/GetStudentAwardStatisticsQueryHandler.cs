@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Application.Awards.GetStudentAwardStatistics;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
 using Core.Models.Students;
+using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -18,7 +17,7 @@ internal sealed class GetStudentAwardStatisticsQueryHandler
 
     public GetStudentAwardStatisticsQueryHandler(
         IStudentRepository studentRepository,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _studentRepository = studentRepository;
         _logger = logger.ForContext<GetStudentAwardStatisticsQuery>();
@@ -28,21 +27,22 @@ internal sealed class GetStudentAwardStatisticsQueryHandler
     {
         List<StudentAwardStatisticsResponse> results = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         if (students is null)
-        {
             return results;
-        }
 
         foreach (Student student in students)
         {
-            Name name = student.GetName();
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
 
             results.Add(new(
-                student.StudentId,
-                name,
-                student.CurrentGrade,
+                student.Id,
+                student.Name,
+                enrolment.Grade,
                 student.AwardTally.Astras,
                 student.AwardTally.Stellars,
                 student.AwardTally.GalaxyMedals,

@@ -49,7 +49,7 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                 results.Add(new(decision, Result.Failure(RolloverErrors.InvalidDecision)));
             }
 
-            Student student = await _studentRepository.GetById(decision.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(decision.StudentId, cancellationToken);
             
             if (student is null)
             {

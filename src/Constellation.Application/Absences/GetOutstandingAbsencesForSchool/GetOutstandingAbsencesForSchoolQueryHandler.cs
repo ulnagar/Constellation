@@ -1,11 +1,13 @@
 ﻿namespace Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models.Absences;
+using Core.Models.Offerings;
+using Core.Models.Students;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -37,7 +39,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
     {
         List<OutstandingAbsencesForSchoolResponse> results = new();
 
-        var students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
         if (students.Count == 0)
         {
@@ -46,38 +48,34 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
             return results;
         }
 
-        foreach (var student in students)
+        foreach (Student student in students)
         {
-            var nameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (nameRequest.IsFailure)
-            {
-                _logger.Warning("Could not create name for student {@student}", student);
-
+            if (enrolment is null)
                 continue;
-            }
 
-            var absences = await _absenceRepository.GetForStudentFromCurrentYear(student.StudentId, cancellationToken);
+            List<Absence> absences = await _absenceRepository.GetForStudentFromCurrentYear(student.Id, cancellationToken);
 
             if (absences.Count == 0)
                 continue;
 
-            foreach (var absence in absences)
+            foreach (Absence absence in absences)
             {
                 if (absence.Explained)
                     continue;
 
-                var pendingResponse = absence
+                Response pendingResponse = absence
                     .Responses
                     .FirstOrDefault(response => 
-                        response.VerificationStatus == Core.Models.Absences.ResponseVerificationStatus.Pending);
+                        response.VerificationStatus == ResponseVerificationStatus.Pending);
 
-                var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+                Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-                var entry = new OutstandingAbsencesForSchoolResponse(
+                OutstandingAbsencesForSchoolResponse entry = new(
                     absence.Id,
-                    nameRequest.Value.DisplayName,
-                    student.CurrentGrade,
+                    student.Name.DisplayName,
+                    enrolment.Grade,
                     absence.Type.Value,
                     absence.Date.ToDateTime(TimeOnly.MinValue),
                     absence.PeriodName,

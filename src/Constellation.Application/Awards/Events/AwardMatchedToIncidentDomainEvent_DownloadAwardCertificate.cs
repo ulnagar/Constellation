@@ -10,9 +10,11 @@ using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
 using Core.Models.Awards;
 using Core.Models.Awards.Events;
+using Core.Models.Students.Enums;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using Serilog;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,7 +76,19 @@ internal sealed class AwardMatchedToIncidentDomainEvent_DownloadAwardCertificate
             return;
         }
 
-        byte[] awardDocument = await _gateway.GetAwardDocument(student.SentralStudentId, award.IncidentId);
+        SystemLink link = student.SystemLinks.FirstOrDefault(entry => entry.System == SystemType.Sentral);
+
+        if (link is null)
+        {
+            _logger
+                .ForContext(nameof(AwardMatchedToIncidentDomainEvent), notification, true)
+                .ForContext(nameof(StudentAward), award, true)
+                .Warning("Failed to retrieve award certificate");
+
+            return;
+        }
+
+        byte[] awardDocument = await _gateway.GetAwardDocument(link.Value, award.IncidentId);
 
         if (awardDocument.Length == 0)
         {
@@ -87,7 +101,7 @@ internal sealed class AwardMatchedToIncidentDomainEvent_DownloadAwardCertificate
         }
 
         Attachment attachment = Attachment.CreateAwardCertificateAttachment(
-            $"{student.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf",
+            $"{student.Name.DisplayName} - Astra Award - {award.AwardedOn:dd-MM-yyyy} - {award.IncidentId}.pdf",
             MediaTypeNames.Application.Pdf,
             award.Id.ToString(),
             _dateTime.Now);

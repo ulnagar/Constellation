@@ -12,6 +12,7 @@ using Constellation.Core.Shared;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using DTOs;
 using Interfaces.Services;
 using Serilog;
@@ -19,7 +20,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler : ICommandHandler<ProvideParentWholeAbsenceExplanationCommand>
+internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler 
+    : ICommandHandler<ProvideParentWholeAbsenceExplanationCommand>
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -61,7 +63,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler : IComm
             return Result.Failure(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        Dictionary<string, bool> studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+        Dictionary<StudentId, bool> studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
         bool exists = studentIds.TryGetValue(absence.StudentId, out bool residentialParent);
 
@@ -115,7 +117,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler : IComm
 
             notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
             notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, offering, request.ParentEmail, request.Comment));
-            notificationEmail.StudentName = student.DisplayName;
+            notificationEmail.StudentName = student.Name.DisplayName;
 
             await _emailService.SendNonResidentialParentAbsenceReasonToSchoolAdmin(notificationEmail);
         }

@@ -1,10 +1,15 @@
-﻿namespace Constellation.Core.Models.WorkFlow;
+﻿using Constellation.Core.Models.Students.Errors;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Constellation.Core.Models.WorkFlow;
 
 using Abstractions.Clock;
 using Attendance;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Attendance.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Training.Identifiers;
 using Enums;
 using Errors;
@@ -27,7 +32,7 @@ public sealed class AttendanceCaseDetail : CaseDetail
 {
     private AttendanceCaseDetail() { }
 
-    public string StudentId { get; private set; } = string.Empty;
+    public StudentId StudentId { get; private set; } = StudentId.Empty;
     public string Name { get; private set; } = string.Empty;
     public Grade Grade { get; private set; }
     public string SchoolCode { get; private set; } = string.Empty;
@@ -50,11 +55,15 @@ public sealed class AttendanceCaseDetail : CaseDetail
         if (value is null)
             return Result.Failure<CaseDetail>(CaseDetailErrors.CreateAttendanceValueNull);
 
-        if (student.StudentId != value.StudentId)
+        if (student.Id != value.StudentId)
             return Result.Failure<CaseDetail>(CaseDetailErrors.CreateStudentMismatch);
 
         AttendanceCaseDetail detail = new();
-        detail.AddFromStudent(student);
+        Result studentDetails = detail.AddFromStudent(student);
+
+        if (studentDetails.IsFailure)
+            return Result.Failure<CaseDetail>(studentDetails.Error);
+
         detail.AddFromAttendanceValue(value);
         detail.Severity = AttendanceSeverity.FromAttendanceValue(value.PerMinuteWeekPercentage);
 
@@ -71,13 +80,24 @@ public sealed class AttendanceCaseDetail : CaseDetail
         PerDayWeekPercentage = value.PerDayWeekPercentage;
     }
 
-    private void AddFromStudent(Student student)
+    private Result AddFromStudent(Student student)
     {
-        StudentId = student.StudentId;
-        Name = student.GetName().DisplayName;
-        Grade = student.CurrentGrade;
-        SchoolCode = student.SchoolCode;
-        SchoolName = student.School.Name;
+        SchoolEnrolment schoolEnrolment = student
+            .SchoolEnrolments
+            .SingleOrDefault(entry =>
+                !entry.IsDeleted &&
+                entry.Year == DateTime.Today.Year);
+
+        if (schoolEnrolment is null)
+            return Result.Failure(SchoolEnrolmentErrors.NotFound);
+
+        StudentId = student.Id;
+        Name = student.Name.DisplayName;
+        Grade = schoolEnrolment.Grade;
+        SchoolCode = schoolEnrolment.SchoolCode;
+        SchoolName = schoolEnrolment.SchoolName;
+
+        return Result.Success();
     }
 
     public override string ToString() => $"Attendance Case for {Name} ({Grade.AsName()}): {PeriodLabel} - {Severity.Name}";
@@ -85,7 +105,7 @@ public sealed class AttendanceCaseDetail : CaseDetail
 
 public sealed class ComplianceCaseDetail : CaseDetail
 {
-    public string StudentId { get; private set; } = string.Empty;
+    public StudentId StudentId { get; private set; } = StudentId.Empty;
     public string Name { get; private set; } = string.Empty;
     public Grade Grade { get; private set; }
     public string SchoolCode { get; private set; } = string.Empty;
@@ -99,7 +119,6 @@ public sealed class ComplianceCaseDetail : CaseDetail
 
     public static Result<CaseDetail> Create(
         Student student,
-        School school,
         Staff teacher,
         string incidentId,
         string incidentType,
@@ -108,10 +127,7 @@ public sealed class ComplianceCaseDetail : CaseDetail
     {
         if (student is null)
             return Result.Failure<CaseDetail>(CaseDetailErrors.CreateStudentNull);
-
-        if (school is null)
-            return Result.Failure<CaseDetail>(CaseDetailErrors.CreateSchoolNull);
-
+        
         if (teacher is null)
             return Result.Failure<CaseDetail>(CaseDetailErrors.CreateTeacherNull);
 
@@ -127,13 +143,18 @@ public sealed class ComplianceCaseDetail : CaseDetail
         if (createdDate == DateOnly.MinValue)
             return Result.Failure<CaseDetail>(ApplicationErrors.ArgumentNull(nameof(createdDate)));
 
+        SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+
+        if (schoolEnrolment is null)
+            return Result.Failure<CaseDetail>(SchoolEnrolmentErrors.NotFound);
+
         ComplianceCaseDetail detail = new()
         {
-            StudentId = student.StudentId,
-            Name = student.GetName().DisplayName, 
-            Grade = student.CurrentGrade,
-            SchoolCode = student.SchoolCode,
-            SchoolName = school.Name,
+            StudentId = student.Id,
+            Name = student.Name.DisplayName, 
+            Grade = schoolEnrolment.Grade,
+            SchoolCode = schoolEnrolment.SchoolCode,
+            SchoolName = schoolEnrolment.SchoolName,
             IncidentId = incidentId,
             IncidentType = incidentType,
             Subject = subject,

@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Application.Awards.GetAllAwards;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Awards.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models;
+using Core.Models.Awards;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students;
+using Core.Shared;
+using Core.ValueObjects;
+using Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -29,7 +32,7 @@ internal sealed class GetAllAwardsQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IAttachmentRepository fileRepository,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _awardRepository = awardRepository;
         _studentRepository = studentRepository;
@@ -42,26 +45,26 @@ internal sealed class GetAllAwardsQueryHandler
     {
         List<AwardResponse> result = new();
 
-        var awards = request.CurrentYearOnly switch
+        List<StudentAward> awards = request.CurrentYearOnly switch
         {
             true => await _awardRepository.GetFromYear(DateTime.Today.Year, cancellationToken),
             false => await _awardRepository.GetAll(cancellationToken)
         };
 
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
-        var currentStudentAwards = awards
+        List<StudentAward> currentStudentAwards = awards
             .Where(award =>
                 students
-                    .Select(student => student.StudentId)
+                    .Select(student => student.Id)
                     .Contains(award.StudentId))
             .ToList();
 
-        var staff = await _staffRepository.GetAll(cancellationToken);
+        List<Staff> staff = await _staffRepository.GetAll(cancellationToken);
 
-        foreach (var award in currentStudentAwards)
+        foreach (StudentAward award in currentStudentAwards)
         {
-            var student = students.FirstOrDefault(student => student.StudentId == award.StudentId);
+            Student student = students.FirstOrDefault(student => student.Id == award.StudentId);
 
             if (student is null)
             {
@@ -69,25 +72,21 @@ internal sealed class GetAllAwardsQueryHandler
                 continue;
             }
 
-            Name studentName = null;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (student is not null)
+            if (enrolment is null)
             {
-                var studentNameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
-
-                if (studentNameRequest.IsSuccess)
-                    studentName = studentNameRequest.Value;
-                else
-                    _logger.Warning("Could not create Name object from student {student} with error {@error}", student.DisplayName, studentNameRequest.Error);
+                _logger.Warning("Could not retrieve current School Enrolment for student");
+                continue;
             }
-
-            var teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
+            
+            Staff teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
 
             Name teacherName = null;
 
             if (teacher is not null)
             {
-                var teacherNameRequest = Name.Create(teacher.FirstName, string.Empty, teacher.LastName);
+                Result<Name> teacherNameRequest = Name.Create(teacher.FirstName, string.Empty, teacher.LastName);
 
                 if (teacherNameRequest.IsSuccess)
                     teacherName = teacherNameRequest.Value;
@@ -95,16 +94,13 @@ internal sealed class GetAllAwardsQueryHandler
                     _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherNameRequest.Error);
             }
 
-            if (studentName is null)
-                continue;
+            bool hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
 
-            var hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
-
-            var entry = new AwardResponse(
+            AwardResponse entry = new(
                 award.Id,
-                studentName,
-                student.CurrentGrade,
-                student.School.Name,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 teacherName,
                 award.AwardedOn,
                 award.Type,

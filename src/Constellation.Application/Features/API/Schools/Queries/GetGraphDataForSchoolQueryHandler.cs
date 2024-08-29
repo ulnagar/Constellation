@@ -73,7 +73,7 @@ internal sealed class GetGraphDataForSchoolQueryHandler : IRequestHandler<GetGra
         // Get the periods for all students at this school
         foreach (Student student in students)
         {
-            List<Offering> offerings = await _offeringRepository.GetByStudentId(student.StudentId, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
             List<int> periodIds = offerings
                 .SelectMany(offering =>

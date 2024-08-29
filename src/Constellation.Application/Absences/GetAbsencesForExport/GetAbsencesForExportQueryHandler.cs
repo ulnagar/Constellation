@@ -1,16 +1,15 @@
 ﻿namespace Constellation.Application.Absences.GetAbsencesForExport;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -23,20 +22,17 @@ internal sealed class GetAbsencesForExportQueryHandler
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetAbsencesForExportQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _offeringRepository = offeringRepository;
         _logger = logger.ForContext<GetAbsencesForExportQuery>();
     }
@@ -45,7 +41,7 @@ internal sealed class GetAbsencesForExportQueryHandler
     {
         List<Absence> absences = await _absenceRepository.GetAllFromCurrentYear(cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(request.Filter.StudentId))
+        if (request.Filter.StudentId != StudentId.Empty)
             absences = absences
                 .Where(absence => absence.StudentId == request.Filter.StudentId)
                 .ToList();
@@ -62,24 +58,33 @@ internal sealed class GetAbsencesForExportQueryHandler
 
         List<AbsenceExportResponse> results = new();
 
-        foreach (var absence in absences)
+        foreach (Absence absence in absences)
         {
             Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
-            if (!string.IsNullOrWhiteSpace(request.Filter.SchoolCode) && student.SchoolCode != request.Filter.SchoolCode)
+            if (student is null)
                 continue;
 
-            if (request.Filter.Grade.HasValue && student.CurrentGrade != (Grade)request.Filter.Grade)
+            SchoolEnrolment enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
                 continue;
 
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(request.Filter.SchoolCode) && enrolment.SchoolCode != request.Filter.SchoolCode)
+                continue;
 
+            if (request.Filter.Grade.HasValue && enrolment.Grade != (Grade)request.Filter.Grade)
+                continue;
+            
             Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-            var entry = new AbsenceExportResponse(
-                student.GetName(),
-                student.CurrentGrade,
-                school.Name,
+            if (offering is null) 
+                continue;
+
+            AbsenceExportResponse entry = new(
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 absence.Explained,
                 absence.Type,
                 absence.Date,

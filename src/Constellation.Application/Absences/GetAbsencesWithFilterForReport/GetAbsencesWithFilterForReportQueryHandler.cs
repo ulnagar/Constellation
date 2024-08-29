@@ -1,16 +1,13 @@
 ﻿namespace Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -22,18 +19,15 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ISchoolRepository _schoolRepository;
 
     public GetAbsencesWithFilterForReportQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        IOfferingRepository offeringRepository,
-        ISchoolRepository schoolRepository)
+        IOfferingRepository offeringRepository)
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
-        _schoolRepository = schoolRepository;
     }
 
     public async Task<Result<List<FilteredAbsenceResponse>>> Handle(GetAbsencesWithFilterForReportQuery request, CancellationToken cancellationToken)
@@ -65,27 +59,25 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
             .Distinct()
             .ToList();
 
-        List<Absence> absences = await _absenceRepository.GetForStudents(students.Select(student => student.StudentId).ToList(), cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetForStudents(students.Select(student => student.Id).ToList(), cancellationToken);
 
-        foreach (var absence in absences)
+        foreach (Absence absence in absences)
         {
-            var student = students.First(student => student.StudentId == absence.StudentId);
+            Student student = students.First(student => student.Id == absence.StudentId);
 
-            Name? studentName = student.GetName();
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (studentName is null)
+            if (enrolment is null)
                 continue;
 
             Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             string offeringName = offering?.Name;
 
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
-
             result.Add(new(
-                studentName,
-                school.Name,
-                student.CurrentGrade,
+                student.Name,
+                enrolment.SchoolName,
+                enrolment.Grade,
                 offeringName,
                 absence.Id,
                 absence.Explained,

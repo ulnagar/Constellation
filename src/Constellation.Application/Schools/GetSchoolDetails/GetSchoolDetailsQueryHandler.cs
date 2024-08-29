@@ -143,10 +143,21 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             foreach (SchoolContactRole role in contact.Assignments.Where(role => !role.IsDeleted && role.SchoolCode == school.Code))
             {
+                Result<Name> name = contact.GetName();
+
+                if (name.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Error), name.Error, true)
+                        .ForContext(nameof(SchoolContact), contact, true)
+                        .ForContext(nameof(SchoolContactRole), role, true)
+                        .Warning("Failed to retrieve School details");
+                }
+
                 contactResponse.Add(new(
                     contact.Id,
                     role.Id,
-                    contact.GetName(),
+                    name.Value,
                     role.Role,
                     role.Note,
                     string.IsNullOrWhiteSpace(contact.PhoneNumber) ? PhoneNumber.Empty : PhoneNumber.Create(contact.PhoneNumber).Value,

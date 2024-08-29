@@ -135,7 +135,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
 
         Attachment attachment = new(stream, fileRequest.Value.FileName, fileRequest.Value.FileType);
 
-        Student student = await _studentRepository.GetById(award.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(award.StudentId, cancellationToken);
 
         if (student is null)
         {

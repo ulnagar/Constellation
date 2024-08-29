@@ -195,7 +195,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
             {
                 School? allocationSchool = schools.FirstOrDefault(entry => entry.Code == importAsset.ResponsibleOfficer);
                 Staff? staffMember = staff.FirstOrDefault(entry => entry.StaffId == importAsset.ResponsibleOfficer);
-                Student? student = students.FirstOrDefault(entry => entry.StudentId == importAsset.ResponsibleOfficer);
+                Student? student = students.FirstOrDefault(entry => entry.StudentReferenceNumber.ToString() == importAsset.ResponsibleOfficer);
 
                 if (allocationSchool is not null)
                 {

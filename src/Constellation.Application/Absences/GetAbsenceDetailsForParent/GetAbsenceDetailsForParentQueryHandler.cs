@@ -1,16 +1,17 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceDetailsForParent;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -51,7 +52,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             return Result.Failure<ParentAbsenceDetailsResponse>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        Dictionary<string, bool> studentsOfParent = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+        Dictionary<StudentId, bool> studentsOfParent = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
         if (!studentsOfParent.ContainsKey(absence.StudentId))
         {
@@ -69,6 +70,15 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             return Result.Failure<ParentAbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));
         }
 
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger.Information("Could not find current School Enrolment for student with id {Id}", absence.StudentId);
+
+            return Result.Failure<ParentAbsenceDetailsResponse>(SchoolEnrolmentErrors.NotFound);
+        }
+
         Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         if (offering is null)
@@ -82,8 +92,8 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
 
         ParentAbsenceDetailsResponse data = new (
             absence.Id,
-            student.GetName(),
-            student.CurrentGrade,
+            student.Name,
+            enrolment.Grade,
             absence.Type,
             absence.Date.ToDateTime(TimeOnly.MinValue),
             absence.PeriodName,
@@ -96,7 +106,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             response?.VerificationStatus,
             response is null ? null : response.VerificationStatus == ResponseVerificationStatus.NotRequired ? response.From : response.Verifier,
             absence.Explained,
-            studentsOfParent.GetValueOrDefault(student.StudentId));
+            studentsOfParent.GetValueOrDefault(student.Id));
 
         return data;
     }

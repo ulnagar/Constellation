@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Assignments;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Identifiers;
 using System;
 
@@ -7,7 +8,7 @@ public class CanvasAssignmentSubmission
 {
     private CanvasAssignmentSubmission(
         AssignmentId assignmentId,
-        string studentId,
+        StudentId studentId,
         string submittedBy,
         DateTime submittedOn,
         int attempt)
@@ -22,7 +23,7 @@ public class CanvasAssignmentSubmission
 
     public AssignmentSubmissionId Id { get; private set; }
     public AssignmentId AssignmentId { get; private set; }
-    public string StudentId { get; private set; }
+    public StudentId StudentId { get; private set; }
     public string SubmittedBy { get; private set; }
     public DateTime SubmittedOn { get; private set; }
     public int Attempt { get; private set; }
@@ -30,7 +31,7 @@ public class CanvasAssignmentSubmission
 
     public static CanvasAssignmentSubmission Create(
         AssignmentId assignmentId,
-        string studentId,
+        StudentId studentId,
         string submittedBy,
         DateTime submittedOn,
         int attempt)

@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.GroupTutorials.AddStudentToTutorial;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using System;
 
 public sealed record AddStudentToTutorialCommand(
     GroupTutorialId TutorialId,
-    string StudentId,
+    StudentId StudentId,
     DateOnly? EffectiveTo) : ICommand;

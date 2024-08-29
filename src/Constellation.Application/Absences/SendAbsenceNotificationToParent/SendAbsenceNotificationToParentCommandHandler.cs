@@ -112,7 +112,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
         List<IGrouping<DateOnly, AbsenceEntry>> groupedAbsences = absenceEntries.GroupBy(absence => absence.Date).ToList();
 
-        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
 
         foreach (Family family in families)
         {
@@ -233,7 +233,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 }
                 else
                 {
-                    await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
+                    await _emailService.SendAdminAbsenceContactAlert(student.Name.DisplayName);
                 }
             }
         }

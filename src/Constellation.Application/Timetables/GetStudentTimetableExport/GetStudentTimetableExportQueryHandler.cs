@@ -60,7 +60,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
     {
         StudentTimetableDataDto response = new();
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
 
         if (student is null)
         {

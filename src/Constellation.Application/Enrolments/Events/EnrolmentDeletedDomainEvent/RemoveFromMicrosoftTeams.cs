@@ -71,7 +71,7 @@ internal sealed class RemoveFromMicrosoftTeams
 
         StudentMSTeamOperation operation = new()
         {
-            StudentId = student.StudentId,
+            StudentId = student.Id,
             OfferingId = offering.Id,
             DateScheduled = _dateTime.Now,
             Action = MSTeamOperationAction.Remove,

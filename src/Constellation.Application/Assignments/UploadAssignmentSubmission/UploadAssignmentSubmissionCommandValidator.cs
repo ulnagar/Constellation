@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Students.Identifiers;
 using FluentValidation;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,6 +35,6 @@ public class UploadAssignmentSubmissionCommandValidator : AbstractValidator<Uplo
     public async Task<bool> BeValidAssignmentId(AssignmentId assignmentId, CancellationToken cancellation = new CancellationToken()) => 
         await _assignmentRepository.IsValidAssignmentId(assignmentId, cancellation);
 
-    public async Task<bool> BeValidStudentId(string studentId, CancellationToken cancellation = new CancellationToken()) => 
+    public async Task<bool> BeValidStudentId(StudentId studentId, CancellationToken cancellation = new CancellationToken()) => 
         await _studentRepository.IsValidStudentId(studentId, cancellation);
 }

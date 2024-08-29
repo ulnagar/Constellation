@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.GroupTutorials.Events;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Helpers;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
+using Core.DomainEvents;
+using Helpers;
+using Interfaces.Repositories;
 using System;
 using System.Linq;
 using System.Threading;

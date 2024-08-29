@@ -34,7 +34,7 @@ internal sealed class CreateCanvasAccount
     {
         _logger.Information("Attempting to add student ({studentId}) to Canvas", notification.StudentId);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
 
         if (student == null)
         {

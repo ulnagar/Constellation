@@ -81,7 +81,7 @@ internal sealed class GetLessonRollDetailsForSchoolsPortalQueryHandler
 
         foreach (SciencePracAttendance attendanceRecord in roll.Attendance)
         {
-            Student student = await _studentRepository.GetById(attendanceRecord.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(attendanceRecord.StudentId, cancellationToken);
 
             if (student is null)
                 continue;

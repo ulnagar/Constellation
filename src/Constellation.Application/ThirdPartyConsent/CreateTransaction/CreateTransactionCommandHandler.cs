@@ -85,7 +85,7 @@ internal sealed class CreateTransactionCommandHandler
             }
         }
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
 
         if (student is null)
         {

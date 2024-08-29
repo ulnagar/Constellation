@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Enrolments.Events.EnrolmentCreatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.Offerings;
@@ -11,9 +10,10 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -86,7 +86,7 @@ internal sealed class AddToCanvas
             string canvasSectionId = resource.CourseId + offering.Name.Value[^2..];
 
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentId,
+                student.Id.ToString(),
                 canvasSectionId,
                 CanvasAction.Add,
                 CanvasUserType.Student,

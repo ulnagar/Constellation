@@ -103,7 +103,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
 
         foreach (StudentAttendanceData entry in attendanceData)
         {
-            Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(entry.StudentId, cancellationToken);
 
             if (student is null)
                 continue;

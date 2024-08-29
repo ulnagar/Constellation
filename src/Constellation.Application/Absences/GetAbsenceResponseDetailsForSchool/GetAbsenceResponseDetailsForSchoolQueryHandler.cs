@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceResponseDetailsForSchool;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models.Students.Errors;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Linq;
@@ -68,7 +68,7 @@ internal sealed class GetAbsenceResponseDetailsForSchoolQueryHandler
         Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
         SchoolAbsenceResponseDetailsResponse entry = new(
-            student.GetName().DisplayName,
+            student.Name.DisplayName,
             offering?.Name,
             absence.Id,
             response.Id,

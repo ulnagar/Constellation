@@ -1,26 +1,26 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceDigestToParent;
 
-using ConvertAbsenceToAbsenceEntry;
 using Abstractions.Messaging;
-using DTOs;
-using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Core.Shared;
-using Core.ValueObjects;
+using Constellation.Core.Models.Students.Repositories;
+using ConvertAbsenceToAbsenceEntry;
 using Core.Abstractions.Clock;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Core.ValueObjects;
+using DTOs;
+using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Core.Models.Students.Repositories;
 
 internal sealed class SendAbsenceDigestToParentCommandHandler
     : ICommandHandler<SendAbsenceDigestToParentCommand>
@@ -63,13 +63,13 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        List<Absence> digestWholeAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
-        List<Absence> digestPartialAbsences = await _absenceRepository.GetUnexplainedPartialAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
+        List<Absence> digestWholeAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.Id, 1, cancellationToken);
+        List<Absence> digestPartialAbsences = await _absenceRepository.GetUnexplainedPartialAbsencesForStudentWithDelay(student.Id, 1, cancellationToken);
 
         if (!digestWholeAbsences.Any() && !digestPartialAbsences.Any())
             return Result.Success();
 
-        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
 
         foreach (Family family in families)
         {
@@ -111,7 +111,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
             }
             else
             {
-                await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
+                await _emailService.SendAdminAbsenceContactAlert(student.Name.DisplayName);
             }
         }
 
@@ -141,7 +141,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
                     .ForContext("JobId", jobId)
                     .ForContext(nameof(Student), student, true)
 
-                    .Information("{id}: Parent digest sent to {address} for {student}", jobId, recipient.Email, student.DisplayName);
+                    .Information("{id}: Parent digest sent to {address} for {student}", jobId, recipient.Email, student.Name.DisplayName);
         }
     }
 

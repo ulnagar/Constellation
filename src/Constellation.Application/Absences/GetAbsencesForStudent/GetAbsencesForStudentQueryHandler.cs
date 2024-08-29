@@ -40,7 +40,7 @@ internal sealed class GetAbsencesForStudentQueryHandler
     {
         List<AbsenceForStudentResponse> results = new();
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -50,8 +50,19 @@ internal sealed class GetAbsencesForStudentQueryHandler
 
             return Result.Failure<List<AbsenceForStudentResponse>>(StudentErrors.NotFound(request.StudentId));
         }
+
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                .Warning("Failed to retrieve list of absences for student");
+
+            return Result.Failure<List<AbsenceForStudentResponse>>(SchoolEnrolmentErrors.NotFound);
+        }
         
-        List<Absence> absences = await _absenceRepository.GetForStudentFromCurrentYear(student.StudentId, cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetForStudentFromCurrentYear(student.Id, cancellationToken);
 
         foreach (Absence absence in absences)
         {
@@ -81,9 +92,9 @@ internal sealed class GetAbsencesForStudentQueryHandler
 
             AbsenceForStudentResponse entry = new(
                 absence.Id,
-                student.StudentId,
-                student.GetName().DisplayName,
-                student.CurrentGrade,
+                student.Id,
+                student.Name.DisplayName,
+                enrolment.Grade,
                 absence.Type.Value,
                 absence.Date.ToDateTime(TimeOnly.MinValue),
                 absence.PeriodName,

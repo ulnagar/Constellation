@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Application.GroupTutorials.GetTutorialRollWithDetailsById;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Extensions;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -59,8 +59,8 @@ internal sealed class GetTutorialRollWithDetailsByIdQueryHandler
             .Select(student =>
                 new TutorialRollStudentResponse(
                     student.StudentId,
-                    studentEntities.First(entity => entity.StudentId == student.StudentId).DisplayName,
-                    studentEntities.First(entity => entity.StudentId == student.StudentId).CurrentGrade.AsName(),
+                    studentEntities.First(entity => entity.Id == student.StudentId).Name.DisplayName,
+                    studentEntities.First(entity => entity.Id == student.StudentId).CurrentEnrolment?.Grade.AsName(),
                     student.Enrolled,
                     student.Present))
             .ToList();

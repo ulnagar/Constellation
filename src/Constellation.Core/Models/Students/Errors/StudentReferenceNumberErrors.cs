@@ -1,7 +1,7 @@
-﻿using Constellation.Core.Shared;
-using System;
+﻿namespace Constellation.Core.Models.Students.Errors;
 
-namespace Constellation.Core.Models.Students.Errors;
+using Shared;
+using System;
 
 public static class StudentReferenceNumberErrors
 {

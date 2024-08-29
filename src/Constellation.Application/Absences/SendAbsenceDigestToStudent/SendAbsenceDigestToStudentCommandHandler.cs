@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceDigestToStudent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
+using ConvertAbsenceToAbsenceEntry;
 using Core.Abstractions.Clock;
 using Core.Models.Offerings;
 using Core.Shared;
@@ -63,14 +63,14 @@ internal sealed class SendAbsenceDigestToStudentCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        List<Absence> digestPartialAbsences = await _absenceRepository.GetUnexplainedPartialAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
+        List<Absence> digestPartialAbsences = await _absenceRepository.GetUnexplainedPartialAbsencesForStudentWithDelay(student.Id, 1, cancellationToken);
 
         if (!digestPartialAbsences.Any()) 
             return Result.Success();
 
         List<EmailRecipient> recipients = new();
             
-        Result<EmailRecipient> result = EmailRecipient.Create(student.DisplayName, student.EmailAddress);
+        Result<EmailRecipient> result = EmailRecipient.Create(student.Name.DisplayName, student.EmailAddress.Email);
 
         if (result.IsFailure)
         {

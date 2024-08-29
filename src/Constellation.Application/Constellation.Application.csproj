@@ -31,6 +31,7 @@
 	  <Folder Include="SchoolContacts\Events\SchoolContactCreated\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactRoleDeleted\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactReinstated\" />
+	  <Folder Include="Students\Events\StudentEmailAddressChanged\" />
 	</ItemGroup>
 
 </Project>

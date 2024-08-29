@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Absences.CreateAbsenceResponseFromStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Absences;
-using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +40,7 @@ internal sealed class CreateAbsenceResponseFromStudentCommandHandler
 
         Result result = absence.AddResponse(
             ResponseType.Student,
-            absence.StudentId,
+            absence.StudentId.ToString(),
             request.Explanation);
 
         if (result.IsFailure)

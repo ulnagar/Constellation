@@ -16,6 +16,7 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Enums;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -81,15 +82,18 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         foreach (Student student in enrolledStudents)
         {
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
 
             students.Add(new(
-                student.StudentId,
+                student.Id,
                 student.Gender,
-                student.GetName(),
-                student.CurrentGrade,
-                student.SchoolCode,
-                school?.Name));
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolCode,
+                enrolment.SchoolName));
         }
 
         List<OfferingDetailsResponse.SessionSummary> sessions = new();
@@ -153,7 +157,7 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         List<SciencePracLesson> activeLessons = await _lessonRepository.GetAllForOffering(offering.Id, cancellationToken);
 
-        List<string> studentIds = students.Select(student => student.StudentId).ToList();
+        List<StudentId> studentIds = students.Select(student => student.StudentId).ToList();
 
         foreach (SciencePracLesson lesson in activeLessons)
         {

@@ -1,30 +1,30 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceDigestToCoordinator;
 
-using ConvertAbsenceToAbsenceEntry;
 using Abstractions.Messaging;
-using DTOs;
-using Interfaces.Repositories;
-using Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.Students;
-using Core.Shared;
-using Core.ValueObjects;
+using Constellation.Core.Models.Students.Repositories;
+using ConvertAbsenceToAbsenceEntry;
 using Core.Abstractions.Clock;
+using Core.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Core.ValueObjects;
+using DTOs;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Core.Models.Students.Repositories;
 
 internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     : ICommandHandler<SendAbsenceDigestToCoordinatorCommand>
@@ -70,12 +70,21 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        List<Absence> digestWholeAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.StudentId, 2, cancellationToken);
-        List<Absence> digestPartialAbsences = await _absenceRepository.GetUnverifiedPartialAbsencesForStudentWithDelay(student.StudentId, 1, cancellationToken);
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger.Warning("{jobId}: Could not find current School Enrolment for student with id {Id}", request.JobId, request.StudentId);
+
+            return Result.Failure(SchoolEnrolmentErrors.NotFound);
+        }
+
+        List<Absence> digestWholeAbsences = await _absenceRepository.GetUnexplainedWholeAbsencesForStudentWithDelay(student.Id, 2, cancellationToken);
+        List<Absence> digestPartialAbsences = await _absenceRepository.GetUnverifiedPartialAbsencesForStudentWithDelay(student.Id, 1, cancellationToken);
 
         if (digestWholeAbsences.Any() || digestPartialAbsences.Any())
         {
-            List<SchoolContact> coordinators = await _schoolContactRepository.GetBySchoolAndRole(student.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
+            List<SchoolContact> coordinators = await _schoolContactRepository.GetBySchoolAndRole(enrolment.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
 
             List<EmailRecipient> recipients = new();
 
@@ -91,13 +100,13 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                     recipients.Add(result.Value);
             }
 
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
             if (school is null)
             {
-                _logger.Warning("{jobId}: Could not find School with Id {id}", request.JobId, student.SchoolCode);
+                _logger.Warning("{jobId}: Could not find School with Id {id}", request.JobId, enrolment.SchoolCode);
 
-                return Result.Failure(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+                return Result.Failure(DomainErrors.Partners.School.NotFound(enrolment.SchoolCode));
             }
 
             if (!recipients.Any()) 
@@ -157,7 +166,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                 _logger
                     .ForContext("JobId", jobId)
                     .ForContext(nameof(Student), student, true)
-                    .Information("{id}: School digest sent to {recipient} for {student}", jobId, recipient.Name, student.DisplayName);
+                    .Information("{id}: School digest sent to {recipient} for {student}", jobId, recipient.Name, student.Name.DisplayName);
         }
     }
 

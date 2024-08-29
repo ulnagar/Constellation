@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.GroupTutorials.AddStudentToTutorial;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
 

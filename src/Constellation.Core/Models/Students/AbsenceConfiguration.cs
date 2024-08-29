@@ -1,17 +1,18 @@
 ﻿namespace Constellation.Core.Models.Students;
 
-using Constellation.Core.Errors;
 using Absences;
+using Constellation.Core.Errors;
+using Constellation.Core.Models.Identifiers;
+using Errors;
 using Identifiers;
 using Primitives;
 using Shared;
-using Errors;
 using System;
 
 public class AbsenceConfiguration: IAuditableEntity
 {
     private AbsenceConfiguration(
-        string studentId,
+        StudentId studentId,
         AbsenceType absenceType,
         DateOnly scanStartDate,
         DateOnly scanEndDate)
@@ -26,7 +27,7 @@ public class AbsenceConfiguration: IAuditableEntity
     }
 
     public StudentAbsenceConfigurationId Id { get; private set; }
-    public string StudentId { get; private set; }
+    public StudentId StudentId { get; private set; }
     public int CalendarYear { get; private set; }
     public AbsenceType AbsenceType { get; private set; }
     public DateOnly ScanStartDate { get; private set; }
@@ -43,7 +44,7 @@ public class AbsenceConfiguration: IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static Result<AbsenceConfiguration> Create(
-        string studentId,
+        StudentId studentId,
         AbsenceType type,
         DateOnly startDate,
         DateOnly? endDate)
@@ -51,7 +52,7 @@ public class AbsenceConfiguration: IAuditableEntity
         if (endDate.HasValue && endDate.Value < startDate)
             return Result.Failure<AbsenceConfiguration>(ValidationErrors.Date.RangeReversed(startDate, endDate.Value));
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (studentId == StudentId.Empty)
             return Result.Failure<AbsenceConfiguration>(ValidationErrors.String.RequiredIsNull(nameof(studentId)));
 
         return new AbsenceConfiguration(

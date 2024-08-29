@@ -29,7 +29,7 @@ internal sealed class WithdrawStudentCommandHandler
 
     public async Task<Result> Handle(WithdrawStudentCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
 
         if (student is null)
         {

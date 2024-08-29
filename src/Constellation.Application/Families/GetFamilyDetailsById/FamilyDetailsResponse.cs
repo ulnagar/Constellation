@@ -2,7 +2,8 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.ValueObjects;
+using Core.Models.Students.Identifiers;
+using Core.ValueObjects;
 using System.Collections.Generic;
 
 public sealed record FamilyDetailsResponse(
@@ -24,7 +25,7 @@ public sealed record FamilyDetailsResponse(
         PhoneNumber? PhoneNumber);
 
     public sealed record StudentResponse(
-        string StudentId,
+        StudentId StudentId,
         Name Name,
         EmailAddress EmailAddress,
         string SchoolCode,

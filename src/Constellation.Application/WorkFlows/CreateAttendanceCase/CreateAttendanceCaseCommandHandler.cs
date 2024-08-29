@@ -46,7 +46,7 @@ internal sealed class CreateAttendanceCaseCommandHandler
 
     public async Task<Result> Handle(CreateAttendanceCaseCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
 
         if (student is null)
         {

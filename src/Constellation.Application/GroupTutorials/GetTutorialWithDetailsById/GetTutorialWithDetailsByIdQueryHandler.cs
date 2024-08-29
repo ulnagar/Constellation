@@ -57,8 +57,8 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
             .Select(student =>
                 new TutorialEnrolmentResponse(
                     student.Id,
-                    studentEntities.First(entity => entity.StudentId == student.StudentId).DisplayName,
-                    studentEntities.First(entity => entity.StudentId == student.StudentId).CurrentGrade.AsName(),
+                    studentEntities.First(entity => entity.Id == student.StudentId).Name.DisplayName,
+                    studentEntities.First(entity => entity.Id == student.StudentId).CurrentEnrolment?.Grade.AsName(),
                     student.EffectiveTo))
             .ToList();
 

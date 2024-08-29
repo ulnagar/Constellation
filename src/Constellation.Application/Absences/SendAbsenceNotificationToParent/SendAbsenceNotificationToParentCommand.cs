@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceNotificationToParent;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Identifiers;
-using System.Collections.Generic;
+using Core.Models.Students.Identifiers;
 using System;
+using System.Collections.Generic;
 
 public sealed record SendAbsenceNotificationToParentCommand(
     Guid JobId,
-    string StudentId,
+    StudentId StudentId,
     List<AbsenceId> AbsenceIds)
     : ICommand;

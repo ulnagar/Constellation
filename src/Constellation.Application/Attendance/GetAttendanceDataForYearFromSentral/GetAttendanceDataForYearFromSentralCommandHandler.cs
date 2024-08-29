@@ -1,16 +1,16 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceDataForYearFromSentral;
 
 using Abstractions.Messaging;
-using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Shared;
+using GetAttendanceDataFromSentral;
 using Interfaces.Gateways;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -86,11 +86,16 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
                     if (student is null)
                         continue;
 
+                    SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+                    if (enrolment is null)
+                        continue;
+
                     Result<AttendanceValue> modelRequest = AttendanceValue.Create(
-                        student.StudentId,
-                        student.CurrentGrade,
+                        student.Id,
+                        enrolment.Grade,
                         dates.Value.StartDate,
-                    dates.Value.EndDate,
+                        dates.Value.EndDate,
                         $"Term {term}, Week {week}, {year}",
                         entry.MinuteYTD,
                         entry.MinuteWeek,

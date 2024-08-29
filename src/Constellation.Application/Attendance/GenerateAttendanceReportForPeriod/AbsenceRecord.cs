@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 
+using Core.Models.Students.Identifiers;
 using System;
 
 public sealed record AbsenceRecord(
-    string StudentId,
+    StudentId StudentId,
     string AbsenceReason,
     DateOnly AbsenceDate,
     string AbsenceLesson,

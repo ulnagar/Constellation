@@ -100,7 +100,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
         notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
         notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress));
         notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, offering));
-        notificationEmail.StudentName = student.DisplayName;
+        notificationEmail.StudentName = student.Name.DisplayName;
 
         await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);
 

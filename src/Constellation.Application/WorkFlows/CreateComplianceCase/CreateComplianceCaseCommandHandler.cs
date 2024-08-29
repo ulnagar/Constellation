@@ -48,7 +48,7 @@ internal sealed class CreateComplianceCaseCommandHandler
 
     public async Task<Result> Handle(CreateComplianceCaseCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.Incident.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(request.Incident.StudentId, cancellationToken);
 
         if (student is null)
         {

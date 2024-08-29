@@ -41,7 +41,7 @@ internal sealed class GetDevicesQueryHandler
 
             Student? student = allocation is null
                 ? null
-                : await _studentRepository.GetWithSchoolById(allocation.StudentId, cancellationToken);
+                : await _studentRepository.GetById(allocation.StudentId, cancellationToken);
 
             if (student is null)
             {
@@ -56,13 +56,28 @@ internal sealed class GetDevicesQueryHandler
                 continue;
             }
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+            {
+                response.Add(new(
+                    device.SerialNumber,
+                    device.Make,
+                    device.Status,
+                    student.Name.DisplayName,
+                    null,
+                    string.Empty));
+
+                continue;
+            }
+
             response.Add(new(
                 device.SerialNumber,
                 device.Make,
                 device.Status,
-                student.GetName().DisplayName,
-                student.CurrentGrade,
-                student.School.Name));
+                student.Name.DisplayName,
+                enrolment.Grade,
+                enrolment.SchoolName));
         }
 
         return response;

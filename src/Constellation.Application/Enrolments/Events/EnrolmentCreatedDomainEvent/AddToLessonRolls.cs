@@ -1,16 +1,16 @@
 ﻿namespace Constellation.Application.Enrolments.Events.EnrolmentCreatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Enums;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +48,19 @@ internal sealed class AddToLessonRolls
         {
             _logger
                 .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId))
+                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId), true)
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
                 .Error("Failed to complete the event handler");
 
             return;
@@ -64,7 +76,7 @@ internal sealed class AddToLessonRolls
         List<SciencePracRoll> rolls = lessons
             .SelectMany(lesson =>
                 lesson.Rolls.Where(roll =>
-                    roll.SchoolCode == student.SchoolCode))
+                    roll.SchoolCode == enrolment.SchoolCode))
             .ToList();
 
         foreach (SciencePracRoll roll in rolls)
@@ -72,25 +84,25 @@ internal sealed class AddToLessonRolls
             if (roll.Status == LessonStatus.Cancelled)
                 roll.ReinstateRoll();
 
-            if (roll.Attendance.Any(attendance => attendance.StudentId == student.StudentId))
+            if (roll.Attendance.Any(attendance => attendance.StudentId == student.Id))
                 continue;
 
-            roll.AddStudent(student.StudentId);
+            roll.AddStudent(student.Id);
         }
 
         List<SciencePracLesson> newRollsRequired = lessons
             .Where(lesson =>
                 lesson.Rolls.All(roll =>
-                    roll.SchoolCode != student.SchoolCode))
+                    roll.SchoolCode != enrolment.SchoolCode))
             .ToList();
 
         foreach (SciencePracLesson lesson in newRollsRequired)
         {
             SciencePracRoll roll = new(
                 lesson.Id,
-                student.SchoolCode);
+                enrolment.SchoolCode);
 
-            roll.AddStudent(student.StudentId);
+            roll.AddStudent(student.Id);
 
             lesson.AddRoll(roll);
         }

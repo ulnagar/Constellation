@@ -1,19 +1,20 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Primitives;
-using ValueObjects;
 using Enums;
 using Extensions;
+using Identifiers;
+using Primitives;
 using System;
+using ValueObjects;
 
 public abstract class Nomination : IFullyAuditableEntity
 {
     public AwardNominationId Id { get; protected set; }
     public AwardNominationPeriodId PeriodId { get; protected set; }
-    public string StudentId { get; protected set; }
+    public StudentId StudentId { get; protected set; }
     public AwardType AwardType { get; protected set; }
 
     public string CreatedBy { get; set; }
@@ -38,7 +39,7 @@ public sealed class FirstInSubjectNomination : Nomination
 {
     public FirstInSubjectNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId, 
         Grade grade,
         string courseName)
@@ -68,7 +69,7 @@ public sealed class AcademicExcellenceNomination : Nomination
 {
     public AcademicExcellenceNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -102,7 +103,7 @@ public sealed class AcademicExcellenceMathematicsNomination : Nomination
 {
     public AcademicExcellenceMathematicsNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -136,7 +137,7 @@ public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
 {
     public AcademicExcellenceScienceTechnologyNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -170,7 +171,7 @@ public sealed class AcademicAchievementNomination : Nomination
 {
     public AcademicAchievementNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -203,7 +204,7 @@ public sealed class AcademicAchievementMathematicsNomination : Nomination
 {
     public AcademicAchievementMathematicsNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -236,7 +237,7 @@ public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
 {
     public AcademicAchievementScienceTechnologyNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -269,7 +270,7 @@ public sealed class PrincipalsAwardNomination : Nomination
 {
     public PrincipalsAwardNomination(
         AwardNominationPeriodId periodId,
-        string studentId)
+        StudentId studentId)
     {
         Id = new();
         PeriodId = periodId;
@@ -286,7 +287,7 @@ public sealed class GalaxyMedalNomination : Nomination
 {
     public GalaxyMedalNomination(
         AwardNominationPeriodId periodId,
-        string studentId)
+        StudentId studentId)
     {
         Id = new();
         PeriodId = periodId;
@@ -303,7 +304,7 @@ public sealed class UniversalAchieverNomination : Nomination
 {
     public UniversalAchieverNomination(
         AwardNominationPeriodId periodId,
-        string studentId)
+        StudentId studentId)
     {
         Id = new();
         PeriodId = periodId;

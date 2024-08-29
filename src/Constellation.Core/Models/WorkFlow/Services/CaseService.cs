@@ -1,6 +1,4 @@
-﻿using Constellation.Core.Models.Training;
-using Constellation.Core.Models.Training.Errors;
-using System.Linq;
+﻿using Constellation.Core.Models.Students.Identifiers;
 
 namespace Constellation.Core.Models.WorkFlow.Services;
 
@@ -10,6 +8,7 @@ using Attendance;
 using Attendance.Errors;
 using Attendance.Repositories;
 using Constellation.Core.Models.Attendance.Identifiers;
+using Constellation.Core.Models.Training.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Models.Training.Repositories;
 using Core.Errors;
@@ -20,8 +19,10 @@ using Students;
 using Students.Errors;
 using Students.Repositories;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Training;
 using WorkFlow;
 
 public sealed class CaseService : ICaseService
@@ -50,7 +51,7 @@ public sealed class CaseService : ICaseService
     }
 
     public async Task<Result<Case>> CreateAttendanceCase(
-        string studentId, 
+        StudentId studentId, 
         AttendanceValueId attendanceValueId,
         CancellationToken cancellationToken = default)
     {
@@ -64,7 +65,7 @@ public sealed class CaseService : ICaseService
         if (value is null)
             return Result.Failure<Case>(AttendanceValueErrors.NotFound(attendanceValueId));
 
-        Student? student = await _studentRepository.GetWithSchoolById(value.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(value.StudentId, cancellationToken);
 
         if (student is null)
             return Result.Failure<Case>(StudentErrors.NotFound(value.StudentId));
@@ -94,7 +95,7 @@ public sealed class CaseService : ICaseService
     }
 
     public async Task<Result<Case>> CreateComplianceCase(
-        string studentId,
+        StudentId studentId,
         string teacherId,
         string incidentId,
         string incidentType,
@@ -107,7 +108,7 @@ public sealed class CaseService : ICaseService
         if (teacher is null)
             return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFound(teacherId));
 
-        Student? student = await _studentRepository.GetWithSchoolById(studentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(studentId, cancellationToken);
 
         if (student is null)
             return Result.Failure<Case>(StudentErrors.NotFound(studentId));
@@ -127,7 +128,6 @@ public sealed class CaseService : ICaseService
         // Create and add CaseDetail
         Result<CaseDetail> detail = ComplianceCaseDetail.Create(
             student,
-            student.School,
             teacher,
             incidentId,
             incidentType,

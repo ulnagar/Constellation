@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Attendance.GetRecentAttendanceValues;
 
 using Core.Enums;
+using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 
 public sealed record AttendanceValueResponse(
-    string StudentId,
+    StudentId StudentId,
     Name? StudentName,
     Grade StudentGrade,
     string SchoolName,

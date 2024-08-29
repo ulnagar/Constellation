@@ -5,7 +5,6 @@ using Core.Abstractions.Clock;
 using Core.Models.Assets;
 using Core.Models.Assets.Errors;
 using Core.Models.Assets.Repositories;
-using Core.Models.Awards.Events;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;

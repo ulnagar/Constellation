@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
+using Constellation.Core.Models.Students.Identifiers;
+using Events;
 using Identifiers;
 using Primitives;
-using Events;
 using System;
 
 public class StudentAward : AggregateRoot
@@ -13,7 +14,7 @@ public class StudentAward : AggregateRoot
     public const string Universal = "Aurora Universal Achiever";
 
     private StudentAward(
-        string studentId,
+        StudentId studentId,
         string category,
         string type,
         DateTime awardedOn)
@@ -25,7 +26,7 @@ public class StudentAward : AggregateRoot
     }
 
     public StudentAwardId Id { get; private set; } = new();
-    public string StudentId { get; private set; }
+    public StudentId StudentId { get; private set; }
     public string? TeacherId { get; private set; }
     public DateTime AwardedOn { get; private set; }
     public string Category { get; private set; }
@@ -34,7 +35,7 @@ public class StudentAward : AggregateRoot
     public string Reason { get; private set; } = string.Empty;
 
     public static StudentAward Create(
-        string studentId,
+        StudentId studentId,
         string category,
         string type,
         DateTime awardedOn)
@@ -53,7 +54,7 @@ public class StudentAward : AggregateRoot
         string incidentId,
         string teacherId,
         string reason,
-        string studentId)
+        StudentId studentId)
     {
         StudentAward award = new(
             studentId,

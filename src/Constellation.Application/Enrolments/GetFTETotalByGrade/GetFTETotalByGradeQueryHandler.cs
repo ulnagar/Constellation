@@ -1,16 +1,16 @@
 ﻿namespace Constellation.Application.Enrolments.GetFTETotalByGrade;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
-using Core.Models.Offerings;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Identifiers;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
+using Core.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,18 +22,15 @@ internal sealed class GetFTETotalByGradeQueryHandler
 {
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
 
     public GetFTETotalByGradeQueryHandler(
         IEnrolmentRepository enrolmentRepository,
         IStudentRepository studentRepository,
-        IOfferingRepository offeringRepository,
         ICourseRepository courseRepository)
     {
         _enrolmentRepository = enrolmentRepository;
         _studentRepository = studentRepository;
-        _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
     }
 
@@ -49,37 +46,27 @@ internal sealed class GetFTETotalByGradeQueryHandler
 
             List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
 
-            List<string> maleStudentIds = students
-                .Where(student => student.Gender == "M")
-                .Select(student => student.StudentId)
+            List<StudentId> maleStudentIds = students
+                .Where(student => student.Gender == Gender.Male)
+                .Select(student => student.Id)
                 .ToList();
 
-            List<string> femaleStudentIds = students
-                .Where(student => student.Gender == "F")
-                .Select(student => student.StudentId)
+            List<StudentId> femaleStudentIds = students
+                .Where(student => student.Gender == Gender.Female)
+                .Select(student => student.Id)
                 .ToList();
-
-            List<Offering> offerings = await _offeringRepository.GetActiveByGrade(grade, cancellationToken);
-
+            
             List<Course> courses = await _courseRepository.GetByGrade(grade, cancellationToken);
 
             foreach (Course course in courses)
             {
-                List<Enrolment> activeEnrolments = 
-                    await _enrolmentRepository.GetCurrentByCourseId(course.Id, cancellationToken);
+                List<Enrolment> activeEnrolments = await _enrolmentRepository.GetCurrentByCourseId(course.Id, cancellationToken);
 
-                maleFteTotal += activeEnrolments.Count(enrol => maleStudentIds.Contains(enrol.StudentId)) *
-                                course.FullTimeEquivalentValue;
+                maleFteTotal += activeEnrolments.Count(enrol => maleStudentIds.Contains(enrol.StudentId)) * course.FullTimeEquivalentValue;
 
-                femaleFteTotal += activeEnrolments.Count(enrol => femaleStudentIds.Contains(enrol.StudentId)) *
-                                  course.FullTimeEquivalentValue;
+                femaleFteTotal += activeEnrolments.Count(enrol => femaleStudentIds.Contains(enrol.StudentId)) * course.FullTimeEquivalentValue;
 
                 fteTotal += activeEnrolments.Count * course.FullTimeEquivalentValue;
-
-                if (fteTotal != maleFteTotal + femaleFteTotal)
-                {
-                    // Something bad has happened!
-                }
             }
 
             response.Add(new(

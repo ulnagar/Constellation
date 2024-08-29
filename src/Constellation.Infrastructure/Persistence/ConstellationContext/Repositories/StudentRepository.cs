@@ -39,7 +39,7 @@ public class StudentRepository : IStudentRepository
             .Include(student => student.School)
             .ToListAsync(cancellationToken);
     
-    public async Task<Student?> GetById(
+    public async Task<Student?> GetBySRN(
         string StudentId,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -47,7 +47,7 @@ public class StudentRepository : IStudentRepository
             .Where(student => student.StudentId == StudentId)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<Student?> GetWithSchoolById(
+    public async Task<Student?> GetWithSchoolBySRN(
         string studentId,
         CancellationToken cancellationToken = default) =>
         await _context

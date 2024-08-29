@@ -38,7 +38,7 @@ internal sealed class ImportStudentsCommandHandler
 
         foreach (StudentImportRecord entry in request.Records)
         {
-            Student existingStudent = await _studentRepository.GetById(entry.StudentId, cancellationToken);
+            Student existingStudent = await _studentRepository.GetBySRN(entry.StudentId, cancellationToken);
 
             if (existingStudent is not null)
             {

@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Awards.GetStudentAwardStatistics;
 
 using Constellation.Core.Enums;
-using Constellation.Core.ValueObjects;
+using Core.Models.Students.Identifiers;
+using Core.ValueObjects;
 
 public sealed record StudentAwardStatisticsResponse(
-    string StudentId,
+    StudentId StudentId,
     Name Name,
     Grade Grade,
     decimal AwardedAstras,

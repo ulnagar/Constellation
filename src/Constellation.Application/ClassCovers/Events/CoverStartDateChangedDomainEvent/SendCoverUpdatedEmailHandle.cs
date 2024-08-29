@@ -2,23 +2,25 @@
 
 using Abstractions;
 using Abstractions.Messaging;
-using CoverEndDateChangedDomainEvent;
-using Extensions;
-using Interfaces.Repositories;
-using Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
-using Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
+using Constellation.Core.Models.Students.Repositories;
+using Core.DomainEvents;
 using Core.Models;
 using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Offerings;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
+using CoverEndDateChangedDomainEvent;
+using Extensions;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System;
@@ -27,8 +29,6 @@ using System.Linq;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Core.Models.Students.Repositories;
-using Core.Models.StaffMembers.Repositories;
 
 internal sealed class SendCoverUpdatedEmailHandle
     : IDomainEventHandler<CoverStartDateChangedDomainEvent>
@@ -195,7 +195,7 @@ internal sealed class SendCoverUpdatedEmailHandle
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOfferingWithSchool(offering.Id, cancellationToken);
+            List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
 
             Attachment rollAttachment = await _emailAttachmentService.GenerateClassRollDocument(offering, classStudents, cancellationToken);
 

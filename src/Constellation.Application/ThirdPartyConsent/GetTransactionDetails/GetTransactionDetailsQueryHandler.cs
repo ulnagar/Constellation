@@ -44,7 +44,7 @@ internal sealed class GetTransactionDetailsQueryHandler
             return Result.Failure<TransactionDetailsResponse>(ConsentErrors.Transaction.NotFound(request.TransactionId));
         }
 
-        Student student = await _studentRepository.GetWithSchoolById(transaction.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetWithSchoolBySRN(transaction.StudentId, cancellationToken);
 
         if (student is null)
         {

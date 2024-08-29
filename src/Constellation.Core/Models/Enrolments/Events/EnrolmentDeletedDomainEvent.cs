@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Core.Models.Enrolments.Events;
 
-using DomainEvents;
-using Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
+using DomainEvents;
+using Identifiers;
 
 public sealed record EnrolmentDeletedDomainEvent(
     DomainEventId Id,
     EnrolmentId EnrolmentId,
-    string StudentId,
+    StudentId StudentId,
     OfferingId OfferingId)
     : DomainEvent(Id);

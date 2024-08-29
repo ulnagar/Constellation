@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Application.Awards.GetRecentAwards;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Awards.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models;
+using Core.Models.Awards;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students;
+using Core.Shared;
+using Core.ValueObjects;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +31,7 @@ internal sealed class GetRecentAwardsQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IAttachmentRepository fileRepository,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _awardRepository = awardRepository;
         _studentRepository = studentRepository;
@@ -41,15 +44,15 @@ internal sealed class GetRecentAwardsQueryHandler
     {
         List<AwardResponse> result = new();
         
-        var awards = await _awardRepository.GetToRecentCount(request.Count, cancellationToken);
+        List<StudentAward> awards = await _awardRepository.GetToRecentCount(request.Count, cancellationToken);
 
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
-        var staff = await _staffRepository.GetAll(cancellationToken);
+        List<Staff> staff = await _staffRepository.GetAll(cancellationToken);
 
-        foreach (var award in awards)
+        foreach (StudentAward award in awards)
         {
-            var student = students.FirstOrDefault(student => student.StudentId == award.StudentId);
+            Student student = students.FirstOrDefault(student => student.Id == award.StudentId);
 
             if (student is null)
             {
@@ -57,20 +60,20 @@ internal sealed class GetRecentAwardsQueryHandler
                 continue;
             }
 
-            var studentName = Name.Create(student.FirstName, string.Empty, student.LastName);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (studentName.IsFailure)
+            if (enrolment is null)
             {
-                _logger.Warning("Could not create Name object from student {student} with error {@error}", student.DisplayName, studentName.Error);
+                _logger.Warning("Could not retrieve School Enrolment for student");
                 continue;
             }
 
-            var teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
+            Staff teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
             Name teacherName = null;
 
             if (teacher is not null)
             {
-                var teacherNameRequest = Name.Create(teacher?.FirstName, string.Empty, teacher?.LastName);
+                Result<Name> teacherNameRequest = Name.Create(teacher?.FirstName, string.Empty, teacher?.LastName);
 
                 if (teacherNameRequest.IsFailure)
                     _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherNameRequest.Error);
@@ -78,13 +81,13 @@ internal sealed class GetRecentAwardsQueryHandler
                     teacherName = teacherNameRequest.Value;
             }
 
-            var hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
+            bool hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
 
-            var entry = new AwardResponse(
+            AwardResponse entry = new AwardResponse(
                 award.Id,
-                studentName.Value,
-                student.CurrentGrade,
-                student.School.Name,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 teacherName,
                 award.AwardedOn,
                 award.Type,

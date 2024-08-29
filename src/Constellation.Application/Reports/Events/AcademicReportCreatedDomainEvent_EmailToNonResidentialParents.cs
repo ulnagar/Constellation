@@ -106,7 +106,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
             recipients.Add(recipient.Value);
         }
 
-        var student = await _studentRepository.GetById(reportEntry.StudentId, cancellationToken);
+        var student = await _studentRepository.GetBySRN(reportEntry.StudentId, cancellationToken);
 
         var studentName = Name.Create(student.FirstName, null, student.LastName);
 

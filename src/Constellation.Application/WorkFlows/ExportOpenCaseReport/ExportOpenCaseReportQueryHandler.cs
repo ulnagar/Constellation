@@ -63,7 +63,7 @@ internal sealed class ExportOpenCaseReportQueryHandler
             {
                 AttendanceCaseDetail details = item.Detail as AttendanceCaseDetail;
 
-                Student student = await _studentRepository.GetById(details!.StudentId, cancellationToken);
+                Student student = await _studentRepository.GetBySRN(details!.StudentId, cancellationToken);
 
                 if (student is null)
                 {

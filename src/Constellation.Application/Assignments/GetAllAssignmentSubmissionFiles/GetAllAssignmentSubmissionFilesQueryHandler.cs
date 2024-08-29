@@ -14,6 +14,7 @@ using Core.Models.Attachments.ValueObjects;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using DTOs;
 using Serilog;
@@ -65,11 +66,11 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
             return Result.Failure<FileDto>(AssignmentErrors.NotFound(request.AssignmentId));
         }
 
-        List<IGrouping<string, CanvasAssignmentSubmission>> submissions = assignment.Submissions.GroupBy(submission => submission.StudentId).ToList();
+        List<IGrouping<StudentId, CanvasAssignmentSubmission>> submissions = assignment.Submissions.GroupBy(submission => submission.StudentId).ToList();
 
         List<AttachmentResponse> files = new();
 
-        foreach (IGrouping<string, CanvasAssignmentSubmission> studentSubmissions in submissions)
+        foreach (IGrouping<StudentId, CanvasAssignmentSubmission> studentSubmissions in submissions)
         {
             Student student = await _studentRepository.GetById(studentSubmissions.Key, cancellationToken);
 
@@ -83,7 +84,7 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
                 continue;
             }
 
-            List<Offering> offerings = await _offeringRepository.GetByStudentId(student.StudentId, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
             Offering offering = offerings.FirstOrDefault(offering => offering.CourseId == assignment.CourseId);
 

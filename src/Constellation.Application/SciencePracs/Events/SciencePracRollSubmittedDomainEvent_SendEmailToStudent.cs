@@ -66,7 +66,7 @@ internal sealed class SciencePracRollSubmittedDomainEvent_SendEmailToStudent
 
         foreach (SciencePracAttendance attendance in presentStudents)
         {
-            Student student = await _studentRepository.GetById(attendance.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(attendance.StudentId, cancellationToken);
 
             await _emailService.SendStudentLessonCompletedEmail(student, lesson.Name, courseName, cancellationToken);
         }

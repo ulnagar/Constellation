@@ -75,7 +75,7 @@ internal sealed class AbsenceResponseConfirmedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetBySRN(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
