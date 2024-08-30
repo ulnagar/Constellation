@@ -79,7 +79,7 @@ internal sealed class AddStudentsToCanvasCourseResource
         foreach (Enrolment enrolment in enrolments)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                enrolment.StudentId,
+                enrolment.StudentId.ToString(),
                 resource.CourseId.ToString(),
                 CanvasAction.Add,
                 CanvasUserType.Student,

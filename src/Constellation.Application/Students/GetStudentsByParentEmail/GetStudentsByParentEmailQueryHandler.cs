@@ -5,6 +5,7 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Extensions;
 using Core.Models.Students;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,17 +30,22 @@ public sealed class GetStudentsByParentEmailQueryHandler
     {
         List<StudentResponse> response = new();
 
-        Dictionary<string, bool> studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
+        Dictionary<StudentId, bool> studentIds = await _familyRepository.GetStudentIdsFromFamilyWithEmail(request.ParentEmail, cancellationToken);
 
         List<Student> students = await _studentRepository.GetListFromIds(studentIds.Keys.ToList(), cancellationToken);
 
         foreach (Student student in students)
         {
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             response.Add(new(
-                student.StudentId,
-                student.FirstName,
-                student.LastName,
-                student.CurrentGrade.AsName()));
+                student.Id,
+                student.Name.PreferredName,
+                student.Name.LastName,
+                enrolment.Grade.AsName()));
         }
 
         return response;

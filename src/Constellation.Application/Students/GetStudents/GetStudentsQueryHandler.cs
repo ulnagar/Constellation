@@ -6,6 +6,7 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Students;
+using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,22 +27,27 @@ internal sealed class GetStudentsQueryHandler
 
         if (students.Count == 0)
         {
-            return Result.Failure<List<StudentResponse>>(StudentErrors.NotFound(""));
+            return Result.Failure<List<StudentResponse>>(StudentErrors.NotFound(StudentId.Empty));
         }
 
         List<StudentResponse> response = new();
 
         foreach (Student student in students)
         {
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             response.Add(new StudentResponse(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.StudentReferenceNumber,
+                student.Name,
                 student.Gender,
-                student.CurrentGrade,
-                student.PortalUsername,
+                enrolment.Grade,
                 student.EmailAddress,
-                student.School.Name,
-                student.SchoolCode,
+                enrolment.SchoolName,
+                enrolment.SchoolCode,
                 student.IsDeleted));
         }
 

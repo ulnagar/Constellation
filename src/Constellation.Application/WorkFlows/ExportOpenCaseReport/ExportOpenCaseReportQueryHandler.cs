@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.WorkFlows.ExportOpenCaseReport;
 
 using Abstractions.Messaging;
-using Constellation.Application.Helpers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
@@ -14,6 +13,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using DTOs;
 using Extensions;
+using Helpers;
 using Interfaces.Services;
 using Serilog;
 using System;
@@ -63,7 +63,7 @@ internal sealed class ExportOpenCaseReportQueryHandler
             {
                 AttendanceCaseDetail details = item.Detail as AttendanceCaseDetail;
 
-                Student student = await _studentRepository.GetBySRN(details!.StudentId, cancellationToken);
+                Student student = await _studentRepository.GetById(details!.StudentId, cancellationToken);
 
                 if (student is null)
                 {
@@ -75,12 +75,22 @@ internal sealed class ExportOpenCaseReportQueryHandler
                     return Result.Failure<FileDto>(StudentErrors.NotFound(details.StudentId));
                 }
 
-                Name name = student.GetName();
+                SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
+                if (enrolment is null)
+                {
+                    _logger
+                        .ForContext(nameof(Case), item, true)
+                        .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                        .Warning("Could not export open Cases");
+
+                    return Result.Failure<FileDto>(SchoolEnrolmentErrors.NotFound);
+                }
+                
                 reportItems.Add(new(
                     $"{shortCaseId}.00",
-                    student.GetName(),
-                    student.CurrentGrade,
+                    student.Name,
+                    enrolment.Grade,
                     item.ToString(),
                     DateOnly.FromDateTime(item.CreatedAt),
                     null,
@@ -96,7 +106,7 @@ internal sealed class ExportOpenCaseReportQueryHandler
                 Index = 0;
 
                 foreach (Action action in parentActions)
-                    CreateFromAction(reportItems, item.Actions.ToList(), shortCaseId, action, student.GetName(), student.CurrentGrade);
+                    CreateFromAction(reportItems, item.Actions.ToList(), shortCaseId, action, student.Name, enrolment.Grade);
             }
         }
 

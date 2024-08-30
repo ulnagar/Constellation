@@ -81,7 +81,7 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
 
                 foreach (StudentAttendanceData entry in attendanceData)
                 {
-                    Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
+                    Student student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
 
                     if (student is null)
                         continue;

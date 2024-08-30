@@ -2,13 +2,15 @@
 
 using Core.Enums;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 using System.Collections.Generic;
 
 public sealed record StudentWithOfferingsResponse(
-    string StudentId,
+    StudentId StudentId,
     Name Name,
-    string Gender,
+    Gender Gender,
     string SchoolName,
     Grade Grade,
     List<StudentWithOfferingsResponse.OfferingResponse> Offerings)

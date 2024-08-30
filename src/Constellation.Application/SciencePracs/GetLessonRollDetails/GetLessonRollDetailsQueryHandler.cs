@@ -1,16 +1,15 @@
 ﻿namespace Constellation.Application.SciencePracs.GetLessonRollDetails;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
-using Core.Models.SchoolContacts.Repositories;
+using Core.Errors;
+using Core.Shared;
+using Core.ValueObjects;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,20 +22,17 @@ internal sealed class GetLessonRollDetailsQueryHandler
     private readonly ILessonRepository _lessonRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolContactRepository _contactRepository;
     private readonly ILogger _logger;
 
     public GetLessonRollDetailsQueryHandler(
         ILessonRepository lessonRepository,
         ISchoolRepository schoolRepository,
         IStudentRepository studentRepository,
-        ISchoolContactRepository contactRepository,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
         _schoolRepository = schoolRepository;
         _studentRepository = studentRepository;
-        _contactRepository = contactRepository;
         _logger = logger.ForContext<GetLessonRollDetailsQuery>();
     }
 
@@ -64,7 +60,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         foreach (SciencePracAttendance entry in roll.Attendance)
         {
-            Student student = await _studentRepository.GetBySRN(entry.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
@@ -72,7 +68,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
             attendanceRecords.Add(new(
                 entry.Id,
                 entry.StudentId,
-                student.GetName(),
+                student.Name,
                 entry.Present));
         }
 
@@ -89,7 +85,9 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
         {
-            Result<Name> contactName = Name.CreateMononym(roll.SubmittedBy);
+            string[] splitName = roll.SubmittedBy.Split(' ', 2);
+
+            Result<Name> contactName = Name.Create(splitName.First(), string.Empty, splitName.Last());
 
             if (contactName.IsFailure)
             {

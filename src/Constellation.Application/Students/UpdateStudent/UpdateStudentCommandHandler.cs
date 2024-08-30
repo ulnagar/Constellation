@@ -29,7 +29,7 @@ internal sealed class UpdateStudentCommandHandler
 
     public async Task<Result> Handle(UpdateStudentCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -42,15 +42,10 @@ internal sealed class UpdateStudentCommandHandler
         }
 
         Result attempt = student.UpdateStudent(
-            request.FirstName,
-            request.LastName,
-            request.PortalUsername,
-            student.AdobeConnectPrincipalId,
-            student.SentralStudentId,
-            request.CurrentGrade,
-            student.EnrolledGrade,
-            request.Gender,
-            request.SchoolCode);
+            request.SRN,
+            request.Name,
+            request.EmailAddress,
+            request.Gender);
 
         if (attempt.IsFailure)
         {

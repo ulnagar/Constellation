@@ -49,7 +49,7 @@ internal sealed class UpdateAllocatedDeviceStatus
             {
                 DateEntered = DateTime.Now,
                 SerialNumber = device.SerialNumber,
-                Details = $"Device unassigned from student due to withdrawal: {allocation.Student.DisplayName}"
+                Details = $"Device unassigned from student due to withdrawal: {allocation.Student.Name.DisplayName}"
             };
             device.Notes.Add(note);
 

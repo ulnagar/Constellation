@@ -31,8 +31,8 @@ internal sealed class GetFilteredStudentsQueryHandler
     {
         List<Student> students = request.Filter switch
         {
-            StudentFilter.Active => await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken),
-            StudentFilter.Inactive => await _studentRepository.GetInactiveStudentsWithSchool(cancellationToken),
+            StudentFilter.Active => await _studentRepository.GetCurrentStudents(cancellationToken),
+            StudentFilter.Inactive => await _studentRepository.GetInactiveStudents(cancellationToken),
             _ => await _studentRepository.GetAllWithSchool(cancellationToken)
         };
 
@@ -40,15 +40,20 @@ internal sealed class GetFilteredStudentsQueryHandler
 
         foreach (Student student in students)
         {
-            int enrolmentCount = await _enrolmentRepository.GetCurrentCountByStudentId(student.StudentId, cancellationToken);
+            int enrolmentCount = await _enrolmentRepository.GetCurrentCountByStudentId(student.Id, cancellationToken);
+
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
 
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
-                student.Gender,
-                student.CurrentGrade,
-                student.School.Name,
-                student.SchoolCode,
+                student.Id,
+                student.Name,
+                student.Gender.Value,
+                enrolment.Grade,
+                enrolment.SchoolName,
+                enrolment.SchoolCode,
                 enrolmentCount,
                 student.IsDeleted));
         }

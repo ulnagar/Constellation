@@ -2,18 +2,18 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Core.Errors;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
+using Core.Errors;
 using Core.Shared;
 using Serilog;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Core.Models.Students.Repositories;
 
 internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
     : IQueryHandler<GetLessonRollSubmitContextForSchoolsPortalQuery, ScienceLessonRollForSubmit>
@@ -80,7 +80,7 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
 
         foreach (SciencePracAttendance attendanceRecord in roll.Attendance)
         {
-            Student student = await _studentRepository.GetBySRN(attendanceRecord.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(attendanceRecord.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
@@ -88,9 +88,9 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
             response.Attendance.Add(new()
             {
                 Id = attendanceRecord.Id,
-                StudentId = student.StudentId,
-                StudentFirstName = student.FirstName,
-                StudentLastName = student.LastName,
+                StudentId = student.Id,
+                StudentFirstName = student.Name.FirstName,
+                StudentLastName = student.Name.LastName,
                 Present = attendanceRecord.Present
             });
         }

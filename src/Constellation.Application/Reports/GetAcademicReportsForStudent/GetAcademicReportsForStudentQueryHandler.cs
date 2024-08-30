@@ -3,6 +3,7 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Reports;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,12 +23,12 @@ internal sealed class GetAcademicReportsForStudentQueryHandler
     {
         List<StudentReportResponse> results = new();
         
-        var reports = await _reportRepository.GetForStudent(request.StudentId, cancellationToken);
+        List<AcademicReport> reports = await _reportRepository.GetForStudent(request.StudentId, cancellationToken);
 
-        if (reports is null || reports.Count == 0)
+        if (reports.Count == 0)
             return results;
 
-        foreach (var report in reports)
+        foreach (AcademicReport report in reports)
         {
             results.Add(new(
                 request.StudentId,

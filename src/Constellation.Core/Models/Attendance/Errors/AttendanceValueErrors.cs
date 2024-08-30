@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Attendance.Errors;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Identifiers;
 using Shared;
 using System;
@@ -10,7 +11,7 @@ public static class AttendanceValueErrors
         "AttendanceValue.NotFound",
         $"Could not find an Attendance Value with the Id {id}");
 
-    public static readonly Func<string, Error> NotFoundForStudent = id => new(
+    public static readonly Func<StudentId, Error> NotFoundForStudent = id => new(
         "AttendanceValue.NotFoundForStudent",
         $"Could not find an Attendance Value for the student with Id {id}");
 

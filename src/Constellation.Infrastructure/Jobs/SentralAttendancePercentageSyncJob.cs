@@ -103,14 +103,19 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
 
         foreach (StudentAttendanceData entry in attendanceData)
         {
-            Student student = await _studentRepository.GetBySRN(entry.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
 
             if (student is null)
                 continue;
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             Result<AttendanceValue> modelRequest = AttendanceValue.Create(
-                student.StudentId,
-                student.CurrentGrade,
+                student.Id,
+                enrolment.Grade,
                 startDate,
                 endDate,
                 $"Term {term}, Week {week}, {_dateTime.CurrentYear}",

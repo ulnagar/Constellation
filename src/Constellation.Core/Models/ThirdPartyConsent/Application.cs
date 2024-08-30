@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Models.ThirdPartyConsent;
+﻿using Constellation.Core.Models.Students.Identifiers;
+
+namespace Constellation.Core.Models.ThirdPartyConsent;
 
 using Primitives;
 using Shared;
@@ -86,7 +88,7 @@ public sealed class Application : IAuditableEntity
     
     public List<Consent?> GetActiveConsents()
     {
-        List<string> studentIds = _consents
+        List<StudentId> studentIds = _consents
             .Select(consent => consent.StudentId)
             .Distinct()
             .ToList();

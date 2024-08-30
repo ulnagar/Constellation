@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Students.Events.StudentReinstatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,7 +34,7 @@ internal sealed class CreateCanvasAccount
     {
         _logger.Information("Attempting to add student ({studentId}) to Canvas", notification.StudentId);
 
-        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {
@@ -43,11 +43,11 @@ internal sealed class CreateCanvasAccount
         }
 
         CreateUserCanvasOperation operation = new(
-            student.StudentId,
-            student.FirstName,
-            student.LastName,
-            student.PortalUsername,
-            student.EmailAddress);
+            student.Id.ToString(),
+            student.Name.PreferredName,
+            student.Name.LastName,
+            student.EmailAddress.Email.Substring(0, student.EmailAddress.Email.IndexOf('@')),
+            student.EmailAddress.Email);
 
         _operationsRepository.Insert(operation);
         await _unitOfWork.CompleteAsync(cancellationToken);

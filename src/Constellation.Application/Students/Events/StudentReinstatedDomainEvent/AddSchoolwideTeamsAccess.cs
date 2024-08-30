@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Students.Events.StudentReinstatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Enums;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
+using Enums;
+using Interfaces.Repositories;
 using Serilog;
 using System;
 using System.Threading;
@@ -37,7 +37,7 @@ internal sealed class AddSchoolwideTeamsAccess
     {
         _logger.Information("Attempting to add student ({studentId}) from school wide teams", notification.StudentId);
 
-        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {

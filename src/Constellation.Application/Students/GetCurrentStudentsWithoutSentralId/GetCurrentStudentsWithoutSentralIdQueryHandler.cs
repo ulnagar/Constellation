@@ -28,15 +28,20 @@ internal sealed class GetCurrentStudentsWithoutSentralIdQueryHandler
 
         foreach (Student student in students)
         {
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.StudentReferenceNumber,
+                student.Name,
                 student.Gender,
-                student.CurrentGrade,
-                student.PortalUsername,
+                enrolment.Grade,
                 student.EmailAddress,
-                student.School.Name,
-                student.SchoolCode,
+                enrolment.SchoolName,
+                enrolment.SchoolCode,
                 student.IsDeleted));
         }
 

@@ -68,7 +68,7 @@ internal sealed class RemoveStudentsFromCanvasCourseResource
         foreach (Enrolment enrolment in enrolments)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                enrolment.StudentId,
+                enrolment.StudentId.ToString(),
                 resource.CourseId.ToString(),
                 CanvasAction.Remove,
                 CanvasUserType.Student, 

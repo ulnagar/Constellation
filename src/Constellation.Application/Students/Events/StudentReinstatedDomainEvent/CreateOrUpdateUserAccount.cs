@@ -31,7 +31,7 @@ internal sealed class CreateOrUpdateUserAccount
 
     public async Task Handle(StudentReinstatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -42,12 +42,12 @@ internal sealed class CreateOrUpdateUserAccount
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(student.EmailAddress);
+        AppUser user = await _userManager.FindByEmailAsync(student.EmailAddress.Email);
 
         if (user is not null)
         {
             user.IsStudent = true;
-            user.StudentId = student.StudentId;
+            user.StudentId = student.Id;
 
             IdentityResult update = await _userManager.UpdateAsync(user);
 
@@ -67,12 +67,12 @@ internal sealed class CreateOrUpdateUserAccount
 
         user = new()
         {
-            UserName = student.EmailAddress,
-            Email = student.EmailAddress,
-            FirstName = student.FirstName,
-            LastName = student.LastName,
+            UserName = student.EmailAddress.Email,
+            Email = student.EmailAddress.Email,
+            FirstName = student.Name.FirstName,
+            LastName = student.Name.LastName,
             IsStudent = true,
-            StudentId = student.StudentId
+            StudentId = student.Id
         };
 
         IdentityResult create = await _userManager.CreateAsync(user);

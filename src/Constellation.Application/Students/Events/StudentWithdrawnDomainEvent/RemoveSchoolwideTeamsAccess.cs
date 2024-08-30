@@ -37,7 +37,7 @@ internal sealed class RemoveSchoolwideTeamsAccess
     {
         _logger.Information("Attempting to remove student ({studentId}) from school wide teams due to withdrawal", notification.StudentId);
 
-        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {

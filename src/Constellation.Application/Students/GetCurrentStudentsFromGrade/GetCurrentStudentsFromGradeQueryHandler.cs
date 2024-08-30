@@ -3,10 +3,8 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models;
 using Core.Models.Students.Errors;
 using Core.Shared;
-using Interfaces.Repositories;
 using Models;
 using Serilog;
 using System.Collections.Generic;
@@ -17,16 +15,13 @@ internal sealed class GetCurrentStudentsFromGradeQueryHandler
     : IQueryHandler<GetCurrentStudentsFromGradeQuery, List<StudentResponse>>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetCurrentStudentsFromGradeQueryHandler(
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _logger = logger;
     }
 
@@ -48,22 +43,20 @@ internal sealed class GetCurrentStudentsFromGradeQueryHandler
 
         foreach (Student student in students)
         {
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            string schoolName = string.Empty;
-
-            if (school is not null)
-                schoolName = school.Name;
+            if (enrolment is null)
+                continue;
 
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.StudentReferenceNumber,
+                student.Name,
                 student.Gender,
-                student.CurrentGrade,
-                student.PortalUsername,
+                enrolment.Grade,
                 student.EmailAddress,
-                schoolName,
-                student.SchoolCode,
+                enrolment.SchoolName,
+                enrolment.SchoolCode,
                 student.IsDeleted));
         }
 

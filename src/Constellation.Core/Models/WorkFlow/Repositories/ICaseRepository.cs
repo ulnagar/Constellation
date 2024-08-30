@@ -14,7 +14,7 @@ public interface ICaseRepository
     Task<List<Case>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<bool> ExistingOpenAttendanceCaseForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<Case?> GetOpenAttendanceCaseForStudent(StudentId studentId, CancellationToken cancellationToken = default);
-    Task<int> CountActiveActionsForUser(StudentId staffId, CancellationToken cancellationToken = default);
+    Task<int> CountActiveActionsForUser(string staffId, CancellationToken cancellationToken = default);
     Task<Case?> GetComplianceCaseForIncident(string incidentId, CancellationToken cancellationToken = default);
     Task<Case?> GetTrainingCaseForStaffAndModule(string staffId, TrainingModuleId moduleId, CancellationToken cancellationToken = default);
     void Insert(Case item);

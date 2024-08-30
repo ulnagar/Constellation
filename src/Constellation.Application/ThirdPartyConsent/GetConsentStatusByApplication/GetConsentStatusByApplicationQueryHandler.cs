@@ -2,7 +2,6 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -81,32 +80,27 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
 
         foreach (Student student in students)
         {
-            string schoolName = string.Empty;
-
-            School school = schools.FirstOrDefault(entry => entry.Code == student.SchoolCode);
-
-            if (school is null)
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+            
+            if (enrolment is null)
             {
                 _logger
                     .ForContext(nameof(GetConsentStatusByApplicationQuery), request, true)
-                    .ForContext("SchoolCode", student.SchoolCode)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(student.SchoolCode), true)
+                    .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
                     .Warning("Failed to retrieve application while building list of Consent Statuses");
-            }
-            else
-            {
-                schoolName = school.Name;
+
+                continue;
             }
 
-            List<Transaction> transactions = await _consentRepository.GetTransactionsByStudentId(student.StudentId, cancellationToken);
+            List<Transaction> transactions = await _consentRepository.GetTransactionsByStudentId(student.Id, cancellationToken);
 
             if (!transactions.Any())
             {
                 response.Add(new(
-                    student.StudentId,
-                    student.GetName(),
-                    student.CurrentGrade,
-                    schoolName,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     application.Name,
                     ConsentStatusResponse.ConsentStatus.Unknown,
                     DateOnly.MinValue));
@@ -124,10 +118,10 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
             if (consent is null)
             {
                 response.Add(new(
-                    student.StudentId,
-                    student.GetName(),
-                    student.CurrentGrade,
-                    schoolName,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     application.Name,
                     ConsentStatusResponse.ConsentStatus.Unknown,
                     DateOnly.MinValue));
@@ -136,10 +130,10 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
             }
 
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
-                student.CurrentGrade,
-                schoolName,
+                student.Id,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 application.Name,
                 consent.ConsentProvided ? ConsentStatusResponse.ConsentStatus.Granted : ConsentStatusResponse.ConsentStatus.Denied,
                 DateOnly.FromDateTime(consent.ProvidedAt)));

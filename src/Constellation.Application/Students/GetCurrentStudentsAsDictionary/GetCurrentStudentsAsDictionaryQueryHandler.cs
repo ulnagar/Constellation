@@ -4,13 +4,14 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 public sealed class GetCurrentStudentsAsDictionaryQueryHandler
-    : IQueryHandler<GetCurrentStudentsAsDictionaryQuery, Dictionary<string, string>>
+    : IQueryHandler<GetCurrentStudentsAsDictionaryQuery, Dictionary<StudentId, string>>
 {
     private readonly IStudentRepository _studentRepository;
 
@@ -19,16 +20,15 @@ public sealed class GetCurrentStudentsAsDictionaryQueryHandler
         _studentRepository = studentRepository;
     }
 
-    public async Task<Result<Dictionary<string, string>>> Handle(GetCurrentStudentsAsDictionaryQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Dictionary<StudentId, string>>> Handle(GetCurrentStudentsAsDictionaryQuery request, CancellationToken cancellationToken)
     {
         var students = await _studentRepository.ForSelectionListAsync();
 
         students = students
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.CurrentEnrolment?.Grade)
+            .ThenBy(student => student.Name.SortOrder)  
             .ToList();
 
-        return students.ToDictionary(k => k.StudentId, k => $"{k.DisplayName} ({k.CurrentGrade.AsName()})");
+        return students.ToDictionary(k => k.Id, k => $"{k.Name.DisplayName} ({k.CurrentEnrolment?.Grade.AsName()})");
     }
 }

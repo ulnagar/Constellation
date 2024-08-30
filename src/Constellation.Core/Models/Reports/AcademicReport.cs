@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Reports;
 
+using Constellation.Core.Models.Students.Identifiers;
 using DomainEvents;
 using Identifiers;
 using Primitives;
@@ -8,7 +9,7 @@ public sealed class AcademicReport : AggregateRoot
 {
     private AcademicReport(
         AcademicReportId id, 
-        string studentId, 
+        StudentId studentId, 
         string publishId, 
         string year, 
         string reportingPeriod)
@@ -21,14 +22,14 @@ public sealed class AcademicReport : AggregateRoot
     }
 
     public AcademicReportId Id { get; private set; }
-    public string StudentId { get; private set; } = string.Empty;
-    public string PublishId { get; private set; } = string.Empty;
-    public string Year { get; private set; } = string.Empty;
-    public string ReportingPeriod { get; private set; } = string.Empty;
+    public StudentId StudentId { get; private set; }
+    public string PublishId { get; private set; }
+    public string Year { get; private set; }
+    public string ReportingPeriod { get; private set; }
 
     public static AcademicReport Create(
         AcademicReportId id,
-        string studentId,
+        StudentId studentId,
         string publishId,
         string year,
         string reportingPeriod)

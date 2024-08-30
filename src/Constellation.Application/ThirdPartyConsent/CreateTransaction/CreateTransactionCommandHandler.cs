@@ -85,7 +85,7 @@ internal sealed class CreateTransactionCommandHandler
             }
         }
 
-        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -106,7 +106,7 @@ internal sealed class CreateTransactionCommandHandler
         }
 
         Result<Transaction> transaction = Transaction.Create(
-            student.StudentId,
+            student.Id,
             request.SubmittedBy,
             _dateTime.Now,
             request.SubmissionMethod,

@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Application.SciencePracs.Events;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.DomainEvents;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Students.Identifiers;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +20,6 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
     : IDomainEventHandler<SciencePracLessonCreatedDomainEvent>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -28,14 +27,12 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
 
     public SciencePracLessonCreatedDomainEvent_CreateRolls(
         ILessonRepository lessonRepository,
-        IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
         IStudentRepository studentRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
-        _offeringRepository = offeringRepository;
         _enrolmentRepository = enrolmentRepository;
         _studentRepository = studentRepository;
         _unitOfWork = unitOfWork;
@@ -52,7 +49,7 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
             return;
         }
 
-        List<string> studentIds = new();
+        List<StudentId> studentIds = new();
 
         foreach (SciencePracLessonOffering record in lesson.Offerings)
         {
@@ -64,16 +61,16 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
 
         List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-        var groupedStudents = students.GroupBy(student => student.SchoolCode);
+        IEnumerable<IGrouping<string, Student>> groupedStudents = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode);
 
-        foreach (var schoolGroup in groupedStudents)
+        foreach (IGrouping<string, Student> schoolGroup in groupedStudents)
         {
             SciencePracRoll roll = new(
                 lesson.Id,
                 schoolGroup.Key);
 
             foreach (Student student in schoolGroup)
-                roll.AddStudent(student.StudentId);
+                roll.AddStudent(student.Id);
 
             lesson.AddRoll(roll);
         }

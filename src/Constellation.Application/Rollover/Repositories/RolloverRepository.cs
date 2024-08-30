@@ -4,6 +4,7 @@ using Constellation.Core.Models.Rollover;
 using Constellation.Core.Models.Rollover.Errors;
 using Constellation.Core.Models.Rollover.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +14,7 @@ internal sealed class RolloverRepository : IRolloverRepository
 
     public Result RegisterDecision(RolloverDecision rolloverDecision)
     {
-        if (string.IsNullOrWhiteSpace(rolloverDecision.StudentId))
+        if (rolloverDecision.StudentId == StudentId.Empty)
             return Result.Failure(RolloverErrors.StudentIdEmpty);
 
         if (RolloverDecisions.Any(entry => entry.StudentId == rolloverDecision.StudentId))

@@ -2,9 +2,10 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Identifiers;
 
 public sealed record StudentWithSentralIdResponse(
-    string StudentId,
+    StudentId StudentId,
     Name Name,
     Grade Grade,
     string SentralId);

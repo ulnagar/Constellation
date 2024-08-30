@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Shared;
+using Abstractions.Messaging;
+using Core.Errors;
 using Core.Models;
+using Core.Shared;
+using Interfaces.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;

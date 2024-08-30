@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Families.AddStudentToFamily;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 
 public sealed record AddStudentToFamilyCommand(
     FamilyId FamilyId,
-    string StudentId)
+    StudentId StudentId)
     : ICommand;

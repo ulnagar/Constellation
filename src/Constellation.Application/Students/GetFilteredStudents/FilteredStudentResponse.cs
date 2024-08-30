@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Students.GetFilteredStudents;
 
 using Core.Enums;
+using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 
 public sealed record FilteredStudentResponse(
-    string StudentId,
+    StudentId StudentId,
     Name StudentName,
     string Gender,
     Grade Grade,

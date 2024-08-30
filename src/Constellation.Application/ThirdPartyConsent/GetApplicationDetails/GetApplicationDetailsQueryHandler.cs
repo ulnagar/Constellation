@@ -39,7 +39,7 @@ internal sealed class GetApplicationDetailsQueryHandler
 
         foreach (Consent consent in currentConsents)
         {
-            Student student = await _studentRepository.GetWithSchoolBySRN(consent.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(consent.StudentId, cancellationToken);
 
             if (student is null)
             {
@@ -52,13 +52,26 @@ internal sealed class GetApplicationDetailsQueryHandler
                 continue;
             }
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+            {
+                _logger
+                    .ForContext(nameof(Application), application, true)
+                    .ForContext(nameof(Consent), consent, true)
+                    .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                    .Warning("Could not find student details to include in Consent details");
+
+                continue;
+            }
+
             consentResponses.Add(new(
                 consent.Id,
                 consent.TransactionId,
                 consent.StudentId,
-                student.GetName(),
-                student.CurrentGrade,
-                student.School.Name,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 consent.ConsentProvided,
                 consent.ProvidedBy,
                 consent.ProvidedAt,

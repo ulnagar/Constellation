@@ -82,6 +82,36 @@ internal sealed class ProcessCanvasOperationCommandHandler
 
                 return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
 
+            case nameof(UpdateUserEmailCanvasOperation):
+                UpdateUserEmailCanvasOperation updateOperation = operation as UpdateUserEmailCanvasOperation;
+
+                _logger
+                    .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                    .Information("Updating Canvas user {UserId} to new Email Address", updateOperation.UserId);
+
+                bool updateSuccess = await _canvasGateway.UpdateUserEmail(
+                    updateOperation.UserId,
+                    $"{updateOperation.PortalUsername}@education.nsw.gov.au");
+
+                if (updateSuccess)
+                {
+                    _logger
+                        .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                        .Information("Successfully updated Canvas user {UserId} to new Email Address", updateOperation.UserId);
+
+                    updateOperation.Complete();
+
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
+                    return Result.Success();
+                }
+
+                _logger
+                    .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                    .Warning("Failed to update Canvas user {UserId} to new Email Address", updateOperation.UserId);
+
+                return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
+
             case nameof(ModifyEnrolmentCanvasOperation):
                 ModifyEnrolmentCanvasOperation modifyOperation = operation as ModifyEnrolmentCanvasOperation;
 

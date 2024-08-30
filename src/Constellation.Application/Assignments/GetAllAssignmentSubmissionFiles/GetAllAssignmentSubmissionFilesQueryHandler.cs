@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Assignments.GetAllAssignmentSubmissionFiles;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
@@ -30,7 +29,6 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
     : IQueryHandler<GetAllAssignmentSubmissionFilesQuery, FileDto>
 {
     private readonly IAssignmentRepository _assignmentRepository;
-    private readonly IAttachmentRepository _fileRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
@@ -38,14 +36,12 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
 
     public GetAllAssignmentSubmissionFilesQueryHandler(
         IAssignmentRepository assignmentRepository,
-        IAttachmentRepository fileRepository,
         IAttachmentService attachmentService,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _assignmentRepository = assignmentRepository;
-        _fileRepository = fileRepository;
         _attachmentService = attachmentService;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
@@ -112,7 +108,7 @@ internal sealed class GetAllAssignmentSubmissionFilesQueryHandler
 
             AttachmentResponse updatedResponse = fileRequest.Value with
             {
-                FileName = $"{student.GetName().SortOrder} - {offering.Name} - {submission.Attempt}.{extension}"
+                FileName = $"{student.Name.SortOrder} - {offering.Name} - {submission.Attempt}.{extension}"
             };
 
             files.Add(updatedResponse);

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Errors;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Identifiers;
 using Shared;
 using System;
@@ -10,7 +11,7 @@ public static class CaseErrors
         "Case.NotFound",
         $"Could not find a Case with the Id {id}");
 
-    public static readonly Func<string, Error> NotFoundForStudent = id => new(
+    public static readonly Func<StudentId, Error> NotFoundForStudent = id => new(
         "Case.NotFoundForStudent",
         $"Could not find a Case for Student with Id {id}");
 

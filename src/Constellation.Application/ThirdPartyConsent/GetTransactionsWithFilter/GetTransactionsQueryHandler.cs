@@ -1,15 +1,16 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactionsWithFilter;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.ThirdPartyConsent.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.ThirdPartyConsent;
 using Constellation.Core.Models.ThirdPartyConsent.Errors;
 using Constellation.Core.Models.ThirdPartyConsent.Identifiers;
 using Constellation.Core.Models.ThirdPartyConsent.Repositories;
-using Constellation.Core.Shared;
+using Core.Models.Students.Errors;
+using Core.Shared;
 using GetTransactions;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,10 +69,21 @@ internal sealed class GetTransactionsWithFilterQueryHandler
 
         List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
 
-        foreach (Student student in students.OrderBy(student => student.CurrentGrade).ThenBy(student => student.LastName).ThenBy(student => student.FirstName))
+        foreach (Student student in students.OrderBy(student => student.CurrentEnrolment?.Grade).ThenBy(student => student.Name.SortOrder))
         {
-            List<Transaction> transactions =
-                await _consentRepository.GetTransactionsByStudentId(student.StudentId, cancellationToken);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+            {
+                _logger
+                    .ForContext(nameof(GetTransactionsQuery), request, true)
+                    .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                    .Warning("Failed to retrieve student details while building list of Consent Transactions");
+
+                continue;
+            }
+
+            List<Transaction> transactions = await _consentRepository.GetTransactionsByStudentId(student.Id, cancellationToken);
 
             foreach (Transaction transaction in transactions)
             {
@@ -118,10 +130,10 @@ internal sealed class GetTransactionsWithFilterQueryHandler
 
                 response.Add(new(
                     transaction.Id,
-                    student.StudentId,
-                    student.GetName(),
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     transaction.SubmittedBy,
                     transaction.SubmittedAt,
                     transaction.SubmissionMethod,

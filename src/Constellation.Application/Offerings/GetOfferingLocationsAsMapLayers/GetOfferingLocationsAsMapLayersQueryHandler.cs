@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingLocationsAsMapLayers;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
@@ -10,9 +8,11 @@ using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
+using DTOs;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,10 +53,18 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
 
         foreach (Enrolment enrolment in enrolments)
         {
-            Student student = await _studentRepository.GetBySRN(enrolment.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
 
-            if (!SchoolCodes.Contains(student.SchoolCode))
-                SchoolCodes.Add(student.SchoolCode);
+            if (student is null)
+                continue;
+
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+
+            if (schoolEnrolment is null)
+                continue;
+
+            if (!SchoolCodes.Contains(schoolEnrolment.SchoolCode))
+                SchoolCodes.Add(schoolEnrolment.SchoolCode);
         }
 
         Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);

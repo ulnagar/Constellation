@@ -79,7 +79,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Enrolment enrolment in enrolments)
             {
@@ -94,12 +94,19 @@ internal sealed class GetSchoolDetailsQueryHandler
                     offering.IsCurrent));
             }
 
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+
+            if (schoolEnrolment is null)
+            {
+                continue;
+            }
+
             studentResponse.Add(new(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.Name,
                 student.Gender,
-                student.School.Name,
-                student.CurrentGrade,
+                schoolEnrolment.SchoolName,
+                schoolEnrolment.Grade,
                 studentOfferings));
         }
 

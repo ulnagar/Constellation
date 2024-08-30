@@ -49,7 +49,7 @@ public static class DomainErrors
     {
         public static class Allocations
         {
-            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+            public static readonly Func<StudentId, Error> NotFoundForStudent = id => new Error(
                 "Assets.Allocations.NotFoundForStudent",
                 $"Could not find any asset allocations for student {id}");
         }
@@ -162,11 +162,11 @@ public static class DomainErrors
     {
         public static class Enrolment
         {
-            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+            public static readonly Func<StudentId, Error> NotFoundForStudent = id => new Error(
                 "Enrolments.Enrolment.NotFoundForStudent",
                 $"No enrolments could be found for student with Id {id}");
 
-            public static readonly Func<string, OfferingId, Error> AlreadyExists = (studentId, offeringId) => new(
+            public static readonly Func<StudentId, OfferingId, Error> AlreadyExists = (studentId, offeringId) => new(
                 "Enrolments.Enrolment.AlreadyExists",
                 $"A current enrolment already exists for student {studentId} and offering {offeringId}");
         }

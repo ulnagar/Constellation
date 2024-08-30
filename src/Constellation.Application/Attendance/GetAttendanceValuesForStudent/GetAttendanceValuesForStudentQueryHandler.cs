@@ -5,6 +5,7 @@ using Core.Abstractions.Clock;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ internal sealed class GetAttendanceValuesForStudentQueryHandler
 
     public async Task<Result<List<AttendanceValue>>> Handle(GetAttendanceValuesForStudentQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.StudentId))
+        if (request.StudentId == StudentId.Empty)
         {
             _logger
                 .ForContext(nameof(GetAttendanceValuesForStudentQuery), request, true)

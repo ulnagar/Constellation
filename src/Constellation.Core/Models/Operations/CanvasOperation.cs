@@ -67,6 +67,21 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
     public CanvasAction Action { get; private set; } = CanvasAction.Add;
 }
 
+public class UpdateUserEmailCanvasOperation : CanvasOperation
+{
+    private UpdateUserEmailCanvasOperation() {}
+
+    public UpdateUserEmailCanvasOperation(
+        string userId,
+        string portalUsername)
+    {
+        UserId = userId;
+        PortalUsername = portalUsername;
+    }
+
+    public string PortalUsername { get; private set; }
+}
+
 public class DeleteUserCanvasOperation : CanvasOperation
 {
     private  DeleteUserCanvasOperation() { }

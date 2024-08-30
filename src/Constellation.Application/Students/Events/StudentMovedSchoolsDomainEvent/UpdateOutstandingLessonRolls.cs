@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Students.Events.StudentMovedSchoolsDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
@@ -9,9 +8,12 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Enrolments;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Events;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -23,17 +25,20 @@ internal sealed class UpdateOutstandingLessonRolls
 : IDomainEventHandler<StudentMovedSchoolsDomainEvent>
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ILessonRepository _lessonRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public UpdateOutstandingLessonRolls(
         IStudentRepository studentRepository,
+        IEnrolmentRepository enrolmentRepository,
         ILessonRepository lessonRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _studentRepository = studentRepository;
+        _enrolmentRepository = enrolmentRepository;
         _lessonRepository = lessonRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<StudentMovedSchoolsDomainEvent>();
@@ -43,7 +48,7 @@ internal sealed class UpdateOutstandingLessonRolls
     {
         _logger.Information("Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
-        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -55,8 +60,9 @@ internal sealed class UpdateOutstandingLessonRolls
             return;
         }
 
-        List<OfferingId> offeringIds = student.Enrolments
-            .Where(enrolment => !enrolment.IsDeleted)
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+
+        List<OfferingId> offeringIds = enrolments
             .Select(enrolments => enrolments.OfferingId)
             .Distinct()
             .ToList();
@@ -94,7 +100,7 @@ internal sealed class UpdateOutstandingLessonRolls
                 _lessonRepository.Delete(attendance);
             }
 
-            _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.PreviousSchoolCode);
+            _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.Name.DisplayName, lesson.Name, notification.PreviousSchoolCode);
 
             updatedLessonIds.Add(lesson.Id);
         }
@@ -111,7 +117,7 @@ internal sealed class UpdateOutstandingLessonRolls
         {
             SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
 
-            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.CurrentSchoolCode);
+            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.Name.DisplayName, lesson.Name, notification.CurrentSchoolCode);
 
             roll.AddStudent(notification.StudentId);
 
@@ -137,9 +143,9 @@ internal sealed class UpdateOutstandingLessonRolls
         {
             SciencePracRoll roll = new(
                 lesson.Id,
-                student.SchoolCode);
+                notification.CurrentSchoolCode);
 
-            roll.AddStudent(student.StudentId);
+            roll.AddStudent(student.Id);
 
             lesson.AddRoll(roll);
 

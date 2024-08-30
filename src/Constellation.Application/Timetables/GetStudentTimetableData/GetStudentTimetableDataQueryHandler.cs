@@ -1,20 +1,20 @@
 ﻿namespace Constellation.Application.Timetables.GetStudentTimetableData;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Errors;
 using Core.Extensions;
 using Core.Models.Offerings.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using DTOs;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,6 @@ internal sealed class GetStudentTimetableDataQueryHandler
     : IQueryHandler<GetStudentTimetableDataQuery, StudentTimetableDataDto>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ITimetablePeriodRepository _periodRepository;
     private readonly IStaffRepository _staffRepository;
@@ -33,14 +32,12 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
     public GetStudentTimetableDataQueryHandler(
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         IOfferingRepository offeringRepository,
         ITimetablePeriodRepository periodRepository,
         IStaffRepository staffRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _offeringRepository = offeringRepository;
         _periodRepository = periodRepository;
         _staffRepository = staffRepository;
@@ -51,7 +48,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
     {
         StudentTimetableDataDto response = new();
 
-        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -63,33 +60,33 @@ internal sealed class GetStudentTimetableDataQueryHandler
             return Result.Failure<StudentTimetableDataDto>(StudentErrors.NotFound(request.StudentId));
         }
 
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-        if (school is null)
+        if (enrolment is null)
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableDataQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(student.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<StudentTimetableDataDto>(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+            return Result.Failure<StudentTimetableDataDto>(SchoolEnrolmentErrors.NotFound);
         }
 
-        response.StudentId = student.StudentId;
-        response.StudentName = student.GetName().DisplayName;
-        response.StudentGrade = student.CurrentGrade.AsName();
-        response.StudentSchool = school.Name;
+        response.StudentId = student.Id;
+        response.StudentName = student.Name.DisplayName;
+        response.StudentGrade = enrolment.Grade.AsName();
+        response.StudentSchool = enrolment.SchoolName;
 
-        List<Offering> offerings = await _offeringRepository.GetByStudentId(student.StudentId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
         if (offerings.Count == 0)
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableDataQuery), request, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFoundForStudent(student.StudentId), true)
+                .ForContext(nameof(Error), OfferingErrors.NotFoundForStudent(student.Id), true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<StudentTimetableDataDto>(OfferingErrors.NotFoundForStudent(student.StudentId));
+            return Result.Failure<StudentTimetableDataDto>(OfferingErrors.NotFoundForStudent(student.Id));
         }
 
         List<int> periodIds = offerings

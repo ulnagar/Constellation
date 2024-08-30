@@ -1,16 +1,19 @@
 ﻿namespace Constellation.Application.Reports.Events;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.ValueObjects;
+using Core.DomainEvents;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
+using Core.Models.Families;
+using Core.Models.Reports;
+using Core.Models.Students;
 using Core.Shared;
+using Core.ValueObjects;
+using DTOs;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +36,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
         IFamilyRepository familyRepository,
         IAttachmentService attachmentService,
         IEmailService emailService,
-        Serilog.ILogger logger)
+        ILogger logger)
     {
         _reportRepository = reportRepository;
         _studentRepository = studentRepository;
@@ -45,7 +48,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
 
     public async Task Handle(AcademicReportCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        var reportEntry = await _reportRepository.GetById(notification.ReportId, cancellationToken);
+        AcademicReport reportEntry = await _reportRepository.GetById(notification.ReportId, cancellationToken);
 
         if (reportEntry is null)
         {
@@ -65,13 +68,13 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
         }
 
         // Get Student family and check for non-residential contacts
-        var families = await _familyRepository.GetFamiliesByStudentId(reportEntry.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(reportEntry.StudentId, cancellationToken);
 
         if (families is null || families.Count == 0)
             return;
 
         // Are there any non-residential families
-        var nonResidentParents = families
+        List<Parent> nonResidentParents = families
             .Where(family => 
                 family.Students.Any(student => 
                     student.StudentId == reportEntry.StudentId && 
@@ -84,21 +87,21 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
 
         List<EmailRecipient> recipients = new();
 
-        foreach (var parent in nonResidentParents)
+        foreach (Parent parent in nonResidentParents)
         {
             // Email the parent a copy of the report
 
-            var name = Name.Create(parent.FirstName, null, parent.LastName);
+            Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
 
             if (name.IsFailure)
                 continue;
 
-            var email = EmailAddress.Create(parent.EmailAddress);
+            Result<EmailAddress> email = EmailAddress.Create(parent.EmailAddress);
 
             if (email.IsFailure)
                 continue;
 
-            var recipient = EmailRecipient.Create(name.Value.DisplayName, email.Value.Email);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(name.Value.DisplayName, email.Value.Email);
 
             if (recipient.IsFailure)
                 continue;
@@ -106,11 +109,9 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
             recipients.Add(recipient.Value);
         }
 
-        var student = await _studentRepository.GetBySRN(reportEntry.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(reportEntry.StudentId, cancellationToken);
 
-        var studentName = Name.Create(student.FirstName, null, student.LastName);
-
-        var fileDto = new FileDto
+        FileDto fileDto = new()
         {
             FileData = fileRequest.Value.FileData,
             FileType = fileRequest.Value.FileType,
@@ -118,6 +119,6 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
         };
 
         if (recipients.Count > 0)
-            await _emailService.SendAcademicReportToNonResidentialParent(recipients, studentName.Value, reportEntry.ReportingPeriod, reportEntry.Year, fileDto, cancellationToken);
+            await _emailService.SendAcademicReportToNonResidentialParent(recipients, student.Name, reportEntry.ReportingPeriod, reportEntry.Year, fileDto, cancellationToken);
     }
 }

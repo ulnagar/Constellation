@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 
+using Core.Models.Students.Identifiers;
+
 public sealed record StudentSelectionResponse(
-    string StudentId,
+    StudentId StudentId,
     string FirstName,
     string LastName,
     string CurrentGrade)

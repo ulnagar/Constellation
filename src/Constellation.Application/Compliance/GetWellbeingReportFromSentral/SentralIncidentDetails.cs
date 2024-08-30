@@ -4,7 +4,7 @@ using Core.Enums;
 using System;
 
 public sealed record SentralIncidentDetails(
-    string StudentId,
+    string StudentReferenceNumber,
     DateOnly DateCreated,
     string IncidentId,
     string Subject,

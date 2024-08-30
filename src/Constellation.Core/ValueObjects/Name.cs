@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
-using Constellation.Core.Errors;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Errors;
+using Primitives;
+using Shared;
 using System;
 using System.Collections.Generic;
 
@@ -29,7 +29,7 @@ public sealed class Name : ValueObject, IComparable
 
         if (string.IsNullOrEmpty(preferredName))
         {
-            preferredName = string.Empty;
+            preferredName = firstName;
         }
 
         return new Name(
@@ -41,8 +41,8 @@ public sealed class Name : ValueObject, IComparable
     public string FirstName { get; }
     public string PreferredName { get; }
     public string LastName { get; }
-    public string DisplayName => $"{(string.IsNullOrEmpty(PreferredName) ? FirstName : PreferredName)} {LastName}";
-    public string SortOrder => $"{LastName}, {(string.IsNullOrEmpty(PreferredName) ? FirstName : PreferredName)}";
+    public string DisplayName => $"{PreferredName} {LastName}";
+    public string SortOrder => $"{LastName}, {PreferredName}";
 
     public override IEnumerable<object> GetAtomicValues()
     {

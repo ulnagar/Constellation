@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.SciencePracs.Events;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
+using Core.DomainEvents;
 using Core.Models.Subjects.Repositories;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,7 +66,7 @@ internal sealed class SciencePracRollSubmittedDomainEvent_SendEmailToStudent
 
         foreach (SciencePracAttendance attendance in presentStudents)
         {
-            Student student = await _studentRepository.GetBySRN(attendance.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(attendance.StudentId, cancellationToken);
 
             await _emailService.SendStudentLessonCompletedEmail(student, lesson.Name, courseName, cancellationToken);
         }

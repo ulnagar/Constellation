@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.WorkFlows.CreateComplianceCase;
 
 using Abstractions.Messaging;
-using Constellation.Application.WorkFlows.CreateAttendanceCase;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.WorkFlow;
@@ -10,6 +9,7 @@ using Core.Errors;
 using Core.Models;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
 using Core.Models.WorkFlow.Services;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -48,28 +48,28 @@ internal sealed class CreateComplianceCaseCommandHandler
 
     public async Task<Result> Handle(CreateComplianceCaseCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetBySRN(request.Incident.StudentId, cancellationToken);
+        Result<StudentReferenceNumber> srn = StudentReferenceNumber.Create(request.Incident.StudentReferenceNumber);
+
+        if (srn.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateComplianceCaseCommand), request, true)
+                .ForContext(nameof(Error), srn.Error, true)
+                .Warning("Failed to create WorkFlow Case");
+
+            return Result.Failure(srn.Error);
+        }
+
+        Student student = await _studentRepository.GetBySRN(srn.Value, cancellationToken);
 
         if (student is null)
         {
             _logger
                 .ForContext(nameof(CreateComplianceCaseCommand), request, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(request.Incident.StudentId), true)
+                .ForContext(nameof(Error), StudentErrors.NotFoundBySRN(srn.Value), true)
                 .Warning("Failed to create WorkFlow Case");
 
-            return Result.Failure(StudentErrors.NotFound(request.Incident.StudentId));
-        }
-
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
-
-        if (school is null)
-        {
-            _logger
-                .ForContext(nameof(CreateComplianceCaseCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(student.SchoolCode), true)
-                .Warning("Failed to create WorkFlow Case");
-
-            return Result.Failure(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+            return Result.Failure(StudentErrors.NotFoundBySRN(srn.Value));
         }
 
         string[] nameFragments = request.Incident.Teacher.Split(',');
@@ -90,7 +90,7 @@ internal sealed class CreateComplianceCaseCommandHandler
         }
 
         Result<Case> caseResult = await _caseService.CreateComplianceCase(
-            student.StudentId, 
+            student.Id,
             teacher.StaffId, 
             request.Incident.IncidentId, 
             request.Incident.Type,

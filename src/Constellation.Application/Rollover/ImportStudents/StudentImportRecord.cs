@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Application.Rollover.ImportStudents;
 
 using Core.Enums;
+using Core.Models.Students.ValueObjects;
 
 public sealed record StudentImportRecord(
-    string StudentId,
+    StudentReferenceNumber StudentReferenceNumber,
     string FirstName,
+    string PreferredName,
     string LastName,
-    string PortalUsername,
+    string EmailAddress,
     Grade Grade,
     string SchoolCode,
     string Gender);

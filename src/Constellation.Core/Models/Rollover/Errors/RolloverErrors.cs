@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Rollover.Errors;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Shared;
 using System;
 
@@ -9,7 +10,7 @@ public static class RolloverErrors
         "Rollover.AddDecision.StudentIdEmpty",
         "Cannot register a Decision without a student Id");
 
-    public static readonly Func<string, Error> AlreadyExists = id => new(
+    public static readonly Func<StudentId, Error> AlreadyExists = id => new(
         "Rollover.AddDecision.AlreadyExists",
         $"A Decision has already been registered for student with Id {id}");
 

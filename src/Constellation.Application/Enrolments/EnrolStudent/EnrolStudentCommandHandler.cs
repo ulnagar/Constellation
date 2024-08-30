@@ -1,17 +1,17 @@
 ﻿namespace Constellation.Application.Enrolments.EnrolStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;

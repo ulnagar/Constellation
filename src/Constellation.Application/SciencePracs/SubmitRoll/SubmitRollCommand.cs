@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,6 @@ public sealed record SubmitRollCommand(
     SciencePracRollId RollId,
     DateTime LessonDate,
     string Comment,
-    List<string> PresentStudents,
-    List<string> AbsentStudents)
+    List<StudentId> PresentStudents,
+    List<StudentId> AbsentStudents)
     : ICommand;

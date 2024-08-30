@@ -38,7 +38,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
     {
         List<StudentWithOfferingsResponse> response = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         List<Offering> offerings = await _offeringRepository.GetAll(cancellationToken);
 
@@ -46,7 +46,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
         {
             List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Enrolment enrolment in enrolments)
             {
@@ -61,12 +61,17 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                     offering.IsCurrent));
             }
 
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+
+            if (schoolEnrolment is null)
+                continue;
+
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.Name,
                 student.Gender,
-                student.School.Name,
-                student.CurrentGrade,
+                schoolEnrolment.SchoolName,
+                schoolEnrolment.Grade,
                 studentOfferings));
         }
 

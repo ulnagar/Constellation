@@ -2,7 +2,6 @@
 
 using Application.Models.Identity;
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
@@ -18,6 +17,7 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
@@ -107,7 +107,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
-                        student.EmailAddress,
+                        student.EmailAddress.Email,
                         TeamsMembershipLevel.Member.Value);
 
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
@@ -285,7 +285,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             // Group Tutorial Team which will have a group tutorial
             string teamCourse = team.Name.Split(" - ")[2];
 
-            GroupTutorial tutorial = await _groupTutorialRepository.GetByName(teamCourse);
+            GroupTutorial tutorial = await _groupTutorialRepository.GetByName(teamCourse, cancellationToken);
 
             if (tutorial is null)
             {
@@ -296,7 +296,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
             // Enrolled Students
 
-            List<string> studentIds = tutorial
+            List<StudentId> studentIds = tutorial
                 .CurrentEnrolments
                 .Select(enrol => enrol.StudentId)
                 .ToList();
@@ -307,7 +307,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             {
                 TeamMembershipResponse entry = new(
                     team.Id,
-                    student.EmailAddress,
+                    student.EmailAddress.Email,
                     TeamsMembershipLevel.Member.Value);
 
                 if (returnData.All(value => value.EmailAddress != entry.EmailAddress))

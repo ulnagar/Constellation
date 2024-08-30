@@ -66,7 +66,7 @@ internal sealed class AuditAllUsersCommandHandler
         List<SchoolContact> contacts = await _contactRepository.GetAllActive(cancellationToken);
         _logger.Information("Found {count} school contacts currently registered", contacts.Count);
         
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
         _logger.Information("Found {count} students currently registered", students.Count);
 
         foreach (AppUser user in users)
@@ -114,14 +114,14 @@ internal sealed class AuditAllUsersCommandHandler
                 user.SchoolContactId = contact.Id;
             }
 
-            Student student = students.FirstOrDefault(student => student.EmailAddress == user.Email);
+            Student student = students.FirstOrDefault(student => student.EmailAddress.Email == user.Email);
 
             if (student is not null)
             {
                 _logger.Information("Found matching student");
 
                 user.IsStudent = true;
-                user.StudentId = student.StudentId;
+                user.StudentId = student.Id;
             }
 
             if (!matchingParents.Any() &&
@@ -295,21 +295,21 @@ internal sealed class AuditAllUsersCommandHandler
 
             _logger
                 .ForContext(nameof(Student), student, true)
-                .Information("Checking student {name}", student.DisplayName);
+                .Information("Checking student {name}", student.Name.DisplayName);
 
-            if (users.All(user => user.Email != student.EmailAddress))
+            if (users.All(user => user.Email != student.EmailAddress.Email))
             {
                 _logger.Information("Found no matching user.");
                 _logger.Information("User will be created");
 
                 AppUser user = new()
                 {
-                    UserName = student.EmailAddress,
-                    Email = student.EmailAddress,
-                    FirstName = student.FirstName,
-                    LastName = student.LastName,
+                    UserName = student.EmailAddress.Email,
+                    Email = student.EmailAddress.Email,
+                    FirstName = student.Name.PreferredName,
+                    LastName = student.Name.LastName,
                     IsStudent = true,
-                    StudentId = student.StudentId
+                    StudentId = student.Id
                 };
 
                 IdentityResult result = await _userManager.CreateAsync(user);

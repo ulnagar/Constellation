@@ -1,7 +1,9 @@
-﻿namespace Constellation.Core.Models.Offerings.Errors;
+﻿using Constellation.Core.Models.Students.Identifiers;
 
-using Identifiers;
+namespace Constellation.Core.Models.Offerings.Errors;
+
 using Constellation.Core.Models.Subjects.Identifiers;
+using Identifiers;
 using Shared;
 using System;
 
@@ -19,7 +21,7 @@ public static class OfferingErrors
         "Offerings.Offering.NotFoundInCourse",
         $"Could not find any Offering linked with Course with Id {id}");
 
-    public static readonly Func<string, Error> NotFoundForStudent = id => new(
+    public static readonly Func<StudentId, Error> NotFoundForStudent = id => new(
         "Offerings.Offering.NotFoundForStudent",
         $"Could not find any Offering linked with Student with Id {id}");
 

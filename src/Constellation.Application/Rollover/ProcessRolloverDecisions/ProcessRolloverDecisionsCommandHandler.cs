@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.Rollover;
 using Core.Models.Rollover.Enums;
@@ -13,6 +14,7 @@ using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,17 +23,20 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
 {
     private readonly IRolloverRepository _rolloverRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public ProcessRolloverDecisionsCommandHandler(
         IRolloverRepository rolloverRepository, 
         IStudentRepository studentRepository,
+        IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _rolloverRepository = rolloverRepository;
         _studentRepository = studentRepository;
+        _dateTime = dateTime;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ProcessRolloverDecisionsCommand>();
     }
@@ -49,7 +54,7 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                 results.Add(new(decision, Result.Failure(RolloverErrors.InvalidDecision)));
             }
 
-            Student student = await _studentRepository.GetBySRN(decision.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(decision.StudentId, cancellationToken);
             
             if (student is null)
             {
@@ -65,14 +70,29 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
 
             if (decision.Decision == RolloverStatus.Withdraw)
             {
-                student.Withdraw();
+                student.Withdraw(_dateTime);
 
                 results.Add(new(decision, Result.Success()));
             }
 
             if (decision.Decision == RolloverStatus.Rollover)
             {
-                if (student.CurrentGrade == Grade.Y12)
+                SchoolEnrolment? enrolment = student.SchoolEnrolments
+                    .SingleOrDefault(entry => !entry.IsDeleted && entry.Year == _dateTime.CurrentYear - 1);
+
+                if (enrolment is null)
+                {
+                    _logger
+                        .ForContext(nameof(RolloverDecision), decision, true)
+                        .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                        .Warning("Could not process Rollover Decision for student");
+
+                    results.Add(new(decision, Result.Failure(SchoolEnrolmentErrors.NotFound)));
+
+                    continue;
+                }
+
+                if (enrolment.Grade == Grade.Y12)
                 {
                     _logger
                         .ForContext(nameof(RolloverDecision), decision, true)
@@ -84,30 +104,47 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                     continue;
                 }
 
-                switch (student.CurrentGrade)
+                if (enrolment.Grade == Grade.Y06)
                 {
-                    case Grade.Y11:
-                        student.CurrentGrade = Grade.Y12;
-                        break;
-                    case Grade.Y10:
-                        student.CurrentGrade = Grade.Y11;
-                        break;
-                    case Grade.Y09:
-                        student.CurrentGrade = Grade.Y10;
-                        break;
-                    case Grade.Y08:
-                        student.CurrentGrade = Grade.Y09;
-                        break;
-                    case Grade.Y07:
-                        student.CurrentGrade = Grade.Y08;
-                        break;
-                    case Grade.Y06:
-                        student.CurrentGrade = Grade.Y07;
-                        student.SchoolCode = "8912";
-                        break;
-                    case Grade.Y05:
-                        student.CurrentGrade = Grade.Y06;
-                        break;
+                    Result newEnrolment = student.AddSchoolEnrolment(
+                        "8912",
+                        "Aurora College",
+                        enrolment.Grade + 1,
+                        _dateTime.CurrentYear,
+                        _dateTime);
+
+                    if (newEnrolment.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(RolloverDecision), decision, true)
+                            .ForContext(nameof(Error), newEnrolment.Error, true)
+                            .Warning("Could not process Rollover Decision for student");
+
+                        results.Add(new(decision, Result.Failure(newEnrolment.Error)));
+
+                        continue;
+                    }
+                }
+                else
+                {
+                    Result newEnrolment = student.AddSchoolEnrolment(
+                        enrolment.SchoolCode,
+                        enrolment.SchoolName,
+                        enrolment.Grade + 1,
+                        _dateTime.CurrentYear,
+                        _dateTime);
+
+                    if (newEnrolment.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(RolloverDecision), decision, true)
+                            .ForContext(nameof(Error), newEnrolment.Error, true)
+                            .Warning("Could not process Rollover Decision for student");
+
+                        results.Add(new(decision, Result.Failure(newEnrolment.Error)));
+
+                        continue;
+                    }
                 }
 
                 results.Add(new(decision, Result.Success()));

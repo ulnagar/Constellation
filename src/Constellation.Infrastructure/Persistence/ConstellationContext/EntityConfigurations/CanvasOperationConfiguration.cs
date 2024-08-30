@@ -15,7 +15,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
             builder.HasDiscriminator<string>("OperationType")
                 .HasValue<CreateUserCanvasOperation>("CreateUser")
                 .HasValue<ModifyEnrolmentCanvasOperation>("ModifyEnrolment")
-                .HasValue<DeleteUserCanvasOperation>("DeleteUser");
+                .HasValue<DeleteUserCanvasOperation>("DeleteUser")
+                .HasValue<UpdateUserEmailCanvasOperation>("UpdateEmail");
         }
     }
 

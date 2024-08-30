@@ -27,7 +27,10 @@ using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
 using Core.Models.Students;
+using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 using Core.Models.Training;
+using Core.Shared;
 using ExcelDataReader;
 using Jobs;
 using OfficeOpenXml;
@@ -630,7 +633,7 @@ public class ExcelService : IExcelService
         workSheet.Cells[6, 2].Style.Fill.PatternType = ExcelFillStyle.Solid;
         workSheet.Cells[6, 2].Style.Fill.BackgroundColor.SetColor(Color.LightGreen);
 
-        List<IGrouping<string, TutorialRollStudentDetailsDto>> students = data.Rolls
+        List<IGrouping<StudentId, TutorialRollStudentDetailsDto>> students = data.Rolls
             .SelectMany(roll => roll.Students)
             .OrderBy(student => student.Grade)
             .ThenBy(student => student.Name)
@@ -655,7 +658,7 @@ public class ExcelService : IExcelService
 
         for (int i = 0; i < students.Count; i++)
         {
-            IGrouping<string, TutorialRollStudentDetailsDto> student = students[i];
+            IGrouping<StudentId, TutorialRollStudentDetailsDto> student = students[i];
 
             workSheet.Cells[startRow + i, startColumn].Value = student.First().Name;
             workSheet.Cells[startRow + i, startColumn + 1].Value = student.First().Grade;
@@ -972,9 +975,14 @@ public class ExcelService : IExcelService
             // Index 15: Percentage explained
             // Index 16: Percentage unexplained
 
-            string studentId = line[5].FormatField();
+            string srn = line[5].FormatField();
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
+
+            if (studentReferenceNumber.IsFailure)
+                continue;
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
@@ -984,7 +992,7 @@ public class ExcelService : IExcelService
             {
                 entry = new()
                 {
-                    StudentId = studentId,
+                    StudentReferenceNumber = studentReferenceNumber.Value,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
                     Grade = (Grade)Convert.ToInt32(line[4].FormatField(), null),
                     DayYTD = Convert.ToDecimal(line[11].FormatField(), null)
@@ -1029,9 +1037,14 @@ public class ExcelService : IExcelService
             // Index 9: Un-tallied Time
             // Index 10: Percentage
 
-            string studentId = row[0].ToString();
+            string srn = row[0].ToString();
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
+
+            if (studentReferenceNumber.IsFailure)
+                continue;
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
@@ -1041,7 +1054,7 @@ public class ExcelService : IExcelService
             {
                 entry = new()
                 {
-                    StudentId = studentId,
+                    StudentReferenceNumber = studentReferenceNumber.Value,
                     Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
                     MinuteYTD = Convert.ToDecimal(row[10], null)
                 };
@@ -1090,9 +1103,14 @@ public class ExcelService : IExcelService
             // Index 15: Percentage explained
             // Index 16: Percentage unexplained
 
-            string studentId = line[5].FormatField();
+            string srn = line[5].FormatField();
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
+
+            if (studentReferenceNumber.IsFailure)
+                continue;
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
@@ -1120,7 +1138,7 @@ public class ExcelService : IExcelService
 
                 entry = new()
                 {
-                    StudentId = studentId,
+                    StudentReferenceNumber = studentReferenceNumber.Value,
                     Name = $"{line[1].FormatField()} {line[0].FormatField()}",
                     DayWeek = dayWeekValue
                 };
@@ -1164,9 +1182,14 @@ public class ExcelService : IExcelService
             // Index 9: Un-tallied Time
             // Index 10: Percentage
 
-            string studentId = row[0].ToString();
+            string srn = row[0].ToString();
 
-            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentId == studentId);
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
+
+            if (studentReferenceNumber.IsFailure)
+                continue;
+
+            StudentAttendanceData entry = data.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (entry is not null)
             {
@@ -1176,7 +1199,7 @@ public class ExcelService : IExcelService
             {
                 entry = new()
                 {
-                    StudentId = studentId,
+                    StudentReferenceNumber = studentReferenceNumber.Value,
                     Name = $"{row[1].ToString().FormatField()} {row[2].ToString().FormatField()}",
                     MinuteWeek = Convert.ToDecimal(row[10], null)
                 };
@@ -1265,7 +1288,7 @@ public class ExcelService : IExcelService
             if (response.Any(entry => entry.IncidentId == incidentId))
                 continue;
 
-            string studentId = row[0].ToString();
+            string srn = row[0].ToString();
 
             bool dateExtractionSucceeded = DateOnly.TryParse(row[6].ToString(), out DateOnly dateCreated);
 
@@ -1291,7 +1314,7 @@ public class ExcelService : IExcelService
                 continue;
 
             response.Add(new(
-                studentId,
+                srn,
                 dateCreated,
                 row[5].ToString().FormatField(),
                 row[9].ToString().FormatField(),
@@ -1321,18 +1344,19 @@ public class ExcelService : IExcelService
             if (row[0].ToString() == "StudentId")
                 continue;
 
-            string studentId = row[0].ToString() ?? string.Empty;
+            string srn = row[0].ToString() ?? string.Empty;
             string firstName = row[1].ToString() ?? string.Empty;
-            string lastName = row[2].ToString() ?? string.Empty;
-            string userName = row[3].ToString() ?? string.Empty;
-            string grade = row[4].ToString() ?? string.Empty;
-            string schoolCode = row[5].ToString() ?? string.Empty;
-            string gender = row[6].ToString() ?? string.Empty;
+            string preferredName = row[2].ToString() ?? string.Empty;
+            string lastName = row[3].ToString() ?? string.Empty;
+            string emailAddress = row[4].ToString() ?? string.Empty;
+            string grade = row[5].ToString() ?? string.Empty;
+            string schoolCode = row[6].ToString() ?? string.Empty;
+            string gender = row[7].ToString() ?? string.Empty;
 
-            if (string.IsNullOrWhiteSpace(studentId) ||
+            if (string.IsNullOrWhiteSpace(srn) ||
                 string.IsNullOrWhiteSpace(firstName) ||
                 string.IsNullOrWhiteSpace(lastName) ||
-                string.IsNullOrWhiteSpace(userName) ||
+                string.IsNullOrWhiteSpace(emailAddress) ||
                 string.IsNullOrWhiteSpace(grade) ||
                 string.IsNullOrWhiteSpace(schoolCode) ||
                 string.IsNullOrWhiteSpace(gender))
@@ -1347,11 +1371,17 @@ public class ExcelService : IExcelService
                 continue;
             }
 
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
+
+            if (studentReferenceNumber.IsFailure)
+                continue;
+
             results.Add(new(
-                studentId,
+                studentReferenceNumber.Value,
                 firstName,
+                preferredName,
                 lastName,
-                userName,
+                emailAddress,
                 gradeVal,
                 schoolCode,
                 gender));
@@ -1736,12 +1766,17 @@ public class ExcelService : IExcelService
 
             worksheet.Cells[row, 1].Value = enrolment.UserId;
 
-            Student student = students.FirstOrDefault(entry => entry.StudentId == enrolment.UserId);
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(enrolment.UserId);
+
+            if (studentReferenceNumber.IsFailure)
+                continue;
+
+            Student student = students.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
 
             if (student is not null)
             {
-                worksheet.Cells[row, 2].Value = student.FirstName;
-                worksheet.Cells[row, 3].Value = student.LastName;
+                worksheet.Cells[row, 2].Value = student.Name.PreferredName;
+                worksheet.Cells[row, 3].Value = student.Name.LastName;
             }
 
             AssignmentResultEntry resultEntry = results.FirstOrDefault(entry => entry.UserId == enrolment.CanvasUserId);
@@ -1893,18 +1928,18 @@ public class ExcelService : IExcelService
         tableLessonsColumn.Value = "Lessons Missed";
         chartWorksheet.Column(9).Width = chartWorksheet.Column(1).Width * 1.5;
 
-        List<string> lowestStudentIds = records
+        List<StudentId> lowestStudentIds = records
             .Where(entry => entry.Group == "Below 50% Attendance")
             .Select(entry => entry.StudentId)
             .ToList();
 
-        List<string> lowerStudentIds = records
+        List<StudentId> lowerStudentIds = records
             .Where(entry => entry.Group == "50% - 75% Attendance")
             .Select(entry => entry.StudentId)
             .ToList();
 
         int rowNumber = 6;
-        foreach (string studentId in lowestStudentIds)
+        foreach (StudentId studentId in lowestStudentIds)
         {
             AttendanceRecord record = records.First(entry => entry.StudentId == studentId);
 
@@ -1982,7 +2017,7 @@ public class ExcelService : IExcelService
             chartWorksheet.Cells[startRow, 6, rowNumber - 1, 9].Style.Font.Color.SetColor(Color.White);
         }
 
-        foreach (string studentId in lowerStudentIds)
+        foreach (StudentId studentId in lowerStudentIds)
         {
             AttendanceRecord record = records.First(entry => entry.StudentId == studentId);
 

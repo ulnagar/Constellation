@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.WorkFlows.CreateAttendanceCase;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Attendance.Identifiers;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Errors;
@@ -14,7 +13,6 @@ using Core.Models.WorkFlow.Services;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -46,7 +44,7 @@ internal sealed class CreateAttendanceCaseCommandHandler
 
     public async Task<Result> Handle(CreateAttendanceCaseCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetBySRN(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -58,16 +56,16 @@ internal sealed class CreateAttendanceCaseCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        AttendanceValue attendanceValue = await _attendanceRepository.GetLatestForStudent(student.StudentId, cancellationToken);
+        AttendanceValue attendanceValue = await _attendanceRepository.GetLatestForStudent(student.Id, cancellationToken);
 
         if (attendanceValue is null)
         {
             _logger
                 .ForContext(nameof(CreateAttendanceCaseCommand), request, true)
-                .ForContext(nameof(Error), AttendanceValueErrors.NotFoundForStudent(student.StudentId), true)
+                .ForContext(nameof(Error), AttendanceValueErrors.NotFoundForStudent(student.Id), true)
                 .Warning("Failed to create WorkFlow Case");
 
-            return Result.Failure(AttendanceValueErrors.NotFoundForStudent(student.StudentId));
+            return Result.Failure(AttendanceValueErrors.NotFoundForStudent(student.Id));
         }
 
         Result<Case> caseResult = await _caseService.CreateAttendanceCase(request.StudentId, attendanceValue.Id, cancellationToken);

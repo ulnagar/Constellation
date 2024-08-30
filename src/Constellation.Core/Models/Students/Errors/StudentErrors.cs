@@ -8,7 +8,7 @@ using ValueObjects;
 
 public static class StudentErrors
 {
-    public static readonly Func<string, Error> AlreadyExists = id => new(
+    public static readonly Func<StudentId, Error> AlreadyExists = id => new(
         "Student.AlreadyExists",
         $"A Student with the Id {id} already exists");
 

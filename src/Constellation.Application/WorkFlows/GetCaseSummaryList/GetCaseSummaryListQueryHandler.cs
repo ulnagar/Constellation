@@ -6,12 +6,12 @@ using Core.Models;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
-using Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +49,7 @@ internal sealed class GetCaseSummaryListQueryHandler
             if (!request.IsAdmin && item.Actions.All(action => action.AssignedToId != request.CurrentUserId))
                 continue;
 
-            string studentId = string.Empty;
+            StudentId studentId = StudentId.Empty;
             string description = string.Empty;
 
             if (item.Type!.Equals(CaseType.Training))
@@ -99,7 +99,7 @@ internal sealed class GetCaseSummaryListQueryHandler
                 description = $"Compliance Case for {details.IncidentType} - {details.Subject}";
             }
 
-            Student student = await _studentRepository.GetBySRN(studentId, cancellationToken);
+            Student student = await _studentRepository.GetById(studentId, cancellationToken);
 
             if (student is null)
             {
@@ -110,12 +110,10 @@ internal sealed class GetCaseSummaryListQueryHandler
 
                 return Result.Failure<List<CaseSummaryResponse>>(StudentErrors.NotFound(studentId));
             }
-
-            Name name = student.GetName();
-
+            
             responses.Add(new(
                 item.Id,
-                name,
+                student.Name,
                 description,
                 item.Status,
                 item.CreatedAt,

@@ -33,7 +33,7 @@ internal sealed class RemoveAppUser
 
     public async Task Handle(StudentWithdrawnDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetBySRN(notification.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -45,7 +45,7 @@ internal sealed class RemoveAppUser
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(student.EmailAddress);
+        AppUser user = await _userManager.FindByEmailAsync(student.EmailAddress.Email);
 
         if (user is null)
         {
