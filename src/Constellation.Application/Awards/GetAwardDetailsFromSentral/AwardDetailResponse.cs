@@ -9,6 +9,6 @@ public sealed record AwardDetailResponse(
     DateTime AwardCreated,
     string Source,
     string SentralStudentId,
-    string StudentId,
+    string StudentReferenceNumber,
     string FirstName,
     string LastName);

@@ -114,6 +114,22 @@ public sealed class Attachment
         return attachment;
     }
 
+    public static Attachment CreateStudentPhotoAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.StudentPhoto,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
     public Result AttachData(byte[] fileData, bool overwrite = false)
     {
         if (!string.IsNullOrWhiteSpace(FilePath) && overwrite is false)

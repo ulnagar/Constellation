@@ -42,7 +42,7 @@ internal sealed class RemoveStudentFromTutorialRollCommandHandler
         if (roll is null)
             return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
 
-        Student student = await _studentRepository.GetForExistCheck(request.StudentId);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
             return Result.Failure(StudentErrors.NotFound(request.StudentId));

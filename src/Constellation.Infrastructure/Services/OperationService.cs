@@ -13,6 +13,7 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.Operations;
 using Core.Models.Operations.Enums;
 using Core.Models.Students;
+using Core.Models.Students.Identifiers;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using System;
@@ -37,10 +38,10 @@ public class OperationService : IOperationService
         _dateTime = dateTime;
     }
 
-    public async Task CreateStudentMSTeamMemberAccess(string studentId, OfferingId offeringId, DateTime schedule)
+    public async Task CreateStudentMSTeamMemberAccess(StudentId studentId, OfferingId offeringId, DateTime schedule)
     {
         // Validate entries
-        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetById(studentId);
         Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (student == null || offering == null)
@@ -136,10 +137,10 @@ public class OperationService : IOperationService
         _unitOfWork.Add(operation);
     }
 
-    public async Task CreateStudentEnrolmentMSTeamAccess(string studentId)
+    public async Task CreateStudentEnrolmentMSTeamAccess(StudentId studentId)
     {
         // Validate entries
-        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetById(studentId);
 
         if (student == null)
             return;
@@ -156,10 +157,10 @@ public class OperationService : IOperationService
         _unitOfWork.Add(operation);
     }
 
-    public async Task RemoveStudentEnrollmentMSTeamAccess(string studentId)
+    public async Task RemoveStudentEnrollmentMSTeamAccess(StudentId studentId)
     {
         // Validate entries
-        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetById(studentId);
 
         if (student == null)
             return;
@@ -240,10 +241,10 @@ public class OperationService : IOperationService
         _unitOfWork.Add(schoolTeamOperation);
     }
     
-    public async Task RemoveStudentMSTeamAccess(string studentId, OfferingId offeringId, DateTime schedule)
+    public async Task RemoveStudentMSTeamAccess(StudentId studentId, OfferingId offeringId, DateTime schedule)
     {
         // Validate entries
-        Student student = await _unitOfWork.Students.GetForExistCheck(studentId);
+        Student student = await _unitOfWork.Students.GetById(studentId);
         Offering offering = await _offeringRepository.GetById(offeringId);
 
         if (student == null || offering == null)
@@ -314,11 +315,11 @@ public class OperationService : IOperationService
             return Task.CompletedTask;
 
         CreateUserCanvasOperation operation = new(
-            student.StudentId,
-            student.FirstName,
-            student.LastName,
-            student.PortalUsername,
-            student.EmailAddress);
+            student.StudentReferenceNumber.Number,
+            student.Name.PreferredName,
+            student.Name.LastName,
+            student.EmailAddress.Email.Substring(0, student.EmailAddress.Email.IndexOf('@')),
+            student.EmailAddress.Email);
 
         _unitOfWork.Add(operation);
 
@@ -356,7 +357,7 @@ public class OperationService : IOperationService
         foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentId,
+                student.StudentReferenceNumber.Number,
                 resource.CourseId.ToString(),
                 CanvasAction.Add,
                 CanvasUserType.Student,
@@ -408,7 +409,7 @@ public class OperationService : IOperationService
         foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                student.StudentId,
+                student.StudentReferenceNumber.Number,
                 resource.CourseId.ToString(),
                 CanvasAction.Remove,
                 CanvasUserType.Student,

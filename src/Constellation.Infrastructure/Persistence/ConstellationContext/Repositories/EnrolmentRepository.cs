@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository
@@ -22,7 +23,7 @@ public class EnrolmentRepository : IEnrolmentRepository
     }
 
     public async Task<List<Enrolment>> GetCurrentByStudentId(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default)
     {
         IQueryable<OfferingId> currentOfferings = _context
@@ -42,7 +43,7 @@ public class EnrolmentRepository : IEnrolmentRepository
     }
 
     public async Task<int> GetCurrentCountByStudentId(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default)
     {
         IQueryable<OfferingId> currentOfferings = _context

@@ -2,6 +2,8 @@
 
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Shared;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -24,7 +26,12 @@ public sealed class IsActiveStudent : AuthorizationHandler<IsCurrentStudentRequi
         if (emailClaim is null)
             return;
 
-        Student? isStudent = await _studentRepository.GetCurrentByEmailAddress(emailClaim.Value);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(emailClaim.Value);
+
+        if (emailAddress.IsFailure)
+            return;
+
+        Student? isStudent = await _studentRepository.GetCurrentByEmailAddress(emailAddress.Value);
 
         if (isStudent is not null)
             context.Succeed(requirement);

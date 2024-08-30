@@ -1,12 +1,11 @@
 ﻿namespace Constellation.Core.Models.Students.Repositories;
 
 using Constellation.Core.Enums;
+using Constellation.Core.ValueObjects;
 using Identifiers;
 using Offerings.Identifiers;
 using Subjects.Identifiers;
-using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ValueObjects;
@@ -14,7 +13,6 @@ using ValueObjects;
 public interface IStudentRepository
 {
     Task<List<Student>> GetAll(CancellationToken cancellationToken = default);
-    Task<List<Student>> GetAllWithSchool(CancellationToken cancellationToken = default);
     Task<Student?> GetById(StudentId studentId, CancellationToken cancellationToken = default);
     Task<Student?> GetBySRN(StudentReferenceNumber studentReferenceNumber, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudents(CancellationToken cancellationToken = default);
@@ -22,7 +20,6 @@ public interface IStudentRepository
     Task<List<Student>> GetListFromIds(List<StudentId> studentIds, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentEnrolmentsForCourse(CourseId courseId, CancellationToken cancellationToken = default);
-    Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(CancellationToken cancellationToken = default);
     Task<bool> IsValidStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Student>> GetFilteredStudents(List<OfferingId> offeringIds, List<Grade> grades, List<string> schoolCodes, CancellationToken cancellationToken = default);
     Task<List<Student>> GetCurrentStudentsFromSchool(string schoolCode, CancellationToken cancellationToken = default);
@@ -34,7 +31,7 @@ public interface IStudentRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Student?> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<Student?> GetCurrentByEmailAddress(EmailAddress emailAddress, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get any student with a specified email address. Can return deleted students.
@@ -42,7 +39,7 @@ public interface IStudentRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Student?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<Student?> GetAnyByEmailAddress(EmailAddress emailAddress, CancellationToken cancellationToken = default);
 
     Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithWholeAbsenceScanDisabled(CancellationToken cancellationToken = default);
@@ -51,11 +48,6 @@ public interface IStudentRepository
     Task<int> GetCountCurrentStudentsWithAwardOverages(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithPendingAwards(CancellationToken cancellationToken = default);
 
-    Task<Student?> GetForExistCheck(StudentId id);
-    Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate);
-    Task<Student?> ForEditAsync(StudentId studentId);
-    Task<Student?> ForBulkUnenrolAsync(StudentId studentId);
-    Task<ICollection<Student>> ForSelectionListAsync();
     Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, CancellationToken cancellationToken = default);
 
     void Insert(Student student);

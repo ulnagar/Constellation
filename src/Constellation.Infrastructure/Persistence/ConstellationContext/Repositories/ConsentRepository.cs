@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Models.ThirdPartyConsent.Repositories;
@@ -66,7 +67,7 @@ internal sealed class ConsentRepository : IConsentRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<Transaction>> GetTransactionsByStudentId(
-        string studentId, 
+        StudentId studentId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Transaction>()

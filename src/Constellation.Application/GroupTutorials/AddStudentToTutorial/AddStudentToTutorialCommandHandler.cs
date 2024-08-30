@@ -38,7 +38,7 @@ internal sealed class AddStudentToTutorialCommandHandler
             return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
         }
 
-        Student student = await _studentRepository.GetForExistCheck(request.StudentId);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {

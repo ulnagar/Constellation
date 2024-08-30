@@ -238,12 +238,12 @@ internal sealed class Gateway : ICanvasGateway
     public async Task<bool> UploadAssignmentSubmission(
         CanvasCourseCode courseId,
         int canvasAssignmentId,
-        string studentId,
+        string studentReferenceNumber,
         AttachmentResponse file,
         CancellationToken cancellationToken = default)
     {
         string stepOnePath =
-            $"courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions/sis_user_id:{studentId}/files";
+            $"courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions/sis_user_id:{studentReferenceNumber}/files";
 
         var stepOnePayload = new
         {
@@ -257,7 +257,7 @@ internal sealed class Gateway : ICanvasGateway
         {
             _logger.Information(
                 "UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}",
-                courseId, canvasAssignmentId, studentId, file, stepOnePath, stepOnePayload);
+                courseId, canvasAssignmentId, studentReferenceNumber, file, stepOnePath, stepOnePayload);
 
             return true;
         }
@@ -311,7 +311,7 @@ internal sealed class Gateway : ICanvasGateway
                 fileUploadConfirmation);
         }
 
-        int? canvasUserId = await SearchForUser(studentId, cancellationToken);
+        int? canvasUserId = await SearchForUser(studentReferenceNumber, cancellationToken);
 
         string stepThreePath = $"/courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions";
         var stepThreePayload = new

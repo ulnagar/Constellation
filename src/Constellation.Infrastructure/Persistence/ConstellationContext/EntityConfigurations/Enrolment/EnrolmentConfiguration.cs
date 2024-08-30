@@ -25,7 +25,7 @@ public class EnrolmentConfiguration : IEntityTypeConfiguration<Enrolment>
 
         builder
             .HasOne<Student>()
-            .WithMany(s => s.Enrolments)
+            .WithMany()
             .HasForeignKey(e => e.StudentId);
 
         builder

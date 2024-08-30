@@ -1,40 +1,38 @@
-﻿using Constellation.Core.Models.Operations;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+
+using Constellation.Core.Models.Operations;
+using Core.Models.Operations.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
+public class CanvasOperationConfiguration : IEntityTypeConfiguration<CanvasOperation>
 {
-    using Core.Models.Operations.Enums;
-
-    public class CanvasOperationConfiguration : IEntityTypeConfiguration<CanvasOperation>
+    public void Configure(EntityTypeBuilder<CanvasOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<CanvasOperation> builder)
-        {
-            builder.ToTable("CanvasOperations");
+        builder.ToTable("CanvasOperations");
 
-            builder.HasDiscriminator<string>("OperationType")
-                .HasValue<CreateUserCanvasOperation>("CreateUser")
-                .HasValue<ModifyEnrolmentCanvasOperation>("ModifyEnrolment")
-                .HasValue<DeleteUserCanvasOperation>("DeleteUser")
-                .HasValue<UpdateUserEmailCanvasOperation>("UpdateEmail");
-        }
+        builder.HasDiscriminator<string>("OperationType")
+            .HasValue<CreateUserCanvasOperation>("CreateUser")
+            .HasValue<ModifyEnrolmentCanvasOperation>("ModifyEnrolment")
+            .HasValue<DeleteUserCanvasOperation>("DeleteUser")
+            .HasValue<UpdateUserEmailCanvasOperation>("UpdateEmail");
     }
+}
 
-    public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfiguration<ModifyEnrolmentCanvasOperation>
+public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfiguration<ModifyEnrolmentCanvasOperation>
+{
+    public void Configure(EntityTypeBuilder<ModifyEnrolmentCanvasOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<ModifyEnrolmentCanvasOperation> builder)
-        {
-            builder
-                .Property(operation => operation.Action)
-                .HasConversion(
-                    action => action.Value,
-                    value => CanvasAction.FromValue(value));
+        builder
+            .Property(operation => operation.Action)
+            .HasConversion(
+                action => action.Value,
+                value => CanvasAction.FromValue(value));
 
-            builder
-                .Property(operation => operation.UserType)
-                .HasConversion(
-                    user => user.Value,
-                    value => CanvasUserType.FromValue(value));
-        }
+        builder
+            .Property(operation => operation.UserType)
+            .HasConversion(
+                user => user.Value,
+                value => CanvasUserType.FromValue(value));
     }
 }

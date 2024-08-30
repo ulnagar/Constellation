@@ -33,7 +33,7 @@ internal sealed class GetFilteredStudentsQueryHandler
         {
             StudentFilter.Active => await _studentRepository.GetCurrentStudents(cancellationToken),
             StudentFilter.Inactive => await _studentRepository.GetInactiveStudents(cancellationToken),
-            _ => await _studentRepository.GetAllWithSchool(cancellationToken)
+            _ => await _studentRepository.GetAll(cancellationToken)
         };
 
         List<FilteredStudentResponse> response = new();

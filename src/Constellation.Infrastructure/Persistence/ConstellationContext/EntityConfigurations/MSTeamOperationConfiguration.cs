@@ -1,148 +1,145 @@
-﻿using Constellation.Core.Models;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+
+using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Faculties.Identifiers;
+using Core.Models.SchoolContacts.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
+public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOperation>
 {
-    using Core.Models.Faculties.Identifiers;
-    using Core.Models.SchoolContacts.Identifiers;
-
-    public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOperation>
+    public void Configure(EntityTypeBuilder<MSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<MSTeamOperation> builder)
-        {
-            builder.HasDiscriminator<string>("UserType")
-                .HasValue<StudentMSTeamOperation>("Student")
-                .HasValue<CasualMSTeamOperation>("Casual")
-                .HasValue<TeacherMSTeamOperation>("Teacher")
-                .HasValue<GroupMSTeamOperation>("Group")
-                .HasValue<StudentEnrolledMSTeamOperation>("StudentEnrolled")
-                .HasValue<TeacherEmployedMSTeamOperation>("TeacherEmployed")
-                .HasValue<ContactAddedMSTeamOperation>("ContactAdded")
-                .HasValue<TeacherAssignmentMSTeamOperation>("TeacherAssigned")
-                .HasValue<StudentOfferingMSTeamOperation>("StudentOffering");
-        }
+        builder.HasDiscriminator<string>("UserType")
+            .HasValue<StudentMSTeamOperation>("Student")
+            .HasValue<CasualMSTeamOperation>("Casual")
+            .HasValue<TeacherMSTeamOperation>("Teacher")
+            .HasValue<GroupMSTeamOperation>("Group")
+            .HasValue<StudentEnrolledMSTeamOperation>("StudentEnrolled")
+            .HasValue<TeacherEmployedMSTeamOperation>("TeacherEmployed")
+            .HasValue<ContactAddedMSTeamOperation>("ContactAdded")
+            .HasValue<TeacherAssignmentMSTeamOperation>("TeacherAssigned")
+            .HasValue<StudentOfferingMSTeamOperation>("StudentOffering");
     }
+}
 
-    public class StudentMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentMSTeamOperation>
+public class StudentMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<StudentMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<StudentMSTeamOperation> builder)
-        {
-            builder.HasOne(o => o.Student)
-                .WithMany(s => s.MSTeamOperations)
-                .HasForeignKey(o => o.StudentId)
-                .OnDelete(DeleteBehavior.NoAction);
-        }
+        builder.HasOne(o => o.Student)
+            .WithMany()
+            .HasForeignKey(o => o.StudentId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
+}
 
-    public class CasualMSTeamOperationConfiguration : IEntityTypeConfiguration<CasualMSTeamOperation>
+public class CasualMSTeamOperationConfiguration : IEntityTypeConfiguration<CasualMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<CasualMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<CasualMSTeamOperation> builder)
-        {
-        }
     }
+}
 
-    public class TeacherMSTeamOperationConfiguration : IEntityTypeConfiguration<TeacherMSTeamOperation>
+public class TeacherMSTeamOperationConfiguration : IEntityTypeConfiguration<TeacherMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<TeacherMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<TeacherMSTeamOperation> builder)
-        {
-            builder.HasOne(o => o.Staff)
-                .WithMany(s => s.MSTeamOperations)
-                .HasForeignKey(o => o.StaffId)
-                .OnDelete(DeleteBehavior.NoAction);
-        }
+        builder.HasOne(o => o.Staff)
+            .WithMany(s => s.MSTeamOperations)
+            .HasForeignKey(o => o.StaffId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
+}
 
-    public class GroupMSTeamOperationConfiguration : IEntityTypeConfiguration<GroupMSTeamOperation>
+public class GroupMSTeamOperationConfiguration : IEntityTypeConfiguration<GroupMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<GroupMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<GroupMSTeamOperation> builder)
-        {
-            builder
-                .Property(operation => operation.FacultyId)
-                .HasConversion(
-                    id => id.Value,
-                    value => FacultyId.FromValue(value));
+        builder
+            .Property(operation => operation.FacultyId)
+            .HasConversion(
+                id => id.Value,
+                value => FacultyId.FromValue(value));
 
-            builder
-                .HasOne(operation => operation.Faculty)
-                .WithMany()
-                .HasForeignKey(operation => operation.FacultyId)
-                .OnDelete(DeleteBehavior.NoAction);
-        }
+        builder
+            .HasOne(operation => operation.Faculty)
+            .WithMany()
+            .HasForeignKey(operation => operation.FacultyId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
+}
 
-    public class GroupTutorialCreatedMSTeamOperationConfiguration : IEntityTypeConfiguration<GroupTutorialCreatedMSTeamOperation>
+public class GroupTutorialCreatedMSTeamOperationConfiguration : IEntityTypeConfiguration<GroupTutorialCreatedMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<GroupTutorialCreatedMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<GroupTutorialCreatedMSTeamOperation> builder)
-        {
-            builder.HasOne(operation => operation.GroupTutorial)
-                .WithMany()
-                .HasForeignKey(operation => operation.TutorialId)
-                .OnDelete(DeleteBehavior.NoAction);
-        }
+        builder.HasOne(operation => operation.GroupTutorial)
+            .WithMany()
+            .HasForeignKey(operation => operation.TutorialId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
+}
 
-    public class OfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<OfferingMSTeamOperation>
+public class OfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<OfferingMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<OfferingMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<OfferingMSTeamOperation> builder)
-        {
-            builder.HasOne(operation => operation.Offering)
-                .WithMany()
-                .HasForeignKey(operation => operation.OfferingId)
-                .OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(operation => operation.Offering)
+            .WithMany()
+            .HasForeignKey(operation => operation.OfferingId)
+            .OnDelete(DeleteBehavior.NoAction);
 
-            builder
-                .Property(a => a.OfferingId)
-                .HasConversion(
-                    id => id.Value,
-                    value => OfferingId.FromValue(value));
-        }
+        builder
+            .Property(a => a.OfferingId)
+            .HasConversion(
+                id => id.Value,
+                value => OfferingId.FromValue(value));
     }
+}
 
-    public class TeacherAssignmentMSTeamOperationConfiguration : IEntityTypeConfiguration<TeacherAssignmentMSTeamOperation>
+public class TeacherAssignmentMSTeamOperationConfiguration : IEntityTypeConfiguration<TeacherAssignmentMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<TeacherAssignmentMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<TeacherAssignmentMSTeamOperation> builder)
-        {
-            builder
-                .Property(operation => operation.StaffId)
-                .HasColumnName(nameof(TeacherAssignmentMSTeamOperation.StaffId));
+        builder
+            .Property(operation => operation.StaffId)
+            .HasColumnName(nameof(TeacherAssignmentMSTeamOperation.StaffId));
 
-            builder
-                .HasOne<Staff>()
-                .WithMany()
-                .HasForeignKey(operation => operation.StaffId)
-                .OnDelete(DeleteBehavior.NoAction);
-        }
+        builder
+            .HasOne<Staff>()
+            .WithMany()
+            .HasForeignKey(operation => operation.StaffId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
+}
 
-    public class StudentOfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentOfferingMSTeamOperation>
+public class StudentOfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentOfferingMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<StudentOfferingMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<StudentOfferingMSTeamOperation> builder)
-        {
-            builder
-                .Property(operation => operation.StudentId)
-                .HasColumnName(nameof(StudentOfferingMSTeamOperation.StudentId));
+        builder
+            .Property(operation => operation.StudentId)
+            .HasColumnName(nameof(StudentOfferingMSTeamOperation.StudentId));
 
-            builder
-                .HasOne<Student>()
-                .WithMany()
-                .HasForeignKey(operation => operation.StudentId)
-                .OnDelete(DeleteBehavior.NoAction);
-        }
+        builder
+            .HasOne<Student>()
+            .WithMany()
+            .HasForeignKey(operation => operation.StudentId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
+}
 
-    public class ContactAddedMSTeamOperationConfiguration : IEntityTypeConfiguration<ContactAddedMSTeamOperation>
+public class ContactAddedMSTeamOperationConfiguration : IEntityTypeConfiguration<ContactAddedMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<ContactAddedMSTeamOperation> builder)
     {
-        public void Configure(EntityTypeBuilder<ContactAddedMSTeamOperation> builder)
-        {
-            builder
-                .Property(operation => operation.ContactId)
-                .HasConversion(
-                    id => id.Value,
-                    value => SchoolContactId.FromValue(value));
-        }
+        builder
+            .Property(operation => operation.ContactId)
+            .HasConversion(
+                id => id.Value,
+                value => SchoolContactId.FromValue(value));
     }
 }

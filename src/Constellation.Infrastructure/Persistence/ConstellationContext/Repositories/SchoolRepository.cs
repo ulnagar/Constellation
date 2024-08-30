@@ -8,7 +8,6 @@ using Constellation.Core.Models;
 using Core.Enums;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 public class SchoolRepository : ISchoolRepository
 {
@@ -62,10 +61,10 @@ public class SchoolRepository : ISchoolRepository
             .SelectMany(school => school.Students.Where(student => !student.IsDeleted))
             .ToListAsync(cancellationToken);
                 
-        if (students.All(student => student.CurrentGrade >= Grade.Y07))
+        if (students.All(student => student.CurrentEnrolment?.Grade >= Grade.Y07))
             return SchoolType.Secondary;
 
-        if (students.All(student => student.CurrentGrade <= Grade.Y06))
+        if (students.All(student => student.CurrentEnrolment?.Grade <= Grade.Y06))
             return SchoolType.Primary;
 
         return SchoolType.Central;
@@ -94,34 +93,9 @@ public class SchoolRepository : ISchoolRepository
             .Where(school => school.Students.Any(student => !student.IsDeleted))
             .ToListAsync(cancellationToken);
 
-    public async Task<ICollection<School>> ForSelectionAsync()
-    {
-        return await _context.Schools
-            .ToListAsync();
-    }
-
-    public async Task<ICollection<School>> ForListAsync(Expression<Func<School, bool>> predicate)
-    {
-        return await _context.Schools
-            .OrderBy(school => school.Name)
-            .Where(predicate)
-            .ToListAsync();
-    }
-
     public async Task<School> ForEditAsync(string id)
     {
         return await _context.Schools
-            .SingleOrDefaultAsync(school => school.Code == id);
-    }
-
-    public async Task<School> ForDetailDisplayAsync(string id)
-    {
-        return await _context.Schools
-            .Include(school => school.Students)
-            .ThenInclude(student => student.Enrolments)
-            .Include(school => school.Staff)
-            .Include(school => school.Staff)
-            .ThenInclude(staff => staff.Faculties)
             .SingleOrDefaultAsync(school => school.Code == id);
     }
 

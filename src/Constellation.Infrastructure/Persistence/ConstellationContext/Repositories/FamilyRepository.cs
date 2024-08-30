@@ -4,6 +4,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FamilyRepository : IFamilyRepository
@@ -65,7 +66,7 @@ internal sealed class FamilyRepository : IFamilyRepository
             .FirstOrDefaultAsync(family => family.Id == Id, cancellationToken);
 
     public async Task<List<Family>> GetFamiliesByStudentId(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Family>()
@@ -84,7 +85,7 @@ internal sealed class FamilyRepository : IFamilyRepository
                 family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()
             ), cancellationToken);
 
-    public async Task<Dictionary<string, bool>> GetStudentIdsFromFamilyWithEmail(
+    public async Task<Dictionary<StudentId, bool>> GetStudentIdsFromFamilyWithEmail(
         string email,
         CancellationToken cancellation = default) =>
         await _context

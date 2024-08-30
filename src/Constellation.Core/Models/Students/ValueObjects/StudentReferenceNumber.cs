@@ -36,4 +36,11 @@ public sealed class StudentReferenceNumber : ValueObject
     }
 
     public override string ToString() => Number;
+
+    /// <summary>
+    /// Do not use. For EF Core only.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static StudentReferenceNumber FromValue(string value) => new(value);
 }

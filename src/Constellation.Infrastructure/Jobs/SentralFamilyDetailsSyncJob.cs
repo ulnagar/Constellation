@@ -12,6 +12,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.ValueObjects;
 using Core.Extensions;
+using Core.Models.Students.Enums;
 using Core.Shared;
 using MediatR;
 using System;
@@ -64,18 +65,23 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
         Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(token);
+        List<Student> students = await _studentRepository.GetCurrentStudents(token);
 
         foreach (KeyValuePair<string, List<string>> family in familyGroups)
         {
-            Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
+            Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
 
             if (firstStudent is null)
                 continue;
 
-            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(firstStudent.SentralStudentId);
+            SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
 
-            entry.StudentIds = family.Value;
+            if (link is null)
+                continue;
+
+            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
+
+            entry.StudentReferenceNumbers = family.Value;
             entry.FamilyId = family.Key;
 
             foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
@@ -128,14 +134,14 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressPostCode);
 
                 //TODO: R1.14.4: Is this operation worth the cost?
-                List<Student> familyStudents = students.Where(student => family.StudentIds.Contains(student.StudentId)).ToList();
+                List<Student> familyStudents = students.Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number)).ToList();
 
                 foreach (Student student in familyStudents)
                 {
                     _logger
-                        .Information("Adding student {name} to family {family} ({code})", student.DisplayName, family.AddressName, family.FamilyId);
+                        .Information("Adding student {name} to family {family} ({code})", student.Name.DisplayName, family.AddressName, family.FamilyId);
 
-                    entry.AddStudent(student.StudentId, true);
+                    entry.AddStudent(student.Id, true);
                 }
 
                 foreach (FamilyDetailsDto.Contact contact in family.Contacts)
@@ -162,9 +168,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         "Family Email",
                         string.Empty,
                         string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.FirstName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                         "No Email Supplied"));
                 } 
                 else
@@ -218,7 +224,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressPostCode);
 
                 //TODO: R1.14.4: Is this operation worth the cost?
-                List<Student> familyStudents = students.Where(student => family.StudentIds.Contains(student.StudentId)).ToList();
+                List<Student> familyStudents = students.Where(student => family.StudentReferenceNumbers.Contains(student.StudentId)).ToList();
 
                 foreach (Student student in familyStudents)
                 {
@@ -235,7 +241,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 List<StudentFamilyMembership> linkedStudents = entry.Students.ToList();
                 foreach (StudentFamilyMembership student in linkedStudents)
                 {
-                    if (!family.StudentIds.Contains(student.StudentId))
+                    if (!family.StudentReferenceNumbers.Contains(student.StudentId))
                     {
                         _logger
                             .Information("Removing student {name} from family {family} ({code})", student.StudentId, family.AddressName, family.FamilyId);

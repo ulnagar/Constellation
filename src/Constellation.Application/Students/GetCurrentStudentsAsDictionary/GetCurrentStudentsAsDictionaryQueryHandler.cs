@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ public sealed class GetCurrentStudentsAsDictionaryQueryHandler
 
     public async Task<Result<Dictionary<StudentId, string>>> Handle(GetCurrentStudentsAsDictionaryQuery request, CancellationToken cancellationToken)
     {
-        var students = await _studentRepository.ForSelectionListAsync();
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         students = students
             .OrderBy(student => student.CurrentEnrolment?.Grade)

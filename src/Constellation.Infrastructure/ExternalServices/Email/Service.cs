@@ -74,12 +74,12 @@ public sealed class Service : IEmailService
         CancellationToken cancellationToken = default)
     {
         List<Attachment> attachments = new();
-        MemoryStream stream = new MemoryStream(file.FileData);
+        MemoryStream stream = new(file.FileData);
         attachments.Add(new Attachment(stream, file.FileName, file.FileType));
 
         foreach (EmailRecipient parent in recipients)
         {
-            AcademicReportEmailViewModel viewModel = new AcademicReportEmailViewModel
+            AcademicReportEmailViewModel viewModel = new()
             {
                 Preheader = "",
                 SenderName = "Chris Robertson",
@@ -105,7 +105,7 @@ public sealed class Service : IEmailService
         List<Attachment> attachments,
         CancellationToken cancellationToken = default)
     {
-        ParentAttendanceReportEmailViewModel viewModel = new ParentAttendanceReportEmailViewModel
+        ParentAttendanceReportEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -137,7 +137,7 @@ public sealed class Service : IEmailService
         List<Attachment> attachments,
         CancellationToken cancellationToken = default)
     {
-        SchoolAttendanceReportEmailViewModel viewModel = new SchoolAttendanceReportEmailViewModel
+        SchoolAttendanceReportEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -173,7 +173,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
-            StudentFirstName = student.FirstName,
+            StudentFirstName = student.Name.PreferredName,
             Absences = absences
         };
 
@@ -212,7 +212,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
-            StudentFirstName = student.FirstName,
+            StudentFirstName = student.Name.PreferredName,
             WholeAbsences = wholeAbsences,
             PartialAbsences = partialAbsences,
             ParentName = familyName
@@ -245,14 +245,14 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        StudentAbsenceExplanationRequestEmailViewModel viewModel = new StudentAbsenceExplanationRequestEmailViewModel
+        StudentAbsenceExplanationRequestEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
-            StudentName = student.DisplayName,
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{student.StudentId}",
+            StudentName = student.Name.DisplayName,
+            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{student.Id}",
             Absences = absences
         };
 
@@ -283,14 +283,16 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        CoordinatorAbsenceVerificationRequestEmailViewModel viewModel = new CoordinatorAbsenceVerificationRequestEmailViewModel
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        CoordinatorAbsenceVerificationRequestEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = "Partial Absence Verification Request",
-            StudentName = student.DisplayName,
-            SchoolName = student.School.Name,
+            StudentName = student.Name.DisplayName,
+            SchoolName = enrolment?.SchoolName ?? "your school",
             ClassList = absences
         };
 
@@ -332,7 +334,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = "Absence Explanation Request",
-            StudentName = student.GetName(),
+            StudentName = student.Name,
             SchoolName = school.Name,
             WholeAbsences = wholeAbsences,
             PartialAbsences = partialAbsences
@@ -374,8 +376,8 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = "[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
-            StudentName = student.GetName(),
-            StudentId = student.StudentId,
+            StudentName = student.Name,
+            StudentId = student.Id,
             PartialAbsences = absences
         };
 
@@ -408,13 +410,13 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients, 
         CancellationToken cancellationToken = default)
     {
-        MissedWorkEmailViewModel viewModel = new MissedWorkEmailViewModel
+        MissedWorkEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = "[Aurora College] Missed Classwork Notification",
-            StudentName = student.DisplayName,
+            StudentName = student.Name.DisplayName,
             Subject = subjectName,
             ClassName = className,
             AbsenceDate = absenceDate
@@ -432,7 +434,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
         };
@@ -446,7 +448,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
         };
@@ -462,13 +464,13 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
             { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
         };
 
-        List<Attachment> attachments = new List<Attachment>
+        List<Attachment> attachments = new()
         {
             new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile)
         };
@@ -482,7 +484,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
             { "auroracoll-h.school@det.nsw.edu.au", "auroracoll-h.school@det.nsw.edu.au" }
@@ -508,7 +510,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
         };
@@ -524,7 +526,7 @@ public sealed class Service : IEmailService
 
     public async Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
     {
-        AbsenceExplanationToSchoolAdminEmailViewModel viewModel = new AbsenceExplanationToSchoolAdminEmailViewModel
+        AbsenceExplanationToSchoolAdminEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -549,7 +551,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>();
+        Dictionary<string, string> toRecipients = new();
         foreach (string entry in notificationEmail.Recipients)
             if (toRecipients.All(recipient => recipient.Value != entry))
                 toRecipients.Add(entry, entry);
@@ -653,7 +655,7 @@ public sealed class Service : IEmailService
 
     public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
     {
-        NewCoverEmailViewModel viewModel = new NewCoverEmailViewModel
+        NewCoverEmailViewModel viewModel = new()
         {
             ToName = resource.CoveringTeacherName,
             Title = "Class Cover Information",
@@ -761,12 +763,12 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
         };
 
-        Dictionary<string, string> ccRecipients = new Dictionary<string, string>();
+        Dictionary<string, string> ccRecipients = new();
 
         foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
             if (toRecipients.All(recipient => recipient.Value != entry.Value))
@@ -892,7 +894,7 @@ public sealed class Service : IEmailService
 
     private async Task SendFirstLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        FirstWarningEmailViewModel viewModel = new FirstWarningEmailViewModel
+        FirstWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -910,7 +912,7 @@ public sealed class Service : IEmailService
 
     private async Task SendSecondLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        SecondWarningEmailViewModel viewModel = new SecondWarningEmailViewModel
+        SecondWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -928,7 +930,7 @@ public sealed class Service : IEmailService
 
     private async Task SendThirdLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        SecondWarningEmailViewModel viewModel = new SecondWarningEmailViewModel
+        SecondWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -946,7 +948,7 @@ public sealed class Service : IEmailService
 
     private async Task SendFinalLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
-        FinalWarningEmailViewModel viewModel = new FinalWarningEmailViewModel
+        FinalWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -964,7 +966,7 @@ public sealed class Service : IEmailService
 
     private async Task SendLessonAlertEmail(LessonMissedNotificationEmail notification)
     {
-        CoordinatorNotificationEmailViewModel viewModel = new CoordinatorNotificationEmailViewModel
+        CoordinatorNotificationEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Lessons.CoordinatorName,
@@ -985,20 +987,20 @@ public sealed class Service : IEmailService
         string courseName,
         CancellationToken cancellationToken)
     {
-        StudentMarkedPresentEmailViewModel viewModel = new StudentMarkedPresentEmailViewModel
+        StudentMarkedPresentEmailViewModel viewModel = new()
         {
             Title = $"Congratulations on finishing your Science Prac!",
             SenderName = "Silvia Rudmann",
             SenderTitle = "R/Head Teacher Science and Agriculture",
             Preheader = "",
-            StudentName = student.DisplayName,
+            StudentName = student.Name.DisplayName,
             LessonTitle = lessonName,
             Subject = courseName
         };
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
-            { student.DisplayName, student.EmailAddress }
+            { student.Name.DisplayName, student.EmailAddress.Email }
         };
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
@@ -1044,7 +1046,7 @@ public sealed class Service : IEmailService
 
     public async Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients)
     {
-        DailyReportEmailViewModel viewModel = new DailyReportEmailViewModel
+        DailyReportEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
@@ -1059,7 +1061,7 @@ public sealed class Service : IEmailService
 
     public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
     {
-        MagicLinkLoginEmailViewModel viewModel = new MagicLinkLoginEmailViewModel
+        MagicLinkLoginEmailViewModel viewModel = new()
         {
             Preheader = "This is an automated message. Please do not reply.",
             SenderName = "",
@@ -1080,12 +1082,12 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new Dictionary<string, string>
+        Dictionary<string, string> toRecipients = new()
         {
             { "", emailAddress }
         };
 
-        List<Attachment> attachments = new List<Attachment>
+        List<Attachment> attachments = new()
         {
             new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile)
         };
@@ -1101,16 +1103,16 @@ public sealed class Service : IEmailService
         Staff? teacher,
         CancellationToken cancellationToken = default)
     {
-        NewAwardCertificateEmailViewModel viewModel = new NewAwardCertificateEmailViewModel
+        NewAwardCertificateEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = "",
             SenderTitle = "",
-            Title = $"[Aurora College] Student Award for {student.DisplayName}",
+            Title = $"[Aurora College] Student Award for {student.Name.DisplayName}",
             AwardType = award.Type,
             AwardedOn = award.AwardedOn,
             AwardReason = award.Reason,
-            StudentName = student?.DisplayName,
+            StudentName = student?.Name.DisplayName,
             TeacherName = teacher?.DisplayName
         };
 
@@ -1138,7 +1140,7 @@ public sealed class Service : IEmailService
             Title = $"[Aurora College] Student Assignment Upload Receipt",
             AssignmentName = assignment.Name,
             CourseName = course.Name,
-            StudentName = student.GetName()?.DisplayName,
+            StudentName = student.Name.DisplayName,
             SubmittedOn = DateOnly.FromDateTime(submission.SubmittedOn)
         };
 

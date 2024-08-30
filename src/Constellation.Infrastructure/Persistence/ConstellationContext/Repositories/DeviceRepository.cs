@@ -2,6 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 public class DeviceRepository : IDeviceRepository
@@ -28,7 +29,7 @@ public class DeviceRepository : IDeviceRepository
             .FirstOrDefaultAsync(device => device.SerialNumber == serialNumber, cancellationToken);
 
     public async Task<List<Device>> GetActiveDevicesForStudent(
-        string studentId, 
+        StudentId studentId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Device>()
@@ -49,7 +50,7 @@ public class DeviceRepository : IDeviceRepository
             .SingleOrDefaultAsync(device => device.SerialNumber == id, cancellationToken);
 
     public async Task<List<Device>> GetHistoryForStudent(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Device>()

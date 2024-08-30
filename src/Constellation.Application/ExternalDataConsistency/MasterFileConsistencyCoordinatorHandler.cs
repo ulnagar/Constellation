@@ -120,7 +120,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
 
         List<MasterFileStudent> masterFileStudents = await _excelService.GetStudentsFromMasterFile(request.MasterFileStream);
 
-        List<Student> dbStudents = await _studentRepository.GetCurrentStudentsWithFamilyMemberships(cancellationToken);
+        List<Student> dbStudents = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         foreach (MasterFileStudent fileStudent in masterFileStudents)
         {

@@ -14,6 +14,7 @@ using Core.Enums;
 using Core.Models.Absences;
 using Core.Models.Identifiers;
 using Core.Models.Students;
+using Core.Models.Students.Enums;
 
 internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {
@@ -54,8 +55,7 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
             List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
 
             students = students
-                .OrderBy(student => student.LastName)
-                .ThenBy(student => student.FirstName)
+                .OrderBy(student => student.Name.SortOrder)
                 .ToList();
 
             _logger.Information("{id}: Found {students} students to scan.", jobId, students.Count);
@@ -83,7 +83,9 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
                     await _unitOfWork.CompleteAsync(cancellationToken);
 
-                    if (string.IsNullOrWhiteSpace(student.SentralStudentId))
+                    SystemLink sentralId = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+
+                    if (sentralId is null)
                         continue;
 
                     if (cancellationToken.IsCancellationRequested)
@@ -99,7 +101,7 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                     if (partialAbsenceIds.Count != 0)
                         await _mediator.Send(new SendAbsenceNotificationToStudentCommand(
                             jobId,
-                            student.StudentId,
+                            student.Id,
                             partialAbsenceIds),
                             cancellationToken);
 
@@ -113,7 +115,7 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                     if (wholeAbsenceIds.Count != 0)
                         await _mediator.Send(new SendAbsenceNotificationToParentCommand(
                             jobId,
-                            student.StudentId,
+                            student.Id,
                             wholeAbsenceIds),
                             cancellationToken);
                 }
@@ -123,9 +125,9 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                     if (cancellationToken.IsCancellationRequested)
                         return;
                     
-                    await _mediator.Send(new SendAbsenceDigestToStudentCommand(jobId, student.StudentId), cancellationToken);
-                    await _mediator.Send(new SendAbsenceDigestToParentCommand(jobId, student.StudentId), cancellationToken);
-                    await _mediator.Send(new SendAbsenceDigestToCoordinatorCommand(jobId, student.StudentId), cancellationToken);
+                    await _mediator.Send(new SendAbsenceDigestToStudentCommand(jobId, student.Id), cancellationToken);
+                    await _mediator.Send(new SendAbsenceDigestToParentCommand(jobId, student.Id), cancellationToken);
+                    await _mediator.Send(new SendAbsenceDigestToCoordinatorCommand(jobId, student.Id), cancellationToken);
                 }
 
                 // If there was any whole absence found for yesterday, send the missed work email to student and parents
@@ -144,7 +146,7 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                     // Send missed work generic email
                     await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
                         jobId, 
-                        student.StudentId,
+                        student.Id,
                         absence.OfferingId,
                         absence.Date),
                         cancellationToken);

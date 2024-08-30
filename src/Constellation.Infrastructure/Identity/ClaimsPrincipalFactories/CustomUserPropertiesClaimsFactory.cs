@@ -34,7 +34,7 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
 
         if (user.IsStudent)
         {
-            identity.AddClaim(new Claim(AuthClaimType.StudentId, user.StudentId));
+            identity.AddClaim(new Claim(AuthClaimType.StudentId, user.StudentId.ToString()));
         }
 
         return identity;

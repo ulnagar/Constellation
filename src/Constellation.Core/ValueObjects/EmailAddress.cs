@@ -3,6 +3,7 @@
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -36,4 +37,11 @@ public sealed class EmailAddress : ValueObject
     }
 
     public override string ToString() => Email;
+
+    /// <summary>
+    /// Do not use. For EF Core Only.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static EmailAddress FromValue(string value) => new(value);
 }
