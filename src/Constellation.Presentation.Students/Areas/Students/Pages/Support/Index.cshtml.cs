@@ -5,6 +5,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Contacts.GetContactListForParentPortal;
 using Constellation.Application.Students.GetStudentsByParentEmail;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
@@ -46,9 +47,9 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve support contacts by user {user}", _currentUserService.UserName);
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -58,6 +59,8 @@ public class IndexModel : BasePageModel
 
             return;
         }
+
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
         
         Result<List<StudentSupportContactResponse>> contactsRequest = await _mediator.Send(new GetContactListForParentPortalQuery(studentId));
 

@@ -3,11 +3,13 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 using Application.Students.Models;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Students.GetStudentById;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Shared.Helpers.ModelBinders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,14 +30,15 @@ public class StudentsModel : PageModel
     public bool ShowAll { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId StudentId { get; set; } = StudentId.Empty;
     public string StudentName { get; set; }
 
     public List<StudentAbsenceSummaryResponse> Absences { get; set; } = new();
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId == StudentId.Empty)
             throw new ArgumentOutOfRangeException(nameof(StudentId));
 
         // Get Student details

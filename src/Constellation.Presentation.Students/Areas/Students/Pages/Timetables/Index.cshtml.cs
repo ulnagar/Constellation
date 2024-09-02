@@ -6,6 +6,7 @@ using Application.Timetables.GetStudentTimetableExport;
 using Constellation.Application.DTOs;
 using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
@@ -49,9 +50,9 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve timetable data by user {user}", _currentUserService.UserName);
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -62,6 +63,8 @@ public class IndexModel : BasePageModel
             return;
         }
 
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
+        
         Result<StudentTimetableDataDto> timetableRequest = await _mediator.Send(new GetStudentTimetableDataQuery(studentId));
 
         if (timetableRequest.IsFailure)
@@ -82,9 +85,9 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to download timetable file by user {user}", _currentUserService.UserName);
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -96,7 +99,9 @@ public class IndexModel : BasePageModel
 
             return Page();
         }
-
+        
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
+        
         Result<FileDto> request = await _mediator.Send(new GetStudentTimetableExportQuery(studentId));
 
         if (request.IsFailure)

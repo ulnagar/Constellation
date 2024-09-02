@@ -6,6 +6,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,9 +56,9 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve absence data by user {user} of type {type}", _currentUserService.UserName, AbsencesType);
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -67,6 +68,8 @@ public class IndexModel : BasePageModel
 
             return;
         }
+
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
 
         Result<List<AbsenceForStudentResponse>> absencesRequest = await _mediator.Send(new GetAbsencesForStudentQuery(studentId));
 

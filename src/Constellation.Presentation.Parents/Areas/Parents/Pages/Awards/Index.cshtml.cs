@@ -10,6 +10,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +44,8 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Awards;
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; } = string.Empty;
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public StudentResponse? SelectedStudent { get; set; }
 
@@ -94,7 +96,7 @@ public class IndexModel : BasePageModel
         if (Students.Count == 1)
             StudentId = Students.First().StudentId;
 
-        if (!string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId != StudentId.Empty)
         {
             _logger.Information("Requested to retrieve award data by user {user} for student {student}", _currentUserService.UserName, StudentId);
             

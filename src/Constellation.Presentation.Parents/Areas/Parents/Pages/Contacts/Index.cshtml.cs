@@ -2,16 +2,17 @@ namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Contacts;
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Constellation.Application.Awards.GetSummaryForStudent;
 using Constellation.Application.Contacts.GetContactListForParentPortal;
 using Constellation.Application.Students.GetStudentsByParentEmail;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]
@@ -39,7 +40,8 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Contacts;
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; } = string.Empty;
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public StudentResponse? SelectedStudent { get; set; }
 
@@ -71,7 +73,7 @@ public class IndexModel : BasePageModel
         if (Students.Count == 1)
             StudentId = Students.First().StudentId;
 
-        if (!string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId != StudentId.Empty)
         {
             _logger.Information("Requested to retrieve contacts by user {user} for student {student}", _currentUserService.UserName, StudentId);
 

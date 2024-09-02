@@ -4,6 +4,7 @@ using Application.Models.Auth;
 using Application.Offerings.GetCurrentOfferingsForStudent;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
@@ -39,9 +40,9 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve Student Dashboard by user {User}", _currentUserService.UserName);
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -52,6 +53,8 @@ public class IndexModel : BasePageModel
             return;
         }
 
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
+        
         Result<List<OfferingDetailResponse>> request = await _mediator.Send(new GetCurrentOfferingsForStudentQuery(studentId));
 
         if (request.IsFailure)

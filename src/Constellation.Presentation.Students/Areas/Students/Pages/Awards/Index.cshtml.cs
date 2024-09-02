@@ -11,6 +11,7 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Identifiers;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -84,9 +85,9 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve award summary by user {user}", _currentUserService.UserName);
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -96,6 +97,8 @@ public class IndexModel : BasePageModel
 
             return;
         }
+
+        StudentId studentId = StudentId.FromValue(new (studentIdClaimValue));
 
         Result<StudentResponse> studentRequest = await _mediator.Send(new GetStudentByIdQuery(studentId));
 
