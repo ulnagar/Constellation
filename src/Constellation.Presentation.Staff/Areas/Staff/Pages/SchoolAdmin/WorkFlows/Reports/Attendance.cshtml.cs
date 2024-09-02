@@ -101,7 +101,7 @@ public class AttendanceModel : BasePageModel
 
                     _logger
                         .ForContext(nameof(UpdateAttendanceCaseDetailsCommand), updateCommand, true)
-                        .Information("Requested to create WorkFlow Attendance Case by user {User}", _currentUserService.UserName);
+                        .Information("Requested to update WorkFlow Attendance Case by user {User}", _currentUserService.UserName);
 
                     result = await _mediator.Send(updateCommand);
                     break;

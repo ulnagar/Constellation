@@ -43,6 +43,7 @@ internal sealed class CaseRepository : ICaseRepository
         await _context
             .Set<Case>()
             .Where(item =>
+                item.Detail is AttendanceCaseDetail &&
                 item.Status.Equals(CaseStatus.Open) &&
                 ((AttendanceCaseDetail)item.Detail).StudentId == studentId)
             .AnyAsync(cancellationToken);
@@ -53,6 +54,7 @@ internal sealed class CaseRepository : ICaseRepository
         await _context
             .Set<Case>()
             .Where(item =>
+                item.Detail is AttendanceCaseDetail &&
                 item.Status.Equals(CaseStatus.Open) &&
                 ((AttendanceCaseDetail)item.Detail).StudentId == studentId)
             .FirstOrDefaultAsync(cancellationToken);
@@ -74,6 +76,7 @@ internal sealed class CaseRepository : ICaseRepository
         await _context
             .Set<Case>()
             .Where(item =>
+                item.Detail is ComplianceCaseDetail &&
                 ((ComplianceCaseDetail)item.Detail).IncidentId == incidentId)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -84,6 +87,7 @@ internal sealed class CaseRepository : ICaseRepository
         await _context
             .Set<Case>()
             .Where(item =>
+                item.Detail is TrainingCaseDetail &&
                 item.Status.Equals(CaseStatus.Open) &&
                 ((TrainingCaseDetail)item.Detail).StaffId == staffId &&
                 ((TrainingCaseDetail)item.Detail).TrainingModuleId == moduleId)
