@@ -66,6 +66,19 @@ internal class AssignmentRepository : IAssignmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<CanvasAssignment>> GetAllCurrentAndFuture(
+        CancellationToken cancellationToken = default)
+    {
+        DateTime today = DateTime.Today;
+
+        return await _context
+            .Set<CanvasAssignment>()
+            .Where(assignment =>
+                assignment.DueDate >= today || 
+                (!assignment.LockDate.HasValue || assignment.LockDate.Value > today))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<CanvasAssignment>> GetAllDueForUpload(
         CancellationToken cancellationToken = default) =>
         await _context

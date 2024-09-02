@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.Assignments;
+using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using System;
 using System.Collections.Generic;
@@ -28,21 +30,21 @@ internal sealed class GetCurrentAssignmentsListingQueryHandler
     {
         List<CurrentAssignmentSummaryResponse> response = new();
 
-        var assignments = await _assignmentRepository.GetAllCurrent(cancellationToken);
+        List<CanvasAssignment> assignments = await _assignmentRepository.GetAllCurrentAndFuture(cancellationToken);
 
-        if (assignments is null)
+        if (assignments.Count == 0)
             return response;
 
-        foreach (var assignment in assignments)
+        foreach (CanvasAssignment assignment in assignments)
         {
-            var course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
+            Course course = await _courseRepository.GetById(assignment.CourseId, cancellationToken);
 
             if (course is null)
                 continue;
 
-            var courseName = $"Y{course.Grade.AsNumber()} {course.Name}";
+            string courseName = $"Y{course.Grade.AsNumber()} {course.Name}";
 
-            var entry = new CurrentAssignmentSummaryResponse(
+            CurrentAssignmentSummaryResponse entry = new CurrentAssignmentSummaryResponse(
                 assignment.Id,
                 courseName,
                 assignment.Name,
