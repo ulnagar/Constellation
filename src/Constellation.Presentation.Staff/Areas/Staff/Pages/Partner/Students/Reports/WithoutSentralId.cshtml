@@ -27,7 +27,7 @@
         <tr>
             <td>@item.StudentId</td>
             <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
-            <td>@Html.DisplayFor(model => item.CurrentGrade, "Grade")</td>
+            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
             <td>@item.School</td>
             <td>
                 <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>

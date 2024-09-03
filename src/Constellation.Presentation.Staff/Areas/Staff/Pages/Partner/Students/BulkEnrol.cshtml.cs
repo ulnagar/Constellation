@@ -11,11 +11,13 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]
@@ -44,7 +46,8 @@ public class BulkEnrolModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Bulk Enrol";
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId Id { get; set; }
 
     public StudentResponse Student { get; set; }
     public List<BulkEnrolOfferingResponse> Offerings { get; set; } = new();
@@ -72,7 +75,7 @@ public class BulkEnrolModel : BasePageModel
 
         PageTitle = $"Enrol {Student.Name.DisplayName}";
 
-        Result<List<BulkEnrolOfferingResponse>> offeringRequest = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(Student.CurrentGrade));
+        Result<List<BulkEnrolOfferingResponse>> offeringRequest = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(Student.Grade));
 
         if (offeringRequest.IsFailure)
         {
@@ -98,7 +101,7 @@ public class BulkEnrolModel : BasePageModel
 
         foreach (StudentEnrolmentResponse enrolment in enrolmentRequest.Value)
         {
-            BulkEnrolOfferingResponse offeringEntry = Offerings.FirstOrDefault(entry => entry.OfferingId == enrolment.OfferingId);
+            BulkEnrolOfferingResponse? offeringEntry = Offerings.FirstOrDefault(entry => entry.OfferingId == enrolment.OfferingId);
 
             if (offeringEntry is not null)
             {

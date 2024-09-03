@@ -11,6 +11,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +53,7 @@ public class AddStudentsModel : BasePageModel
     public string OfferingName { get; set; }
 
     [BindProperty]
-    public List<string> SelectedStudentIds { get; set; } = new();
+    public List<StudentId> SelectedStudentIds { get; set; } = new();
     public List<StudentFromGradeResponse> Students { get; set; } = new();
     public List<EnrolmentResponse> ExistingEnrolments { get; set; } = new();
 

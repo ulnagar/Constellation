@@ -89,18 +89,6 @@ internal sealed class CreateStudentCommandHandler
             return Result.Failure(emailAddress.Error);
         }
 
-        Gender? gender = Gender.FromValue(request.Gender);
-
-        if (gender is null)
-        {
-            _logger
-                .ForContext(nameof(CreateStudentCommand), request, true)
-                .ForContext(nameof(Error), GenderErrors.InvalidValue, true)
-                .Warning("Failed to create new student");
-
-            return Result.Failure(GenderErrors.InvalidValue);
-        }
-
         School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
@@ -120,7 +108,7 @@ internal sealed class CreateStudentCommandHandler
             request.Grade,
             school,
             _dateTime.CurrentYear,
-            gender,
+            request.Gender,
             _dateTime);
 
         if (student.IsFailure)

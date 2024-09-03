@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Identifiers;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Models.Students.Identifiers;
 using Microsoft.AspNetCore.Mvc;
 
 public class FamilyAddStudentSelection
@@ -10,6 +11,7 @@ public class FamilyAddStudentSelection
     public FamilyId FamilyId { get; set; }
     public string FamilyName { get; set; } = string.Empty;
 
-    public string StudentId { get; set; } = string.Empty;
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId StudentId { get; set; }
     public Dictionary<string, string> Students { get; set; } = new();
 }

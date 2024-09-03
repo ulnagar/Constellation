@@ -3,10 +3,12 @@ namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 using Application.Absences.GetAbsenceDetailsForStudent;
 using Constellation.Application.Absences.CreateAbsenceResponseFromStudent;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Shared.Helpers.ModelBinders;
 using System;
 using System.Threading.Tasks;
 
@@ -28,7 +30,8 @@ public class StudentExplanationModel : PageModel
     [BindProperty]
     public string Reason { get; set; }
     [BindProperty]
-    public string StudentId { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {

@@ -2,7 +2,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Timetables;
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Constellation.Application.DTOs;
+using Application.Students.Models;
 using Constellation.Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
@@ -41,13 +41,13 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;
 
-    public List<StudentDto> Students { get; set; } = new();
+    public List<StudentResponse> Students { get; set; } = new();
 
     public async Task OnGet()
     {
         _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
 
-        Result<List<StudentDto>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
+        Result<List<StudentResponse>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
 
         if (students.IsFailure)
         {
@@ -57,9 +57,8 @@ public class IndexModel : BasePageModel
         }
 
         Students = students.Value
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.Grade)
+            .ThenBy(student => student.Name.SortOrder)
             .ToList();
     }
 }

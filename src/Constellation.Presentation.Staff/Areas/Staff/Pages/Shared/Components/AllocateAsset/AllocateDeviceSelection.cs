@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Assets.Enums;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Models.Students.Identifiers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -10,7 +11,8 @@ public sealed class AllocateDeviceSelection
     [ModelBinder(typeof(BaseFromValueBinder))]
     public AllocationType AllocationType { get; set; }
 
-    public string StudentId { get; set; } = string.Empty;
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId StudentId { get; set; } = StudentId.Empty;
     public string SchoolCode { get; set; } = string.Empty;
     public string StaffId { get; set; } = string.Empty;
     public string UserEmail { get; set; } = string.Empty;

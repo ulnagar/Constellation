@@ -1,13 +1,14 @@
-﻿@page "{id?}"
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.UpsertModel
 
 @using Constellation.Core.Enums
+@using Constellation.Core.Models.Students.Identifiers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
 }
 
-<h2>@(string.IsNullOrWhiteSpace(Model.Id) ? "New Student" : "Edit Student")</h2>
+<h2>@(Model.Id == StudentId.Empty ? "New Student" : "Edit Student")</h2>
 
 <div class="page-menu">
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -20,10 +21,10 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group row">
-            <label asp-for="StudentId" class="col-md-2">SRN</label>
+            <label asp-for="StudentReferenceNumber" class="col-md-2">SRN</label>
             <div class="col-md-3">
-                <input asp-for="StudentId" class="form-control" readonly="@(!string.IsNullOrWhiteSpace(Model.Id))"/>
-                <span asp-validation-for="StudentId" class="text-danger"></span>
+                <input asp-for="StudentReferenceNumber" class="form-control" />
+                <span asp-validation-for="StudentReferenceNumber" class="text-danger"></span>
             </div>
         </div>
 
@@ -44,10 +45,10 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="PortalUsername" class="col-md-2">DoE Username</label>
+            <label asp-for="EmailAddress" class="col-md-2">DoE Email Address</label>
             <div class="col-md-3">
-                <input asp-for="PortalUsername" class="form-control" />
-                <span asp-validation-for="PortalUsername" class="text-danger"></span>
+                <input asp-for="EmailAddress" class="form-control" />
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
             </div>
         </div>
 
@@ -83,7 +84,14 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-3">
-                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                @if (Model.Id == StudentId.Empty)
+                {
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                }
+                else
+                {
+                    <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
+                }
             </div>
         </div>
     </div>

@@ -5,18 +5,20 @@
 
 <h1>Aurora College Schools Portal</h1>
 
-@foreach (var group in Model.Students.GroupBy(student => student.CurrentGrade))
+@foreach (var group in Model.Students.GroupBy(student => student.Grade))
 {
     <h4>@group.Key.AsName()</h4>
 
     <div class="flex-row">
         @foreach (var student in group)
         {
+            //TODO: R1.16.0: Implement request for student photo
+
             <div class="card m-3 float-start">
-                <img class="card-img-top" src="@student.PhotoSrc">
+                <img class="card-img-top" src="">
                 <div class="card-body">
-                    <h5 class="card-title">@student.FirstName @student.LastName</h5>
-                    <p class="card-text">Grade: @student.CurrentGrade</p>
+                    <h5 class="card-title">@student.Name.PreferredName @student.Name.LastName</h5>
+                    <p class="card-text">Grade: @student.Grade</p>
                 </div>
             </div>
         }

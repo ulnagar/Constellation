@@ -9,6 +9,7 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -62,9 +63,9 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        string studentId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
         {
             _logger
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
@@ -76,6 +77,8 @@ public class DetailsModel : BasePageModel
 
             return Page();
         }
+
+        StudentId studentId = StudentId.FromValue(new (studentIdClaimValue));
 
         CreateAbsenceResponseFromStudentCommand command = new(Id, studentId, Comment);
 

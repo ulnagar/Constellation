@@ -112,7 +112,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = student.Value.EmailAddress
+                UserEmail = student.Value.EmailAddress.Email
             };
 
             teamOperation.Action = operation.Action switch
@@ -147,7 +147,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                UserEmail = operation.Student.EmailAddress
+                UserEmail = operation.Student.EmailAddress.Email
             };
 
             teamOperation.Action = operation.Action switch
@@ -266,8 +266,8 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = operation.Student.EmailAddress,
-                AdditionalInformation = operation.Student.CurrentGrade.ToString()
+                UserEmail = operation.Student.EmailAddress.Email,
+                AdditionalInformation = operation.Student.CurrentEnrolment?.Grade.ToString()
             };
 
             teamOperation.Action = operation.Action switch

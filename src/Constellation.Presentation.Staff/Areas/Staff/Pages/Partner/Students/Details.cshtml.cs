@@ -20,6 +20,9 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -59,7 +62,8 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Student Details";
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; }
+    [ModelBinder(typeof(ConstructorBinder))]
+    public StudentId Id { get; set; } = StudentId.Empty;
 
     public StudentResponse Student { get; set; }
 
@@ -78,7 +82,7 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(Id))
+        if (Id == StudentId.Empty)
         {
             GenerateError(new("Page.Parameter.NotFound", "You must specify a value for the Student Id parameter"));
             return;
@@ -91,7 +95,7 @@ public class DetailsModel : BasePageModel
     {
         _logger.Information("Requested to retrieve details of Student with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-        Result<StudentResponse>? studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
+        Result<StudentResponse> studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
 
         if (studentRequest.IsFailure)
         {
@@ -183,6 +187,8 @@ public class DetailsModel : BasePageModel
             await PreparePage(cancellationToken);
             return;
         }
+
+        // TODO: R1.16.0: Implement new reinstate student functionality with proposed school and grade linked
 
         ReinstateStudentCommand command = new(Id);
 
@@ -284,7 +290,7 @@ public class DetailsModel : BasePageModel
             error,
             _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
         
-        Student = new("", Name.Create("John", "", "Doe").Value, "", Core.Enums.Grade.SpecialProgram, "", "", "", "", false);
+        Student = new(StudentId.Empty, StudentReferenceNumber.Empty, Name.Create("John", "", "Doe").Value, Gender.NonBinary, Core.Enums.Grade.SpecialProgram, EmailAddress.None, "", "", false);
     }
 
     private int CalculateTotalSessionDuration()

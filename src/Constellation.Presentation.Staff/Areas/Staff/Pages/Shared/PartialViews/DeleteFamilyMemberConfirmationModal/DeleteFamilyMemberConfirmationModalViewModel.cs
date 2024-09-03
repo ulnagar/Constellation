@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 
 public sealed class DeleteFamilyMemberConfirmationModalViewModel
 {
@@ -8,6 +9,6 @@ public sealed class DeleteFamilyMemberConfirmationModalViewModel
     public string UserName { get; set; } = string.Empty;
     public string FamilyName { get; set; } = string.Empty;
     public ParentId ParentId { get; set; }
-    public string StudentId { get; set; } = string.Empty;
+    public StudentId StudentId { get; set; }
     public FamilyId FamilyId { get; set; }
 }

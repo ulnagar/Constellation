@@ -2,11 +2,12 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences;
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Constellation.Application.DTOs;
+using Application.Students.Models;
 using Constellation.Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -48,10 +49,10 @@ public class ReportModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;
 
-    public List<StudentDto> Students { get; set; } = new();
+    public List<StudentResponse> Students { get; set; } = new();
 
     [BindProperty]
-    public List<string> SelectedStudents { get; set; } = new();
+    public List<StudentId> SelectedStudents { get; set; } = new();
 
     [BindProperty]
     [DataType(DataType.Date)]
@@ -62,7 +63,7 @@ public class ReportModel : BasePageModel
     {
         _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
         
-        Result<List<StudentDto>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
+        Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
 
         if (studentsRequest.IsFailure)
         {
@@ -74,14 +75,14 @@ public class ReportModel : BasePageModel
         }
 
         Students = studentsRequest.Value
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.Grade)
+            .ThenBy(student => student.Name.SortOrder)
             .ToList();
     }
 
     public async Task<IActionResult> OnPost()
     {
+        // TODO: R1.16.0: Implement attendance report download for Schools Portal
 
         return Page();
     }
