@@ -1,7 +1,7 @@
 ﻿@using Constellation.Application.Awards.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
 
-<div class="col mb-4 sortable">
+<div class="col mb-4 sortable" data-id="card-workflow-actions">
     <div class="card h-100 @(Model.ActiveWorkFlowActions > 0 ? "text-white bg-danger" : "text-white bg-success")">
         <div class="card-header">WorkFlow Actions</div>
         <div class="card-body">
@@ -14,7 +14,7 @@
 
 @if (Model.ShowSentralIdWidgets)
 {
-    <div class="col mb-4 sortable">
+    <div class="col mb-4 sortable" data-id="card-student-sentralid">
         <div class="card h-100 @(Model.StudentsWithoutSentralId > 0 ? "text-white bg-danger" : "text-white bg-success")">
             <div class="card-header">Student Configuration</div>
             <div class="card-body">
@@ -28,7 +28,7 @@
 
 @if (Model.ShowTrainingWidgets)
 {
-    <div class="col mb-4 sortable">
+    <div class="col mb-4 sortable" data-id="card-training-withoutrole">
         <div class="card h-100 @(Model.WithoutRole > 0 ? "text-white bg-danger" : "text-white bg-success")">
             <div class="card-header">Mandatory Training</div>
             <div class="card-body">
@@ -42,7 +42,7 @@
 
 @if (Model.ShowAbsenceWidgets)
 {
-    <div class="col mb-4 sortable">
+    <div class="col mb-4 sortable" data-id="card-absences-partialdisabled">
         <div class="card h-100 @(Model.PartialScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
             <div class="card-header">Absence Scanning</div>
             <div class="card-body">
@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <div class="col mb-4 sortable">
+    <div class="col mb-4 sortable" data-id="card-absences-wholedisabled">
         <div class="card h-100 @(Model.WholeScanDisabled > 0 ? "text-white bg-danger" : "text-white bg-success")">
             <div class="card-header">Absence Scanning</div>
             <div class="card-body">
@@ -67,7 +67,7 @@
 
 @if (Model.ShowAwardsWidgets)
 {
-    <div class="col mb-4 sortable">
+    <div class="col mb-4 sortable" data-id="card-awards-additions">
         <div class="card h-100 @(Model.AwardAdditions > 0 ? "text-white bg-danger" : "text-white bg-success")">
             <div class="card-header">Awards</div>
             <div class="card-body">
@@ -78,7 +78,7 @@
         </div>
     </div>
 
-    <div class="col mb-4 sortable">
+    <div class="col mb-4 sortable" data-id="card-awards-overage">
         <div class="card h-100 @(Model.AwardOverages > 0 ? "text-white bg-danger" : "text-white bg-success")">
             <div class="card-header">Awards</div>
             <div class="card-body">
