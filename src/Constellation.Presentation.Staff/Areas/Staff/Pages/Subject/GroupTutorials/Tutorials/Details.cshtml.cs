@@ -14,12 +14,12 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.TutorialRollCreate;
 using Shared.Components.TutorialStudentEnrolment;
@@ -58,7 +58,6 @@ public class DetailsModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public GroupTutorialId Id { get; set; } = GroupTutorialId.Empty;
     
     public GroupTutorialDetailResponse Tutorial { get; set; }
@@ -92,7 +91,7 @@ public class DetailsModel : BasePageModel
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        if (string.IsNullOrWhiteSpace(viewModel.StudentId))
+        if (viewModel.StudentId == StudentId.Empty)
         {
             _logger
                 .ForContext(nameof(Error), ValidationErrors.String.RequiredIsNull(nameof(viewModel.StudentId)), true)
@@ -162,8 +161,7 @@ public class DetailsModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostAjaxRemoveTeacher(
-        [ModelBinder(typeof(ConstructorBinder))] TutorialTeacherId teacherId)
+    public async Task<IActionResult> OnPostAjaxRemoveTeacher(TutorialTeacherId teacherId)
     {
         Result<GroupTutorialDetailResponse> result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(Id));
 
@@ -209,8 +207,7 @@ public class DetailsModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostAjaxRemoveStudent(
-        [ModelBinder(typeof(ConstructorBinder))] TutorialEnrolmentId enrolmentId)
+    public async Task<IActionResult> OnPostAjaxRemoveStudent(TutorialEnrolmentId enrolmentId)
     {
         Result<GroupTutorialDetailResponse> result = await _mediator.Send(new GetTutorialWithDetailsByIdQuery(Id));
 

@@ -17,7 +17,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
@@ -43,7 +42,6 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Course";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId Id { get; set; } = CourseId.Empty;
 
     [BindProperty]
@@ -54,7 +52,6 @@ public class UpsertModel : BasePageModel
     public Grade Grade { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public FacultyId FacultyId { get; set; } = FacultyId.Empty;
     [BindProperty]
     public decimal FTEValue { get; set; }

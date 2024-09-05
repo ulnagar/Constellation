@@ -29,8 +29,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using Shared.Components.ReinstateStudent;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -62,7 +62,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Student Details";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId Id { get; set; } = StudentId.Empty;
 
     public StudentResponse Student { get; set; }
@@ -173,7 +172,9 @@ public class DetailsModel : BasePageModel
         await PreparePage(cancellationToken);
     }
 
-    public async Task OnGetReinstate(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnPostReinstate(
+        ReinstateStudentSelection viewModel,
+        CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
@@ -185,12 +186,12 @@ public class DetailsModel : BasePageModel
 
             GenerateError(DomainErrors.Permissions.Unauthorised);
             await PreparePage(cancellationToken);
-            return;
+            return Page();
         }
 
         // TODO: R1.16.0: Implement new reinstate student functionality with proposed school and grade linked
 
-        ReinstateStudentCommand command = new(Id);
+        ReinstateStudentCommand command = new(Id, viewModel.SchoolCode, viewModel.Grade);
 
         _logger
             .ForContext(nameof(ReinstateStudentCommand), command, true)
@@ -206,14 +207,14 @@ public class DetailsModel : BasePageModel
 
             GenerateError(result.Error);
             await PreparePage(cancellationToken);
-            return;
+            return Page();
         }
 
-        await PreparePage(cancellationToken);
+        return RedirectToPage();
     }
 
     public async Task OnGetUnenrol(
-        [ModelBinder(typeof(ConstructorBinder))] OfferingId offeringId, 
+        OfferingId offeringId, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);

@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Students.Identifiers;
 
+using Primitives;
 using System;
 
 public readonly record struct StudentId(Guid Value)
+    : IStronglyTypedId
 {
     public static StudentId Empty => new(Guid.Empty);
 

@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct AwardNominationPeriodId(Guid Value)
+    : IStronglyTypedId
 {
     public static AwardNominationPeriodId Empty => new(Guid.Empty);
 

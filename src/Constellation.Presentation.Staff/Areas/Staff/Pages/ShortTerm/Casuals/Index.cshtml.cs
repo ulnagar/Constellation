@@ -15,7 +15,6 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.Threading;
 
@@ -50,7 +49,7 @@ public class IndexModel : BasePageModel
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnGetDelete(
-        [ModelBinder(typeof(ConstructorBinder))] CasualId id, 
+        CasualId id, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);
@@ -89,7 +88,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetRestore(
-        [ModelBinder(typeof(ConstructorBinder))] CasualId id, 
+        CasualId id, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);

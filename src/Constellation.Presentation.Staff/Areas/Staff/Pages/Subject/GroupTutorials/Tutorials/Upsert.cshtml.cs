@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditGroupTutorials)]
@@ -42,7 +41,6 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Group Tutorial";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public GroupTutorialId Id { get; set; } = GroupTutorialId.Empty;
 
     [BindProperty]

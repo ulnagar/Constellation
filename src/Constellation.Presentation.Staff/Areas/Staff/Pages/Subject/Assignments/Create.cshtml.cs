@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
@@ -51,7 +50,6 @@ public class CreateModel : BasePageModel
 
     public SelectList Courses { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId Id { get; set; } = CourseId.Empty;
     public string CourseName { get; set; }
 

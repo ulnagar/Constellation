@@ -1,10 +1,12 @@
 ﻿#nullable enable
 namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
+using Core.Primitives;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using System.ComponentModel;
 
-public sealed class ConstructorBinder : IModelBinder
+public sealed class StronglyTypedIdBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
@@ -41,4 +43,19 @@ public sealed class ConstructorBinder : IModelBinder
 
     private Type? GetContainedType(Type idType) =>
         idType.GetProperty("Value")?.PropertyType;
+}
+
+public sealed class StronglyTypedIdBinderProvider : IModelBinderProvider
+{
+    public IModelBinder GetBinder(ModelBinderProviderContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+
+        Type[] interfaceTypes = context.Metadata.ModelType.FindInterfaces((type, criteria) => type.ToString() == criteria.ToString(), typeof(IStronglyTypedId));
+
+        if (interfaceTypes.Contains(typeof(IStronglyTypedId)))
+            return new BinderTypeModelBinder(typeof(StronglyTypedIdBinder));
+
+        return null;
+    }
 }

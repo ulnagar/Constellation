@@ -5,6 +5,7 @@ using Constellation.Application.Families.Models;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,12 +22,23 @@ public class FamilyAddStudentViewComponent : ViewComponent
     public async Task<IViewComponentResult> InvokeAsync(FamilyId familyId)
     {
         Result<FamilyResponse> familyResult = await _mediator.Send(new GetFamilyByIdQuery(familyId));
-        Result<Dictionary<string, string>> studentResult = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+
+        if (familyResult.IsFailure)
+        {
+            return Content(string.Empty);
+        }
+
+        Result<Dictionary<StudentId, string>> studentResult = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+
+        if (studentResult.IsFailure)
+        {
+            return Content(string.Empty);
+        }
 
         FamilyAddStudentSelection viewModel = new()
         {
             FamilyId = familyId,
-            FamilyName = familyResult.Value?.FamilyName,
+            FamilyName = familyResult.Value.FamilyName,
             Students = studentResult.Value
         };
 

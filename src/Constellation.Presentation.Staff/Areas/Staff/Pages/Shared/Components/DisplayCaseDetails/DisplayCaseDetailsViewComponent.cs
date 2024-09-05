@@ -3,7 +3,6 @@
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Core.Models.WorkFlow.Repositories;
-using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Microsoft.AspNetCore.Mvc;
 
 public class DisplayCaseDetailsViewComponent : ViewComponent
@@ -16,7 +15,7 @@ public class DisplayCaseDetailsViewComponent : ViewComponent
         _caseRepository = caseRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync([ModelBinder(typeof(ConstructorBinder))] CaseId caseId)
+    public async Task<IViewComponentResult> InvokeAsync(CaseId caseId)
     {
         Case? item = await _caseRepository.GetById(caseId);
 

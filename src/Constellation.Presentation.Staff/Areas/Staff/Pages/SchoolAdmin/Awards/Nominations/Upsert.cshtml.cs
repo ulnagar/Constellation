@@ -42,7 +42,6 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Award Period";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId Id { get; set; } = AwardNominationPeriodId.Empty;
 
     [BindProperty]

@@ -9,10 +9,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Shared.Helpers.ModelBinders;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 [AllowAnonymous]
@@ -30,7 +28,6 @@ public class StudentsModel : PageModel
     public bool ShowAll { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId StudentId { get; set; } = StudentId.Empty;
     public string StudentName { get; set; }
 

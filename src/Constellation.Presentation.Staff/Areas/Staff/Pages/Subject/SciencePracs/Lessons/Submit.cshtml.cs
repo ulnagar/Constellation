@@ -7,12 +7,12 @@ using Constellation.Application.SciencePracs.SubmitRoll;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
@@ -41,10 +41,8 @@ public class SubmitModel : BasePageModel
     [ViewData] public string PageTitle => "Submit Lesson Roll";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracLessonId LessonId { get; set; }
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracRollId RollId { get; set; }
 
     public string LessonName { get; set; }
@@ -146,7 +144,7 @@ public class SubmitModel : BasePageModel
     public class AttendanceRecord
     {
         public SciencePracAttendanceId? Id { get; set; }
-        public string StudentId { get; set; }
+        public StudentId StudentId { get; set; }
         public string? Name { get; set; }
         public bool Present { get; set; }
     }

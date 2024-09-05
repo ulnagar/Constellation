@@ -5,7 +5,9 @@ using Application.Models.Auth;
 using Application.Timetables.GetStudentTimetableExport;
 using Constellation.Application.DTOs;
 using Constellation.Application.Timetables.GetStudentTimetableData;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +45,7 @@ public class ViewModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
 
     public StudentTimetableDataDto StudentTimetableData { get; set; }
 

@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.Attributes;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.UploadTrainingCompletionCertificate;
 using System;
@@ -67,11 +66,9 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     [Required(ErrorMessage = "You must select a training module")]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingModuleId ModuleId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingCompletionId Id { get; set; }
 
     [BindProperty]

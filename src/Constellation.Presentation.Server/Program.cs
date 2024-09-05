@@ -8,6 +8,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Infrastructure;
 using Constellation.Presentation.Server.Services;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
@@ -99,7 +100,10 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddMvc()
+builder.Services.AddMvc(options =>
+    {
+        options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
+    })
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());

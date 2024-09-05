@@ -9,6 +9,7 @@ using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +46,7 @@ public class StudentModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Student Attendance Details";
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public StudentResponse Student { get; set; }
     public List<AttendanceValue> Points { get; set; } = new();
@@ -54,7 +55,7 @@ public class StudentModel : BasePageModel
     {
         _logger.Information("Requested to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
 
-        if (string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId == StudentId.Empty)
         {
             Error error = new("Page.Parameter.Required", "A valid StudentId must be provided");
 

@@ -44,7 +44,6 @@ public class ExplainModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Absences;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceId AbsenceId { get; set; }
 
     public string StudentName { get; set; } = string.Empty;

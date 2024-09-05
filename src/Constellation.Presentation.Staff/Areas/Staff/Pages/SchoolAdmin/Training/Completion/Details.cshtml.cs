@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.Threading.Tasks;
 
@@ -49,11 +48,9 @@ public class DetailsModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingCompletionId CompletionId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingModuleId ModuleId { get; set; }
 
     public CompletionRecordDto? Record { get; set; } = new();

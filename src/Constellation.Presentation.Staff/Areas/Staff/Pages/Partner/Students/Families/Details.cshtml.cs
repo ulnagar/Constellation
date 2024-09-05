@@ -56,7 +56,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Family Details";
     
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public FamilyId Id { get; set; }
 
     public FamilyDetailsResponse? Family { get; set; }
@@ -65,8 +64,8 @@ public class DetailsModel : BasePageModel
         => await PreparePage(cancellationToken);
     
     public async Task<IActionResult> OnPostAjaxDeleteStudent(
-        [ModelBinder(typeof(ConstructorBinder))] FamilyId familyId,
-        [ModelBinder(typeof(ConstructorBinder))] StudentId studentId)
+        FamilyId familyId,
+        StudentId studentId)
     {
         Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
@@ -85,7 +84,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetRemoveStudent(
-        [ModelBinder(typeof(ConstructorBinder))] StudentId studentId,
+        StudentId studentId,
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -133,8 +132,8 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxDeleteParent(
-        [ModelBinder(typeof(ConstructorBinder))] FamilyId familyId,
-        [ModelBinder(typeof(ConstructorBinder))] ParentId parentId)
+        FamilyId familyId,
+        ParentId parentId)
     {
         Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
@@ -153,7 +152,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetRemoveParent(
-        [ModelBinder(typeof(ConstructorBinder))] ParentId parentId, 
+        ParentId parentId, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);

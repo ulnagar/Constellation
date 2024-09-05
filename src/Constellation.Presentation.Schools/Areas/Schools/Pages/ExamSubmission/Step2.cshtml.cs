@@ -6,6 +6,7 @@ using Constellation.Application.Courses.GetCoursesForStudent;
 using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -45,7 +47,7 @@ public class Step2Model : BasePageModel
 
     public SelectList Students { get; set; }
     [BindProperty]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
 
     public SelectList Courses { get; set; }
     public CourseId CourseId { get; set; }

@@ -42,7 +42,6 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public StudentResponse? SelectedStudent { get; set; }

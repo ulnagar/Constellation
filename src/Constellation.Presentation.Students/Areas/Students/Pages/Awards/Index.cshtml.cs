@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.Threading.Tasks;
 
@@ -52,8 +51,7 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet() => await PreparePage();
 
-    public async Task<IActionResult> OnGetDownloadCertificate(
-        [ModelBinder(typeof(ConstructorBinder))] StudentAwardId awardId)
+    public async Task<IActionResult> OnGetDownloadCertificate(StudentAwardId awardId)
     {
         GetAttachmentFileQuery command = new(AttachmentType.AwardCertificate, awardId.ToString());
 

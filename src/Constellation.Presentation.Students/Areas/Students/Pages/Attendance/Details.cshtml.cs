@@ -7,7 +7,6 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -42,7 +41,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceId Id { get; set; }
 
     public AbsenceForStudentResponse? Absence { get; set; }

@@ -11,7 +11,6 @@ public sealed class AllocateDeviceSelection
     [ModelBinder(typeof(BaseFromValueBinder))]
     public AllocationType AllocationType { get; set; }
 
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId StudentId { get; set; } = StudentId.Empty;
     public string SchoolCode { get; set; } = string.Empty;
     public string StaffId { get; set; } = string.Empty;

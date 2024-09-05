@@ -50,7 +50,6 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Student";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId Id { get; set; } = StudentId.Empty;
 
 

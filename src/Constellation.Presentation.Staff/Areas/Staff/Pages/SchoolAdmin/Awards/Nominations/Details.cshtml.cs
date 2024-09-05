@@ -45,7 +45,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Award Nomination Details";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId PeriodId { get; set; }
 
     public NominationPeriodDetailResponse Period { get; set; }
@@ -79,7 +78,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDelete(
-        [ModelBinder(typeof(ConstructorBinder))] AwardNominationId entryId, 
+        AwardNominationId entryId, 
         CancellationToken cancellationToken = default)
     {
         DeleteAwardNominationCommand command = new(PeriodId, entryId);

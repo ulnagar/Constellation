@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Offerings.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct SessionId(Guid Value)
+    : IStronglyTypedId
 {
     public static SessionId Empty => new(Guid.Empty);
 

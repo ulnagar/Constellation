@@ -46,7 +46,6 @@ public class BulkEnrolModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Bulk Enrol";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId Id { get; set; }
 
     public StudentResponse Student { get; set; }

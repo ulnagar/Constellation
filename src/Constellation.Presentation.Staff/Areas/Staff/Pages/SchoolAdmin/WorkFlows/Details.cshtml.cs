@@ -64,7 +64,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Cases;
     [ViewData] public string PageTitle => "WorkFlow Case Details";
 
-    [ModelBinder(typeof(ConstructorBinder))]
     [BindProperty(SupportsGet = true)]
     public CaseId Id { get; set; }
 
@@ -131,8 +130,7 @@ public class DetailsModel : BasePageModel
         return Partial("ConfirmActionUpdateModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetCancelAction(
-        [ModelBinder(typeof(ConstructorBinder))] ActionId actionId)
+    public async Task<IActionResult> OnGetCancelAction(ActionId actionId)
     {
         CancelActionCommand command = new(Id, actionId);
 
@@ -174,7 +172,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAddActionNote(
-        [ModelBinder(typeof(ConstructorBinder))] ActionId actionId, 
+        ActionId actionId, 
         string note)
     {
         AddActionNoteCommand command = new(Id, actionId, note);
@@ -220,7 +218,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostReassignAction(
-        [ModelBinder(typeof(ConstructorBinder))] ActionId actionId, 
+        ActionId actionId, 
         string staffId)
     {
         ReassignActionCommand command = new(Id, actionId, staffId);

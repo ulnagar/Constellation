@@ -67,8 +67,7 @@ public class IndexModel : BasePageModel
             .ToList();
     }
 
-    public async Task<IActionResult> OnGetDownload(
-        [ModelBinder(typeof(ConstructorBinder))] AcademicReportId reportId)
+    public async Task<IActionResult> OnGetDownload(AcademicReportId reportId)
     {
         _logger.Information("Requested to download report data by user {user} for Id {reportId}", _currentUserService.UserName, reportId);
 

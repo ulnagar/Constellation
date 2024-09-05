@@ -45,7 +45,6 @@ public class Step2Model : BasePageModel
     [ViewData] public string PageTitle => "New Award Nomination";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId PeriodId { get; set; }
 
     [BindProperty]

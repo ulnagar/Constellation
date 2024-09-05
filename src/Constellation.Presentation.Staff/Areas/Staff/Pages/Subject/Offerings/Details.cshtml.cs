@@ -21,6 +21,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,7 +64,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Offering Details";
     
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId Id { get; set; } = OfferingId.Empty;
 
     public OfferingDetailsResponse Offering { get; set; }
@@ -125,7 +125,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetUnenrolStudent(
-        string studentId)
+        StudentId studentId)
     {
         UnenrolStudentCommand command = new(studentId, Id);
 
@@ -155,7 +155,7 @@ public class DetailsModel : BasePageModel
 
     public IActionResult OnPostAjaxRemoveSession(
         string sessionPeriod,
-        [ModelBinder(typeof(ConstructorBinder))] SessionId sessionId,
+        SessionId sessionId,
         string courseName,
         string offeringName)
     {
@@ -169,8 +169,7 @@ public class DetailsModel : BasePageModel
         return Partial("RemoveSessionModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetRemoveSession(
-        [ModelBinder(typeof(ConstructorBinder))] SessionId sessionId)
+    public async Task<IActionResult> OnGetRemoveSession(SessionId sessionId)
     {
         RemoveSessionCommand command = new(Id, sessionId);
 
@@ -361,7 +360,7 @@ public class DetailsModel : BasePageModel
         string offeringName,
         string resourceName,
         string resourceType,
-        [ModelBinder(typeof(ConstructorBinder))] ResourceId resourceId)
+        ResourceId resourceId)
     {
     RemoveResourceFromOfferingModalViewModel viewModel = new(
             Id,
@@ -374,8 +373,7 @@ public class DetailsModel : BasePageModel
         return Partial("RemoveResourceFromOfferingModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetRemoveResource(
-        [ModelBinder(typeof(ConstructorBinder))] ResourceId resourceId)
+    public async Task<IActionResult> OnGetRemoveResource(ResourceId resourceId)
     {
         RemoveResourceFromOfferingCommand command = new(Id, resourceId);
 

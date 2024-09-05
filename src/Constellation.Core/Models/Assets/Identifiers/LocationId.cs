@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Assets.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct LocationId(Guid Value)
+    : IStronglyTypedId
 {
     public static readonly LocationId Empty = new(Guid.Empty);
 

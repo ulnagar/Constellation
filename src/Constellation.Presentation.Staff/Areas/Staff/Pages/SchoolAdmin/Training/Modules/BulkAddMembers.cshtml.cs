@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
@@ -44,7 +43,6 @@ public class BulkAddMembersModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingModuleId Id { get; set; }
 
     public ModuleDetailsDto Module { get; set; }

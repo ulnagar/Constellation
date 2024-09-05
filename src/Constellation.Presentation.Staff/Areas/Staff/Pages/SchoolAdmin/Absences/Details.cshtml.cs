@@ -9,12 +9,12 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -46,7 +46,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Absence Details";
     
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AbsenceId Id { get; set; }
 
     public AbsenceDetailsResponse Absence;
@@ -74,7 +73,9 @@ public class DetailsModel : BasePageModel
         PageTitle = $"Absence Details - {result.Value.StudentName.DisplayName}";
     }
 
-    public async Task<IActionResult> OnGetSendNotification(string studentId, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnGetSendNotification(
+        StudentId studentId, 
+        CancellationToken cancellationToken = default)
     {
         _logger.Information("Requested to send notification for Absence with id {Id} by user {User}", Id, _currentUserService.UserName);
 

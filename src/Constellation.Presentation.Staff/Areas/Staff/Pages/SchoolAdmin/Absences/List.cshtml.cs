@@ -14,6 +14,7 @@ using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -54,7 +55,7 @@ public class ListModel : BasePageModel
 
     public List<SchoolSelectionListResponse> SchoolsList { get; set; } = new();
 
-    public Dictionary<string, string> StudentsList { get; set; } = new();
+    public Dictionary<StudentId, string> StudentsList { get; set; } = new();
 
     public List<FilteredAbsenceResponse> Absences { get; set; } = new();
 
@@ -167,7 +168,7 @@ public class ListModel : BasePageModel
 
         SchoolsList = schoolsRequest.Value;
 
-        Result<Dictionary<string, string>> studentsRequest = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
+        Result<Dictionary<StudentId, string>> studentsRequest = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
 
         if (studentsRequest.IsFailure)
         {
@@ -219,7 +220,7 @@ public class ListModel : BasePageModel
         public List<Guid> Offerings { get; set; } = new();
         public List<Grade> Grades { get; set; } = new();
         public List<string> Schools { get; set; } = new();
-        public List<string> Students { get; set; } = new();
+        public List<StudentId> Students { get; set; } = new();
 
         public FilterAction Action { get; set; } = FilterAction.Filter;
 

@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -131,7 +130,6 @@ public class AttendanceModel : BasePageModel
 
     public class WorkFlowNeeded
     {
-        [ModelBinder(typeof(ConstructorBinder))]
         public StudentId StudentId { get; set; }
         public ActionType Type { get; set; }
 

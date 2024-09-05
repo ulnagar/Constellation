@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
@@ -45,7 +44,6 @@ public class AddSessionsModel : BasePageModel
     [ViewData] public string PageTitle => "Bulk Add Sessions";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId Id { get; set; }
 
     public string CourseName { get; set; }

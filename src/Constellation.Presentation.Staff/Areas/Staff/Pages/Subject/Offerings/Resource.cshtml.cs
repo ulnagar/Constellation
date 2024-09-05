@@ -49,7 +49,6 @@ public class ResourceModel : BasePageModel
     [ViewData] public string PageTitle => "Add Resource";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId Id { get; set; } = OfferingId.Empty;
 
     [BindProperty]

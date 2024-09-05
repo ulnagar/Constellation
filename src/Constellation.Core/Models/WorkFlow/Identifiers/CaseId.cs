@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct CaseId(Guid Value)
+    : IStronglyTypedId
 {
     public static readonly CaseId Empty = new(Guid.Empty);
 

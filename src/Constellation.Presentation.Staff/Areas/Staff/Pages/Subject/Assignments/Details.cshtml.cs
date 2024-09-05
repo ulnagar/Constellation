@@ -11,12 +11,12 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.UploadAssignmentSubmission;
 using AssignmentId = Core.Models.Assignments.Identifiers.AssignmentId;
@@ -48,7 +48,6 @@ public class DetailsModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AssignmentId Id { get; set; } = AssignmentId.Empty;
 
     public AssignmentResponse Assignment { get; set; }
@@ -99,7 +98,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetResubmit(
-        [ModelBinder(typeof(ConstructorBinder))] AssignmentSubmissionId submission, 
+        AssignmentSubmissionId submission, 
         CancellationToken cancellationToken)
     {
         ResendAssignmentSubmissionToCanvasCommand command = new(Id, submission);
@@ -125,7 +124,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDownload(
-    [ModelBinder(typeof(ConstructorBinder))] AssignmentSubmissionId submission, 
+        AssignmentSubmissionId submission, 
         CancellationToken cancellationToken)
     {
         GetAssignmentSubmissionFileQuery command = new(Id, submission);
@@ -154,7 +153,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpload(AssignmentStudentSelection viewModel, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StudentId))
+        if (viewModel.StudentId == StudentId.Empty)
         {
             ModalContent = new ErrorDisplay(
                 new("Page.Parameter.InvalidValue", "The student Id value is invalid"),

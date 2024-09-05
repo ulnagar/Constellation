@@ -8,7 +8,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Shared.Helpers.ModelBinders;
 using System;
 using System.Threading.Tasks;
 
@@ -30,7 +29,6 @@ public class StudentExplanationModel : PageModel
     [BindProperty]
     public string Reason { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)

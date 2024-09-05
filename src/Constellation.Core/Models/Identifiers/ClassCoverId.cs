@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct ClassCoverId(Guid Value)
+    : IStronglyTypedId
 {
     public static ClassCoverId Empty => new(Guid.Empty);
 

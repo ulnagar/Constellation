@@ -12,6 +12,7 @@ using Constellation.Application.Students.GetStudentById;
 using Constellation.Application.Students.Models;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,14 +45,14 @@ public class IndexModel : BasePageModel
     public string SchoolCode { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public string ReportFor { get; set; }
     public List<RollSummaryResponse> Rolls { get; set; } = new();
     
     public async Task OnGet()
     {
-        if (!string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId != StudentId.Empty)
         {
             _logger.Information("Requested to retrieve Lesson Rolls for Student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
 

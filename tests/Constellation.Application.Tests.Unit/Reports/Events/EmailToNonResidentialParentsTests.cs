@@ -11,6 +11,7 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Errors;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Moq;
 
@@ -22,6 +23,8 @@ public class EmailToNonResidentialParentsTests
     private readonly Mock<IAttachmentService> _attachmentServiceMock;
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<Serilog.ILogger> _loggerMock;
+
+    private readonly StudentId _studentId = StudentId.FromValue(new("27864b85-a672-48cb-a93a-ad671ba72d24"));
 
     public EmailToNonResidentialParentsTests()
     {
@@ -89,7 +92,7 @@ public class EmailToNonResidentialParentsTests
 
         var academicReport = AcademicReport.Create(
             notification.ReportId,
-            "123456789",
+            _studentId,
             "1234",
             "2023",
             "Year 7, Semester 1, 2023");
@@ -144,7 +147,7 @@ public class EmailToNonResidentialParentsTests
 
         var academicReport = AcademicReport.Create(
             notification.ReportId,
-            "123456789",
+            _studentId,
             "1234",
             "2023",
             "Year 7, Semester 1, 2023");
@@ -176,7 +179,7 @@ public class EmailToNonResidentialParentsTests
 
         _familyRepositoryMock.Setup(
             x => x.GetFamiliesByStudentId(
-                It.IsAny<string>(),
+                It.IsAny<StudentId>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => null)
             .Verifiable();

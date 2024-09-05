@@ -44,7 +44,6 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Reports;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(StudentId))]
     public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public StudentResponse? SelectedStudent { get; set; }
@@ -55,8 +54,7 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet() => await PreparePage();
 
-    public async Task<IActionResult> OnGetDownload(
-        [ModelBinder(typeof(ConstructorBinder))] AcademicReportId reportId)
+    public async Task<IActionResult> OnGetDownload(AcademicReportId reportId)
     {
         Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, reportId.ToString()));
 

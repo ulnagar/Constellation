@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Training.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct TrainingModuleId(Guid Value)
+    : IStronglyTypedId
 {
     public static readonly TrainingModuleId Empty = new(Guid.Empty);
 

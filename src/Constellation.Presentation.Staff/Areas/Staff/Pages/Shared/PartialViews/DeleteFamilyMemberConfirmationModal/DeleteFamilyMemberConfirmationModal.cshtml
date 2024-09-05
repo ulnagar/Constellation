@@ -1,5 +1,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.DeleteFamilyMemberConfirmationModal.DeleteFamilyMemberConfirmationModalViewModel
 
+@using Constellation.Core.Models.Students.Identifiers
+
 <div class="modal-header">
     <h5 class="modal-title">@Model.Title</h5>
 </div>
@@ -11,7 +13,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    @if (string.IsNullOrWhiteSpace(Model.StudentId))
+    @if (Model.StudentId == StudentId.Empty)
     {
         <a asp-page-handler="RemoveParent" asp-route-parentId="@Model.ParentId" class="btn btn-danger">Remove</a>
     }

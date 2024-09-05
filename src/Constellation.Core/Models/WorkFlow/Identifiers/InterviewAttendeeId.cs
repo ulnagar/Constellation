@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.WorkFlow.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public readonly record struct InterviewAttendeeId(Guid Value)
+    : IStronglyTypedId
 {
     public static InterviewAttendeeId Empty = new(Guid.Empty);
 

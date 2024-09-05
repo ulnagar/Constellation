@@ -20,7 +20,7 @@
 
         @if (Model.Student.IsDeleted)
         {
-            <a asp-page-handler="Reinstate" class="btn btn-danger">Re-enrol</a>
+            <button data-toggle="modal" data-target="#reinstateStudentModal" class="btn btn-danger">Re-enrol</button>
         }
         else
         {
@@ -406,3 +406,5 @@
         </div>
     </div>
 </div>
+
+<vc:reinstate-student />
