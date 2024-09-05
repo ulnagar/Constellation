@@ -3,7 +3,6 @@
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
-using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -13,6 +12,7 @@ public sealed class EmailAddress : ValueObject
 
     public static readonly EmailAddress None = new("");
 
+    private EmailAddress() { }
     private EmailAddress(string email)
     {
         Email = email;

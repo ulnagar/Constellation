@@ -11,6 +11,8 @@ using System;
 
 public sealed class SchoolEnrolment : IAuditableEntity
 {
+    private SchoolEnrolment() { }
+
     private SchoolEnrolment(
         StudentId studentId,
         string schoolCode,

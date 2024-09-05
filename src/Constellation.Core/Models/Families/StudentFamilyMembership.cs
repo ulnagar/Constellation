@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 public sealed class StudentFamilyMembership
 {
-    //private StudentFamilyMembership() { }
+    private StudentFamilyMembership() { }
 
     [JsonConstructor]
     private StudentFamilyMembership(

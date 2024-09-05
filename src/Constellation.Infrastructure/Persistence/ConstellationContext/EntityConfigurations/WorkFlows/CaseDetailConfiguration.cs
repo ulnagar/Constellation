@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.WorkFlows;
 
 using Core.Models.Attendance.Identifiers;
+using Core.Models.Students.Identifiers;
 using Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -52,6 +53,12 @@ internal sealed class AttendanceCaseDetailConfiguration : IEntityTypeConfigurati
             .HasColumnName(nameof(AttendanceCaseDetail.StudentId));
 
         builder
+            .Property(detail => detail.StudentId)
+            .HasConversion(
+                id => id.Value,
+                value => StudentId.FromValue(value));
+
+        builder
             .Property(detail => detail.Name)
             .HasColumnName(nameof(AttendanceCaseDetail.Name));
 
@@ -76,6 +83,12 @@ internal sealed class ComplianceCaseDetailConfiguration : IEntityTypeConfigurati
         builder
             .Property(detail => detail.StudentId)
             .HasColumnName(nameof(ComplianceCaseDetail.StudentId));
+
+        builder
+            .Property(detail => detail.StudentId)
+            .HasConversion(
+                id => id.Value,
+                value => StudentId.FromValue(value));
 
         builder
             .Property(detail => detail.Name)

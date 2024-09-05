@@ -5,6 +5,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,6 +34,12 @@ public class StudentMSTeamOperationConfiguration : IEntityTypeConfiguration<Stud
             .WithMany()
             .HasForeignKey(o => o.StudentId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(operation => operation.StudentId)
+            .HasConversion(
+                id => id.Value,
+                value => StudentId.FromValue(value));
     }
 }
 
@@ -125,6 +132,12 @@ public class StudentOfferingMSTeamOperationConfiguration : IEntityTypeConfigurat
             .HasColumnName(nameof(StudentOfferingMSTeamOperation.StudentId));
 
         builder
+            .Property(operation => operation.StudentId)
+            .HasConversion(
+                id => id.Value,
+                value => StudentId.FromValue(value));
+
+        builder
             .HasOne<Student>()
             .WithMany()
             .HasForeignKey(operation => operation.StudentId)
@@ -141,5 +154,17 @@ public class ContactAddedMSTeamOperationConfiguration : IEntityTypeConfiguration
             .HasConversion(
                 id => id.Value,
                 value => SchoolContactId.FromValue(value));
+    }
+}
+
+public class StudentEnrolledMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentEnrolledMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<StudentEnrolledMSTeamOperation> builder)
+    {
+        builder
+            .Property(operation => operation.StudentId)
+            .HasConversion(
+                id => id.Value,
+                value => StudentId.FromValue(value));
     }
 }

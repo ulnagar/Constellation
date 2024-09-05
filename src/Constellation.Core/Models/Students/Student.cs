@@ -20,6 +20,8 @@ public class Student : AggregateRoot, IAuditableEntity
     private readonly List<SchoolEnrolment> _schoolEnrolments = new();
     private readonly List<SystemLink> _systemLinks = new();
 
+    private Student() { }
+
     private Student(
         StudentReferenceNumber studentReferenceNumber,
         Name name,

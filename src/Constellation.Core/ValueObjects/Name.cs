@@ -8,6 +8,8 @@ using System.Collections.Generic;
 
 public sealed class Name : ValueObject, IComparable
 {
+    private Name() { }
+
     private Name(string firstName, string preferredName, string lastName)
     {
         FirstName = firstName;

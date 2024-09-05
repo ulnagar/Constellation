@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Students;
 
 using Constellation.Core.Models.Students;
 using Core.Models.Absences;
@@ -14,7 +14,10 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 {
     public void Configure(EntityTypeBuilder<Student> builder)
     {
-        builder.HasKey(student => student.Id);
+        builder.ToTable("Students", "Students");
+
+        builder
+            .HasKey(student => student.Id);
 
         builder
             .Property(student => student.Id)
@@ -23,15 +26,18 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
                 value => StudentId.FromValue(value));
 
         builder
-            .Property(student => student.StudentReferenceNumber)
-            .IsRequired(false)
-            .HasConversion(
-                entry => entry.Number,
-                value => StudentReferenceNumber.FromValue(value));
+            .OwnsOne(student => student.StudentReferenceNumber);
 
-        builder
-            .HasIndex(student => student.StudentReferenceNumber)
-            .IsUnique();
+        //builder
+        //    .Property(student => student.StudentReferenceNumber)
+        //    .IsRequired(false)
+        //    .HasConversion(
+        //        entry => entry.Number,
+        //        value => StudentReferenceNumber.FromValue(value));
+
+        //builder
+        //    .HasIndex(student => student.StudentReferenceNumber)
+        //    .IsUnique();
 
         builder
             .OwnsOne(student => student.Name);
@@ -77,13 +83,23 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder
             .HasMany(student => student.SchoolEnrolments)
             .WithOne()
-            .HasForeignKey(student => student.Id)
+            .HasForeignKey(enrolment => enrolment.StudentId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .Navigation(student => student.SchoolEnrolments)
             .AutoInclude();
-            
+
+        builder
+            .HasMany(student => student.SystemLinks)
+            .WithOne()
+            .HasForeignKey(link => link.StudentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .Navigation(student => student.SystemLinks)
+            .AutoInclude();
+
         builder
             .HasMany<StudentFamilyMembership>()
             .WithOne()

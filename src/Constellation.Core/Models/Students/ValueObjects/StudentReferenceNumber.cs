@@ -14,9 +14,11 @@ public sealed class StudentReferenceNumber : ValueObject
 
     public string Number { get; }
 
-    private StudentReferenceNumber(string srn)
+    private StudentReferenceNumber() { }
+
+    private StudentReferenceNumber(string number)
     {
-        Number = srn;
+        Number = number;
     }
 
     public static Result<StudentReferenceNumber> Create(string srn)

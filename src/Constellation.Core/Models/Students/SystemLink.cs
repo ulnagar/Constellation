@@ -7,6 +7,8 @@ using Shared;
 
 public sealed class SystemLink
 {
+    private SystemLink() { }
+
     private SystemLink(
         StudentId studentId,
         SystemType system,
