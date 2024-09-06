@@ -114,7 +114,7 @@ public class UpsertModel : BasePageModel
         FirstName = student.Value.Name.FirstName;
         LastName = student.Value.Name.LastName;
         Gender = student.Value.Gender;
-        Grade = student.Value.Grade;
+        Grade = student.Value.Grade!.Value;
         EmailAddress = student.Value.EmailAddress.Email;
         SchoolCode = student.Value.SchoolCode;
 

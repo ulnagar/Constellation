@@ -206,7 +206,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         if (existingMembership is null)
         {
-            var membership = StudentFamilyMembership.Create(studentId, studentReferenceNumber, Id, isResidential);
+            var membership = StudentFamilyMembership.Create(studentId, Id, isResidential);
 
             RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new DomainEventId(), membership));
 

@@ -3,6 +3,7 @@
 
 @inject IAuthorizationService authorizationService;
 
+@using Constellation.Application.Absences.GetAbsenceSummaryForStudent
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Families;
 @using Constellation.Core.ValueObjects
@@ -78,7 +79,7 @@
             <label asp-for="Student.Grade"></label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Student.Grade.AsName()</span>
+            <span>@Model.Student.Grade?.AsName()</span>
         </dd>
     </dl>
 </div>
@@ -304,7 +305,7 @@
         <div id="studentAbsences" class="tab-pane">
             <h3>Absences</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover absence-data-table">
                 <thead>
                 <tr>
                     <th>Explained</th>
@@ -316,10 +317,10 @@
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (var item in Model.Absences.OrderBy(a => a.AbsenceDate).ThenBy(a => a.Timeframe))
+                @foreach (StudentAbsenceSummaryResponse item in Model.Absences)
                 {
                     <tr>
-                        <td data-order="@item.AbsenceDate.ToString("yyyy-MM-dd")">
+                        <td data-order="@item.IsExplained">
                             @if (item.IsExplained)
                             {
                                 <i class="fal fa-comment-check" />
@@ -330,8 +331,8 @@
                             }
                         </td>
                         <td>@item.AbsenceType</td>
-                        <td>@item.AbsenceDate.ToShortDateString()</td>
-                        <td>@item.Timeframe (@item.PeriodName)</td>
+                        <td data-order="@item.AbsenceDate.ToString("yyyy-MM-dd")">@item.AbsenceDate.ToShortDateString()</td>
+                        <td data-order="@item.Timeframe">@item.Timeframe (@item.PeriodName)</td>
                         <td>@item.OfferingName</td>
                         <td>
                             <a asp-page="/SchoolAdmin/Absences/Details" asp-area="Staff" asp-route-Id="@item.AbsenceId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
@@ -408,3 +409,16 @@
 </div>
 
 <vc:reinstate-student />
+
+@section scripts {
+    <script>
+        $(document).ready(function (){
+            $('.absence-data-table').DataTable({
+                "order": [
+                    [2, 'asc'],
+                    [3, 'asc']
+                ] 
+            });
+        })
+    </script>
+}

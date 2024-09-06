@@ -236,15 +236,16 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 }
 
                 List<StudentFamilyMembership> linkedStudents = entry.Students.ToList();
-                foreach (StudentFamilyMembership student in linkedStudents)
+                List<Student> existingStudents = await _studentRepository.GetListFromIds(linkedStudents.Select(student => student.StudentId).ToList(), token);
+                foreach (Student student in existingStudents)
                 {
                     if (!family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number))
                     {
                         _logger
-                            .Information("Removing student {name} from family {family} ({code})", student.StudentId, family.AddressName, family.FamilyId);
+                            .Information("Removing student {name} from family {family} ({code})", student.Name.DisplayName, family.AddressName, family.FamilyId);
 
                         // Student should not be linked
-                        entry.RemoveStudent(student.StudentId);
+                        entry.RemoveStudent(student.Id);
                     }
                 }
 

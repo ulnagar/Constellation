@@ -29,7 +29,18 @@ internal sealed class GetStudentByIdQueryHandler
         SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
-            return Result.Failure<StudentResponse>(SchoolEnrolmentErrors.NotFound);
+        {
+            return new StudentResponse(
+                student.Id,
+                student.StudentReferenceNumber,
+                student.Name,
+                student.Gender,
+                null,
+                student.EmailAddress,
+                null,
+                null,
+                student.IsDeleted);
+        }
 
         return new StudentResponse(
             student.Id,

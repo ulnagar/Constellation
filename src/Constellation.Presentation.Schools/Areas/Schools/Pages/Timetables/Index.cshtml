@@ -31,7 +31,7 @@
                     var first = group.First();
 
                     <tr class="group">
-                        <td colspan="3">@first.Grade.AsName()</td>
+                        <td colspan="3">@first.Grade?.AsName()</td>
                     </tr>
 
                     @foreach (var item in group)

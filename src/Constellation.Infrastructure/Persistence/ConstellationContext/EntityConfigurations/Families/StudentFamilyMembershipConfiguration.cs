@@ -25,8 +25,5 @@ internal sealed class StudentFamilyMembershipConfiguration : IEntityTypeConfigur
             .WithMany(family => family.Students)
             .HasForeignKey(member => member.FamilyId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder
-            .OwnsOne(family => family.StudentReferenceNumber);
     }
 }

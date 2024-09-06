@@ -26,21 +26,37 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
                 value => StudentId.FromValue(value));
 
         builder
-            .OwnsOne(student => student.StudentReferenceNumber);
-
-        //builder
-        //    .Property(student => student.StudentReferenceNumber)
-        //    .IsRequired(false)
-        //    .HasConversion(
-        //        entry => entry.Number,
-        //        value => StudentReferenceNumber.FromValue(value));
-
-        //builder
-        //    .HasIndex(student => student.StudentReferenceNumber)
-        //    .IsUnique();
+            .Property(student => student.StudentReferenceNumber)
+            .IsRequired(false)
+            .HasConversion(
+                entry => entry.Number,
+                value => StudentReferenceNumber.FromValue(value));
 
         builder
-            .OwnsOne(student => student.Name);
+            .HasIndex(student => student.StudentReferenceNumber)
+            .IsUnique();
+
+        //builder
+        //    .OwnsOne(student => student.Name);
+
+        builder
+            .ComplexProperty(student => student.Name)
+            .IsRequired();
+
+        builder
+            .ComplexProperty(student => student.Name)
+            .Property(name => name.FirstName)
+            .IsRequired();
+
+        builder
+            .ComplexProperty(student => student.Name)
+            .Property(name => name.PreferredName)
+            .IsRequired(false);
+
+        builder
+            .ComplexProperty(student => student.Name)
+            .Property(name => name.LastName)
+            .IsRequired();
 
         builder
             .Property(student => student.EmailAddress)
@@ -99,11 +115,6 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder
             .Navigation(student => student.SystemLinks)
             .AutoInclude();
-
-        builder
-            .HasMany<StudentFamilyMembership>()
-            .WithOne()
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder
             .HasMany<Absence>()

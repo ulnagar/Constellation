@@ -7,7 +7,7 @@
 
 @foreach (var group in Model.Students.GroupBy(student => student.Grade))
 {
-    <h4>@group.Key.AsName()</h4>
+    <h4>@group.Key?.AsName()</h4>
 
     <div class="flex-row">
         @foreach (var student in group)

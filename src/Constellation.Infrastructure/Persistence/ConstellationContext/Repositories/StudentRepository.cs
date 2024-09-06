@@ -258,7 +258,7 @@ public class StudentRepository : IStudentRepository
         await _context
             .Set<Student>()
             .Where(student => student.IsDeleted == false)
-            .Where(student => student.SystemLinks.Any(link => link.System == SystemType.Sentral))
+            .Where(student => student.SystemLinks.All(link => link.System != SystemType.Sentral))
             .CountAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentStudentsWithoutSentralId(

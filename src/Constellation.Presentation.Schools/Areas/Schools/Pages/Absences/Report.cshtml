@@ -20,7 +20,7 @@
 
                         if (student is not null)
                         {
-                            <button type="button" id="studentSelect-@student.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@student.StudentId)">@student.Name (@student.Grade.AsName())</button>
+                            <button type="button" id="studentSelect-@student.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@student.StudentId)">@student.Name (@student.Grade?.AsName())</button>
                         }
                     }
                 </div>
@@ -36,7 +36,7 @@
                     <div class="col-4 button-list">
                         @foreach (var entry in list)
                         {
-                            <button type="button" id="studentSelect-@entry.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@entry.StudentId)">@entry.Name (@entry.Grade.AsName())</button>
+                            <button type="button" id="studentSelect-@entry.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@entry.StudentId)">@entry.Name (@entry.Grade?.AsName())</button>
                         }
                     </div>
                 }

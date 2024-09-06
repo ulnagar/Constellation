@@ -11,8 +11,8 @@ public sealed record StudentResponse(
     StudentReferenceNumber StudentReferenceNumber,
     Name Name,
     Gender Gender,
-    Grade Grade,
+    Grade? Grade,
     EmailAddress EmailAddress,
-    string School,
-    string SchoolCode,
+    string? School,
+    string? SchoolCode,
     bool IsDeleted);

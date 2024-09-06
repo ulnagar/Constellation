@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Application.Students.GetFilteredStudents;
 
 using Constellation.Application.Abstractions.Messaging;
+using Core.Enums;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,17 +47,33 @@ internal sealed class GetFilteredStudentsQueryHandler
             SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
-                continue;
+            {
+                enrolment = student.SchoolEnrolments.MaxBy(entry => entry.DeletedAt);
 
-            response.Add(new(
-                student.Id,
-                student.Name,
-                student.Gender.Value,
-                enrolment.Grade,
-                enrolment.SchoolName,
-                enrolment.SchoolCode,
-                enrolmentCount,
-                student.IsDeleted));
+                response.Add(new(
+                    student.Id,
+                    student.StudentReferenceNumber,
+                    student.Name,
+                    student.Gender,
+                    enrolment?.Grade,
+                    enrolment?.SchoolName,
+                    enrolment?.SchoolCode,
+                    0,
+                    student.IsDeleted));
+            }
+            else
+            {
+                response.Add(new(
+                    student.Id,
+                    student.StudentReferenceNumber,
+                    student.Name,
+                    student.Gender,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
+                    enrolment.SchoolCode,
+                    enrolmentCount,
+                    student.IsDeleted));
+            }
         }
 
         return response;

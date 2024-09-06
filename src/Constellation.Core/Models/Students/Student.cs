@@ -29,7 +29,7 @@ public class Student : AggregateRoot, IAuditableEntity
         Gender gender,
         Gender? preferredGender)
     {
-        Id = StudentId.Empty;
+        Id = new();
 
         StudentReferenceNumber = studentReferenceNumber;
         Name = name;

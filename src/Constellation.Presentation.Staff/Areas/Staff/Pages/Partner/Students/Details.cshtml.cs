@@ -77,7 +77,7 @@ public class DetailsModel : BasePageModel
 
     public List<StudentAbsenceSummaryResponse> Absences { get; set; } = new();
 
-    public RecordLifecycleDetailsResponse RecordLifecycle { get; set; }
+    public RecordLifecycleDetailsResponse RecordLifecycle { get; set; } = new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
@@ -110,30 +110,30 @@ public class DetailsModel : BasePageModel
 
         PageTitle = $"Details - {Student.Name.DisplayName}";
 
-        Result<List<FamilyContactResponse>>? familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
+        Result<List<FamilyContactResponse>> familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
         FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : new();
 
-        Result<List<StudentEnrolmentResponse>>? enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
+        Result<List<StudentEnrolmentResponse>> enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
 
         Enrolments = enrolmentRequest.IsSuccess ? enrolmentRequest.Value : new();
 
-        Result<List<StudentSessionDetailsResponse>>? sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
+        Result<List<StudentSessionDetailsResponse>> sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
 
         Sessions = sessionRequest.IsSuccess ? sessionRequest.Value : new();
 
-        Result<List<StudentDeviceResponse>>? equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
+        Result<List<StudentDeviceResponse>> equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
 
         Equipment = equipmentRequest.IsSuccess ? equipmentRequest.Value : new();
 
-        Result<List<StudentAbsenceSummaryResponse>>? absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
+        Result<List<StudentAbsenceSummaryResponse>> absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
 
         Absences = absencesRequest.IsSuccess ? absencesRequest.Value : new();
 
-        Result<RecordLifecycleDetailsResponse>? lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
+        Result<RecordLifecycleDetailsResponse> lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
 
         RecordLifecycle = lifecycleRequest.IsSuccess ? lifecycleRequest.Value : new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
-        
+
         return true;
     }
 

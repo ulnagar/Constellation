@@ -74,7 +74,7 @@ public class BulkEnrolModel : BasePageModel
 
         PageTitle = $"Enrol {Student.Name.DisplayName}";
 
-        Result<List<BulkEnrolOfferingResponse>> offeringRequest = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(Student.Grade));
+        Result<List<BulkEnrolOfferingResponse>> offeringRequest = await _mediator.Send(new GetOfferingsForBulkEnrolQuery(Student.Grade!.Value));
 
         if (offeringRequest.IsFailure)
         {
