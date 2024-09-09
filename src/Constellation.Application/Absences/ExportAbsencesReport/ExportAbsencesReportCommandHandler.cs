@@ -1,21 +1,20 @@
 ﻿namespace Constellation.Application.Absences.ExportAbsencesReport;
 
-using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Shared;
+using DTOs;
+using GetAbsencesWithFilterForReport;
 using Helpers;
+using Interfaces.Repositories;
+using Interfaces.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -60,19 +59,21 @@ internal sealed class ExportAbsencesReportCommandHandler
         if (request.StudentIds.Any())
             students.AddRange(await _studentRepository.GetListFromIds(request.StudentIds, cancellationToken));
 
-        students.AddRange(await _studentRepository
-            .GetFilteredStudents(
-                request.OfferingCodes,
-        request.Grades,
-        request.SchoolCodes,
-        cancellationToken));
+        if (request.OfferingCodes.Any() || request.Grades.Any() || request.SchoolCodes.Any())
+            students.AddRange(await _studentRepository
+                .GetFilteredStudents(
+                    request.OfferingCodes,
+                    request.Grades,
+                    request.SchoolCodes,
+                    cancellationToken));
+
         students = students
             .Distinct()
             .ToList();
-
+        
         List<Absence> absences = await _absenceRepository.GetForStudents(students.Select(student => student.Id).ToList(), cancellationToken);
 
-        foreach (var absence in absences)
+        foreach (Absence absence in absences)
         {
             Student student = students.First(student => student.Id == absence.StudentId);
 
