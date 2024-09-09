@@ -103,6 +103,7 @@ internal sealed class GetSchoolDetailsQueryHandler
 
             studentResponse.Add(new(
                 student.Id,
+                student.StudentReferenceNumber,
                 student.Name,
                 student.Gender,
                 schoolEnrolment.SchoolName,

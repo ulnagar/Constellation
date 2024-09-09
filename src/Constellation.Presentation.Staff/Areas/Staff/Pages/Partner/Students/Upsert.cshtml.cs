@@ -112,6 +112,7 @@ public class UpsertModel : BasePageModel
 
         StudentReferenceNumber = student.Value.StudentReferenceNumber.Number;
         FirstName = student.Value.Name.FirstName;
+        PreferredName = student.Value.Name.PreferredName;
         LastName = student.Value.Name.LastName;
         Gender = student.Value.Gender;
         Grade = student.Value.Grade!.Value;

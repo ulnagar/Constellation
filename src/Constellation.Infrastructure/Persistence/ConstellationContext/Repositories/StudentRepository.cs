@@ -156,9 +156,10 @@ public class StudentRepository : IStudentRepository
                 enrolment.Year == DateTime.Today.Year)
             .ToListAsync(cancellationToken);
 
-        IQueryable<Student> students = _context
+        List<Student> students = await _context
             .Set<Student>()
-            .Where(student => !student.IsDeleted);
+            .Where(student => !student.IsDeleted)
+            .ToListAsync(cancellationToken);
 
         if (OfferingIds.Count > 0)
         {
@@ -179,7 +180,8 @@ public class StudentRepository : IStudentRepository
                 .ToListAsync(cancellationToken);
 
             students = students
-                .Where(student => studentIds.Contains(student.Id));
+                .Where(student => studentIds.Contains(student.Id))
+                .ToList();
         }
 
         if (Grades.Count > 0)
@@ -187,7 +189,8 @@ public class StudentRepository : IStudentRepository
             students = students
                 .Where(student => schoolEnrolments.Any(enrolment => 
                     enrolment.StudentId == student.Id && 
-                    Grades.Contains(enrolment.Grade)));
+                    Grades.Contains(enrolment.Grade)))
+                .ToList();
         }
 
         if (SchoolCodes.Count > 0)
@@ -195,10 +198,11 @@ public class StudentRepository : IStudentRepository
             students = students
                 .Where(student => schoolEnrolments.Any(enrolment =>
                     enrolment.StudentId == student.Id &&
-                    SchoolCodes.Contains(enrolment.SchoolCode)));
+                    SchoolCodes.Contains(enrolment.SchoolCode)))
+                .ToList();
         }
 
-        return await students.ToListAsync(cancellationToken);
+        return students;
     }
         
     public async Task<List<Student>> GetCurrentStudentsFromSchool(

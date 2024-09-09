@@ -68,6 +68,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
 
             response.Add(new(
                 student.Id,
+                student.StudentReferenceNumber,
                 student.Name,
                 student.Gender,
                 schoolEnrolment.SchoolName,

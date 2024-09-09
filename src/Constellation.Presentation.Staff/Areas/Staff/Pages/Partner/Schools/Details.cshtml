@@ -1,5 +1,6 @@
 ﻿@page "{id}"
 @using Constellation.Application.Faculties.GetFacultiesSummary
+@using Constellation.Core.Extensions
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.DetailsModel
 
 @inject IAuthorizationService authService
@@ -160,7 +161,7 @@
         <div id="studentTab" class="tab-pane">
             <h3>Current Students</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover students-data-table">
                 <thead>
                     <tr>
                         <th>SRN</th>
@@ -174,9 +175,9 @@
                     @foreach (var item in Model.School.Students)
                     {
                         <tr>
-                            <td>@item.StudentId</td>
-                            <td data-order="@item.Name.SortOrder">@Html.DisplayFor(model => item.Gender, "Gender") @item.Name.DisplayName</td>
-                            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+                            <td>@item.StudentReferenceNumber</td>
+                            <td data-order="@item.Name.SortOrder"><gender gender="@item.Gender" /> @item.Name.DisplayName</td>
+                            <td data-order="@item.Grade.AsNumber()">@item.Grade.AsName()</td>
                             <td>
                                 @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
                                 {
@@ -265,6 +266,15 @@
 @section scripts
 {
     <script>
+        $(document).ready(function (){
+            $('.students-data-table').DataTable({
+                "order": [
+                    [2, 'asc'],
+                    [1, 'asc']
+                ] 
+            });
+        });
+
         $(document)
             .ready(function () {
                 $('#getTGraph').click(function () {

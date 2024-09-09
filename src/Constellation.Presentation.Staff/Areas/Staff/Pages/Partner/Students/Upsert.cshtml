@@ -1,4 +1,4 @@
-﻿@page "{id}"
+﻿@page "{id?}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.UpsertModel
 
 @using Constellation.Core.Enums
@@ -35,7 +35,15 @@
                 <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
         </div>
-
+        
+        <div class="form-group row">
+            <label asp-for="PreferredName" class="col-md-2">Preferred First Name</label>
+            <div class="col-md-3">
+                <input asp-for="PreferredName" class="form-control" />
+                <span asp-validation-for="PreferredName" class="text-danger"></span>
+            </div>
+        </div>
+        
         <div class="form-group row">
             <label asp-for="LastName" class="col-md-2">Last Name</label>
             <div class="col-md-3">
@@ -53,7 +61,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="Grade" class="col-md-2">Grade at Present</label>
+            <label asp-for="Grade" class="col-md-2">Grade</label>
             <div class="col-md-3">
                 <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-control">
                     <option value="">-- Select --</option>

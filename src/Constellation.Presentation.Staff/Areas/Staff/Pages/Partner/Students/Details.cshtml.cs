@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 using Application.Common.PresentationModels;
 using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
+using Application.Students.GetSchoolEnrolmentHistoryForStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
@@ -77,6 +78,8 @@ public class DetailsModel : BasePageModel
 
     public List<StudentAbsenceSummaryResponse> Absences { get; set; } = new();
 
+    public List<SchoolEnrolmentResponse> SchoolEnrolments { get; set; } = new();
+
     public RecordLifecycleDetailsResponse RecordLifecycle { get; set; } = new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
 
     public async Task OnGet(CancellationToken cancellationToken)
@@ -109,6 +112,10 @@ public class DetailsModel : BasePageModel
         Student = studentRequest.Value;
 
         PageTitle = $"Details - {Student.Name.DisplayName}";
+
+        Result<List<SchoolEnrolmentResponse>> schoolEnrolmentRequest = await _mediator.Send(new GetSchoolEnrolmentHistoryForStudentQuery(Id), cancellationToken);
+
+        SchoolEnrolments = schoolEnrolmentRequest.IsSuccess ? schoolEnrolmentRequest.Value : new();
 
         Result<List<FamilyContactResponse>> familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
