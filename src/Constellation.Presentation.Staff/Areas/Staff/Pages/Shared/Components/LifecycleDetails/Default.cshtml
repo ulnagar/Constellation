@@ -1,0 +1,64 @@
+@model Constellation.Application.Students.GetLifecycleDetailsForStudent.RecordLifecycleDetailsResponse
+
+<div class="modal" id="lifecycleDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Lifecycle Details</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <dl class="row">
+                        <dt class="col-md-4">
+                            <label asp-for="CreatedBy">Created By</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.CreatedBy</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="CreatedAt">Created At</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.CreatedAt.ToString("f")</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="ModifiedBy">Modified By</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.ModifiedBy</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="ModifiedAt">Modified On</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@(Model.ModifiedAt == DateTime.MinValue ? null : Model.ModifiedAt.ToString("f"))</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="DeletedBy">Deleted By</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@Model.DeletedBy</span>
+                        </dd>
+
+                        <dt class="col-md-4">
+                            <label asp-for="DeletedAt">Deleted At</label>
+                        </dt>
+                        <dd class="col-md-8">
+                            <span>@(Model.DeletedAt.HasValue || Model.DeletedAt == DateTime.MinValue ? null : Model.DeletedAt?.ToString("f"))</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

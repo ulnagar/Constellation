@@ -1,20 +1,20 @@
-﻿namespace Constellation.Application.Students.ReinstateStudent;
+﻿namespace Constellation.Application.Students.TransferStudent;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class ReinstateStudentCommandHandler
-    : ICommandHandler<ReinstateStudentCommand>
+internal sealed class TransferStudentCommandHandler
+    : ICommandHandler<TransferStudentCommand>
 {
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
@@ -22,7 +22,7 @@ internal sealed class ReinstateStudentCommandHandler
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
-    public ReinstateStudentCommandHandler(
+    public TransferStudentCommandHandler(
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
         IUnitOfWork unitOfWork,
@@ -33,26 +33,21 @@ internal sealed class ReinstateStudentCommandHandler
         _schoolRepository = schoolRepository;
         _unitOfWork = unitOfWork;
         _dateTime = dateTime;
-        _logger = logger.ForContext<ReinstateStudentCommand>();
+        _logger = logger;
     }
 
-    public async Task<Result> Handle(ReinstateStudentCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(TransferStudentCommand request, CancellationToken cancellationToken)
     {
         Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
             _logger
-                .ForContext(nameof(ReinstateStudentCommand), request, true)
+                .ForContext(nameof(TransferStudentCommand), request, true)
                 .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
-                .Warning("Failed to reinstate student with id {id}", request.StudentId);
+                .Warning("Failed to transfer student to new school or grade");
 
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
-        }
-
-        if (!student.IsDeleted)
-        {
-            return Result.Success();
         }
 
         School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
@@ -60,30 +55,31 @@ internal sealed class ReinstateStudentCommandHandler
         if (school is null)
         {
             _logger
-                .ForContext(nameof(ReinstateStudentCommand), request, true)
+                .ForContext(nameof(TransferStudentCommand), request, true)
                 .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
-                .Warning("Failed to reinstate student with id {Id}", request.StudentId);
+                .Warning("Failed to transfer student to new school or grade");
 
             return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
         }
 
-        Result result = student.Reinstate(
-            school,
+        Result newEnrolment = student.AddSchoolEnrolment(
+            school.Code,
+            school.Name,
             request.Grade,
-            _dateTime);
+            _dateTime,
+            request.StartDate);
 
-        if (result.IsFailure)
+        if (newEnrolment.IsFailure)
         {
             _logger
-                .ForContext(nameof(ReinstateStudentCommand), request, true)
-                .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to reinstate student with id {Id}", request.StudentId);
+                .ForContext(nameof(TransferStudentCommand), request, true)
+                .ForContext(nameof(Error), newEnrolment.Error, true)
+                .Warning("Failed to transfer student to new school or grade");
 
-            return Result.Failure(result.Error);
+            return Result.Failure(newEnrolment.Error);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
-
         return Result.Success();
     }
 }

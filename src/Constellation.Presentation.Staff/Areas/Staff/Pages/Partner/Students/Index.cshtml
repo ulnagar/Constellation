@@ -62,14 +62,14 @@
     {
         <tr>
             <td data-order="@item.EnrolmentCount">
-                @if (item.EnrolmentCount > 0)
-                {
-                    <span class="badge badge-info">@item.EnrolmentCount</span>
-                }
-                
                 @if (item.IsDeleted)
                 {
                     <i class="fas fa-times-circle" style="color: red"></i>
+                }
+
+                @if (item.EnrolmentCount > 0)
+                {
+                    <span class="badge badge-info">@item.EnrolmentCount</span>
                 }
             </td>
             <td>@item.StudentReferenceNumber</td>

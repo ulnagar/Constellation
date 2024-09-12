@@ -78,9 +78,12 @@ public sealed class SchoolEnrolment : IAuditableEntity
     }
 
     internal void Delete(
+        DateOnly endDate,
         IDateTimeProvider dateTime)
     {
-        EndDate = dateTime.Today;
-        IsDeleted = true;
+        if (endDate <= dateTime.Today)
+            IsDeleted = true;
+        
+        EndDate = endDate;
     }
 }

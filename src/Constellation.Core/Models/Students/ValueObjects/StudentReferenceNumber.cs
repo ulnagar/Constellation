@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 public sealed class StudentReferenceNumber : ValueObject
 {
-    private const string _srnRegex = @"^\d{10}$";
+    private const string _srnRegex = @"^\d{9}$";
 
     public static readonly StudentReferenceNumber Empty = new(string.Empty);
 

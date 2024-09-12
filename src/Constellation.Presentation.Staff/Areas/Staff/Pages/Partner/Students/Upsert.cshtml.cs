@@ -52,15 +52,14 @@ public class UpsertModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public StudentId Id { get; set; } = StudentId.Empty;
 
-
     [BindProperty]
-    public string StudentReferenceNumber { get; set; } = string.Empty;
+    public string? StudentReferenceNumber { get; set; } = string.Empty;
 
     [BindProperty]
     public string FirstName { get; set; } = string.Empty;
 
     [BindProperty] 
-    public string PreferredName { get; set; } = string.Empty;
+    public string? PreferredName { get; set; } = string.Empty;
 
     [BindProperty]
     public string LastName { get; set; } = string.Empty;
@@ -73,10 +72,10 @@ public class UpsertModel : BasePageModel
     public Grade Grade { get; set; }
 
     [BindProperty]
-    public string EmailAddress { get; set; } = string.Empty;
+    public string? EmailAddress { get; set; } = string.Empty;
 
     [BindProperty]
-    public string SchoolCode { get; set; } = string.Empty;
+    public string? SchoolCode { get; set; } = string.Empty;
 
     public SelectList SchoolList { get; set; }
 
@@ -173,20 +172,44 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        Result<StudentReferenceNumber> srn = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
+        GetStudentByIdQuery command = new(Id);
+        
+        Result<StudentResponse> student = await _mediator.Send(command);
 
-        if (srn.IsFailure)
+        if (student.IsFailure)
         {
-            ModalContent = new ErrorDisplay(srn.Error);
+            ModalContent = new ErrorDisplay(
+                student.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
             _logger
-                .ForContext(nameof(Error), srn.Error, true)
-                .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+                .ForContext(nameof(Error), student.Error, true)
+                .Warning("Failed to retrieve Student with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-            await PreparePage();
             return Page();
         }
 
+        StudentReferenceNumber? srn = null;
+
+        if (student.Value.StudentReferenceNumber != Core.Models.Students.ValueObjects.StudentReferenceNumber.Empty || StudentReferenceNumber is not null)
+        {
+            Result<StudentReferenceNumber> srnRequest = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
+
+            if (srnRequest.IsFailure)
+            {
+                ModalContent = new ErrorDisplay(srnRequest.Error);
+
+                _logger
+                    .ForContext(nameof(Error), srnRequest.Error, true)
+                    .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+
+                await PreparePage();
+                return Page();
+            }
+
+            srn = srnRequest.Value;
+        }
+        
         Result<Name> name = Name.Create(FirstName, PreferredName, LastName);
 
         if (name.IsFailure)
@@ -201,27 +224,34 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        Result<EmailAddress> email = Core.ValueObjects.EmailAddress.Create(EmailAddress);
+        EmailAddress email = Core.ValueObjects.EmailAddress.None;
 
-        if (email.IsFailure)
+        if (student.Value.EmailAddress != Core.ValueObjects.EmailAddress.None || EmailAddress is not null)
         {
-            ModalContent = new ErrorDisplay(email.Error);
+            Result<EmailAddress> emailRequest = Core.ValueObjects.EmailAddress.Create(EmailAddress);
 
-            _logger
-                .ForContext(nameof(Error), email.Error, true)
-                .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+            if (emailRequest.IsFailure)
+            {
+                ModalContent = new ErrorDisplay(emailRequest.Error);
 
-            await PreparePage();
-            return Page();
+                _logger
+                    .ForContext(nameof(Error), emailRequest.Error, true)
+                    .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+
+                await PreparePage();
+                return Page();
+            }
+
+            email = emailRequest.Value;
         }
 
         // Edit existing student
         UpdateStudentCommand updateCommand = new(
             Id,
-            srn.Value,
+            srn,
             name.Value,
             Grade,
-            email.Value,
+            email,
             Gender);
 
         _logger

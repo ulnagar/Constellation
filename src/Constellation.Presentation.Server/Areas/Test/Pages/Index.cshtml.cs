@@ -80,7 +80,6 @@ public class IndexModel : BasePageModel
                 email.Value,
                 Grade.Y09,
                 school,
-                2024,
                 Gender.Male,
                 _dateTime);
 

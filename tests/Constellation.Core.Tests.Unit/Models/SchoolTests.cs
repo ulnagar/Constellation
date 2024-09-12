@@ -20,7 +20,6 @@ public class SchoolTests
         EmailAddress.Create("john.doe3@education.nsw.gov.au").Value,
         Grade.Y09,
         School,
-        2024,
         Gender.NonBinary, 
         _dateTimeProvider)
         .Value;

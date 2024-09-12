@@ -82,11 +82,7 @@ public sealed class AttendanceCaseDetail : CaseDetail
 
     private Result AddFromStudent(Student student)
     {
-        SchoolEnrolment schoolEnrolment = student
-            .SchoolEnrolments
-            .SingleOrDefault(entry =>
-                !entry.IsDeleted &&
-                entry.Year == DateTime.Today.Year);
+        SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
 
         if (schoolEnrolment is null)
             return Result.Failure(SchoolEnrolmentErrors.NotFound);

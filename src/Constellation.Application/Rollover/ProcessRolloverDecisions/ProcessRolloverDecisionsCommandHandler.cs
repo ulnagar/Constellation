@@ -110,7 +110,6 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                         "8912",
                         "Aurora College",
                         enrolment.Grade + 1,
-                        _dateTime.CurrentYear,
                         _dateTime);
 
                     if (newEnrolment.IsFailure)
@@ -131,7 +130,6 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
                         enrolment.SchoolCode,
                         enrolment.SchoolName,
                         enrolment.Grade + 1,
-                        _dateTime.CurrentYear,
                         _dateTime);
 
                     if (newEnrolment.IsFailure)

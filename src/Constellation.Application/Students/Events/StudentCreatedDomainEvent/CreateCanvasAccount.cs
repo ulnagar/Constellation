@@ -5,6 +5,7 @@ using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
@@ -39,6 +40,12 @@ internal sealed class CreateCanvasAccount
         if (student == null)
         {
             _logger.Warning("Could not find student with Id {studentId} to add to Canvas", notification.StudentId);
+            return;
+        }
+
+        if (student.EmailAddress == EmailAddress.None)
+        {
+            _logger.Warning("Student with id {StudentId} does not have a valid email address to add to Canvas", notification.StudentId);
             return;
         }
 

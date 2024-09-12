@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using Models;
 using System.Threading;
@@ -32,7 +33,7 @@ internal sealed class GetStudentByIdQueryHandler
         {
             return new StudentResponse(
                 student.Id,
-                student.StudentReferenceNumber,
+                student.StudentReferenceNumber ?? StudentReferenceNumber.Empty,
                 student.Name,
                 student.Gender,
                 null,
@@ -44,7 +45,7 @@ internal sealed class GetStudentByIdQueryHandler
 
         return new StudentResponse(
             student.Id,
-            student.StudentReferenceNumber,
+            student.StudentReferenceNumber ?? StudentReferenceNumber.Empty,
             student.Name,
             student.Gender,
             enrolment.Grade,

@@ -77,7 +77,7 @@ internal sealed class ImportStudentsCommandHandler
                         results.Add(new(entry, Result.Failure(StudentErrors.AlreadyExists(existingStudent.Id))));
                         break;
                     case true:
-                        existingStudent.Reinstate(school, entry.Grade, _dateTime.CurrentYear, _dateTime);
+                        existingStudent.Reinstate(school, entry.Grade, _dateTime);
 
                         results.Add(new(entry, Result.Success()));
                         break;
@@ -123,7 +123,6 @@ internal sealed class ImportStudentsCommandHandler
                 emailAddress.Value,
                 entry.Grade,
                 school,
-                _dateTime.CurrentYear,
                 gender,
                 _dateTime);
 

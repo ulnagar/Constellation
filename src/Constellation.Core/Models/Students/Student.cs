@@ -60,9 +60,29 @@ public class Student : AggregateRoot, IAuditableEntity
     public SchoolEnrolment? CurrentEnrolment => _schoolEnrolments
         .SingleOrDefault(entry => 
             !entry.IsDeleted &&
-            entry.Year == DateTime.Today.Year);
+            entry.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
+            (entry.EndDate == null || entry.EndDate >= DateOnly.FromDateTime(DateTime.Today)));
 
     public IReadOnlyCollection<SystemLink> SystemLinks => _systemLinks.AsReadOnly();
+
+    public static Result<Student> Create(
+        Name name,
+        Gender gender,
+        IDateTimeProvider dateTime)
+    {
+        Student entry = new(
+            null,
+            name,
+            EmailAddress.None,
+            gender,
+            null);
+
+        entry.AwardTally = new(entry.Id);
+
+        entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), entry.Id));
+
+        return entry;
+    }
 
     public static Result<Student> Create(
         StudentReferenceNumber srn,
@@ -70,7 +90,6 @@ public class Student : AggregateRoot, IAuditableEntity
         EmailAddress emailAddress,
         Grade grade,
         School school,
-        int year,
         Gender gender,
         IDateTimeProvider dateTime)
     {
@@ -84,7 +103,7 @@ public class Student : AggregateRoot, IAuditableEntity
             gender,
             null);
 
-        Result enrolment = entry.AddSchoolEnrolment(school.Code, school.Name, grade, year, dateTime);
+        Result enrolment = entry.AddSchoolEnrolment(school.Code, school.Name, grade, dateTime);
 
         if (enrolment.IsFailure)
             return Result.Failure<Student>(enrolment.Error);
@@ -100,25 +119,31 @@ public class Student : AggregateRoot, IAuditableEntity
         string schoolCode,
         string schoolName,
         Grade grade,
-        int year,
         IDateTimeProvider dateTime,
         DateOnly? startDate = null)
     {
         startDate ??= dateTime.Today;
 
-        if (_schoolEnrolments.Any(entry =>
-                !entry.IsDeleted && 
-                entry.SchoolCode == schoolCode && 
-                entry.Grade == grade && 
-                entry.Year == year))
-            return Result.Failure(SchoolEnrolmentErrors.AlreadyExists);
+        SchoolEnrolment? currentEnrolment = CurrentEnrolment;
+
+        if (currentEnrolment is not null)
+        {
+            if (currentEnrolment.SchoolCode == schoolCode &&
+                currentEnrolment.Grade == grade)
+                return Result.Success();
+
+            if (currentEnrolment.SchoolCode != schoolCode)
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode, startDate));
+
+            currentEnrolment.Delete(startDate.Value, dateTime);
+        }
 
         Result<SchoolEnrolment> enrolment = SchoolEnrolment.Create(
             Id,
             schoolCode,
             schoolName,
             grade,
-            year,
+            startDate.Value.Year,
             startDate.Value,
             null,
             dateTime);
@@ -127,48 +152,7 @@ public class Student : AggregateRoot, IAuditableEntity
             return Result.Failure(enrolment.Error);
 
         _schoolEnrolments.Add(enrolment.Value);
-
-        return Result.Success();
-    }
-
-    public Result TransferSchool(
-        School school,
-        int year,
-        IDateTimeProvider dateTime)
-    {
-        List<SchoolEnrolment> enrolments = _schoolEnrolments
-            .Where(entry => 
-                !entry.IsDeleted &&
-                entry.Year == year)
-            .ToList();
-
-        if (enrolments.Count == 0)
-            return Result.Failure(SchoolEnrolmentErrors.NotFound);
-
-        if (enrolments.Count > 1)
-            return Result.Failure(SchoolEnrolmentErrors.TooMany);
-
-        SchoolEnrolment enrolment = enrolments.First();
-
-        Result<SchoolEnrolment> newEnrolment = SchoolEnrolment.Create(
-            Id,
-            school.Code,
-            school.Name,
-            enrolment.Grade,
-            enrolment.Year,
-            dateTime.Today,
-            null,
-            dateTime);
-
-        if (newEnrolment.IsFailure)
-            return Result.Failure(newEnrolment.Error);
-
-        _schoolEnrolments.Add(newEnrolment.Value);
-
-        enrolment.Delete(dateTime);
-
-        RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, enrolment.SchoolCode, newEnrolment.Value.SchoolCode));
-
+        
         return Result.Success();
     }
 
@@ -187,6 +171,19 @@ public class Student : AggregateRoot, IAuditableEntity
             _systemLinks.Remove(existingEntry);
 
         _systemLinks.Add(entry.Value);
+
+        return Result.Success();
+    }
+
+    public Result RemoveSystemLink(
+        SystemType type)
+    {
+        SystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+
+        if (existingEntry is null)
+            return Result.Failure(SystemLinkErrors.NotFound(type));
+
+        _systemLinks.Remove(existingEntry);
 
         return Result.Success();
     }
@@ -258,8 +255,8 @@ public class Student : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        foreach (SchoolEnrolment entry in _schoolEnrolments.Where(entry => !entry.IsDeleted && entry.Year == dateTime.CurrentYear))
-            entry.Delete(dateTime);
+        if (CurrentEnrolment is not null)
+            CurrentEnrolment.Delete(dateTime.Today, dateTime);
      
         RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), Id));
     }
@@ -267,17 +264,19 @@ public class Student : AggregateRoot, IAuditableEntity
     public Result Reinstate(
         School school,
         Grade grade,
-        int year,
-        IDateTimeProvider dateTime)
+        IDateTimeProvider dateTime,
+        DateOnly? startDate = null)
     {
         IsDeleted = false;
+        DeletedAt = DateTime.MinValue;
+        DeletedBy = string.Empty;
 
         Result enrolment = AddSchoolEnrolment(
             school.Code, 
             school.Name,
             grade,
-            year,
-            dateTime);
+            dateTime,
+            startDate);
 
         if (enrolment.IsFailure)
             return Result.Failure(enrolment.Error);

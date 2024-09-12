@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
 using Application.Students.GetSchoolEnrolmentHistoryForStudent;
+using Application.Students.TransferStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
@@ -32,6 +33,7 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 using Shared.Components.ReinstateStudent;
+using Shared.Components.TransferStudent;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -195,9 +197,7 @@ public class DetailsModel : BasePageModel
             await PreparePage(cancellationToken);
             return Page();
         }
-
-        // TODO: R1.16.0: Implement new reinstate student functionality with proposed school and grade linked
-
+        
         ReinstateStudentCommand command = new(Id, viewModel.SchoolCode, viewModel.Grade);
 
         _logger
@@ -261,7 +261,7 @@ public class DetailsModel : BasePageModel
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
-        if (authorised.Succeeded)
+        if (!authorised.Succeeded)
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
@@ -290,6 +290,47 @@ public class DetailsModel : BasePageModel
         }
 
         await PreparePage(cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostTransferStudent(
+        TransferStudentSelection viewModel,
+        CancellationToken cancellationToken)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (!authorised.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return Page();
+        }
+
+        TransferStudentCommand command = new(
+            Id,
+            viewModel.SchoolCode,
+            viewModel.Grade,
+            viewModel.StartDate);
+
+        _logger
+            .ForContext(nameof(TransferStudentCommand), command, true)
+            .Information("Requested to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
+        }
+
+        return RedirectToPage();
     }
 
     private void GenerateError(Error error)

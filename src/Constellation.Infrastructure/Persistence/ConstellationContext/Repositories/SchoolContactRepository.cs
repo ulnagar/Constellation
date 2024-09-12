@@ -96,12 +96,15 @@ public class SchoolContactRepository : ISchoolContactRepository
         Grade grade,
         CancellationToken cancellationToken = default)
     {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
         List<string> schoolCodes = await _context
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .SelectMany(student => student.SchoolEnrolments.Where(enrolment => 
                 !enrolment.IsDeleted &&
-                enrolment.Year == DateTime.Today.Year &&
+                enrolment.StartDate <= today &&
+                (!enrolment.EndDate.HasValue || enrolment.EndDate >= today) &&
                 enrolment.Grade == grade))
             .Select(enrolment => enrolment.SchoolCode)
             .Distinct()

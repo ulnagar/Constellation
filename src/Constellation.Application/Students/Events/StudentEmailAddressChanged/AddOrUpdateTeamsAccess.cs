@@ -1,40 +1,40 @@
-﻿namespace Constellation.Application.Students.Events.StudentCreatedDomainEvent;
+﻿namespace Constellation.Application.Students.Events.StudentEmailAddressChanged;
 
-using Abstractions.Messaging;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Enums;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
-using Core.ValueObjects;
-using Enums;
-using Interfaces.Repositories;
+using Constellation.Core.ValueObjects;
 using Serilog;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class AddSchoolwideTeamsAccess 
-    : IDomainEventHandler<StudentCreatedDomainEvent>
+internal sealed class AddOrUpdateTeamsAccess 
+    : IDomainEventHandler<StudentEmailAddressChangedDomainEvent>
 {
     private readonly ILogger _logger;
     private readonly IStudentRepository _studentRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public AddSchoolwideTeamsAccess(
+    public AddOrUpdateTeamsAccess(
         IStudentRepository studentRepository,
         IMSTeamOperationsRepository operationsRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _logger = logger.ForContext<StudentCreatedDomainEvent>();
+        _logger = logger.ForContext<StudentEmailAddressChangedDomainEvent>();
         _studentRepository = studentRepository;
         _operationsRepository = operationsRepository;
         _unitOfWork = unitOfWork;
     }
     
-    public async Task Handle(StudentCreatedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(StudentEmailAddressChangedDomainEvent notification, CancellationToken cancellationToken)
     {
         _logger.Information("Attempting to add student ({studentId}) from school wide teams", notification.StudentId);
 

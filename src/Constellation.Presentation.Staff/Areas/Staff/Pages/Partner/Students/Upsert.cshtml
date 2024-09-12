@@ -61,16 +61,6 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="Grade" class="col-md-2">Grade</label>
-            <div class="col-md-3">
-                <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-control">
-                    <option value="">-- Select --</option>
-                </select>
-                <span asp-validation-for="Grade" class="text-danger"></span>
-            </div>
-        </div>
-
-        <div class="form-group row">
             <label asp-for="Gender" class="col-md-2"></label>
             <div class="col-md-3">
                 <select asp-for="Gender" asp-items="Model.GenderList" class="form-control">
@@ -80,15 +70,28 @@
             </div>
         </div>
 
-        <div class="form-group row">
-            <label asp-for="SchoolCode" class="col-md-2">School</label>
-            <div class="col-md-3">
-                <select asp-for="SchoolCode" asp-items="Model.SchoolList" class="form-control combo">
-                    <option value="">-- Select --</option>
-                </select>
-                <span asp-validation-for="SchoolCode" class="text-danger"></span>
+        @if (Model.Id == StudentId.Empty)
+        {
+            <div class="form-group row">
+                <label asp-for="Grade" class="col-md-2">Grade</label>
+                <div class="col-md-3">
+                    <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-control">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="Grade" class="text-danger"></span>
+                </div>
             </div>
-        </div>
+
+            <div class="form-group row">
+                <label asp-for="SchoolCode" class="col-md-2">School</label>
+                <div class="col-md-3">
+                    <select asp-for="SchoolCode" asp-items="Model.SchoolList" class="form-control combo">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="SchoolCode" class="text-danger"></span>
+                </div>
+            </div>
+        }
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-3">

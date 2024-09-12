@@ -4,9 +4,11 @@ using Constellation.Application.Abstractions.Messaging;
 using Core.Enums;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Students;
+using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -48,7 +50,19 @@ internal sealed class GetFilteredStudentsQueryHandler
 
             if (enrolment is null)
             {
-                enrolment = student.SchoolEnrolments.MaxBy(entry => entry.DeletedAt);
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                        .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    enrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
 
                 response.Add(new(
                     student.Id,
@@ -58,7 +72,7 @@ internal sealed class GetFilteredStudentsQueryHandler
                     enrolment?.Grade,
                     enrolment?.SchoolName,
                     enrolment?.SchoolCode,
-                    0,
+                    enrolmentCount,
                     student.IsDeleted));
             }
             else
