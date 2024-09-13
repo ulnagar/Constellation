@@ -1118,6 +1118,17 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             #endregion
 
+            #region Assets.Allocations
+
+            migrationBuilder.Sql(
+                @"UPDATE [Assets].[Allocations]
+                 SET [UserId] = [Students].[Students].[Id]
+                 FROM [Students].[Students]
+                 INNER JOIN [Assets].[Allocations]
+                 ON [Assets].[Allocations].[UserId] = [Students].[Students].[StudentReferenceNumber];");
+
+            #endregion
+
             migrationBuilder.CreateIndex(
                 name: "IX_Students_StudentReferenceNumber",
                 schema: "Students",

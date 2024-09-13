@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsWithCurrentOfferings;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
@@ -9,6 +10,7 @@ using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
 using Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -62,18 +64,36 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
             }
 
             SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+            bool currentEnrolment = true;
 
             if (schoolEnrolment is null)
-                continue;
+            {
+                currentEnrolment = false;
+
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                        .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    schoolEnrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
+            }
 
             response.Add(new(
                 student.Id,
                 student.StudentReferenceNumber,
                 student.Name,
                 student.Gender,
-                schoolEnrolment.SchoolName,
-                schoolEnrolment.Grade,
-                studentOfferings));
+                schoolEnrolment?.SchoolName,
+                schoolEnrolment?.Grade,
+                studentOfferings,
+                currentEnrolment));
         }
 
         return response;

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingLocationsAsMapLayers;
 
 using Abstractions.Messaging;
+using Constellation.Application.Helpers;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
@@ -13,8 +14,11 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using DTOs;
 using Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +51,8 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
 
     public async Task<Result<List<MapLayer>>> Handle(GetOfferingLocationsAsMapLayersQuery request, CancellationToken cancellationToken)
     {
-        List<string> SchoolCodes = new();
+        List<string> studentSchoolCodes = new();
+        List<string> staffSchoolCodes = new();
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(request.OfferingId, cancellationToken);
 
@@ -63,8 +68,8 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
             if (schoolEnrolment is null)
                 continue;
 
-            if (!SchoolCodes.Contains(schoolEnrolment.SchoolCode))
-                SchoolCodes.Add(schoolEnrolment.SchoolCode);
+            if (!studentSchoolCodes.Contains(schoolEnrolment.SchoolCode))
+                studentSchoolCodes.Add(schoolEnrolment.SchoolCode);
         }
 
         Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
@@ -83,11 +88,53 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
         {
             Staff staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
-            if (!SchoolCodes.Contains(staffMember.SchoolCode))
-                SchoolCodes.Add(staffMember.SchoolCode);
+            if (!staffSchoolCodes.Contains(staffMember.SchoolCode))
+                staffSchoolCodes.Add(staffMember.SchoolCode);
         }
 
-        List<MapLayer> layers = _schoolRepository.GetForMapping(SchoolCodes).ToList();
+        List<string> schoolCodes = studentSchoolCodes.ToList();
+
+        foreach (string schoolCode in staffSchoolCodes)
+        {
+            if (!schoolCodes.Contains(schoolCode))
+                schoolCodes.Add(schoolCode);
+        }
+
+        List<MapLayer> layers = new();
+
+        List<School> schools = await _schoolRepository.GetListFromIds(schoolCodes, cancellationToken);
+
+        MapLayer blueLayer = new() { Colour = "blue", Name = "Students only" };
+        MapLayer redLayer = new() { Colour = "red", Name = "Staff only" };
+        MapLayer greenLayer = new() { Colour = "green", Name = "Both Students and Staff" };
+        
+        foreach (var school in schools)
+        {
+            int studentCount = await _studentRepository.GetCountCurrentStudentsFromSchool(school.Code, cancellationToken);
+            int staffCount = school.Staff.Count(entry => !entry.IsDeleted);
+
+            MapItem marker = new()
+            {
+                SchoolName = school.Name,
+                Latitude = school.Latitude,
+                Longitude = school.Longitude,
+                StudentCount = studentCount,
+                StaffCount = staffCount
+            };
+
+            switch (studentCount)
+            {
+                case > 0 when staffCount > 0:
+                    greenLayer.AddMarker(marker);
+                    break;
+                case  0 when staffCount > 0:
+                    redLayer.AddMarker(marker);
+                    break;
+                case > 0 when staffCount == 0:
+                    blueLayer.AddMarker(marker);
+                    break;
+            }
+        }
 
         return layers;
     }

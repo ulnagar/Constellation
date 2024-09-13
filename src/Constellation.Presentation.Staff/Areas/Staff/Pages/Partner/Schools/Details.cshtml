@@ -177,7 +177,16 @@
                         <tr>
                             <td>@item.StudentReferenceNumber</td>
                             <td data-order="@item.Name.SortOrder"><gender gender="@item.Gender" /> @item.Name.DisplayName</td>
-                            <td data-order="@item.Grade.AsNumber()">@item.Grade.AsName()</td>
+                            <td data-order="@item.Grade?.AsNumber()">
+                                @if (!item.CurrentEnrolment)
+                                {
+                                    <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                                }
+                                else
+                                {
+                                    <grade grade="@item.Grade" />
+                                }
+                            </td>
                             <td>
                                 @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
                                 {

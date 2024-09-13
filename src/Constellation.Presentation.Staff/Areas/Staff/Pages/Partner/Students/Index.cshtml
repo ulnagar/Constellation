@@ -2,6 +2,8 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.IndexModel
 
 @using Constellation.Application.Students.GetFilteredStudents
+@using Constellation.Core.Extensions
+@using Constellation.Presentation.Shared.Helpers.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authService
@@ -74,8 +76,26 @@
             </td>
             <td>@item.StudentReferenceNumber</td>
             <td data-order="@item.StudentName.SortOrder"><gender gender="@item.Gender" /> @item.StudentName.DisplayName</td>
-            <td data-order="@item.Grade"><grade grade="@item.Grade" /></td>
-            <td>@item.School</td>
+            <td data-order="@item.Grade?.AsNumber()">
+                @if (!item.CurrentEnrolment)
+                {
+                    <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                }
+                else
+                {
+                    <grade grade="@item.Grade" />
+                }
+            </td>
+            <td>
+                @if (!item.CurrentEnrolment)
+                {
+                    <span class="font-weight-light font-italic">@item.School</span>
+                }
+                else
+                {
+                    @item.School
+                }
+            </td>
             <td>
                 <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
             </td>

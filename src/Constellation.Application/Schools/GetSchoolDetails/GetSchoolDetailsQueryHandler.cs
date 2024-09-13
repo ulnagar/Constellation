@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Enrolments.Repositories;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Enrolments;
@@ -20,6 +21,7 @@ using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using Students.GetCurrentStudentsWithCurrentOfferings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -96,9 +98,25 @@ internal sealed class GetSchoolDetailsQueryHandler
 
             SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
 
+            bool currentEnrolment = true;
+
             if (schoolEnrolment is null)
             {
-                continue;
+                currentEnrolment = false;
+
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                    .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    schoolEnrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
             }
 
             studentResponse.Add(new(
@@ -106,9 +124,10 @@ internal sealed class GetSchoolDetailsQueryHandler
                 student.StudentReferenceNumber,
                 student.Name,
                 student.Gender,
-                schoolEnrolment.SchoolName,
-                schoolEnrolment.Grade,
-                studentOfferings));
+                schoolEnrolment?.SchoolName,
+                schoolEnrolment?.Grade,
+                studentOfferings,
+                currentEnrolment));
         }
 
         List<Staff> teachers = await _staffRepository.GetActiveFromSchool(school.Code, cancellationToken);

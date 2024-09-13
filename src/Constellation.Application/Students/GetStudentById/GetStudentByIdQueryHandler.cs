@@ -40,6 +40,7 @@ internal sealed class GetStudentByIdQueryHandler
                 student.EmailAddress,
                 null,
                 null,
+                false,
                 student.IsDeleted);
         }
 
@@ -52,6 +53,7 @@ internal sealed class GetStudentByIdQueryHandler
             student.EmailAddress,
             enrolment.SchoolName,
             enrolment.SchoolCode,
+            true,
             student.IsDeleted);
     }
 }

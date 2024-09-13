@@ -48,7 +48,7 @@ internal sealed class GetSchoolsForContactQueryHandler
 
         if (request.ContactId == SchoolContactId.Empty)
         {
-            List<School> schools = await _schoolRepository.GetAllActiveWithStudents(cancellationToken);
+            List<School> schools = await _schoolRepository.GetWithCurrentStudents(cancellationToken);
 
             foreach(School school in schools)
             {

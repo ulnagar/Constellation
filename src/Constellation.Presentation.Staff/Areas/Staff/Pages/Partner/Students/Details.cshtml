@@ -305,9 +305,10 @@
         <div id="studentDevices" class="tab-pane">
             <h3>Device history</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover device-data-table">
                 <thead>
                 <tr>
+                    <th>Asset Number</th>
                     <th>Make</th>
                     <th>Serial Number</th>
                     <th>Status</th>
@@ -320,18 +321,19 @@
                 @foreach (var item in Model.Equipment)
                 {
                     <tr>
+                        <td>@item.AssetNumber</td>
                         <td>@item.Make</td>
                         <td>@item.SerialNumber</td>
                         <td>@item.Status</td>
-                        <td>@item.DateAllocated.ToShortDateString()</td>
-                        <td>
-                            @if (item.DateReturned.HasValue)
+                        <td data-order="@item.DateAllocated.ToString("yyyy-MM-dd")">@item.DateAllocated.ToShortDateString()</td>
+                        <td data-order="@(item.DateReturned == DateOnly.MinValue ? DateOnly.MaxValue.ToString("yyyy-MM-dd") : item.DateReturned.ToString("yyyy-MM-dd"))">
+                            @if (item.DateReturned != DateOnly.MinValue)
                             {
-                                item.DateReturned.Value.ToShortDateString();
+                                @item.DateReturned.ToShortDateString()
                             }
                         </td>
                         <td>
-                            <a asp-page="/Equipment/Devices/Details" asp-area="Staff" asp-route-id="@item.SerialNumber" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                            <a asp-page="/Equipment/Assets/Details" asp-area="Staff" asp-route-assetNumber="@item.AssetNumber" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                         </td>
                     </tr>
                 }
@@ -399,6 +401,13 @@
             $('.school-data-table').DataTable({
                 "order": [
                     [0, 'desc'],
+                    [4, 'desc']
+                ]
+            });
+
+            $('.device-data-table').DataTable({
+                "order": [
+                    [5, 'desc'],
                     [4, 'desc']
                 ]
             });

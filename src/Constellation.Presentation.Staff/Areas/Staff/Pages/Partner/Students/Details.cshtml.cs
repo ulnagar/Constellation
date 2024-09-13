@@ -339,7 +339,7 @@ public class DetailsModel : BasePageModel
             error,
             _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
         
-        Student = new(StudentId.Empty, StudentReferenceNumber.Empty, Name.Create("John", "", "Doe").Value, Gender.NonBinary, Core.Enums.Grade.SpecialProgram, EmailAddress.None, "", "", false);
+        Student = new(StudentId.Empty, StudentReferenceNumber.Empty, Name.Create("John", "", "Doe").Value, Gender.NonBinary, Core.Enums.Grade.SpecialProgram, EmailAddress.None, "", "", false, false);
     }
 
     private int CalculateTotalSessionDuration()

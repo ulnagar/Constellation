@@ -187,13 +187,15 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
             if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
                 continue;
 
+            bool hasStudents = await _schoolRepository.IsPartnerSchoolWithStudents(csvSchool.SchoolCode, cancellationToken);
+
             // Compare Principal in database to information in csv by email address
             // If different, mark database entry as old/deleted and create a new entry
             if (principals.Any())
             {
                 foreach (SchoolContact principal in principals)
                 {
-                    if (!dbSchool.Students.All(student => student.IsDeleted) &&
+                    if (!hasStudents &&
                         !dbSchool.Staff.All(staff => staff.IsDeleted) &&
                         string.Equals(principal.EmailAddress, csvSchool.PrincipalEmail, StringComparison.CurrentCultureIgnoreCase)) 
                         continue;

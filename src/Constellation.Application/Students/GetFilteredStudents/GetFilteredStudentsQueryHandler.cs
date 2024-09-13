@@ -47,7 +47,7 @@ internal sealed class GetFilteredStudentsQueryHandler
             int enrolmentCount = await _enrolmentRepository.GetCurrentCountByStudentId(student.Id, cancellationToken);
 
             SchoolEnrolment? enrolment = student.CurrentEnrolment;
-
+            
             if (enrolment is null)
             {
                 // retrieve most recent applicable school enrolment
@@ -73,6 +73,7 @@ internal sealed class GetFilteredStudentsQueryHandler
                     enrolment?.SchoolName,
                     enrolment?.SchoolCode,
                     enrolmentCount,
+                    false,
                     student.IsDeleted));
             }
             else
@@ -86,6 +87,7 @@ internal sealed class GetFilteredStudentsQueryHandler
                     enrolment.SchoolName,
                     enrolment.SchoolCode,
                     enrolmentCount,
+                    true,
                     student.IsDeleted));
             }
         }

@@ -15,4 +15,5 @@ public sealed record StudentResponse(
     EmailAddress EmailAddress,
     string? School,
     string? SchoolCode,
+    bool CurrentEnrolment,
     bool IsDeleted);

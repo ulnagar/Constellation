@@ -15,4 +15,5 @@ public sealed record FilteredStudentResponse(
     string School,
     string SchoolCode,
     int EnrolmentCount,
+    bool CurrentEnrolment,
     bool IsDeleted);

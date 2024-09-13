@@ -19,6 +19,7 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -84,16 +85,36 @@ internal sealed class GetOfferingDetailsQueryHandler
         {
             SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
+            bool currentEnrolment = true;
+
             if (enrolment is null)
-                continue;
+            {
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    currentEnrolment = false;
+
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                        .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    enrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
+            }
 
             students.Add(new(
                 student.Id,
+                student.StudentReferenceNumber,
                 student.Gender,
                 student.Name,
-                enrolment.Grade,
-                enrolment.SchoolCode,
-                enrolment.SchoolName));
+                enrolment?.Grade,
+                enrolment?.SchoolCode,
+                enrolment?.SchoolName,
+                currentEnrolment));
         }
 
         List<OfferingDetailsResponse.SessionSummary> sessions = new();

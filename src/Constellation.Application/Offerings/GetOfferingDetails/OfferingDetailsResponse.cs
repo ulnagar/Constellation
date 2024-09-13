@@ -8,6 +8,7 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 using System;
 using System.Collections.Generic;
 
@@ -30,11 +31,13 @@ public sealed record OfferingDetailsResponse(
 {
     public sealed record StudentSummary(
         StudentId StudentId,
+        StudentReferenceNumber StudentReferenceNumber,
         Gender Gender,
         Name Name,
-        Grade Grade,
-        string SchoolCode,
-        string SchoolName);
+        Grade? Grade,
+        string? SchoolCode,
+        string? SchoolName,
+        bool CurrentEnrolment);
 
     public sealed record SessionSummary(
         SessionId SessionId,

@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.Assets;
+using Core.Models.Assets.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using System;
@@ -14,11 +14,14 @@ using System.Threading.Tasks;
 internal sealed class GetDevicesAllocatedToStudentQueryHandler
     : IQueryHandler<GetDevicesAllocatedToStudentQuery, List<StudentDeviceResponse>>
 {
+    private readonly IAssetRepository _assetRepository;
     private readonly IDeviceRepository _deviceRepository;
 
     public GetDevicesAllocatedToStudentQueryHandler(
+        IAssetRepository assetRepository,
         IDeviceRepository deviceRepository)
     {
+        _assetRepository = assetRepository;
         _deviceRepository = deviceRepository;
     }
 
@@ -26,27 +29,24 @@ internal sealed class GetDevicesAllocatedToStudentQueryHandler
     {
         List<StudentDeviceResponse> returnData = new();
 
-        List<Device> devices = await _deviceRepository.GetHistoryForStudent(request.StudentId, cancellationToken);
+        List<Asset> assets = await _assetRepository.GetDeviceHistoryForStudent(request.StudentId, cancellationToken);
 
-        if (devices is null)
+        foreach (Asset asset in assets)
         {
-            return Result.Failure<List<StudentDeviceResponse>>(DomainErrors.Assets.Allocations.NotFoundForStudent(request.StudentId));
-        }
+            List<Allocation> allocations = asset.Allocations
+                .Where(allocation => allocation.UserId.Equals(request.StudentId.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
 
-        List<DeviceAllocation> allocations = devices
-            .SelectMany(device =>
-                device.Allocations.Where(allocation => 
-                    allocation.StudentId == request.StudentId))
-            .ToList();
-
-        foreach (DeviceAllocation allocation in allocations)
-        {
-            returnData.Add(new(
-                allocation.Device.SerialNumber,
-                allocation.Device.Make,
-                allocation.Device.Status.ToString(),
-                DateOnly.FromDateTime(allocation.DateAllocated),
-                allocation.DateDeleted.HasValue ? DateOnly.FromDateTime(allocation.DateDeleted.Value) : null));
+            foreach (Allocation allocation in allocations)
+            {
+                returnData.Add(new(
+                    asset.AssetNumber,
+                    asset.SerialNumber,
+                    asset.ModelDescription,
+                    asset.Status.Name,
+                    allocation.AllocationDate,
+                    allocation.ReturnDate));
+            }
         }
 
         return returnData;

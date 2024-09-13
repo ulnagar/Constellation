@@ -4,6 +4,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Abstractions.Clock;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,6 +82,20 @@ internal sealed class GroupTutorialRepository : IGroupTutorialRepository
                 tutorial.Teachers.Any(member =>
                     !member.IsDeleted &&
                     member.EffectiveTo < _dateTime.Today))
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<GroupTutorial>> GetAllActiveForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<GroupTutorial>()
+            .Where(tutorial =>
+                tutorial.Enrolments.Any(enrol =>
+                    !enrol.IsDeleted &&
+                    enrol.StudentId == studentId) &&
+                tutorial.EndDate >= _dateTime.Today &&
+                !tutorial.IsDeleted)
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
 

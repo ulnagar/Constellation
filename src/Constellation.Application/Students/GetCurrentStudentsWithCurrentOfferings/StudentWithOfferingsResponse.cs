@@ -14,8 +14,9 @@ public sealed record StudentWithOfferingsResponse(
     Name Name,
     Gender Gender,
     string SchoolName,
-    Grade Grade,
-    List<StudentWithOfferingsResponse.OfferingResponse> Offerings)
+    Grade? Grade,
+    List<StudentWithOfferingsResponse.OfferingResponse> Offerings,
+    bool CurrentEnrolment)
 {
     public sealed record OfferingResponse(
         OfferingId Id,

@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using Constellation.Core.Models.Students.Identifiers;
+
 namespace Constellation.Core.Models.Assets.Repositories;
 
 using Enums;
@@ -21,6 +23,7 @@ public interface IAssetRepository
     Task<List<Asset>> GetAllByStatus(AssetStatus status, CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllByLocationCategory(LocationCategory category, CancellationToken cancellationToken = default);
     Task<bool> IsAssetNumberTaken(AssetNumber assetNumber, CancellationToken cancellationToken = default);
+    Task<List<Asset>> GetDeviceHistoryForStudent(StudentId studentId, CancellationToken cancellationToken = default);
 
     void Insert(Asset asset);
     void Insert(Allocation allocation);

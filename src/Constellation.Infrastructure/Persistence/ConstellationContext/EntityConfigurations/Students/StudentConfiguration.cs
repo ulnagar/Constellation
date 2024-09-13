@@ -36,9 +36,6 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
             .HasIndex(student => student.StudentReferenceNumber)
             .IsUnique();
 
-        //builder
-        //    .OwnsOne(student => student.Name);
-
         builder
             .ComplexProperty(student => student.Name)
             .IsRequired();

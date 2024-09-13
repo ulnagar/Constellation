@@ -5,6 +5,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
+using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
@@ -12,36 +13,59 @@ using Microsoft.EntityFrameworkCore;
 public class SchoolRepository : ISchoolRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public SchoolRepository(AppDbContext context)
+    public SchoolRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<List<School>> GetAllActive(
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<School>()
-            .Where(school => 
-                school.Students.Any(student => !student.IsDeleted) ||
-                school.Staff.Any(staff => !staff.IsDeleted))
+        CancellationToken cancellationToken = default)
+    {
+        List<string> studentSchoolCodes = await _context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments)
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                enrolment.EndDate >= _dateTime.Today)
+            .Select(enrolment => enrolment.SchoolCode)
             .ToListAsync(cancellationToken);
-
-    public async Task<List<School>> GetAllActiveWithStudents(
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<School>()
-            .Where(school => school.Students.Any(student => !student.IsDeleted))
-            .ToListAsync(cancellationToken);
-
-    public async Task<List<School>> GetAllInactive(
-        CancellationToken cancellationToken = default) =>
-        await _context
+        
+        return await _context
             .Set<School>()
             .Where(school =>
-                school.Students.All(student => student.IsDeleted) &&
+                studentSchoolCodes.Contains(school.Code) &&
+                school.Staff.Any(staff => !staff.IsDeleted))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<School>> GetAllInactive(
+        CancellationToken cancellationToken = default)
+    {
+        List<string> studentSchoolCodes = await _context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments)
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                enrolment.EndDate >= _dateTime.Today)
+            .Select(enrolment => enrolment.SchoolCode)
+            .ToListAsync(cancellationToken);
+        
+        return await _context
+            .Set<School>()
+            .Where(school =>
+                !studentSchoolCodes.Contains(school.Code) &&
                 school.Staff.All(staff => staff.IsDeleted))
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<School>> GetListFromIds(
         List<string> schoolCodes, 
@@ -56,11 +80,16 @@ public class SchoolRepository : ISchoolRepository
         CancellationToken cancellationToken = default)
     {
         List<Student> students = await _context
-            .Set<School>()
-            .Where(school => school.Code == schoolCode)
-            .SelectMany(school => school.Students.Where(student => !student.IsDeleted))
+            .Set<Student>()
+            .Where(student => 
+                !student.IsDeleted &&
+                student.SchoolEnrolments
+                    .Any(enrolment =>
+                        !enrolment.IsDeleted &&
+                        enrolment.StartDate <= _dateTime.Today &&
+                        enrolment.EndDate >= _dateTime.Today))
             .ToListAsync(cancellationToken);
-                
+        
         if (students.All(student => student.CurrentEnrolment?.Grade >= Grade.Y07))
             return SchoolType.Secondary;
 
@@ -87,11 +116,25 @@ public class SchoolRepository : ISchoolRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<School>> GetWithCurrentStudents(
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<School>()
-            .Where(school => school.Students.Any(student => !student.IsDeleted))
+        CancellationToken cancellationToken = default)
+    {
+        List<string> schoolCodes = await _context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments)
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                enrolment.EndDate >= _dateTime.Today)
+            .Select(enrolment => enrolment.SchoolCode)
             .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<School>()
+            .Where(school => schoolCodes.Contains(school.Code))
+            .ToListAsync(cancellationToken);
+    }
+        
 
     public async Task<School> ForEditAsync(string id)
     {
@@ -99,11 +142,19 @@ public class SchoolRepository : ISchoolRepository
             .SingleOrDefaultAsync(school => school.Code == id);
     }
 
-    public async Task<bool> IsPartnerSchoolWithStudents(string code)
-    {
-        return await _context.Schools
-            .AnyAsync(school => school.Code == code && school.Students.Any(student => !student.IsDeleted));
-    }
+    public async Task<bool> IsPartnerSchoolWithStudents(
+        string code,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments)
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                enrolment.EndDate >= _dateTime.Today)
+            .Select(enrolment => enrolment.SchoolCode)
+            .AnyAsync(schoolCode => schoolCode == code, cancellationToken);
 
     public async Task<bool> AnyWithId(string id)
     {
@@ -116,30 +167,40 @@ public class SchoolRepository : ISchoolRepository
         var vm = new List<MapLayer>();
 
         var schools = _context.Schools
-            .Include(school => school.Students)
             .Include(school => school.Staff);
 
+        List<string> studentSchoolCodes = _context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments)
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                enrolment.EndDate >= _dateTime.Today)
+            .Select(enrolment => enrolment.SchoolCode)
+            .ToList();
+        
         var filteredSchools = schoolCodes.Count > 0
             ? schools.Where(school => schoolCodes.Any(code => code == school.Code))
             : schools;
 
         vm.Add(MapHelpers.MapLayerBuilder(
             filteredSchools.Where(school =>
-                school.Students.Any(student => !student.IsDeleted) &&
+                studentSchoolCodes.Contains(school.Code) &&
                 school.Staff.All(staff => staff.IsDeleted)),
             "Students only",
             "blue"));
 
         vm.Add(MapHelpers.MapLayerBuilder(
             filteredSchools.Where(school =>
-                school.Students.All(student => student.IsDeleted) &&
+                !studentSchoolCodes.Contains(school.Code) &&
                 school.Staff.Any(staff => !staff.IsDeleted)),
             "Staff only",
             "red"));
 
         vm.Add(MapHelpers.MapLayerBuilder(
             filteredSchools.Where(school =>
-                school.Students.Any(student => !student.IsDeleted) &&
+                studentSchoolCodes.Contains(school.Code) &&
                 school.Staff.Any(staff => !staff.IsDeleted)),
             "Both Students and Staff",
             "green"));

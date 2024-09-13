@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Application.DTOs;
 
-using Constellation.Core.Models;
 using System.Collections.Generic;
-using System.Linq;
 
 public class MapLayer
 {
@@ -14,27 +12,19 @@ public class MapLayer
     {
         if (marker.Colour != Colour)
             marker.Colour = Colour;
-
         Markers.Add(marker);
     }
 }
-
 public class MapItem
 {
-    public string Description { get; set; }
+    public string Description => $"<strong>{SchoolName}</strong><br /><hr />Students: {StudentCount}<br />Staff: {StaffCount}";
 
-    public double X { get; set; }
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public bool ShowPopup { get; set; }
+    public string Colour { get; set; } = string.Empty;
 
-    public double Y { get; set; }
-
-    public bool ShowPopup { get; set; } = false;
-    public string Colour { get; set; }
-
-    public static MapItem ConvertFromSchool(School school) =>
-        new()
-        {
-            Description = $"<strong>{school.Name}</strong><br /><hr />Students: {school.Students.Count(student => !student.IsDeleted)}<br />Staff: {school.Staff.Count(staff => !staff.IsDeleted)}",
-            X = school.Latitude,
-            Y = school.Longitude
-        };
+    public string SchoolName { get; set; } = string.Empty;
+    public int StudentCount { get; set; }
+    public int StaffCount { get; set; }
 }

@@ -149,7 +149,7 @@ public class StudentRepository : IStudentRepository
         List<string> schoolCodes,
         CancellationToken cancellationToken = default)
     {
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly today = _dateTime.Today;
 
         List<SchoolEnrolment> schoolEnrolments = await _context
             .Set<SchoolEnrolment>()
@@ -212,7 +212,7 @@ public class StudentRepository : IStudentRepository
         string SchoolCode,
         CancellationToken cancellationToken = default)
     {
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly today = _dateTime.Today;
 
         return await _context
             .Set<Student>()
@@ -226,11 +226,25 @@ public class StudentRepository : IStudentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> GetCountCurrentStudentsFromSchool(
+        string schoolCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student =>
+                student.SchoolEnrolments.Any(enrolment =>
+                    !enrolment.IsDeleted &&
+                    enrolment.StartDate <= _dateTime.Today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today) &&
+                    enrolment.SchoolCode == schoolCode) &&
+                !student.IsDeleted)
+            .CountAsync(cancellationToken);
+
     public async Task<List<Student>> GetCurrentStudentFromGrade(
         Grade grade,
         CancellationToken cancellationToken = default)
     {
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly today = _dateTime.Today;
 
         return await _context
             .Set<Student>()

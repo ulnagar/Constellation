@@ -9,10 +9,8 @@ public static class MapHelpers
 {
     public static MapLayer MapLayerBuilder(IQueryable<School> schools, string name, string colour)
     {
-        List<MapItem> markers = schools
-            .Select(school => MapItem.ConvertFromSchool(school))
-            .ToList();
-            
+        List<MapItem> markers = new();
+        
         MapLayer layer = new()
         {
             Colour = colour,
