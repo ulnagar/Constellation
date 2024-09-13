@@ -33,14 +33,15 @@ public class SchoolRepository : ISchoolRepository
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
                 enrolment.StartDate <= _dateTime.Today &&
-                enrolment.EndDate >= _dateTime.Today)
+                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
+            .Distinct()
             .ToListAsync(cancellationToken);
         
         return await _context
             .Set<School>()
             .Where(school =>
-                studentSchoolCodes.Contains(school.Code) &&
+                studentSchoolCodes.Contains(school.Code) ||
                 school.Staff.Any(staff => !staff.IsDeleted))
             .ToListAsync(cancellationToken);
     }
@@ -55,7 +56,7 @@ public class SchoolRepository : ISchoolRepository
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
                 enrolment.StartDate <= _dateTime.Today &&
-                enrolment.EndDate >= _dateTime.Today)
+                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
             .ToListAsync(cancellationToken);
         
@@ -87,7 +88,7 @@ public class SchoolRepository : ISchoolRepository
                     .Any(enrolment =>
                         !enrolment.IsDeleted &&
                         enrolment.StartDate <= _dateTime.Today &&
-                        enrolment.EndDate >= _dateTime.Today))
+                        (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today)))
             .ToListAsync(cancellationToken);
         
         if (students.All(student => student.CurrentEnrolment?.Grade >= Grade.Y07))
@@ -125,7 +126,7 @@ public class SchoolRepository : ISchoolRepository
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
                 enrolment.StartDate <= _dateTime.Today &&
-                enrolment.EndDate >= _dateTime.Today)
+                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
             .ToListAsync(cancellationToken);
 
@@ -152,7 +153,7 @@ public class SchoolRepository : ISchoolRepository
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
                 enrolment.StartDate <= _dateTime.Today &&
-                enrolment.EndDate >= _dateTime.Today)
+                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
             .AnyAsync(schoolCode => schoolCode == code, cancellationToken);
 
@@ -176,7 +177,7 @@ public class SchoolRepository : ISchoolRepository
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
                 enrolment.StartDate <= _dateTime.Today &&
-                enrolment.EndDate >= _dateTime.Today)
+                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
             .ToList();
         
