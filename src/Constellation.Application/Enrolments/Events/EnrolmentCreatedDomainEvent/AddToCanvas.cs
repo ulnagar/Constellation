@@ -12,7 +12,9 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System;
@@ -54,9 +56,20 @@ internal sealed class AddToCanvas
         if (student is null)
         {
             _logger
-                .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId))
-                .Error("Failed to complete the event handler");
+                .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId), true)
+                .Warning("Failed to add student to Canvas course");
+
+            return;
+        }
+
+        if (student.StudentReferenceNumber == StudentReferenceNumber.Empty ||
+            student.EmailAddress == EmailAddress.None)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StudentReferenceNumberErrors.EmptyValue, true)
+                .Warning("Failed to add student to Canvas course");
 
             return;
         }
@@ -66,9 +79,9 @@ internal sealed class AddToCanvas
         if (offering is null)
         {
             _logger
-                .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
-                .Error("Failed to complete the event handler");
+                .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId), true)
+                .Warning("Failed to add student to Canvas course");
 
             return;
         }
@@ -86,7 +99,7 @@ internal sealed class AddToCanvas
             string canvasSectionId = resource.CourseId + offering.Name.Value[^2..];
 
             ModifyEnrolmentCanvasOperation operation = new(
-                student.Id.ToString(),
+                student.StudentReferenceNumber.Number,
                 canvasSectionId,
                 CanvasAction.Add,
                 CanvasUserType.Student,
