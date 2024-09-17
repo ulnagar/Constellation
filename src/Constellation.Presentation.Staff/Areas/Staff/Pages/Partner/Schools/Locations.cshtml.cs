@@ -1,24 +1,28 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
+using Application.Common.PresentationModels;
 using Application.Interfaces.Repositories;
+using Application.Schools.GetSchoolLocationsAsMapLayers;
 using Constellation.Application.DTOs;
 using Core.Abstractions.Services;
+using Core.Shared;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Serilog;
 
 public class LocationsModel : BasePageModel
 {
-    private readonly ISchoolRepository _schoolRepository;
+    private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public LocationsModel(
-        ISchoolRepository schoolRepository,
+        ISender mediator,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
-        _schoolRepository = schoolRepository;
+        _mediator = mediator;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<LocationsModel>()
@@ -33,12 +37,23 @@ public class LocationsModel : BasePageModel
 
     public bool Anonymous { get; set; }
 
-    public void OnGet()
+    public async Task OnGet()
     {
         _logger
             .Information("Requested to retrieve map of Schools by anonymous user");
 
-        Layers = _schoolRepository.GetForMapping(new List<string>()).ToList();
+        Result<List<MapLayer>> layerRequest = await _mediator.Send(new GetSchoolLocationsAsMapLayersQuery(new()));
+
+        if (layerRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), layerRequest.Error, true)
+                .Warning("Failed to retrieve map of Schools by anonymous user");
+
+            ModalContent = new ErrorDisplay(layerRequest.Error);
+        }
+
+        Layers = layerRequest.Value;
         Anonymous = true;
     }
 
@@ -47,7 +62,18 @@ public class LocationsModel : BasePageModel
         _logger
             .Information("Requested to retrieve map of Schools by user {User}", _currentUserService.UserName);
 
-        Layers = _schoolRepository.GetForMapping(schoolCodes).ToList();
+        Result<List<MapLayer>> layerRequest = await _mediator.Send(new GetSchoolLocationsAsMapLayersQuery(schoolCodes));
+
+        if (layerRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), layerRequest.Error, true)
+                .Warning("Failed to retrieve map of Schools by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(layerRequest.Error);
+        }
+
+        Layers = layerRequest.Value;
 
         return Page();
     }

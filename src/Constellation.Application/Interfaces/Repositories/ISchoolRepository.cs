@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Repositories;
 
-using Constellation.Application.DTOs;
 using Constellation.Core.Models;
 using Schools.Enums;
 using System.Collections.Generic;
@@ -16,9 +15,6 @@ public interface ISchoolRepository
     Task<List<School>> GetAll(CancellationToken cancellationToken = default);
     Task<List<School>> GetWithCurrentStudents(CancellationToken cancellationToken = default);
     Task<List<School>> GetListFromIds(List<string> schoolCodes, CancellationToken cancellationToken = default);
-    Task<School> ForEditAsync(string id);
     Task<bool> IsPartnerSchoolWithStudents(string code, CancellationToken cancellationToken = default);
-    Task<bool> AnyWithId(string id);
-    IList<MapLayer> GetForMapping(IList<string> schoolCodes);
     Task<SchoolType> GetSchoolType(string schoolCode, CancellationToken cancellationToken = default);
 }

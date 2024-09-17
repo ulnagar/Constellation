@@ -107,7 +107,7 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
         MapLayer blueLayer = new() { Colour = "blue", Name = "Students only" };
         MapLayer redLayer = new() { Colour = "red", Name = "Staff only" };
         MapLayer greenLayer = new() { Colour = "green", Name = "Both Students and Staff" };
-        
+
         foreach (var school in schools)
         {
             int studentCount = await _studentRepository.GetCountCurrentStudentsFromSchool(school.Code, cancellationToken);
@@ -136,6 +136,10 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
             }
         }
 
+        layers.Add(blueLayer);
+        layers.Add(greenLayer);
+        layers.Add(redLayer);
+        
         return layers;
     }
 
