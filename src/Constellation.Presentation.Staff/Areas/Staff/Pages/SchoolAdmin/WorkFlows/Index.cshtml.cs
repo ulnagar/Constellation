@@ -46,15 +46,24 @@ public class IndexModel : BasePageModel
     [BindProperty(SupportsGet=true)]
     public FilterEnum Filter { get; set; } = FilterEnum.Open;
 
+    public bool IsAdmin { get; set; } = false;
+
     public async Task OnGet()
     {
         _logger.Information("Requested to retrieve list of WorkFlow Cases by user {User}", _currentUserService.UserName);
 
-        AuthorizationResult isAdmin = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+        AuthorizationResult isAdminTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+
+        if (isAdminTest.Succeeded)
+            IsAdmin = true;
 
         string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
 
-        Result<List<CaseSummaryResponse>> request = await _mediator.Send(new GetCaseSummaryListQuery(isAdmin.Succeeded, staffId));
+        Result<List<CaseSummaryResponse>> request = Filter switch
+        {
+            FilterEnum.ForMe => await _mediator.Send(new GetCaseSummaryListQuery(false, staffId)),
+            _ => await _mediator.Send(new GetCaseSummaryListQuery(IsAdmin, staffId))
+        };
 
         if (request.IsFailure)
         {
@@ -73,6 +82,7 @@ public class IndexModel : BasePageModel
             FilterEnum.Open => request.Value.Where(entry => !entry.Status.Equals(CaseStatus.Completed) && !entry.Status.Equals(CaseStatus.Cancelled)).ToList(),
             FilterEnum.Closed => request.Value.Where(entry => entry.Status.Equals(CaseStatus.Completed) || entry.Status.Equals(CaseStatus.Cancelled)).ToList(),
             FilterEnum.Overdue => request.Value.Where(entry => (entry.Status.Equals(CaseStatus.Open) || entry.Status.Equals(CaseStatus.PendingAction)) && entry.DueDate < _dateTime.Today).ToList(),
+            FilterEnum.ForMe => request.Value.Where(entry => !entry.Status.Equals(CaseStatus.Completed) && !entry.Status.Equals(CaseStatus.Cancelled)).ToList(),
             _ => request.Value
         };
     }
@@ -82,6 +92,7 @@ public class IndexModel : BasePageModel
         All,
         Closed,
         Open,
-        Overdue
+        Overdue,
+        ForMe
     }
 }
