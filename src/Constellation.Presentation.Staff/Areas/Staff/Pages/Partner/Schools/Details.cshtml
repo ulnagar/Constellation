@@ -214,7 +214,7 @@
         <div id="staffTab" class="tab-pane">
             <h3>Current Staff</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover staff-data-table">
                 <thead>
                     <tr>
                         <th>Id</th>
@@ -281,6 +281,12 @@
                     [2, 'asc'],
                     [1, 'asc']
                 ] 
+            });
+
+            $('.staff-data-table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
             });
         });
 

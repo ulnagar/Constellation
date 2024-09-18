@@ -95,7 +95,7 @@ internal class RemoveFromCanvas
                 continue;
 
             ModifyEnrolmentCanvasOperation operation = new(
-                student.Id.ToString(),
+                student.StudentReferenceNumber.Number,
                 resource.CourseId.ToString(),
                 CanvasAction.Remove,
                 CanvasUserType.Student,

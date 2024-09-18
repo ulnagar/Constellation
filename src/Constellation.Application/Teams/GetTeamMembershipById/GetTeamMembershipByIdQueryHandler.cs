@@ -21,6 +21,7 @@ using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
+using Core.ValueObjects;
 using Interfaces.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -105,6 +106,9 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 foreach (Student student in students)
                 {
+                    if (student.EmailAddress == EmailAddress.None)
+                        continue;
+
                     TeamMembershipResponse entry = new(
                         team.Id,
                         student.EmailAddress.Email,

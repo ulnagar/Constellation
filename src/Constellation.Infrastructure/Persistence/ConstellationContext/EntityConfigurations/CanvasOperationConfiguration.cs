@@ -19,6 +19,16 @@ public class CanvasOperationConfiguration : IEntityTypeConfiguration<CanvasOpera
     }
 }
 
+public class CreateUserCanvasOperationConfiguration : IEntityTypeConfiguration<CreateUserCanvasOperation>
+{
+    public void Configure(EntityTypeBuilder<CreateUserCanvasOperation> builder)
+    {
+        builder
+            .Property(operation => operation.PortalUsername)
+            .HasColumnName(nameof(CreateUserCanvasOperation.PortalUsername));
+    }
+}
+
 public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfiguration<ModifyEnrolmentCanvasOperation>
 {
     public void Configure(EntityTypeBuilder<ModifyEnrolmentCanvasOperation> builder)
@@ -34,5 +44,15 @@ public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfigurat
             .HasConversion(
                 user => user.Value,
                 value => CanvasUserType.FromValue(value));
+    }
+}
+
+public class UpdateUserEmailCanvasOperationConfiguration : IEntityTypeConfiguration<UpdateUserEmailCanvasOperation>
+{
+    public void Configure(EntityTypeBuilder<UpdateUserEmailCanvasOperation> builder)
+    {
+        builder
+            .Property(operation => operation.PortalUsername)
+            .HasColumnName(nameof(UpdateUserEmailCanvasOperation.PortalUsername));
     }
 }

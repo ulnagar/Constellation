@@ -31,7 +31,11 @@ internal sealed class ProcessCanvasOperationCommandHandler
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ProcessCanvasOperationCommand>();
     }
-
+    
+    // TODO: R1.16.0: Remove operations entirely.
+    // Move account management features to real-time handlers.
+    // Rely on audit for per course enrolment management.
+    // This would allow caching of Canvas User Id with principals (e.g. Student SystemLinks)
     public async Task<Result> Handle(ProcessCanvasOperationCommand request, CancellationToken cancellationToken)
     {
         CanvasOperation operation = await _operationsRepository.WithDetails(request.OperationId, cancellationToken);

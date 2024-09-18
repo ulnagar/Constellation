@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Application.Schools.Enums;
-using Constellation.Application.DTOs;
-using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Core.Abstractions.Clock;
@@ -136,13 +134,6 @@ public class SchoolRepository : ISchoolRepository
             .ToListAsync(cancellationToken);
     }
         
-
-    public async Task<School> ForEditAsync(string id)
-    {
-        return await _context.Schools
-            .SingleOrDefaultAsync(school => school.Code == id);
-    }
-
     public async Task<bool> IsPartnerSchoolWithStudents(
         string code,
         CancellationToken cancellationToken = default) =>
@@ -156,56 +147,4 @@ public class SchoolRepository : ISchoolRepository
                 (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
             .AnyAsync(schoolCode => schoolCode == code, cancellationToken);
-
-    public async Task<bool> AnyWithId(string id)
-    {
-        return await _context.Schools
-            .AnyAsync(school => school.Code == id);
-    }
-
-    public IList<MapLayer> GetForMapping(IList<string> schoolCodes)
-    {
-        var vm = new List<MapLayer>();
-
-        var schools = _context.Schools
-            .Include(school => school.Staff);
-
-        List<string> studentSchoolCodes = _context
-            .Set<Student>()
-            .Where(student => !student.IsDeleted)
-            .SelectMany(student => student.SchoolEnrolments)
-            .Where(enrolment =>
-                !enrolment.IsDeleted &&
-                enrolment.StartDate <= _dateTime.Today &&
-                (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
-            .Select(enrolment => enrolment.SchoolCode)
-            .ToList();
-        
-        var filteredSchools = schoolCodes.Count > 0
-            ? schools.Where(school => schoolCodes.Any(code => code == school.Code))
-            : schools;
-
-        vm.Add(MapHelpers.MapLayerBuilder(
-            filteredSchools.Where(school =>
-                studentSchoolCodes.Contains(school.Code) &&
-                school.Staff.All(staff => staff.IsDeleted)),
-            "Students only",
-            "blue"));
-
-        vm.Add(MapHelpers.MapLayerBuilder(
-            filteredSchools.Where(school =>
-                !studentSchoolCodes.Contains(school.Code) &&
-                school.Staff.Any(staff => !staff.IsDeleted)),
-            "Staff only",
-            "red"));
-
-        vm.Add(MapHelpers.MapLayerBuilder(
-            filteredSchools.Where(school =>
-                studentSchoolCodes.Contains(school.Code) &&
-                school.Staff.Any(staff => !staff.IsDeleted)),
-            "Both Students and Staff",
-            "green"));
-
-        return vm;
-    }
 }

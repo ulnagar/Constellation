@@ -39,7 +39,7 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Faculty";
 
     [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    public FacultyId Id { get; set; } = FacultyId.Empty;
 
     [Required]
     [BindProperty]
@@ -50,7 +50,7 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id.HasValue)
+        if (Id != FacultyId.Empty)
         {
             _logger.Information("Requested to retrieve Faculty with id {FacultyId} for edit by user {User}", Id, _currentUserService.UserName);
 
@@ -77,54 +77,55 @@ public class UpsertModel : BasePageModel
         }
     }
 
-    public async Task<IActionResult> OnPostUpdate()
+    public async Task<IActionResult> OnPostCreate()
     {
         if (!ModelState.IsValid)
         {
             return Page();
         }
 
-        if (Id.HasValue)
-        {
-            // Update existing entry
-            FacultyId facultyId = FacultyId.FromValue(Id.Value);
+        // Create new entry
+        CreateFacultyCommand command = new(
+            Name,
+            Colour);
 
-            UpdateFacultyCommand command = new(
-                facultyId,
-                Name,
-                Colour);
+        _logger
+            .ForContext(nameof(CreateFacultyCommand), command, true)
+            .Information("Requested to create Faculty by user {User}", _currentUserService.UserName);
 
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
             _logger
-                .ForContext(nameof(UpdateFacultyCommand), command, true)
-                .Information("Requested to update Faculty with Id {FacultyId} by user {User}", Id, _currentUserService.UserName);
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to create Faculty by user {User}", _currentUserService.UserName);
+    
+        return RedirectToPage("/Partner/Staff/Faculties/Index", new { area = "Staff"});
+    }
 
-            Result result = await _mediator.Send(command);
-
-            if (result.IsFailure)
-                _logger
-                    .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to update Faculty with Id {FacultyId} by user {User}", Id, _currentUserService.UserName);
-        }
-        else
+    public async Task<IActionResult> OnPostUpdate()
+    {
+        if (!ModelState.IsValid)
         {
-            // Create new entry
-
-            CreateFacultyCommand command = new(
-                Name,
-                Colour);
-            
-            _logger
-                .ForContext(nameof(CreateFacultyCommand), command, true)
-                .Information("Requested to create Faculty by user {User}", _currentUserService.UserName);
-
-            Result result = await _mediator.Send(command);
-
-            if (result.IsFailure)
-                _logger
-                    .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to create Faculty by user {User}", _currentUserService.UserName);
+            return Page();
         }
+        
+        UpdateFacultyCommand command = new(
+            Id,
+            Name,
+            Colour);
 
+        _logger
+            .ForContext(nameof(UpdateFacultyCommand), command, true)
+            .Information("Requested to update Faculty with Id {FacultyId} by user {User}", Id, _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Faculty with Id {FacultyId} by user {User}", Id, _currentUserService.UserName);
+        
         return RedirectToPage("/Partner/Staff/Faculties/Index", new { area = "Staff"});
     }
 }
