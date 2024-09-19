@@ -138,7 +138,7 @@ public sealed class Attachment
             return Result.Failure(AttachmentErrors.FilePathExists);
         }
 
-        if (FileData is not null && FileData.Length is not 0 && overwrite is false)
+        if (FileData?.Length is not 0 && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FileDataExists);
         }
