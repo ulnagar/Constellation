@@ -149,14 +149,12 @@ public class StudentRepository : IStudentRepository
         List<string> schoolCodes,
         CancellationToken cancellationToken = default)
     {
-        DateOnly today = _dateTime.Today;
-
         List<SchoolEnrolment> schoolEnrolments = await _context
             .Set<SchoolEnrolment>()
             .Where(enrolment => 
                 !enrolment.IsDeleted &&
-                enrolment.StartDate <= today &&
-                (!enrolment.EndDate.HasValue || enrolment.EndDate >= today))
+                enrolment.StartDate <= _dateTime.Today &&
+                (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today))
             .ToListAsync(cancellationToken);
 
         List<Student> students = await _context
@@ -209,22 +207,18 @@ public class StudentRepository : IStudentRepository
     }
 
     public async Task<List<Student>> GetCurrentStudentsFromSchool(
-        string SchoolCode,
-        CancellationToken cancellationToken = default)
-    {
-        DateOnly today = _dateTime.Today;
-
-        return await _context
+        string schoolCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
             .Set<Student>()
             .Where(student =>
                 student.SchoolEnrolments.Any(enrolment =>
                     !enrolment.IsDeleted &&
-                    enrolment.StartDate <= today &&
-                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= today) &&
-                    enrolment.SchoolCode == SchoolCode) &&
+                    enrolment.StartDate <= _dateTime.Today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today) &&
+                    enrolment.SchoolCode == schoolCode) &&
                 !student.IsDeleted)
             .ToListAsync(cancellationToken);
-    }
 
     public async Task<int> GetCountCurrentStudentsFromSchool(
         string schoolCode,
@@ -242,22 +236,18 @@ public class StudentRepository : IStudentRepository
 
     public async Task<List<Student>> GetCurrentStudentFromGrade(
         Grade grade,
-        CancellationToken cancellationToken = default)
-    {
-        DateOnly today = _dateTime.Today;
-
-        return await _context
+        CancellationToken cancellationToken = default) =>
+        await _context
             .Set<Student>()
             .Where(student =>
                 student.SchoolEnrolments.Any(enrolment =>
                     !enrolment.IsDeleted &&
-                    enrolment.StartDate <= today &&
-                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= today) &&
+                    enrolment.StartDate <= _dateTime.Today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today) &&
                     enrolment.Grade == grade) &&
                 !student.IsDeleted)
             .ToListAsync(cancellationToken);
-    }
-    
+
     public async Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(
         CancellationToken cancellationToken = default) =>
         await _context
