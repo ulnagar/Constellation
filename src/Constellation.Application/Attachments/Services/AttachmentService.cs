@@ -34,9 +34,9 @@ internal sealed class AttachmentService : IAttachmentService
     }
 
     public async Task<Result<AttachmentResponse>> GetAttachmentFile(
-    AttachmentType type,
-    string linkId,
-    CancellationToken cancellationToken = default)
+        AttachmentType type,
+        string linkId,
+        CancellationToken cancellationToken = default)
     {
         Attachment record = await _attachmentRepository.GetByTypeAndLinkId(type, linkId, cancellationToken);
         if (record is null)
@@ -49,7 +49,7 @@ internal sealed class AttachmentService : IAttachmentService
             return Result.Failure<AttachmentResponse>(AttachmentErrors.NotFound(type, linkId));
         }
 
-        if (record.FilePath is null)
+        if (string.IsNullOrWhiteSpace(record.FilePath))
         {
             if (record.FileData is null)
             {
