@@ -102,4 +102,7 @@ public interface IEmailService
     Task SendComplianceWorkFlowNotificationEmail(List<EmailRecipient> recipients, CaseId caseId, ComplianceCaseDetail detail, int incidentAge, string incidentLink, CancellationToken cancellationToken = default);
     Task SendTrainingWorkFlowNotificationEmail(List<EmailRecipient> recipients, TrainingCaseDetail detail, string reviewer, CancellationToken cancellationToken = default);
     Task SendAllActionsCompletedEmail(List<EmailRecipient> recipients, Case item, CancellationToken cancellationToken = default);
+
+    // Student Portal Emails
+    Task SendSupportTicketRequest(EmailRecipient submitter, string subject, string description, CancellationToken cancellationToken = default);
 }

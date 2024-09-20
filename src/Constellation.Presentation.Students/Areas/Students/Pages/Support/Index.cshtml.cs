@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages.Support;
 
 using Application.Models.Auth;
+using Application.Students.GetStudentById;
+using Application.Students.Models;
+using Application.SupportTicket.SubmitSupportTicket;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Contacts.GetContactListForParentPortal;
-using Constellation.Application.Students.GetStudentsByParentEmail;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -76,5 +79,84 @@ public class IndexModel : BasePageModel
         }
 
         Contacts = contactsRequest.Value;
+    }
+
+    public async Task<IActionResult> OnPostTechnologyForm(
+        string issueType,
+        string serialNumber,
+        string description)
+    {
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
+        {
+            _logger
+                .ForContext(nameof(Error), StudentErrors.InvalidId, true)
+                .Warning("Failed to retrieve support contacts by user {user}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+
+            return Page();
+        }
+
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
+
+        Result<StudentResponse> student = await _mediator.Send(new GetStudentByIdQuery(studentId));
+
+        if (student.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), student.Error, true)
+                .Warning("Failed to submit student support request by user {user}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(student.Error);
+
+            return Page();
+        }
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(student.Value.Name.DisplayName, student.Value.EmailAddress.Email);
+
+        if (recipient.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), recipient.Error, true)
+                .Warning("Failed to submit student support request by user {user}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(recipient.Error);
+
+            return Page();
+        }
+        
+        SubmitSupportTicketCommand command = new(
+            recipient.Value,
+            issueType,
+            serialNumber,
+            description);
+
+        _logger
+            .ForContext(nameof(SubmitSupportTicketCommand), command, true)
+            .Information("Requested to submit student support request by user {user}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to submit student support request by user {user}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
+
+        ModalContent = new FeedbackDisplay(
+            "Success",
+            "Thank you. Your request for support has been sent to our Technology Support Team!",
+            "Close",
+            "btn-default",
+            _linkGenerator.GetPathByPage("/Support/Index", values: new { area = "Students" }));
+
+        return Page();
     }
 }

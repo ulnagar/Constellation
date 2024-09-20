@@ -28,7 +28,7 @@
                         <li>Wellbeing Support</li>
                     </ul>
                     
-                    <div>Check out the Student Info Hub for more details: <a href="https://sites.google.com/education.nsw.gov.au/aurorastudentlst/welcome">Google Site: Student Info Hub</a></div>
+                    <div>Check out the Student Info Hub for more details: <a href="https://sites.google.com/education.nsw.gov.au/aurorastudentlst/welcome" target="_blank">Google Site: Student Info Hub</a></div>
                 </div>
             </div>
         </div>
@@ -49,14 +49,14 @@
                     }
 
                     <p>
-                        Check out our Careers website at <a href="https://careers.aurora.nsw.edu.au/">https://careers.aurora.nsw.edu.au/</a> 
+                        Check out our Careers website at <a href="https://careers.aurora.nsw.edu.au/" target="_blank">https://careers.aurora.nsw.edu.au/</a> 
                         @if (careersContact is not null)
                         {
                             <span>or contact @careersContact.DisplayName at <a href="mailto:@careersContact.EmailAddress">@careersContact.EmailAddress</a></span>
                         }
                     </p>
                     
-                    <p>You can also visit the <a href="https://teams.microsoft.com/l/channel/19%3Ab19eeb1db26544f79a6b6b619b129dea%40thread.tacv2/Virtual%20Careers%20Room%20?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991">Virtual Careers Room in the Aurora College Students Team</a></p>
+                    <p>You can also visit the <a href="https://teams.microsoft.com/l/channel/19%3Ab19eeb1db26544f79a6b6b619b129dea%40thread.tacv2/Virtual%20Careers%20Room%20?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991" target="_blank">Virtual Careers Room in the Aurora College Students Team</a></p>
                 </div>
             </div>
         </div>
@@ -76,16 +76,61 @@
                     
                     <p>You can also fill in the form below for assistance:</p>
                     
-                    <form>
-                        Question
-                        Hardware
-                        Software
-                        Accessory
+                    <div class="w-50">
+                        <form asp-page-handler="TechnologyForm" method="post">
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2 col">
+                                    <strong>Report an issue</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2 col-12">
+                                    <strong>Type</strong>
+                                </div>
+                                <div class="mb-2 col-12">
+                                    <span>
+                                        <select name="IssueType" required>
+                                            <option value=""> -- Select issue type -- </option>
+                                            <option value="Question">Question</option>
+                                            <option value="Hardware">Computer Issue (Laptop or desktop)</option>
+                                            <option value="Software">Application Issue (Teams, OneNote, etc)</option>
+                                            <option value="Accessory">Accessory Issue (Headset or webcam, etc)</option>
+                                        </select>
+                                    </span>
+                                </div>
+                            </div>
+                        
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2">
+                                    <strong>Device details (serial number or asset number)</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <span>
+                                        <input name="SerialNumber" />
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2 col-12">
+                                    <strong>Description of issue</strong>
+                                </div>
+                                <div class="mb-2 col-12">
+                                    <span>
+                                        <textarea name="Description" cols="100" rows="5" required minlength="20"></textarea>
+                                    </span>
+                                </div>
+                            </div>
 
-                        Serial Number/Asset Number
-                        Description of issue
-                    </form>
-
+                            <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
+                                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+                            </div>
+                            <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
+                                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,3 +152,8 @@
         </div>
     </div>
 </div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

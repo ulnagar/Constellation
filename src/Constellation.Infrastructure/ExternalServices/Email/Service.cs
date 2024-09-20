@@ -179,7 +179,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(emailAddresses, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -220,7 +220,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceDigestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(emailAddresses, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -258,7 +258,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -298,7 +298,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -342,7 +342,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -383,7 +383,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceDigestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, null, viewModel.Title, body, cancellationToken);
+        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -427,6 +427,18 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, cancellationToken);
     }
 
+    public async Task SendSupportTicketRequest(
+        EmailRecipient submitter,
+        string subject,
+        string description,
+        CancellationToken cancellationToken = default)
+    {
+        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", description);
+
+        Result<EmailRecipient> toAddress = EmailRecipient.Create("Aurora College Support", "support@aurora.nsw.edu.au");
+        
+        await _emailSender.Send([toAddress.Value], submitter, subject, body, cancellationToken);
+    }
 
     public async Task SendAdminAbsenceSentralAlert(string studentName)
     {

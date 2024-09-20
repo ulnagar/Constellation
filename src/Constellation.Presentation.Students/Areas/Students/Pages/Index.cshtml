@@ -11,7 +11,7 @@
              
             <ul class="list-group">
                 <li class="list-group-item">
-                    <a href="https://sites.google.com/education.nsw.gov.au/aurorastudentlst/welcome" class="stretched-link"></a>
+                    <a href="https://sites.google.com/education.nsw.gov.au/aurorastudentlst/welcome" target="_blank" class="stretched-link"></a>
                     <i class="fas fa-link"></i> 
                     Google Site: Student Info Hub
                 </li>
@@ -26,7 +26,7 @@
             
             <ul class="list-group">
                 <li class="list-group-item">
-                    <a href="https://teams.microsoft.com/l/team/19%3A6ba422c37a2540d5add4220c43657414%40thread.tacv2/conversations?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991" class="stretched-link"></a>
+                    <a href="https://teams.microsoft.com/l/team/19%3A6ba422c37a2540d5add4220c43657414%40thread.tacv2/conversations?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991" target="_blank" class="stretched-link"></a>
                     <i class="fas fa-link"></i> 
                     Aurora College Students on Microsoft Teams
                 </li>
@@ -54,7 +54,7 @@
                     @foreach (var resource in offering.Resources.OrderBy(entry => entry.Type))
                     {
                         <ul class="list-group">
-                            <li class="list-group-item"><a href="@resource.Url" class="stretched-link"></a><i class="fas fa-link"></i> @resource.Type<br />@resource.Name</li>
+                            <li class="list-group-item"><a href="@resource.Url" target="_blank" class="stretched-link"></a><i class="fas fa-link"></i> @resource.Type<br />@resource.Name</li>
                         </ul>
                     }
             </div>
