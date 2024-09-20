@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.RoleAddUser;
+﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 
 public class RoleAddUserSelection
 {

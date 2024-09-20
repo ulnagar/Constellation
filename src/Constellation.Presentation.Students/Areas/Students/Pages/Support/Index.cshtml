@@ -42,8 +42,21 @@
             </h2>
             <div id="accordion-item-careers" class="accordion-collapse collapse" aria-labelledby="accordion-header-careers" data-bs-parent="#accordion">
                 <div class="accordion-body">
-                    <div>Do you need help deciding on the next step of your education journey? Our Careers Advisor would love to chat about your options and find the right solution for you.</div>
+                    <p>Do you need help deciding on the next step of your education journey? Our Careers Advisor would love to chat about your options and find the right solution for you.</p>
+                    
+                    @{
+                        var careersContact = Model.Contacts.FirstOrDefault(entry => entry.Detail == "Careers Advisor");
+                    }
 
+                    <p>
+                        Check out our Careers website at <a href="https://careers.aurora.nsw.edu.au/">https://careers.aurora.nsw.edu.au/</a> 
+                        @if (careersContact is not null)
+                        {
+                            <span>or contact @careersContact.DisplayName at <a href="mailto:@careersContact.EmailAddress">@careersContact.EmailAddress</a></span>
+                        }
+                    </p>
+                    
+                    <p>You can also visit the <a href="https://teams.microsoft.com/l/channel/19%3Ab19eeb1db26544f79a6b6b619b129dea%40thread.tacv2/Virtual%20Careers%20Room%20?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991">Virtual Careers Room in the Aurora College Students Team</a></p>
                 </div>
             </div>
         </div>
@@ -57,7 +70,21 @@
             </h2>
             <div id="accordion-item-technology" class="accordion-collapse collapse" aria-labelledby="accordion-header-technology" data-bs-parent="#accordion">
                 <div class="accordion-body">
-                    <div>If you're having trouble getting your technology to work, the first step to getting it fixed is to let us know!</div>
+                    <p>If you're having trouble getting your technology to work, the first step to getting it fixed is to let us know!</p>
+                    
+                    <p>Contact us at <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a> and let us know your issues. You can also call us on <strong>1300 610 733</strong> during school hours.</p>
+                    
+                    <p>You can also fill in the form below for assistance:</p>
+                    
+                    <form>
+                        Question
+                        Hardware
+                        Software
+                        Accessory
+
+                        Serial Number/Asset Number
+                        Description of issue
+                    </form>
 
                 </div>
             </div>
@@ -72,8 +99,9 @@
             </h2>
             <div id="accordion-item-general" class="accordion-collapse collapse" aria-labelledby="accordion-header-general" data-bs-parent="#accordion">
                 <div class="accordion-body">
-                    <div>If you can't find the support your after, our helpful office staff can direct you to the right place!</div>
-
+                    <p>If you can't find the support your after, our helpful office staff can direct you to the right place!</p>
+                    
+                    <p>Contact us at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a> and let us know your question. You can also call us on <strong>1300 287 629</strong> during school hours.</p>
                 </div>
             </div>
         </div>
