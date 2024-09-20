@@ -26,7 +26,7 @@ public class Service : ISMSService
         foreach (string offering in absences.Select(absence => absence.OfferingName).OrderBy(c => c))
             classListString += $"{offering}\r\n";
 
-        string link = $"https://aurora.au/";
+        string link = $"https://aurora.link/";
 
         string messageText = $"{student.Name.PreferredName} was reported absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
         
