@@ -114,20 +114,20 @@ internal class Gateway : IDoEDataSourcesGateway
                 DataCollectionsSchoolResponse school = new DataCollectionsSchoolResponse
                 {
                     SchoolCode = splitString[0].Trim(),
-                    Name = splitString[5].Trim('"').Trim(),
-                    Address = splitString[6].Trim(),
-                    Town = textInfo.ToTitleCase(splitString[7].Trim()),
-                    PostCode = splitString[8].Trim(),
-                    Status = splitString[12].Trim(),
-                    Electorate = splitString[15].Trim(),
-                    PrincipalNetwork = splitString[14].Trim(),
-                    Division = splitString[13].Trim(), // School Performance Directorate
-                    PhoneNumber = Regex.Replace(splitString[34].Trim(), @"[^0-9]", ""),
-                    EmailAddress = splitString[36].Trim(),
-                    FaxNumber = Regex.Replace(splitString[35].Trim(), @"[^0-9]", ""),
-                    HeatSchool = splitString[39] == "Y",
-                    PrincipalName = splitString[47].Trim(),
-                    PrincipalEmail = splitString[48].Trim()
+                    Name = splitString[9].Trim('"').Trim(),
+                    Address = splitString[10].Trim(),
+                    Town = textInfo.ToTitleCase(splitString[11].Trim()),
+                    PostCode = splitString[12].Trim(),
+                    Status = splitString[16].Trim(),
+                    Electorate = splitString[19].Trim(),
+                    PrincipalNetwork = splitString[29].Trim(),
+                    Division = splitString[28].Trim(), // School Performance Directorate
+                    PhoneNumber = Regex.Replace(splitString[47].Trim(), @"[^0-9]", ""),
+                    EmailAddress = splitString[49].Trim(),
+                    FaxNumber = Regex.Replace(splitString[50].Trim(), @"[^0-9]", ""),
+                    HeatSchool = splitString[54] == "Y",
+                    PrincipalName = splitString[75].Trim(),
+                    PrincipalEmail = splitString[76].Trim()
                 };
 
                 if (school.PhoneNumber.Length == 8)
