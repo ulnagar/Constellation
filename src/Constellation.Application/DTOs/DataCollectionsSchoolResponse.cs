@@ -15,11 +15,11 @@ public sealed class DataCollectionsSchoolResponse
     //Column 9
     public string Status { get; set; }
     //Column 17
-    public string Electorate { get; set; }
+    public string EducationalServicesTeam { get; set; }
     //Column 24
     public string PrincipalNetwork { get; set; }
     //Column 21
-    public string Division { get; set; }
+    public string Directorate { get; set; }
     //Column 43
     public string PhoneNumber { get; set; }
     //Column 46

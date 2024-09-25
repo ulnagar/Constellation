@@ -243,9 +243,9 @@ internal sealed class GetSchoolDetailsQueryHandler
             school.FaxNumber,
             school.EmailAddress,
             school.HeatSchool,
-            school.Division,
+            school.Directorate,
             school.PrincipalNetwork,
-            school.Electorate,
+            school.EducationalServicesTeam,
             staffResponse,
             studentResponse,
             contactResponse);

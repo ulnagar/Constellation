@@ -17,9 +17,9 @@ public sealed record SchoolDetailsResponse(
     string FaxNumber,
     string EmailAddress,
     bool HeatSchool,
-    string Division,
+    string Directorate,
     string PrincipalNetwork,
-    string Electorate,
+    string EducationalServicesTeam,
     List<SchoolDetailsResponse.SchoolStaff> Staff,
     List<StudentWithOfferingsResponse> Students,
     List<SchoolDetailsResponse.SchoolContact> Contacts)

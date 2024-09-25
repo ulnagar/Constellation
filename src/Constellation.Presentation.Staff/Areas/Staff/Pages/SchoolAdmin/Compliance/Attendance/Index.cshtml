@@ -27,7 +27,7 @@
 
 <hr />
 
-<table class="table table-striped data-table">
+<table class="table table-striped attendance-data-table">
     <thead>
     <tr>
         <th>Student</th>
@@ -40,13 +40,13 @@
     </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.StudentData.OrderBy(entry => entry.StudentId).ThenBy(entry => entry.PeriodLabel))
+        @foreach (var entry in Model.StudentData)
         {
             <tr>
-                <td>
+                <td data-order="@entry.StudentName?.SortOrder">
                     @if (entry.StudentName is null)
                     {
-                        <a asp-page="/SchoolAdmin/Compliance/Attendance/Student" asp-area="Staff" asp-route-studentId="@entry.StudentId">@entry.StudentId</a>
+                        <a asp-page="/SchoolAdmin/Compliance/Attendance/Student" asp-area="Staff" asp-route-studentId="@entry.StudentId">@entry.StudentReferenceNumber</a>
                     }
                     else
                     {
@@ -94,3 +94,18 @@
         </div>
     </div>
 </div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $('.attendance-data-table').DataTable({
+                "order": [
+                    [1, 'asc'],
+                    [0, 'asc'],
+                    [2, 'asc']
+                ]
+            });
+        });
+    </script>
+}

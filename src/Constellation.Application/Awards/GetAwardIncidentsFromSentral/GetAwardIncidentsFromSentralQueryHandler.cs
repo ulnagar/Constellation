@@ -98,9 +98,9 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
                                     continue;
                                 }
 
-                                _logger
-                                    .ForContext("Text Incident Date", entry.InnerText.Trim())
-                                    .Information("Detected incident creation date");
+                                //_logger
+                                //    .ForContext("Text Incident Date", entry.InnerText.Trim())
+                                //    .Information("Detected incident creation date");
 
                                 string text = entry.InnerText.Trim();
                                 string[] split = text.Split(' ');

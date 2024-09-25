@@ -51,6 +51,7 @@ internal class GetRecentAttendanceValuesQueryHandler
 
             response.Add(new(
                 value.StudentId,
+                student.StudentReferenceNumber,
                 student.Name,
                 value.Grade,
                 enrolment.SchoolName,

@@ -9,6 +9,7 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Persistence.TrackItContext;
 using Persistence.TrackItContext.Models;
@@ -50,9 +51,9 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     {
         JobId = jobId;
 
-        List<Student> acosStudents = await _studentRepository.GetCurrentStudents(cancellationToken);
+        List<Student> acosStudents = await _studentRepository.GetAll(cancellationToken);
         List<School> acosSchools = await _schoolRepository.GetAllActive(cancellationToken);
-        List<Staff> acosStaff = await _staffRepository.GetAllActive(cancellationToken);
+        List<Staff> acosStaff = await _staffRepository.GetAll(cancellationToken);
         _faculties = await _facultyRepository.GetAll(cancellationToken);
 
         List<Customer> tiCustomers = await _tiContext.Customers.ToListAsync(cancellationToken);
@@ -102,12 +103,15 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             {
                 Staff? staffMember = acosStaff.FirstOrDefault(staff => staff.EmailAddress.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
 
-                if (staffMember is not null && !staffMember.IsDeleted)
-                    continue;
+                if (staffMember is not null)
+                {
+                    if (!staffMember.IsDeleted)
+                        continue;
 
-                if (staffMember?.DateDeleted != null && staffMember.DateDeleted.Value.AddDays(7) > DateTime.Today)
-                    continue;
-
+                    if (staffMember.DateDeleted != null && staffMember.DateDeleted.Value.AddDays(7) > DateTime.Today)
+                        continue;
+                }
+                
                 _logger.Information("{id}: Customer: {user} no longer active - removing", jobId, emailAddress);
 
                 customer.Inactive = 1;
@@ -119,11 +123,15 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             {
                 Student? student = acosStudents.FirstOrDefault(student => student.EmailAddress.Email.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
 
-                if (student is not null && !student.IsDeleted)
-                    continue;
+                // Student not found. Should be removed.
+                if (student is not null)
+                {
+                    if (!student.IsDeleted)
+                        continue;
 
-                if (student.DeletedAt != DateTime.MinValue && student.DeletedAt.AddDays(7) > DateTime.Today)
-                    continue;
+                    if (student.DeletedAt != DateTime.MinValue && student.DeletedAt.AddDays(7) > DateTime.Today)
+                        continue;
+                }
 
                 _logger.Information("{id}: Customer: {user} no longer active - removing", jobId, emailAddress);
 
@@ -133,10 +141,14 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             }
         }
         
-        foreach (Student acosStudent in acosStudents)
+        foreach (Student acosStudent in acosStudents.Where(student => !student.IsDeleted))
         {
             if (cancellationToken.IsCancellationRequested)
                 return;
+
+            // If student does not have an email address registered, they cannot be created in TrackIt
+            if (acosStudent.EmailAddress == EmailAddress.None)
+                continue;
 
             _logger.Information("{id}: Student: Name {student} - Email {emailAddress}", jobId, acosStudent.Name.DisplayName, acosStudent.EmailAddress);
             
@@ -157,7 +169,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         SetNextCustomerSequence();
         await _tiContext.SaveChangesAsync(cancellationToken);
 
-        foreach (Staff acosStaffMember in acosStaff)
+        foreach (Staff acosStaffMember in acosStaff.Where(staff => !staff.IsDeleted))
         {
             if (cancellationToken.IsCancellationRequested)
                 return;

@@ -12,6 +12,7 @@ using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
@@ -130,8 +131,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                //TODO: R1.14.4: Is this operation worth the cost?
-                List<Student> familyStudents = students.Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number)).ToList();
+                List<Student> familyStudents = students
+                    .Where(student => student.StudentReferenceNumber != StudentReferenceNumber.Empty)
+                    .Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number)).ToList();
 
                 foreach (Student student in familyStudents)
                 {
@@ -220,35 +222,41 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                //TODO: R1.14.4: Is this operation worth the cost?
-                List<Student> familyStudents = students.Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number)).ToList();
+                List<Student> familyStudents = students
+                    .Where(student => student.StudentReferenceNumber != StudentReferenceNumber.Empty)
+                    .Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number))
+                    .ToList();
 
-                foreach (Student student in familyStudents)
+                List<Student> dbStudents = students
+                    .Where(student => entry.Students.Any(member => member.StudentId == student.Id))
+                    .ToList();
+
+                foreach (Student dbStudent in dbStudents)
                 {
-                    if (entry.Students.All(entry => entry.StudentId != student.Id))
+                    // Student is not listed in the Sentral Students list, but is in the db Students list
+                    if (familyStudents.All(sentralStudent => sentralStudent.Id != dbStudent.Id))
+                    {
+                        _logger
+                            .Information("Removing student {name} from family {family} ({code})", dbStudent.Name.DisplayName, family.AddressName, family.FamilyId);
+
+                        // Student should not be linked
+                        entry.RemoveStudent(dbStudent.Id);
+                    }
+                }
+
+                foreach (Student sentralStudent in familyStudents)
+                {
+                    // Student is listed in the Sentral Students list, but is not in the db Students list
+                    if (entry.Students.All(entry => entry.StudentId != sentralStudent.Id))
                     {
                         // Student is not currently linked
                         _logger
-                            .Information("Adding student {name} to family {family} ({code})", student.Name.DisplayName, family.AddressName, family.FamilyId);
+                            .Information("Adding student {name} to family {family} ({code})", sentralStudent.Name.DisplayName, family.AddressName, family.FamilyId);
 
-                        entry.AddStudent(student.Id, student.StudentReferenceNumber, true);
+                        entry.AddStudent(sentralStudent.Id, sentralStudent.StudentReferenceNumber, true);
                     }
                 }
-
-                List<StudentFamilyMembership> linkedStudents = entry.Students.ToList();
-                List<Student> existingStudents = await _studentRepository.GetListFromIds(linkedStudents.Select(student => student.StudentId).ToList(), token);
-                foreach (Student student in existingStudents)
-                {
-                    if (!family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number))
-                    {
-                        _logger
-                            .Information("Removing student {name} from family {family} ({code})", student.Name.DisplayName, family.AddressName, family.FamilyId);
-
-                        // Student should not be linked
-                        entry.RemoveStudent(student.Id);
-                    }
-                }
-
+                
                 foreach (Parent parent in entry.Parents.ToList())
                 {
                     FamilyDetailsDto.Contact contact = family.Contacts.FirstOrDefault(contact => contact.SentralId == parent.SentralId);

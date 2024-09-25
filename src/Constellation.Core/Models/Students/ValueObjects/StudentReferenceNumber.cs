@@ -44,5 +44,11 @@ public sealed class StudentReferenceNumber : ValueObject
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static StudentReferenceNumber FromValue(string value) => new(value);
+    public static StudentReferenceNumber FromValue(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Empty;
+
+        return new(value);
+    }
 }

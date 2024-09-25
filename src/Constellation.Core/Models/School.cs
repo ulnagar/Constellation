@@ -22,9 +22,9 @@ public class School
     public string PhoneNumber { get; set; }
     public string FaxNumber { get; set; }
     public string EmailAddress { get; set; }
-    public string Division { get; set; }
+    public string Directorate { get; set; }
     public bool HeatSchool { get; set; }
-    public string Electorate { get; set; }
+    public string EducationalServicesTeam { get; set; }
     public string PrincipalNetwork { get; set; }
     public string TimetableApplication { get; set; }
     public string RollCallGroup { get; set; }

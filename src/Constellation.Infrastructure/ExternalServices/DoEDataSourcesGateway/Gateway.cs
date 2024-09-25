@@ -119,9 +119,9 @@ internal class Gateway : IDoEDataSourcesGateway
                     Town = textInfo.ToTitleCase(splitString[11].Trim()),
                     PostCode = splitString[12].Trim(),
                     Status = splitString[16].Trim(),
-                    Electorate = splitString[19].Trim(),
+                    EducationalServicesTeam = splitString[28].Trim(),
                     PrincipalNetwork = splitString[29].Trim(),
-                    Division = splitString[28].Trim(), // School Performance Directorate
+                    Directorate = splitString[27].Trim(),
                     PhoneNumber = Regex.Replace(splitString[47].Trim(), @"[^0-9]", ""),
                     EmailAddress = splitString[49].Trim(),
                     FaxNumber = Regex.Replace(splitString[50].Trim(), @"[^0-9]", ""),

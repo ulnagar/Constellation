@@ -69,9 +69,9 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     Town = csvSchool.Town,
                     State = "NSW",
                     PostCode = csvSchool.PostCode,
-                    Electorate = csvSchool.Electorate,
+                    Electorate = csvSchool.EducationalServicesTeam,
                     PrincipalNetwork = csvSchool.PrincipalNetwork,
-                    Division = csvSchool.Division,
+                    Division = csvSchool.Directorate,
                     PhoneNumber = csvSchool.PhoneNumber,
                     EmailAddress = csvSchool.EmailAddress,
                     FaxNumber = csvSchool.FaxNumber,
@@ -92,7 +92,6 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     command.LateOpening = ceseSchool.LateOpening == "Y";
                     command.Longitude = double.Parse(ceseSchool.Longitude);
                     command.Latitude = double.Parse(ceseSchool.Latitude);
-                    command.LateOpening = (ceseSchool.LateOpening == "Y");
                 }
 
                 await _mediator.Send(command, cancellationToken);
@@ -124,10 +123,10 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     dbSchool.PostCode = csvSchool.PostCode;
                 }
 
-                if (dbSchool.Electorate != csvSchool.Electorate)
+                if (dbSchool.EducationalServicesTeam != csvSchool.EducationalServicesTeam)
                 {
-                    _logger.Information("{id}: School {Name} ({SchoolCode}): Change Electorate from {oldValue} to {newValue}", jobId, csvSchool.Name, csvSchool.SchoolCode, dbSchool.Electorate, csvSchool.Electorate);
-                    dbSchool.Electorate = csvSchool.Electorate;
+                    _logger.Information("{id}: School {Name} ({SchoolCode}): Change EducationalServicesTeam from {oldValue} to {newValue}", jobId, csvSchool.Name, csvSchool.SchoolCode, dbSchool.EducationalServicesTeam, csvSchool.EducationalServicesTeam);
+                    dbSchool.EducationalServicesTeam = csvSchool.EducationalServicesTeam;
                 }
 
                 if (dbSchool.PrincipalNetwork != csvSchool.PrincipalNetwork)
@@ -136,10 +135,10 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                     dbSchool.PrincipalNetwork = csvSchool.PrincipalNetwork;
                 }
 
-                if (dbSchool.Division != csvSchool.Division)
+                if (dbSchool.Directorate != csvSchool.Directorate)
                 {
-                    _logger.Information("{id}: School {Name} ({SchoolCode}): Change Division from {oldValue} to {newValue}", jobId, csvSchool.Name, csvSchool.SchoolCode, dbSchool.Division, csvSchool.Division);
-                    dbSchool.Division = csvSchool.Division;
+                    _logger.Information("{id}: School {Name} ({SchoolCode}): Change Directorate from {oldValue} to {newValue}", jobId, csvSchool.Name, csvSchool.SchoolCode, dbSchool.Directorate, csvSchool.Directorate);
+                    dbSchool.Directorate = csvSchool.Directorate;
                 }
 
                 if (dbSchool.PhoneNumber != csvSchool.PhoneNumber)
@@ -172,69 +171,69 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
 
         // Do not update Principal data as this might overwrite custom data updates
         // Filter out all closed/proposed schools
-        openSchools = openSchools.Where(school => !string.IsNullOrWhiteSpace(school.PrincipalEmail)).ToList();
+        //openSchools = openSchools.Where(school => !string.IsNullOrWhiteSpace(school.PrincipalEmail)).ToList();
         
-        foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
-        {
-            _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
-            School dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
+        //foreach (DataCollectionsSchoolResponse csvSchool in openSchools)
+        //{
+        //    _logger.Information("{id}: Processing School {Name} ({SchoolCode})", jobId, csvSchool.Name, csvSchool.SchoolCode);
+        //    School dbSchool = dbSchools.SingleOrDefault(school => school.Code == csvSchool.SchoolCode);
 
-            if (dbSchool == null)
-                continue;
+        //    if (dbSchool == null)
+        //        continue;
 
-            List<SchoolContact> principals = await _contactRepository.GetPrincipalsForSchool(dbSchool.Code, cancellationToken);
+        //    List<SchoolContact> principals = await _contactRepository.GetPrincipalsForSchool(dbSchool.Code, cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
-                continue;
+        //    if (string.IsNullOrWhiteSpace(csvSchool.PrincipalEmail))
+        //        continue;
 
-            bool hasStudents = await _schoolRepository.IsPartnerSchoolWithStudents(csvSchool.SchoolCode, cancellationToken);
+        //    bool hasStudents = await _schoolRepository.IsPartnerSchoolWithStudents(csvSchool.SchoolCode, cancellationToken);
 
-            // Compare Principal in database to information in csv by email address
-            // If different, mark database entry as old/deleted and create a new entry
-            if (principals.Any())
-            {
-                foreach (SchoolContact principal in principals)
-                {
-                    if (!hasStudents &&
-                        !dbSchool.Staff.All(staff => staff.IsDeleted) &&
-                        string.Equals(principal.EmailAddress, csvSchool.PrincipalEmail, StringComparison.CurrentCultureIgnoreCase)) 
-                        continue;
+        //    // Compare Principal in database to information in csv by email address
+        //    // If different, mark database entry as old/deleted and create a new entry
+        //    if (principals.Any())
+        //    {
+        //        foreach (SchoolContact principal in principals)
+        //        {
+        //            if (!hasStudents &&
+        //                !dbSchool.Staff.All(staff => staff.IsDeleted) &&
+        //                string.Equals(principal.EmailAddress, csvSchool.PrincipalEmail, StringComparison.CurrentCultureIgnoreCase)) 
+        //                continue;
                     
-                    Console.WriteLine($" Removing old Principal: {principal.DisplayName}");
-                    SchoolContactRole role = principal.Assignments.FirstOrDefault(role => 
-                        role.Role == SchoolContactRole.Principal && 
-                        role.SchoolCode == dbSchool.Code && 
-                        !role.IsDeleted);
+        //            Console.WriteLine($" Removing old Principal: {principal.DisplayName}");
+        //            SchoolContactRole role = principal.Assignments.FirstOrDefault(role => 
+        //                role.Role == SchoolContactRole.Principal && 
+        //                role.SchoolCode == dbSchool.Code && 
+        //                !role.IsDeleted);
 
-                    if (role is null) 
-                        continue;
+        //            if (role is null) 
+        //                continue;
 
-                    Result request = await _mediator.Send(new RemoveContactRoleCommand(principal.Id, role.Id), cancellationToken);
+        //            Result request = await _mediator.Send(new RemoveContactRoleCommand(principal.Id, role.Id), cancellationToken);
 
-                    if (request.IsSuccess) 
-                        continue;
+        //            if (request.IsSuccess) 
+        //                continue;
 
-                    _logger
-                        .ForContext(nameof(SchoolContact), principal, true)
-                        .Warning("Failed to remove expired role from contact");
-                }
-            } 
-            else 
-            {
-                // Does the email address appear in the SchoolContact list?
-                Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
-                Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
-                await _mediator.Send(new CreateContactWithRoleCommand(
-                    csvSchool.PrincipalFirstName,
-                    csvSchool.PrincipalLastName,
-                    csvSchool.PrincipalEmail,
-                    string.Empty,
-                    SchoolContactRole.Principal,
-                    csvSchool.SchoolCode,
-                    "Principal created from CESE Data Source",
-                    false),
-                    cancellationToken);
-            }
-        }
+        //            _logger
+        //                .ForContext(nameof(SchoolContact), principal, true)
+        //                .Warning("Failed to remove expired role from contact");
+        //        }
+        //    } 
+        //    else 
+        //    {
+        //        // Does the email address appear in the SchoolContact list?
+        //        Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
+        //        Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
+        //        await _mediator.Send(new CreateContactWithRoleCommand(
+        //            csvSchool.PrincipalFirstName,
+        //            csvSchool.PrincipalLastName,
+        //            csvSchool.PrincipalEmail,
+        //            string.Empty,
+        //            SchoolContactRole.Principal,
+        //            csvSchool.SchoolCode,
+        //            "Principal created from CESE Data Source",
+        //            false),
+        //            cancellationToken);
+        //    }
+        //}
     }
 }

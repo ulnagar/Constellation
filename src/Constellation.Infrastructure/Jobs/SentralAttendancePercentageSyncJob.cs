@@ -81,6 +81,8 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
                 .ForContext(nameof(week), week)
                 .ForContext(nameof(_dateTime.Today), _dateTime.Today)
                 .Warning("Could not sync the Attendance Percentages");
+
+            return;
         }
 
         // Grab the file from Sentral

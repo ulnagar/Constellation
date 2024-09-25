@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Students;
 
 using Constellation.Core.Models.Students;
+using Converters;
 using Core.Models.Absences;
-using Core.Models.Families;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
-using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -28,9 +27,7 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder
             .Property(student => student.StudentReferenceNumber)
             .IsRequired(false)
-            .HasConversion(
-                entry => entry.Number,
-                value => StudentReferenceNumber.FromValue(value));
+            .HasConversion(new StudentReferenceNumberConverter());
 
         builder
             .HasIndex(student => student.StudentReferenceNumber)
