@@ -73,7 +73,7 @@ internal sealed class AttachmentService : IAttachmentService
             _logger
                 .ForContext(nameof(GetAttachmentFile), new { Type = type, LinkId = linkId}, true)
                 .ForContext(nameof(Error), AttachmentErrors.NotFoundOnDisk(type, linkId), true)
-            .Warning("Failed to retrieve attachment file");
+                .Warning("Failed to retrieve attachment file");
 
             return Result.Failure<AttachmentResponse>(AttachmentErrors.NotFoundOnDisk(type, linkId));
         }
