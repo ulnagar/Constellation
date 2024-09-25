@@ -706,6 +706,17 @@ internal sealed class Gateway : ICanvasGateway
         CanvasPermissionLevel permissionLevel,
         CancellationToken cancellationToken = default)
     {
+        if (sectionId == CanvasSectionCode.Empty)
+        {
+            // Section is invalid
+            _logger
+                .ForContext(nameof(CanvasSectionCode), sectionId, true)
+                .ForContext(nameof(userId), userId, true)
+                .Warning("Failed to enrol user to section");
+
+            return false;
+        }
+
         int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
         if (canvasUserId == null)

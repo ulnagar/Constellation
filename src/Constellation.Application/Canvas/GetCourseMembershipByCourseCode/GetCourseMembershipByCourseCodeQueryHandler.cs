@@ -53,7 +53,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
             {
                 response.Add(new(
                     request.CourseCode, 
-                    student.Id.ToString(), 
+                    student.StudentReferenceNumber.Number, 
                     resource.SectionId, 
                     CanvasPermissionLevel.Student));
             }

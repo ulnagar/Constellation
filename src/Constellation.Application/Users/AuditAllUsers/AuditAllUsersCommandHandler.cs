@@ -11,6 +11,7 @@ using Core.Models.Families;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Collections.Generic;
@@ -147,9 +148,7 @@ internal sealed class AuditAllUsersCommandHandler
 
         _logger.Information("Finished processing registered users");
 
-        users = _userManager.Users.ToList();
-
-        _logger.Information("{count} registered users remaining", users.Count);
+        _logger.Information("{count} registered users remaining", _userManager.Users.Count());
 
         foreach (Family family in families)
         {
@@ -299,6 +298,9 @@ internal sealed class AuditAllUsersCommandHandler
 
             if (users.All(user => user.Email != student.EmailAddress.Email))
             {
+                if (student.EmailAddress == EmailAddress.None)
+                    continue;
+
                 _logger.Information("Found no matching user.");
                 _logger.Information("User will be created");
 
@@ -326,10 +328,8 @@ internal sealed class AuditAllUsersCommandHandler
         }
 
         _logger.Information("Finished processing potential users");
-
-        users = _userManager.Users.ToList();
-
-        _logger.Information("{count} total users now registered", users.Count);
+        
+        _logger.Information("{count} total users now registered", _userManager.Users.Count());
 
         return Result.Success();
     }

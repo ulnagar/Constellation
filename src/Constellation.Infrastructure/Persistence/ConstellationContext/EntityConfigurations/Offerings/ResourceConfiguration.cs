@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Converters;
 using Core.Models.Canvas.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -47,8 +48,6 @@ internal sealed class CanvasCourseResourceConfiguration : IEntityTypeConfigurati
     {
         builder
             .Property(resource => resource.SectionId)
-            .HasConversion(
-                item => item.ToString(),
-                value => CanvasSectionCode.FromValue(value));
+            .HasConversion(new CanvasSectionCodeConverter());
     }
 }

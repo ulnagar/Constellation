@@ -161,7 +161,7 @@ public sealed class Offering : AggregateRoot
         Resource resource = type switch
         {
             _ when type == ResourceType.MicrosoftTeam => new MicrosoftTeamResource(Id, resourceId, name, url),
-            _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, CanvasCourseCode.FromValue(resourceId), CanvasSectionCode.FromValue(additional), name, url),
+            _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, CanvasCourseCode.FromValue(resourceId), string.IsNullOrWhiteSpace(additional) ? CanvasSectionCode.Empty : CanvasSectionCode.FromValue(additional), name, url),
             _ => null
         };
 
