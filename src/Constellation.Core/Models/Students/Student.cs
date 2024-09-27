@@ -132,10 +132,23 @@ public class Student : AggregateRoot, IAuditableEntity
                 currentEnrolment.Grade == grade)
                 return Result.Success();
 
-            if (currentEnrolment.SchoolCode != schoolCode)
-                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode, startDate));
-
             currentEnrolment.Delete(startDate.Value, dateTime);
+        }
+
+        switch (currentEnrolment)
+        {
+            case null when startDate != dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode, startDate));
+                break;
+            case null when startDate == dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode));
+                break;
+            case not null when startDate != dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode, startDate));
+                break;
+            case not null when startDate == dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode));
+                break;
         }
 
         Result<SchoolEnrolment> enrolment = SchoolEnrolment.Create(
@@ -154,6 +167,14 @@ public class Student : AggregateRoot, IAuditableEntity
         _schoolEnrolments.Add(enrolment.Value);
         
         return Result.Success();
+    }
+
+    // TODO: R1.16: What happens if the active enrolment is removed, but a new one is not created?
+    // The student should be removed from Science Prac rolls for the old school. This does not currently happen.
+    // Perhaps a new domain event that is only used when there is no new active School Enrolment during the deletion process.
+    public void RemoveSchoolEnrolment(SchoolEnrolment enrolment, IDateTimeProvider dateTime)
+    {
+        enrolment.Delete(dateTime.Today, dateTime);
     }
 
     public Result AddSystemLink(

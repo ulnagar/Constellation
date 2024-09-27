@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
 using Application.Students.GetSchoolEnrolmentHistoryForStudent;
+using Application.Students.RemoveSchoolEnrolment;
 using Application.Students.TransferStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
@@ -326,6 +327,45 @@ public class DetailsModel : BasePageModel
             _logger
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetRemoveSchoolEnrolment(
+        SchoolEnrolmentId enrolmentId,
+        CancellationToken cancellationToken = default)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (!authorised.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to remove School Enrolment by user {User}", _currentUserService.UserName);
+
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return Page();
+        }
+
+        RemoveSchoolEnrolmentCommand command = new(
+            Id,
+            enrolmentId);
+
+        _logger
+            .ForContext(nameof(RemoveSchoolEnrolmentCommand), command, true)
+            .Information("Requested to remove School Enrolment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove School Enrolment by user {User}", _currentUserService.UserName);
 
             GenerateError(result.Error);
         }

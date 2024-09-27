@@ -15,4 +15,8 @@ public static class SchoolEnrolmentErrors
     public static readonly Error TooMany = new(
         "Student.SchoolEnrolment.TooMany",
         "Found too many current School Enrolments for this student");
+
+    public static readonly Error RecordDeleted = new(
+        "Student.SchoolEnrolment.AlreadyDeleted",
+        "This School Enrolment record has been marked deleted");
 }

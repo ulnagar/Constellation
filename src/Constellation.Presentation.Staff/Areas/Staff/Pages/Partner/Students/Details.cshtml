@@ -1,11 +1,14 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.DetailsModel
 
+@using Constellation.Core.Abstractions.Clock
+@using Constellation.Core.DomainEvents
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Families
 @using Constellation.Core.ValueObjects
 
 @inject IAuthorizationService authorizationService;
+@inject IDateTimeProvider dateTime;
 
 @{
     var authorised = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -154,17 +157,27 @@
                         <th>Grade</th>
                         <th>From</th>
                         <th>To</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var entry in Model.SchoolEnrolments)
                     {
-                        <tr>
+                        var isCurrent = !entry.IsDeleted && entry.StartDate <= dateTime.Today && (!entry.EndDate.HasValue || entry.EndDate.Value >= dateTime.Today);
+                        var isFuture = !entry.IsDeleted && entry.StartDate > dateTime.Today;
+
+                        <tr class="@(isCurrent ? "current" : "") @(isFuture ? "future" : "")">
                             <td>@entry.Year</td>
                             <td>@entry.SchoolName</td>
                             <td data-order="@entry.Grade.AsNumber()">@entry.Grade.AsName()</td>
                             <td data-order="@entry.StartDate.ToString("yyyy-MM-dd")">@entry.StartDate.ToString("d")</td>
                             <td data-order="@(entry.EndDate.HasValue ? entry.EndDate.Value.ToString("yyyy-MM-dd") : DateOnly.MaxValue.ToString("yyyy-MM-dd"))">@entry.EndDate?.ToString("d")</td>
+                            <td>
+                                @if (entry is { IsDeleted: false, EndDate: null } && authorised.Succeeded)
+                                {
+                                    <a asp-page-handler="RemoveSchoolEnrolment" asp-route-enrolmentId="@entry.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>

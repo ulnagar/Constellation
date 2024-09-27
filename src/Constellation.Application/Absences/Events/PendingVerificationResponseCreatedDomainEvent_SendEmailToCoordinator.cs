@@ -17,6 +17,7 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students.Errors;
 using MediatR;
 using Serilog;
 using System.Collections.Generic;
@@ -87,7 +88,11 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
 
         if (enrolment is null)
         {
-            _logger.Warning("Could not retrieve current school details for student {studentId}", absence.StudentId);
+            _logger
+                .ForContext(nameof(PendingVerificationResponseCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                .Error("Could not retrieve current school details for student {studentId}", absence.StudentId);
+            
             return;
         }
 

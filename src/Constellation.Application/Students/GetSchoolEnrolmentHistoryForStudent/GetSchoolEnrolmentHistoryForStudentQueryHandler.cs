@@ -44,6 +44,7 @@ internal sealed class GetSchoolEnrolmentHistoryForStudentQueryHandler
         foreach (SchoolEnrolment enrolment in student.SchoolEnrolments)
         {
             response.Add(new(
+                enrolment.Id,
                 enrolment.SchoolCode,
                 enrolment.SchoolName,
                 enrolment.Grade,
