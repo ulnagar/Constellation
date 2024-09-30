@@ -15,4 +15,5 @@ public interface IAcademicReportRepository
     Task<List<AcademicReport>> GetForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<AcademicReport?> GetByPublishId(string PublishId, CancellationToken cancellationToken = default);
     void Insert(AcademicReport entity);
+    void Remove(AcademicReport entity);
 }

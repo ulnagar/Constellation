@@ -34,6 +34,31 @@ internal class AttachmentRepository : IAttachmentRepository
             .Take(count)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Attachment>> GetSubsetLocallyStoredWithoutChecksum(
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Attachment>()
+            .Where(attachment =>
+                attachment.FileData != null &&
+                attachment.FileData != Array.Empty<byte>() &&
+                attachment.Checksum == null)
+            .OrderBy(attachment => attachment.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Attachment>> GetSubsetExternallyStoredWithoutChecksum(
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Attachment>()
+            .Where(attachment =>
+                attachment.FilePath != null &&
+                attachment.Checksum == null)
+            .OrderBy(attachment => attachment.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Attachment>> GetEmptyArrayItems(
         int count,
         CancellationToken cancellationToken = default) =>

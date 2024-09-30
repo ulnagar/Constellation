@@ -69,6 +69,8 @@ internal sealed class UpdateOutstandingLessonRolls
 
         List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(notification.StudentId, cancellationToken);
 
+        List<SciencePracLessonId> updatedLessonIds = new();
+
         // The PreviousSchoolCode item may be blank if there was no active previous school when the transfer was created.
         if (!string.IsNullOrWhiteSpace(notification.PreviousSchoolCode))
         {
@@ -79,8 +81,6 @@ internal sealed class UpdateOutstandingLessonRolls
                     roll.Status == LessonStatus.Active &&
                     roll.Attendance.Any(attendance => attendance.StudentId == notification.StudentId))
                 .ToList();
-
-            List<SciencePracLessonId> updatedLessonIds = new();
 
             foreach (SciencePracRoll roll in oldRolls)
             {

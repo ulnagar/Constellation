@@ -19,5 +19,6 @@ public interface IAssignmentRepository
     Task<List<CanvasAssignment>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignment>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<List<CanvasAssignment>> GetAllDueForUpload(CancellationToken cancellationToken = default);
+    Task<List<CanvasAssignment>> GetForCleanup(CancellationToken cancellationToken = default);
     void Insert(CanvasAssignment entity);
 }

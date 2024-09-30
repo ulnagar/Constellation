@@ -33,6 +33,7 @@ public sealed class Attachment
     public DateTime CreatedAt { get; private set; }
     public AttachmentType LinkType { get; private set; } = AttachmentType.Unset;
     public string LinkId { get; private set; } = string.Empty;
+    public string Checksum { get; private set; } = string.Empty;
 
     public static Attachment CreateAwardCertificateAttachment(
         string name,
@@ -130,7 +131,7 @@ public sealed class Attachment
         return attachment;
     }
 
-    public Result AttachData(byte[] fileData, bool overwrite = false)
+    public Result AttachData(byte[] fileData, string checksum, bool overwrite = false)
     {
         if (!string.IsNullOrWhiteSpace(FilePath) && overwrite is false)
         {
@@ -145,11 +146,12 @@ public sealed class Attachment
         FileData = fileData;
         FileSize = fileData.Length;
         FilePath = string.Empty;
+        Checksum = checksum;
 
         return Result.Success();
     }
 
-    public Result AttachPath(string filePath, int fileSize, bool overwrite = false)
+    public Result AttachPath(string filePath, int fileSize, string checksum, bool overwrite = false)
     {
         if (!string.IsNullOrWhiteSpace(FilePath) && overwrite is false)
         {
@@ -164,7 +166,11 @@ public sealed class Attachment
         FilePath = filePath;
         FileSize = fileSize;
         FileData = null;
+        Checksum = checksum;
 
         return Result.Success();
     }
+
+    public void UpdateChecksum(string checksum) =>
+        Checksum = checksum;
 }

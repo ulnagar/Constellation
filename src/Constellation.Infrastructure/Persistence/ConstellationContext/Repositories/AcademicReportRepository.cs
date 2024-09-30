@@ -46,4 +46,7 @@ internal sealed class AcademicReportRepository : IAcademicReportRepository
 
     public void Insert(AcademicReport entity) =>
         _context.Add(entity);
+
+    public void Remove(AcademicReport entity) =>
+        _context.Remove(entity);
 }

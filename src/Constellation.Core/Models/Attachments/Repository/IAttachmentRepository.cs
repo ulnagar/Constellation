@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 public interface IAttachmentRepository
 {
     Task<List<Attachment>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<Attachment>> GetSubsetLocallyStoredWithoutChecksum(int count, CancellationToken cancellationToken = default);
+    Task<List<Attachment>> GetSubsetExternallyStoredWithoutChecksum(int count, CancellationToken cancellationToken = default);
     Task<List<Attachment>> GetSubsetOverSizeInDb(int maxSize, int count, CancellationToken cancellationToken = default);
     Task<List<Attachment>> GetEmptyArrayItems(int count, CancellationToken cancellationToken = default);
     Task<Attachment?> GetByTypeAndLinkId(AttachmentType type, string linkId, CancellationToken cancellationToken = default);

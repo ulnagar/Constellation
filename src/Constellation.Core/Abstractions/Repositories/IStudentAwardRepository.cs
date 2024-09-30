@@ -17,4 +17,5 @@ public interface IStudentAwardRepository
     Task<List<StudentAward>> GetToRecentCount(int Count, CancellationToken cancellationToken = default);
 
     void Insert(StudentAward studentAward);
+    void Remove(StudentAward studentAward);
 }

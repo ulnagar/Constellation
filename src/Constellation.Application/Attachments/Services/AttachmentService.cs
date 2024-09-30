@@ -16,6 +16,7 @@ using System.IO;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 internal sealed class AttachmentService : IAttachmentService
 {
@@ -93,6 +94,15 @@ internal sealed class AttachmentService : IAttachmentService
     {
         bool useDisk = _configuration is not null;
 
+        SHA256 sha = SHA256.Create();
+        byte[] checksum = sha.ComputeHash(fileData);
+
+        if (attachment.Checksum != BitConverter.ToString(checksum).Replace("-", string.Empty) && overwrite == false)
+            return Result.Failure(AttachmentErrors.FileDataExists);
+
+        if (attachment.Checksum == BitConverter.ToString(checksum).Replace("-", string.Empty))
+            return Result.Success();
+
         if (useDisk && fileData.Length > _configuration.MaxDBStoreSize)
         {
             string basePath = _configuration.BaseFilePath;
@@ -109,23 +119,23 @@ internal sealed class AttachmentService : IAttachmentService
             string filePath = $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
 
             // Ensure the directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
 
             await File.WriteAllBytesAsync(filePath, fileData, cancellationToken);
 
-            Result attempt = attachment.AttachPath(filePath, fileData.Length, overwrite);
+            Result attempt = attachment.AttachPath(filePath, fileData.Length, BitConverter.ToString(checksum).Replace("-", string.Empty), overwrite);
 
             return attempt;
         }
         else
         {
             // Store file in database
-            Result attempt = attachment.AttachData(fileData, overwrite);
+            Result attempt = attachment.AttachData(fileData, BitConverter.ToString(checksum).Replace("-", string.Empty), overwrite);
 
             return attempt;
         }
     }
-
+    
     public async Task<Result> RemediateEntry(
         Attachment attachment,
         CancellationToken cancellationToken = default)
@@ -154,8 +164,11 @@ internal sealed class AttachmentService : IAttachmentService
             byte[] fileContents = await File.ReadAllBytesAsync(filePath, cancellationToken);
             int fileSize = fileContents.Length;
 
-            Result attempt = attachment.AttachPath(filePath, fileSize, true);
+            SHA256 sha = SHA256.Create();
+            byte[] checksum = sha.ComputeHash(fileContents);
 
+            Result attempt = attachment.AttachPath(filePath, fileSize, BitConverter.ToString(checksum).Replace("-", string.Empty), true);
+            
             return attempt;
         }
 

@@ -76,4 +76,7 @@ internal sealed class StudentAwardRepository : IStudentAwardRepository
 
     public void Insert(StudentAward studentAward) =>
         _context.Set<StudentAward>().Add(studentAward);
+
+    public void Remove(StudentAward studentAward) =>
+        _context.Set<StudentAward>().Remove(studentAward);
 }

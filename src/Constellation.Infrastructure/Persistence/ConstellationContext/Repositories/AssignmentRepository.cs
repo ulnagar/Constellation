@@ -74,4 +74,11 @@ internal class AssignmentRepository : IAssignmentRepository
                 assignment.DelayForwarding &&
                 assignment.ForwardingDate == _dateTime.Today)
             .ToListAsync(cancellationToken);
+
+    public async Task<List<CanvasAssignment>> GetForCleanup(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CanvasAssignment>()
+            .Where(assignment => assignment.DueDate <= _dateTime.Today.AddMonths(-18).ToDateTime(TimeOnly.MinValue))
+            .ToListAsync(cancellationToken);
 }

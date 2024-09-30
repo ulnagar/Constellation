@@ -75,7 +75,7 @@
                 }
             </td>
             <td>@item.StudentReferenceNumber</td>
-            <td data-order="@item.StudentName.SortOrder"><gender gender="@item.Gender" /> @item.StudentName.DisplayName</td>
+            <td data-order="@item.StudentName.SortOrder" data-search="@item.StudentName.FirstName @item.StudentName.DisplayName"><gender gender="@item.Gender" /> @item.StudentName.DisplayName</td>
             <td data-order="@item.Grade?.AsNumber()">
                 @if (!item.CurrentEnrolment)
                 {
