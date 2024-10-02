@@ -104,6 +104,10 @@ public static class DomainErrors
             public static readonly Error InvalidOfferingId = new(
                 "Awards.Nomination.InvalidOfferingId",
                 "Could not identify the Offering from the Offering Id provided");
+
+            public static readonly Error DuplicateFound = new(
+                "Awards.Nomination.DuplicateFound",
+                "A nomination for this award and student already exists in the period");
         }
     }
 

@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Reports;
 
 using Application.Common.PresentationModels;
+using Application.SciencePracs.BulkCancelRolls;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Schools.GetSchoolById;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Serilog;
+using Shared.Components.BulkCancelSciencePracRolls;
 
 [Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
 public class IndexModel : BasePageModel
@@ -119,5 +121,32 @@ public class IndexModel : BasePageModel
         }
 
         return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostBulkCancel(BulkCancelSciencePracRollsSelection viewModel)
+    {
+        BulkCancelRollsCommand command = new(
+            viewModel.SelectedSchoolCodes,
+            viewModel.SelectedGrades,
+            viewModel.Comment);
+
+        _logger
+            .ForContext(nameof(BulkCancelRollsCommand), command, true)
+            .Information("Requested to bulk cancel Science Prac Rolls by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to bulk cancel Science Prac Rolls by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

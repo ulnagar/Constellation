@@ -1,0 +1,49 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.BulkCancelSciencePracRolls.BulkCancelSciencePracRollsSelection
+
+@using Constellation.Core.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<div class="modal fade" tabindex="-1" id="removeRolls">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="BulkCancel">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bulk Cancel Science Prac Rolls</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="SelectedSchoolCodes">Schools</label>
+                            <select asp-for="SelectedSchoolCodes" asp-items="@(new SelectList(Model.Schools, "Code", "Name"))" class="combo" data-select2-id="RemoveRolls.Schools" style="width:100%" multiple="multiple">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="SelectedGrades" class="col-md-3">Grades</label>
+                            <div class="col-md-9">
+                                <select asp-for="SelectedGrades" asp-items="@Html.GetEnumSelectList<Grade>()" class="combo" data-select2-id="RemoveRolls.Grade" multiple="multiple">
+                                    <option value=""> -- Select Grade -- </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="Comment" class="col-md-3">Comment</label>
+                            <div class="col-md-9">
+                                <textarea asp-for="Comment" cols="50" rows="5"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Cancel Rolls" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -97,6 +97,8 @@ public class Step4Model : BasePageModel
                 response.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Nominate/Step1", values: new { area = "Staff", PeriodId }));
 
+            await PreparePage();
+
             return Page();
         }
 
