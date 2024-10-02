@@ -113,6 +113,17 @@ public class LessonRepository : ILessonRepository
                 lesson.Rolls.Any(roll => roll.Status == LessonStatus.Active))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<SciencePracLesson>> GetWithoutPresentStudents(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SciencePracLesson>()
+            .Where(lesson =>
+                lesson.DueDate >= _dateTime.FirstDayOfYear &&
+                lesson.Rolls.Any(roll =>
+                    roll.Status == LessonStatus.Completed &&
+                    roll.Attendance.All(entry => !entry.Present)))
+            .ToListAsync(cancellationToken);
+
     public void Insert(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Add(lesson);
 
     public void Delete(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Remove(lesson);

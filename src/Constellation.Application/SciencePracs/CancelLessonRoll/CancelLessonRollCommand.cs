@@ -5,5 +5,6 @@ using Constellation.Core.Models.Identifiers;
 
 public sealed record CancelLessonRollCommand(
     SciencePracLessonId LessonId,
-    SciencePracRollId RollId)
+    SciencePracRollId RollId,
+    string Comment)
     : ICommand;

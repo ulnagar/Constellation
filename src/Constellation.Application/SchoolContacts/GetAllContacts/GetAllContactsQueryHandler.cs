@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetAllContacts;
 
 using Abstractions.Messaging;
+using Constellation.Application.SchoolContacts.Models;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
-using GroupTutorials.GenerateTutorialAttendanceReport;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -50,20 +51,24 @@ internal sealed class GetAllContactsQueryHandler
             List<SchoolContactRole> activeAssignments = contact.Assignments
                 .Where(assignment => !assignment.IsDeleted)
                 .ToList();
+            
+            Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
+            Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
 
             if (activeAssignments.Count == 0)
             {
                 response.Add(new SchoolContactResponse(
                     contact.Id,
                     SchoolContactRoleId.Empty, 
-                    contact.DisplayName,
-                    contact.EmailAddress,
-                    contact.PhoneNumber,
+                    name.Value,
+                    email.Value,
+                    PhoneNumber.Empty, 
                     true,
                     string.Empty,
                     string.Empty,
                     false,
-                    string.Empty));
+                    string.Empty,
+                    contact.SelfRegistered));
 
                 continue;
             }
@@ -73,31 +78,32 @@ internal sealed class GetAllContactsQueryHandler
                 School school = schools.FirstOrDefault(entry => entry.Code == assignment.SchoolCode);
 
                 bool directNumber = false;
-                string phoneNumber;
+                PhoneNumber phone;
 
                 if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
                 {
-                    phoneNumber = school?.PhoneNumber;
-                    if (!string.IsNullOrWhiteSpace(phoneNumber))
-                        directNumber = false;
+                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
+                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
                 }
                 else
                 {
-                    phoneNumber = contact.PhoneNumber;
+                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(contact.PhoneNumber);
+                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
                     directNumber = true;
                 }
 
                 response.Add(new(
                     contact.Id,
                     assignment.Id,
-                    contact.DisplayName,
-                    contact.EmailAddress,
-                    phoneNumber,
+                    name.Value,
+                    email.Value,
+                    phone,
                     directNumber,
                     assignment.Role,
                     assignment.SchoolName,
                     school is not null,
-                    assignment.Note));
+                    assignment.Note,
+                    contact.SelfRegistered));
             }
         }
 

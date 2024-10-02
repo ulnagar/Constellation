@@ -3,6 +3,7 @@
 
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Constellation.Application.SchoolContacts.GetAllContacts
+@using Constellation.Core.ValueObjects
 
 @inject IAuthorizationService authService
 
@@ -70,18 +71,19 @@
                 }
                 @item.SchoolName
             </td>
-            <td class="text-nowrap">@item.Name</td>
+            <td class="text-nowrap" data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
             <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
-            <td class="text-nowrap">
+            <td class="text-nowrap" data-order="@item.PhoneNumber.ToString(PhoneNumber.Format.None)">
                 @if (item.IsDirectNumber)
                 {
                     <i class="fal fa-user mr-1"></i>
+                    @item.PhoneNumber.ToString()
                 }
-                else if (!string.IsNullOrWhiteSpace(item.PhoneNumber))
+                else if (item.PhoneNumber != PhoneNumber.Empty)
                 {
                     <i class="fal fa-school mr-2"></i>
+                    @item.PhoneNumber.ToString()
                 }
-                @Html.DisplayFor(model => item.PhoneNumber, "PhoneNumber")
             </td>
             <td>
                 @Html.DisplayFor(model => item.Role)
@@ -101,8 +103,8 @@
                             <button class="dropdown-item create-assignment-button" data-contact-id="@item.Id.Value" data-name="@item.Name">Add Role</button>
                             @if (!string.IsNullOrEmpty(item.Role))
                             {
-                                <button data-contact-id="@item.Id.Value" data-role-id="@item.AssignmentId.Value" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
-                                <button data-contact-id="@item.Id.Value" data-role-id="@item.AssignmentId.Value" data-name="@item.Name" data-role="@item.Role" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
+                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
+                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name" data-role="@item.Role" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                             }
                             <div class="dropdown-divider"></div>
                             <a asp-page-handler="RepairUser" asp-route-id="@item.Id" class="dropdown-item">Repair Account</a>

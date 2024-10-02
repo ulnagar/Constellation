@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
 using Application.Common.PresentationModels;
+using Application.SchoolContacts.Models;
 using Application.Users.RepairSchoolContactUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
@@ -50,7 +51,7 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
     [ViewData] public string PageTitle => "Science Prac Teacher List";
 
-    public List<ContactResponse> Contacts = new();
+    public List<SchoolContactResponse> Contacts = new();
 
     public async Task OnGet() => await PreparePage();
 
@@ -213,7 +214,7 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve list of Science Prac Teachers by user {User}", _currentUserService.UserName);
 
-        Result<List<ContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
+        Result<List<SchoolContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
 
         if (contactRequest.IsFailure)
         {
@@ -226,6 +227,6 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Contacts = contactRequest.Value.OrderBy(contact => contact.ContactName.SortOrder).ToList();
+        Contacts = contactRequest.Value;
     }
 }

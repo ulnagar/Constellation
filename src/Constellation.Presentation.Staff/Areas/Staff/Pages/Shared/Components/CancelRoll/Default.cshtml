@@ -1,0 +1,33 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.CancelRoll.CancelRollSelection
+
+<form method="post" asp-page-handler="Cancel">
+    <div class="modal fade" tabindex="-1" id="cancel-roll-modal">
+        <div class="modal-dialog">
+            <div id="modal-content" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Roll</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Are you sure you want to cancel this roll?</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="Comment" class="col-md-3"></label>
+                            <div class="col-md-9">
+                                <textarea asp-for="Comment" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Cancel Roll</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.Events.SchoolContactEmailAddressChanged;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Errors;
 using Constellation.Core.Shared;
@@ -8,7 +9,6 @@ using Core.Errors;
 using Core.Models.SchoolContacts.Events;
 using Core.Models.SchoolContacts.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Models.Identity;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
