@@ -3,5 +3,6 @@
 using Abstractions.Messaging;
 
 public sealed record ProcessCanvasOperationCommand(
-    int OperationId)
+    int OperationId,
+    bool UseSections)
     : ICommand;

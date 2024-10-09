@@ -8,6 +8,7 @@ using Core.Models.Operations.Enums;
 using Core.Shared;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -127,8 +128,10 @@ internal sealed class ProcessCanvasOperationCommandHandler
                 {
                     _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Teacher) =>
                         await _canvasGateway.EnrolToCourse(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Teacher, cancellationToken),
-                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) =>
+                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) && request.UseSections =>
                         await _canvasGateway.EnrolToSection(modifyOperation.UserId, CanvasSectionCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Student, cancellationToken),
+                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) && !request.UseSections =>
+                        await _canvasGateway.EnrolToCourse(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Student, cancellationToken),
                     _ when modifyOperation.Action.Equals(CanvasAction.Remove) =>
                         await _canvasGateway.UnenrolUser(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), cancellationToken),
                     _ => false

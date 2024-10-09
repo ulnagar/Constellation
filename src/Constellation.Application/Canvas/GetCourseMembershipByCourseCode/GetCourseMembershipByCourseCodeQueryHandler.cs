@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Core.Models;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers.Repositories;
@@ -37,6 +38,11 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
         List<CanvasCourseMembership> response = new();
 
         List<Offering> offerings = await _offeringRepository.GetWithLinkedCanvasResource(request.CourseCode, cancellationToken);
+
+        if (offerings.Count == 0)
+        {
+            return Result.Failure<List<CanvasCourseMembership>>(OfferingErrors.NotFoundForResource(request.CourseCode.ToString()));
+        }
 
         foreach (Offering offering in offerings)
         {
