@@ -53,7 +53,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
         _logger.Information("Found {count} operations to process.", operations.Count);
         
         foreach (CanvasOperation operation in operations)
-            await _mediator.Send(new ProcessCanvasOperationCommand(operation.Id), cancellationToken);
+            await _mediator.Send(new ProcessCanvasOperationCommand(operation.Id, _configuration.UseSections), cancellationToken);
 
         _logger.Information("Auditing Canvas Enrolments");
 
