@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using Shared.Components.ExportAwardNominations;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
@@ -51,9 +52,15 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGet(CancellationToken cancellationToken = default) => await PreparePage(cancellationToken);
 
-    public async Task<IActionResult> OnGetExport(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnPostExport(
+        ExportAwardNominationsSelection viewModel,
+        CancellationToken cancellationToken = default)
     {
-        ExportAwardNominationsCommand command = new(PeriodId);
+        ExportAwardNominationsCommand command = new(
+            PeriodId,
+            viewModel.Grouping,
+            viewModel.ShowClass,
+            viewModel.ShowGrade);
 
         _logger
             .ForContext(nameof(ExportAwardNominationsCommand), command, true)

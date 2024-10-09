@@ -924,6 +924,9 @@ public class ExcelService : IExcelService
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
 
+        // TODO: R1.16: Convert to line by line text
+        // Loop over items in the last column to append rich text to the cell
+
         workSheet.Cells[1, 1].LoadFromCollection(nominations, true);
 
         workSheet.View.FreezePanes(2, 1);

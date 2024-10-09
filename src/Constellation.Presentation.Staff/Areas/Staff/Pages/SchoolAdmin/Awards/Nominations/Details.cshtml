@@ -21,7 +21,7 @@
     @if (canManageTest.Succeeded)
     {
         <a asp-page="/SchoolAdmin/Awards/Nominations/Upsert" asp-area="Staff" asp-route-id="@Model.PeriodId" class="btn btn-primary">Edit</a>
-        <a asp-page-handler="Export" class="btn btn-warning">Export Nominations</a>
+        <button data-toggle="modal" data-target="#export-award-modal" class="btn btn-warning">Export Nominations</button>
     }
 
     <a asp-page="/SchoolAdmin/Awards/Nominations/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -60,27 +60,29 @@
 
 <table class="table-striped data-table">
     <thead>
-        <tr>
-            <th>Award</th>
-            <th>Student</th>
-            <th>Nominated By</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Award</th>
+        <th>Student</th>
+        <th>Nominated By</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.Period.Nominations)
-        {
-            <tr>
-                <td>@entry.AwardType.Value<br />@entry.Description</td>
-                <td>@entry.Student.DisplayName</td>
-                <td>@entry.NominatedBy</td>
-                <td>
-                    @if (canManageTest.Succeeded)
-                    {
-                        <a asp-page-handler="Delete" asp-route-entryId="@entry.Id.Value" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
-                    }
-                </td>
-            </tr>
-        }
+    @foreach (var entry in Model.Period.Nominations)
+    {
+        <tr>
+            <td>@entry.AwardType.Value<br />@entry.Description</td>
+            <td>@entry.Student.DisplayName</td>
+            <td>@entry.NominatedBy</td>
+            <td>
+                @if (canManageTest.Succeeded)
+                {
+                    <a asp-page-handler="Delete" asp-route-entryId="@entry.Id.Value" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                }
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+<vc:export-award-nominations />

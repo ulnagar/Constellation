@@ -52,31 +52,7 @@ internal sealed class ExportAwardNominationsCommandHandler
 
         List<AwardNominationExportDto> exportDtos = new();
 
-        IEnumerable<IGrouping<StudentId, Nomination>> groupedNominations = period.Nominations.Where(nomination => !nomination.IsDeleted).GroupBy(nomination => nomination.StudentId);
-
-        foreach (IGrouping<StudentId, Nomination> student in groupedNominations)
-        {
-            Student studentEntry = await _studentRepository.GetById(student.Key, cancellationToken);
-
-            SchoolEnrolment? enrolment = studentEntry.CurrentEnrolment;
-
-            if (enrolment is null)
-                continue;
-
-            List<string> awardDescriptions = student.Select(entry => entry.GetDescription()).ToList();
-            var countOfAwardDescriptions = awardDescriptions.Select(entry => new { Name = entry, Count = awardDescriptions.Count(value => value == entry) });
-            countOfAwardDescriptions = countOfAwardDescriptions.Distinct();
-            string awards = string.Join("; ", countOfAwardDescriptions.Select(entry => entry.Count > 1 ? $"{entry.Name} x{entry.Count}" : entry.Name));
-
-            exportDtos.Add(new(
-                studentEntry.StudentReferenceNumber.Number,
-                studentEntry.Name.FirstName,
-                studentEntry.Name.LastName,
-                studentEntry.Name.DisplayName,
-                enrolment.Grade.AsName(),
-                enrolment.SchoolName,
-                awards));
-        }
+        exportDtos.AddRange(await GroupByStudent(period, request.ShowGrade, request.ShowClass, cancellationToken));
 
         MemoryStream stream = await _excelService.CreateAwardNominationsExportFile(exportDtos, cancellationToken);
 
@@ -88,5 +64,38 @@ internal sealed class ExportAwardNominationsCommandHandler
         };
 
         return file;
+    }
+
+    private async Task<List<AwardNominationExportDto>> GroupByStudent(NominationPeriod period, bool showGrade, bool showClass, CancellationToken cancellationToken)
+    {
+        List<AwardNominationExportDto> response = new();
+
+        IEnumerable<IGrouping<StudentId, Nomination>> groupedNominations = period.Nominations.Where(nomination => !nomination.IsDeleted).GroupBy(nomination => nomination.StudentId);
+
+        foreach (IGrouping<StudentId, Nomination> student in groupedNominations)
+        {
+            Student studentEntry = await _studentRepository.GetById(student.Key, cancellationToken);
+
+            SchoolEnrolment? enrolment = studentEntry.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
+            List<string> awardDescriptions = student.Select(entry => entry.GetDescription(showGrade, showClass)).ToList();
+            var countOfAwardDescriptions = awardDescriptions.Select(entry => new { Name = entry, Count = awardDescriptions.Count(value => value == entry) });
+            countOfAwardDescriptions = countOfAwardDescriptions.Distinct();
+            string awards = string.Join("; ", countOfAwardDescriptions.Select(entry => entry.Count > 1 ? $"{entry.Name} x{entry.Count}" : entry.Name));
+
+            response.Add(new(
+                studentEntry.StudentReferenceNumber.Number,
+                studentEntry.Name.FirstName,
+                studentEntry.Name.LastName,
+                studentEntry.Name.DisplayName,
+                enrolment.Grade.AsName(),
+                enrolment.SchoolName,
+                awards));
+        }
+
+        return response;
     }
 }
