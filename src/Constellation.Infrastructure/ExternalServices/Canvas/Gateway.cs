@@ -829,7 +829,7 @@ internal sealed class Gateway : ICanvasGateway
     {
         List<CourseListEntry> returnData = new();
 
-        string path = $"accounts/1/courses?search_by=course&search_term={year}";
+        string path = $"accounts/1/courses?search_by=course&search_term={year[..^1]}&ends_after={year}-01-01";
 
         bool nextPageExists = true;
 
