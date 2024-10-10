@@ -917,17 +917,180 @@ public class ExcelService : IExcelService
         return memoryStream;
     }
 
-    public async Task<MemoryStream> CreateAwardNominationsExportFile(
-        List<AwardNominationExportDto> nominations, 
+    public async Task<MemoryStream> CreateAwardNominationsExportFileByStudent(
+        List<AwardNominationExportByStudentDto> nominations,
         CancellationToken cancellationToken = default)
     {
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
 
-        // TODO: R1.16: Convert to line by line text
-        // Loop over items in the last column to append rich text to the cell
+        // TODO: R1.16: Ensure that code is rebased from master once this action has been completed and before publishing
 
-        workSheet.Cells[1, 1].LoadFromCollection(nominations, true);
+        workSheet.Cells[1, 1].Value = "SRN";
+        workSheet.Cells[1, 2].Value = "Student First Name";
+        workSheet.Cells[1, 3].Value = "Student Last Name";
+        workSheet.Cells[1, 4].Value = "Student Name";
+        workSheet.Cells[1, 5].Value = "Grade";
+        workSheet.Cells[1, 6].Value = "School";
+        workSheet.Cells[1, 7].Value = "Awards";
+        
+        int totalRows = nominations.Count;
+
+        for (int row = 2; row <= totalRows + 1; row++)
+        {
+            workSheet.Cells[row, 1].Value = nominations[row -2].SRN;
+            workSheet.Cells[row, 2].Value = nominations[row -2].StudentName.PreferredName;
+            workSheet.Cells[row, 3].Value = nominations[row -2].StudentName.LastName;
+            workSheet.Cells[row, 4].Value = nominations[row -2].StudentName.DisplayName;
+            workSheet.Cells[row, 5].Value = nominations[row -2].Grade.AsName();
+            workSheet.Cells[row, 6].Value = nominations[row -2].School;
+
+            foreach (string award in nominations[row - 2].Awards)
+            {
+                if (nominations[row - 2].Awards.IndexOf(award) != 0)
+                    workSheet.Cells[row, 7].RichText.Add("\r\n");
+
+                workSheet.Cells[row, 7].RichText.Add($"\u2022 {award.Trim()}");
+            }
+        }
+
+        workSheet.View.FreezePanes(2, 1);
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+        workSheet.Columns[7].Style.WrapText = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateAwardNominationsExportFileBySchool(
+        List<AwardNominationExportBySchoolDto> nominations,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
+        
+        workSheet.Cells[1, 1].Value = "School";
+        workSheet.Cells[1, 2].Value = "Awards";
+
+        int totalRows = nominations.Count;
+
+        for (int row = 2; row <= totalRows + 1; row++)
+        {
+            workSheet.Cells[row, 1].Value = nominations[row - 2].School;
+
+            foreach (AwardNominationExportByStudentDto student in nominations[row - 2].Students)
+            {
+                if (nominations[row - 2].Students.IndexOf(student) != 0)
+                {
+                    workSheet.Cells[row, 2].RichText.Add("\r\n");
+                    workSheet.Cells[row, 2].RichText.Add("\r\n");
+                }
+
+                workSheet.Cells[row, 2].RichText.Add($"{student.StudentName.DisplayName} ({student.Grade.AsName()})");
+
+                foreach (string award in student.Awards)
+                {
+                    workSheet.Cells[row, 2].RichText.Add("\r\n");
+                    workSheet.Cells[row, 2].RichText.Add($"  \u2022 {award.Trim()}");
+                }
+            }
+        }
+
+        workSheet.View.FreezePanes(2, 1);
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+        workSheet.Columns[2].Style.WrapText = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateAwardNominationsExportFileBySubject(
+        List<AwardNominationExportBySubjectDto> nominations,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
+
+        workSheet.Cells[1, 1].Value = "Subject";
+        workSheet.Cells[1, 2].Value = "Awards";
+
+        int totalRows = nominations.Count;
+
+        for (int row = 2; row <= totalRows + 1; row++)
+        {
+            workSheet.Cells[row, 1].Value = nominations[row - 2].Subject;
+
+            foreach (AwardNominationExportByStudentDto student in nominations[row - 2].Students)
+            {
+                if (nominations[row - 2].Students.IndexOf(student) != 0)
+                {
+                    workSheet.Cells[row, 2].RichText.Add("\r\n");
+                    workSheet.Cells[row, 2].RichText.Add("\r\n");
+                }
+
+                workSheet.Cells[row, 2].RichText.Add($"{student.StudentName.DisplayName} ({student.Grade.AsName()})");
+
+                foreach (string award in student.Awards)
+                {
+                    workSheet.Cells[row, 2].RichText.Add("\r\n");
+                    workSheet.Cells[row, 2].RichText.Add($"  \u2022 {award.Trim()}");
+                }
+            }
+        }
+
+        workSheet.View.FreezePanes(2, 1);
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFitColumns();
+        workSheet.Columns[2].Style.WrapText = true;
+        workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateAwardNominationsExportFile(
+        List<AwardNominationExportDto> nominations,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+        ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
+        
+        workSheet.Cells[1, 1].Value = "SRN";
+        workSheet.Cells[1, 2].Value = "Student First Name";
+        workSheet.Cells[1, 3].Value = "Student Last Name";
+        workSheet.Cells[1, 4].Value = "Student Name";
+        workSheet.Cells[1, 5].Value = "Grade";
+        workSheet.Cells[1, 6].Value = "School";
+        workSheet.Cells[1, 7].Value = "Awards";
+
+        int totalRows = nominations.Count;
+
+        for (int row = 2; row <= totalRows + 1; row++)
+        {
+            workSheet.Cells[row, 1].Value = nominations[row - 2].SRN;
+            workSheet.Cells[row, 2].Value = nominations[row - 2].StudentName.PreferredName;
+            workSheet.Cells[row, 3].Value = nominations[row - 2].StudentName.LastName;
+            workSheet.Cells[row, 4].Value = nominations[row - 2].StudentName.DisplayName;
+            workSheet.Cells[row, 5].Value = nominations[row - 2].Grade.AsName();
+            workSheet.Cells[row, 6].Value = nominations[row - 2].School;
+            workSheet.Cells[row, 7].Value = nominations[row - 2].Award;
+        }
 
         workSheet.View.FreezePanes(2, 1);
         workSheet.Cells[1, 1, workSheet.Dimension.Rows, workSheet.Dimension.Columns].AutoFilter = true;

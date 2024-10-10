@@ -65,9 +65,11 @@ public sealed class FirstInSubjectNomination : Nomination
     public override string GetDescription(bool showGrade = true, bool showClass = true) =>
         (showClass && showGrade)
             ? $"First in Course {Grade.AsName()} {CourseName}"
-        : showClass
+        : (showClass)
             ? $"First in Course {CourseName}"
-            : $"First in Course {Grade.AsName()}";
+        : (showGrade)
+            ? $"First in Course {Grade.AsName()}"
+            : $"First in Course";
 }
 
 public sealed class AcademicExcellenceNomination : Nomination

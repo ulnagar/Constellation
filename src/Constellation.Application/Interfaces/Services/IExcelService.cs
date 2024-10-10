@@ -43,6 +43,9 @@ public interface IExcelService
     Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream);
     Task<MemoryStream> CreateMasterFileConsistencyReport(List<UpdateItem> updateItems, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateContactExportFile(List<ContactResponse> contacts, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateAwardNominationsExportFileByStudent(List<AwardNominationExportByStudentDto> nominations, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateAwardNominationsExportFileBySchool(List<AwardNominationExportBySchoolDto> nominations, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateAwardNominationsExportFileBySubject(List<AwardNominationExportBySubjectDto> nominations, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAwardNominationsExportFile(List<AwardNominationExportDto> nominations, CancellationToken cancellationToken = default);
     List<StudentAttendanceData> ExtractPerDayYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     List<StudentAttendanceData> ExtractPerMinuteYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);

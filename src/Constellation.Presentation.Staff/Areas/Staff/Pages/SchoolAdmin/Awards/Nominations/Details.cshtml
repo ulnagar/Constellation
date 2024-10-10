@@ -86,3 +86,12 @@
 </table>
 
 <vc:export-award-nominations />
+
+@section scripts {
+    <script>
+        function dismissModal() {
+            $('#export-award-modal').modal('hide');
+            showLoader();
+        };
+    </script>
+}
