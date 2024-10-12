@@ -26,6 +26,7 @@
                 @if (Model.Id != OfferingId.Empty)
                 {
                     <span>@Model.Name</span>
+                    <input asp-for="Name" class="form-control" type="hidden" />
                 }
                 else
                 {
