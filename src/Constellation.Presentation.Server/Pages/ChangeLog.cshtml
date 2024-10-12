@@ -28,7 +28,121 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.15.1 (Build @version)</h3>
+<h3>Current version: Release V1.16.0 (Build @version)</h3>
+
+<div class="changelog">
+    <ul>
+        <li>System-wide
+            <ul>
+                <li>Authentication
+                    <ul>
+                        <li>Add authentication support for student users</li>
+                    </ul>
+                </li>
+                <li>Students
+                    <ul>
+                        <li>Update Student model to new aggregate style including new ID property</li>
+                        <li>Allow for students to be entered without SRN or Email Address</li>
+                        <li>Allow students to not have active grades or schools</li>
+                        <li>Move student photos storage to Attachments models</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Automation
+            <ul>
+                <li>Attendance Notifications
+                    <ul>
+                        <li>Update SMS template to parents to use new static short link instead of url shortener</li>
+                    </ul>
+                </li>
+                <li>External Connections
+                    <ul>
+                        <li>Update SchoolRegisterJob to use new data.nsw sources and file layouts</li>
+                        <li>Update AttachmentManagementJob to remove expired attachments as required</li>
+                        <li>Update filtering options on CanvasGateway to ensure that all current courses are returned</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Staff Portal
+            <ul>
+                <li>Dashboard
+                    <ul>
+                        <li>Update dashboard widgets to have sticky positioning</li>
+                        <li>Update Auth dashboard to include student users</li>
+                    </ul>
+                </li>
+                <li>Award Nominations
+                    <ul>
+                        <li>Update to reject duplicate nominations as they are entered</li>
+                        <li>Expand reporting options for award nominations, including grouping options by school, by student, and by subject</li>
+                    </ul>
+                </li>
+                <li>Assignments
+                    <ul>
+                        <li>Assignments list now include future assignments</li>
+                    </ul>
+                </li>
+                <li>Science Pracs
+                    <ul>
+                        <li>Update to allow for bulk cancel of Rolls</li>
+                        <li>Allow addition of custom comments when cancelling Rolls</li>
+                        <li>Add report for Rolls submitted without students marked present</li>
+                    </ul>
+                </li>
+                <li>Workflows
+                    <ul>
+                        <li>Include a "For Me" filter to show only currently assigned cases for Head Teachers</li>
+                        <li>Fix a bug where Compliance cases could be mistakenly detected as Attendance cases</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Schools Portal
+            <ul>
+                <li>Dashboard
+                    <ul>
+                        <li>Fix bug preventing student photos from being displayed properly</li>
+                    </ul>
+                </li>
+                <li>Attendance
+                    <ul>
+                        <li>Update Attendance Report button to actually generate report</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Students Portal
+            <ul>
+                <li>Attendance
+                    <ul>
+                        <li>Add attendance section where students can view all attendance data</li>
+                        <li>Add ability for students to submit explanations for Partial Absences</li>
+                    </ul>
+                </li>
+                <li>Awards
+                    <ul>
+                        <li>Add awards section where students can view award tallies and recent awards</li>
+                    </ul>
+                </li>
+                <li>Support
+                    <ul>
+                        <li>Add support section outlining where to obtain help from the school</li>
+                        <li>Add submission form for Technology Support team that is routed to the helpdesk</li>
+                    </ul>
+                </li>
+                <li>Timetables
+                    <ul>
+                        <li>Add ability for students to view and download timetables</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3>Previous version: Release V1.15.1 (Build 2409.25)</h3>
 
 <div class="changelog">
     <ul>
