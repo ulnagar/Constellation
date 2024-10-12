@@ -1,11 +1,14 @@
 ﻿namespace Constellation.Core.Models.Students.Events;
 
+using Constellation.Core.Models.Identifiers;
 using DomainEvents;
 using Identifiers;
+using System;
 
 public sealed record StudentMovedSchoolsDomainEvent(
     DomainEventId Id,
-    string StudentId,
+    StudentId StudentId,
     string PreviousSchoolCode,
-    string CurrentSchoolCode)
-    : DomainEvent(Id);
+    string CurrentSchoolCode,
+    DateOnly? DelayUntil = null)
+    : DomainEvent(Id, DelayUntil);

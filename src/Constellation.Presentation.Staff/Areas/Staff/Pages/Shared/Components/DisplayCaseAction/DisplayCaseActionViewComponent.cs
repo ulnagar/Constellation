@@ -24,21 +24,21 @@ public class DisplayCaseActionViewComponent : ViewComponent
         _caseRepository = caseRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid caseId, Guid actionId, bool showMenu)
+    public async Task<IViewComponentResult> InvokeAsync(CaseId caseId, ActionId actionId, bool showMenu)
     {
-        Case item = await _caseRepository.GetById(CaseId.FromValue(caseId));
+        Case? item = await _caseRepository.GetById(caseId);
 
         if (item is null)
             return Content(string.Empty);
 
-        Action action = item.Actions.FirstOrDefault(action => action.Id == ActionId.FromValue(actionId));
+        Action? action = item.Actions.FirstOrDefault(action => action.Id == actionId);
 
         if (action is null)
             return Content(string.Empty);
 
         List<Action> subActions = item.Actions.Where(entry => entry.ParentActionId == action.Id).ToList();
 
-        string currentUserId = UserClaimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? currentUserId = UserClaimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         bool assignedToMe = action.AssignedToId == currentUserId;
 

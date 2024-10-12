@@ -32,7 +32,11 @@ internal sealed class ProcessCanvasOperationCommandHandler
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ProcessCanvasOperationCommand>();
     }
-
+    
+    // TODO: R1.16.0: Remove operations entirely.
+    // Move account management features to real-time handlers.
+    // Rely on audit for per course enrolment management.
+    // This would allow caching of Canvas User Id with principals (e.g. Student SystemLinks)
     public async Task<Result> Handle(ProcessCanvasOperationCommand request, CancellationToken cancellationToken)
     {
         CanvasOperation operation = await _operationsRepository.WithDetails(request.OperationId, cancellationToken);
@@ -80,6 +84,36 @@ internal sealed class ProcessCanvasOperationCommandHandler
                 _logger
                     .ForContext(nameof(CreateUserCanvasOperation), createOperation, true)
                     .Warning("Failed to create Canvas user for {name}", $"{createOperation.FirstName} {createOperation.LastName}");
+
+                return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
+
+            case nameof(UpdateUserEmailCanvasOperation):
+                UpdateUserEmailCanvasOperation updateOperation = operation as UpdateUserEmailCanvasOperation;
+
+                _logger
+                    .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                    .Information("Updating Canvas user {UserId} to new Email Address", updateOperation.UserId);
+
+                bool updateSuccess = await _canvasGateway.UpdateUserEmail(
+                    updateOperation.UserId,
+                    $"{updateOperation.PortalUsername}@education.nsw.gov.au");
+
+                if (updateSuccess)
+                {
+                    _logger
+                        .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                        .Information("Successfully updated Canvas user {UserId} to new Email Address", updateOperation.UserId);
+
+                    updateOperation.Complete();
+
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
+                    return Result.Success();
+                }
+
+                _logger
+                    .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                    .Warning("Failed to update Canvas user {UserId} to new Email Address", updateOperation.UserId);
 
                 return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
 

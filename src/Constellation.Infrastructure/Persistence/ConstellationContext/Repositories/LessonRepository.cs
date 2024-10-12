@@ -9,6 +9,7 @@ using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Abstractions.Clock;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,7 +85,7 @@ public class LessonRepository : ILessonRepository
             .ToListAsync(cancellationToken);
         
     public async Task<List<SciencePracLesson>> GetAllForStudent(
-        string StudentId, 
+        StudentId studentId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SciencePracLesson>()
@@ -92,7 +93,7 @@ public class LessonRepository : ILessonRepository
                 lesson.DueDate > _dateTime.FirstDayOfYear &&
                 lesson.Rolls.Any(roll => 
                     roll.Attendance.Any(attendance => 
-                        attendance.StudentId == StudentId)))
+                        attendance.StudentId == studentId)))
             .ToListAsync(cancellationToken);
 
     public async Task<SciencePracLesson> GetById(
@@ -110,6 +111,17 @@ public class LessonRepository : ILessonRepository
                 lesson.DueDate > _dateTime.FirstDayOfYear &&
                 lesson.DueDate < _dateTime.Today && 
                 lesson.Rolls.Any(roll => roll.Status == LessonStatus.Active))
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<SciencePracLesson>> GetWithoutPresentStudents(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SciencePracLesson>()
+            .Where(lesson =>
+                lesson.DueDate >= _dateTime.FirstDayOfYear &&
+                lesson.Rolls.Any(roll =>
+                    roll.Status == LessonStatus.Completed &&
+                    roll.Attendance.All(entry => !entry.Present)))
             .ToListAsync(cancellationToken);
 
     public void Insert(SciencePracLesson lesson) => _context.Set<SciencePracLesson>().Add(lesson);

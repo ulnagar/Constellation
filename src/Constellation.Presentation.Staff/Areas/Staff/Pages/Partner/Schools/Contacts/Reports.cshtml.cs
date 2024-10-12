@@ -101,7 +101,7 @@ public class ReportsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
+        SchoolContactId contactId,
         string name)
     {
         AssignRoleModalViewModel viewModel = new();
@@ -121,7 +121,7 @@ public class ReportsModel : BasePageModel
         string schoolCode,
         string roleName,
         string note,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId)
+        SchoolContactId contactId)
     {
         CreateContactRoleAssignmentCommand command = new(contactId, schoolCode, roleName, note);
 
@@ -148,8 +148,8 @@ public class ReportsModel : BasePageModel
     }
 
     public IActionResult OnPostAjaxDelete(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
+        SchoolContactId contactId,
+        SchoolContactRoleId roleId,
         string name,
         string role,
         string school)
@@ -165,8 +165,8 @@ public class ReportsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDeleteAssignment(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId)
+        SchoolContactId contactId,
+        SchoolContactRoleId roleId)
     {
         RemoveContactRoleCommand command = new(contactId, roleId);
 
@@ -179,7 +179,7 @@ public class ReportsModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetRepairUser([ModelBinder(typeof(ConstructorBinder))] SchoolContactId id)
+    public async Task<IActionResult> OnGetRepairUser(SchoolContactId id)
     {
         RepairSchoolContactUserCommand command = new(id);
 

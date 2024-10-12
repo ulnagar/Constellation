@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -44,7 +43,6 @@ public class MapModel : BasePageModel
     [ViewData] public string PageTitle => "Map Data";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId Id { get; set; } = OfferingId.Empty;
 
     public List<MapLayer> Layers { get; set; } = new();

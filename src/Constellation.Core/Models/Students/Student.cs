@@ -1,12 +1,12 @@
 namespace Constellation.Core.Models.Students;
 
-using Absences;
 using Abstractions.Clock;
-using Enrolments;
+using Constellation.Core.Enums;
+using Constellation.Core.ValueObjects;
 using Enums;
 using Errors;
 using Events;
-using Families;
+using Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -14,119 +14,221 @@ using System.Collections.Generic;
 using System.Linq;
 using ValueObjects;
 
-public class Student : AggregateRoot
+public class Student : AggregateRoot, IAuditableEntity
 {
     private readonly List<AbsenceConfiguration> _absenceConfigurations = new();
+    private readonly List<SchoolEnrolment> _schoolEnrolments = new();
+    private readonly List<SystemLink> _systemLinks = new();
+
+    private Student() { }
 
     private Student(
-        string studentId,
-        string firstName,
-        string lastName,
-        string portalUsername,
-        Grade grade,
-        string schoolCode,
-        string gender)
+        StudentReferenceNumber studentReferenceNumber,
+        Name name,
+        EmailAddress emailAddress,
+        Gender gender,
+        Gender? preferredGender)
     {
-        StudentId = studentId;
-        FirstName = firstName;
-        LastName = lastName;
-        PortalUsername = portalUsername;
-        CurrentGrade = grade;
-        EnrolledGrade = grade;
+        Id = new();
+
+        StudentReferenceNumber = studentReferenceNumber;
+        Name = name;
+        EmailAddress = emailAddress;
         Gender = gender;
-        SchoolCode = schoolCode;
-
-        DateEntered = DateTime.Now;
+        PreferredGender = preferredGender ?? gender;
     }
 
-    public Student()
-    {
-        IsDeleted = false;
-        DateEntered = DateTime.Now;
+    public StudentId Id { get; private set; }
+    public StudentReferenceNumber StudentReferenceNumber { get; private set; }
+    public Name Name { get; private set; }
+    public EmailAddress EmailAddress { get; private set; }
+    public Gender Gender { get; private set; }
+    public Gender PreferredGender { get; private set; }
 
-        Enrolments = new List<Enrolment>();
-        Devices = new List<DeviceAllocation>();
-        MSTeamOperations = new List<StudentMSTeamOperation>();
+    public string CreatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string ModifiedBy { get; set; }
+    public DateTime ModifiedAt { get; set; }
+    public bool IsDeleted { get; private set; }
+    public string DeletedBy { get; set; }
+    public DateTime DeletedAt { get; set; }
+    
+    public AwardTally AwardTally { get; private set; }
+    public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations.AsReadOnly();
+    public IReadOnlyCollection<SchoolEnrolment> SchoolEnrolments => _schoolEnrolments.AsReadOnly();
 
-        Absences = new List<Absence>();
-    }
+    public SchoolEnrolment? CurrentEnrolment => _schoolEnrolments
+        .SingleOrDefault(entry => 
+            !entry.IsDeleted &&
+            entry.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
+            (entry.EndDate == null || entry.EndDate >= DateOnly.FromDateTime(DateTime.Today)));
 
-    public string StudentId { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string PortalUsername { get; set; }
-    public string AdobeConnectPrincipalId { get; set; }
-    public string SentralStudentId { get; set; }
-    public Grade CurrentGrade { get; set; }
-    public Grade EnrolledGrade { get; set; }
-    public string Gender { get; set; }
-    public bool IsDeleted { get; set; }
-    public DateTime? DateDeleted { get; set; }
-    public DateTime? DateEntered { get; set; }
-    public string SchoolCode { get; set; }
-    public School School { get; set; }
-    public bool IncludeInAbsenceNotifications { get; set; }
-    public DateTime? AbsenceNotificationStartDate { get; set; }
-    public string DisplayName => FirstName.Trim() + " " + LastName.Trim();
-    public string EmailAddress => PortalUsername + "@education.nsw.gov.au";
-    public byte[] Photo { get; set; }
+    public IReadOnlyCollection<SystemLink> SystemLinks => _systemLinks.AsReadOnly();
 
-    public readonly AwardTally AwardTally = new ();
-    public List<StudentFamilyMembership> FamilyMemberships { get; set; } = new();
-    public ICollection<Enrolment> Enrolments { get; set; }
-    public ICollection<DeviceAllocation> Devices { get; set; }
-    public ICollection<StudentMSTeamOperation> MSTeamOperations { get; set; }
-    public ICollection<Absence> Absences { get; set; }
-    public IReadOnlyCollection<AbsenceConfiguration> AbsenceConfigurations => _absenceConfigurations;
-
-    public static Student Create(
-        string studentId,
-        string firstName,
-        string lastName,
-        string portalUsername,
-        Grade grade,
-        string schoolCode,
-        string gender)
+    public static Result<Student> Create(
+        Name name,
+        Gender gender,
+        IDateTimeProvider dateTime)
     {
         Student entry = new(
-            studentId,
-            firstName,
-            lastName,
-            portalUsername,
-            grade,
-            schoolCode,
-            gender);
+            null,
+            name,
+            EmailAddress.None,
+            gender,
+            null);
 
-        entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), studentId));
+        entry.AwardTally = new(entry.Id);
+
+        entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), entry.Id));
 
         return entry;
     }
 
+    public static Result<Student> Create(
+        StudentReferenceNumber srn,
+        Name name,
+        EmailAddress emailAddress,
+        Grade grade,
+        School school,
+        Gender gender,
+        IDateTimeProvider dateTime)
+    {
+        if (srn == StudentReferenceNumber.Empty)
+            return Result.Failure<Student>(StudentReferenceNumberErrors.EmptyValue);
+
+        Student entry = new(
+            srn,
+            name,
+            emailAddress,
+            gender,
+            null);
+
+        Result enrolment = entry.AddSchoolEnrolment(school.Code, school.Name, grade, dateTime);
+
+        if (enrolment.IsFailure)
+            return Result.Failure<Student>(enrolment.Error);
+
+        entry.AwardTally = new(entry.Id);
+
+        entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), entry.Id));
+
+        return entry;
+    }
+
+    public Result AddSchoolEnrolment(
+        string schoolCode,
+        string schoolName,
+        Grade grade,
+        IDateTimeProvider dateTime,
+        DateOnly? startDate = null)
+    {
+        startDate ??= dateTime.Today;
+
+        SchoolEnrolment? currentEnrolment = CurrentEnrolment;
+
+        if (currentEnrolment is not null)
+        {
+            if (currentEnrolment.SchoolCode == schoolCode &&
+                currentEnrolment.Grade == grade)
+                return Result.Success();
+
+            currentEnrolment.Delete(startDate.Value, dateTime);
+        }
+
+        switch (currentEnrolment)
+        {
+            case null when startDate != dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode, startDate));
+                break;
+            case null when startDate == dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode));
+                break;
+            case not null when startDate != dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode, startDate));
+                break;
+            case not null when startDate == dateTime.Today:
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode));
+                break;
+        }
+
+        Result<SchoolEnrolment> enrolment = SchoolEnrolment.Create(
+            Id,
+            schoolCode,
+            schoolName,
+            grade,
+            startDate.Value.Year,
+            startDate.Value,
+            null,
+            dateTime);
+
+        if (enrolment.IsFailure)
+            return Result.Failure(enrolment.Error);
+
+        _schoolEnrolments.Add(enrolment.Value);
+        
+        return Result.Success();
+    }
+
+    // TODO: R1.16: What happens if the active enrolment is removed, but a new one is not created?
+    // The student should be removed from Science Prac rolls for the old school. This does not currently happen.
+    // Perhaps a new domain event that is only used when there is no new active School Enrolment during the deletion process.
+    public void RemoveSchoolEnrolment(SchoolEnrolment enrolment, IDateTimeProvider dateTime)
+    {
+        enrolment.Delete(dateTime.Today, dateTime);
+    }
+
+    public Result AddSystemLink(
+        SystemType type,
+        string value)
+    {
+        SystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+
+        Result<SystemLink> entry = SystemLink.Create(Id, type, value);
+
+        if (entry.IsFailure)
+            return Result.Failure(entry.Error);
+
+        if (existingEntry is not null)
+            _systemLinks.Remove(existingEntry);
+
+        _systemLinks.Add(entry.Value);
+
+        return Result.Success();
+    }
+
+    public Result RemoveSystemLink(
+        SystemType type)
+    {
+        SystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+
+        if (existingEntry is null)
+            return Result.Failure(SystemLinkErrors.NotFound(type));
+
+        _systemLinks.Remove(existingEntry);
+
+        return Result.Success();
+    }
+
     public Result AddAbsenceConfiguration(AbsenceConfiguration configuration)
     {
-        if (_absenceConfigurations.Any(config =>
-            !config.IsDeleted &&
-            config.AbsenceType == configuration.AbsenceType &&
-            DoDateRangesOverlap(configuration.ScanStartDate, configuration.ScanEndDate, config.ScanStartDate, config.ScanEndDate)))
-        {
+        List<AbsenceConfiguration> existingEntry = _absenceConfigurations.Where(config =>
+                !config.IsDeleted &&
+                config.AbsenceType == configuration.AbsenceType &&
+                DoDateRangesOverlap(
+                    configuration.ScanStartDate, 
+                    configuration.ScanEndDate, 
+                    config.ScanStartDate,
+                config.ScanEndDate))
+            .ToList();
+
+        if (existingEntry.Count > 0)
             return Result.Failure(AbsenceConfigurationErrors.RecordForRangeExists(configuration.ScanStartDate, configuration.ScanEndDate));
-        }
 
         _absenceConfigurations.Add(configuration);
 
         return Result.Success();
     }
-
-    public Name GetName()
-    {
-        Result<Name> request = Name.Create(FirstName, string.Empty, LastName);
-
-        if (request.IsSuccess)
-            return request.Value;
-
-        return null;
-    }
-
+    
     /// <summary>
     /// Compare two sets of dates, and determine whether there is any overlap between the ranges
     /// </summary>
@@ -169,80 +271,59 @@ public class Student : AggregateRoot
         return false;
     }
 
-    public void Withdraw()
+    public void Withdraw(
+        IDateTimeProvider dateTime)
     {
         IsDeleted = true;
-        DateDeleted = DateTime.Now;
 
-        RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), StudentId));
+        if (CurrentEnrolment is not null)
+            CurrentEnrolment.Delete(dateTime.Today, dateTime);
+     
+        RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), Id));
     }
 
-    public void Reinstate(IDateTimeProvider dateTime)
+    public Result Reinstate(
+        School school,
+        Grade grade,
+        IDateTimeProvider dateTime,
+        DateOnly? startDate = null)
     {
-        int yearLeft = DateDeleted!.Value.Year;
-        int previousGrade = (int)CurrentGrade;
-        int thisYear = dateTime.Today.Year;
-        int difference = thisYear - yearLeft;
-        int thisGrade = previousGrade + difference;
-        
-        if (thisGrade > 12 || thisGrade == previousGrade)
-        {
-            // Do NOTHING!
-        }
-        else if (Enum.IsDefined(typeof(Grade), thisGrade))
-        {
-            Grade newGrade = (Grade)thisGrade;
-            CurrentGrade = newGrade;
-        }
-
         IsDeleted = false;
-        DateDeleted = null;
+        DeletedAt = DateTime.MinValue;
+        DeletedBy = string.Empty;
 
-        RaiseDomainEvent(new StudentReinstatedDomainEvent(new(), StudentId));
+        Result enrolment = AddSchoolEnrolment(
+            school.Code, 
+            school.Name,
+            grade,
+            dateTime,
+            startDate);
+
+        if (enrolment.IsFailure)
+            return Result.Failure(enrolment.Error);
+
+        RaiseDomainEvent(new StudentReinstatedDomainEvent(new(), Id));
+
+        return Result.Success();
     }
 
     public Result UpdateStudent(
-        string firstName,
-        string lastName,
-        string portalUsername,
-        string adobeConnectId,
-        string sentralId,
-        Grade currentGrade,
-        Grade enrolledGrade,
-        string gender,
-        string schoolCode)
+        StudentReferenceNumber srn,
+        Name name,
+        EmailAddress emailAddress,
+        Gender preferredGender)
     {
-        if (string.IsNullOrWhiteSpace(firstName))
-            return Result.Failure(StudentErrors.FirstNameInvalid);
+        if (srn != StudentReferenceNumber.Empty)
+            StudentReferenceNumber = srn;
 
-        if (string.IsNullOrWhiteSpace(lastName))
-            return Result.Failure(StudentErrors.LastNameInvalid);
+        Name = name;
+        PreferredGender = preferredGender;
 
-        if (string.IsNullOrWhiteSpace(portalUsername))
-            return Result.Failure(StudentErrors.PortalUsernameInvalid);
-
-        if (string.IsNullOrWhiteSpace(gender) ||
-            (gender != "M" && gender != "F"))
-            return Result.Failure(StudentErrors.GenderInvalid);
-
-        if (string.IsNullOrWhiteSpace(schoolCode) || 
-            schoolCode.Length != 4)
-            return Result.Failure(StudentErrors.SchoolCodeInvalid);
-
-        FirstName = firstName;
-        LastName = lastName;
-        PortalUsername = portalUsername;
-        AdobeConnectPrincipalId = adobeConnectId;
-        SentralStudentId = sentralId;
-        CurrentGrade = currentGrade;
-        EnrolledGrade = enrolledGrade;
-        Gender = gender;
-
-        if (SchoolCode != schoolCode)
+        if (EmailAddress != emailAddress)
         {
-            RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), StudentId, SchoolCode, schoolCode));
+            RaiseDomainEvent(new StudentEmailAddressChangedDomainEvent(new(), Id, EmailAddress, emailAddress));
 
-            SchoolCode = schoolCode;
+            EmailAddress = emailAddress;
         }
 
         return Result.Success();

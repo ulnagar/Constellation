@@ -80,17 +80,17 @@ namespace Constellation.Infrastructure.Services
 
             foreach (var student in students)
             {
-                var dto = new ClassMonitorDtos.MonitorUser
-                {
-                    Id = student.StudentId,
-                    DisplayName = student.DisplayName,
-                    Gender = student.Gender,
-                    UserType = "Student",
-                    UserPrincipalId = student.AdobeConnectPrincipalId,
-                    IsDeleted = student.IsDeleted
-                };
+                //var dto = new ClassMonitorDtos.MonitorUser
+                //{
+                //    Id = student.StudentId,
+                //    DisplayName = student.DisplayName,
+                //    Gender = student.Gender,
+                //    UserType = "Student",
+                //    UserPrincipalId = student.AdobeConnectPrincipalId,
+                //    IsDeleted = student.IsDeleted
+                //};
 
-                Cache.Users.Add(dto);
+                //Cache.Users.Add(dto);
             }
 
             foreach (var teacher in staff)

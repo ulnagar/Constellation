@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Students.AuditAwardTallyValues;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Awards;
@@ -35,11 +35,11 @@ internal sealed class AuditAwardTallyValuesCommandHandler
 
     public async Task<Result> Handle(AuditAwardTallyValuesCommand request, CancellationToken cancellationToken)
     {
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         foreach (Student student in students)
         {
-            List<StudentAward> awards = await _awardRepository.GetByStudentId(student.StudentId, cancellationToken);
+            List<StudentAward> awards = await _awardRepository.GetByStudentId(student.Id, cancellationToken);
 
             int issuedAstras = awards.Count(award => award.Type == StudentAward.Astra);
             int issuedStellars = awards.Count(award => award.Type == StudentAward.Stellar);

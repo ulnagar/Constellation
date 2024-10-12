@@ -57,10 +57,10 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
         DateOnly startDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-1)).VerifyStartOfFortnight();
         DateOnly endDate = startDate.AddDays(12);
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
         List<IGrouping<string, Student>> studentsBySchool = students
-            .OrderBy(s => s.School.Name)
-            .GroupBy(s => s.SchoolCode)
+            .OrderBy(s => s.CurrentEnrolment?.SchoolName)
+            .GroupBy(s => s.CurrentEnrolment?.SchoolCode)
             .ToList();
 
         foreach (IGrouping<string, Student> school in studentsBySchool)
@@ -68,7 +68,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            _logger.Information("{id}: Processing School: {name}", JobId, school.First().School.Name);
+            _logger.Information("{id}: Processing School: {name}", JobId, school.First().CurrentEnrolment?.SchoolName);
 
             Dictionary<string, string> studentFiles = new();
 
@@ -77,9 +77,9 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
-                _logger.Information("{id}: Creating Report for {name}", JobId, student.DisplayName);
+                _logger.Information("{id}: Creating Report for {name}", JobId, student.Name.DisplayName);
                 // Get Data from server
-                Result<FileDto> studentReportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(student.StudentId, startDate, endDate), cancellationToken);
+                Result<FileDto> studentReportRequest = await _mediator.Send(new GenerateAttendanceReportForStudentQuery(student.Id, startDate, endDate), cancellationToken);
 
                 if (studentReportRequest.IsFailure)
                     continue;
@@ -91,7 +91,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
                 await SendParentEmail(studentReportRequest.Value, student, startDate, cancellationToken);
             }
 
-            _logger.Information("{id}: Sending reports to school {school}", JobId, school.First().School.Name);
+            _logger.Information("{id}: Sending reports to school {school}", JobId, school.First().CurrentEnrolment?.SchoolName);
 
             // Email all the files to the school
             List<Attachment> attachmentList = new();
@@ -131,7 +131,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
             // Email the file to the school contacts
             await SendSchoolEmailAsync(school.Key, attachmentList, startDate, cancellationToken);
 
-            _logger.Information("{id}: Cleaning up temporary files created for {school}", JobId, school.First().School.Name);
+            _logger.Information("{id}: Cleaning up temporary files created for {school}", JobId, school.First().CurrentEnrolment?.SchoolName);
 
             // Delete all temp files
             foreach (KeyValuePair<string, string> entry in studentFiles)
@@ -149,7 +149,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
         CancellationToken cancellationToken)
     {
         // Email the file to the parents
-        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
         List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
         List<EmailRecipient> recipients = new();
 
@@ -179,7 +179,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
             MemoryStream stream = new(file.FileData);
 
             bool success = await _emailService.SendParentAttendanceReportEmail(
-                student.DisplayName, 
+                student.Name.DisplayName, 
                 dateToReport, 
                 dateToReport.AddDays(12), 
                 recipients, 
@@ -199,7 +199,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
         }
         else
         {
-            await _emailService.SendAdminAbsenceContactAlert(student.DisplayName);
+            await _emailService.SendAdminAbsenceContactAlert(student.Name.DisplayName);
         }
     }
     

@@ -89,7 +89,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetAttemptDownload(
-        [ModelBinder(typeof(ConstructorBinder))] StudentAwardId id, 
+        StudentAwardId id, 
         CancellationToken cancellationToken = default)
     {
         _logger.Information("Requested to retrieve Award Certificate with id {Id} by user {User}", id, _currentUserService.UserName);

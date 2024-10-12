@@ -14,8 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using Shared.Components.CancelRoll;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class RollModel : BasePageModel
@@ -43,11 +43,9 @@ public class RollModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Lesson Roll";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracLessonId LessonId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracRollId RollId { get; set; }
 
     public LessonRollDetailsResponse Roll { get; set; }
@@ -57,9 +55,10 @@ public class RollModel : BasePageModel
         return await PreparePage();
     }
 
-    public async Task<IActionResult> OnGetCancel()
+    public async Task<IActionResult> OnPostCancel(
+        CancelRollSelection viewModel)
     {
-        CancelLessonRollCommand command = new(LessonId, RollId);
+        CancelLessonRollCommand command = new(LessonId, RollId, viewModel.Comment);
 
         _logger
             .ForContext(nameof(CancelLessonRollCommand), command, true)

@@ -1,0 +1,159 @@
+@page
+@model Constellation.Presentation.Students.Areas.Students.Pages.Support.IndexModel
+
+<h2>Need help?</h2>
+
+<div>Select the type of support you need below:</div>
+
+<div class="d-flex flex-column justify-content-around">
+    <div class="accordion" id="accordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-wellbeing">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-wellbeing" aria-expanded="false" aria-controls="accordion-item-wellbeing">
+                    <span>Wellbeing & Learning Support</span>
+                    <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                </button>
+            </h2>
+            <div id="accordion-item-wellbeing" class="accordion-collapse collapse" aria-labelledby="accordion-header-wellbeing" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <div>Our Learning and Support Team, headed up by our Head Teacher Wellbeing, are available to help you in many ways.</div>
+                    
+                    <ul>
+                        <li>Tutorial Support</li>
+                        <li>Study Support</li>
+                        <li>Counsellor Sessions</li>
+                        <li>Learning Plans</li>
+                        <li>Anti-Bullying Support</li>
+                        <li>Aboriginal Education Support</li>
+                        <li>Wellbeing Support</li>
+                    </ul>
+                    
+                    <div>Check out the Student Info Hub for more details: <a href="https://sites.google.com/education.nsw.gov.au/aurorastudentlst/welcome" target="_blank">Google Site: Student Info Hub</a></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-careers">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-careers" aria-expanded="false" aria-controls="accordion-item-careers">
+                    <span>Careers Advice and Support</span>
+                    <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                </button>
+            </h2>
+            <div id="accordion-item-careers" class="accordion-collapse collapse" aria-labelledby="accordion-header-careers" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <p>Do you need help deciding on the next step of your education journey? Our Careers Advisor would love to chat about your options and find the right solution for you.</p>
+                    
+                    @{
+                        var careersContact = Model.Contacts.FirstOrDefault(entry => entry.Detail == "Careers Advisor");
+                    }
+
+                    <p>
+                        Check out our Careers website at <a href="https://careers.aurora.nsw.edu.au/" target="_blank">https://careers.aurora.nsw.edu.au/</a> 
+                        @if (careersContact is not null)
+                        {
+                            <span>or contact @careersContact.DisplayName at <a href="mailto:@careersContact.EmailAddress">@careersContact.EmailAddress</a></span>
+                        }
+                    </p>
+                    
+                    <p>You can also visit the <a href="https://teams.microsoft.com/l/channel/19%3Ab19eeb1db26544f79a6b6b619b129dea%40thread.tacv2/Virtual%20Careers%20Room%20?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991" target="_blank">Virtual Careers Room in the Aurora College Students Team</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-technology">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-technology" aria-expanded="false" aria-controls="accordion-item-technology">
+                    <span>Technology Support</span>
+                    <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                </button>
+            </h2>
+            <div id="accordion-item-technology" class="accordion-collapse collapse" aria-labelledby="accordion-header-technology" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <p>If you're having trouble getting your technology to work, the first step to getting it fixed is to let us know!</p>
+                    
+                    <p>Contact us at <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a> and let us know your issues. You can also call us on <strong>1300 610 733</strong> during school hours.</p>
+                    
+                    <p>You can also fill in the form below for assistance:</p>
+                    
+                    <div class="w-50">
+                        <form asp-page-handler="TechnologyForm" method="post">
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2 col">
+                                    <strong>Report an issue</strong>
+                                </div>
+                            </div>
+                            
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2 col-12">
+                                    <strong>Type</strong>
+                                </div>
+                                <div class="mb-2 col-12">
+                                    <span>
+                                        <select name="IssueType" required>
+                                            <option value=""> -- Select issue type -- </option>
+                                            <option value="Question">Question</option>
+                                            <option value="Hardware">Computer Issue (Laptop or desktop)</option>
+                                            <option value="Software">Application Issue (Teams, OneNote, etc)</option>
+                                            <option value="Accessory">Accessory Issue (Headset or webcam, etc)</option>
+                                        </select>
+                                    </span>
+                                </div>
+                            </div>
+                        
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2">
+                                    <strong>Device details (serial number or asset number)</strong>
+                                </div>
+                                <div class="mb-2">
+                                    <span>
+                                        <input name="SerialNumber" />
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-sm-flex flex-column border-bottom mt-1">
+                                <div class="mb-2 col-12">
+                                    <strong>Description of issue</strong>
+                                </div>
+                                <div class="mb-2 col-12">
+                                    <span>
+                                        <textarea name="Description" cols="100" rows="5" required minlength="20"></textarea>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none mt-1">
+                                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+                            </div>
+                            <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
+                                <button class="btn btn-success btn-lg" type="submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-general">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-general" aria-expanded="false" aria-controls="accordion-item-general">
+                    <span>Other Support</span>
+                    <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                </button>
+            </h2>
+            <div id="accordion-item-general" class="accordion-collapse collapse" aria-labelledby="accordion-header-general" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <p>If you can't find the support your after, our helpful office staff can direct you to the right place!</p>
+                    
+                    <p>Contact us at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a> and let us know your question. You can also call us on <strong>1300 287 629</strong> during school hours.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

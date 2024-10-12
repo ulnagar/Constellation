@@ -2,19 +2,15 @@
 
 using Application.DTOs;
 using Application.Interfaces.Repositories;
-using Application.StaffMembers.GetStaffById;
-using Application.Students.GetStudentById;
-using Application.Students.Models;
-using Application.Teams.GetTeamByName;
-using Constellation.Application.Features.API.Operations.Queries;
 using Constellation.Application.Teams.Models;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Shared;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models;
 using Core.Models.Casuals;
-using MediatR;
+using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students;
+using Core.Models.Students.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
@@ -22,25 +18,34 @@ using Models;
 [ApiController]
 public class OperationsController : ControllerBase
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMediator _mediator;
+    private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ITeamRepository _teamRepository;
+    private readonly IStudentRepository _studentRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public OperationsController(
-        IUnitOfWork unitOfWork, 
-        IMediator mediator, 
-        ICasualRepository casualRepository)
+        IMSTeamOperationsRepository operationsRepository,
+        ITeamRepository teamRepository,
+        IStudentRepository studentRepository,
+        IStaffRepository staffRepository,
+        ICasualRepository casualRepository,
+        IUnitOfWork unitOfWork)
     {
-        _unitOfWork = unitOfWork;
-        _mediator = mediator;
+        _operationsRepository = operationsRepository;
+        _teamRepository = teamRepository;
+        _studentRepository = studentRepository;
+        _staffRepository = staffRepository;
         _casualRepository = casualRepository;
+        _unitOfWork = unitOfWork;
     }
 
     // GET api/Operations/Due
     [Route("Due")]
     public async Task<IEnumerable<TeamsOperation>> GetDue()
     {
-        MSTeamOperationsList operations = await _unitOfWork.MSTeamOperations.ToProcess();
+        MSTeamOperationsList operations = await _operationsRepository.ToProcess();
 
         return await BuildOperations(operations);
     }
@@ -50,7 +55,7 @@ public class OperationsController : ControllerBase
     [Route("Overdue")]
     public async Task<IEnumerable<TeamsOperation>> GetOverdue()
     {
-        MSTeamOperationsList operations = await _unitOfWork.MSTeamOperations.OverdueToProcess();
+        MSTeamOperationsList operations = await _operationsRepository.OverdueToProcess();
 
         return await BuildOperations(operations);
     }
@@ -61,18 +66,16 @@ public class OperationsController : ControllerBase
 
         foreach (TeacherAssignmentMSTeamOperation operation in operations.AssignmentOperations)
         {
-            Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(operation.StaffId));
+            Staff staffMember = await _staffRepository.GetById(operation.StaffId);
 
-            if (staffMember.IsFailure)
-            {
+            if (staffMember is null)
                 continue;
-            }
 
             TeamsOperation teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = staffMember.Value.EmailAddress.Email
+                UserEmail = staffMember.EmailAddress
             };
 
             teamOperation.Action = operation.Action switch
@@ -91,28 +94,28 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+            TeamResource? team = await GetTeam(operation.TeamName);
 
-            if (request.IsFailure)
+            if (team is null)
                 continue;
 
-            teamOperation.TeamId = request.Value.Id.ToString();
+            teamOperation.TeamId = team.Id.ToString();
 
             returnData.Add(teamOperation);
         }
 
         foreach (StudentOfferingMSTeamOperation operation in operations.StudentOfferingOperations)
         {
-            Result<StudentResponse> student = await _mediator.Send(new GetStudentByIdQuery(operation.StudentId));
-
-            if (student.IsFailure)
+            Student student = await _studentRepository.GetById(operation.StudentId);
+            
+            if (student is null)
                 continue;
 
             TeamsOperation teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = student.Value.EmailAddress
+                UserEmail = student.EmailAddress.Email
             };
 
             teamOperation.Action = operation.Action switch
@@ -131,12 +134,12 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            Result<TeamResource> request = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+            TeamResource? team = await GetTeam(operation.TeamName);
 
-            if (request.IsFailure)
+            if (team is null)
                 continue;
 
-            teamOperation.TeamId = request.Value.Id.ToString();
+            teamOperation.TeamId = team.Id.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -147,7 +150,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                UserEmail = operation.Student.EmailAddress
+                UserEmail = operation.Student.EmailAddress.Email
             };
 
             teamOperation.Action = operation.Action switch
@@ -166,7 +169,12 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+            Guid? offeringTeamId = await _teamRepository.GetIdByOffering(operation.Offering.Name, operation.Offering.EndDate.Year.ToString());
+
+            if (offeringTeamId is null)
+                continue;
+
+            teamOperation.TeamId = offeringTeamId.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -196,7 +204,12 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+            Guid? offeringTeamId = await _teamRepository.GetIdByOffering(operation.Offering.Name, operation.Offering.EndDate.Year.ToString());
+
+            if (offeringTeamId is null)
+                continue;
+
+            teamOperation.TeamId = offeringTeamId.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -228,7 +241,12 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+            Guid? offeringTeamId = await _teamRepository.GetIdByOffering(operation.Offering.Name, operation.Offering.EndDate.Year.ToString());
+
+            if (offeringTeamId is null)
+                continue;
+
+            teamOperation.TeamId = offeringTeamId.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -243,7 +261,12 @@ public class OperationsController : ControllerBase
                 Faculty = operation.Faculty.ToString()
             };
 
-            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.Offering.Name, Year = operation.Offering.EndDate.Year.ToString() });
+            Guid? offeringTeamId = await _teamRepository.GetIdByOffering(operation.Offering.Name, operation.Offering.EndDate.Year.ToString());
+
+            if (offeringTeamId is null)
+                continue;
+
+            teamOperation.TeamId = offeringTeamId.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -266,8 +289,8 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = operation.Student.EmailAddress,
-                AdditionalInformation = operation.Student.CurrentGrade.ToString()
+                UserEmail = operation.Student.EmailAddress.Email,
+                AdditionalInformation = operation.Student.CurrentEnrolment?.Grade.ToString()
             };
 
             teamOperation.Action = operation.Action switch
@@ -286,8 +309,13 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            teamOperation.TeamId = await _mediator.Send(new GetTeamIdForOfferingQuery { ClassName = operation.TeamName, Year = operation.TeamName });
+            Guid? offeringTeamId = await _teamRepository.GetIdByOffering(operation.TeamName, operation.TeamName);
 
+            if (offeringTeamId is null)
+                continue;
+
+            teamOperation.TeamId = offeringTeamId.ToString();
+            
             returnData.Add(teamOperation);
         }
 
@@ -317,12 +345,12 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            Result<TeamResource> team = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+            TeamResource? team = await GetTeam(operation.TeamName);
 
-            if (team.IsFailure)
+            if (team is null)
                 continue;
 
-            teamOperation.TeamId = team.Value.Id.ToString();
+            teamOperation.TeamId = team.Id.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -352,12 +380,12 @@ public class OperationsController : ControllerBase
                 _ => teamOperation.Role
             };
 
-            Result<TeamResource> team = await _mediator.Send(new GetTeamByNameQuery(operation.TeamName));
+            TeamResource? team = await GetTeam(operation.TeamName);
 
-            if (team.IsFailure)
+            if (team is null)
                 continue;
 
-            teamOperation.TeamId = team.Value.Id.ToString();
+            teamOperation.TeamId = team.Id.ToString();
 
             returnData.Add(teamOperation);
         }
@@ -370,12 +398,34 @@ public class OperationsController : ControllerBase
     [HttpPost]
     public async Task Complete(int id)
     {
-        MSTeamOperation operation = await _unitOfWork.MSTeamOperations.ForMarkingCompleteOrCancelled(id);
+        MSTeamOperation operation = await _operationsRepository.ForMarkingCompleteOrCancelled(id);
 
         if (operation != null)
         {
             operation.Complete();
             await _unitOfWork.CompleteAsync();
         }
+    }
+
+    private async Task<TeamResource?> GetTeam(string name)
+    {
+        List<Team> teams = await _teamRepository.GetByName(name);
+
+        if (teams.Count == 0)
+            return null;
+
+        Team exactMatch = teams.FirstOrDefault(team => team.Name == name);
+
+        if (exactMatch is not null)
+        {
+            return new(
+                exactMatch.Id,
+                exactMatch.Name,
+                exactMatch.Description,
+                exactMatch.Link,
+                exactMatch.IsArchived);
+        }
+
+        return null;
     }
 }

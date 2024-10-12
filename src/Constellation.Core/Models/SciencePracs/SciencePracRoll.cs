@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.SciencePracs;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Enums;
 using Errors;
 using Identifiers;
@@ -40,13 +41,13 @@ public sealed class SciencePracRoll
         string submittedBy,
         DateOnly lessonDate,
         string comment,
-        List<string> presentStudents,
-        List<string> absentStudents)
+        List<StudentId> presentStudents,
+        List<StudentId> absentStudents)
     {
         if (presentStudents.Count == 0 && string.IsNullOrWhiteSpace(comment))
             return Result.Failure(DomainErrors.SciencePracs.Roll.CommentRequiredNonePresent);
 
-        foreach (string studentId in presentStudents)
+        foreach (StudentId studentId in presentStudents)
         {
             SciencePracAttendance attendance = _attendance.SingleOrDefault(entry => entry.StudentId == studentId);
 
@@ -56,7 +57,7 @@ public sealed class SciencePracRoll
             attendance.UpdateAttendance(true);
         }
 
-        foreach (string studentId in absentStudents)
+        foreach (StudentId studentId in absentStudents)
         {
             SciencePracAttendance attendance = _attendance.SingleOrDefault(entry => entry.StudentId == studentId);
 
@@ -102,7 +103,7 @@ public sealed class SciencePracRoll
         return Result.Success();
     }
 
-    public void AddStudent(string studentId)
+    public void AddStudent(StudentId studentId)
     {
         SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
         
@@ -119,7 +120,7 @@ public sealed class SciencePracRoll
     /// Do not use. Does not delete record and throws NRE for the Attendance (as RollId is null)
     /// </summary>
     /// <param name="studentId"></param>
-    public SciencePracAttendance? RemoveStudent(string studentId)
+    public SciencePracAttendance? RemoveStudent(StudentId studentId)
     {
         SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
 

@@ -1,13 +1,15 @@
 ﻿namespace Constellation.Application.Absences.SetAbsenceConfigurationForStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,19 +35,19 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
     {
         if (!string.IsNullOrWhiteSpace(request.SchoolCode))
         {
-            var students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
+            List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
             if (request.GradeFilter is not null)
             {
                 students = students
-                    .Where(student => student.CurrentGrade == (Grade)request.GradeFilter)
+                    .Where(student => student.CurrentEnrolment?.Grade == (Grade)request.GradeFilter)
                     .ToList();
             }
 
             foreach (var student in students)
             {
                 Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
-                    student.StudentId,
+                    student.Id,
                     request.AbsenceType,
                     request.StartDate,
                     request.EndDate);
@@ -54,7 +56,7 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
                 {
                     _logger
                         .ForContext("Error", configRequest.Error)
-                        .Warning("Failed to create Absence Configuration for student {student}", student.DisplayName);
+                        .Warning("Failed to create Absence Configuration for student {student}", student.Name.DisplayName);
 
                     return Result.Failure(configRequest.Error);
                 }
@@ -76,12 +78,12 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
             return Result.Success();
         }
 
-        if (!string.IsNullOrWhiteSpace(request.StudentId))
+        if (request.StudentId != StudentId.Empty)
         {
-            var student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
             Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
-                student.StudentId,
+                student.Id,
                 request.AbsenceType,
                 request.StartDate,
                 request.EndDate);
@@ -90,7 +92,7 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
             {
                 _logger
                     .ForContext("Error", configRequest.Error)
-                    .Warning("Failed to create Absence Configuration for student {student}", student.DisplayName);
+                    .Warning("Failed to create Absence Configuration for student {student}", student.Name.DisplayName);
 
                 return Result.Failure(configRequest.Error);
             }

@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.GroupTutorials.GetTutorialRollWithDetailsById;
 
+using Core.Models.Students.Identifiers;
+
 public sealed record TutorialRollStudentResponse(
-    string StudentId,
+    StudentId StudentId,
     string Name,
     string Grade,
     bool Enrolled,

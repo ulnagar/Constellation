@@ -43,8 +43,6 @@ public class UpdateModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Contacts;
     [ViewData] public string PageTitle => "Update School Contact";
 
-
-    [ModelBinder(typeof(ConstructorBinder))]
     [BindProperty(SupportsGet = true)]
     public SchoolContactId Id { get; set; }
 

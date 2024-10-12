@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.GroupTutorials.SubmitRoll;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 
 public sealed record SubmitRollCommand(
     GroupTutorialId TutorialId,
     TutorialRollId RollId,
     string StaffEmail,
-    Dictionary<string,bool> StudentPresence) : ICommand;
+    Dictionary<StudentId,bool> StudentPresence) : ICommand;

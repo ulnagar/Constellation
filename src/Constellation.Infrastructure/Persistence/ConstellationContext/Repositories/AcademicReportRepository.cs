@@ -3,6 +3,7 @@
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class AcademicReportRepository : IAcademicReportRepository
@@ -36,7 +37,7 @@ internal sealed class AcademicReportRepository : IAcademicReportRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<AcademicReport>> GetForStudent(
-        string StudentId,
+        StudentId StudentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<AcademicReport>()
@@ -45,4 +46,7 @@ internal sealed class AcademicReportRepository : IAcademicReportRepository
 
     public void Insert(AcademicReport entity) =>
         _context.Add(entity);
+
+    public void Remove(AcademicReport entity) =>
+        _context.Remove(entity);
 }

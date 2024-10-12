@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Students.GetStudentsByParentEmail;
 
+using Core.Models.Students.Identifiers;
+
 public sealed record StudentResponse(
-    string StudentId,
+    StudentId StudentId,
     string FirstName,
     string LastName,
     string CurrentGrade)

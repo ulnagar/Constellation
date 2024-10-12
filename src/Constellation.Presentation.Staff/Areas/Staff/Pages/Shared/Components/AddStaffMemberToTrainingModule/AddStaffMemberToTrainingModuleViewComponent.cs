@@ -5,7 +5,6 @@ using Constellation.Application.Training.GetModuleDetails;
 using Constellation.Application.Training.Models;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -20,8 +19,7 @@ public class AddStaffMemberToTrainingModuleViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(
-        [ModelBinder(typeof(ConstructorBinder))] TrainingModuleId moduleId)
+    public async Task<IViewComponentResult> InvokeAsync(TrainingModuleId moduleId)
     {
         Result<ModuleDetailsDto> module = await _mediator.Send(new GetModuleDetailsQuery(moduleId));
 

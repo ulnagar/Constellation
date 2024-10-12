@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 
 using Core.Enums;
+using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 
 public sealed record AttendanceRecord(
-    string StudentId,
+    StudentId StudentId,
     Name StudentName,
     Grade Grade,
     decimal Percentage,

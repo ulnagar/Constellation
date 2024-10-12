@@ -58,33 +58,46 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover staff-data-table">
     <thead>
-        <tr>
-            <th>Staff Id</th>
-            <th>Name</th>
-            <th>Faculty</th>
-            <th>School</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Staff Id</th>
+        <th>Name</th>
+        <th>Faculty</th>
+        <th>School</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.Staff)
-        {
-            <tr>
-                <td>@item.StaffId</td>
-                <td>@item.Name.DisplayName</td>
-                <td>
-                    @foreach (var entry in item.Faculties)
-                    {
-                        <span class="badge" style="background-color: @entry.Colour; color: white">@entry.Name</span>
-                    }
-                </td>
-                <td>@item.School</td>
-                <td>
-                    <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
-                </td>
-            </tr>
-        }
+    @foreach (var item in Model.Staff)
+    {
+        <tr>
+            <td>@item.StaffId</td>
+            <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
+            <td>
+                @foreach (var entry in item.Faculties)
+                {
+                    <span class="badge" style="background-color: @entry.Colour; color: white">@entry.Name</span>
+                }
+            </td>
+            <td>@item.School</td>
+            <td>
+                <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@item.StaffId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('.staff-data-table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+        });
+    </script>
+}

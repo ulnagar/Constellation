@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Timetables.GetStudentTimetableExport;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Extensions;
 using Core.Models;
@@ -16,6 +15,7 @@ using Core.Models.Students.Repositories;
 using Core.Shared;
 using DTOs;
 using Interfaces.Repositories;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.IO;
@@ -72,33 +72,33 @@ internal sealed class GetStudentTimetableExportQueryHandler
             return Result.Failure<FileDto>(StudentErrors.NotFound(request.StudentId));
         }
 
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-        if (school is null)
+        if (enrolment is null)
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableExportQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(student.SchoolCode), true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<FileDto>(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+            return Result.Failure<FileDto>(SchoolEnrolmentErrors.NotFound);
         }
 
-        response.StudentId = student.StudentId;
-        response.StudentName = student.GetName().DisplayName;
-        response.StudentGrade = student.CurrentGrade.AsName();
-        response.StudentSchool = school.Name;
+        response.StudentId = student.Id;
+        response.StudentName = student.Name.DisplayName;
+        response.StudentGrade = enrolment.Grade.AsName();
+        response.StudentSchool = enrolment.SchoolName;
 
-        List<Offering> offerings = await _offeringRepository.GetByStudentId(student.StudentId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
         if (offerings.Count == 0)
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableExportQuery), request, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFoundForStudent(student.StudentId), true)
+                .ForContext(nameof(Error), OfferingErrors.NotFoundForStudent(student.Id), true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<FileDto>(OfferingErrors.NotFoundForStudent(student.StudentId));
+            return Result.Failure<FileDto>(OfferingErrors.NotFoundForStudent(student.Id));
         }
 
         List<int> periodIds = offerings

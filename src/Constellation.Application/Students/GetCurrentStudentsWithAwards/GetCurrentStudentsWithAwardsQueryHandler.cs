@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Awards;
+using Core.Models.Students;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,15 +28,15 @@ internal sealed class GetCurrentStudentsWithAwardsQueryHandler
     {
         List<CurrentStudentWithAwardsResponse> result = new();
 
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
-        foreach (var student in students)
+        foreach (Student student in students)
         {
-            var awards = await _awardRepository.GetByStudentId(student.StudentId, cancellationToken);
+            List<StudentAward> awards = await _awardRepository.GetByStudentId(student.Id, cancellationToken);
 
             List<CurrentStudentWithAwardsResponse.RegisteredAward> studentAwards = new();
 
-            foreach (var award in awards)
+            foreach (StudentAward award in awards)
             {
                 studentAwards.Add(new(
                     award.Id,
@@ -43,14 +45,19 @@ internal sealed class GetCurrentStudentsWithAwardsQueryHandler
                     award.AwardedOn));
             }
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             result.Add(new(
-                student.StudentId,
-                student.FirstName,
-                student.LastName,
-                student.DisplayName,
-                student.SchoolCode,
-                student.School.Name,
-                student.CurrentGrade,
+                student.Id,
+                student.Name.PreferredName,
+                student.Name.LastName,
+                student.Name.DisplayName,
+                enrolment.SchoolCode,
+                enrolment.SchoolName,
+                enrolment.Grade,
                 studentAwards));
         }
 

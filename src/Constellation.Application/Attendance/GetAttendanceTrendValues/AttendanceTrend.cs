@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceTrendValues;
 
 using Core.Enums;
+using Core.Models.Students.Identifiers;
 using Core.Models.WorkFlow.Enums;
 using Core.ValueObjects;
 
 public sealed record AttendanceTrend(
-    string StudentId,
+    StudentId StudentId,
     Name Name,
     Grade Grade,
     string SchoolCode,

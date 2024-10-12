@@ -10,6 +10,7 @@ using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -49,11 +50,11 @@ public class SettingsModel : BasePageModel
     public SelectList Students { get; set; }
     public SelectList Grades { get; set; }
 
-    [BindProperty(SupportsGet = false)]
-    public string StudentId { get; set; }
-    [BindProperty(SupportsGet = false)]
+    [BindProperty] 
+    public StudentId StudentId { get; set; } = StudentId.Empty;
+    [BindProperty]
     public string SchoolCode { get; set; }
-    [BindProperty(SupportsGet = false)]
+    [BindProperty]
     public int Grade { get; set; }
 
     [BindProperty]
@@ -67,7 +68,7 @@ public class SettingsModel : BasePageModel
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(StudentId) && string.IsNullOrWhiteSpace(SchoolCode))
+        if (StudentId == StudentId.Empty && string.IsNullOrWhiteSpace(SchoolCode))
         {
             Error error = new("Validation.Page.EmptyValues", "You must select a value for either Student or School to continue");
 
@@ -116,7 +117,7 @@ public class SettingsModel : BasePageModel
     {
         _logger.Information("Requested to start creation of Student Absence Setting by user {User}", _currentUserService.UserName);
 
-        Result<Dictionary<string, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
+        Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
 
         if (students.IsFailure)
         {

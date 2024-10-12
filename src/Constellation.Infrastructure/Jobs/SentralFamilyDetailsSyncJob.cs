@@ -1,18 +1,20 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.DTOs;
-using Constellation.Application.Interfaces.Gateways;
+using Application.Interfaces.Gateways;
+using Application.Interfaces.Repositories;
+using Application.Students.SendFamilyContactChangesReport;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Application.Students.SendFamilyContactChangesReport;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Families;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.ValueObjects;
+using Core.Abstractions.Repositories;
 using Core.Extensions;
+using Core.Models.Families;
+using Core.Models.Identifiers;
+using Core.Models.Students;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -28,9 +30,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
     private readonly IMediator _mediator;
     private readonly IFamilyRepository _familyRepository;
     private readonly IStudentRepository _studentRepository;
-
-    private Guid _jobId;
-
+    
     public SentralFamilyDetailsSyncJob(
         IUnitOfWork unitOfWork,
         ILogger logger,
@@ -49,7 +49,6 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        _jobId = jobId;
         _logger.ForContext(nameof(jobId), jobId);
 
         _logger
@@ -64,18 +63,23 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
         Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(token);
+        List<Student> students = await _studentRepository.GetCurrentStudents(token);
 
         foreach (KeyValuePair<string, List<string>> family in familyGroups)
         {
-            Student firstStudent = students.FirstOrDefault(student => student.StudentId == family.Value.First());
+            Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
 
             if (firstStudent is null)
                 continue;
 
-            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(firstStudent.SentralStudentId);
+            SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
 
-            entry.StudentIds = family.Value;
+            if (link is null)
+                continue;
+
+            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
+
+            entry.StudentReferenceNumbers = family.Value;
             entry.FamilyId = family.Key;
 
             foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
@@ -127,15 +131,16 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                //TODO: R1.14.4: Is this operation worth the cost?
-                List<Student> familyStudents = students.Where(student => family.StudentIds.Contains(student.StudentId)).ToList();
+                List<Student> familyStudents = students
+                    .Where(student => student.StudentReferenceNumber != StudentReferenceNumber.Empty)
+                    .Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number)).ToList();
 
                 foreach (Student student in familyStudents)
                 {
                     _logger
-                        .Information("Adding student {name} to family {family} ({code})", student.DisplayName, family.AddressName, family.FamilyId);
+                        .Information("Adding student {name} to family {family} ({code})", student.Name.DisplayName, family.AddressName, family.FamilyId);
 
-                    entry.AddStudent(student.StudentId, true);
+                    entry.AddStudent(student.Id, student.StudentReferenceNumber, true);
                 }
 
                 foreach (FamilyDetailsDto.Contact contact in family.Contacts)
@@ -162,9 +167,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         "Family Email",
                         string.Empty,
                         string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.FirstName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                         "No Email Supplied"));
                 } 
                 else
@@ -177,9 +182,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             "Family Email",
                             string.Empty,
                             family.FamilyEmail,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.PreferredName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                             "Family Email Invalid"));
                     }
                     else
@@ -192,9 +197,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             "Family Email",
                             string.Empty,
                             family.FamilyEmail,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.PreferredName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                             "Family Email Added"));
                         }
                     }
@@ -217,34 +222,41 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     family.AddressTown,
                     family.AddressPostCode);
 
-                //TODO: R1.14.4: Is this operation worth the cost?
-                List<Student> familyStudents = students.Where(student => family.StudentIds.Contains(student.StudentId)).ToList();
+                List<Student> familyStudents = students
+                    .Where(student => student.StudentReferenceNumber != StudentReferenceNumber.Empty)
+                    .Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number))
+                    .ToList();
 
-                foreach (Student student in familyStudents)
+                List<Student> dbStudents = students
+                    .Where(student => entry.Students.Any(member => member.StudentId == student.Id))
+                    .ToList();
+
+                foreach (Student dbStudent in dbStudents)
                 {
-                    if (entry.Students.All(entry => entry.StudentId != student.StudentId))
+                    // Student is not listed in the Sentral Students list, but is in the db Students list
+                    if (familyStudents.All(sentralStudent => sentralStudent.Id != dbStudent.Id))
+                    {
+                        _logger
+                            .Information("Removing student {name} from family {family} ({code})", dbStudent.Name.DisplayName, family.AddressName, family.FamilyId);
+
+                        // Student should not be linked
+                        entry.RemoveStudent(dbStudent.Id);
+                    }
+                }
+
+                foreach (Student sentralStudent in familyStudents)
+                {
+                    // Student is listed in the Sentral Students list, but is not in the db Students list
+                    if (entry.Students.All(entry => entry.StudentId != sentralStudent.Id))
                     {
                         // Student is not currently linked
                         _logger
-                            .Information("Adding student {name} to family {family} ({code})", student.DisplayName, family.AddressName, family.FamilyId);
+                            .Information("Adding student {name} to family {family} ({code})", sentralStudent.Name.DisplayName, family.AddressName, family.FamilyId);
 
-                        entry.AddStudent(student.StudentId, true);
+                        entry.AddStudent(sentralStudent.Id, sentralStudent.StudentReferenceNumber, true);
                     }
                 }
-
-                List<StudentFamilyMembership> linkedStudents = entry.Students.ToList();
-                foreach (StudentFamilyMembership student in linkedStudents)
-                {
-                    if (!family.StudentIds.Contains(student.StudentId))
-                    {
-                        _logger
-                            .Information("Removing student {name} from family {family} ({code})", student.StudentId, family.AddressName, family.FamilyId);
-
-                        // Student should not be linked
-                        entry.RemoveStudent(student.StudentId);
-                    }
-                }
-
+                
                 foreach (Parent parent in entry.Parents.ToList())
                 {
                     FamilyDetailsDto.Contact contact = family.Contacts.FirstOrDefault(contact => contact.SentralId == parent.SentralId);
@@ -313,9 +325,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         "Family Email",
                         string.Empty,
                         family.FamilyEmail,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.PreferredName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                        (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                         "Family Email Invalid"));
                 }
                 else if (familyEmail.Value != entryEmail.Value)
@@ -333,9 +345,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             "Family Email",
                             string.Empty,
                             family.FamilyEmail,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.PreferredName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                             "Family Email Added"));
                     }
 
@@ -345,9 +357,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             "Family Email",
                             oldEmail,
                             family.FamilyEmail,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.PreferredName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                             "Family Email Changed"));
                     }
 
@@ -357,9 +369,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                             "Family Email",
                             oldEmail,
                             string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().FirstName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().LastName : string.Empty,
-                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentGrade.AsName() : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.PreferredName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().Name.LastName : string.Empty,
+                            (familyStudents.FirstOrDefault() is not null) ? familyStudents.First().CurrentEnrolment?.Grade.AsName() : string.Empty,
                             "Family Email Removed"));
                     }
 
@@ -421,9 +433,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 displayName,
                 string.Empty,
                 emailAddress,
-                (firstStudent is not null) ? firstStudent.FirstName : string.Empty,
-                (firstStudent is not null) ? firstStudent.LastName : string.Empty,
-                (firstStudent is not null) ? firstStudent.CurrentGrade.AsName() : string.Empty,
+                (firstStudent is not null) ? firstStudent.Name.PreferredName : string.Empty,
+                (firstStudent is not null) ? firstStudent.Name.LastName : string.Empty,
+                (firstStudent is not null) ? firstStudent.CurrentEnrolment?.Grade.AsName() : string.Empty,
                 "Parent Email Invalid");
         }
         
@@ -450,9 +462,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             displayName,
             string.Empty,
             email.Value.Email,
-            (firstStudent is not null) ? firstStudent.FirstName : string.Empty,
-            (firstStudent is not null) ? firstStudent.LastName : string.Empty,
-            (firstStudent is not null) ? firstStudent.CurrentGrade.AsName() : string.Empty,
+            (firstStudent is not null) ? firstStudent.Name.PreferredName : string.Empty,
+            (firstStudent is not null) ? firstStudent.Name.LastName : string.Empty,
+            (firstStudent is not null) ? firstStudent.CurrentEnrolment?.Grade.AsName() : string.Empty,
             "New Parent Added");
     }
 
@@ -484,9 +496,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 displayName,
                 string.Empty,
                 emailAddress,
-                (firstStudent is not null) ? firstStudent.FirstName : string.Empty,
-                (firstStudent is not null) ? firstStudent.LastName : string.Empty,
-                (firstStudent is not null) ? firstStudent.CurrentGrade.AsName() : string.Empty,
+                (firstStudent is not null) ? firstStudent.Name.PreferredName : string.Empty,
+                (firstStudent is not null) ? firstStudent.Name.LastName : string.Empty,
+                (firstStudent is not null) ? firstStudent.CurrentEnrolment?.Grade.AsName() : string.Empty,
                 "Parent Email Invalid");
         }
         
@@ -557,9 +569,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 displayName,
                 oldEmail,
                 email.Value.Email,
-                (firstStudent is not null) ? firstStudent.FirstName : string.Empty,
-                (firstStudent is not null) ? firstStudent.LastName : string.Empty,
-                (firstStudent is not null) ? firstStudent.CurrentGrade.AsName() : string.Empty,
+                (firstStudent is not null) ? firstStudent.Name.PreferredName : string.Empty,
+                (firstStudent is not null) ? firstStudent.Name.LastName : string.Empty,
+                (firstStudent is not null) ? firstStudent.CurrentEnrolment?.Grade.AsName() : string.Empty,
                 "Parent Email Updated");
         }
 

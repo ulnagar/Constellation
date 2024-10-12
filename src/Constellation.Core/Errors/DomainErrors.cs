@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Errors;
+﻿using Constellation.Core.Models.Students.Identifiers;
+
+namespace Constellation.Core.Errors;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
@@ -47,7 +49,7 @@ public static class DomainErrors
     {
         public static class Allocations
         {
-            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+            public static readonly Func<StudentId, Error> NotFoundForStudent = id => new Error(
                 "Assets.Allocations.NotFoundForStudent",
                 $"Could not find any asset allocations for student {id}");
         }
@@ -102,6 +104,10 @@ public static class DomainErrors
             public static readonly Error InvalidOfferingId = new(
                 "Awards.Nomination.InvalidOfferingId",
                 "Could not identify the Offering from the Offering Id provided");
+
+            public static readonly Error DuplicateFound = new(
+                "Awards.Nomination.DuplicateFound",
+                "A nomination for this award and student already exists in the period");
         }
     }
 
@@ -160,11 +166,11 @@ public static class DomainErrors
     {
         public static class Enrolment
         {
-            public static readonly Func<string, Error> NotFoundForStudent = id => new Error(
+            public static readonly Func<StudentId, Error> NotFoundForStudent = id => new Error(
                 "Enrolments.Enrolment.NotFoundForStudent",
                 $"No enrolments could be found for student with Id {id}");
 
-            public static readonly Func<string, OfferingId, Error> AlreadyExists = (studentId, offeringId) => new(
+            public static readonly Func<StudentId, OfferingId, Error> AlreadyExists = (studentId, offeringId) => new(
                 "Enrolments.Enrolment.AlreadyExists",
                 $"A current enrolment already exists for student {studentId} and offering {offeringId}");
         }
@@ -271,11 +277,11 @@ public static class DomainErrors
                 "GroupTutorials.TutorialRoll.SubmitInvalidStatus",
                 "Cannot submit a roll that has been cancelled or previously submitted");
 
-            public static readonly Func<string, Error> StudentNotFound = student => new Error(
+            public static readonly Func<StudentId, Error> StudentNotFound = student => new Error(
                 "GroupTutorials.TutorialRoll.StudentNotFound",
                 $"Cannot find an attendance record for student with Id {student} attached to the roll");
 
-            public static readonly Func<string, Error> RemoveEnrolledStudent = student => new Error(
+            public static readonly Func<StudentId, Error> RemoveEnrolledStudent = student => new Error(
                 "GroupTutorials.TutorialRoll.RemoveEnrolledStudent",
                 $"Cannot remove student with Id {student} from the roll as they are enrolled in the tutorial");
         }

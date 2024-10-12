@@ -37,3 +37,12 @@
 td:has(i) {
     max-width: 1px;
 }
+
+.table-striped tbody tr.current {
+    background-color: rgba(34, 139, 34, 0.5);
+    font-weight: bold;
+}
+
+tr.future {
+    font-style: italic;
+}

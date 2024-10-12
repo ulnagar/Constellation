@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using DomainEvents;
 using Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -17,7 +18,7 @@ public class Absence : AggregateRoot
     private Absence(
         AbsenceId id,
         AbsenceType type,
-        string studentId,
+        StudentId studentId,
         OfferingId offeringId,
         DateOnly date,
         string periodName,
@@ -44,7 +45,7 @@ public class Absence : AggregateRoot
     public AbsenceId Id { get; private set; }
     public AbsenceType Type { get; private set; }
 
-    public string StudentId { get; private set; }
+    public StudentId StudentId { get; private set; }
     public OfferingId OfferingId { get; private set; }
 
     public DateOnly Date { get; private set; }
@@ -66,7 +67,7 @@ public class Absence : AggregateRoot
 
     public static Absence Create(
         AbsenceType type,
-        string studentId,
+        StudentId studentId,
         OfferingId offeringId,
         DateOnly date,
         string periodName,
@@ -149,8 +150,8 @@ public class Absence : AggregateRoot
         if (_responses.Count == 0)
             return null;
 
-        if (!Explained)
-            return null;
+        //if (!Explained)
+        //    return null;
 
         Response? explainedResponse = _responses
             .FirstOrDefault(response => 

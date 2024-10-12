@@ -30,7 +30,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
     {
         var messages = await _context
             .Set<OutboxMessage>()
-            .Where(m => m.ProcessedOn == null)
+            .Where(m => m.ProcessedOn == null && m.OccurredOn <= DateTime.Now)
             .OrderBy(m => m.OccurredOn)
             .Take(20)
             .ToListAsync(token);

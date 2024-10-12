@@ -2,6 +2,7 @@
 
 using Constellation.Application.Helpers;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -37,7 +38,7 @@ public class ScienceLessonRollForSubmit
     {
         public SciencePracAttendanceId Id { get; set; }
 
-        public string StudentId { get; set; }
+        public StudentId StudentId { get; set; }
         public string StudentFirstName { get; set; }
         public string StudentLastName { get; set; }
         public string StudentName => $"{StudentFirstName} {StudentLastName}";

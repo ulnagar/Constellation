@@ -40,7 +40,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Consent Response Details";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public ConsentTransactionId Id { get; set; } = ConsentTransactionId.Empty;
 
     public TransactionDetailsResponse Transaction { get; set; }

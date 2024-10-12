@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Core.Enums;
-using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 
 public class SchoolContactRepository : ISchoolContactRepository
@@ -96,14 +96,18 @@ public class SchoolContactRepository : ISchoolContactRepository
         Grade grade,
         CancellationToken cancellationToken = default)
     {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
         List<string> schoolCodes = await _context
-            .Set<School>()
-            .Where(school =>
-                school.Students
-                    .Any(student =>
-                        !student.IsDeleted &&
-                        student.CurrentGrade == grade))
-            .Select(school => school.Code)
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments.Where(enrolment => 
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= today &&
+                (!enrolment.EndDate.HasValue || enrolment.EndDate >= today) &&
+                enrolment.Grade == grade))
+            .Select(enrolment => enrolment.SchoolCode)
+            .Distinct()
             .ToListAsync(cancellationToken);
 
         return await _context

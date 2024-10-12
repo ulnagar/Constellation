@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetAllContacts;
 
 using Abstractions.Messaging;
+using Constellation.Application.SchoolContacts.Models;
 using System.Collections.Generic;
 
 public sealed record GetAllContactsQuery(

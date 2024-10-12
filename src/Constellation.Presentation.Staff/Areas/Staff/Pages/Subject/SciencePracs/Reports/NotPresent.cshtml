@@ -1,0 +1,43 @@
+@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Reports.NotPresentModel
+@{
+}
+
+<h2>Submitted Rolls without Present Students</h2>
+
+<div class="page-menu">
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>School</th>
+            <th>Lesson</th>
+            <th>Course</th>
+            <th>Due Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in @Model.Rolls)
+        {
+            <tr>
+                <td data-search="@item.SchoolCode">@item.SchoolName</td>
+                <td>@item.LessonName</td>
+                <td>@item.CourseName</td>
+                <td data-search="@item.DueDate.ToString("yyyy-MM-dd")">@item.DueDate.ToShortDateString()</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            <a asp-page="/Subject/SciencePracs/Lessons/Roll" asp-area="Staff" asp-route-lessonId="@item.LessonId" asp-route-rollId="@item.RollId" class="dropdown-item">Go to Roll</a>
+                            <a asp-page="/Subject/SciencePracs/Lessons/Details" asp-area="Staff" asp-route-id="@item.LessonId" class="dropdown-item">Go to Lesson</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

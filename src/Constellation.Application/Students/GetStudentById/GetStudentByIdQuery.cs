@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Application.Students.GetStudentById;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Students.Models;
+using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
+using Models;
 
 public sealed record GetStudentByIdQuery(
-    string StudentId)
+    StudentId StudentId)
     : IQuery<StudentResponse>;

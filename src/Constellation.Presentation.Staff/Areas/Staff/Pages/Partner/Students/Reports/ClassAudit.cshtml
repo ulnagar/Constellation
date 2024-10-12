@@ -26,10 +26,28 @@
         @foreach (var item in Model.Students)
         {
             <tr>
-                <td>@item.StudentId</td>
+                <td>@item.StudentReferenceNumber</td>
                 <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
-                <td>@item.Grade.AsName()</td>
-                <td>@item.SchoolName</td>
+                <td data-order="@item.Grade?.AsNumber()">
+                    @if (!item.CurrentEnrolment)
+                    {
+                        <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                    }
+                    else
+                    {
+                        <grade grade="@item.Grade" />
+                    }
+                </td>
+                <td>
+                    @if (!item.CurrentEnrolment)
+                    {
+                        <span class="font-weight-light font-italic">@item.SchoolName</span>
+                    }
+                    else
+                    {
+                        @item.SchoolName
+                    }
+                </td>
                 <td>
                     @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
                     {

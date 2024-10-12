@@ -62,7 +62,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
         DateOnly startDate = request.StartDate.VerifyStartOfFortnight();
         DateOnly endDate = startDate.AddDays(12);
 
-        List<Absence> absences = await _absenceRepository.GetForStudentFromDateRange(student.StudentId, startDate, endDate, cancellationToken);
+        List<Absence> absences = await _absenceRepository.GetForStudentFromDateRange(student.Id, startDate, endDate, cancellationToken);
 
         List<AttendanceAbsenceDetail> absenceDetails = new();
 
@@ -114,7 +114,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
         foreach (DateOnly date in reportableDates)
         {
-            List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.StudentId, date, date.GetDayNumber(), cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.Id, date, date.GetDayNumber(), cancellationToken);
             List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
 
             foreach (Offering offering in offerings)
@@ -160,7 +160,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
             absenceDetails,
             attendanceDates);
 
-        var fileName = $"{student.LastName}, {student.FirstName} - {request.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
+        var fileName = $"{student.Name.LastName}, {student.Name.FirstName} - {request.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
 
         var result = new FileDto
         {

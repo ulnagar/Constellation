@@ -84,7 +84,7 @@ else
                                             <span class="fst-italic">Click or tap to download</span>
 
                                             <div class="d-block">
-                                                <a asp-page-handler="Download" asp-route-startDate="@startDate" asp-route-endDate="@endDate" asp-route-studentId="@Model.StudentId" class="stretched-link" onclick="showLoader(5000)"></a>
+                                                <a asp-page-handler="Download" asp-route-startDate="@startDate.ToString("yyyy-MM-dd")" asp-route-endDate="@endDate.ToString("yyyy-MM-dd")" asp-route-studentId="@Model.StudentId" class="stretched-link" onclick="showLoader(5000)"></a>
                                             </div>
                                         }
                                     </div>

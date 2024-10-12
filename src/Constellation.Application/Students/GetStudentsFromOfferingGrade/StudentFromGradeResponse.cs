@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Students.GetStudentsFromOfferingGrade;
 
+using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
 
 public sealed record StudentFromGradeResponse(
-    string StudentId,
+    StudentId StudentId,
     Name Name);

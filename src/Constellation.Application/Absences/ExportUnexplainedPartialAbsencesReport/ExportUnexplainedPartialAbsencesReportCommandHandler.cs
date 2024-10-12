@@ -5,15 +5,13 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models;
 using Core.Models.Absences;
 using Core.Models.Offerings;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
-using Core.ValueObjects;
 using DTOs;
 using Helpers;
-using Interfaces.Repositories;
 using Interfaces.Services;
 using Serilog;
 using System;
@@ -29,7 +27,6 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
@@ -37,14 +34,12 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
         IAbsenceRepository absenceRepository, 
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
-        ISchoolRepository schoolRepository,
         IExcelService excelService,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
-        _schoolRepository = schoolRepository;
         _excelService = excelService;
         _logger = logger.ForContext<ExportUnexplainedPartialAbsencesReportCommand>();
     }
@@ -53,15 +48,15 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
     {
         List<UnexplainedPartialAbsenceResponse> responses = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         List<Absence> absences = await _absenceRepository.GetUnexplainedPartialAbsences(cancellationToken);
 
-        IEnumerable<IGrouping<string, Absence>> groupedAbsences = absences.GroupBy(absence => absence.StudentId);
+        IEnumerable<IGrouping<StudentId, Absence>> groupedAbsences = absences.GroupBy(absence => absence.StudentId);
 
-        foreach (IGrouping<string, Absence> absenceGroup in groupedAbsences)
+        foreach (IGrouping<StudentId, Absence> absenceGroup in groupedAbsences)
         {
-            Student student = students.FirstOrDefault(student => student.StudentId == absenceGroup.Key);
+            Student student = students.FirstOrDefault(student => student.Id == absenceGroup.Key);
 
             if (student is null)
             {
@@ -73,13 +68,11 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
                 continue;
             }
 
-            Name studentName = student.GetName();
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (studentName is null)
+            if (enrolment is null)
                 continue;
-
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
-
+            
             foreach (Absence absence in absenceGroup)
             {
                 Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
@@ -90,11 +83,11 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
 
                 responses.Add(new(
                     absence.Id,
-                    student.StudentId,
-                    studentName.FirstName,
-                    studentName.LastName,
-                    student.CurrentGrade,
-                    school?.Name,
+                    student.Id,
+                    student.Name.FirstName,
+                    student.Name.LastName,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     absence.Date,
                     offeringName,
                     absence.AbsenceLength,

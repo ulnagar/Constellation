@@ -2,11 +2,12 @@
 
 using Core.Enums;
 using Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using System;
 
 public sealed record UnexplainedPartialAbsenceResponse(
     AbsenceId AbsenceId,
-    string StudentId,
+    StudentId StudentId,
     string FirstName,
     string LastName,
     Grade Grade,

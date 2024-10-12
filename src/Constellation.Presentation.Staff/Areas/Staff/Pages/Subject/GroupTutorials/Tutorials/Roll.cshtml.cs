@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials;
 
+using Application.GroupTutorials.AddStudentToTutorialRoll;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.GroupTutorials.AddStudentToRoll;
 using Constellation.Application.GroupTutorials.GetTutorialRollWithDetailsById;
 using Constellation.Application.GroupTutorials.RemoveStudentFromTutorialRoll;
 using Constellation.Application.GroupTutorials.SubmitRoll;
@@ -10,12 +10,12 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.TutorialRollAddStudent;
 
@@ -49,11 +49,9 @@ public class RollModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public GroupTutorialId TutorialId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TutorialRollId RollId { get; set; }
 
     [BindProperty(SupportsGet = true)]
@@ -88,7 +86,7 @@ public class RollModel : BasePageModel
     {
         string emailAddress = _currentUserService.EmailAddress;
 
-        Dictionary<string, bool> studentData = Students.ToDictionary(k => k.StudentId, k => k.Present);
+        Dictionary<StudentId, bool> studentData = Students.ToDictionary(k => k.StudentId, k => k.Present);
 
         SubmitRollCommand command = new(
             TutorialId,
@@ -144,7 +142,7 @@ public class RollModel : BasePageModel
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        if (string.IsNullOrWhiteSpace(AddStudentSelection.StudentId))
+        if (AddStudentSelection.StudentId == StudentId.Empty)
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.GroupTutorials.TutorialRoll.StudentNotFound(AddStudentSelection.StudentId), true)
@@ -170,7 +168,7 @@ public class RollModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetRemoveStudent(string studentId)
+    public async Task<IActionResult> OnGetRemoveStudent(StudentId studentId)
     {
         RemoveStudentFromTutorialRollCommand command = new(TutorialId, RollId, studentId);
 

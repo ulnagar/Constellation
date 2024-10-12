@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Enrolments.Repositories;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Errors;
 using Core.Models;
 using Core.Models.Enrolments;
@@ -20,6 +21,7 @@ using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using Students.GetCurrentStudentsWithCurrentOfferings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -79,7 +81,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Enrolment enrolment in enrolments)
             {
@@ -94,13 +96,38 @@ internal sealed class GetSchoolDetailsQueryHandler
                     offering.IsCurrent));
             }
 
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+
+            bool currentEnrolment = true;
+
+            if (schoolEnrolment is null)
+            {
+                currentEnrolment = false;
+
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                    .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    schoolEnrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
+            }
+
             studentResponse.Add(new(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.StudentReferenceNumber,
+                student.Name,
                 student.Gender,
-                student.School.Name,
-                student.CurrentGrade,
-                studentOfferings));
+                schoolEnrolment?.SchoolName,
+                schoolEnrolment?.Grade,
+                studentOfferings,
+                currentEnrolment));
         }
 
         List<Staff> teachers = await _staffRepository.GetActiveFromSchool(school.Code, cancellationToken);
@@ -143,14 +170,65 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             foreach (SchoolContactRole role in contact.Assignments.Where(role => !role.IsDeleted && role.SchoolCode == school.Code))
             {
+                Result<Name> name = contact.GetName();
+
+                if (name.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(Error), name.Error, true)
+                        .ForContext(nameof(SchoolContact), contact, true)
+                        .ForContext(nameof(SchoolContactRole), role, true)
+                        .Warning("Failed to retrieve School details");
+                }
+
+                PhoneNumber phoneNumber = PhoneNumber.Empty;
+
+                if (!string.IsNullOrWhiteSpace(contact.PhoneNumber))
+                {
+                    Result<PhoneNumber> convertedNumber = PhoneNumber.Create(contact.PhoneNumber);
+
+                    if (convertedNumber.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(Error), convertedNumber.Error, true)
+                            .ForContext(nameof(SchoolContact), contact, true)
+                            .ForContext(nameof(SchoolContactRole), role, true)
+                            .Warning("Failed to retrieve School details");
+                    }
+                    else
+                    {
+                        phoneNumber = convertedNumber.Value;
+                    }
+                }
+
+                EmailAddress emailAddress = EmailAddress.None;
+
+                if (!string.IsNullOrWhiteSpace(contact.EmailAddress))
+                {
+                    Result<EmailAddress> convertedEmail = EmailAddress.Create(contact.EmailAddress);
+
+                    if (convertedEmail.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(Error), convertedEmail.Error, true)
+                            .ForContext(nameof(SchoolContact), contact, true)
+                            .ForContext(nameof(SchoolContactRole), role, true)
+                            .Warning("Failed to retrieve School details");
+                    }
+                    else
+                    {
+                        emailAddress = convertedEmail.Value;
+                    }
+                }
+
                 contactResponse.Add(new(
                     contact.Id,
                     role.Id,
-                    contact.GetName(),
+                    name.Value,
                     role.Role,
                     role.Note,
-                    string.IsNullOrWhiteSpace(contact.PhoneNumber) ? PhoneNumber.Empty : PhoneNumber.Create(contact.PhoneNumber).Value,
-                    string.IsNullOrWhiteSpace(contact.EmailAddress) ? EmailAddress.None : EmailAddress.Create(contact.EmailAddress).Value));
+                    phoneNumber,
+                    emailAddress));
             }
         }
 
@@ -165,9 +243,9 @@ internal sealed class GetSchoolDetailsQueryHandler
             school.FaxNumber,
             school.EmailAddress,
             school.HeatSchool,
-            school.Division,
+            school.Directorate,
             school.PrincipalNetwork,
-            school.Electorate,
+            school.EducationalServicesTeam,
             staffResponse,
             studentResponse,
             contactResponse);

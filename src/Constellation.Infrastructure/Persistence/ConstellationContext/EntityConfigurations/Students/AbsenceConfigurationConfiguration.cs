@@ -10,7 +10,7 @@ internal sealed class AbsenceConfigurationConfiguration : IEntityTypeConfigurati
 {
     public void Configure(EntityTypeBuilder<AbsenceConfiguration> builder) 
     {
-        builder.ToTable("Students_AbsenceConfiguration");
+        builder.ToTable("AbsenceConfigurations", "Students");
 
         builder
             .HasKey(config => config.Id);

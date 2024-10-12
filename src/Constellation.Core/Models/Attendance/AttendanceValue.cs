@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Attendance;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Enums;
 using Errors;
 using Identifiers;
@@ -12,7 +13,7 @@ public sealed class AttendanceValue : AggregateRoot
     private AttendanceValue() {}
 
     private AttendanceValue(
-        string studentId,
+        StudentId studentId,
         Grade grade,
         DateOnly startDate,
         DateOnly endDate,
@@ -36,7 +37,7 @@ public sealed class AttendanceValue : AggregateRoot
     }
 
     public AttendanceValueId Id { get; private set; } = new();
-    public string StudentId { get; private set; } = string.Empty;
+    public StudentId StudentId { get; private set; } = StudentId.Empty;
     public Grade Grade { get; private set; }
     public DateOnly StartDate { get; private set; }
     public DateOnly EndDate { get; private set; }
@@ -48,7 +49,7 @@ public sealed class AttendanceValue : AggregateRoot
     public decimal PerDayWeekPercentage { get; private set; }
 
     public static Result<AttendanceValue> Create(
-        string studentId,
+        StudentId studentId,
         Grade grade,
         DateOnly startDate,
         DateOnly endDate,

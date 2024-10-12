@@ -1,13 +1,14 @@
 ﻿namespace Constellation.Application.Students.Events.StudentCreatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Enums;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
+using Core.ValueObjects;
+using Enums;
+using Interfaces.Repositories;
 using Serilog;
 using System;
 using System.Threading;
@@ -42,6 +43,12 @@ internal sealed class AddSchoolwideTeamsAccess
         if (student == null)
         {
             _logger.Warning("Could not find student with Id {studentId} to add to school wide teams", notification.StudentId);
+            return;
+        }
+
+        if (student.EmailAddress == EmailAddress.None)
+        {
+            _logger.Warning("Student with id {StudentId} does not have a valid email address to add to school wide teams", notification.StudentId);
             return;
         }
 

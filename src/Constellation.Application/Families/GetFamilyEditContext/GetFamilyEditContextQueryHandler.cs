@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Application.Families.GetFamilyEditContext;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
 using Core.Extensions;
+using Core.Models.Families;
+using Core.Models.Students;
+using Core.Shared;
+using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,16 +29,16 @@ internal sealed class GetFamilyEditContextQueryHandler
 
     public async Task<Result<FamilyEditContextResponse>> Handle(GetFamilyEditContextQuery request, CancellationToken cancellationToken)
     {
-        var family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
+        Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
             return Result.Failure<FamilyEditContextResponse>(DomainErrors.Families.Family.NotFound(request.FamilyId));
 
         List<string> parents = new();
 
-        foreach (var parent in family.Parents)
+        foreach (Parent parent in family.Parents)
         {
-            var name = Name.Create(parent.FirstName, null, parent.LastName);
+            Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
 
             if (name.IsSuccess)
                 parents.Add(name.Value.DisplayName);
@@ -44,12 +46,12 @@ internal sealed class GetFamilyEditContextQueryHandler
 
         List<string> students = new();
 
-        foreach (var member in family.Students)
+        foreach (StudentFamilyMembership member in family.Students)
         {
-            var student = await _studentRepository.GetById(member.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(member.StudentId, cancellationToken);
 
             if (student is not null)
-                students.Add($"{student.DisplayName} ({student.CurrentGrade.AsName()})");
+                students.Add($"{student.Name.DisplayName} ({student.CurrentEnrolment?.Grade.AsName()})");
         }
 
         return new FamilyEditContextResponse(

@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
 using System.Collections.Generic;
 
 public sealed record GetAbsenceSummaryForStudentQuery(
-    string StudentId,
+    StudentId StudentId,
     bool OutstandingOnly = false)
     : IQuery<List<StudentAbsenceSummaryResponse>>;

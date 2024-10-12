@@ -42,15 +42,10 @@ internal sealed class UpdateStudentCommandHandler
         }
 
         Result attempt = student.UpdateStudent(
-            request.FirstName,
-            request.LastName,
-            request.PortalUsername,
-            student.AdobeConnectPrincipalId,
-            student.SentralStudentId,
-            request.CurrentGrade,
-            student.EnrolledGrade,
-            request.Gender,
-            request.SchoolCode);
+            request.SRN,
+            request.Name,
+            request.EmailAddress,
+            request.Gender);
 
         if (attempt.IsFailure)
         {

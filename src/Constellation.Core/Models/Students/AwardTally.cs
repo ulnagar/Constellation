@@ -1,15 +1,21 @@
-﻿namespace Constellation.Core.Models.Students;
+﻿using Constellation.Core.Models.Students.Identifiers;
+
+namespace Constellation.Core.Models.Students;
 
 public sealed class AwardTally
 {
-    public AwardTally()
+    public AwardTally(
+        StudentId studentId)
     {
+        StudentId = studentId;
+
         Astras = 0;
         Stellars = 0;
         GalaxyMedals = 0;
         UniversalAchievers = 0;
     }
 
+    public StudentId StudentId { get; private set; }
     public int Astras { get; private set; }
     public int Stellars { get; private set; }
     public int GalaxyMedals { get; private set; }

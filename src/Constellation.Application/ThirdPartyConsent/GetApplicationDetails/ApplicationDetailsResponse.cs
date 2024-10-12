@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetApplicationDetails;
 
 using Core.Enums;
+using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent.Enums;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.ValueObjects;
@@ -22,7 +23,7 @@ public sealed record ApplicationDetailsResponse(
     public sealed record ConsentResponse(
         ConsentId Id,
         ConsentTransactionId TransactionId,
-        string StudentId,
+        StudentId StudentId,
         Name Name,
         Grade Grade,
         string SchoolName,

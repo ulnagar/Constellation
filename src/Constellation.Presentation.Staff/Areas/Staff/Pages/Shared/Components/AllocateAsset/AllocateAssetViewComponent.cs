@@ -6,6 +6,7 @@ using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -24,7 +25,7 @@ public class AllocateAssetViewComponent : ViewComponent
     {
         AllocateDeviceSelection viewModel = new();
 
-        Result<Dictionary<string, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+        Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
 
         if (students.IsFailure)
             return Content(string.Empty);

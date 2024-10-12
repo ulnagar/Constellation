@@ -10,6 +10,7 @@ using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -52,7 +53,7 @@ internal sealed class EnrolMultipleStudentsInOfferingCommandHandler
             return Result.Failure(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        foreach (string studentId in request.StudentIds)
+        foreach (StudentId studentId in request.StudentIds)
         {
             Student student = await _studentRepository.GetById(studentId, cancellationToken);
 

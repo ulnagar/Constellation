@@ -45,16 +45,21 @@ internal sealed class GetDeviceDetailsQueryHandler
 
         foreach (DeviceAllocation allocation in device.Allocations)
         {
-            Student student = await _studentRepository.GetWithSchoolById(allocation.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetById(allocation.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             allocations.Add(new(
                 allocation.DateAllocated,
-                student.GetName(),
-                student.CurrentGrade,
-                student.School.Name,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 allocation.DateDeleted));
         }
 

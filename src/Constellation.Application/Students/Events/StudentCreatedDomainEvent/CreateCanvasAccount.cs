@@ -1,11 +1,13 @@
 ﻿namespace Constellation.Application.Students.Events.StudentCreatedDomainEvent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Events;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
+using Core.ValueObjects;
+using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,12 +44,24 @@ internal sealed class CreateCanvasAccount
             return;
         }
 
+        if (student.StudentReferenceNumber == StudentReferenceNumber.Empty)
+        {
+            _logger.Warning("Student with id {StudentId} does not have a valid SRN to add to Canvas", notification.StudentId);
+            return;
+        }
+
+        if (student.EmailAddress == EmailAddress.None)
+        {
+            _logger.Warning("Student with id {StudentId} does not have a valid email address to add to Canvas", notification.StudentId);
+            return;
+        }
+
         CreateUserCanvasOperation operation = new(
-            student.StudentId,
-            student.FirstName,
-            student.LastName,
-            student.PortalUsername,
-            student.EmailAddress);
+            student.StudentReferenceNumber.Number,
+            student.Name.FirstName,
+            student.Name.LastName,
+            student.EmailAddress.Email.Substring(0, student.EmailAddress.Email.IndexOf('@')),
+            student.EmailAddress.Email);
 
         _operationsRepository.Insert(operation);
         await _unitOfWork.CompleteAsync(cancellationToken);

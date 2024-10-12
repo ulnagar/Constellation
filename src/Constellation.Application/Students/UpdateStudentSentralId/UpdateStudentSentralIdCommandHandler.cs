@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
+using Core.Models.Students.Enums;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Gateways;
@@ -45,7 +46,19 @@ internal sealed class UpdateStudentSentralIdCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        string id = await _gateway.GetSentralStudentIdFromSRN(student.StudentId, ((int)student.CurrentGrade).ToString());
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(UpdateStudentSentralIdCommand), request, true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                .Warning("Failed to update Student Sentral Id");
+
+            return Result.Failure(SchoolEnrolmentErrors.NotFound);
+        }
+
+        string id = await _gateway.GetSentralStudentIdFromSRN(student.StudentReferenceNumber.Number, ((int)enrolment.Grade).ToString());
 
         if (string.IsNullOrWhiteSpace(id))
         {
@@ -57,7 +70,17 @@ internal sealed class UpdateStudentSentralIdCommandHandler
             return Result.Failure(new Error("ExternalGateway.Sentral", "Failed to identify the student in the list"));
         }
 
-        student.SentralStudentId = id;
+        Result result = student.AddSystemLink(SystemType.Sentral, id);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(UpdateStudentSentralIdCommand), request, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Student Sentral Id");
+
+            return Result.Failure(result.Error);
+        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Contacts.GetContactListForStudent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Contacts.Models;
+using Core.Models.Students.Identifiers;
+using Models;
 using System.Collections.Generic;
 
 public sealed record GetContactListForStudentQuery(
-    string StudentId)
+    StudentId StudentId)
     : IQuery<List<ContactResponse>>;

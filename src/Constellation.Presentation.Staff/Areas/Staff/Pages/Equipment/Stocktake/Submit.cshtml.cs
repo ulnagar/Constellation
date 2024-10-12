@@ -8,6 +8,7 @@ using Application.Schools.GetSchoolsFromList;
 using Application.StaffMembers.GetStaffById;
 using Application.StaffMembers.GetStaffForSelectionList;
 using Application.Students.GetCurrentStudentsFromSchool;
+using Application.Students.Models;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Application.Stocktake.RegisterSighting;
 using Constellation.Core.Errors;
@@ -68,7 +69,7 @@ public class SubmitModel : BasePageModel
     [BindProperty]
     public string? Comment { get; set; }
 
-    public List<StudentDto> StudentList { get; set; } = new();
+    public List<StudentResponse> StudentList { get; set; } = new();
     public List<StaffSelectionListResponse> StaffList { get; set; } = new();
     public List<SchoolDto> SchoolList { get; set; } = new();
 
@@ -137,7 +138,7 @@ public class SubmitModel : BasePageModel
             return;
         }
 
-        Result<List<StudentDto>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(staffMember.Value.SchoolCode));
+        Result<List<StudentResponse>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(staffMember.Value.SchoolCode));
 
         if (students.IsFailure)
         {
@@ -149,9 +150,8 @@ public class SubmitModel : BasePageModel
         }
 
         StudentList = students.Value
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.Grade)
+            .ThenBy(student => student.Name.SortOrder)
             .ToList();
 
         Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffForSelectionListQuery());

@@ -4,8 +4,12 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models;
+using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Offerings;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -40,7 +44,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
     {
         List<StudentEnrolmentResponse> returnData = new();
 
-        var enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
         if (enrolments is null || !enrolments.Any())
         {
@@ -49,9 +53,9 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
             return Result.Failure<List<StudentEnrolmentResponse>>(DomainErrors.Enrolments.Enrolment.NotFoundForStudent(request.StudentId));
         }
 
-        foreach (var enrolment in enrolments)
+        foreach (Enrolment enrolment in enrolments)
         {
-            var offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 
             if (offering is null)
             {
@@ -60,14 +64,14 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
                 continue;
             }
 
-            var teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
+            List<Staff> teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
 
             if (teachers is null || !teachers.Any())
             {
                 _logger.Warning("Could not find teacher for offering {offering}", offering.Name);
             }
 
-            var course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+            Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
             if (course is null)
             {
@@ -76,11 +80,20 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
                 continue;
             }
 
+            List<StudentEnrolmentResponse.Resource> resources = offering.Resources
+                .Select(entry =>
+                    new StudentEnrolmentResponse.Resource(
+                        entry.Type.Value, 
+                        entry.Name, 
+                        entry.Url))
+                .ToList();
+
             returnData.Add(new(
                 enrolment.OfferingId,
                 offering.Name,
                 course.Name,
                 teachers?.Select(teacher => teacher.DisplayName).ToList(),
+                resources,
                 false));
         }
 

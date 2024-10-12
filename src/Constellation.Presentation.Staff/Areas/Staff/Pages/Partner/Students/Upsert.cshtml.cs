@@ -8,10 +8,14 @@ using Application.Students.CreateStudent;
 using Application.Students.GetStudentById;
 using Application.Students.Models;
 using Application.Students.UpdateStudent;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Enums;
-using Core.Models.Students;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,29 +50,32 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Student";
 
     [BindProperty(SupportsGet = true)]
-    public string? Id { get; set; } = string.Empty;
-
+    public StudentId Id { get; set; } = StudentId.Empty;
 
     [BindProperty]
-    public string StudentId { get; set; } = string.Empty;
+    public string? StudentReferenceNumber { get; set; } = string.Empty;
 
     [BindProperty]
     public string FirstName { get; set; } = string.Empty;
+
+    [BindProperty] 
+    public string? PreferredName { get; set; } = string.Empty;
 
     [BindProperty]
     public string LastName { get; set; } = string.Empty;
 
     [BindProperty]
-    public string Gender { get; set; } = string.Empty;
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public Gender Gender { get; set; }
 
     [BindProperty]
     public Grade Grade { get; set; }
 
     [BindProperty]
-    public string PortalUsername { get; set; } = string.Empty;
+    public string? EmailAddress { get; set; } = string.Empty;
 
     [BindProperty]
-    public string SchoolCode { get; set; } = string.Empty;
+    public string? SchoolCode { get; set; } = string.Empty;
 
     public SelectList SchoolList { get; set; }
 
@@ -76,30 +83,10 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        List<SelectListItem> genders = new()
-        {
-            new() { Text ="Male", Value = "M" },
-            new() { Text = "Female", Value = "F" }
-        };
+        await PreparePage();
 
-        Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
-
-        if (schools.IsFailure)
-        {
-            ModalContent = new ErrorDisplay(
-                schools.Error,
-                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
-
+        if (Id == StudentId.Empty)
             return;
-        }
-        
-        if (string.IsNullOrWhiteSpace(Id))
-        {
-            GenderList = new(genders, "Value", "Text");
-            SchoolList = new(schools.Value, "Code", "Name");
-
-            return;
-        }
 
         GetStudentByIdQuery command = new(Id);
 
@@ -122,90 +109,150 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        StudentId = student.Value.StudentId;
+        StudentReferenceNumber = student.Value.StudentReferenceNumber.Number;
         FirstName = student.Value.Name.FirstName;
+        PreferredName = student.Value.Name.PreferredName;
         LastName = student.Value.Name.LastName;
         Gender = student.Value.Gender;
-        Grade = student.Value.CurrentGrade;
-        PortalUsername = student.Value.PortalUsername;
+        Grade = student.Value.Grade!.Value;
+        EmailAddress = student.Value.EmailAddress.Email;
         SchoolCode = student.Value.SchoolCode;
 
         PageTitle = $"Edit - {student.Value.Name.DisplayName}";
-
-        GenderList = new(genders, "Value", "Text", student.Value.Gender);
-        SchoolList = new(schools.Value, "Code", "Name", student.Value.SchoolCode);
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostCreate()
     {
         if (!ModelState.IsValid)
         {
-            List<SelectListItem> genders = new()
-            {
-                new() { Text ="Male", Value = "M" },
-                new() { Text = "Female", Value = "F" }
-            };
-
-            Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
-
-            GenderList = new(genders, "Value", "Text", Gender);
-            SchoolList = new(schools.Value, "Code", "Name", SchoolCode);
+            await PreparePage();
 
             return Page();
         }
 
-        if (string.IsNullOrWhiteSpace(Id))
+        // Create new student
+        CreateStudentCommand createCommand = new(
+            StudentReferenceNumber,
+            FirstName,
+            PreferredName,
+            LastName,
+            Gender,
+            Grade,
+            EmailAddress,
+            SchoolCode);
+
+        _logger
+            .ForContext(nameof(CreateStudentCommand), createCommand, true)
+            .Information("Requested to create new Student by user {User}", _currentUserService.UserName);
+
+        Result createResult = await _mediator.Send(createCommand);
+
+        if (createResult.IsFailure)
         {
-            // Create new student
-            CreateStudentCommand createCommand = new(
-                StudentId,
-                FirstName,
-                LastName,
-                Gender,
-                Grade,
-                PortalUsername,
-                SchoolCode);
+            ModalContent = new ErrorDisplay(createResult.Error);
 
             _logger
-                .ForContext(nameof(CreateStudentCommand), createCommand, true)
-                .Information("Requested to create new Student by user {User}", _currentUserService.UserName);
+                .ForContext(nameof(Error), createResult.Error, true)
+                .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
 
-            Result createResult = await _mediator.Send(createCommand);
+            await PreparePage();
 
-            if (createResult.IsFailure)
+            return Page();
+        }
+
+        return RedirectToPage("/Partner/Students/Index", new { area = "Staff" });
+    }
+
+    public async Task<IActionResult> OnPostUpdate()
+    {
+        if (!ModelState.IsValid)
+        {
+            await PreparePage();
+
+            return Page();
+        }
+
+        GetStudentByIdQuery command = new(Id);
+        
+        Result<StudentResponse> student = await _mediator.Send(command);
+
+        if (student.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                student.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
+
+            _logger
+                .ForContext(nameof(Error), student.Error, true)
+                .Warning("Failed to retrieve Student with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
+
+            return Page();
+        }
+
+        StudentReferenceNumber? srn = null;
+
+        if (student.Value.StudentReferenceNumber != Core.Models.Students.ValueObjects.StudentReferenceNumber.Empty || StudentReferenceNumber is not null)
+        {
+            Result<StudentReferenceNumber> srnRequest = Core.Models.Students.ValueObjects.StudentReferenceNumber.Create(StudentReferenceNumber);
+
+            if (srnRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(createResult.Error);
-                
+                ModalContent = new ErrorDisplay(srnRequest.Error);
+
                 _logger
-                    .ForContext(nameof(Error), createResult.Error, true)
+                    .ForContext(nameof(Error), srnRequest.Error, true)
                     .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
 
-                List<SelectListItem> genders = new()
-                {
-                    new() { Text ="Male", Value = "M" },
-                    new() { Text = "Female", Value = "F" }
-                };
-
-                Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
-
-                GenderList = new(genders, "Value", "Text", Gender);
-                SchoolList = new(schools.Value, "Code", "Name", SchoolCode);
-
+                await PreparePage();
                 return Page();
             }
 
-            return RedirectToPage("/Partner/Students/Index", new { area = "Staff" });
+            srn = srnRequest.Value;
+        }
+        
+        Result<Name> name = Name.Create(FirstName, PreferredName, LastName);
+
+        if (name.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(name.Error);
+
+            _logger
+                .ForContext(nameof(Error), name.Error, true)
+                .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+
+            await PreparePage();
+            return Page();
+        }
+
+        EmailAddress email = Core.ValueObjects.EmailAddress.None;
+
+        if (student.Value.EmailAddress != Core.ValueObjects.EmailAddress.None || EmailAddress is not null)
+        {
+            Result<EmailAddress> emailRequest = Core.ValueObjects.EmailAddress.Create(EmailAddress);
+
+            if (emailRequest.IsFailure)
+            {
+                ModalContent = new ErrorDisplay(emailRequest.Error);
+
+                _logger
+                    .ForContext(nameof(Error), emailRequest.Error, true)
+                    .Warning("Failed to create new Student by user {User}", _currentUserService.UserName);
+
+                await PreparePage();
+                return Page();
+            }
+
+            email = emailRequest.Value;
         }
 
         // Edit existing student
         UpdateStudentCommand updateCommand = new(
-            StudentId,
-            FirstName,
-            LastName,
-            PortalUsername,
+            Id,
+            srn,
+            name.Value,
             Grade,
-            Gender,
-            SchoolCode);
+            email,
+            Gender);
 
         _logger
             .ForContext(nameof(UpdateStudentCommand), updateCommand, true)
@@ -221,20 +268,30 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), updateResult.Error, true)
                 .Warning("Failed to update Student with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            List<SelectListItem> genders = new()
-            {
-                new() { Text ="Male", Value = "M" },
-                new() { Text = "Female", Value = "F" }
-            };
-
-            Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
-
-            GenderList = new(genders, "Value", "Text", Gender);
-            SchoolList = new(schools.Value, "Code", "Name", SchoolCode);
-
+            await PreparePage();
             return Page();
         }
 
         return RedirectToPage("/Partner/Students/Index", new { area = "Staff" });
+    }
+
+    private async Task PreparePage()
+    {
+        IEnumerable<Gender> genders = Gender.GetOptions;
+
+        GenderList = new(genders, "Value", "Value");
+
+        Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
+
+        if (schools.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                schools.Error,
+                _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        SchoolList = new(schools.Value, "Code", "Name");
     }
 }

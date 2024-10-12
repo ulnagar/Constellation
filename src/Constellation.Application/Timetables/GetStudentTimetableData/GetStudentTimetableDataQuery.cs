@@ -2,7 +2,8 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.DTOs;
+using Core.Models.Students.Identifiers;
 
 public sealed record GetStudentTimetableDataQuery(
-    string StudentId)
+    StudentId StudentId)
     : IQuery<StudentTimetableDataDto>;

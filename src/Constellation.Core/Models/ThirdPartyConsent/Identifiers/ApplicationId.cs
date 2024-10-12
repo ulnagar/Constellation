@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct ApplicationId(Guid Value)
+    : IStronglyTypedId
 {
     public static ApplicationId Empty => new(Guid.Empty);
 

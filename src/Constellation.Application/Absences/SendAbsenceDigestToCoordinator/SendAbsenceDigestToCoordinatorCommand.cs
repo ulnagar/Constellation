@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Absences.SendAbsenceDigestToCoordinator;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
 using System;
 
 public sealed record SendAbsenceDigestToCoordinatorCommand(
     Guid JobId,
-    string StudentId)
+    StudentId StudentId)
     : ICommand;

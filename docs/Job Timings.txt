@@ -11,7 +11,7 @@ IProcessOutboxMessagesJob - 02:00 - 23:00 Every Day
 IRollMarkingReportJob - 17:00 Mon-Fri
 ISchoolRegisterJob - 18:15 First Of Month
 ISentralAttendancePercentageSyncJob - 05:00 Mon
-ISentralAwardSyncJob - 08:15 Mon-Sat
+ISentralAwardSyncJob - 05:15 Mon-Sat
 ISentralFamilyDetailsSyncJob - 09:00 Mon-Sat
 ISentralPhotoSyncJob - 09:15 Mon-Sat
 ITrackItSyncJob - 17:30 Every Day

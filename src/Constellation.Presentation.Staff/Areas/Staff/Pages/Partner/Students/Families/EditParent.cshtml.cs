@@ -46,11 +46,9 @@ public class EditParentModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public ParentId ParentId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public FamilyId FamilyId { get; set; }
 
     [BindProperty]

@@ -11,6 +11,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
@@ -123,7 +124,7 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
-        string studentId,
+        StudentId studentId,
         DateTime absenceDate,
         int dayNumber,
         CancellationToken cancellationToken = default)
@@ -168,14 +169,14 @@ public class OfferingRepository : IOfferingRepository
 
     // Method is not async as we are passing the task to another method
     public Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
-        string studentId,
+        StudentId studentId,
         DateOnly absenceDate,
         int dayNumber,
         CancellationToken cancellationToken = default) =>
         GetCurrentEnrolmentsFromStudentForDate(studentId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
 
     public async Task<List<Offering>> GetByStudentId(
-        string studentId, 
+        StudentId studentId, 
         CancellationToken cancellationToken = default)
     {
         List<OfferingId> offeringIds = await _context

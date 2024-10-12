@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Reports.CreateInterviewsImport;
 
 using Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
@@ -16,6 +15,7 @@ using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Shared;
+using DTOs;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -59,17 +59,17 @@ internal sealed class CreateInterviewsImportQueryHandler
         
         foreach (Student student in students)
         {
-            List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+            List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
 
             if (request.ResidentialFamilyOnly)
                 families = families
                     .Where(entry =>
                         entry.Students.Any(member =>
-                        member.StudentId == student.StudentId &&
+                        member.StudentId == student.Id &&
                             member.IsResidentialFamily))
                 .ToList();
 
-            List<Enrolment> validEnrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+            List<Enrolment> validEnrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Family family in families)
             {
@@ -91,9 +91,9 @@ internal sealed class CreateInterviewsImportQueryHandler
                     {
                         InterviewExportDto dto = new()
                         {
-                            StudentId = student.StudentId,
-                            StudentFirstName = student.FirstName,
-                            StudentLastName = student.LastName,
+                            StudentId = student.StudentReferenceNumber.Number,
+                            StudentFirstName = student.Name.FirstName,
+                            StudentLastName = student.Name.LastName,
                             ClassCode = offering.Name,
                             ClassGrade = course.Grade.AsNumber(),
                             ClassName = course.Name,

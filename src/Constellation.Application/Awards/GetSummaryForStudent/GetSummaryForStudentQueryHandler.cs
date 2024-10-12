@@ -4,6 +4,8 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
+using Core.Models;
+using Core.Models.Awards;
 using Core.Models.StaffMembers.Repositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,27 +31,27 @@ internal sealed class GetSummaryForStudentQueryHandler
 
     public async Task<Result<StudentAwardSummaryResponse>> Handle(GetSummaryForStudentQuery request, CancellationToken cancellationToken)
     {
-        var data = await _awardRepository.GetByStudentId(request.StudentId, cancellationToken);
+        List<StudentAward> data = await _awardRepository.GetByStudentId(request.StudentId, cancellationToken);
 
         if (data is null)
             return new StudentAwardSummaryResponse(0, 0, 0, 0, new());
 
-        var recentAwards = data.OrderByDescending(award => award.AwardedOn).Take(10).ToList();
+        List<StudentAward> recentAwards = data.OrderByDescending(award => award.AwardedOn).Take(10).ToList();
         List<StudentAwardSummaryResponse.StudentAwardResponse> recent = new();
 
-        foreach (var entry in recentAwards)
+        foreach (StudentAward entry in recentAwards)
         {
             string teacherName = string.Empty;
 
             if (!string.IsNullOrEmpty(entry.TeacherId))
             {
-                var teacher = await _staffRepository.GetById(entry.TeacherId, cancellationToken);
+                Staff teacher = await _staffRepository.GetById(entry.TeacherId, cancellationToken);
 
                 if (teacher is not null)
                     teacherName = teacher.DisplayName;
             }
 
-            var hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(entry.Id.ToString(), cancellationToken);
+            bool hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(entry.Id.ToString(), cancellationToken);
 
             recent.Add(new(
                 entry.Id,
@@ -61,7 +63,7 @@ internal sealed class GetSummaryForStudentQueryHandler
                 hasCertificate));
         }
 
-        var summary = new StudentAwardSummaryResponse(
+        StudentAwardSummaryResponse summary = new(
             data.Count(award => award.Type == "Astra Award"),
             data.Count(award => award.Type == "Stellar Award"),
             data.Count(award => award.Type == "Galaxy Medal"),

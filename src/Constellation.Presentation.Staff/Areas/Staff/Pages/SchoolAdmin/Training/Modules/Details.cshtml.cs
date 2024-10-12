@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.AddStaffMemberToTrainingModule;
 using Shared.PartialViews.RemoveStaffMemberFromTrainingModuleModal;
@@ -53,7 +52,6 @@ public class DetailsModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public TrainingModuleId Id { get; set; }
 
     public ModuleDetailsDto? Module { get; set; }

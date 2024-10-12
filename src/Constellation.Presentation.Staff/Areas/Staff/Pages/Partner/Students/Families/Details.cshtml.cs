@@ -16,6 +16,7 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,7 +56,6 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Family Details";
     
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public FamilyId Id { get; set; }
 
     public FamilyDetailsResponse? Family { get; set; }
@@ -64,8 +64,8 @@ public class DetailsModel : BasePageModel
         => await PreparePage(cancellationToken);
     
     public async Task<IActionResult> OnPostAjaxDeleteStudent(
-        [ModelBinder(typeof(ConstructorBinder))] FamilyId familyId, 
-        string studentId)
+        FamilyId familyId,
+        StudentId studentId)
     {
         Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
@@ -83,7 +83,9 @@ public class DetailsModel : BasePageModel
         return Partial("DeleteFamilyMemberConfirmationModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetRemoveStudent(string studentId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetRemoveStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
@@ -96,7 +98,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        if (string.IsNullOrWhiteSpace(studentId))
+        if (studentId == StudentId.Empty)
         {
             ModalContent = new ErrorDisplay(
                 StudentErrors.InvalidId,
@@ -130,8 +132,8 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxDeleteParent(
-        [ModelBinder(typeof(ConstructorBinder))] FamilyId familyId,
-        [ModelBinder(typeof(ConstructorBinder))] ParentId parentId)
+        FamilyId familyId,
+        ParentId parentId)
     {
         Result<FamilyResponse> family = await _mediator.Send(new GetFamilyByIdQuery(familyId));
 
@@ -150,7 +152,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetRemoveParent(
-        [ModelBinder(typeof(ConstructorBinder))] ParentId parentId, 
+        ParentId parentId, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -201,7 +203,7 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        if (string.IsNullOrWhiteSpace(viewModel.StudentId))
+        if (viewModel.StudentId == StudentId.Empty)
         {
             ModalContent = new ErrorDisplay(
                 StudentErrors.InvalidId,

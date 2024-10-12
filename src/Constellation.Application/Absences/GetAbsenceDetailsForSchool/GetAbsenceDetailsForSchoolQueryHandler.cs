@@ -1,12 +1,15 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceDetailsForSchool;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Models.Absences;
+using Core.Models.Offerings;
+using Core.Models.Students;
+using Core.Models.Students.Errors;
+using Core.Shared;
 using Serilog;
 using System;
 using System.Threading;
@@ -34,7 +37,7 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
 
     public async Task<Result<SchoolAbsenceDetailsResponse>> Handle(GetAbsenceDetailsForSchoolQuery request, CancellationToken cancellationToken)
     {
-        var absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -43,21 +46,19 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
             return Result.Failure<SchoolAbsenceDetailsResponse>(DomainErrors.Absences.Absence.NotFound(request.AbsenceId));
         }
 
-        var student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
             _logger.Warning("Could not find student with id {student_id} when trying to retrieve absence {@absence}", absence.StudentId, absence);
 
-            return Result.Failure<SchoolAbsenceDetailsResponse>(DomainErrors.Partners.Staff.NotFound(absence.StudentId));
+            return Result.Failure<SchoolAbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));
         }
 
-        var nameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-        var offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-
-        var entry = new SchoolAbsenceDetailsResponse(
-            nameRequest.Value.DisplayName,
+        SchoolAbsenceDetailsResponse entry = new(
+            student.Name,
             offering?.Name,
             absence.Id,
             absence.Date.ToDateTime(TimeOnly.MinValue),

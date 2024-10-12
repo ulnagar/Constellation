@@ -1,15 +1,16 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetTransactions;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.ThirdPartyConsent.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.ThirdPartyConsent.Errors;
 using Constellation.Core.Models.ThirdPartyConsent.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,20 +41,20 @@ internal sealed class GetTransactionsQueryHandler
 
         List<Transaction> transactions = await _consentRepository.GetAllTransactions(cancellationToken);
 
-        IEnumerable<IGrouping<string, Transaction>> transactionsByStudent = transactions.GroupBy(entry => entry.StudentId);
+        IEnumerable<IGrouping<StudentId, Transaction>> transactionsByStudent = transactions.GroupBy(entry => entry.StudentId);
 
         List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
 
-        foreach (IGrouping<string, Transaction> transactionList in transactionsByStudent)
+        foreach (IGrouping<StudentId, Transaction> transactionList in transactionsByStudent)
         {
 
-            Student student = await _studentRepository.GetWithSchoolById(transactionList.Key, cancellationToken);
+            Student student = await _studentRepository.GetById(transactionList.Key, cancellationToken);
 
             if (student is null)
             {
                 _logger
                     .ForContext(nameof(GetTransactionsQuery), request, true)
-                    .ForContext(nameof(Student.StudentId), transactionList.Key)
+                    .ForContext(nameof(Student.Id), transactionList.Key)
                     .ForContext(nameof(Error), StudentErrors.NotFound(transactionList.Key), true)
                     .Warning("Failed to retrieve student while building list of Consent Transactions");
 
@@ -62,6 +63,19 @@ internal sealed class GetTransactionsQueryHandler
 
             if (student.IsDeleted)
                 continue;
+
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+            {
+                _logger
+                    .ForContext(nameof(GetTransactionsQuery), request, true)
+                    .ForContext(nameof(Student.Id), transactionList.Key)
+                    .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                    .Warning("Failed to retrieve student details while building list of Consent Transactions");
+
+                continue;
+            }
 
             foreach (Transaction transaction in transactionList)
             {
@@ -105,10 +119,10 @@ internal sealed class GetTransactionsQueryHandler
 
                 response.Add(new(
                     transaction.Id,
-                    student.StudentId,
-                    student.GetName(),
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     transaction.SubmittedBy,
                     transaction.SubmittedAt,
                     transaction.SubmissionMethod,

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Enums;
 using Errors;
 using Events;
@@ -18,7 +19,7 @@ public sealed class Transaction : AggregateRoot
     private Transaction() { } // Required by EF Core
 
     private Transaction(
-        string studentId,
+        StudentId studentId,
         string submittedBy,
         DateTime submittedAt,
         ConsentMethod submissionMethod,
@@ -33,7 +34,7 @@ public sealed class Transaction : AggregateRoot
     }
 
     public ConsentTransactionId Id { get; private init; }
-    public string StudentId { get; private init; }
+    public StudentId StudentId { get; private init; }
     public string SubmittedBy { get; private init; }
     public DateTime SubmittedAt { get; private init; }
     public ConsentMethod SubmissionMethod { get; private init; }
@@ -42,7 +43,7 @@ public sealed class Transaction : AggregateRoot
     public IReadOnlyList<Consent> Consents => _consents.ToList();
 
     public static Result<Transaction> Create(
-        string studentId,
+        StudentId studentId,
         string submittedBy,
         DateTime submittedAt,
         ConsentMethod submissionMethod,

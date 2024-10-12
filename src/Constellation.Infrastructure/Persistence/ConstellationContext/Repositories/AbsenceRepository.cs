@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
+using ConstellationContext;
 using Core.Abstractions.Clock;
+using Core.Models.Absences;
+using Core.Models.Identifiers;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ public class AbsenceRepository : IAbsenceRepository
             .Add(absence);
 
     public async Task<List<Absence>> GetForStudentFromCurrentYear(
-        string StudentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default)
     {
         var startOfYear = new DateOnly(DateTime.Today.Year, 1, 1);
@@ -51,7 +52,7 @@ public class AbsenceRepository : IAbsenceRepository
             .Include(absence => absence.Responses)
             .Include(absence => absence.Notifications)
             .Where(absence =>
-                absence.StudentId == StudentId &&
+                absence.StudentId == studentId &&
                 absence.Date > startOfYear &&
                 absence.Date < endOfYear)
             .ToListAsync(cancellationToken);
@@ -89,7 +90,7 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountForStudentDateAndOffering(
-        string studentId,
+        StudentId studentId,
         DateOnly absenceDate,
         OfferingId offeringId,
         string absenceTimeframe,
@@ -104,7 +105,7 @@ public class AbsenceRepository : IAbsenceRepository
                 cancellationToken);
 
     public async Task<List<Absence>> GetAllForStudentDateAndOffering(
-        string studentId, 
+        StudentId studentId, 
         DateOnly absenceDate,
         OfferingId offeringId, 
         string absenceTimeframe, 
@@ -121,7 +122,7 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Absence>> GetUnexplainedWholeAbsencesForStudentWithDelay(
-        string studentId,
+        StudentId studentId,
         int ageInWeeks,
         CancellationToken cancellationToken = default)
     {
@@ -143,7 +144,7 @@ public class AbsenceRepository : IAbsenceRepository
     }
 
     public async Task<List<Absence>> GetUnexplainedPartialAbsencesForStudentWithDelay(
-        string studentId,
+        StudentId studentId,
         int ageInWeeks,
         CancellationToken cancellationToken = default)
     {
@@ -165,7 +166,7 @@ public class AbsenceRepository : IAbsenceRepository
     }
 
     public async Task<List<Absence>> GetUnverifiedPartialAbsencesForStudentWithDelay(
-        string studentId,
+        StudentId studentId,
         int ageInWeeks,
         CancellationToken cancellationToken = default)
     {
@@ -187,7 +188,7 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
     }
     public async Task<List<Absence>> GetForStudentFromDateRange(
-        string studentId, 
+        StudentId studentId, 
         DateOnly startDate, 
         DateOnly endDate, 
         CancellationToken cancellationToken = default) =>
@@ -202,7 +203,7 @@ public class AbsenceRepository : IAbsenceRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Absence>> GetForStudents(
-        List<string> studentIds,
+        List<StudentId> studentIds,
         CancellationToken cancellationToken = default)
     {
         DateOnly startOfYear = new(DateTime.Today.Year, 1, 1);
@@ -218,5 +219,4 @@ public class AbsenceRepository : IAbsenceRepository
                 absence.Date <= endOfYear)
             .ToListAsync(cancellationToken);
     }
-        
 }

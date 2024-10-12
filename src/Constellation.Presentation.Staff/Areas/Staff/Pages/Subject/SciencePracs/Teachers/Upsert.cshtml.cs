@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
@@ -46,7 +45,6 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Science Prac Teacher";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SchoolContactId Id { get; set; } = SchoolContactId.Empty;
 
     [BindProperty]

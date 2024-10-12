@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Core.Models.Students.Identifiers;
 using Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -38,7 +39,7 @@ internal sealed class CaseRepository : ICaseRepository
             .ToListAsync(cancellationToken);
 
     public async Task<bool> ExistingOpenAttendanceCaseForStudent(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Case>()
@@ -49,7 +50,7 @@ internal sealed class CaseRepository : ICaseRepository
             .AnyAsync(cancellationToken);
 
     public async Task<Case?> GetOpenAttendanceCaseForStudent(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Case>()

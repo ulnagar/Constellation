@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Application.Features.Auth.Command;
 
-using Interfaces.Services;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using Models.Identity;
+using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,36 +11,37 @@ internal sealed class RegisterParentContactAsUserCommandHandler
     : IRequestHandler<RegisterParentContactAsUserCommand>
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly ILogger<IAuthService> _logger;
+    private readonly ILogger _logger;
 
     public RegisterParentContactAsUserCommandHandler(
         UserManager<AppUser> userManager, 
-        ILogger<IAuthService> logger)
+        ILogger logger)
     {
         _userManager = userManager;
-        _logger = logger;
+        _logger = logger
+            .ForContext<RegisterParentContactAsUserCommand>();
     }
 
     public async Task Handle(RegisterParentContactAsUserCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Requested to create new user for email {email}", request.EmailAddress);
+        _logger.Information("Requested to create new user for email {email}", request.EmailAddress);
 
         AppUser user = await _userManager.FindByEmailAsync(request.EmailAddress);
 
         if (user != null)
         {
-            _logger.LogInformation("Existing user found for email {email}", request.EmailAddress);
+            _logger.Information("Existing user found for email {email}", request.EmailAddress);
 
             user.IsParent = true;
 
             IdentityResult result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
-                _logger.LogInformation("User updated: {email}", request.EmailAddress);
+                _logger.Information("User updated: {email}", request.EmailAddress);
             else
             {
                 foreach (IdentityError error in result.Errors)
-                    _logger.LogInformation("User update failed for {email} because {error}", request.EmailAddress, error.Description);
+                    _logger.Information("User update failed for {email} because {error}", request.EmailAddress, error.Description);
             }
         }
         else
@@ -55,16 +55,16 @@ internal sealed class RegisterParentContactAsUserCommandHandler
                 IsParent = true
             };
 
-            _logger.LogInformation("Attempting to create new user for email {email}", request.EmailAddress);
+            _logger.Information("Attempting to create new user for email {email}", request.EmailAddress);
 
             IdentityResult result = await _userManager.CreateAsync(user);
 
             if (result.Succeeded)
-                _logger.LogInformation("New user created: {email}", request.EmailAddress);
+                _logger.Information("New user created: {email}", request.EmailAddress);
             else
             {
                 foreach (IdentityError error in result.Errors)
-                    _logger.LogInformation("New user creation failed for {email} because {error}", request.EmailAddress, error.Description);
+                    _logger.Information("New user creation failed for {email} because {error}", request.EmailAddress, error.Description);
             }
         }
     }

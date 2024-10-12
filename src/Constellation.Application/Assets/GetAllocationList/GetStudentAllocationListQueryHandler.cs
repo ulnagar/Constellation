@@ -38,20 +38,25 @@ internal sealed class GetStudentAllocationListQueryHandler
 
         List<Asset> assets = await _assetRepository.GetAllActiveAllocatedToStudents(cancellationToken);
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         foreach (Student student in students)
         {
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             List<Asset> studentAssets = assets
-                .Where(entry => entry.CurrentAllocation?.UserId == student.StudentId)
+                .Where(entry => entry.CurrentAllocation?.UserId == student.Id.ToString())
                 .ToList();
 
             if (!studentAssets.Any())
             {
                 response.Add(new(
-                    student.StudentId,
-                    student.GetName().DisplayName,
-                    student.CurrentGrade.AsName(),
+                    student.Id.ToString(),
+                    student.Name.DisplayName,
+                    enrolment.Grade.AsName(),
                     AssetId.Empty, 
                     AssetNumber.Empty, 
                     null,
@@ -67,9 +72,9 @@ internal sealed class GetStudentAllocationListQueryHandler
             foreach (Asset asset in studentAssets)
             {
                 response.Add(new(
-                    student.StudentId,
-                    student.GetName().DisplayName,
-                    student.CurrentGrade.AsName(),
+                    student.Id.ToString(),
+                    student.Name.DisplayName,
+                    enrolment.Grade.AsName(),
                     asset.Id,
                     asset.AssetNumber,
                     asset.SerialNumber,

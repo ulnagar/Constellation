@@ -1,22 +1,24 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance;
 
+using Application.Common.PresentationModels;
+using Application.DTOs;
 using Application.Models.Auth;
 using Application.Students.GetStudentsByParentEmail;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
-using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.DTOs;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Parents.GetParentWithStudentIds;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Errors;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]
@@ -47,7 +49,7 @@ public class ReportsModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;
 
     [BindProperty(SupportsGet = true)]
-    public string StudentId { get; set; } = string.Empty;
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public StudentResponse? SelectedStudent { get; set; }
 
@@ -125,7 +127,7 @@ public class ReportsModel : BasePageModel
         if (Students.Count == 1)
             StudentId = Students.First().StudentId;
 
-        if (!string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId != StudentId.Empty)
         {
             _logger.Information("Requested to retrieve absence report dates by parent {name}", _currentUserService.UserName);
 
@@ -150,7 +152,7 @@ public class ReportsModel : BasePageModel
         if (user is null)
             return false;
 
-        Result<List<string>> studentIdRequest = await _mediator.Send(new GetParentWithStudentIdsQuery(user.Email));
+        Result<List<StudentId>> studentIdRequest = await _mediator.Send(new GetParentWithStudentIdsQuery(user.Email));
 
         if (studentIdRequest.IsFailure)
             return false;

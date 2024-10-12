@@ -6,7 +6,6 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,11 +38,11 @@ internal sealed class GetLifecycleDetailsForStudentQueryHandler
         }
 
         return new RecordLifecycleDetailsResponse(
-            string.Empty,
-            student.DateEntered ?? DateTime.MinValue,
-            string.Empty,
-            DateTime.MinValue,
-            string.Empty,
-            student.DateDeleted);
+            student.CreatedBy,
+            student.CreatedAt,
+            student.ModifiedBy,
+            student.ModifiedAt,
+            student.DeletedBy,
+            student.DeletedAt);
     }
 }

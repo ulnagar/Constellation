@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.SchoolContacts.Events.SchoolContactRoleCreated;
 
 using Abstractions.Messaging;
+using Application.Models.Auth;
+using Application.Models.Identity;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Errors;
 using Constellation.Core.Models.SchoolContacts.Events;
 using Constellation.Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
-using Models.Auth;
-using Models.Identity;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;

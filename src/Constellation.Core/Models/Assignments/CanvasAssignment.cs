@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Models.Assignments;
+﻿using Constellation.Core.Models.Students.Identifiers;
+
+namespace Constellation.Core.Models.Assignments;
 
 using DomainEvents;
 using Constellation.Core.Errors;
@@ -78,7 +80,7 @@ public class CanvasAssignment : AggregateRoot
     }
 
     public Result<CanvasAssignmentSubmission> AddSubmission(
-        string studentId,
+        StudentId studentId,
         string submittedBy)
     {
         bool existing = Submissions.Any(entry => entry.StudentId == studentId);

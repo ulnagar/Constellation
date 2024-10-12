@@ -15,7 +15,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.Threading;
 
@@ -52,7 +51,7 @@ public class IndexModel : BasePageModel
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
     
     public async Task<IActionResult> OnGetCancel(
-        [ModelBinder(typeof(ConstructorBinder))] ClassCoverId id, 
+        ClassCoverId id, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCovers);

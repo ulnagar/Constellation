@@ -3,6 +3,9 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 using Application.Common.PresentationModels;
 using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
+using Application.Students.GetSchoolEnrolmentHistoryForStudent;
+using Application.Students.RemoveSchoolEnrolment;
+using Application.Students.TransferStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
@@ -20,14 +23,18 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using Shared.Components.ReinstateStudent;
+using Shared.Components.TransferStudent;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -59,7 +66,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Student Details";
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; }
+    public StudentId Id { get; set; } = StudentId.Empty;
 
     public StudentResponse Student { get; set; }
 
@@ -74,11 +81,13 @@ public class DetailsModel : BasePageModel
 
     public List<StudentAbsenceSummaryResponse> Absences { get; set; } = new();
 
-    public RecordLifecycleDetailsResponse RecordLifecycle { get; set; }
+    public List<SchoolEnrolmentResponse> SchoolEnrolments { get; set; } = new();
+
+    public RecordLifecycleDetailsResponse RecordLifecycle { get; set; } = new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(Id))
+        if (Id == StudentId.Empty)
         {
             GenerateError(new("Page.Parameter.NotFound", "You must specify a value for the Student Id parameter"));
             return;
@@ -91,7 +100,7 @@ public class DetailsModel : BasePageModel
     {
         _logger.Information("Requested to retrieve details of Student with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-        Result<StudentResponse>? studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
+        Result<StudentResponse> studentRequest = await _mediator.Send(new GetStudentByIdQuery(Id), cancellationToken);
 
         if (studentRequest.IsFailure)
         {
@@ -107,30 +116,34 @@ public class DetailsModel : BasePageModel
 
         PageTitle = $"Details - {Student.Name.DisplayName}";
 
-        Result<List<FamilyContactResponse>>? familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
+        Result<List<SchoolEnrolmentResponse>> schoolEnrolmentRequest = await _mediator.Send(new GetSchoolEnrolmentHistoryForStudentQuery(Id), cancellationToken);
+
+        SchoolEnrolments = schoolEnrolmentRequest.IsSuccess ? schoolEnrolmentRequest.Value : new();
+
+        Result<List<FamilyContactResponse>> familyRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(Id), cancellationToken);
 
         FamilyContacts = familyRequest.IsSuccess ? familyRequest.Value : new();
 
-        Result<List<StudentEnrolmentResponse>>? enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
+        Result<List<StudentEnrolmentResponse>> enrolmentRequest = await _mediator.Send(new GetStudentEnrolmentsWithDetailsQuery(Id), cancellationToken);
 
         Enrolments = enrolmentRequest.IsSuccess ? enrolmentRequest.Value : new();
 
-        Result<List<StudentSessionDetailsResponse>>? sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
+        Result<List<StudentSessionDetailsResponse>> sessionRequest = await _mediator.Send(new GetSessionDetailsForStudentQuery(Id), cancellationToken);
 
         Sessions = sessionRequest.IsSuccess ? sessionRequest.Value : new();
 
-        Result<List<StudentDeviceResponse>>? equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
+        Result<List<StudentDeviceResponse>> equipmentRequest = await _mediator.Send(new GetDevicesAllocatedToStudentQuery(Id), cancellationToken);
 
         Equipment = equipmentRequest.IsSuccess ? equipmentRequest.Value : new();
 
-        Result<List<StudentAbsenceSummaryResponse>>? absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
+        Result<List<StudentAbsenceSummaryResponse>> absencesRequest = await _mediator.Send(new GetAbsenceSummaryForStudentQuery(Id), cancellationToken);
 
         Absences = absencesRequest.IsSuccess ? absencesRequest.Value : new();
 
-        Result<RecordLifecycleDetailsResponse>? lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
+        Result<RecordLifecycleDetailsResponse> lifecycleRequest = await _mediator.Send(new GetLifecycleDetailsForStudentQuery(Id), cancellationToken);
 
         RecordLifecycle = lifecycleRequest.IsSuccess ? lifecycleRequest.Value : new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
-        
+
         return true;
     }
 
@@ -169,7 +182,9 @@ public class DetailsModel : BasePageModel
         await PreparePage(cancellationToken);
     }
 
-    public async Task OnGetReinstate(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnPostReinstate(
+        ReinstateStudentSelection viewModel,
+        CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
@@ -181,10 +196,10 @@ public class DetailsModel : BasePageModel
 
             GenerateError(DomainErrors.Permissions.Unauthorised);
             await PreparePage(cancellationToken);
-            return;
+            return Page();
         }
-
-        ReinstateStudentCommand command = new(Id);
+        
+        ReinstateStudentCommand command = new(Id, viewModel.SchoolCode, viewModel.Grade);
 
         _logger
             .ForContext(nameof(ReinstateStudentCommand), command, true)
@@ -200,14 +215,14 @@ public class DetailsModel : BasePageModel
 
             GenerateError(result.Error);
             await PreparePage(cancellationToken);
-            return;
+            return Page();
         }
 
-        await PreparePage(cancellationToken);
+        return RedirectToPage();
     }
 
     public async Task OnGetUnenrol(
-        [ModelBinder(typeof(ConstructorBinder))] OfferingId offeringId, 
+        OfferingId offeringId, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
@@ -247,7 +262,7 @@ public class DetailsModel : BasePageModel
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 
-        if (authorised.Succeeded)
+        if (!authorised.Succeeded)
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
@@ -278,13 +293,93 @@ public class DetailsModel : BasePageModel
         await PreparePage(cancellationToken);
     }
 
+    public async Task<IActionResult> OnPostTransferStudent(
+        TransferStudentSelection viewModel,
+        CancellationToken cancellationToken)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (!authorised.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return Page();
+        }
+
+        TransferStudentCommand command = new(
+            Id,
+            viewModel.SchoolCode,
+            viewModel.Grade,
+            viewModel.StartDate);
+
+        _logger
+            .ForContext(nameof(TransferStudentCommand), command, true)
+            .Information("Requested to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to transfer Student to new School/Grade by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetRemoveSchoolEnrolment(
+        SchoolEnrolmentId enrolmentId,
+        CancellationToken cancellationToken = default)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (!authorised.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to remove School Enrolment by user {User}", _currentUserService.UserName);
+
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return Page();
+        }
+
+        RemoveSchoolEnrolmentCommand command = new(
+            Id,
+            enrolmentId);
+
+        _logger
+            .ForContext(nameof(RemoveSchoolEnrolmentCommand), command, true)
+            .Information("Requested to remove School Enrolment by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to remove School Enrolment by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
+        }
+
+        return RedirectToPage();
+    }
+
     private void GenerateError(Error error)
     {
         ModalContent = new ErrorDisplay(
             error,
             _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
         
-        Student = new("", Name.Create("John", "", "Doe").Value, "", Core.Enums.Grade.SpecialProgram, "", "", "", "", false);
+        Student = new(StudentId.Empty, StudentReferenceNumber.Empty, Name.Create("John", "", "Doe").Value, Gender.NonBinary, Core.Enums.Grade.SpecialProgram, EmailAddress.None, "", "", false, false);
     }
 
     private int CalculateTotalSessionDuration()

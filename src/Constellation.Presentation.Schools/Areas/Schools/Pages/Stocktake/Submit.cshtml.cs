@@ -4,8 +4,8 @@ using Application.Models.Auth;
 using Application.Schools.GetSchoolById;
 using Application.StaffMembers.GetStaffFromSchool;
 using Application.Stocktake.RegisterSighting;
+using Application.Students.Models;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.DTOs;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Core.Models.Stocktake;
@@ -57,7 +57,7 @@ public class SubmitModel : BasePageModel
     [BindProperty] public string UserCode { get; set; } = string.Empty;
     [BindProperty] public string? Comment { get; set; } = string.Empty;
 
-    public List<StudentDto> StudentList { get; set; } = new();
+    public List<StudentResponse> StudentList { get; set; } = new();
     public List<StaffSelectionListResponse> StaffList { get; set; } = new();
 
     public async Task OnGet() => await PreparePage();
@@ -66,7 +66,7 @@ public class SubmitModel : BasePageModel
     {
         _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
 
-        Result<List<StudentDto>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
+        Result<List<StudentResponse>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
 
         if (students.IsFailure)
         {
@@ -78,9 +78,8 @@ public class SubmitModel : BasePageModel
         }
 
         StudentList = students.Value
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.Grade)
+            .ThenBy(student => student.Name.SortOrder)
             .ToList();
 
         _logger.Information("Requested to retrieve staff list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);

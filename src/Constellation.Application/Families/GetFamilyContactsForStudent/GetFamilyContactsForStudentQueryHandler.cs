@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Families.GetFamilyContactsForStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Families.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Shared;
+using Core.ValueObjects;
+using Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -27,18 +27,18 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
     {
         List<FamilyContactResponse> contacts = new();
 
-        var families = await _familyRepository.GetFamiliesByStudentId(request.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(request.StudentId, cancellationToken);
 
         if (families is null || !families.Any())
         {
             return Result.Failure<List<FamilyContactResponse>>(DomainErrors.Families.Students.NoLinkedFamilies);
         }
 
-        foreach (var family in families)
+        foreach (Family family in families)
         {
-            var isResidentialFamily = family.Students.Any(student => student.StudentId == request.StudentId && student.IsResidentialFamily);
+            bool isResidentialFamily = family.Students.Any(student => student.StudentId == request.StudentId && student.IsResidentialFamily);
 
-            var familyEmail = EmailAddress.Create(family.FamilyEmail);
+            Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
             if (familyEmail.IsFailure)
             {
@@ -55,10 +55,10 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
                 family.Id,
                 new()));
 
-            foreach (var parent in family.Parents)
+            foreach (Parent parent in family.Parents)
             {
-                var parentEmail = EmailAddress.Create(parent.EmailAddress);
-                var parentMobile = PhoneNumber.Create(parent.MobileNumber);
+                Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
+                Result<PhoneNumber> parentMobile = PhoneNumber.Create(parent.MobileNumber);
 
                 contacts.Add(new(
                     isResidentialFamily,

@@ -2,6 +2,8 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.IndexModel
 
 @using Constellation.Application.Students.GetFilteredStudents
+@using Constellation.Core.Extensions
+@using Constellation.Presentation.Shared.Helpers.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authService
@@ -46,7 +48,7 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover">
     <thead>
     <tr>
         <th></th>
@@ -62,15 +64,38 @@
     {
         <tr>
             <td data-order="@item.EnrolmentCount">
+                @if (item.IsDeleted)
+                {
+                    <i class="fas fa-times-circle" style="color: red"></i>
+                }
+
                 @if (item.EnrolmentCount > 0)
                 {
                     <span class="badge badge-info">@item.EnrolmentCount</span>
                 }
             </td>
-            <td>@item.StudentId</td>
-            <td data-order="@item.StudentName.SortOrder">@Html.DisplayFor(model => item.Gender, "Gender") @item.StudentName.DisplayName</td>
-            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
-            <td>@item.School</td>
+            <td>@item.StudentReferenceNumber</td>
+            <td data-order="@item.StudentName.SortOrder" data-search="@item.StudentName.FirstName @item.StudentName.DisplayName"><gender gender="@item.Gender" /> @item.StudentName.DisplayName</td>
+            <td data-order="@item.Grade?.AsNumber()">
+                @if (!item.CurrentEnrolment)
+                {
+                    <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                }
+                else
+                {
+                    <grade grade="@item.Grade" />
+                }
+            </td>
+            <td>
+                @if (!item.CurrentEnrolment)
+                {
+                    <span class="font-weight-light font-italic">@item.School</span>
+                }
+                else
+                {
+                    @item.School
+                }
+            </td>
             <td>
                 <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
             </td>
@@ -78,3 +103,17 @@
     }
     </tbody>
 </table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({ 
+                "order": [
+                    [3, 'asc'],
+                    [2, 'asc']
+                ] 
+            });
+        })
+    </script>
+}

@@ -11,12 +11,14 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Repositories;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Faculties.ValueObjects;
 using Core.Models.Families;
 using Core.Models.Offerings;
+using Core.Models.Students.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
@@ -64,7 +66,18 @@ internal sealed class GetContactListForStudentQueryHandler
 
         Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+        if (student is null)
+            return Result.Failure<List<ContactResponse>>(StudentErrors.NotFound(request.StudentId));
+
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+            return Result.Failure<List<ContactResponse>>(SchoolEnrolmentErrors.NotFound);
+            
+        School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
+
+        if (school is null)
+            return Result.Failure<List<ContactResponse>>(DomainErrors.Partners.School.NotFound(enrolment.SchoolCode));
 
         List<Staff> staffMembers = await _staffRepository
             .GetAll(cancellationToken);
@@ -75,40 +88,36 @@ internal sealed class GetContactListForStudentQueryHandler
         List<Course> courses = await _courseRepository
             .GetAll(cancellationToken);
 
-        Name studentName = student.GetName();
-
-        Result<EmailAddress> studentEmail = EmailAddress.Create(student.EmailAddress);
-
         result.Add(new ContactResponse(
-            student.StudentId,
-            studentName,
-            student.CurrentGrade,
-            school!.Name,
+            student.Id,
+            student.Name,
+            enrolment.Grade,
+            enrolment.SchoolName,
             ContactCategory.Student,
-            studentName.DisplayName,
-            studentEmail.Value,
+            student.Name.DisplayName,
+            student.EmailAddress,
             null,
             null));
 
-        Result<PhoneNumber> schoolPhone = PhoneNumber.Create(student.School.PhoneNumber);
+        Result<PhoneNumber> schoolPhone = PhoneNumber.Create(school.PhoneNumber);
 
-        Result<EmailAddress> schoolEmail = EmailAddress.Create(student.School.EmailAddress);
+        Result<EmailAddress> schoolEmail = EmailAddress.Create(school.EmailAddress);
 
         if (schoolEmail.IsSuccess)
         {
             result.Add(new ContactResponse(
-                student.StudentId,
-                studentName,
-                student.CurrentGrade,
-                student.School.Name,
+                student.Id,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 ContactCategory.PartnerSchoolSchool,
-                student.School.Name,
+                enrolment.SchoolName,
                 schoolEmail.Value,
                 schoolPhone.IsSuccess ? schoolPhone.Value : null,
                 null));
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(student.SchoolCode, cancellationToken);
+        List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(enrolment.SchoolCode, cancellationToken);
 
         foreach (SchoolContact contact in contacts)
         {
@@ -123,7 +132,7 @@ internal sealed class GetContactListForStudentQueryHandler
 
             Result<PhoneNumber> contactPhone = PhoneNumber.Create(contact.PhoneNumber);
 
-            foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == student.SchoolCode))
+            foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
             {
                 ContactCategory category = role.Role switch
                 {
@@ -134,10 +143,10 @@ internal sealed class GetContactListForStudentQueryHandler
                 };
 
                 result.Add(new ContactResponse(
-                    student.StudentId,
-                    studentName,
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     category,
                     contactName.Value.DisplayName,
                     contactEmail.Value,
@@ -146,7 +155,7 @@ internal sealed class GetContactListForStudentQueryHandler
             }
         }
 
-        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
 
         foreach (Family family in families)
         {
@@ -155,15 +164,15 @@ internal sealed class GetContactListForStudentQueryHandler
             if (familyEmail.IsFailure)
                 continue;
 
-            bool isResidential = family.Students.First(entry => entry.StudentId == student.StudentId).IsResidentialFamily;
+            bool isResidential = family.Students.First(entry => entry.StudentId == student.Id).IsResidentialFamily;
 
             if (isResidential)
             {
                 result.Add(new ContactResponse(
-                    student.StudentId,
-                    studentName,
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     ContactCategory.ResidentialFamily,
                     family.FamilyTitle,
                     familyEmail.Value,
@@ -192,10 +201,10 @@ internal sealed class GetContactListForStudentQueryHandler
                     };
 
                     result.Add(new ContactResponse(
-                        student.StudentId,
-                        studentName,
-                        student.CurrentGrade,
-                        student.School.Name,
+                        student.Id,
+                        student.Name,
+                        enrolment.Grade,
+                        enrolment.SchoolName,
                         category,
                         parentName.Value.DisplayName,
                         parentEmail.Value,
@@ -206,10 +215,10 @@ internal sealed class GetContactListForStudentQueryHandler
             else
             {
                 result.Add(new ContactResponse(
-                    student.StudentId,
-                    studentName,
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     ContactCategory.NonResidentialFamily,
                     family.FamilyTitle,
                     familyEmail.Value,
@@ -231,10 +240,10 @@ internal sealed class GetContactListForStudentQueryHandler
                     Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
 
                     result.Add(new ContactResponse(
-                        student.StudentId,
-                        studentName,
-                        student.CurrentGrade,
-                        student.School.Name,
+                        student.Id,
+                        student.Name,
+                        enrolment.Grade,
+                        enrolment.SchoolName,
                         ContactCategory.NonResidentialParent,
                         parentName.Value.DisplayName,
                         parentEmail.Value,
@@ -244,7 +253,7 @@ internal sealed class GetContactListForStudentQueryHandler
             }
         }
 
-        List<Offering> studentOfferings = await _offeringRepository.GetByStudentId(student.StudentId, cancellationToken);
+        List<Offering> studentOfferings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
         foreach (Offering offering in studentOfferings)
         {
@@ -269,10 +278,10 @@ internal sealed class GetContactListForStudentQueryHandler
                     continue;
 
                 result.Add(new ContactResponse(
-                    student.StudentId,
-                    studentName,
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     ContactCategory.AuroraTeacher,
                     teacherName,
                     teacherEmail.Value,
@@ -309,16 +318,16 @@ internal sealed class GetContactListForStudentQueryHandler
                 bool existingEntry = result.Any(entry =>
                     entry.Category.Equals(ContactCategory.AuroraHeadTeacher) &&
                 entry.Contact == teacherName &&
-                    entry.StudentId == student.StudentId);
+                    entry.StudentId == student.Id);
 
                 if (existingEntry)
                     continue;
 
                 result.Add(new ContactResponse(
-                    student.StudentId,
-                    studentName,
-                    student.CurrentGrade,
-                    student.School.Name,
+                    student.Id,
+                    student.Name,
+                    enrolment.Grade,
+                    enrolment.SchoolName,
                     ContactCategory.AuroraHeadTeacher,
                     teacherName,
                     teacherEmail.Value,

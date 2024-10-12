@@ -1,16 +1,15 @@
-﻿using Constellation.Core.Models;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+
+using Constellation.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
+public class TeamConfiguration : IEntityTypeConfiguration<Team>
 {
-    public class TeamConfiguration : IEntityTypeConfiguration<Team>
+    public void Configure(EntityTypeBuilder<Team> builder)
     {
-        public void Configure(EntityTypeBuilder<Team> builder)
-        {
-            builder.ToTable("LinkedSystems_Teams");
+        builder.ToTable("LinkedSystems_Teams");
 
-            builder.HasKey(team => team.Id);
-        }
+        builder.HasKey(team => team.Id);
     }
 }

@@ -1,14 +1,34 @@
 ﻿namespace Constellation.Core.Tests.Unit.Models.GroupTutorials;
 
+using Abstractions.Clock;
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
 using Core.Models.Students;
+using Core.Models.Students.Enums;
+using Core.Models.Students.ValueObjects;
+using Enums;
+using ValueObjects;
 
 public class GroupTutorialTests
 {
+    private IDateTimeProvider _dateTimeProvider = new DateTimeProvider();
+
+    private School School => new School() { Code = "1234", Name = "Imaginarium Public School" };
+
+    private Student Student => Student.Create(
+            StudentReferenceNumber.FromValue("123456789"),
+            Name.Create("John", "Johnny", "Doe").Value,
+            EmailAddress.Create("john.doe3@education.nsw.gov.au").Value,
+            Grade.Y09,
+            School,
+            Gender.NonBinary,
+            _dateTimeProvider)
+        .Value;
+
+
     [Fact]
     public void AddTeacher_ShouldReturnFailure_WhenTutorialHasExpired()
     {
@@ -377,13 +397,10 @@ public class GroupTutorialTests
         var sut = GroupTutorial.Create(
             new GroupTutorialId(),
             "Stage 4 Mathematics",
-            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
-            DateOnly.FromDateTime(DateTime.Today.AddDays(-1)));
+            _dateTimeProvider.Yesterday,
+            _dateTimeProvider.Yesterday);
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         // Act
         var result = sut.EnrolStudent(student);
@@ -400,15 +417,12 @@ public class GroupTutorialTests
         var sut = GroupTutorial.Create(
             new GroupTutorialId(),
             "Stage 4 Mathematics",
-            DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
-            DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
+            _dateTimeProvider.FirstDayOfYear,
+            _dateTimeProvider.LastDayOfYear);
 
         sut.Delete();
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         // Act
         var result = sut.EnrolStudent(student);
@@ -428,10 +442,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var initialResult = sut.EnrolStudent(student);
 
@@ -456,10 +467,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var initialResult = sut.EnrolStudent(student);
 
@@ -490,11 +498,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
-
+        var student = Student;
         sut.ClearDomainEvents();
 
         // Act
@@ -518,10 +522,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        Student student = Student;
 
         // Act
         var result = sut.UnenrolStudent(student);
@@ -529,7 +530,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        enrolments.Any(member => member.StudentId == student.StudentId).Should().BeFalse();
+        enrolments.Any(member => member.StudentId == student.Id).Should().BeFalse();
     }
 
     [Fact]
@@ -542,11 +543,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
-
+        var student = Student;
         sut.ClearDomainEvents();
 
         // Act
@@ -568,10 +565,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var initialResult = sut.EnrolStudent(student);
         sut.UnenrolStudent(student);
@@ -582,7 +576,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        enrolments.Any(member => member.StudentId == student.StudentId && !member.IsDeleted).Should().BeFalse();
+        enrolments.Any(member => member.StudentId == student.Id && !member.IsDeleted).Should().BeFalse();
     }
 
     [Fact]
@@ -595,10 +589,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var initialResult = sut.EnrolStudent(student);
         sut.UnenrolStudent(student);
@@ -612,7 +603,7 @@ public class GroupTutorialTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         events.Should().HaveCount(0);
-        enrolments.Any(member => member.StudentId == student.StudentId && !member.IsDeleted).Should().BeFalse();
+        enrolments.Any(member => member.StudentId == student.Id && !member.IsDeleted).Should().BeFalse();
     }
 
     [Fact]
@@ -625,10 +616,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var initialResult = sut.EnrolStudent(student);
 
@@ -638,7 +626,7 @@ public class GroupTutorialTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        enrolments.Any(member => member.StudentId == student.StudentId && !member.IsDeleted).Should().BeFalse();
+        enrolments.Any(member => member.StudentId == student.Id && !member.IsDeleted).Should().BeFalse();
     }
 
     [Fact]
@@ -651,10 +639,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         sut.EnrolStudent(student);
         sut.ClearDomainEvents();
@@ -679,10 +664,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
@@ -708,10 +690,7 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var student = new Student
-        {
-            StudentId = "123456789"
-        };
+        var student = Student;
 
         var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(-5));
 
@@ -721,7 +700,7 @@ public class GroupTutorialTests
         // Act
         var result = sut.UnenrolStudent(student, takesEffectOn);
         var events = sut.GetDomainEvents();
-        var studentEntry = sut.Enrolments.First(member => member.StudentId == student.StudentId);
+        var studentEntry = sut.Enrolments.First(member => member.StudentId == student.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

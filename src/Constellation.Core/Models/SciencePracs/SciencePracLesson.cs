@@ -1,10 +1,11 @@
-﻿namespace Constellation.Core.Models.SciencePracs;
+﻿using Constellation.Core.Models.Students.Identifiers;
 
+namespace Constellation.Core.Models.SciencePracs;
+
+using Constellation.Core.Models.Offerings.Identifiers;
 using DomainEvents;
 using Errors;
 using Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -67,8 +68,8 @@ public sealed class SciencePracLesson : AggregateRoot
         string submittedBy,
         DateOnly lessonDate,
         string comment,
-        List<string> presentStudents,
-        List<string> absentStudents)
+        List<StudentId> presentStudents,
+        List<StudentId> absentStudents)
     {
         SciencePracRoll roll = _rolls.FirstOrDefault(roll => roll.Id == rollId);
 

@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.GroupTutorials.AddStudentToTutorialRoll;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.GroupTutorials.AddStudentToRoll;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Models.Students.Errors;
+using Core.Shared;
+using Interfaces.Repositories;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,12 +42,12 @@ internal sealed class AddStudentToTutorialRollCommandHandler
         if (roll is null)
             return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
 
-        Student student = await _studentRepository.GetForExistCheck(request.StudentId);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StudentId));
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
 
-        roll.AddStudent(student.StudentId, false);
+        roll.AddStudent(student.Id, false);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

@@ -11,12 +11,12 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditSubjects)]
@@ -45,14 +45,13 @@ public class AddStudentsModel : BasePageModel
     [ViewData] public string PageTitle => "Bulk Add Students";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId Id { get; set; } = OfferingId.Empty;
 
     public string CourseName { get; set; }
     public string OfferingName { get; set; }
 
     [BindProperty]
-    public List<string> SelectedStudentIds { get; set; } = new();
+    public List<StudentId> SelectedStudentIds { get; set; } = new();
     public List<StudentFromGradeResponse> Students { get; set; } = new();
     public List<EnrolmentResponse> ExistingEnrolments { get; set; } = new();
 

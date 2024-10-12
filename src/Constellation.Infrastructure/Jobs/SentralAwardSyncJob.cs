@@ -12,8 +12,8 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Extensions;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students.Enums;
 using Core.Shared;
-using Core.ValueObjects;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,12 +64,11 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             return;
         }
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         students = students
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.CurrentEnrolment?.Grade)
+            .ThenBy(student => student.Name.SortOrder)
             .ToList();
 
         List<Staff> teachers = await _staffRepository.GetAllActive(cancellationToken);
@@ -79,23 +78,31 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 
         foreach (Student student in students)
         {
-            Name name = student.GetName();
-
             _logger
-                .Information("Processing Student {name} ({grade})", name.DisplayName, student.CurrentGrade.AsName());
+                .Information("Processing Student {name} ({grade})", student.Name.DisplayName, student.CurrentEnrolment?.Grade.AsName());
+
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
+            SystemLink systemLink = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+
+            if (systemLink is null)
+                continue;
 
             List<AwardDetailResponse> reportAwards = details
                 .Value
                 .Where(entry => 
-                    entry.StudentId == student.StudentId)
+                    entry.StudentReferenceNumber == student.StudentReferenceNumber.Number)
                 .ToList();
 
-            List<StudentAward> existingAwards = await _awardRepository.GetByStudentId(student.StudentId, cancellationToken);
+            List<StudentAward> existingAwards = await _awardRepository.GetByStudentId(student.Id, cancellationToken);
 
             _logger
-                .Information("Found {count} total awards for student {name} ({grade})", reportAwards.Count, name.DisplayName, student.CurrentGrade.AsName());
+                .Information("Found {count} total awards for student {name} ({grade})", reportAwards.Count, student.Name.DisplayName, enrolment.Grade.AsName());
 
-            Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(student.SentralStudentId, _dateTime.CurrentYear.ToString()), cancellationToken);
+            Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(systemLink.Value, _dateTime.CurrentYear.ToString()), cancellationToken);
 
             if (awardIncidentsRequest.IsFailure)
             {
@@ -107,7 +114,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             }
 
             _logger
-                .Information("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, name.DisplayName, student.CurrentGrade.AsName());
+                .Information("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, student.Name.DisplayName, enrolment.Grade.AsName());
 
             foreach (AwardDetailResponse item in reportAwards)
             {
@@ -117,7 +124,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                         .Information("Found new {type} on {date}", item.Type, item.AwardCreated.ToShortDateString());
 
                     StudentAward entry = StudentAward.Create(
-                        student.StudentId,
+                        student.Id,
                         item.Category,
                         item.Type,
                         item.AwardCreated);

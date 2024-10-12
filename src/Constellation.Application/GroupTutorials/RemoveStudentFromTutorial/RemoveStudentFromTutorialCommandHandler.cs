@@ -42,7 +42,7 @@ internal sealed class RemoveStudentFromTutorialCommandHandler
         if (studentRecord is null)
             return Result.Failure(DomainErrors.GroupTutorials.TutorialEnrolment.NotFound);
 
-        Student studentEntity = await _studentRepository.GetForExistCheck(studentRecord.StudentId);
+        Student studentEntity = await _studentRepository.GetById(studentRecord.StudentId, cancellationToken);
 
         if (studentEntity is null)
             return Result.Failure(StudentErrors.NotFound(studentRecord.StudentId));

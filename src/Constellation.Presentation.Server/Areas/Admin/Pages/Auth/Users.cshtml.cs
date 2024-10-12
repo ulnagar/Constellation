@@ -29,17 +29,17 @@ public class UsersModel : BasePageModel
     {
         Staff,
         School,
-        Parent
+        Parent,
+        Student
     }
 
-    public async Task OnGet()
-    {
+    public async Task OnGet() =>
         Users = SelectedUserType switch
         {
             UserType.Staff => _userManager.Users.Where(user => user.IsStaffMember).ToList(),
             UserType.School => _userManager.Users.Where(user => user.IsSchoolContact).ToList(),
             UserType.Parent => _userManager.Users.Where(user => user.IsParent).ToList(),
+            UserType.Student => _userManager.Users.Where(user => user.IsStudent).ToList(),
             _ => _userManager.Users.Where(user => user.IsStaffMember).ToList()
         };
-    }
 }

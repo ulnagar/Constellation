@@ -194,12 +194,12 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public Name GetName()
+    public Result<Name> GetName()
     {
         Result<Name> name = Name.Create(FirstName, string.Empty, LastName);
 
         if (name.IsFailure)
-            return Name.CreateMononym($"{FirstName} {LastName}").Value;
+            return Result.Failure<Name>(name.Error);
 
         return name.Value;
     }

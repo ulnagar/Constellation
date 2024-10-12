@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class FamilyDetailsDto
 {
-    public List<string> StudentIds { get; set; } = new List<string>();
+    public List<string> StudentReferenceNumbers { get; set; } = new List<string>();
     public string FamilyId { get; set; }
     public List<Contact> Contacts { get; set; } = new();
     public string FamilyEmail { get; set; }

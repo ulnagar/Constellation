@@ -33,6 +33,7 @@ public sealed class Attachment
     public DateTime CreatedAt { get; private set; }
     public AttachmentType LinkType { get; private set; } = AttachmentType.Unset;
     public string LinkId { get; private set; } = string.Empty;
+    public string Checksum { get; private set; } = string.Empty;
 
     public static Attachment CreateAwardCertificateAttachment(
         string name,
@@ -114,14 +115,30 @@ public sealed class Attachment
         return attachment;
     }
 
-    public Result AttachData(byte[] fileData, bool overwrite = false)
+    public static Attachment CreateStudentPhotoAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.StudentPhoto,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
+    public Result AttachData(byte[] fileData, string checksum, bool overwrite = false)
     {
         if (!string.IsNullOrWhiteSpace(FilePath) && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FilePathExists);
         }
 
-        if (FileData is not null && FileData.Length is not 0 && overwrite is false)
+        if (FileData?.Length is not 0 && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FileDataExists);
         }
@@ -129,18 +146,19 @@ public sealed class Attachment
         FileData = fileData;
         FileSize = fileData.Length;
         FilePath = string.Empty;
+        Checksum = checksum;
 
         return Result.Success();
     }
 
-    public Result AttachPath(string filePath, int fileSize, bool overwrite = false)
+    public Result AttachPath(string filePath, int fileSize, string checksum, bool overwrite = false)
     {
         if (FileData is not null && FileData.Length is not 0 && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FileDataExists);
         }
 
-        if (!string.IsNullOrWhiteSpace(FilePath) && overwrite is false)
+        if (FilePath?.Length is not 0 && overwrite is false)
         {
             return Result.Failure(AttachmentErrors.FilePathExists);
         }
@@ -148,7 +166,11 @@ public sealed class Attachment
         FilePath = filePath;
         FileSize = fileSize;
         FileData = null;
+        Checksum = checksum;
 
         return Result.Success();
     }
+
+    public void UpdateChecksum(string checksum) =>
+        Checksum = checksum;
 }

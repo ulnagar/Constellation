@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers.IndexModel
 
 @using Constellation.Core.Models.SchoolContacts;
+@using Constellation.Core.ValueObjects
 
 @inject IAuthorizationService authService
 
@@ -20,31 +21,49 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover contact-table">
     <thead>
-        <tr>
-            <th></th>
-            <th>Name</th>
-            <th>School</th>
-            <th>Email</th>
-            <th>Notes</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>School</th>
+        <th>Phone Number</th>
+        <th>Email</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
         @foreach (var item in Model.Contacts)
         {
             <tr>
-                <td data-order="@(item.SelfRegistered ? 1 : 2)">
-                    @if (item.SelfRegistered)
+                <td data-order="@(item.IsSelfRegistered ? 1 : 2)">
+                    @if (item.IsSelfRegistered)
                     {
                         <i class="fal fa-flag"></i>
                     }
                 </td>
-                <td>@item.ContactName.DisplayName</td>
+                <td data-order="@item.Name.SortOrder">
+                    @item.Name.DisplayName
+                    @if (!string.IsNullOrWhiteSpace(item.Note))
+                    {
+                        <br/>
+                        <span class="font-italic text-muted">@item.Note</span>
+                    }
+                </td>
                 <td>@item.SchoolName</td>
-                <td>@item.ContactEmail.Email</td>
-                <td>@item.Note</td>
+                <td class="text-nowrap" data-order="@item.PhoneNumber.ToString(PhoneNumber.Format.None)">
+                    @if (item.IsDirectNumber)
+                    {
+                        <i class="fal fa-user mr-2"></i>
+                        @item.PhoneNumber.ToString()
+                    }
+                    else if (item.PhoneNumber != PhoneNumber.Empty)
+                    {
+                        <i class="fal fa-school mr-1"></i>
+                        @item.PhoneNumber.ToString()
+                    }
+                </td>
+                <td>@item.EmailAddress.Email</td>
                 <td>
                     @if (canEditTest.Succeeded)
                     {
@@ -52,11 +71,11 @@
                             <button id="btnGroupDrop1" type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                 <a asp-page="/Subject/SciencePracs/Teachers/Upsert" asp-area="Staff" asp-route-id="@item.Id.Value" class="dropdown-item">Edit Contact</a>
-                                <button data-contact-id="@item.Id" data-name="@item.ContactName.DisplayName" class="dropdown-item create-assignment-button">Add Role</button>
-                                <button data-contact-id="@item.Id.Value" data-role-id="@item.RoleId.Value" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
-                                <button data-contact-id="@item.Id.Value" data-role-id="@item.RoleId.Value" data-name="@item.ContactName.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
+                                <button data-contact-id="@item.Id" data-name="@item.Name.DisplayName" class="dropdown-item create-assignment-button">Add Role</button>
+                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
+                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                 <div class="dropdown-divider"></div>
-                                <a asp-page="/Subject/SciencePracs/Teachers/Audit" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
+                                <a asp-page-handler="Audit" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
                             </div>
                         </div>
                     }
@@ -78,6 +97,15 @@
 
 @section scripts {
     <script>
+        $(document).ready(function () {
+            $('.contact-table').DataTable({
+                "order": [
+                    [2, 'asc'],
+                    [1, 'asc']
+                ]
+            });
+        })
+
         $('.delete-role-button').click(function (event) {
             var contactId = $(this).data("contactId");
             var roleId = $(this).data("roleId");

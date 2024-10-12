@@ -35,7 +35,7 @@ public class ExportService : IExportService
 
         var viewModel = new AttendanceReportViewModel
         {
-            StudentName = student.DisplayName,
+            StudentName = student.Name.DisplayName,
             StartDate = startDate,
             ExcludedDates = excludedDates,
             Absences = absences,

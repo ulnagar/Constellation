@@ -1,14 +1,12 @@
 ﻿namespace Constellation.Application.Assignments.Events.AssignmentAttemptSubmittedDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Assignments;
 using Constellation.Core.Models.Assignments.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
-using Constellation.Core.Shared;
 using Core.DomainEvents;
 using Core.Models.Assignments.Errors;
 using Core.Models.SchoolContacts;
@@ -17,6 +15,8 @@ using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
+using Core.Shared;
+using Interfaces.Services;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -100,7 +100,19 @@ internal sealed class SendUploadReceipt
             return;
         }
 
-        SchoolContact contact = await _contactRepository.GetByNameAndSchool(submission.SubmittedBy, student.SchoolCode, cancellationToken);
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(AssignmentAttemptSubmittedDomainEvent), notification, true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                .Error("Failed to send Assignment Submission receipt to uploader");
+
+            return;
+        }
+
+        SchoolContact contact = await _contactRepository.GetByNameAndSchool(submission.SubmittedBy, enrolment.SchoolCode, cancellationToken);
 
         if (contact is null)
         {

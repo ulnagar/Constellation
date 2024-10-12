@@ -88,8 +88,8 @@ internal sealed class GetLessonRollDetailsForSchoolsPortalQueryHandler
 
             response.Attendance.Add(new()
             {
-                StudentFirstName = student.FirstName,
-                StudentLastName = student.LastName,
+                StudentFirstName = student.Name.FirstName,
+                StudentLastName = student.Name.LastName,
                 Present = attendanceRecord.Present
             });
         }

@@ -10,6 +10,7 @@ using Application.ThirdPartyConsent.GetApplications;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent.Enums;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
@@ -50,7 +51,7 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a student")]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a parent")]
@@ -69,7 +70,7 @@ public class UpsertModel : BasePageModel
 
     public List<FamilyContactResponse> Parents { get; set; } = new();
 
-    public Dictionary<string, string> Students { get; set; }
+    public Dictionary<StudentId, string> Students { get; set; }
 
     public async Task<IActionResult> OnGet() => await PreparePage();
 
@@ -161,7 +162,7 @@ public class UpsertModel : BasePageModel
         return RedirectToPage("/SchoolAdmin/Consent/Responses/Index", new { area = "Staff" });
     }
 
-    public async Task<IActionResult> OnPostAjaxGetParents(string studentId)
+    public async Task<IActionResult> OnPostAjaxGetParents(StudentId studentId)
     {
         Result<List<FamilyContactResponse>> family = await _mediator.Send(new GetFamilyContactsForStudentQuery(studentId));
 
@@ -192,7 +193,7 @@ public class UpsertModel : BasePageModel
             
         Applications = applications.Value;
 
-        Result<Dictionary<string, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+        Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
 
         if (students.IsFailure)
         {
@@ -209,7 +210,7 @@ public class UpsertModel : BasePageModel
 
         Students = students.Value;
 
-        if (StudentId is not null)
+        if (StudentId != StudentId.Empty)
         {
             Result<List<FamilyContactResponse>> family = await _mediator.Send(new GetFamilyContactsForStudentQuery(StudentId));
 

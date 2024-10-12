@@ -12,6 +12,7 @@ using Constellation.Core.Enums;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
@@ -50,7 +51,6 @@ public class Step4Model : BasePageModel
     [ViewData] public string PageTitle => "New Award Nomination";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId PeriodId { get; set; }
 
     [BindProperty]
@@ -58,15 +58,13 @@ public class Step4Model : BasePageModel
     public AwardType Type { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; } = CourseId.Empty;
 
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId OfferingId { get; set; } = OfferingId.Empty;
 
-    [BindProperty]
-    public string? StudentId { get; set; }
+    [BindProperty] 
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public List<StudentForSelectionList> StudentsList { get; set; }
     public SelectList Courses { get; set; }
@@ -79,7 +77,7 @@ public class Step4Model : BasePageModel
     
     public async Task<IActionResult> OnPost()
     {
-        if (string.IsNullOrWhiteSpace(StudentId))
+        if (StudentId == StudentId.Empty)
         {
             return await PreparePage();
         }
@@ -98,6 +96,8 @@ public class Step4Model : BasePageModel
             ModalContent = new ErrorDisplay(
                 response.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Nominate/Step1", values: new { area = "Staff", PeriodId }));
+
+            await PreparePage();
 
             return Page();
         }

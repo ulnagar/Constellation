@@ -1,21 +1,19 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Gateways;
+using Application.Absences.ConvertAbsenceToAbsenceEntry;
+using Application.DTOs;
+using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.Students;
-using Constellation.Core.ValueObjects;
+using Core.Models.Students;
+using Core.ValueObjects;
 
 public class Service : ISMSService
 {
     private readonly ISMSGateway _service;
-    private readonly ILinkShortenerGateway _linkShortenerService;
 
-    public Service(ISMSGateway service, ILinkShortenerGateway linkShortenerService)
+    public Service(ISMSGateway service)
     {
         _service = service;
-        _linkShortenerService = linkShortenerService;
     }
 
     public async Task<SMSMessageCollectionDto> SendAbsenceNotification(
@@ -28,14 +26,11 @@ public class Service : ISMSService
         foreach (string offering in absences.Select(absence => absence.OfferingName).OrderBy(c => c))
             classListString += $"{offering}\r\n";
 
-        string link = $"https://acos.aurora.nsw.edu.au/Parents";
-        link = await _linkShortenerService.ShortenURL(link);
+        string link = $"https://aurora.link/";
 
-        string messageText = $"{student.FirstName} was reported absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
-
-        string notifyUri = "json+https://acos.aurora.nsw.edu.au/api/SMS/Delivery";
-
-        SMSMessageToSend messageContent = new SMSMessageToSend
+        string messageText = $"{student.Name.PreferredName} was reported absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
+        
+        SMSMessageToSend messageContent = new()
         {
             origin = "Aurora",
             destinations = phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.None)).ToList(),

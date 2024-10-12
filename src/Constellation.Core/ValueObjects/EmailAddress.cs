@@ -12,6 +12,7 @@ public sealed class EmailAddress : ValueObject
 
     public static readonly EmailAddress None = new("");
 
+    private EmailAddress() { }
     private EmailAddress(string email)
     {
         Email = email;
@@ -36,4 +37,11 @@ public sealed class EmailAddress : ValueObject
     }
 
     public override string ToString() => Email;
+
+    /// <summary>
+    /// Do not use. For EF Core Only.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static EmailAddress FromValue(string value) => new(value);
 }

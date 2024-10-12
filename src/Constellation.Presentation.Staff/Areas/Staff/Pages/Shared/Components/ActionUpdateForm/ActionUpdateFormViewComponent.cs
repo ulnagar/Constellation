@@ -1,18 +1,19 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ActionUpdateForm;
 
-using Constellation.Application.Contacts.GetContactListForStudent;
+using Application.Contacts.GetContactListForStudent;
+using Application.Families.GetFamilyContactsForStudent;
+using Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.Contacts.Models;
-using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
-using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
-using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,14 +36,14 @@ public class ActionUpdateFormViewComponent : ViewComponent
         _dateTime = dateTime;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid caseId, Guid actionId)
+    public async Task<IViewComponentResult> InvokeAsync(CaseId caseId, ActionId actionId)
     {
-        Case item = await _caseRepository.GetById(CaseId.FromValue(caseId));
+        Case? item = await _caseRepository.GetById(caseId);
 
         if (item is null)
             return Content(string.Empty);
 
-        Action action = item.Actions.FirstOrDefault(action => action.Id == ActionId.FromValue(actionId));
+        Action? action = item.Actions.FirstOrDefault(action => action.Id == actionId);
 
         if (action is null)
             return Content(string.Empty);
@@ -53,10 +54,10 @@ public class ActionUpdateFormViewComponent : ViewComponent
         if (action.Status.Equals(ActionStatus.Cancelled))
             return View("ActionCancelled", string.Empty);
 
-        string? studentId =
+        StudentId studentId =
             item.Type!.Equals(CaseType.Attendance) ? ((AttendanceCaseDetail)item.Detail!).StudentId
             : item.Type!.Equals(CaseType.Compliance) ? ((ComplianceCaseDetail)item.Detail!).StudentId
-            : null;
+            : StudentId.Empty;
 
         // Limit the datetime-local field precision to minutes 
         DateTime now = _dateTime.Now;
@@ -98,7 +99,7 @@ public class ActionUpdateFormViewComponent : ViewComponent
                             Name = contact.Contact,
                             Email = contact.ContactEmail.Email,
                             Type = type,
-                            Notes = contact.Category?.Name
+                            Notes = contact.Category.Name
                         });
                 }
 
@@ -146,7 +147,7 @@ public class ActionUpdateFormViewComponent : ViewComponent
                 return View("ConfirmSentralEntryAction", confirmViewModel);
 
             case PhoneParentAction phoneAction:
-                if (string.IsNullOrWhiteSpace(studentId))
+                if (studentId == StudentId.Empty)
                     return Content(string.Empty);
 
                 Result<List<FamilyContactResponse>> phoneParentRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(studentId));
@@ -163,7 +164,7 @@ public class ActionUpdateFormViewComponent : ViewComponent
                 return View("PhoneParentAction", phoneViewModel);
 
             case ParentInterviewAction interviewAction:
-                if (string.IsNullOrWhiteSpace(studentId))
+                if (studentId == StudentId.Empty)
                     return Content(string.Empty);
 
                 Result<List<FamilyContactResponse>> interviewParentRequest = await _mediator.Send(new GetFamilyContactsForStudentQuery(studentId));

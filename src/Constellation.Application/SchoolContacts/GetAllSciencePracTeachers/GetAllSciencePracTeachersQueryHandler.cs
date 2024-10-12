@@ -1,91 +1,92 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models;
 using Core.Models.SchoolContacts.Repositories;
+using Core.ValueObjects;
+using Models;
 using Serilog;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetAllSciencePracTeachersQueryHandler
-    : IQueryHandler<GetAllSciencePracTeachersQuery, List<ContactResponse>>
+    : IQueryHandler<GetAllSciencePracTeachersQuery, List<SchoolContactResponse>>
 {
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetAllSciencePracTeachersQueryHandler(
         ISchoolContactRepository contactRepository,
+        ISchoolRepository schoolRepository,
         ILogger logger)
     {
         _contactRepository = contactRepository;
+        _schoolRepository = schoolRepository;
         _logger = logger.ForContext<GetAllSciencePracTeachersQuery>();
     }
 
-    public async Task<Result<List<ContactResponse>>> Handle(GetAllSciencePracTeachersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SchoolContactResponse>>> Handle(GetAllSciencePracTeachersQuery request, CancellationToken cancellationToken)
     {
-        List<ContactResponse> responses = new();
+        List<SchoolContactResponse> response = new();
 
         List<SchoolContact> contacts = await _contactRepository.GetAllByRole(SchoolContactRole.SciencePrac, cancellationToken);
 
+        List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
+
         foreach (SchoolContact contact in contacts)
         {
-            Result<Name> nameRequest = Name.Create(contact.FirstName, string.Empty, contact.LastName);
+            List<SchoolContactRole> activeAssignments = contact.Assignments
+                .Where(assignment => 
+                    !assignment.IsDeleted &&
+                    assignment.Role == SchoolContactRole.SciencePrac)
+                .ToList();
 
-            if (nameRequest.IsFailure)
+            Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
+            Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
+
+            foreach (SchoolContactRole assignment in activeAssignments)
             {
-                _logger
-                    .ForContext(nameof(SchoolContact), contact, true)
-                    .ForContext(nameof(Result.Error), nameRequest.Error, true)
-                    .Warning("Could not create name for school contact");
+                School school = schools.FirstOrDefault(entry => entry.Code == assignment.SchoolCode);
 
-                continue;
-            }
-
-            Result<EmailAddress> emailRequest = EmailAddress.Create(contact.EmailAddress);
-
-            if (emailRequest.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(SchoolContact), contact, true)
-                    .ForContext(nameof(Result.Error), emailRequest.Error, true)
-                    .Warning("Could not create email address for school contact");
-
-                continue;
-            }
-
-            Result<PhoneNumber> phoneRequest = PhoneNumber.Create(contact.PhoneNumber);
-
-            if (phoneRequest.IsFailure && !string.IsNullOrWhiteSpace(contact.PhoneNumber)) 
-            {
-                _logger
-                    .ForContext(nameof(SchoolContact), contact, true)
-                    .ForContext(nameof(Result.Error), phoneRequest.Error, true)
-                    .Warning("Could not create phone number for school contact");
-
-                continue;
-            }
-
-            foreach (SchoolContactRole assignment in contact.Assignments)
-            {
-                if (assignment.Role != SchoolContactRole.SciencePrac)
+                if (school is null)
                     continue;
+                
+                bool directNumber = false;
+                PhoneNumber phone;
 
-                responses.Add(new(
+                if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
+                {
+                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
+                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                }
+                else
+                {
+                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(contact.PhoneNumber);
+                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    directNumber = true;
+                }
+
+                response.Add(new(
                     contact.Id,
                     assignment.Id,
-                    nameRequest.Value,
-                    emailRequest.Value,
-                    phoneRequest.IsSuccess ? phoneRequest.Value : null,
-                    contact.SelfRegistered,
-                    assignment.SchoolCode,
+                    name.Value,
+                    email.Value,
+                    phone,
+                    directNumber,
+                    assignment.Role,
                     assignment.SchoolName,
-                    assignment.Note));
+                    true,
+                    assignment.Note,
+                    contact.SelfRegistered));
             }
         }
 
-        return responses;
+        return response;
     }
 }

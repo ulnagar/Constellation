@@ -47,7 +47,6 @@ public class Step3Model : BasePageModel
     [ViewData] public string PageTitle => "New Award Nomination";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId PeriodId { get; set; }
 
     [BindProperty]
@@ -55,7 +54,6 @@ public class Step3Model : BasePageModel
     public AwardType Type { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; }
     public OfferingId? OfferingId { get; set; }
 

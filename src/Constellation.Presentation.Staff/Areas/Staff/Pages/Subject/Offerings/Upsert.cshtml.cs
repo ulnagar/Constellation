@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
@@ -53,13 +52,11 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Offering";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public OfferingId Id { get; set; } = OfferingId.Empty;
 
     [BindProperty]
     public string Name { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; } = CourseId.Empty;
     public string CourseName { get; set; }
     [BindProperty]

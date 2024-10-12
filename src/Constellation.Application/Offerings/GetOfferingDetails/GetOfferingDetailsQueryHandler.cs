@@ -16,8 +16,10 @@ using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Enums;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -81,15 +83,38 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         foreach (Student student in enrolledStudents)
         {
-            School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            bool currentEnrolment = true;
+
+            if (enrolment is null)
+            {
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    currentEnrolment = false;
+
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                        .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    enrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
+            }
 
             students.Add(new(
-                student.StudentId,
+                student.Id,
+                student.StudentReferenceNumber,
                 student.Gender,
-                student.GetName(),
-                student.CurrentGrade,
-                student.SchoolCode,
-                school?.Name));
+                student.Name,
+                enrolment?.Grade,
+                enrolment?.SchoolCode,
+                enrolment?.SchoolName,
+                currentEnrolment));
         }
 
         List<OfferingDetailsResponse.SessionSummary> sessions = new();
@@ -153,7 +178,7 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         List<SciencePracLesson> activeLessons = await _lessonRepository.GetAllForOffering(offering.Id, cancellationToken);
 
-        List<string> studentIds = students.Select(student => student.StudentId).ToList();
+        List<StudentId> studentIds = students.Select(student => student.StudentId).ToList();
 
         foreach (SciencePracLesson lesson in activeLessons)
         {

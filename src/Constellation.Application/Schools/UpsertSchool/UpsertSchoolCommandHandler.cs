@@ -46,9 +46,9 @@ internal sealed class UpsertSchoolCommandHandler
         entity.Town = request.Town;
         entity.State = request.State;
         entity.PostCode = request.PostCode;
-        entity.Electorate = request.Electorate;
+        entity.EducationalServicesTeam = request.Electorate;
         entity.PrincipalNetwork = request.PrincipalNetwork;
-        entity.Division = request.Division;
+        entity.Directorate = request.Division;
         entity.EmailAddress = request.EmailAddress;
         entity.PhoneNumber = request.PhoneNumber;
         entity.FaxNumber = request.FaxNumber;

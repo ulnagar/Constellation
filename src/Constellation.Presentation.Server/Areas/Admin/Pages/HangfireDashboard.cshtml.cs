@@ -27,7 +27,7 @@ public class HangfireDashboardModel : BasePageModel
         JobDefinitions.Add(new (typeof(ICanvasAccessAuditJob), nameof(ICanvasAccessAuditJob), "*/10 7-15 * * 1-5"));
         JobDefinitions.Add(new (typeof(IClassMonitorJob), nameof(IClassMonitorJob), "* 7-15 * * 1-5"));
         JobDefinitions.Add(new (typeof(ISchoolRegisterJob), nameof(ISchoolRegisterJob), "15 18 1 * *"));
-        JobDefinitions.Add(new (typeof(IUserManagerJob), nameof(IUserManagerJob), "0 6 1 * *"));
+        JobDefinitions.Add(new (typeof(IUserManagerJob), nameof(IUserManagerJob), "0 3 * * *"));
         JobDefinitions.Add(new (typeof(IRollMarkingReportJob), nameof(IRollMarkingReportJob), "0 17 * * 1-5"));
         JobDefinitions.Add(new (typeof(IAbsenceMonitorJob), nameof(IAbsenceMonitorJob), "0 11 * * 1-6"));
         JobDefinitions.Add(new (typeof(ILessonNotificationsJob), nameof(ILessonNotificationsJob), "0 10 * * 1"));
@@ -37,7 +37,7 @@ public class HangfireDashboardModel : BasePageModel
         JobDefinitions.Add(new (typeof(ISentralAttendancePercentageSyncJob), nameof(ISentralAttendancePercentageSyncJob), "0 5 * * 1"));
         JobDefinitions.Add(new (typeof(ISentralPhotoSyncJob), nameof(ISentralPhotoSyncJob), "15 9 * * 1-6"));
         JobDefinitions.Add(new (typeof(ISentralReportSyncJob), nameof(ISentralReportSyncJob), "* 18 * * 1-6"));
-        JobDefinitions.Add(new (typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 8 * * 1-6"));
+        JobDefinitions.Add(new (typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 5 * * 1-6"));
         JobDefinitions.Add(new (typeof(IMandatoryTrainingScanJob), nameof(IMandatoryTrainingScanJob), "0 12 * * 1"));    
         JobDefinitions.Add(new (typeof(IProcessOutboxMessagesJob), nameof(IProcessOutboxMessagesJob), "* 2-22 * * *"));
         JobDefinitions.Add(new (typeof(IGroupTutorialExpiryScanJob), nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5"));

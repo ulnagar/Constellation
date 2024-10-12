@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Students.Events.StudentMovedSchoolsDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
@@ -9,9 +8,12 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Enrolments;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Events;
 using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -23,17 +25,20 @@ internal sealed class UpdateOutstandingLessonRolls
 : IDomainEventHandler<StudentMovedSchoolsDomainEvent>
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ILessonRepository _lessonRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public UpdateOutstandingLessonRolls(
         IStudentRepository studentRepository,
+        IEnrolmentRepository enrolmentRepository,
         ILessonRepository lessonRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _studentRepository = studentRepository;
+        _enrolmentRepository = enrolmentRepository;
         _lessonRepository = lessonRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<StudentMovedSchoolsDomainEvent>();
@@ -55,48 +60,53 @@ internal sealed class UpdateOutstandingLessonRolls
             return;
         }
 
-        List<OfferingId> offeringIds = student.Enrolments
-            .Where(enrolment => !enrolment.IsDeleted)
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+
+        List<OfferingId> offeringIds = enrolments
             .Select(enrolments => enrolments.OfferingId)
             .Distinct()
             .ToList();
 
         List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(notification.StudentId, cancellationToken);
 
-        List<SciencePracRoll> oldRolls = lessons
-            .SelectMany(lesson => lesson.Rolls)
-            .Where(roll =>
-                roll.SchoolCode == notification.PreviousSchoolCode &&
-                roll.Status == LessonStatus.Active &&
-                roll.Attendance.Any(attendance => attendance.StudentId == notification.StudentId))
-            .ToList();
-
         List<SciencePracLessonId> updatedLessonIds = new();
 
-        foreach (SciencePracRoll roll in oldRolls)
+        // The PreviousSchoolCode item may be blank if there was no active previous school when the transfer was created.
+        if (!string.IsNullOrWhiteSpace(notification.PreviousSchoolCode))
         {
-            SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
+            List<SciencePracRoll> oldRolls = lessons
+                .SelectMany(lesson => lesson.Rolls)
+                .Where(roll =>
+                    roll.SchoolCode == notification.PreviousSchoolCode &&
+                    roll.Status == LessonStatus.Active &&
+                    roll.Attendance.Any(attendance => attendance.StudentId == notification.StudentId))
+                .ToList();
 
-            if (roll.Attendance.Count == 1)
+            foreach (SciencePracRoll roll in oldRolls)
             {
-                _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Name, roll.SchoolCode);
+                SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
 
-                // This is the last student in the class from this school
-                // The roll is no longer needed and should be cancelled
-                roll.CancelRoll("Last student has withdrawn. Roll no longer required.");
+                if (roll.Attendance.Count == 1)
+                {
+                    _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Name, roll.SchoolCode);
+
+                    // This is the last student in the class from this school
+                    // The roll is no longer needed and should be cancelled
+                    roll.CancelRoll("Last student has withdrawn. Roll no longer required.");
+                }
+
+                // Remove the student from the roll
+                SciencePracAttendance? attendance = roll.RemoveStudent(notification.StudentId);
+
+                if (attendance is not null)
+                {
+                    _lessonRepository.Delete(attendance);
+                }
+
+                _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.Name.DisplayName, lesson.Name, notification.PreviousSchoolCode);
+
+                updatedLessonIds.Add(lesson.Id);
             }
-
-            // Remove the student from the roll
-            SciencePracAttendance? attendance = roll.RemoveStudent(notification.StudentId);
-
-            if (attendance is not null)
-            {
-                _lessonRepository.Delete(attendance);
-            }
-
-            _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.PreviousSchoolCode);
-
-            updatedLessonIds.Add(lesson.Id);
         }
 
         List<SciencePracRoll> existingRollsAtNewSchool = lessons
@@ -111,7 +121,7 @@ internal sealed class UpdateOutstandingLessonRolls
         {
             SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
 
-            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.DisplayName, lesson.Name, notification.CurrentSchoolCode);
+            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.Name.DisplayName, lesson.Name, notification.CurrentSchoolCode);
 
             roll.AddStudent(notification.StudentId);
 
@@ -137,9 +147,9 @@ internal sealed class UpdateOutstandingLessonRolls
         {
             SciencePracRoll roll = new(
                 lesson.Id,
-                student.SchoolCode);
+                notification.CurrentSchoolCode);
 
-            roll.AddStudent(student.StudentId);
+            roll.AddStudent(student.Id);
 
             lesson.AddRoll(roll);
 

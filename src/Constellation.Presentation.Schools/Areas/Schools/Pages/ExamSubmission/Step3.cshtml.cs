@@ -9,6 +9,7 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Assignments.Identifiers;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -48,11 +49,10 @@ public class Step3Model : BasePageModel
 
     public SelectList Students { get; set; }
     [BindProperty]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
 
     public SelectList Courses { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; }
 
     public SelectList Assignments { get; set; }

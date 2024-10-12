@@ -14,6 +14,7 @@
         var open_style = all_style;
         var overdue_style = all_style;
         var closed_style = all_style;
+        var forMe_style = all_style;
 
         switch (Model.Filter)
         {
@@ -29,6 +30,9 @@
             case IndexModel.FilterEnum.Closed:
                 closed_style = "btn-primary";
                 break;
+            case IndexModel.FilterEnum.ForMe:
+                forMe_style = "btn-primary";
+                break;
         }
     }
 
@@ -37,6 +41,10 @@
         <a asp-route-filter="@IndexModel.FilterEnum.Open" class="btn @open_style">Open</a>
         <a asp-route-filter="@IndexModel.FilterEnum.Overdue" class="btn @overdue_style">Overdue</a>
         <a asp-route-filter="@IndexModel.FilterEnum.Closed" class="btn @closed_style">Closed</a>
+        @if (Model.IsAdmin)
+        {
+            <a asp-route-filter="@IndexModel.FilterEnum.ForMe" class="btn @forMe_style">For Me</a>
+        }
     </div>
 </div>
 

@@ -1,0 +1,101 @@
+@page
+@model Constellation.Presentation.Students.Areas.Students.Pages.Awards.IndexModel
+
+<h2>Awards for @Model.Student.Name.DisplayName</h2>
+
+<div>
+    <div class="mt-3">
+        @if (Model.AwardSummary is not null)
+        {
+            <div class="row mt-3">
+                <h4>Award Tally</h4>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-star-shooting fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@Model.AwardSummary.Astras Astra awards</div>
+                            <span class="fst-italic">Astra awards are given out by classroom teachers.</span>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-star-christmas fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@Model.AwardSummary.Stellars Stellar awards</div>
+                            <span class="fst-italic">5 Astra awards = 1 Stellar award.</span>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-solar-system fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@Model.AwardSummary.Galaxies Galaxy medals</div>
+                            <span class="fst-italic">5 Stellar awards = 1 Galaxy Medal.</span>
+                        </div>
+                    </span>
+                </div>
+
+                <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                    <span class="row d-flex align-items-center">
+                        @*Display as flex to enable vertical centering of the button in the second div*@
+                        <div class="fa-icon-sizing">
+                            <i class="fad fa-galaxy fa-3x app-theme"></i>
+                        </div>
+                        <div class="col">
+                            <div class="h4">@Model.AwardSummary.Universals Universal Achiever awards</div>
+                            <span class="fst-italic">5 Galaxy medals = 1 Universal Achiever award.</span>
+                        </div>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <h4>Recent Award List</h4>
+
+                @foreach (var award in Model.AwardSummary.RecentAwards.OrderByDescending(award => award.AwardedOn).ToList())
+                {
+                    <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+                        <span class="row d-flex align-items-center">
+                            <div class="col">
+                                <div class="h4">@award.Type</div>
+                                @if (!string.IsNullOrEmpty(award.AwardedBy))
+                                {
+                                    <span class="fst-italic d-block">Awarded By @award.AwardedBy</span>
+                                }
+
+                                @if (!string.IsNullOrEmpty(award.AwardedFor))
+                                {
+                                    <span class="fst-italic d-block">For @award.AwardedFor</span>
+                                }
+
+                                <span class="fst-italic d-block">On @award.AwardedOn.ToShortDateString()</span>
+                            </div>
+                            @if (award.HasCertificate)
+                            {
+                                <div class="fa-icon-sizing">
+                                    <a asp-page-handler="DownloadCertificate" asp-route-awardId="@award.AwardId" class="stretched-link">
+                                        <i class="fad fa-file-download fa-3x app-theme"></i>
+                                    </a>
+                                </div>
+                            }
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,14 +1,18 @@
 ﻿namespace Constellation.Application.StaffMembers.ReinstateStaffMember;
 
 using Abstractions.Messaging;
+using Application.Models.Identity;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models.Auth;
 using Core.Errors;
 using Core.Models;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,20 +21,20 @@ internal sealed class ReinstateStaffMemberCommandHandler
 {
     private readonly IStaffRepository _staffRepository;
     private readonly IOperationService _operationsService;
-    private readonly IAuthService _authService;
+    private readonly UserManager<AppUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public ReinstateStaffMemberCommandHandler(
         IStaffRepository staffRepository,
         IOperationService operationsService,
-        IAuthService authService,
+        UserManager<AppUser> userManager,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _staffRepository = staffRepository;
         _operationsService = operationsService;
-        _authService = authService;
+        _userManager = userManager;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ReinstateStaffMemberCommand>();
     }
@@ -60,7 +64,7 @@ internal sealed class ReinstateStaffMemberCommandHandler
         await _operationsService.CreateTeacherEmployedMSTeamAccess(staffMember.StaffId);
 
         // Reinstate user access
-        UserTemplateDto newUser = new()
+        UserTemplateDto userDetails = new()
         {
             FirstName = staffMember.FirstName,
             LastName = staffMember.LastName,
@@ -69,7 +73,39 @@ internal sealed class ReinstateStaffMemberCommandHandler
             IsStaffMember = false
         };
 
-        await _authService.UpdateUser(staffMember.EmailAddress, newUser);
+        if (_userManager.Users.Any(u => u.UserName == userDetails.Username))
+        {
+            AppUser user = await _userManager.FindByEmailAsync(userDetails.Email);
+
+            user!.UserName = userDetails.Username;
+            user.Email = userDetails.Email;
+            user.FirstName = userDetails.FirstName;
+            user.LastName = userDetails.LastName;
+            user.IsStaffMember = true;
+            user.StaffId = userDetails.StaffId;
+
+            await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
+
+            await _userManager.UpdateAsync(user);
+        }
+        else
+        {
+            AppUser user = new()
+            {
+                UserName = userDetails.Username,
+                Email = userDetails.Email,
+                FirstName = userDetails.FirstName,
+                LastName = userDetails.LastName,
+                StaffId = userDetails.StaffId,
+                IsSchoolContact = false,
+                IsStaffMember = true
+            };
+
+            IdentityResult result = await _userManager.CreateAsync(user);
+
+            if (result == IdentityResult.Success)
+                await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
+        }
         
         await _unitOfWork.CompleteAsync(cancellationToken);
 

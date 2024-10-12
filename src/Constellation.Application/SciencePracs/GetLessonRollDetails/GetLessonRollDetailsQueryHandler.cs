@@ -1,16 +1,19 @@
 ﻿namespace Constellation.Application.SciencePracs.GetLessonRollDetails;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
+using Core.ValueObjects;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,7 +75,8 @@ internal sealed class GetLessonRollDetailsQueryHandler
             attendanceRecords.Add(new(
                 entry.Id,
                 entry.StudentId,
-                student.GetName(),
+                student.StudentReferenceNumber,
+                student.Name,
                 entry.Present));
         }
 
@@ -89,20 +93,64 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
         {
-            Result<Name> contactName = Name.CreateMononym(roll.SubmittedBy);
+            SchoolContact contact = roll.SubmittedBy.Contains('@')
+                ? await _contactRepository.GetWithRolesByEmailAddress(roll.SubmittedBy, cancellationToken)
+                : await _contactRepository.GetByNameAndSchool(roll.SubmittedBy, roll.SchoolCode, cancellationToken);
 
-            if (contactName.IsFailure)
+            if (contact is null)
             {
-                _logger
-                    .Warning("Could not create Name from roll submitted by field");
+                Result<Name> contactName = Name.Create(roll.SubmittedBy, string.Empty, "-");
 
-                return Result.Failure<LessonRollDetailsResponse>(contactName.Error);
+                if (contactName.IsFailure)
+                {
+                    _logger
+                        .Warning("Could not create Name from roll submitted by field");
+
+                    return Result.Failure<LessonRollDetailsResponse>(contactName.Error);
+                }
+
+                Result<EmailAddress> contactEmail = EmailAddress.Create(roll.SubmittedBy);
+
+                if (contactEmail.IsFailure)
+                {
+                    _logger
+                        .Warning("Could not create EmailAddress from roll submitted by field");
+
+                    return Result.Failure<LessonRollDetailsResponse>(contactEmail.Error);
+                }
+
+                contactDetails = new(
+                    SchoolContactId.Empty,
+                    contactName.Value,
+                    contactEmail.Value);
             }
+            else
+            {
+                Result<Name> contactName = Name.Create(contact.FirstName, string.Empty, contact.LastName);
 
-            contactDetails = new(
-                0,
-                contactName.Value,
-                EmailAddress.None);
+                if (contactName.IsFailure)
+                {
+                    _logger
+                        .Warning("Could not create Name from roll submitted by field");
+
+                    return Result.Failure<LessonRollDetailsResponse>(contactName.Error);
+                }
+
+                Result<EmailAddress> contactEmail = EmailAddress.Create(contact.EmailAddress);
+
+                if (contactEmail.IsFailure)
+                {
+                    _logger
+                        .Warning("Could not create EmailAddress from roll submitted by field");
+
+                    return Result.Failure<LessonRollDetailsResponse>(contactEmail.Error);
+                }
+
+                contactDetails = new(
+                    contact.Id,
+                    contactName.Value,
+                    contactEmail.Value);
+            }
         }
 
         LessonRollDetailsResponse response = new(

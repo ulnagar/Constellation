@@ -1,19 +1,20 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Primitives;
-using ValueObjects;
 using Enums;
 using Extensions;
+using Identifiers;
+using Primitives;
 using System;
+using ValueObjects;
 
 public abstract class Nomination : IFullyAuditableEntity
 {
     public AwardNominationId Id { get; protected set; }
     public AwardNominationPeriodId PeriodId { get; protected set; }
-    public string StudentId { get; protected set; }
+    public StudentId StudentId { get; protected set; }
     public AwardType AwardType { get; protected set; }
 
     public string CreatedBy { get; set; }
@@ -31,14 +32,14 @@ public abstract class Nomination : IFullyAuditableEntity
         IsDeleted = true;
     }
 
-    public abstract string GetDescription();
+    public abstract string GetDescription(bool showGrade = true, bool showClass = true);
 }
 
 public sealed class FirstInSubjectNomination : Nomination
 {
     public FirstInSubjectNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId, 
         Grade grade,
         string courseName)
@@ -61,14 +62,21 @@ public sealed class FirstInSubjectNomination : Nomination
 
     public override string ToString() => $"{AwardType.ToString()} in {Grade.AsName()} {CourseName}";
 
-    public override string GetDescription() => $"First in Course {Grade.AsName()} {CourseName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) =>
+        (showClass && showGrade)
+            ? $"First in Course {Grade.AsName()} {CourseName}"
+        : (showClass)
+            ? $"First in Course {CourseName}"
+        : (showGrade)
+            ? $"First in Course {Grade.AsName()}"
+            : $"First in Course";
 }
 
 public sealed class AcademicExcellenceNomination : Nomination
 {
     public AcademicExcellenceNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -95,14 +103,17 @@ public sealed class AcademicExcellenceNomination : Nomination
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
 
-    public override string GetDescription() => $"Academic Excellence {CourseName} - {ClassName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) =>
+        showClass
+            ? $"Academic Excellence {CourseName} - {ClassName}"
+            : $"Academic Excellence {CourseName}";
 }
 
 public sealed class AcademicExcellenceMathematicsNomination : Nomination
 {
     public AcademicExcellenceMathematicsNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -129,14 +140,17 @@ public sealed class AcademicExcellenceMathematicsNomination : Nomination
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
 
-    public override string GetDescription() => $"Academic Excellence - Mathematics - {CourseName} - {ClassName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) =>
+        showClass
+            ? $"Academic Excellence - Mathematics - {CourseName} - {ClassName}"
+            : $"Academic Excellence - Mathematics - {CourseName}";
 }
 
 public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
 {
     public AcademicExcellenceScienceTechnologyNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -163,14 +177,17 @@ public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
 
-    public override string GetDescription() => $"Academic Excellence - Science & Technology - {CourseName} - {ClassName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => 
+        showClass 
+            ? $"Academic Excellence - Science & Technology - {CourseName} - {ClassName}"
+            : $"Academic Excellence - Science & Technology - {CourseName}";
 }
 
 public sealed class AcademicAchievementNomination : Nomination
 {
     public AcademicAchievementNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -196,14 +213,17 @@ public sealed class AcademicAchievementNomination : Nomination
     public void UpdateClassName(string className) => ClassName = className;
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
-    public override string GetDescription() => $"Academic Achievement {CourseName} - {ClassName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => 
+        showClass 
+            ? $"Academic Achievement {CourseName} - {ClassName}" 
+            : $"Academic Achievement {CourseName}";
 }
 
 public sealed class AcademicAchievementMathematicsNomination : Nomination
 {
     public AcademicAchievementMathematicsNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -229,14 +249,17 @@ public sealed class AcademicAchievementMathematicsNomination : Nomination
     public void UpdateClassName(string className) => ClassName = className;
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
-    public override string GetDescription() => $"Academic Achievement - Mathematics - {CourseName} - {ClassName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => 
+        showClass 
+            ? $"Academic Achievement - Mathematics - {CourseName} - {ClassName}"
+            : $"Academic Achievement - Mathematics - {CourseName}";
 }
 
 public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
 {
     public AcademicAchievementScienceTechnologyNomination(
         AwardNominationPeriodId periodId,
-        string studentId,
+        StudentId studentId,
         CourseId courseId,
         string courseName,
         OfferingId offeringId,
@@ -262,14 +285,17 @@ public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
     public void UpdateClassName(string className) => ClassName = className;
 
     public override string ToString() => $"{AwardType.ToString()} in {CourseName} for {ClassName}";
-    public override string GetDescription() => $"Academic Achievement - Science & Technology - {CourseName} - {ClassName}";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => 
+        showClass 
+            ? $"Academic Achievement - Science & Technology - {CourseName} - {ClassName}"
+            : $"Academic Achievement - Science & Technology - {CourseName}";
 }
 
 public sealed class PrincipalsAwardNomination : Nomination
 {
     public PrincipalsAwardNomination(
         AwardNominationPeriodId periodId,
-        string studentId)
+        StudentId studentId)
     {
         Id = new();
         PeriodId = periodId;
@@ -279,14 +305,14 @@ public sealed class PrincipalsAwardNomination : Nomination
 
     public override string ToString() => $"{AwardType.ToString()}";
 
-    public override string GetDescription() => $"Principals Award";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Principals Award";
 }
 
 public sealed class GalaxyMedalNomination : Nomination
 {
     public GalaxyMedalNomination(
         AwardNominationPeriodId periodId,
-        string studentId)
+        StudentId studentId)
     {
         Id = new();
         PeriodId = periodId;
@@ -296,14 +322,14 @@ public sealed class GalaxyMedalNomination : Nomination
 
     public override string ToString() => $"{AwardType.ToString()}";
 
-    public override string GetDescription() => $"Galaxy Medal";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Galaxy Medal";
 }
 
 public sealed class UniversalAchieverNomination : Nomination
 {
     public UniversalAchieverNomination(
         AwardNominationPeriodId periodId,
-        string studentId)
+        StudentId studentId)
     {
         Id = new();
         PeriodId = periodId;
@@ -312,5 +338,5 @@ public sealed class UniversalAchieverNomination : Nomination
     }
 
     public override string ToString() => $"{AwardType.ToString()}";
-    public override string GetDescription() => $"Universal Achiever Award";
+    public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Universal Achiever Award";
 }

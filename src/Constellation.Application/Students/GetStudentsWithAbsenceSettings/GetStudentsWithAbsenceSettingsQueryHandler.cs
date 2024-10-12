@@ -23,7 +23,7 @@ internal sealed class GetStudentsWithAbsenceSettingsQueryHandler
     {
         List<StudentAbsenceSettingsResponse> returnData = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         if (students.Count == 0)
             return returnData;
@@ -43,12 +43,17 @@ internal sealed class GetStudentsWithAbsenceSettingsQueryHandler
                     configuration.ScanEndDate));
             }
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             StudentAbsenceSettingsResponse entry = new(
-                student.StudentId,
-                student.DisplayName,
-                student.Gender,
-                student.CurrentGrade,
-                student.School.Name,
+                student.StudentReferenceNumber.Number,
+                student.Name.DisplayName,
+                student.Gender.Value,
+                enrolment.Grade,
+                enrolment.SchoolName,
                 absenceConfigurationResponses);
 
             returnData.Add(entry);

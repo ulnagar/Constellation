@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct CasualId(Guid Value)
+    : IStronglyTypedId
 {
     public static CasualId Empty => new(Guid.Empty);
 

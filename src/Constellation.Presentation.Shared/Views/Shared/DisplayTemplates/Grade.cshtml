@@ -1,3 +1,6 @@
-﻿@using Constellation.Core.Enums
-@model Grade
-Year @(((int)Model).ToString("D2"))
+﻿@model Grade?
+
+@using Constellation.Core.Enums
+@using Constellation.Core.Extensions
+
+<span>@(Model.HasValue ? Model.Value.AsName() : string.Empty)</span>

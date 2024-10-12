@@ -1,4 +1,7 @@
 ﻿#nullable enable
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Students.ValueObjects;
+
 namespace Constellation.Core.Models.Families;
 
 using DomainEvents;
@@ -195,7 +198,8 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     }
 
     public Result<StudentFamilyMembership> AddStudent(
-        string studentId,
+        StudentId studentId,
+        StudentReferenceNumber studentReferenceNumber,
         bool isResidential)
     {
         var existingMembership = _studentMemberships.FirstOrDefault(entry => entry.StudentId == studentId);
@@ -225,7 +229,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     }
 
     public Result RemoveStudent(
-        string studentId)
+        StudentId studentId)
     {
         var existingMembership = _studentMemberships.FirstOrDefault(entry => entry.StudentId == studentId);
 

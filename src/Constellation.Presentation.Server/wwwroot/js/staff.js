@@ -18,6 +18,12 @@
     // Format dates in datatables for AUS
     $.fn.dataTable.moment('D/M/YYYY');
 
+    // Set datatables defaults
+    Object.assign(DataTable.defaults, {
+        stateSave: true,
+        stateDuration: 60 * 10
+    });
+
     // Activate any datatables
     $('.data-table').DataTable({ "order": [[0, 'asc']] });
 

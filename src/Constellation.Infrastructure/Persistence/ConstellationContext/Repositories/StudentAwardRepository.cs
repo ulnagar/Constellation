@@ -3,6 +3,7 @@
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class StudentAwardRepository : IStudentAwardRepository
@@ -28,7 +29,7 @@ internal sealed class StudentAwardRepository : IStudentAwardRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<StudentAward>> GetByStudentId(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StudentAward>()
@@ -75,4 +76,7 @@ internal sealed class StudentAwardRepository : IStudentAwardRepository
 
     public void Insert(StudentAward studentAward) =>
         _context.Set<StudentAward>().Add(studentAward);
+
+    public void Remove(StudentAward studentAward) =>
+        _context.Set<StudentAward>().Remove(studentAward);
 }

@@ -1,10 +1,11 @@
 namespace Constellation.Core.Models.Offerings.Repositories;
 
 using Canvas.Models;
-using Enums;
-using Offerings;
-using Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Enums;
+using Identifiers;
+using Offerings;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -22,8 +23,8 @@ public interface IOfferingRepository
     Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByGrade(Grade grade, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
-    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
-    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(string studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all current Course Offerings that a student is enrolled in
@@ -31,7 +32,7 @@ public interface IOfferingRepository
     /// <param name="studentId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<List<Offering>> GetByStudentId(string studentId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<Offering?> GetFromYearAndName(int year, string name, CancellationToken cancellationToken = default);
 
     void Insert(Offering offering);

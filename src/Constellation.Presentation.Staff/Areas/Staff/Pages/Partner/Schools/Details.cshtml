@@ -1,5 +1,6 @@
 ﻿@page "{id}"
 @using Constellation.Application.Faculties.GetFacultiesSummary
+@using Constellation.Core.Extensions
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.DetailsModel
 
 @inject IAuthorizationService authService
@@ -20,7 +21,7 @@
 
 <div>
     <div class="row">
-        <label asp-for="School.SchoolCode" class="col-md-2"></label>
+        <label asp-for="School.SchoolCode" class="col-md-2">School Code</label>
         <div class="col-md-9">
             @Html.DisplayFor(model => model.School.SchoolCode, new { htmlAttributes = new { @class = "form-control" } })
         </div>
@@ -45,10 +46,10 @@
         <div class="col-md-3">
             @Html.DisplayFor(model => model.School.Town, new { htmlAttributes = new { @class = "form-control" } })
         </div>
-
-        <label asp-for="School.Division" class="col-md-2 offset-2"></label>
+        
+        <label asp-for="School.HeatSchool" class="col-md-2 offset-2">Heat Week?</label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.School.Division, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.DisplayFor(model => model.School.HeatSchool)
         </div>
     </div>
 
@@ -58,45 +59,45 @@
             @Html.DisplayFor(model => model.School.State, new { htmlAttributes = new { @class = "form-control" } })
         </div>
 
-        <label asp-for="School.HeatSchool" class="col-md-2 offset-2">Heat Week?</label>
+        <label asp-for="School.Directorate" class="col-md-2 offset-2"></label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.School.HeatSchool)
+            @Html.DisplayFor(model => model.School.Directorate, new { htmlAttributes = new { @class = "form-control" } })
         </div>
     </div>
 
     <div class="row">
-        <label asp-for="School.PostCode" class="col-md-2"></label>
+        <label asp-for="School.PostCode" class="col-md-2">Post Code</label>
         <div class="col-md-3">
             @Html.DisplayFor(model => model.School.PostCode, new { htmlAttributes = new { @class = "form-control" } })
         </div>
 
-        <label asp-for="School.Electorate" class="col-md-2 offset-2"></label>
+        <label asp-for="School.EducationalServicesTeam" class="col-md-2 offset-2">Educational Services Team</label>
         <div class="col-md-3">
-            @Html.DisplayFor(model => model.School.Electorate, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.DisplayFor(model => model.School.EducationalServicesTeam, new { htmlAttributes = new { @class = "form-control" } })
         </div>
     </div>
 
     <div class="row">
-        <label asp-for="School.PhoneNumber" class="col-md-2"></label>
+        <label asp-for="School.PhoneNumber" class="col-md-2">Phone Number</label>
         <div class="col-md-3">
             @Html.DisplayFor(model => model.School.PhoneNumber, "PhoneNumber", new { htmlAttributes = new { @class = "form-control" } })
         </div>
 
-        <label asp-for="School.PrincipalNetwork" class="col-md-2 offset-2"></label>
+        <label asp-for="School.PrincipalNetwork" class="col-md-2 offset-2">Principal Network</label>
         <div class="col-md-3">
             @Html.DisplayFor(model => model.School.PrincipalNetwork, new { htmlAttributes = new { @class = "form-control" } })
         </div>
     </div>
 
     <div class="row">
-        <label asp-for="School.FaxNumber" class="col-md-2"></label>
+        <label asp-for="School.FaxNumber" class="col-md-2">Fax Number</label>
         <div class="col-md-3">
             @Html.DisplayFor(model => model.School.FaxNumber, "PhoneNumber", new { htmlAttributes = new { @class = "form-control" } })
         </div>
     </div>
 
     <div class="row">
-        <label asp-for="School.EmailAddress" class="col-md-2"></label>
+        <label asp-for="School.EmailAddress" class="col-md-2">Email Address</label>
         <div class="col-md-5">
             @Html.DisplayFor(model => model.School.EmailAddress, "EmailAddress", new { htmlAttributes = new { @class = "form-control" } })
         </div>
@@ -160,7 +161,7 @@
         <div id="studentTab" class="tab-pane">
             <h3>Current Students</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover students-data-table">
                 <thead>
                     <tr>
                         <th>SRN</th>
@@ -174,9 +175,18 @@
                     @foreach (var item in Model.School.Students)
                     {
                         <tr>
-                            <td>@item.StudentId</td>
-                            <td data-order="@item.Name.SortOrder">@Html.DisplayFor(model => item.Gender, "Gender") @item.Name.DisplayName</td>
-                            <td>@Html.DisplayFor(model => item.Grade, "Grade")</td>
+                            <td>@item.StudentReferenceNumber</td>
+                            <td data-order="@item.Name.SortOrder"><gender gender="@item.Gender" /> @item.Name.DisplayName</td>
+                            <td data-order="@item.Grade?.AsNumber()">
+                                @if (!item.CurrentEnrolment)
+                                {
+                                    <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                                }
+                                else
+                                {
+                                    <grade grade="@item.Grade" />
+                                }
+                            </td>
                             <td>
                                 @foreach (var course in item.Offerings.OrderBy(offering => offering.Name))
                                 {
@@ -204,7 +214,7 @@
         <div id="staffTab" class="tab-pane">
             <h3>Current Staff</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table-striped table-hover staff-data-table">
                 <thead>
                     <tr>
                         <th>Id</th>
@@ -265,6 +275,21 @@
 @section scripts
 {
     <script>
+        $(document).ready(function (){
+            $('.students-data-table').DataTable({
+                "order": [
+                    [2, 'asc'],
+                    [1, 'asc']
+                ] 
+            });
+
+            $('.staff-data-table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+        });
+
         $(document)
             .ready(function () {
                 $('#getTGraph').click(function () {

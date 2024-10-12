@@ -2,6 +2,8 @@
 
 using Constellation.Application.Students.GetStudentsFromCourseAsDictionary;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,8 +18,8 @@ public class UploadAssignmentSubmissionViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(CourseId CourseId)
     {
-        var viewModel = new AssignmentStudentSelection();
-        var result = await _mediator.Send(new GetStudentsFromCourseAsDictionaryQuery(CourseId));
+        AssignmentStudentSelection viewModel = new();
+        Result<Dictionary<StudentId, string>> result = await _mediator.Send(new GetStudentsFromCourseAsDictionaryQuery(CourseId));
 
         if (result.IsFailure)
         {

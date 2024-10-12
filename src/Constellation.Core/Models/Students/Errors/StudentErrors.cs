@@ -1,12 +1,14 @@
 ﻿namespace Constellation.Core.Models.Students.Errors;
 
-using Enums;
+using Constellation.Core.Enums;
+using Identifiers;
 using Shared;
 using System;
+using ValueObjects;
 
 public static class StudentErrors
 {
-    public static readonly Func<string, Error> AlreadyExists = id => new(
+    public static readonly Func<StudentId, Error> AlreadyExists = id => new(
         "Student.AlreadyExists",
         $"A Student with the Id {id} already exists");
 
@@ -14,9 +16,13 @@ public static class StudentErrors
         "Student.InvalidId",
         "The provided student id is not valid");
 
-    public static readonly Func<string, Error> NotFound = id => new Error(
+    public static readonly Func<StudentId, Error> NotFound = id => new Error(
         "Student.NotFound",
         $"A student with the Id {id} could not be found");
+
+    public static readonly Func<StudentReferenceNumber, Error> NotFoundBySRN = srn => new(
+        "Student.NotFound",
+        $"A student with the SRN {srn} could not be found");
 
     public static readonly Func<string, Error> NotFoundForSchool = id => new Error(
         "Student.NotFoundForSchool",
@@ -30,24 +36,7 @@ public static class StudentErrors
         "Student.NoneFoundFilter",
         $"No current students found that match the selected filter");
 
-
-    public static readonly Error FirstNameInvalid = new(
-        "Student.FirstNameInvalid",
-        "The provided First Name is not valid");
-
-    public static readonly Error LastNameInvalid = new(
-        "Student.LastNameInvalid",
-        "The provided Last Name is not valid");
-
-    public static readonly Error PortalUsernameInvalid = new(
-        "Student.PortalUsernameInvalid",
-        "The provided Portal Username is not valid");
-
     public static readonly Error GenderInvalid = new(
         "Student.GenderInvalid",
         "The provided Gender is not valid");
-
-    public static readonly Error SchoolCodeInvalid = new(
-        "Student.SchoolCodeInvalid",
-        "The provided School Code is not valid");
 }

@@ -1,16 +1,15 @@
-﻿using Constellation.Application.Models;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+
+using Constellation.Application.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations
+public class JobActivationConfiguration : IEntityTypeConfiguration<JobActivation>
 {
-    public class JobActivationConfiguration : IEntityTypeConfiguration<JobActivation>
+    public void Configure(EntityTypeBuilder<JobActivation> builder)
     {
-        public void Configure(EntityTypeBuilder<JobActivation> builder)
-        {
-            builder.HasKey(job => job.Id);
+        builder.HasKey(job => job.Id);
 
-            builder.HasIndex(job => job.JobName).IsUnique();
-        }
+        builder.HasIndex(job => job.JobName).IsUnique();
     }
 }

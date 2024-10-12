@@ -8,6 +8,7 @@ using Constellation.Application.Assignments.GetAssignmentsByCourse;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCoursesForStudent;
 using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
@@ -53,16 +54,14 @@ public class Step4Model : BasePageModel
 
     public SelectList Students { get; set; }
     [BindProperty]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; }
 
     public SelectList Courses { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; }
 
     public SelectList Assignments { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AssignmentId AssignmentId { get; set; }
 
     [BindProperty]

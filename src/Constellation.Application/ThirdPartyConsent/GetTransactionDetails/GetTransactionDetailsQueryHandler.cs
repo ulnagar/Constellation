@@ -44,7 +44,7 @@ internal sealed class GetTransactionDetailsQueryHandler
             return Result.Failure<TransactionDetailsResponse>(ConsentErrors.Transaction.NotFound(request.TransactionId));
         }
 
-        Student student = await _studentRepository.GetWithSchoolById(transaction.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(transaction.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -54,6 +54,18 @@ internal sealed class GetTransactionDetailsQueryHandler
                 .Warning("Failed to retrieve Consent Transaction details");
 
             return Result.Failure<TransactionDetailsResponse>(StudentErrors.NotFound(transaction.StudentId));
+        }
+
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(GetTransactionDetailsQuery), request, true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                .Warning("Failed to retrieve Consent Transaction details");
+
+            return Result.Failure<TransactionDetailsResponse>(SchoolEnrolmentErrors.NotFound);
         }
 
         List<TransactionDetailsResponse.ConsentResponse> consentResponses = new();
@@ -97,9 +109,9 @@ internal sealed class GetTransactionDetailsQueryHandler
         return new TransactionDetailsResponse(
             transaction.Id,
             transaction.StudentId,
-            student.GetName(),
-            student.CurrentGrade,
-            student.School.Name,
+            student.Name,
+            enrolment.Grade,
+            enrolment.SchoolName,
             transaction.SubmittedBy,
             transaction.SubmittedAt,
             transaction.SubmissionMethod,

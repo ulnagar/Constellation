@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
 using Application.Common.PresentationModels;
+using Application.SchoolContacts.Models;
+using Application.Users.RepairSchoolContactUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.SchoolContacts.CreateContactRoleAssignment;
 using Constellation.Application.SchoolContacts.GetAllSciencePracTeachers;
@@ -12,7 +14,6 @@ using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -50,13 +51,31 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_SciencePracs_Teachers;
     [ViewData] public string PageTitle => "Science Prac Teacher List";
 
-    public List<ContactResponse> Contacts = new();
+    public List<SchoolContactResponse> Contacts = new();
 
     public async Task OnGet() => await PreparePage();
 
+    public async Task OnGetAudit(SchoolContactId id)
+    {
+        _logger.Information("Requested to audit user details for School Contact with id {Id} by user {User}", id, _currentUserService.UserName);
+
+        Result auditRequest = await _mediator.Send(new RepairSchoolContactUserCommand(id));
+
+        if (auditRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), auditRequest.Error, true)
+                .Warning("Failed to audit user details for School Contact with id {Id} by user {User}", id, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(auditRequest.Error);
+
+            await PreparePage();
+        }
+    }
+
     public IActionResult OnPostAjaxDelete(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
+        SchoolContactId contactId,
+        SchoolContactRoleId roleId,
         string name,
         string role,
         string school)
@@ -72,7 +91,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxAssign(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
+        SchoolContactId contactId,
         string name)
     {
         AssignRoleModalViewModel viewModel = new();
@@ -90,8 +109,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDeleteAssignment(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId)
+        SchoolContactId contactId,
+        SchoolContactRoleId roleId)
     {
         RemoveContactRoleCommand command = new(contactId, roleId);
 
@@ -121,7 +140,7 @@ public class IndexModel : BasePageModel
         string schoolCode,
         string roleName,
         string note,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId)
+        SchoolContactId contactId)
     {
         CreateContactRoleAssignmentCommand command = new(contactId, schoolCode, roleName, note);
 
@@ -148,8 +167,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxUpdateNote(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
+        SchoolContactId contactId,
+        SchoolContactRoleId roleId,
         string note)
     {
         UpdateRoleNoteModalViewModel viewModel = new()
@@ -163,8 +182,8 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostUpdateNote(
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactId contactId,
-        [ModelBinder(typeof(ConstructorBinder))] SchoolContactRoleId roleId,
+        SchoolContactId contactId,
+        SchoolContactRoleId roleId,
         string note)
     {
         UpdateRoleNoteCommand command = new(contactId, roleId, note);
@@ -195,7 +214,7 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve list of Science Prac Teachers by user {User}", _currentUserService.UserName);
 
-        Result<List<ContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
+        Result<List<SchoolContactResponse>> contactRequest = await _mediator.Send(new GetAllSciencePracTeachersQuery());
 
         if (contactRequest.IsFailure)
         {
@@ -208,6 +227,6 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Contacts = contactRequest.Value.OrderBy(contact => contact.ContactName.SortOrder).ToList();
+        Contacts = contactRequest.Value;
     }
 }

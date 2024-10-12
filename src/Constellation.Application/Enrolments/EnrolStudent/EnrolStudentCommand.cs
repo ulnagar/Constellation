@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Enrolments.EnrolStudent;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Identifiers;
 
 public sealed record EnrolStudentCommand(
-    string StudentId,
+    StudentId StudentId,
     OfferingId OfferingId)
     : ICommand;

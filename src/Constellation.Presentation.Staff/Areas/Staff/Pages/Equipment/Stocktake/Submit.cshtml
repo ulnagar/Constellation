@@ -84,7 +84,7 @@
                                 <option value="">-- Select --</option>
                                 @foreach (var student in Model.StudentList)
                                 {
-                                    <option value="@student.StudentId">@student.Name (@student.CurrentGrade)</option>
+                                    <option value="@student.StudentId">@student.Name (@student.Grade)</option>
                                 }
                             </select>
                             <span asp-validation-for="UserCode" class="text-danger"></span>

@@ -1,18 +1,18 @@
 ﻿namespace Constellation.Application.GroupTutorials.GenerateTutorialAttendanceReport;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Errors;
 using Core.Extensions;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
+using DTOs;
 using Helpers;
+using Interfaces.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -60,15 +60,20 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
 
             foreach (TutorialRollStudent student in roll.Students)
             {
-                Student entity = studentEntities.FirstOrDefault(entry => entry.StudentId == student.StudentId);
+                Student entity = studentEntities.FirstOrDefault(entry => entry.Id == student.StudentId);
 
                 if (entity is null)
                     continue;
 
+                SchoolEnrolment? enrolment = entity.CurrentEnrolment;
+
+                if (enrolment is null)
+                    continue;
+
                 students.Add(new(
                     student.StudentId,
-                    entity.DisplayName,
-                    entity.CurrentGrade.AsName(),
+                    entity.Name.DisplayName,
+                    enrolment.Grade.AsName(),
                     student.Enrolled,
                     student.Present));
             }

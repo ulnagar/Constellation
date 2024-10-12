@@ -141,7 +141,7 @@ public static class ServicesRegistration
             selector.FromAssemblies(
                 Constellation.Application.AssemblyReference.Assembly,
                 Constellation.Infrastructure.AssemblyReference.Assembly)
-            .AddClasses(classes => classes.InNamespaceOf<AuthService>(), false)
+            .AddClasses(classes => classes.InNamespaceOf<ActiveDirectoryActionsService>(), false)
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsMatchingInterface()
             .WithScopedLifetime());
@@ -167,6 +167,7 @@ public static class ServicesRegistration
         services.AddScoped<IAuthorizationHandler, HasActiveContactAssignmentToCurrentPartnerSchool>();
         services.AddScoped<IAuthorizationHandler, HasAdminUserPrivileges>();
         services.AddScoped<IAuthorizationHandler, HasActiveStaffRecord>();
+        services.AddScoped<IAuthorizationHandler, IsActiveStudent>();
 
         return services;
     }

@@ -2,6 +2,7 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.ThirdPartyConsent.Enums;
+using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.ValueObjects;
 using System;
@@ -10,7 +11,7 @@ using ApplicationId = Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
 
 public sealed record TransactionDetailsResponse(
     ConsentTransactionId Id,
-    string StudentId,
+    StudentId StudentId,
     Name Name,
     Grade Grade,
     string School,

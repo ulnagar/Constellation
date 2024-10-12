@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Faculties.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct FacultyMembershipId(Guid Value)
+    : IStronglyTypedId
 {
     public static FacultyMembershipId Empty => new(Guid.Empty);
 

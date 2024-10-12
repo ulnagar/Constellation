@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Core.Models.Enrolments;
 
+using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Errors;
 using Events;
 using Identifiers;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -14,7 +14,7 @@ public class Enrolment : AggregateRoot, IAuditableEntity
 {
 
     private Enrolment(
-        string studentId,
+        StudentId studentId,
         OfferingId offeringId)
     {
         Id = new();
@@ -23,7 +23,7 @@ public class Enrolment : AggregateRoot, IAuditableEntity
     }
 
     public EnrolmentId Id { get; private set; }
-    public string StudentId { get; private set; }
+    public StudentId StudentId { get; private set; }
     public OfferingId OfferingId { get; private set; }
     public bool IsDeleted { get; private set; }
     public string CreatedBy { get; set; }
@@ -34,7 +34,7 @@ public class Enrolment : AggregateRoot, IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static Enrolment Create(
-        string studentId,
+        StudentId studentId,
         OfferingId offeringId)
     {
         Enrolment entry = new(studentId, offeringId);

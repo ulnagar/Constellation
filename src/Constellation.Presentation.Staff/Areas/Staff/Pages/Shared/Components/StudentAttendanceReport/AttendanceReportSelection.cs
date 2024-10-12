@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StudentAttendanceReport;
 
+using Core.Models.Students.Identifiers;
+
 public class AttendanceReportSelection
 {
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; } = StudentId.Empty;
     public DateTime ReportDate { get; set; } = DateTime.Today;
 
-    public Dictionary<string, string> StudentList { get; set; }
+    public Dictionary<StudentId, string> StudentList { get; set; }
 }

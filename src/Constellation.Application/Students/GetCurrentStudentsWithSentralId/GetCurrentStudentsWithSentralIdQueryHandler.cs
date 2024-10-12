@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsWithSentralId;
 
-using Constellation.Application.Abstractions.Messaging;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models.Students;
+using Core.Models.Students.Enums;
+using Core.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,23 +25,28 @@ internal sealed class GetCurrentStudentsWithSentralIdQueryHandler
     {
         List<StudentWithSentralIdResponse> results = new();
 
-        var students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         if (students is null)
             return results;
 
-        foreach (var student in students)
+        foreach (Student student in students)
         {
-            var studentName = Name.Create(student.FirstName, null, student.LastName);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (studentName.IsFailure)
+            if (enrolment is null) 
+                continue;
+
+            SystemLink? link = student.SystemLinks.FirstOrDefault(entry => entry.System == SystemType.Sentral);
+
+            if (link is null)
                 continue;
 
             results.Add(new(
-                student.StudentId,
-                studentName.Value,
-                student.CurrentGrade,
-                student.SentralStudentId));
+                student.Id,
+                student.Name,
+                enrolment.Grade,
+                link.Value));
         }
 
         return results;

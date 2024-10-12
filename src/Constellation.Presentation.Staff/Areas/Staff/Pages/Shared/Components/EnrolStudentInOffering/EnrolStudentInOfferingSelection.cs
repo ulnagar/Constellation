@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.EnrolStudentInOffering;
 
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Models.Students.Identifiers;
 
 public class EnrolStudentInOfferingSelection
 {
@@ -8,6 +9,6 @@ public class EnrolStudentInOfferingSelection
     public string OfferingName { get; set; } = string.Empty;
     public string CourseName { get; set; } = string.Empty;
 
-    public string StudentId { get; set; } = string.Empty;
-    public Dictionary<string, string> Students { get; set; } = new();
+    public StudentId StudentId { get; set; } = StudentId.Empty;
+    public Dictionary<StudentId, string> Students { get; set; } = new();
 }

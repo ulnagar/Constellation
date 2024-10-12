@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.WorkFlows.CreateAttendanceCase;
 
 using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
 
 public sealed record CreateAttendanceCaseCommand(
-    string StudentId)
+    StudentId StudentId)
     : ICommand;

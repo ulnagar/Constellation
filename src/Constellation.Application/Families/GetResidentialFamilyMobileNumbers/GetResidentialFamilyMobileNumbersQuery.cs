@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Families.GetResidentialFamilyMobileNumbers;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.ValueObjects;
+using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
+using Core.ValueObjects;
 using System.Collections.Generic;
 
 public sealed record GetResidentialFamilyMobileNumbersQuery(
-    string StudentId)
+    StudentId StudentId)
     : IQuery<List<PhoneNumber>>;

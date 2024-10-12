@@ -14,6 +14,8 @@ using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -97,6 +99,24 @@ internal sealed class CreateAwardNominationCommandHandler
             return Result.Failure(DomainErrors.Awards.Nomination.NotRecognised);
         }
 
+        // Check that there is not a duplicate nomination already existing in the period
+        List<Nomination> existingNomination = period.Nominations.Where(entry =>
+                entry.AwardType == nomination.AwardType &&
+                entry.StudentId == nomination.StudentId &&
+                !entry.IsDeleted)
+            .ToList();
+
+        if (existingNomination.Any())
+        {
+            _logger
+                .ForContext(nameof(request), request, true)
+                .ForContext(nameof(Nomination), nomination, true)
+                .ForContext(nameof(Error), DomainErrors.Awards.Nomination.DuplicateFound, true)
+                .Warning("Award nomination already exists");
+
+            return Result.Failure(DomainErrors.Awards.Nomination.DuplicateFound);
+        }
+        
         period.AddNomination(nomination);
 
         await _unitOfWork.CompleteAsync(cancellationToken);

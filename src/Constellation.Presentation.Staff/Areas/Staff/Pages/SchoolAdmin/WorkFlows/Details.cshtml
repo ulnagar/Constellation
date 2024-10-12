@@ -40,11 +40,11 @@
     </div>
     @foreach (var action in Model.Case?.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
     {
-        <vc:display-case-action case-id="@Model.Id.Value" action-id="@action.ActionId.Value" show-menu="true" />
+        <vc:display-case-action case-id="@Model.Id" action-id="@action.ActionId" show-menu="true" />
 
         @foreach (var subAction in Model.Case?.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
         {
-            <vc:display-case-action case-id="@Model.Id.Value" action-id="@subAction.ActionId.Value" show-menu="true" />
+            <vc:display-case-action case-id="@Model.Id" action-id="@subAction.ActionId" show-menu="true" />
         }
     }
 </div>

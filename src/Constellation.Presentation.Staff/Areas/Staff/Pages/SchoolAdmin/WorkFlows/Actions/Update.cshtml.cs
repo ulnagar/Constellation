@@ -23,7 +23,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.ActionUpdateForm;
 
@@ -52,11 +51,9 @@ public class UpdateModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_WorkFlows_Cases;
     [ViewData] public string PageTitle { get; set; } = "WorkFlow Action Update";
 
-    [ModelBinder(typeof(ConstructorBinder))]
     [BindProperty(SupportsGet = true)]
     public CaseId CaseId { get; set; }
 
-    [ModelBinder(typeof(ConstructorBinder))]
     [BindProperty(SupportsGet = true)]
     public ActionId ActionId { get; set; }
 

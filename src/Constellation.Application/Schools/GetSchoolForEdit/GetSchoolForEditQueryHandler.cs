@@ -47,9 +47,9 @@ internal sealed class GetSchoolForEditQueryHandler
             school.PhoneNumber,
             school.FaxNumber,
             school.EmailAddress,
-            school.Division,
+            school.Directorate,
             school.HeatSchool,
-            school.Electorate,
+            school.EducationalServicesTeam,
             school.PrincipalNetwork,
             school.TimetableApplication,
             school.RollCallGroup);

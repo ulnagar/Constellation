@@ -2,6 +2,7 @@
 
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ public class SelectStudentForLessonFilterViewComponent : ViewComponent
     public async Task<IViewComponentResult> InvokeAsync()
     {
         SelectStudentForLessonFilterSelection viewModel = new();
-        Result<Dictionary<string, string>> result = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+        Result<Dictionary<StudentId, string>> result = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
 
         if (result.IsFailure)
         {

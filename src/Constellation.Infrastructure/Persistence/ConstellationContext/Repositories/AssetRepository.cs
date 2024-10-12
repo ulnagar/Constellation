@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Models.Assets;
 using Core.Models.Assets.Enums;
 using Core.Models.Assets.Identifiers;
@@ -116,6 +117,14 @@ internal sealed class AssetRepository : IAssetRepository
         await _context
             .Set<Asset>()
             .AnyAsync(asset => asset.AssetNumber == assetNumber, cancellationToken);
+
+    public async Task<List<Asset>> GetDeviceHistoryForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .Where(asset => asset.Allocations.Any(allocation => allocation.UserId == studentId.ToString()))
+            .ToListAsync(cancellationToken);
 
     public void Insert(Asset asset) => _context.Set<Asset>().Add(asset);
 

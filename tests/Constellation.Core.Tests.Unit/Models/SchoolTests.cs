@@ -1,60 +1,9 @@
-﻿using Constellation.Core.Models;
+﻿namespace Constellation.Core.Tests.Unit.Models;
 
-namespace Constellation.Core.Tests.Unit.Models;
-
-using Core.Models.Students;
+using Constellation.Core.Models;
 
 public class SchoolTests
 {
-    [Fact]
-    public void HasStudents_ShouldReturnFalse_WhenNoStudentsExist()
-    {
-        // Arrange
-        var sut = new School();
-
-        // Act
-        var result = sut.HasStudents;
-
-        // Assert
-        result.Should().BeFalse();
-    }
-
-    [Fact]
-    public void HasStudents_ShouldReturnFalse_WhenNoCurrentStudentsExist()
-    {
-		// Arrange
-		var sut = new School();
-
-		var student = new Student();
-		student.IsDeleted = true;
-
-		sut.Students.Add(student);
-
-		// Act
-		var result = sut.HasStudents;
-
-		// Assert
-		result.Should().BeFalse();
-	}
-
-    [Fact]
-    public void HasStudents_ShouldReturnTrue_WhenCurrentStudentsExist()
-    {
-        // Arrange
-        var sut = new School();
-
-        var student = new Student();
-        student.IsDeleted = false;
-
-        sut.Students.Add(student);
-
-        // Act
-        var result = sut.HasStudents;
-
-        // Assert
-        result.Should().BeTrue();
-    }
-
     [Fact]
     public void HasStaff_ShouldReturnFalse_WhenNoStaffExist()
     {

@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Application.Offerings.GetSessionDetailsForStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Errors;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
-using Constellation.Core.Shared;
+using Core.Errors;
+using Core.Models;
+using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Offerings;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +44,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
     {
         List<StudentSessionDetailsResponse> sessionList = new();
 
-        var enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
         if (enrolments is null || !enrolments.Any())
         {
@@ -50,9 +53,9 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
             return Result.Failure<List<StudentSessionDetailsResponse>>(DomainErrors.Enrolments.Enrolment.NotFoundForStudent(request.StudentId));
         }
 
-        foreach (var enrolment in enrolments)
+        foreach (Enrolment enrolment in enrolments)
         {
-            var offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 
             if (offering is null)
             {
@@ -61,18 +64,18 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
                 continue;
             }
 
-            var assignments = offering
+            List<TeacherAssignment> assignments = offering
                 .Teachers
                 .Where(assignment => 
                     assignment.Type == AssignmentType.ClassroomTeacher && 
                     !assignment.IsDeleted)
                 .ToList();
 
-            var teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
+            List<Staff> teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
             
-            foreach (var session in offering.Sessions.Where(session => !session.IsDeleted))
+            foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
             {
-                var period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+                TimetablePeriod period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
                 if (period is null)
                 {

@@ -32,6 +32,11 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
             identity.AddClaim(new Claim(AuthClaimType.StaffEmployeeId, user.StaffId));
         }
 
+        if (user.IsStudent)
+        {
+            identity.AddClaim(new Claim(AuthClaimType.StudentId, user.StudentId.ToString()));
+        }
+
         return identity;
     }
 }

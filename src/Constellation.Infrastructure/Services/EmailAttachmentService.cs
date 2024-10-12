@@ -36,10 +36,10 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         foreach (var student in students)
         {
             var entry = new CoverRollViewModel.EnrolledStudent();
-            entry.Name = student.DisplayName;
-            entry.Gender = student.Gender;
-            entry.School = student.School.Name;
-            entry.OrderName = $"{student.LastName} {student.FirstName}";
+            entry.Name = student.Name.DisplayName;
+            entry.Gender = student.Gender.Name;
+            entry.School = student.CurrentEnrolment?.SchoolName;
+            entry.OrderName = student.Name.SortOrder;
 
             model.Students.Add(entry);
         }

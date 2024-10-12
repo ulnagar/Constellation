@@ -8,10 +8,13 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Absences;
-using LinqKit;
+using Core.Models.Enrolments;
+using Core.Models.Students.Enums;
+using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
 public class StudentRepository : IStudentRepository
 {
@@ -32,64 +35,65 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Student>> GetAllWithSchool(
-        CancellationToken cancellationToken = default) =>
+    public async Task<Student> GetById(
+        StudentId studentId, 
+        CancellationToken cancellationToken = default) => 
         await _context
             .Set<Student>()
-            .Include(student => student.School)
-            .ToListAsync(cancellationToken);
-    
-    public async Task<Student?> GetById(
-        string StudentId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Student>()
-            .Where(student => student.StudentId == StudentId)
+            .Where(student => student.Id == studentId)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<Student?> GetWithSchoolById(
-        string studentId,
+    public async Task<Student?> GetBySRN(
+        StudentReferenceNumber studentReferenceNumber,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Include(student => student.School)
-            .Where(student => student.StudentId == studentId)
+            .Where(student => student.StudentReferenceNumber == studentReferenceNumber)
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<Student?> GetCurrentByEmailAddress(
-        string emailAddress, 
+        EmailAddress emailAddress, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
             .Where(student =>
-                emailAddress.Contains(student.PortalUsername) &&
+                student.EmailAddress == emailAddress &&
                 !student.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<Student?> GetAnyByEmailAddress(
-        string emailAddress, 
+        EmailAddress emailAddress, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Where(student =>
-                emailAddress.Contains(student.PortalUsername))
+            .Where(student => student.EmailAddress == emailAddress)
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<Student>> GetListFromIds(
-        List<string> studentIds,
+        List<StudentId> studentIds,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Where(student => studentIds.Contains(student.StudentId))
+            .Where(student => studentIds.Contains(student.Id))
             .ToListAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentEnrolmentsForOffering(
         OfferingId offeringId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Student>()
-            .Where(student => student.Enrolments.Any(enrolment => enrolment.OfferingId == offeringId && !enrolment.IsDeleted))
+        CancellationToken cancellationToken = default)
+    {
+        List<StudentId> studentIds = await _context
+            .Set<Enrolment>()
+            .Where(enrolment => 
+                enrolment.OfferingId == offeringId &&
+                !enrolment.IsDeleted)
+            .Select(enrolment => enrolment.StudentId)
             .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Student>()
+            .Where(student => studentIds.Contains(student.Id))
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<Student>> GetCurrentEnrolmentsForCourse(
         CourseId courseId,
@@ -104,117 +108,144 @@ public class StudentRepository : IStudentRepository
             .Select(offering => offering.Id)
             .ToListAsync(cancellationToken);
 
-        List<Student> students = await _context
-            .Set<Student>()
-            .Where(student => student.Enrolments.Any(enrolment => 
-                offeringIds.Contains(enrolment.OfferingId) && 
-                !enrolment.IsDeleted))
+        List<StudentId> studentIds = await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                offeringIds.Contains(enrolment.OfferingId) &&
+                !enrolment.IsDeleted)
+            .Select(enrolment => enrolment.StudentId)
             .ToListAsync(cancellationToken);
 
-        return students;
+        return await _context
+            .Set<Student>()
+            .Where(student => studentIds.Contains(student.Id))
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Student>> GetCurrentEnrolmentsForOfferingWithSchool(
-        OfferingId offeringId,
+    public async Task<bool> IsValidStudentId(
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Include(student => student.School)
-            .Where(student => student.Enrolments.Any(enrolment => enrolment.OfferingId == offeringId && !enrolment.IsDeleted))
-            .ToListAsync(cancellationToken);
+            .AnyAsync(student => student.Id == studentId, cancellationToken);
 
-    public async Task<List<Student>> GetCurrentStudentsWithSchool(
+    public async Task<List<Student>> GetCurrentStudents(
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Include(student => student.School)
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Student>> GetInactiveStudentsWithSchool(
+    public async Task<List<Student>> GetInactiveStudents(
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Include(student => student.School)
             .Where(student => student.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Student>> GetCurrentStudentsWithFamilyMemberships(
-        CancellationToken cancellationToken = default) =>
-        await _context
+    public async Task<List<Student>> GetFilteredStudents(
+        List<OfferingId> offeringIds,
+        List<Grade> grades,
+        List<string> schoolCodes,
+        CancellationToken cancellationToken = default)
+    {
+        List<SchoolEnrolment> schoolEnrolments = await _context
+            .Set<SchoolEnrolment>()
+            .Where(enrolment => 
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today))
+            .ToListAsync(cancellationToken);
+
+        List<Student> students = await _context
             .Set<Student>()
-            .Include(student => student.FamilyMemberships)
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<bool> IsValidStudentId(
-        string studentId, 
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Student>()
-            .AnyAsync(student => student.StudentId == studentId && !student.IsDeleted, cancellationToken);
-
-    public async Task<List<Student>> GetFilteredStudents(
-        List<OfferingId> OfferingIds,
-        List<Grade> Grades,
-        List<string> SchoolCodes,
-        CancellationToken cancellationToken = default)
-    {
-        IQueryable<Student> students = _context
-            .Set<Student>()
-            .Include(student => student.School)
-            .Include(student => student.Enrolments)
-            .Where(student => !student.IsDeleted);
-
-        if (OfferingIds.Count > 0)
+        if (offeringIds.Count > 0)
         {
             List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
                 .Where(offering =>
-                    OfferingIds.Contains(offering.Id) &&
+                    offeringIds.Contains(offering.Id) &&
                     offering.StartDate <= _dateTime.Today &&
                     offering.EndDate >= _dateTime.Today)
                 .Select(offering => offering.Id)
                 .ToListAsync(cancellationToken);
 
+            List<StudentId> studentIds = await _context
+                .Set<Enrolment>()
+                .Where(enrolment =>
+                    currentOfferingIds.Contains(enrolment.OfferingId) &&
+                    !enrolment.IsDeleted)
+                .Select(enrolment => enrolment.StudentId)
+                .ToListAsync(cancellationToken);
+
             students = students
-                .Where(student => student.Enrolments.Any(enrol =>
-                    !enrol.IsDeleted &&
-                    currentOfferingIds.Contains(enrol.OfferingId)));
+                .Where(student => studentIds.Contains(student.Id))
+                .ToList();
         }
 
-        if (Grades.Count > 0)
+        if (grades.Count > 0)
         {
             students = students
-                .Where(student => Grades.Contains(student.CurrentGrade));
+                .Where(student => schoolEnrolments.Any(enrolment => 
+                    enrolment.StudentId == student.Id && 
+                    grades.Contains(enrolment.Grade)))
+                .ToList();
         }
 
-        if (SchoolCodes.Count > 0)
+        if (schoolCodes.Count > 0)
         {
             students = students
-                .Where(student => SchoolCodes.Contains(student.SchoolCode));
+                .Where(student => schoolEnrolments.Any(enrolment =>
+                    enrolment.StudentId == student.Id &&
+                    schoolCodes.Contains(enrolment.SchoolCode)))
+                .ToList();
         }
 
-        return await students.ToListAsync(cancellationToken);
+        return students;
     }
-        
+
     public async Task<List<Student>> GetCurrentStudentsFromSchool(
-        string SchoolCode,
+        string schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Where(student => 
-                student.SchoolCode == SchoolCode &&
-                student.IsDeleted == false)
+            .Where(student =>
+                student.SchoolEnrolments.Any(enrolment =>
+                    !enrolment.IsDeleted &&
+                    enrolment.StartDate <= _dateTime.Today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today) &&
+                    enrolment.SchoolCode == schoolCode) &&
+                !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Student>> GetCurrentStudentFromGrade(
-        Grade grade, 
+    public async Task<int> GetCountCurrentStudentsFromSchool(
+        string schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Where(student => 
-                student.IsDeleted == false &&
-                student.CurrentGrade == grade)
+            .Where(student =>
+                student.SchoolEnrolments.Any(enrolment =>
+                    !enrolment.IsDeleted &&
+                    enrolment.StartDate <= _dateTime.Today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today) &&
+                    enrolment.SchoolCode == schoolCode) &&
+                !student.IsDeleted)
+            .CountAsync(cancellationToken);
+
+    public async Task<List<Student>> GetCurrentStudentFromGrade(
+        Grade grade,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Student>()
+            .Where(student =>
+                student.SchoolEnrolments.Any(enrolment =>
+                    !enrolment.IsDeleted &&
+                    enrolment.StartDate <= _dateTime.Today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today) &&
+                    enrolment.Grade == grade) &&
+                !student.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountCurrentStudentsWithPartialAbsenceScanDisabled(
@@ -248,16 +279,15 @@ public class StudentRepository : IStudentRepository
         await _context
             .Set<Student>()
             .Where(student => student.IsDeleted == false)
-            .Where(student => string.IsNullOrWhiteSpace(student.SentralStudentId))
+            .Where(student => student.SystemLinks.All(link => link.System != SystemType.Sentral))
             .CountAsync(cancellationToken);
 
     public async Task<List<Student>> GetCurrentStudentsWithoutSentralId(
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Student>()
-            .Include(student => student.School)
             .Where(student => student.IsDeleted == false)
-            .Where(student => string.IsNullOrWhiteSpace(student.SentralStudentId))
+            .Where(student => student.SystemLinks.All(link => link.System != SystemType.Sentral))
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountCurrentStudentsWithAwardOverages(
@@ -284,75 +314,42 @@ public class StudentRepository : IStudentRepository
 
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 
-    public async Task<Student> GetForExistCheck(string id)
-    {
-        return await _context.Students
-            .SingleOrDefaultAsync(student => student.StudentId == id);
-    }
-
-    public async Task<ICollection<Student>> ForListAsync(Expression<Func<Student, bool>> predicate)
-    {
-        return await _context.Students
-            .Include(student => student.School)
-            .Include(student => student.Enrolments)
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .Where(predicate)
-            .ToListAsync();
-    }
-
-    public async Task<Student> ForEditAsync(string studentId)
-    {
-        return await _context.Students
-            .SingleOrDefaultAsync(student => student.StudentId == studentId);
-    }
-
-    public async Task<Student> ForBulkUnenrolAsync(string studentId)
-    {
-        return await _context.Students
-            .Include(student => student.Enrolments)
-            .SingleOrDefaultAsync(student => student.StudentId == studentId);
-    }
-
-    public async Task<ICollection<Student>> ForSelectionListAsync()
-    {
-        return await _context.Students
-            .Where(student => !student.IsDeleted)
-            .ToListAsync();
-    }
-
     public async Task<List<Student>> ForInterviewsExportAsync(
-        List<int> filterGrades, 
+        List<int> filterGrades,
         List<OfferingId> filterClasses,
-        CancellationToken cancellationToken = default) =>
-        await _context.Students
-            .Include(student => student.Enrolments)
-            .Include(student => student.FamilyMemberships)
-            .Where(student => !student.IsDeleted)
-            .Where(FilterStudent(filterGrades, filterClasses))
+        CancellationToken cancellationToken = default)
+    {
+        List<StudentId> offeringStudentIds = await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                !enrolment.IsDeleted &&
+                filterClasses.Contains(enrolment.OfferingId))
+            .Select(enrolment => enrolment.StudentId)
             .ToListAsync(cancellationToken);
 
-    public async Task<ICollection<Student>> WithoutAdobeConnectDetailsForUpdate()
-    {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        List<StudentId> gradeStudentIds = await _context
+            .Set<Student>()
+            .Where(student =>
+                !student.IsDeleted &&
+                student.SchoolEnrolments.Any(enrolment =>
+                    !enrolment.IsDeleted &&
+                    enrolment.StartDate <= today &&
+                    (!enrolment.EndDate.HasValue || enrolment.EndDate >= today) &&
+                    filterGrades.Contains((int)enrolment.Grade)))
+            .Select(student => student.Id)
+            .ToListAsync(cancellationToken);
+
+        List<StudentId> combinedIdList = 
+            (offeringStudentIds.Count > 0 && gradeStudentIds.Count > 0) ? offeringStudentIds.Intersect(gradeStudentIds).ToList()
+            : offeringStudentIds.Count > 0 ? offeringStudentIds
+            : gradeStudentIds;
+
         return await _context.Students
-            .Where(student => string.IsNullOrWhiteSpace(student.AdobeConnectPrincipalId))
-            .ToListAsync();
-    }
-
-    private static Expression<Func<Student, bool>> FilterStudent(List<int> filterGrades, List<OfferingId> filterClasses)
-    {
-        ExpressionStarter<Student> predicate = PredicateBuilder.New<Student>();
-
-        if (filterGrades.Count > 0)
-        {
-            predicate.And(student => filterGrades.Contains((int)student.CurrentGrade));
-        }
-
-        if (filterClasses.Count > 0)
-        {
-            predicate.And(student => student.Enrolments.Any(enrolment => !enrolment.IsDeleted && filterClasses.Contains(enrolment.OfferingId)));
-        }
-
-        return predicate;
+            .Where(student => 
+                !student.IsDeleted &&
+                combinedIdList.Contains(student.Id))
+            .ToListAsync(cancellationToken);
     }
 }

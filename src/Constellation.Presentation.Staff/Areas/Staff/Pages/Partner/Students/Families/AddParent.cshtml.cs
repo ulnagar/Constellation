@@ -45,7 +45,6 @@ public class AddParentModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public FamilyId FamilyId { get; set; }
 
     [BindProperty]

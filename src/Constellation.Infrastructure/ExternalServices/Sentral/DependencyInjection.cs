@@ -2,7 +2,6 @@
 
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.ExternalServices.Sentral;
 using Microsoft.Extensions.Configuration;
 using System.Net;
@@ -23,7 +22,6 @@ public static class SentralServicesRegistration
         services.Configure<SentralGatewayConfiguration>(configuration.GetSection(SentralGatewayConfiguration.Section));
 
         services.AddScoped<ISentralGateway, Gateway>();
-        services.AddScoped<ISentralService, Service>();
 
         return services;
     }

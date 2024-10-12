@@ -32,11 +32,16 @@ internal sealed class GetStudentsFromSchoolForSelectionQueryHandler
 
         foreach (Student student in students)
         {
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             response.Add(new(
-                student.StudentId,
-                student.FirstName, 
-                student.LastName,
-                student.CurrentGrade.AsName()));
+                student.Id,
+                student.Name.PreferredName, 
+                student.Name.LastName,
+                enrolment.Grade.AsName()));
         }
 
         return response;

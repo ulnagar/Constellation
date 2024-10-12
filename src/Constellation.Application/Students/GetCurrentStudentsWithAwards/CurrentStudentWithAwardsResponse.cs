@@ -2,11 +2,12 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using System;
 using System.Collections.Generic;
 
 public sealed record CurrentStudentWithAwardsResponse(
-    string StudentId,
+    StudentId StudentId,
     string FirstName,
     string LastName,
     string DisplayName,

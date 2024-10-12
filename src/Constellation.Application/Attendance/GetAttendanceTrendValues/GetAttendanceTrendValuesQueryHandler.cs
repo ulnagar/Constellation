@@ -5,11 +5,10 @@ using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models;
+using Core.Models.Students.Identifiers;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,18 +19,15 @@ internal sealed class GetAttendanceTrendValuesQueryHandler
 {
     private readonly ICaseRepository _caseRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly IAttendanceRepository _attendanceRepository;
 
     public GetAttendanceTrendValuesQueryHandler(
         ICaseRepository caseRepository,
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         IAttendanceRepository attendanceRepository)
     {
         _caseRepository = caseRepository;
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _attendanceRepository = attendanceRepository;
     }
 
@@ -39,36 +35,34 @@ internal sealed class GetAttendanceTrendValuesQueryHandler
     {
         List<AttendanceTrend> response = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
-
-        List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         List<AttendanceValue> values = await _attendanceRepository.GetAllRecent(cancellationToken);
 
-        IEnumerable<IGrouping<string, AttendanceValue>> groupedValues = values.OrderByDescending(value => value.EndDate).GroupBy(value => value.StudentId);
+        IEnumerable<IGrouping<StudentId, AttendanceValue>> groupedValues = values.OrderByDescending(value => value.EndDate).GroupBy(value => value.StudentId);
 
-        foreach (IGrouping<string, AttendanceValue> studentEntries in groupedValues)
+        foreach (IGrouping<StudentId, AttendanceValue> studentEntries in groupedValues)
         {
-            Student student = students.FirstOrDefault(entry => entry.StudentId == studentEntries.Key);
+            Student student = students.FirstOrDefault(entry => entry.Id == studentEntries.Key);
 
             if (student is null)
                 continue;
 
-            School school = schools.FirstOrDefault(entry => entry.Code == student.SchoolCode);
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-            if (school is null) 
+            if (enrolment is null) 
                 continue;
 
             string period = studentEntries.First().PeriodLabel;
 
-            bool existingCase = await _caseRepository.ExistingOpenAttendanceCaseForStudent(student.StudentId, cancellationToken);
+            bool existingCase = await _caseRepository.ExistingOpenAttendanceCaseForStudent(student.Id, cancellationToken);
 
             response.Add(new(
                 studentEntries.Key,
-                student.GetName(),
-                student.CurrentGrade,
-                student.SchoolCode,
-                school.Name,
+                student.Name,
+                enrolment.Grade,
+                enrolment.SchoolCode,
+                enrolment.SchoolName,
                 period,
                 existingCase,
                 studentEntries.FirstOrDefault()?.PerMinuteWeekPercentage ?? 100,

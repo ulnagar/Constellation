@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Application.Students.GetStudentById;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Students.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
+using Core.Models.Students;
 using Core.Models.Students.Errors;
+using Core.Models.Students.ValueObjects;
+using Core.Shared;
+using Models;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,22 +22,38 @@ internal sealed class GetStudentByIdQueryHandler
 
     public async Task<Result<StudentResponse>> Handle(GetStudentByIdQuery request, CancellationToken cancellationToken)
     {
-        var student = await _studentRepository.GetWithSchoolById(request.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
-        {
             return Result.Failure<StudentResponse>(StudentErrors.NotFound(request.StudentId));
+
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            return new StudentResponse(
+                student.Id,
+                student.StudentReferenceNumber ?? StudentReferenceNumber.Empty,
+                student.Name,
+                student.Gender,
+                null,
+                student.EmailAddress,
+                null,
+                null,
+                false,
+                student.IsDeleted);
         }
 
         return new StudentResponse(
-            student.StudentId,
-            student.GetName(),
+            student.Id,
+            student.StudentReferenceNumber ?? StudentReferenceNumber.Empty,
+            student.Name,
             student.Gender,
-            student.CurrentGrade,
-            student.PortalUsername,
+            enrolment.Grade,
             student.EmailAddress,
-            student.School.Name,
-            student.SchoolCode,
+            enrolment.SchoolName,
+            enrolment.SchoolCode,
+            true,
             student.IsDeleted);
     }
 }

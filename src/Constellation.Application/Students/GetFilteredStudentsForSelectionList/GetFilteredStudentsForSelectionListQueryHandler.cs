@@ -92,10 +92,15 @@ internal sealed class GetFilteredStudentsForSelectionListQueryHandler
 
         foreach (Student student in filteredStudents)
         {
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
-                student.CurrentGrade));
+                student.Id,
+                student.Name,
+                enrolment.Grade));
         }
 
         return response;

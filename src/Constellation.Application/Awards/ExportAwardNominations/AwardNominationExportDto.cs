@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Application.Awards.ExportAwardNominations;
 
+using Core.Enums;
+using Core.Models.Students.ValueObjects;
+using Core.ValueObjects;
+
 public sealed record AwardNominationExportDto(
-    string SRN,
-    string StudentFirstName,
-    string StudentLastName,
-    string StudentName,
-    string Grade,
+    StudentReferenceNumber SRN,
+    Name StudentName,
+    Grade Grade,
     string School,
-    string Awards);
+    string Award);

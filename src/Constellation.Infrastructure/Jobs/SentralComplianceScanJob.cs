@@ -47,9 +47,10 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
         (Stream BasicFile, Stream DetailFile) files = await _sentralGateway.GetNAwardReport(cancellationToken);
         List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYear.ToString());
         List<SentralIncidentDetails> incidents = await _excelService.ConvertSentralIncidentReport(files.BasicFile, files.DetailFile, excludedDates, cancellationToken);
-        
-        // Exclude all items created before system is live
-        incidents = incidents.Where(entry => entry.DateCreated > DateOnly.Parse("2024-07-22")).ToList();
+
+        // Do not run on dates that are in the excluded list to prevent from processing the same values over and over (e.g. during school holidays)
+        if (excludedDates.Contains(_dateTime.Today))
+            return;
         
         // Get all entries that are currently 12 days overdue
         IEnumerable<SentralIncidentDetails> workingIncidents = incidents

@@ -34,7 +34,7 @@
                 prefix: 'fa'
             });
 
-            var marker = L.marker([m.x, m.y], { icon: markerIcon }).bindPopup(m.description);
+            var marker = L.marker([m.latitude, m.longitude], { icon: markerIcon }).bindPopup(m.description);
             marker.addTo(markersGroup);
             marker.addTo(group);
         });

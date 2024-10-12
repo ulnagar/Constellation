@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using Shared.Components.ExportAwardNominations;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
@@ -45,16 +46,21 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Award Nomination Details";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public AwardNominationPeriodId PeriodId { get; set; }
 
     public NominationPeriodDetailResponse Period { get; set; }
 
     public async Task OnGet(CancellationToken cancellationToken = default) => await PreparePage(cancellationToken);
 
-    public async Task<IActionResult> OnGetExport(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> OnPostExport(
+        ExportAwardNominationsSelection viewModel,
+        CancellationToken cancellationToken = default)
     {
-        ExportAwardNominationsCommand command = new(PeriodId);
+        ExportAwardNominationsCommand command = new(
+            PeriodId,
+            viewModel.Grouping,
+            viewModel.ShowClass,
+            viewModel.ShowGrade);
 
         _logger
             .ForContext(nameof(ExportAwardNominationsCommand), command, true)
@@ -79,7 +85,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDelete(
-        [ModelBinder(typeof(ConstructorBinder))] AwardNominationId entryId, 
+        AwardNominationId entryId, 
         CancellationToken cancellationToken = default)
     {
         DeleteAwardNominationCommand command = new(PeriodId, entryId);

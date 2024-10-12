@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Core.Models.Identifiers;
 
+using Constellation.Core.Primitives;
 using System;
 
 public record struct GroupTutorialId(Guid Value)
+    : IStronglyTypedId
 {
     public static GroupTutorialId Empty => new(Guid.Empty);
 

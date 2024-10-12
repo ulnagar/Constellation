@@ -20,8 +20,7 @@ public class AddTeacherToOfferingViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(
-        [ModelBinder(typeof(ConstructorBinder))] OfferingId id)
+    public async Task<IViewComponentResult> InvokeAsync(OfferingId id)
     {
         Result<OfferingDetailsResponse> offering = await _mediator.Send(new GetOfferingDetailsQuery(id));
         Result<List<StaffSelectionListResponse>> staffResult = await _mediator.Send(new GetStaffForSelectionListQuery());

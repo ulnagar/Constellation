@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Enrolments.UnenrolStudentFromAllOfferings;
 
 using Abstractions.Messaging;
+using Core.Models.Students.Identifiers;
 
 public sealed record UnenrolStudentFromAllOfferingsCommand(
-    string StudentId)
+    StudentId StudentId)
     : ICommand;

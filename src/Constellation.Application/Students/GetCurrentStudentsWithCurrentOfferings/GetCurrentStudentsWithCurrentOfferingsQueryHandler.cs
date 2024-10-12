@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Students.GetCurrentStudentsWithCurrentOfferings;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
@@ -9,6 +10,7 @@ using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
 using Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -38,7 +40,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
     {
         List<StudentWithOfferingsResponse> response = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         List<Offering> offerings = await _offeringRepository.GetAll(cancellationToken);
 
@@ -46,7 +48,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
         {
             List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.StudentId, cancellationToken);
+            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Enrolment enrolment in enrolments)
             {
@@ -61,13 +63,37 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                     offering.IsCurrent));
             }
 
+            SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
+            bool currentEnrolment = true;
+
+            if (schoolEnrolment is null)
+            {
+                currentEnrolment = false;
+
+                // retrieve most recent applicable school enrolment
+                if (student.SchoolEnrolments.Count > 0)
+                {
+                    int maxYear = student.SchoolEnrolments.Max(item => item.Year);
+
+                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                        .Where(entry => entry.Year == maxYear)
+                        .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
+                        .MaxBy(entry => entry.Date)
+                        .Id;
+
+                    schoolEnrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
+                }
+            }
+
             response.Add(new(
-                student.StudentId,
-                student.GetName(),
+                student.Id,
+                student.StudentReferenceNumber,
+                student.Name,
                 student.Gender,
-                student.School.Name,
-                student.CurrentGrade,
-                studentOfferings));
+                schoolEnrolment?.SchoolName,
+                schoolEnrolment?.Grade,
+                studentOfferings,
+                currentEnrolment));
         }
 
         return response;

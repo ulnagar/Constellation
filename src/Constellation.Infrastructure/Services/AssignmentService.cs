@@ -9,22 +9,28 @@ using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Canvas.Models;
+using Core.Models.Students;
+using Core.Models.Students.Errors;
+using Core.Models.Students.Repositories;
 using Core.Shared;
 using System.Threading.Tasks;
 
 internal class AssignmentService : IAssignmentService
 {
+    private readonly IStudentRepository _studentRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly ICanvasGateway _canvasGateway;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public AssignmentService(
+        IStudentRepository studentRepository,
         IAttachmentService attachmentService,
         ICanvasGateway canvasGateway,
         IEmailService emailService,
         ILogger logger)
     {
+        _studentRepository = studentRepository;
         _attachmentService = attachmentService;
         _canvasGateway = canvasGateway;
         _emailService = emailService;
@@ -51,9 +57,20 @@ internal class AssignmentService : IAssignmentService
             return fileRequest;
         }
 
+        Student student = await _studentRepository.GetById(submission.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(Error), StudentErrors.NotFound(submission.StudentId), true)
+                .Warning("Failed to upload Assignment Submission to Canvas");
+
+            return Result.Failure<AttachmentResponse>(StudentErrors.NotFound(submission.StudentId));
+        }
+
         // Upload file to Canvas
         // Include error checking/retry on failure
-        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, submission.StudentId, fileRequest.Value, cancellationToken);
+        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, student.StudentReferenceNumber.Number, fileRequest.Value, cancellationToken);
 
         if (!result)
         {
@@ -64,7 +81,7 @@ internal class AssignmentService : IAssignmentService
             await _emailService.SendAssignmentUploadFailedNotification(
                 assignment.Name, 
                 assignment.Id, 
-                submission.StudentId,
+                student.Name.DisplayName,
                 submission.Id, 
                 cancellationToken);
 

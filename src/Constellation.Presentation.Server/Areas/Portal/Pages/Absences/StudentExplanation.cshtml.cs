@@ -1,8 +1,9 @@
 namespace Constellation.Presentation.Server.Areas.Portal.Pages.Absences;
 
+using Application.Absences.GetAbsenceDetailsForStudent;
 using Constellation.Application.Absences.CreateAbsenceResponseFromStudent;
-using Constellation.Application.Absences.GetAbsenceForStudentResponse;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,13 +29,13 @@ public class StudentExplanationModel : PageModel
     [BindProperty]
     public string Reason { get; set; }
     [BindProperty]
-    public string StudentId { get; set; }
+    public StudentId StudentId { get; set; } = StudentId.Empty;
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken = default)
     {
         var absenceId = AbsenceId.FromValue(Id);
 
-        var absenceRequest = await _mediator.Send(new GetAbsenceForStudentResponseQuery(absenceId), cancellationToken);
+        var absenceRequest = await _mediator.Send(new GetAbsenceDetailsForStudentQuery(absenceId), cancellationToken);
 
         if (absenceRequest.IsFailure)
             throw new InvalidDataException(absenceRequest.Error.Message);

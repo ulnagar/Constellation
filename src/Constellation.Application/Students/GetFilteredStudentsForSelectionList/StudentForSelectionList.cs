@@ -2,8 +2,9 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Identifiers;
 
 public sealed record StudentForSelectionList(
-    string StudentId,
+    StudentId StudentId,
     Name StudentName,
     Grade Grade);

@@ -18,6 +18,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
+using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -103,7 +104,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.AllocationType.Equals(AllocationType.Student))
         {
-            if (string.IsNullOrWhiteSpace(viewModel.StudentId))
+            if (viewModel.StudentId == StudentId.Empty)
             {
                 ModalContent = new ErrorDisplay(AllocationErrors.StudentEmpty);
 

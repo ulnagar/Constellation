@@ -18,7 +18,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
@@ -47,7 +46,6 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Lesson";
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracLessonId Id { get; set; } = SciencePracLessonId.Empty;
 
     [BindProperty]
@@ -55,7 +53,6 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public DateOnly DueDate { get; set; }
     [BindProperty]
-    [ModelBinder(typeof(ConstructorBinder))]
     public CourseId CourseId { get; set; }
     [BindProperty]
     public bool DoNotGenerateRolls { get; set; }

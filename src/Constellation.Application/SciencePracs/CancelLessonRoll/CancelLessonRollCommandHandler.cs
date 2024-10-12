@@ -6,9 +6,9 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Serilog;
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,17 +19,20 @@ internal sealed class CancelLessonRollCommandHandler
     private readonly ILessonRepository _lessonRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public CancelLessonRollCommandHandler(
         ILessonRepository lessonRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
+        _dateTime = dateTime;
         _logger = logger.ForContext<CancelLessonRollCommand>();
     }
 
@@ -60,7 +63,7 @@ internal sealed class CancelLessonRollCommandHandler
             return Result.Failure(DomainErrors.SciencePracs.Roll.CannotCancelCompletedRoll);
         }
 
-        Result cancelRequest = roll.CancelRoll($"Roll cancelled by {_currentUserService.UserName} at {DateTime.Now}");
+        Result cancelRequest = roll.CancelRoll($"{request.Comment} Roll cancelled by {_currentUserService.UserName} at {_dateTime.Now}");
 
         if (cancelRequest.IsFailure)
         {

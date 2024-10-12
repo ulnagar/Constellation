@@ -4,12 +4,13 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.Students.Identifiers;
 using System;
 using System.Collections.Generic;
 
 public sealed record AbsenceDetailsResponse(
     AbsenceId AbsenceId,
-    string StudentId,
+    StudentId StudentId,
     Name StudentName,
     Grade StudentGrade,
     string SchoolName,

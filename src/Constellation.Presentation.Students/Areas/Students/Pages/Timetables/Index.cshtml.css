@@ -1,0 +1,45 @@
+.Timetable-Week {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Timetable-Day {
+    display: flex;
+    padding: 0.5rem 0;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Timetable-Day-Title {
+    text-align: center;
+    font-weight: bolder;
+    margin: 2px 1px;
+}
+
+.Timetable-Day-Period {
+    border: 1px solid green;
+    height: 7rem;
+    margin: 2px;
+    padding: 0.5rem;
+    text-align: center;
+    width: 10vw;
+    min-width: 125px;
+    background-color: azure;
+}
+
+    .Timetable-Day-Period.Active {
+        background-color: darkseagreen;
+        font-weight: bold;
+    }
+
+    .Timetable-Day-Period.Break {
+        background-color: lightyellow;
+    }
+
+    .Timetable-Day-Period.Other {
+        background-color: lightgray;
+    }

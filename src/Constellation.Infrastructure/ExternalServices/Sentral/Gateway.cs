@@ -1065,15 +1065,15 @@ public class Gateway : ISentralGateway
                 continue;
 
             string familyId = row[4].ToString().FormatField();
-            string studentId = row[0].ToString().FormatField();
+            string studentReferenceNumber = row[0].ToString().FormatField();
 
             if (data.ContainsKey(familyId))
             {
-                data[familyId].Add(studentId);
+                data[familyId].Add(studentReferenceNumber);
             }
             else
             {
-                data.Add(familyId, new List<string>() { studentId });
+                data.Add(familyId, new List<string>() { studentReferenceNumber });
             }
         }
 
@@ -1340,8 +1340,8 @@ public class Gateway : ISentralGateway
             {
                 string studentId = row[0].ToString().FormatField();
 
-                if (existingEntry.StudentIds.All(entry => entry != studentId))
-                    existingEntry.StudentIds.Add(studentId);
+                if (existingEntry.StudentReferenceNumbers.All(entry => entry != studentId))
+                    existingEntry.StudentReferenceNumbers.Add(studentId);
             }
             else
             {
@@ -1381,7 +1381,7 @@ public class Gateway : ISentralGateway
                     });
                 }
 
-                detail.StudentIds.Add(row[0].ToString().FormatField());
+                detail.StudentReferenceNumbers.Add(row[0].ToString().FormatField());
 
                 data.Add(detail);
             }
@@ -1397,7 +1397,7 @@ public class Gateway : ISentralGateway
 
             string studentId = row[0].ToString().FormatField();
 
-            FamilyDetailsDto detail = data.FirstOrDefault(item => item.StudentIds.Contains(studentId));
+            FamilyDetailsDto detail = data.FirstOrDefault(item => item.StudentReferenceNumbers.Contains(studentId));
 
             if (detail is null)
             {
@@ -1428,7 +1428,7 @@ public class Gateway : ISentralGateway
             }
         }
 
-        return data.Where(entry => entry.StudentIds.Any()).ToList();
+        return data.Where(entry => entry.StudentReferenceNumbers.Any()).ToList();
     }
 
     public async Task<HtmlDocument> GetAwardsReport(CancellationToken cancellationToken = default)

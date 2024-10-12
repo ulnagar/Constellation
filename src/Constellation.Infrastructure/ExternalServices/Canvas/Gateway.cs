@@ -238,12 +238,12 @@ internal sealed class Gateway : ICanvasGateway
     public async Task<bool> UploadAssignmentSubmission(
         CanvasCourseCode courseId,
         int canvasAssignmentId,
-        string studentId,
+        string studentReferenceNumber,
         AttachmentResponse file,
         CancellationToken cancellationToken = default)
     {
         string stepOnePath =
-            $"courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions/sis_user_id:{studentId}/files";
+            $"courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions/sis_user_id:{studentReferenceNumber}/files";
 
         var stepOnePayload = new
         {
@@ -257,7 +257,7 @@ internal sealed class Gateway : ICanvasGateway
         {
             _logger.Information(
                 "UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}",
-                courseId, canvasAssignmentId, studentId, file, stepOnePath, stepOnePayload);
+                courseId, canvasAssignmentId, studentReferenceNumber, file, stepOnePath, stepOnePayload);
 
             return true;
         }
@@ -311,7 +311,7 @@ internal sealed class Gateway : ICanvasGateway
                 fileUploadConfirmation);
         }
 
-        int? canvasUserId = await SearchForUser(studentId, cancellationToken);
+        int? canvasUserId = await SearchForUser(studentReferenceNumber, cancellationToken);
 
         string stepThreePath = $"/courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions";
         var stepThreePayload = new
@@ -580,6 +580,89 @@ internal sealed class Gateway : ICanvasGateway
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<bool> UpdateUserEmail(
+        string userId,
+        string emailAddress,
+        CancellationToken cancellationToken = default)
+    {
+        _logger
+            .ForContext(nameof(userId), userId)
+            .ForContext(nameof(emailAddress), emailAddress)
+            .Information("Requested to update user email address");
+
+        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+
+        if (canvasUserId is null)
+        {
+            _logger
+                .ForContext(nameof(userId), userId)
+                .ForContext(nameof(emailAddress), emailAddress)
+                .Warning("Failed to find existing user at Canvas");
+
+            return false;
+        }
+
+        // Update communication email address
+        string path = $"accounts/1/users/{canvasUserId.Value}";
+
+        var commsPayload = new
+        {
+            user = new
+            {
+                email = emailAddress
+            }
+        };
+
+        HttpResponseMessage response = await RequestAsync(path, HttpVerb.Put, commsPayload, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger
+                .ForContext(nameof(userId), userId)
+                .ForContext(nameof(emailAddress), emailAddress)
+                .Warning("Failed to update communication email field of existing user at Canvas");
+
+            return false;
+        }
+
+        // Update login email address
+        int? canvasUserLogin = await SearchForUserLogin(userId, cancellationToken);
+
+        if (canvasUserLogin is null)
+        {
+            _logger
+                .ForContext(nameof(userId), userId)
+                .ForContext(nameof(emailAddress), emailAddress)
+                .Warning("Failed to find logins for existing user at Canvas");
+
+            return false;
+        }
+
+        path = $"accounts/1/logins/{canvasUserLogin.Value}";
+
+        var loginPayload = new
+        {
+            login = new
+            {
+                unique_id = emailAddress
+            }
+        };
+
+        response = await RequestAsync(path, HttpVerb.Put, loginPayload, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger
+                .ForContext(nameof(userId), userId)
+                .ForContext(nameof(emailAddress), emailAddress)
+                .Error("Failed to update login email field of existing user at Canvas");
+
+            return false;
+        }
+
+        return true;
+    }
+
     public async Task<bool> EnrolToCourse(
         string userId,
         CanvasCourseCode courseId,
@@ -623,6 +706,17 @@ internal sealed class Gateway : ICanvasGateway
         CanvasPermissionLevel permissionLevel,
         CancellationToken cancellationToken = default)
     {
+        if (sectionId == CanvasSectionCode.Empty)
+        {
+            // Section is invalid
+            _logger
+                .ForContext(nameof(CanvasSectionCode), sectionId, true)
+                .ForContext(nameof(userId), userId, true)
+                .Warning("Failed to enrol user to section");
+
+            return false;
+        }
+
         int? canvasUserId = await SearchForUser(userId, cancellationToken);
 
         if (canvasUserId == null)

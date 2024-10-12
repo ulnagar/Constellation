@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Absences.SendMissedWorkEmailToStudent;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Services;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings;
@@ -9,10 +8,11 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
 using Core.Models.Students.Errors;
 using Core.Models.Subjects.Repositories;
+using Core.Shared;
+using Core.ValueObjects;
+using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,19 +56,19 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.StudentId, cancellationToken);
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
 
         foreach (var family in families)
         {
             List<EmailRecipient> recipients = new();
 
-            Result<EmailRecipient> studentEmailResult = EmailRecipient.Create(student.GetName()?.DisplayName, student.EmailAddress);
+            Result<EmailRecipient> studentEmailResult = EmailRecipient.Create(student.Name.DisplayName, student.EmailAddress.Email);
 
             if (studentEmailResult.IsFailure)
             {
                 _logger
                     .ForContext("Error", studentEmailResult.Error, true)
-                    .Warning("{jobId}: Could not create email recipient from student {name}", request.JobId, student.GetName()?.DisplayName);
+                    .Warning("{jobId}: Could not create email recipient from student {name}", request.JobId, student.Name.DisplayName);
 
                 return Result.Failure(studentEmailResult.Error);
             }

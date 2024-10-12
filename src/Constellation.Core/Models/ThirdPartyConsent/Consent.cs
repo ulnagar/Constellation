@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.ThirdPartyConsent;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Enums;
 using Identifiers;
 using System;
@@ -12,7 +13,7 @@ public sealed class Consent
     private Consent(
         ConsentTransactionId transactionId,
         ApplicationId applicationId,
-        string studentId,
+        StudentId studentId,
         bool consentProvided,
         string providedBy,
         DateTime providedAt,
@@ -34,7 +35,7 @@ public sealed class Consent
     public ConsentId Id { get; private set; }
     public ApplicationId ApplicationId { get; private set; }
     public ConsentTransactionId TransactionId { get; private set; }
-    public string StudentId { get; private set; }
+    public StudentId StudentId { get; private set; }
     public bool ConsentProvided { get; private set; }
     public string ProvidedBy { get; private set; }
     public DateTime ProvidedAt { get; private set; }
@@ -43,7 +44,7 @@ public sealed class Consent
 
     public static Consent Create(
         ConsentTransactionId transactionId,
-        string studentId,
+        StudentId studentId,
         ApplicationId applicationId,
         bool consentProvided,
         string submittedBy,

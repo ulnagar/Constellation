@@ -1,14 +1,16 @@
 ﻿namespace Constellation.Application.Families.GetFamilyContacts;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Families.GetFamilyContactsForStudent;
-using Constellation.Application.Families.Models;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
 using Core.Extensions;
+using Core.Models.Students;
+using Core.Models.Students.Identifiers;
+using Core.Shared;
+using Core.ValueObjects;
+using GetFamilyContactsForStudent;
+using Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,19 +34,19 @@ internal sealed class GetFamilyContactsQueryHandler
     {
         List<FamilyContactResponse> contacts = new();
 
-        var families = await _familyRepository.GetAllCurrent(cancellationToken);
+        List<Family> families = await _familyRepository.GetAllCurrent(cancellationToken);
 
-        foreach (var family in families)
+        foreach (Family family in families)
         {
-            var isResidentialFamily = family.Students.Any(student => student.IsResidentialFamily);
+            bool isResidentialFamily = family.Students.Any(student => student.IsResidentialFamily);
 
-            var familyEmail = EmailAddress.Create(family.FamilyEmail);
+            Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
-            var studentIds = family.Students.Select(member => member.StudentId).ToList();
+            List<StudentId> studentIds = family.Students.Select(member => member.StudentId).ToList();
 
-            var students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
+            List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-            var studentNames = students.OrderBy(student => student.CurrentGrade).Select(student => $"{student.DisplayName} (Y{student.CurrentGrade.AsNumber()})").ToList();
+            List<string> studentNames = students.OrderBy(student => student.CurrentEnrolment?.Grade).Select(student => $"{student.Name.DisplayName} (Y{student.CurrentEnrolment?.Grade.AsNumber()})").ToList();
 
             contacts.Add(new(
                 isResidentialFamily,
@@ -56,11 +58,11 @@ internal sealed class GetFamilyContactsQueryHandler
                 family.Id,
                 studentNames));
 
-            foreach (var parent in family.Parents)
+            foreach (Parent parent in family.Parents)
             {
-                var parentEmail = EmailAddress.Create(parent.EmailAddress);
-                var parentMobile = PhoneNumber.Create(parent.MobileNumber);
-                var name = Name.Create(parent.FirstName, null, parent.LastName);
+                Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
+                Result<PhoneNumber> parentMobile = PhoneNumber.Create(parent.MobileNumber);
+                Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
 
                 contacts.Add(new(
                     isResidentialFamily,

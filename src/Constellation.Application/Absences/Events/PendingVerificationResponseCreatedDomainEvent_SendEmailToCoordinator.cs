@@ -17,6 +17,7 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students.Errors;
 using MediatR;
 using Serilog;
 using System.Collections.Generic;
@@ -75,7 +76,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        Student student = await _studentRepository.GetWithSchoolById(absence.StudentId, cancellationToken);
+        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -83,7 +84,19 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        List<SchoolContact> coordinators = await _contactRepository.GetBySchoolAndRole(student.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
+        SchoolEnrolment enrolment = student.CurrentEnrolment;
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(PendingVerificationResponseCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
+                .Error("Could not retrieve current school details for student {studentId}", absence.StudentId);
+            
+            return;
+        }
+
+        List<SchoolContact> coordinators = await _contactRepository.GetBySchoolAndRole(enrolment.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
 
         List<EmailRecipient> recipients = new();
 
@@ -99,11 +112,11 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
                 recipients.Add(result.Value);
         }
 
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
+        School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
         if (school is null)
         {
-            _logger.Warning("Could not find School with Id {id}", student.SchoolCode);
+            _logger.Warning("Could not find School with Id {id}", enrolment.SchoolCode);
 
             return;
         }
@@ -159,6 +172,6 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             _dateTime.Now);
 
         foreach (EmailRecipient recipient in recipients)
-            _logger.Information("Partial Absence Verification Request send to {recipient} for absence by {student} on {date}", recipient.Name, student.DisplayName, absence.Date);
+            _logger.Information("Partial Absence Verification Request send to {recipient} for absence by {student} on {date}", recipient.Name, student.Name.DisplayName, absence.Date);
     }
 }

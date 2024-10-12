@@ -4,24 +4,26 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Shared;
+using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 
 public class FamilyTests
 {
-    private const string FamilyName = "Mr L Higgins";
-    private const string SentralId = "100";
-    private const string FamilyAddressLine1 = "123 Fake Street";
-    private const string FamilyAddressLine2 = "Unit 3";
-    private const string FamilyAddressTown = "Nowhere";
-    private const string FamilyAddressPostCode = "1234";
-    private const string InvalidEmail = "not.valid@";
-    private const string ValidEmail = "test@here.com";
-    private const string OtherValidEmail = "test2@here.com";
-    private const string ParentTitle = "Mr";
-    private const string ParentFirstName = "Leslie";
-    private const string ParentLastName = "Higgins";
-    private const string ParentMobile = "0400111222";
-    private const string StudentId = "123456789";
+    private const string _familyName = "Mr L Higgins";
+    private const string _sentralId = "100";
+    private const string _familyAddressLine1 = "123 Fake Street";
+    private const string _familyAddressLine2 = "Unit 3";
+    private const string _familyAddressTown = "Nowhere";
+    private const string _familyAddressPostCode = "1234";
+    private const string _invalidEmail = "not.valid@";
+    private const string _validEmail = "test@here.com";
+    private const string _otherValidEmail = "test2@here.com";
+    private const string _parentTitle = "Mr";
+    private const string _parentFirstName = "Leslie";
+    private const string _parentLastName = "Higgins";
+    private const string _parentMobile = "0400111222";
+    private readonly StudentId _studentId = StudentId.FromValue(new Guid("27864b85-a672-48cb-a93a-ad671ba72d24")) ;
+    private readonly StudentReferenceNumber _studentReferenceNumber = StudentReferenceNumber.FromValue("123456789");
 
     [Fact]
     public void LinkFamilyToSentralDetails_ShouldReturnFailure_WhenEmptySentralIdProvided()
@@ -29,7 +31,7 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.LinkFamilyToSentralDetails(string.Empty);
@@ -45,14 +47,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
-        var result = sut.LinkFamilyToSentralDetails(SentralId);
+        var result = sut.LinkFamilyToSentralDetails(_sentralId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        sut.SentralId.Should().Be(SentralId);
+        sut.SentralId.Should().Be(_sentralId);
     }
 
     [Fact]
@@ -61,15 +63,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
             string.Empty,
-            FamilyAddressLine1,
-            FamilyAddressLine2,
-            FamilyAddressTown,
-            FamilyAddressPostCode);
+            _familyAddressLine1,
+            _familyAddressLine2,
+            _familyAddressTown,
+            _familyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -82,15 +84,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            FamilyName,
+            _familyName,
             string.Empty,
-            FamilyAddressLine2,
-            FamilyAddressTown,
-            FamilyAddressPostCode);
+            _familyAddressLine2,
+            _familyAddressTown,
+            _familyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -103,15 +105,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            FamilyName,
-            FamilyAddressLine1,
-            FamilyAddressLine2,
+            _familyName,
+            _familyAddressLine1,
+            _familyAddressLine2,
             string.Empty,
-            FamilyAddressPostCode);
+            _familyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -124,14 +126,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            FamilyName,
-            FamilyAddressLine1,
-            FamilyAddressLine2,
-            FamilyAddressTown,
+            _familyName,
+            _familyAddressLine1,
+            _familyAddressLine2,
+            _familyAddressTown,
             string.Empty);
 
         // Assert
@@ -145,22 +147,22 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateFamilyAddress(
-            FamilyName,
-            FamilyAddressLine1,
+            _familyName,
+            _familyAddressLine1,
             string.Empty,
-            FamilyAddressTown,
-            FamilyAddressPostCode);
+            _familyAddressTown,
+            _familyAddressPostCode);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        sut.FamilyTitle.Should().Be(FamilyName);
-        sut.AddressLine1.Should().Be(FamilyAddressLine1);
-        sut.AddressTown.Should().Be(FamilyAddressTown);
-        sut.AddressPostCode.Should().Be(FamilyAddressPostCode);
+        sut.FamilyTitle.Should().Be(_familyName);
+        sut.AddressLine1.Should().Be(_familyAddressLine1);
+        sut.AddressTown.Should().Be(_familyAddressTown);
+        sut.AddressPostCode.Should().Be(_familyAddressPostCode);
         sut.AddressLine2.Should().Be(string.Empty);
     }
 
@@ -170,14 +172,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         sut.UpdateFamilyAddress(
-            FamilyName,
-            FamilyAddressLine1,
-            FamilyAddressLine2,
-            FamilyAddressTown,
-            FamilyAddressPostCode);
+            _familyName,
+            _familyAddressLine1,
+            _familyAddressLine2,
+            _familyAddressTown,
+            _familyAddressPostCode);
 
         // Act
         var result = sut.UpdateFamilyAddress(
@@ -202,10 +204,10 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
-        var result = sut.UpdateFamilyEmail(InvalidEmail);
+        var result = sut.UpdateFamilyEmail(_invalidEmail);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -217,7 +219,7 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateFamilyEmail(string.Empty);
@@ -232,10 +234,10 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
-        var result = sut.UpdateFamilyEmail(ValidEmail);
+        var result = sut.UpdateFamilyEmail(_validEmail);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -250,15 +252,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            InvalidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _invalidEmail,
             Parent.SentralReference.None);
 
         // Assert
@@ -272,23 +274,23 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Act 
         var result = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Assert
@@ -303,15 +305,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
         var events = sut.GetDomainEvents();
 
@@ -328,21 +330,21 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<Parent>();
-        result.Value.MobileNumber.Should().Be(ParentMobile);
+        result.Value.MobileNumber.Should().Be(_parentMobile);
     }
 
     [Fact]
@@ -351,15 +353,15 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
             "1",
-            ValidEmail,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Assert
@@ -374,24 +376,24 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
         
         var parent = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Act
         var result = sut.UpdateParent(
             parent.Value.Id,
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            InvalidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _invalidEmail,
             Parent.SentralReference.None);
 
         // Assert
@@ -405,16 +407,16 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
         var result = sut.UpdateParent(
             new ParentId(),
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Assert
@@ -428,14 +430,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var parent = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         sut.ClearDomainEvents();
@@ -443,11 +445,11 @@ public class FamilyTests
         // Act
         var result = sut.UpdateParent(
             parent.Value.Id,
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            OtherValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _otherValidEmail,
             Parent.SentralReference.None);
 
         var events = sut.GetDomainEvents();
@@ -464,14 +466,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var parent = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         sut.ClearDomainEvents();
@@ -479,11 +481,11 @@ public class FamilyTests
         // Act
         var result = sut.UpdateParent(
             parent.Value.Id,
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         var events = sut.GetDomainEvents();
@@ -499,30 +501,30 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var parent = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
             string.Empty,
-            ValidEmail,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Act
         var result = sut.UpdateParent(
             parent.Value.Id,
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<Parent>();
-        result.Value.MobileNumber.Should().Be(ParentMobile);
+        result.Value.MobileNumber.Should().Be(_parentMobile);
     }
 
     [Fact]
@@ -531,24 +533,24 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var parent = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Act
         var result = sut.UpdateParent(
             parent.Value.Id,
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
             string.Empty,
-            ValidEmail,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Assert
@@ -563,18 +565,18 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var otherFamily = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var parent = otherFamily.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         // Act
@@ -592,14 +594,14 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         var parent = sut.AddParent(
-            ParentTitle,
-            ParentFirstName,
-            ParentLastName,
-            ParentMobile,
-            ValidEmail,
+            _parentTitle,
+            _parentFirstName,
+            _parentLastName,
+            _parentMobile,
+            _validEmail,
             Parent.SentralReference.None);
 
         sut.ClearDomainEvents();
@@ -620,10 +622,10 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
-        var result = sut.AddStudent(StudentId, false);
+        var result = sut.AddStudent(_studentId, _studentReferenceNumber, false);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -638,13 +640,13 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
-        sut.AddStudent(StudentId, false);
+        sut.AddStudent(_studentId, _studentReferenceNumber, false);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddStudent(StudentId, false);
+        var result = sut.AddStudent(_studentId, _studentReferenceNumber, false);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -658,13 +660,13 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
-        sut.AddStudent(StudentId, false);
+        sut.AddStudent(_studentId, _studentReferenceNumber, false);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddStudent(StudentId, true);
+        var result = sut.AddStudent(_studentId, _studentReferenceNumber, true);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -679,10 +681,10 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
         // Act
-        var result = sut.RemoveStudent(StudentId);
+        var result = sut.RemoveStudent(_studentId);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -696,13 +698,13 @@ public class FamilyTests
         // Arrange
         var sut = Family.Create(
             new FamilyId(),
-            FamilyName);
+            _familyName);
 
-        sut.AddStudent(StudentId, false);
+        sut.AddStudent(_studentId, _studentReferenceNumber, false);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveStudent(StudentId);
+        var result = sut.RemoveStudent(_studentId);
         var events = sut.GetDomainEvents();
 
         // Assert

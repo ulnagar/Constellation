@@ -33,19 +33,28 @@ internal class GetRecentAttendanceValuesQueryHandler
     {
         List<AttendanceValueResponse> response = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudentsWithSchool(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
         List<AttendanceValue> values = await _attendanceRepository.GetAllRecent(cancellationToken);
 
         foreach (AttendanceValue value in values)
         {
-            Student student = students.FirstOrDefault(entry => entry.StudentId == value.StudentId);
+            Student student = students.FirstOrDefault(entry => entry.Id == value.StudentId);
+
+            if (student is null)
+                continue;
+
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
 
             response.Add(new(
                 value.StudentId,
-                student?.GetName(),
+                student.StudentReferenceNumber,
+                student.Name,
                 value.Grade,
-                student?.School.Name,
+                enrolment.SchoolName,
                 value.PeriodLabel,
                 value.PerDayYearToDatePercentage,
                 value.PerDayWeekPercentage,

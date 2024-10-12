@@ -200,7 +200,7 @@ internal sealed class SendCoverUpdatedEmailHandler
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
-            List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOfferingWithSchool(offering.Id, cancellationToken);
+            List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
 
             Attachment rollAttachment = await _emailAttachmentService.GenerateClassRollDocument(offering, classStudents, cancellationToken);
 

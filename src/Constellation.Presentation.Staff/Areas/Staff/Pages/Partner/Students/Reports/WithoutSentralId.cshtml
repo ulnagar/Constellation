@@ -1,4 +1,6 @@
 ﻿@page
+@using Constellation.Core.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.WithoutSentralIdModel
 
 <h2>Students without Sentral Id</h2>
@@ -25,10 +27,28 @@
     @foreach (var item in Model.Students)
     {
         <tr>
-            <td>@item.StudentId</td>
+            <td>@item.StudentReferenceNumber</td>
             <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
-            <td>@Html.DisplayFor(model => item.CurrentGrade, "Grade")</td>
-            <td>@item.School</td>
+            <td data-order="@item.Grade?.AsNumber()">
+                @if (!item.CurrentEnrolment)
+                {
+                    <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                }
+                else
+                {
+                    <grade grade="@item.Grade" />
+                }
+            </td>
+            <td>
+                @if (!item.CurrentEnrolment)
+                {
+                    <span class="font-weight-light font-italic">@item.School</span>
+                }
+                else
+                {
+                    @item.School
+                }
+            </td>
             <td>
                 <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
             </td>

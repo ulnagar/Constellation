@@ -19,7 +19,7 @@
         </thead>
         <tbody>
             @{
-                var items = Model.Students.GroupBy(student => student.CurrentGrade).ToList();
+                var items = Model.Students.GroupBy(student => student.Grade).ToList();
 
                 if (items.Count == 0)
                 {
@@ -31,7 +31,7 @@
                     var first = group.First();
 
                     <tr class="group">
-                        <td colspan="3">@first.CurrentGrade.AsName()</td>
+                        <td colspan="3">@first.Grade?.AsName()</td>
                     </tr>
 
                     @foreach (var item in group)

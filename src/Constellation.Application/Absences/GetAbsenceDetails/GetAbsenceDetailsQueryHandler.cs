@@ -1,16 +1,13 @@
 ﻿namespace Constellation.Application.Absences.GetAbsenceDetails;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
+using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Errors;
 using Core.Models.Students.Errors;
+using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -21,18 +18,15 @@ internal sealed class GetAbsenceDetailsQueryHandler
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceDetailsQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
         _logger = logger.ForContext<GetAbsenceDetailsQuery>();
     }
 
@@ -58,22 +52,13 @@ internal sealed class GetAbsenceDetailsQueryHandler
             return Result.Failure<AbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));        
         }
 
-        Result<Name> studentNameRequest = Name.Create(student.FirstName, string.Empty, student.LastName);
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
-        if (studentNameRequest.IsFailure)
+        if (enrolment is null)
         {
-            _logger.Warning("Could not create Name object from student with Id {id}", absence.StudentId);
+            _logger.Warning("Could not retrieve current School Enrolment for student with id {Id}", absence.StudentId);
 
-            return Result.Failure<AbsenceDetailsResponse>(studentNameRequest.Error);
-        }
-
-        School school = await _schoolRepository.GetById(student.SchoolCode, cancellationToken);
-
-        if (school is null)
-        {
-            _logger.Warning("Could not locate school with Id {id}", student.SchoolCode);
-
-            return Result.Failure<AbsenceDetailsResponse>(DomainErrors.Partners.School.NotFound(student.SchoolCode));
+            return Result.Failure<AbsenceDetailsResponse>(SchoolEnrolmentErrors.NotFound);
         }
 
         List<AbsenceDetailsResponse.AbsenceResponseDetails> convertedResponses = new();
@@ -109,10 +94,10 @@ internal sealed class GetAbsenceDetailsQueryHandler
 
         AbsenceDetailsResponse result = new(
             absence.Id,
-            student.StudentId,
-            studentNameRequest.Value,
-            student.CurrentGrade,
-            school.Name,
+            student.Id,
+            student.Name,
+            enrolment.Grade,
+            enrolment.SchoolName,
             absence.Type,
             absence.Date,
             absence.PeriodName,

@@ -13,6 +13,8 @@ using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Operations.Enums;
+using Core.Models.Students;
+using Core.Models.Students.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +25,7 @@ internal sealed class AddStudentsToCanvasCourseResource
     : IDomainEventHandler<ResourceAddedToOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
+    private readonly IStudentRepository _studentRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ICanvasOperationsRepository _operationsRepository;
     private readonly IDateTimeProvider _dateTime;
@@ -31,14 +34,14 @@ internal sealed class AddStudentsToCanvasCourseResource
 
     public AddStudentsToCanvasCourseResource(
         IOfferingRepository offeringRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IStudentRepository studentRepository,
         ICanvasOperationsRepository operationsRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _studentRepository = studentRepository;
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
@@ -74,12 +77,12 @@ internal sealed class AddStudentsToCanvasCourseResource
             return;
         }
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (Student student in students)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                enrolment.StudentId,
+                student.StudentReferenceNumber.Number,
                 resource.CourseId.ToString(),
                 CanvasAction.Add,
                 CanvasUserType.Student,

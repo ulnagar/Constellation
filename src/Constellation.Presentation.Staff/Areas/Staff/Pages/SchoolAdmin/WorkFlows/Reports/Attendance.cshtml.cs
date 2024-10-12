@@ -7,6 +7,7 @@ using Application.WorkFlows.CreateAttendanceCase;
 using Application.WorkFlows.UpdateAttendanceCaseDetails;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -129,7 +130,7 @@ public class AttendanceModel : BasePageModel
 
     public class WorkFlowNeeded
     {
-        public string StudentId { get; set; }
+        public StudentId StudentId { get; set; }
         public ActionType Type { get; set; }
 
         public enum ActionType

@@ -106,7 +106,7 @@ internal sealed class CreateTransactionCommandHandler
         }
 
         Result<Transaction> transaction = Transaction.Create(
-            student.StudentId,
+            student.Id,
             request.SubmittedBy,
             _dateTime.Now,
             request.SubmissionMethod,

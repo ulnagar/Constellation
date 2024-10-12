@@ -68,14 +68,19 @@ internal sealed class GetAttendanceDataFromSentralQueryHandler
 
         foreach (StudentAttendanceData entry in attendanceData)
         {
-            Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
+            Student student = await _studentRepository.GetBySRN(entry.StudentReferenceNumber, cancellationToken);
 
             if (student is null)
                 continue;
 
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+            if (enrolment is null)
+                continue;
+
             Result<AttendanceValue> modelRequest = AttendanceValue.Create(
-                student.StudentId,
-                student.CurrentGrade,
+                student.Id,
+                enrolment.Grade,
                 dateResponse.Value.StartDate,
                 dateResponse.Value.EndDate,
                 $"Term {request.Term}, Week {request.Week}, {request.Year}",

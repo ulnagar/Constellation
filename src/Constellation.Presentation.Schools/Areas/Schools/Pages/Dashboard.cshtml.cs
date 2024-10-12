@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages;
 
 using Application.Common.PresentationModels;
-using Application.DTOs;
 using Application.Students.GetCurrentStudentsFromSchool;
+using Application.Students.Models;
 using Constellation.Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Errors;
@@ -42,7 +42,7 @@ public class DashboardModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;
 
-    public List<StudentDto> Students { get; set; } = new();
+    public List<StudentResponse> Students { get; set; } = new();
 
     public async Task OnGet()
     {
@@ -55,7 +55,7 @@ public class DashboardModel : BasePageModel
 
         _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
 
-        Result<List<StudentDto>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
+        Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(CurrentSchoolCode));
 
         if (studentsRequest.IsFailure)
         {
@@ -65,9 +65,8 @@ public class DashboardModel : BasePageModel
         }
 
         Students = studentsRequest.Value
-            .OrderBy(student => student.CurrentGrade)
-            .ThenBy(student => student.LastName)
-            .ThenBy(student => student.FirstName)
+            .OrderBy(student => student.Grade)
+            .ThenBy(student => student.Name.SortOrder)
             .ToList();
     }
 }

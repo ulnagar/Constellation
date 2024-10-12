@@ -1,0 +1,32 @@
+.flex-row {
+    margin-left: -1rem;
+}
+
+.flex-row .card {
+    background-image: linear-gradient(135deg, #69B3E7, 35%, #009B77 100%);
+}
+
+.card-body .list-group {
+    margin-top: 0.3rem;
+}
+
+.list-group-item {
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (min-width: 1161px) {
+    .flex-row .card {
+        min-width: 400px;
+    }
+
+    .flex-row.hero .card {
+        min-width: 45%;
+    }
+}
+
+@media (max-width: 1160px) {
+    .card {
+        min-width: 95%;
+    }
+}

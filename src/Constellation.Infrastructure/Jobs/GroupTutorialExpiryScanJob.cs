@@ -85,13 +85,13 @@ internal class GroupTutorialExpiryScanJob : IGroupTutorialExpiryScanJob
 
             foreach (Student student in students)
             {
-                _logger.Information("{id}: Removing {student}", jobId, student.DisplayName);
+                _logger.Information("{id}: Removing {student}", jobId, student.Name.DisplayName);
                 Result result = tutorial.UnenrolStudent(student);
 
                 if (result.IsFailure)
-                    _logger.Warning("{id}: Failed to remove {student} from tutorial {tutorial}", jobId, student.DisplayName, tutorial.Name);
+                    _logger.Warning("{id}: Failed to remove {student} from tutorial {tutorial}", jobId, student.Name.DisplayName, tutorial.Name);
                 else
-                    _logger.Information("{id}: Successfully removed {student}", jobId, student.DisplayName);
+                    _logger.Information("{id}: Successfully removed {student}", jobId, student.Name.DisplayName);
             }
         }
 

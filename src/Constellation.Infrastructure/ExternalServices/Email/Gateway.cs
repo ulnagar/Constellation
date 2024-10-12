@@ -26,8 +26,27 @@ public class Gateway : IEmailGateway
 
         if (_logOnly)
         {
-            _logger.Information("Gateway initalised in log only mode");
+            _logger.Information("Gateway initialised in log only mode");
         }
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        EmailRecipient fromRecipient,
+        string subject,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            null,
+            null,
+            fromRecipient,
+            subject,
+            body,
+            null,
+            null,
+            cancellationToken);
     }
 
     public Task<MimeMessage> Send(
@@ -522,11 +541,121 @@ public class Gateway : IEmailGateway
 
         var message = new MimeMessage();
 
-        if (fromAddress == null)
+        if (string.IsNullOrWhiteSpace(fromAddress))
             message.From.Add(new MailboxAddress("Aurora College", "auroracoll-h.school@det.nsw.edu.au"));
         else
             message.From.Add(new MailboxAddress("Aurora College", fromAddress));
 
+        foreach (var recipient in toRecipients)
+        {
+            _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
+            message.To.Add(new MailboxAddress(recipient.Name, recipient.Email));
+        }
+
+        if (ccRecipients != null)
+            foreach (var recipient in ccRecipients)
+            {
+                _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Name, recipient.Email);
+                message.Cc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+            }
+
+        if (bccRecipients != null)
+            foreach (var recipient in bccRecipients)
+            {
+                _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Name, recipient.Email);
+                message.Bcc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+            }
+
+        _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
+        message.Subject = subject;
+
+        var textPartBody = new TextPart(TextFormat.Html)
+        {
+            Text = body
+        };
+
+        if (attachments != null || calendarInfo != null)
+        {
+            var multipart = new Multipart("mixed")
+            {
+                textPartBody
+            };
+
+            if (attachments != null)
+            {
+                foreach (var item in attachments)
+                {
+                    var attachment = new MimePart
+                    {
+                        Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
+                        ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        FileName = item.Name
+                    };
+
+                    _logger.Information("{id}: Adding attachment {name}", id, item.Name);
+
+                    multipart.Add(attachment);
+                }
+            }
+
+            if (calendarInfo != null)
+            {
+                var ical = new TextPart("calendar")
+                {
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    Text = calendarInfo
+                };
+
+                ical.ContentType.Parameters.Add("method", "REQUEST");
+                ical.ContentType.Parameters.Add("name", "meeting.ics");
+
+                _logger.Information("{id}: Adding calendar appointment info", id);
+
+                multipart.Add(ical);
+
+                message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
+            }
+
+            message.Body = multipart;
+        }
+        else
+        {
+            message.Body = textPartBody;
+        }
+
+        if (_logOnly)
+        {
+            _logger.Information("SendAll: Log Only Mode");
+        }
+        else
+        {
+            _logger.Information("{id}: Sending...", id);
+            await PushToServer(message, cancellationToken);
+        }
+
+        return message;
+    }
+
+    private async Task<MimeMessage> SendAll(
+    List<EmailRecipient> toRecipients,
+    List<EmailRecipient> ccRecipients,
+    List<EmailRecipient> bccRecipients,
+    EmailRecipient fromAddress,
+    string subject,
+    string body,
+    ICollection<Attachment> attachments,
+    string calendarInfo,
+    CancellationToken cancellationToken = default)
+    {
+        var id = Guid.NewGuid();
+
+        _logger.Information("Sending email {id}", id);
+
+        var message = new MimeMessage();
+
+        message.From.Add(new MailboxAddress(fromAddress.Name, fromAddress.Email));
+        
         foreach (var recipient in toRecipients)
         {
             _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
@@ -635,7 +764,7 @@ public class Gateway : IEmailGateway
 
         var message = new MimeMessage();
 
-        if (fromAddress == null)
+        if (string.IsNullOrWhiteSpace(fromAddress))
             message.From.Add(new MailboxAddress("Aurora College", "auroracoll-h.school@det.nsw.edu.au"));
         else
             message.From.Add(new MailboxAddress("Aurora College", fromAddress));

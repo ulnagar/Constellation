@@ -1,0 +1,46 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ExportAwardNominations.ExportAwardNominationsSelection
+
+@using Constellation.Application.Awards.ExportAwardNominations
+
+<form asp-page-handler="Export" method="post">
+    <div class="modal fade" tabindex="-1" id="export-award-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Export Award Nominations</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="Grouping">Grouping</label>
+                            <select asp-for="Grouping" asp-items="@Html.GetEnumSelectList<ExportAwardNominationsCommand.GroupCategory>()" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" asp-for="ShowClass">
+                                <label class="custom-control-label" asp-for="ShowClass">Show Class</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="form-group col">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" asp-for="ShowGrade">
+                                <label class="custom-control-label" asp-for="ShowGrade">Show Grade</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Export" onclick="dismissModal()" class="btn btn-primary btn-block btn-lg"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

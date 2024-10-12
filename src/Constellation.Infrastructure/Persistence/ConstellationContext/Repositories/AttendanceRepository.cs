@@ -5,6 +5,7 @@ using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
+using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ internal class AttendanceRepository : IAttendanceRepository
 
     public async Task<List<AttendanceValue>> GetAllForStudent(
         int year,
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default)
     {
         DateOnly startOfYear = _dateTime.GetFirstDayOfYear(year);
@@ -72,7 +73,7 @@ internal class AttendanceRepository : IAttendanceRepository
     }
 
     public async Task<AttendanceValue> GetLatestForStudent(
-        string studentId,
+        StudentId studentId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<AttendanceValue>()
@@ -91,7 +92,7 @@ internal class AttendanceRepository : IAttendanceRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<AttendanceValue>> GetAllForStudentAndDate(
-        string studentId,
+        StudentId studentId,
         DateOnly selectedDate,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -178,7 +179,7 @@ internal class AttendanceRepository : IAttendanceRepository
     }
 
     public async Task<List<AttendanceValue>> GetForStudentBetweenDates(
-        string studentId, 
+        StudentId studentId, 
         DateOnly earlierEndDate, 
         DateOnly laterEndDate, 
         CancellationToken cancellationToken = default) =>

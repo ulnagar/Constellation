@@ -79,7 +79,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 
         List<EmailRecipient> recipients = new();
 
-        Result<EmailRecipient> result = EmailRecipient.Create(student.DisplayName, student.EmailAddress);
+        Result<EmailRecipient> result = EmailRecipient.Create(student.Name.DisplayName, student.EmailAddress.Email);
 
         if (result.IsSuccess)
         {
@@ -114,7 +114,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 
         foreach (Absence absence in absences)
         {
-            absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress, sentEmail.id, _dateTime.Now);
+            absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress.Email, sentEmail.id, _dateTime.Now);
 
             foreach (EmailRecipient recipient in recipients)
                 _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", request.JobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());

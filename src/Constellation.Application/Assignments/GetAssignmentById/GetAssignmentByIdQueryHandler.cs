@@ -2,19 +2,19 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Assignments.Repositories;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Core.Extensions;
-using Core.Shared;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Errors;
 using Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
+using Core.Shared;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Students.Repositories;
-using Core.Models.Subjects.Repositories;
 
 internal sealed class GetAssignmentByIdQueryHandler
     : IQueryHandler<GetAssignmentByIdQuery, AssignmentResponse>
@@ -51,7 +51,7 @@ internal sealed class GetAssignmentByIdQueryHandler
 
             AssignmentResponse.Submission record = new(
                 submission.Id,
-                student.DisplayName,
+                student.Name.DisplayName,
                 DateOnly.FromDateTime(submission.SubmittedOn),
                 submission.Attempt);
 

@@ -2,9 +2,12 @@
 
 using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Assignments;
+using Core.Models.Students.Identifiers;
 
 public class CanvasAssignmentTests
 {
+    private readonly StudentId _studentId = StudentId.FromValue(new Guid("27864b85-a672-48cb-a93a-ad671ba72d24"));
+
     [Fact]
     public void AddSubmission_ShouldSetAttemptToOne_WhenNoPreviousAttemptExists()
     {
@@ -22,7 +25,7 @@ public class CanvasAssignmentTests
 
         // Act
         var result = sut.AddSubmission(
-            "StudentId", 
+            _studentId, 
             "test@email.com");
 
         // Assert
@@ -47,12 +50,12 @@ public class CanvasAssignmentTests
             3);
 
         sut.AddSubmission(
-            "StudentId", 
+            _studentId, 
             "test@email.com");
 
         // Act
         var result = sut.AddSubmission(
-            "StudentId", 
+            _studentId, 
             "test@email.com");
 
         // Assert
@@ -77,7 +80,7 @@ public class CanvasAssignmentTests
             3);
 
         sut.AddSubmission(
-            "StudentId",
+            _studentId,
             "test@email.com");
 
         // Act

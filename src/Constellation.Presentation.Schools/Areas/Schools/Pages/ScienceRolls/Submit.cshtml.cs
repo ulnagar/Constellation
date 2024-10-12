@@ -5,6 +5,7 @@ using Application.Models.Auth;
 using Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
 using Application.SciencePracs.SubmitRoll;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Shared;
@@ -45,11 +46,9 @@ public class SubmitModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracLessonId LessonId { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(ConstructorBinder))]
     public SciencePracRollId RollId { get; set; }
 
     public string LessonName { get; set; }
@@ -101,7 +100,7 @@ public class SubmitModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        List<string> presentStudents = Attendance
+        List<StudentId> presentStudents = Attendance
             .Where(entry => entry.Present)
             .Select(entry => entry.StudentId)
             .ToList();
@@ -117,7 +116,7 @@ public class SubmitModel : BasePageModel
             return Page();
         }
 
-        List<string> absentStudents = Attendance
+        List<StudentId> absentStudents = Attendance
             .Where(entry => !entry.Present)
             .Select(entry => entry.StudentId)
             .ToList();
@@ -148,10 +147,9 @@ public class SubmitModel : BasePageModel
 
     public class StudentAttendance
     {
-        [ModelBinder(typeof(ConstructorBinder))]
         public SciencePracAttendanceId Id { get; set; }
 
-        public string StudentId { get; set; }
+        public StudentId StudentId { get; set; }
         public string StudentFirstName { get; set; }
         public string StudentLastName { get; set; }
         public string StudentName => $"{StudentFirstName} {StudentLastName}";
