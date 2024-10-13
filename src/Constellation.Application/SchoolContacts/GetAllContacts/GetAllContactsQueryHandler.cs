@@ -1,7 +1,7 @@
-﻿namespace Constellation.Application.SchoolContacts.GetAllContacts;
+﻿#nullable enable
+namespace Constellation.Application.SchoolContacts.GetAllContacts;
 
 using Abstractions.Messaging;
-using Constellation.Application.SchoolContacts.Models;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
@@ -9,6 +9,7 @@ using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
+using Models;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,8 @@ internal sealed class GetAllContactsQueryHandler
     {
         _contactRepository = contactRepository;
         _schoolRepository = schoolRepository;
-        _logger = logger;
+        _logger = logger
+            .ForContext<GetAllContactsQuery>();
     }
 
     public async Task<Result<List<SchoolContactResponse>>> Handle(GetAllContactsQuery request, CancellationToken cancellationToken)
@@ -57,7 +59,7 @@ internal sealed class GetAllContactsQueryHandler
 
             if (activeAssignments.Count == 0)
             {
-                response.Add(new SchoolContactResponse(
+                response.Add(new(
                     contact.Id,
                     SchoolContactRoleId.Empty, 
                     name.Value,
@@ -75,14 +77,14 @@ internal sealed class GetAllContactsQueryHandler
 
             foreach (SchoolContactRole assignment in activeAssignments)
             {
-                School school = schools.FirstOrDefault(entry => entry.Code == assignment.SchoolCode);
+                School? school = schools.FirstOrDefault(entry => entry.Code == assignment.SchoolCode);
 
                 bool directNumber = false;
                 PhoneNumber phone;
 
                 if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
                 {
-                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
+                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school?.PhoneNumber);
                     phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
                 }
                 else
