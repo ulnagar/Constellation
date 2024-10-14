@@ -72,7 +72,7 @@
                 @item.SchoolName
             </td>
             <td class="text-nowrap" data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
-            <td>@Html.DisplayFor(model => item.EmailAddress, "EmailAddress")</td>
+            <td>@item.EmailAddress.Email</td>
             <td class="text-nowrap" data-order="@item.PhoneNumber.ToString(PhoneNumber.Format.None)">
                 @if (item.IsDirectNumber)
                 {
