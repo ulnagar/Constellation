@@ -97,11 +97,14 @@ internal sealed class AttachmentService : IAttachmentService
         SHA256 sha = SHA256.Create();
         byte[] checksum = sha.ComputeHash(fileData);
 
-        if (attachment.Checksum != BitConverter.ToString(checksum).Replace("-", string.Empty) && overwrite == false)
-            return Result.Failure(AttachmentErrors.FileDataExists);
+        if (!string.IsNullOrWhiteSpace(attachment.Checksum))
+        {
+            if (attachment.Checksum != BitConverter.ToString(checksum).Replace("-", string.Empty) && overwrite == false)
+                return Result.Failure(AttachmentErrors.FileDataExists);
 
-        if (attachment.Checksum == BitConverter.ToString(checksum).Replace("-", string.Empty))
-            return Result.Success();
+            if (attachment.Checksum == BitConverter.ToString(checksum).Replace("-", string.Empty))
+                return Result.Success();
+        }
 
         if (useDisk && fileData.Length > _configuration.MaxDBStoreSize)
         {
