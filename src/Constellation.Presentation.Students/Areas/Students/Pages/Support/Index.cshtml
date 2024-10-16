@@ -32,7 +32,34 @@
                 </div>
             </div>
         </div>
-        
+
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-library">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-library" aria-expanded="false" aria-controls="accordion-item-library">
+                    <span>School Library</span>
+                    <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                </button>
+            </h2>
+            <div id="accordion-item-library" class="accordion-collapse collapse" aria-labelledby="accordion-header-library" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <p>Do you love to read? Our Librarian can help you find the right books in our digital library. Suggest your favourite books, or join our virtual book club!</p>
+
+                    @{
+                        var libraryContact = Model.Contacts.FirstOrDefault(entry => entry.Detail == "School Librarian");
+
+                        if (libraryContact is not null)
+                        {
+                            <p>
+                                <span>Contact @libraryContact.DisplayName at <a href="mailto:@libraryContact.EmailAddress">@libraryContact.EmailAddress</a></span>
+                            </p>
+                        }
+                    }
+
+                    <p>You can also visit the <a href="https://teams.microsoft.com/l/channel/19%3Af6fe2ce529c846e9aa805b1a0b7ace3b%40thread.tacv2/Library?groupId=bd9fe897-11a8-4508-9191-3b148ddb8095&tenantId=05a0e69a-418a-47c1-9c25-9387261bf991" target="_blank">Library channel in the Aurora College Students Team</a></p>
+                </div>
+            </div>
+        </div>
+
         <div class="accordion-item">
             <h2 class="accordion-header" id="accordion-header-careers">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-careers" aria-expanded="false" aria-controls="accordion-item-careers">

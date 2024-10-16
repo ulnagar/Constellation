@@ -60,6 +60,7 @@ public sealed class AppConfiguration
     {
         public List<string> CounsellorIds { get; set; }
         public List<string> CareersAdvisorIds { get; set; }
+        public List<string> LibrarianIds { get; set; }
         public Dictionary<Grade, List<string>> LearningSupportIds { get; set; }
         public Dictionary<Grade, List<string>> DeputyPrincipalIds { get; set; }
         public string PrincipalId { get; set; }

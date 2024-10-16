@@ -108,6 +108,28 @@ internal sealed class GetContactListForParentPortalQueryHandler
                 "Careers Advisor"));
         }
 
+        // Add Librarian
+        foreach (string staffId in _configuration.Contacts.LibrarianIds)
+        {
+            Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+
+            if (member is null)
+            {
+                _logger.Warning("Could not find Staff with Id {id}", staffId);
+
+                continue;
+            }
+
+            response.Add(new(
+                member.FirstName,
+                member.LastName,
+                member.DisplayName,
+                member.EmailAddress,
+                string.Empty,
+                "Support",
+                "School Librarian"));
+        }
+
         // Add Admin office and Tech Support
         response.Add(StudentSupportContactResponse.GetDefault);
         response.Add(StudentSupportContactResponse.GetSupport);
