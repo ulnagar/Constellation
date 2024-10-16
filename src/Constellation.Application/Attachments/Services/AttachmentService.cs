@@ -121,14 +121,16 @@ internal sealed class AttachmentService : IAttachmentService
             // Store file on disk
             string filePath = $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
 
-            // Ensure the directory exists
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-
-            await File.WriteAllBytesAsync(filePath, fileData, cancellationToken);
-
             Result attempt = attachment.AttachPath(filePath, fileData.Length, BitConverter.ToString(checksum).Replace("-", string.Empty), overwrite);
 
-            return attempt;
+            if (attempt.IsFailure)
+                return attempt;
+
+            // Ensure the directory exists
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            await File.WriteAllBytesAsync(filePath, fileData, cancellationToken);
+
+            return Result.Success();
         }
         else
         {
