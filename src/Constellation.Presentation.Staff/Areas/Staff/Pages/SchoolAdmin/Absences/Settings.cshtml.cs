@@ -9,6 +9,7 @@ using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
+using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
@@ -27,17 +28,20 @@ public class SettingsModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SettingsModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
+        _dateTime = dateTime;
         _logger = logger
             .ForContext<SettingsModel>()
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
@@ -53,9 +57,9 @@ public class SettingsModel : BasePageModel
     [BindProperty] 
     public StudentId StudentId { get; set; } = StudentId.Empty;
     [BindProperty]
-    public string SchoolCode { get; set; }
+    public string? SchoolCode { get; set; }
     [BindProperty]
-    public int Grade { get; set; }
+    public int? Grade { get; set; }
 
     [BindProperty]
     public string Type { get; set; }
@@ -83,31 +87,90 @@ public class SettingsModel : BasePageModel
             return Page();
         }
 
-        SetAbsenceConfigurationForStudentCommand command = new(
-            StudentId,
-            SchoolCode,
-            Grade,
-            AbsenceType.FromValue(Type),
-            StartDate,
-            EndDate);
-
-        _logger
-            .ForContext(nameof(SetAbsenceConfigurationForStudentCommand), command, true)
-            .Information("Requested to create new Student Absence Setting by user {User}", _currentUserService.UserName);
-
-        Result request = await _mediator.Send(command, cancellationToken);
-
-        if (request.IsFailure)
+        if (Type == "Both")
         {
+            SetAbsenceConfigurationForStudentCommand partialCommand = new(
+                StudentId,
+                SchoolCode,
+                Grade,
+                AbsenceType.Partial,
+                StartDate,
+                EndDate);
+
             _logger
-                .ForContext(nameof(Error), request.Error, true)
-                .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
+                .ForContext(nameof(SetAbsenceConfigurationForStudentCommand), partialCommand, true)
+                .Information("Requested to create new Student Absence Setting by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
-                request.Error,
-                _linkGenerator.GetPathByPage(page: "/SchoolAdmin/Absences/Audit", values: new { area = "Staff" }));
+            Result partialRequest = await _mediator.Send(partialCommand, cancellationToken);
 
-            return Page();
+            if (partialRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), partialRequest.Error, true)
+                    .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
+
+                ModalContent = new ErrorDisplay(
+                    partialRequest.Error,
+                    _linkGenerator.GetPathByPage(page: "/SchoolAdmin/Absences/Audit", values: new { area = "Staff" }));
+
+                return Page();
+            }
+
+            SetAbsenceConfigurationForStudentCommand wholeCommand = new(
+                StudentId,
+                SchoolCode,
+                Grade,
+                AbsenceType.Whole,
+                StartDate,
+                EndDate);
+
+            _logger
+                .ForContext(nameof(SetAbsenceConfigurationForStudentCommand), wholeCommand, true)
+                .Information("Requested to create new Student Absence Setting by user {User}", _currentUserService.UserName);
+
+            Result wholeRequest = await _mediator.Send(wholeCommand, cancellationToken);
+
+            if (wholeRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), wholeRequest.Error, true)
+                    .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
+
+                ModalContent = new ErrorDisplay(
+                    wholeRequest.Error,
+                    _linkGenerator.GetPathByPage(page: "/SchoolAdmin/Absences/Audit", values: new { area = "Staff" }));
+
+                return Page();
+            }
+        }
+        else
+        {
+            SetAbsenceConfigurationForStudentCommand command = new(
+                StudentId,
+                SchoolCode,
+                Grade,
+                AbsenceType.FromValue(Type),
+                StartDate,
+                EndDate);
+
+            _logger
+                .ForContext(nameof(SetAbsenceConfigurationForStudentCommand), command, true)
+                .Information("Requested to create new Student Absence Setting by user {User}", _currentUserService.UserName);
+
+            Result request = await _mediator.Send(command, cancellationToken);
+
+            if (request.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), request.Error, true)
+                    .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
+
+                ModalContent = new ErrorDisplay(
+                    request.Error,
+                    _linkGenerator.GetPathByPage(page: "/SchoolAdmin/Absences/Audit", values: new { area = "Staff" }));
+
+                return Page();
+            }
         }
 
         return RedirectToPage("/SchoolAdmin/Absences/Audit", new { area = "Staff" });
@@ -115,6 +178,8 @@ public class SettingsModel : BasePageModel
 
     private async Task PreparePage(CancellationToken cancellationToken)
     {
+        StartDate = _dateTime.Today;
+
         _logger.Information("Requested to start creation of Student Absence Setting by user {User}", _currentUserService.UserName);
 
         Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery(), cancellationToken);
@@ -134,7 +199,7 @@ public class SettingsModel : BasePageModel
 
         Students = new SelectList(students.Value, "Key", "Value");
 
-        Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery(), cancellationToken);
+        Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools), cancellationToken);
 
         if (schools.IsFailure)
         {

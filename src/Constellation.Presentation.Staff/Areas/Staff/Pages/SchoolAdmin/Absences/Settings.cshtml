@@ -1,4 +1,6 @@
 ﻿@page
+@using Constellation.Core.Models.Students.Identifiers
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Absences.SettingsModel
 
 <h2>Student Absence Configuration</h2>
@@ -13,7 +15,7 @@
             <label asp-for="StudentId" class="col-md-2">Student</label>
             <div class="col-md-3">
                 <select asp-for="StudentId" asp-items="@Model.Students" class="form-control combo">
-                    <option value="">-- Select --</option>
+                    <option value="@StudentId.Empty">-- Select --</option>
                 </select>
                 <span asp-validation-for="StudentId" class="text-danger"></span>
             </div>
@@ -47,6 +49,7 @@
             <label asp-for="Type" class="col-md-2">Absence Type</label>
             <div class="col-md-3">
                 <select asp-for="Type" class="form-control combo">
+                    <option value="Both">Both Whole and Partial Absences</option>
                     <option value="Partial">Partial Absences</option>
                     <option value="Whole">Whole Absences</option>
                 </select>
@@ -104,7 +107,7 @@
 
             var label = 'All students';
 
-            if (studentOption.val() == '') {
+            if (studentOption.val() == "@StudentId.Empty") {
                 var student = null;
             } else {
                 var student = studentOption.text();
