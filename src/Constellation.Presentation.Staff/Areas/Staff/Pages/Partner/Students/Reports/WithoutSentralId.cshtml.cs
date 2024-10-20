@@ -60,7 +60,7 @@ public class WithoutSentralIdModel : BasePageModel
 
     public async Task<IActionResult> OnGetUpdateSentralIds()
     {
-        _logger.Information("Requested to update Sentral Id data for Students by user {User}", _currentUserService);
+        _logger.Information("Requested to update Sentral Id data for Students by user {User}", _currentUserService.UserName);
 
         Result<List<StudentResponse>> request = await _mediator.Send(new GetCurrentStudentsWithoutSentralIdQuery());
 

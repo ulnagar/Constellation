@@ -235,7 +235,7 @@ public class CreateModel : BasePageModel
 
                 _logger
                     .ForContext(nameof(Error), request.Error, true)
-                    .Warning("Failed to create new School Contact by user {User}", _currentUserService);
+                    .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
 
                 Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
                 if (rolesRequest.IsFailure)

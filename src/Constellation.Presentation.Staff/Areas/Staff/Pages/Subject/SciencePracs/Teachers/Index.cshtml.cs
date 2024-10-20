@@ -146,7 +146,7 @@ public class IndexModel : BasePageModel
 
         _logger
             .ForContext(nameof(CreateContactRoleAssignmentCommand), command, true)
-            .Information("Requested to assign role to Contact by user {User}", _currentUserService);
+            .Information("Requested to assign role to Contact by user {User}", _currentUserService.UserName);
 
         Result request = await _mediator.Send(command);
 
@@ -154,7 +154,7 @@ public class IndexModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), request.Error, true)
-                .Information("Requested to assign role to Contact by user {User}", _currentUserService);
+                .Information("Requested to assign role to Contact by user {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(request.Error);
 

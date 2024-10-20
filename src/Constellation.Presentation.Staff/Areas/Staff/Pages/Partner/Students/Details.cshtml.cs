@@ -155,7 +155,7 @@ public class DetailsModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
-                .Warning("Failed to withdraw Student by user {User}", _currentUserService);
+                .Warning("Failed to withdraw Student by user {User}", _currentUserService.UserName);
 
             GenerateError(DomainErrors.Permissions.Unauthorised);
             await PreparePage(cancellationToken);
@@ -174,7 +174,7 @@ public class DetailsModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to withdraw Student by user {User}", _currentUserService);
+                .Warning("Failed to withdraw Student by user {User}", _currentUserService.UserName);
 
             GenerateError(result.Error);
         }
@@ -192,7 +192,7 @@ public class DetailsModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
-                .Warning("Failed to reinstate Student by user {User}", _currentUserService);
+                .Warning("Failed to reinstate Student by user {User}", _currentUserService.UserName);
 
             GenerateError(DomainErrors.Permissions.Unauthorised);
             await PreparePage(cancellationToken);
@@ -203,7 +203,7 @@ public class DetailsModel : BasePageModel
 
         _logger
             .ForContext(nameof(ReinstateStudentCommand), command, true)
-            .Information("Requested to reinstate Student by user {User}", _currentUserService);
+            .Information("Requested to reinstate Student by user {User}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command, cancellationToken);
 
@@ -211,7 +211,7 @@ public class DetailsModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to reinstate Student by user {User}", _currentUserService);
+                .Warning("Failed to reinstate Student by user {User}", _currentUserService.UserName);
 
             GenerateError(result.Error);
             await PreparePage(cancellationToken);

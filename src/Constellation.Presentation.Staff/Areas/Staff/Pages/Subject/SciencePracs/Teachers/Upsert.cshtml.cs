@@ -166,7 +166,7 @@ public class UpsertModel : BasePageModel
 
         _logger
             .ForContext(nameof(UpdateContactCommand), command, true)
-            .Information("Requested to update School Contact by user {User}", _currentUserService);
+            .Information("Requested to update School Contact by user {User}", _currentUserService.UserName);
 
         Result request = await _mediator.Send(command);
 
@@ -174,7 +174,7 @@ public class UpsertModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), request.Error, true)
-                .Warning("Failed to update School Contact by user {User}", _currentUserService);
+                .Warning("Failed to update School Contact by user {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(request.Error);
 
