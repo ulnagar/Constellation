@@ -1,4 +1,5 @@
-﻿namespace Constellation.Core.Models.ThirdPartyConsent;
+﻿#nullable enable
+namespace Constellation.Core.Models.ThirdPartyConsent;
 
 using Constellation.Core.Models.Students.Identifiers;
 using Enums;
@@ -40,7 +41,7 @@ public sealed class Transaction : AggregateRoot
     public ConsentMethod SubmissionMethod { get; private init; }
     public string SubmissionNotes { get; private init; }
 
-    public IReadOnlyList<Consent> Consents => _consents.ToList();
+    public IReadOnlyList<Consent> Consents => _consents.AsReadOnly();
 
     public static Result<Transaction> Create(
         StudentId studentId,
@@ -55,7 +56,7 @@ public sealed class Transaction : AggregateRoot
             return Result.Failure<Transaction>(ConsentErrors.Transaction.NoResponses);
         }
 
-        Transaction transaction = new Transaction(
+        Transaction transaction = new(
             studentId,
             submittedBy,
             submittedAt,
