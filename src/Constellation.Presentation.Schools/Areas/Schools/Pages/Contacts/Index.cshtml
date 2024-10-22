@@ -29,7 +29,7 @@
 
     <div class="form-group row">
         <label class="col-md-2 text-bold">Email Address</label>
-        <div class="col-md-6"><vc:email-address email="@Model.SchoolDetails.EmailAddress" /></div>
+        <div class="col-md-6">@Html.DisplayFor(model => model.SchoolDetails.EmailAddress, "EmailAddress")</div>
     </div>
 </div>
 
@@ -75,7 +75,7 @@
                             <vc:phone-number number="@item.PhoneNumber" />
                         </td>
                         <td>
-                            <vc:email-address email="@item.EmailAddress" />
+                            @Html.DisplayFor(model => item.EmailAddress, "EmailAddress")
                         </td>
                         <td>
                             <button class="btn btn-sm btn-outline-danger button-hover remove-contact-button" data-assignment-id="@item.AssignmentId.ToString()">Remove</button>
