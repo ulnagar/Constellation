@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.SchoolContacts.Models;
+using Core.Abstractions.Services;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
@@ -20,16 +21,20 @@ internal sealed class GetAllContactsQueryHandler
 {
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ISchoolRepository _schoolRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public GetAllContactsQueryHandler(
         ISchoolContactRepository contactRepository,
         ISchoolRepository schoolRepository,
+        ICurrentUserService currentUserService,
         ILogger logger)
     {
         _contactRepository = contactRepository;
         _schoolRepository = schoolRepository;
-        _logger = logger;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<GetAllContactsQuery>();
     }
 
     public async Task<Result<List<SchoolContactResponse>>> Handle(GetAllContactsQuery request, CancellationToken cancellationToken)
@@ -53,15 +58,30 @@ internal sealed class GetAllContactsQueryHandler
                 .ToList();
             
             Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
+            if (name.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SchoolContact), contact, true)
+                    .ForContext(nameof(Error), name.Error, true)
+                    .Warning("Failed to create Name for School Contact by user {User}", _currentUserService.UserName);
+            }
+
             Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
+            if (email.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SchoolContact), contact, true)
+                    .ForContext(nameof(Error), email.Error, true)
+                    .Warning("Failed to create EmailAddress for School Contact by user {User}", _currentUserService.UserName);
+            }
 
             if (activeAssignments.Count == 0)
             {
                 response.Add(new SchoolContactResponse(
                     contact.Id,
                     SchoolContactRoleId.Empty, 
-                    name.Value,
-                    email.Value,
+                    name.IsSuccess ? name.Value : null,
+                    email.IsSuccess ? email.Value : EmailAddress.None,
                     PhoneNumber.Empty, 
                     true,
                     string.Empty,
@@ -82,8 +102,15 @@ internal sealed class GetAllContactsQueryHandler
 
                 if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
                 {
-                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
-                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    if (school is null)
+                    {
+                        phone = PhoneNumber.Empty;
+                    }
+                    else
+                    {
+                        Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
+                        phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    }
                 }
                 else
                 {
