@@ -52,10 +52,10 @@ internal sealed class CreateTransactionCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateTransactionCommand), request, true)
-                .ForContext(nameof(Error), ConsentErrors.Transaction.NoResponses, true)
+                .ForContext(nameof(Error), ConsentTransactionErrors.NoResponses, true)
                 .Warning("Failed to create Consent Transaction");
 
-            return Result.Failure(ConsentErrors.Transaction.NoResponses);
+            return Result.Failure(ConsentTransactionErrors.NoResponses);
         }
 
         List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
@@ -68,20 +68,20 @@ internal sealed class CreateTransactionCommandHandler
             {
                 _logger
                     .ForContext(nameof(CreateTransactionCommand), request, true)
-                    .ForContext(nameof(Error), ConsentErrors.Application.NotFound(entry.Key), true)
+                    .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(entry.Key), true)
                     .Warning("Failed to create Consent Transaction");
 
-                return Result.Failure(ConsentErrors.Application.NotFound(entry.Key));
+                return Result.Failure(ConsentApplicationErrors.NotFound(entry.Key));
             }
 
             if (!application.ConsentRequired)
             {
                 _logger
                     .ForContext(nameof(CreateTransactionCommand), request, true)
-                    .ForContext(nameof(Error), ConsentErrors.Application.NotRequired(application.Id, application.Name), true)
+                    .ForContext(nameof(Error), ConsentApplicationErrors.NotRequired(application.Id, application.Name), true)
                     .Warning("Failed to create Consent Transaction");
 
-                return Result.Failure(ConsentErrors.Application.NotRequired(application.Id, application.Name));
+                return Result.Failure(ConsentApplicationErrors.NotRequired(application.Id, application.Name));
             }
         }
 

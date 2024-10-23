@@ -38,10 +38,10 @@ internal sealed class GetTransactionDetailsQueryHandler
         {
             _logger
                 .ForContext(nameof(GetTransactionDetailsQuery), request, true)
-                .ForContext(nameof(Error), ConsentErrors.Transaction.NotFound(request.TransactionId), true)
+                .ForContext(nameof(Error), ConsentTransactionErrors.NotFound(request.TransactionId), true)
                 .Warning("Failed to retrieve Consent Transaction details");
 
-            return Result.Failure<TransactionDetailsResponse>(ConsentErrors.Transaction.NotFound(request.TransactionId));
+            return Result.Failure<TransactionDetailsResponse>(ConsentTransactionErrors.NotFound(request.TransactionId));
         }
 
         Student student = await _studentRepository.GetById(transaction.StudentId, cancellationToken);
@@ -79,7 +79,7 @@ internal sealed class GetTransactionDetailsQueryHandler
                 _logger
                     .ForContext(nameof(GetTransactionDetailsQuery), request, true)
                     .ForContext(nameof(Consent), consent, true)
-                    .ForContext(nameof(Error), ConsentErrors.Consent.NotFound(consent.Id), true)
+                    .ForContext(nameof(Error), ConsentErrors.NotFound(consent.Id), true)
                     .Warning("Failed to retrieve Consent Transaction details");
 
                 continue;
@@ -92,7 +92,7 @@ internal sealed class GetTransactionDetailsQueryHandler
                 _logger
                     .ForContext(nameof(GetTransactionDetailsQuery), request, true)
                     .ForContext(nameof(Consent), consent, true)
-                    .ForContext(nameof(Error), ConsentErrors.Application.NotFound(consent.ApplicationId), true)
+                    .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(consent.ApplicationId), true)
                     .Warning("Failed to retrieve Consent Transaction details");
 
                 continue;

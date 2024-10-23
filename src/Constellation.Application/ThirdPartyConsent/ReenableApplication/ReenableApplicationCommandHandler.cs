@@ -36,10 +36,10 @@ internal sealed class ReenableApplicationCommandHandler
         {
             _logger
                 .ForContext(nameof(DisableApplicationCommand), request, true)
-                .ForContext(nameof(Error), ConsentErrors.Application.NotFound(request.ApplicationId), true)
+                .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(request.ApplicationId), true)
                 .Warning("Failed to reenable Consent Application");
 
-            return Result.Failure(ConsentErrors.Application.NotFound(request.ApplicationId));
+            return Result.Failure(ConsentApplicationErrors.NotFound(request.ApplicationId));
         }
 
         application.Reenable();

@@ -53,7 +53,7 @@ public sealed class Transaction : AggregateRoot
     {
         if (!consentResponses.Any())
         {
-            return Result.Failure<Transaction>(ConsentErrors.Transaction.NoResponses);
+            return Result.Failure<Transaction>(ConsentTransactionErrors.NoResponses);
         }
 
         Transaction transaction = new(

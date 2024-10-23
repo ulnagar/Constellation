@@ -31,10 +31,10 @@ internal sealed class GetApplicationByIdQueryHandler
         {
             _logger
                 .ForContext(nameof(GetApplicationByIdQuery), request, true)
-                .ForContext(nameof(Error), ConsentErrors.Application.NotFound(request.ApplicationId), true)
+                .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(request.ApplicationId), true)
                 .Warning("Failed to retrieve Consent Application");
 
-            return Result.Failure<ApplicationResponse>(ConsentErrors.Application.NotFound(request.ApplicationId));
+            return Result.Failure<ApplicationResponse>(ConsentApplicationErrors.NotFound(request.ApplicationId));
         }
 
         return new ApplicationResponse(

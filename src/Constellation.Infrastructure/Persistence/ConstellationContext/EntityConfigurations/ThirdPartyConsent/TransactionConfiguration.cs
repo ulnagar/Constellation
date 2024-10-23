@@ -11,7 +11,7 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
 {
     public void Configure(EntityTypeBuilder<Transaction> builder)
     {
-        builder.ToTable("ThirdParty_Transactions");
+        builder.ToTable("Transactions", "ThirdParty");
 
         builder
             .HasKey(transaction => transaction.Id);

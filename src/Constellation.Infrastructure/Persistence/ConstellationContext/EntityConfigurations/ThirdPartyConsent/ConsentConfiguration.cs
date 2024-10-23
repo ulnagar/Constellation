@@ -12,7 +12,7 @@ internal sealed class ConsentConfiguration : IEntityTypeConfiguration<Consent>
 {
     public void Configure(EntityTypeBuilder<Consent> builder)
     {
-        builder.ToTable("ThirdParty_Consents");
+        builder.ToTable("Consents", "ThirdParty");
 
         builder
             .HasKey(consent => consent.Id);

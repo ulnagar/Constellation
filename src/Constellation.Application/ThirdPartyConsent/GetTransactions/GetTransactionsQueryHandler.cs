@@ -91,7 +91,7 @@ internal sealed class GetTransactionsQueryHandler
                             .ForContext(nameof(GetTransactionsQuery), request, true)
                             .ForContext(nameof(Consent), consent, true)
                             .ForContext(nameof(ApplicationId), consent.ApplicationId, true)
-                            .ForContext(nameof(Error), ConsentErrors.Application.NotFound(consent.ApplicationId), true)
+                            .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(consent.ApplicationId), true)
                             .Warning("Failed to retrieve application while building list of Consent Transactions");
 
                         continue;
@@ -105,7 +105,7 @@ internal sealed class GetTransactionsQueryHandler
                             .ForContext(nameof(GetTransactionsQuery), request, true)
                             .ForContext(nameof(Consent), consent, true)
                             .ForContext(nameof(ConsentId), consent.Id, true)
-                            .ForContext(nameof(Error), ConsentErrors.Consent.NotFound(consent.Id), true)
+                            .ForContext(nameof(Error), ConsentErrors.NotFound(consent.Id), true)
                             .Warning("Failed to retrieve consent response while building list of Consent Transactions");
 
                         continue;

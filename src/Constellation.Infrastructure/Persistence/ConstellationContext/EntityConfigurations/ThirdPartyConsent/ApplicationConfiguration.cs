@@ -9,7 +9,7 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
 {
     public void Configure(EntityTypeBuilder<Application> builder)
     {
-        builder.ToTable("ThirdParty_Applications");
+        builder.ToTable("Applications", "ThirdParty");
 
         builder
             .HasKey(application => application.Id);

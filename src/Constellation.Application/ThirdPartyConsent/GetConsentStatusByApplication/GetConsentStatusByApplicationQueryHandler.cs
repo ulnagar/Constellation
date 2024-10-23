@@ -70,10 +70,10 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
             _logger
                 .ForContext(nameof(GetConsentStatusByApplicationQuery), request, true)
                 .ForContext(nameof(ApplicationId), request.ApplicationId, true)
-                .ForContext(nameof(Error), ConsentErrors.Application.NotFound(request.ApplicationId), true)
+                .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(request.ApplicationId), true)
                 .Warning("Failed to retrieve application while building list of Consent Statuses");
 
-            return Result.Failure<List<ConsentStatusResponse>>(ConsentErrors.Application.NotFound(request.ApplicationId));
+            return Result.Failure<List<ConsentStatusResponse>>(ConsentApplicationErrors.NotFound(request.ApplicationId));
         }
 
         List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);

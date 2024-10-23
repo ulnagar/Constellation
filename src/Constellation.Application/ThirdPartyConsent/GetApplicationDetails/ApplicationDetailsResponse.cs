@@ -18,7 +18,8 @@ public sealed record ApplicationDetailsResponse(
     string[] SharedWith,
     bool ConsentRequired,
     bool IsDeleted,
-    List<ApplicationDetailsResponse.ConsentResponse> Consents)
+    List<ApplicationDetailsResponse.ConsentResponse> Consents,
+    List<ApplicationDetailsResponse.Requirement> Requirements)
 {
     public sealed record ConsentResponse(
         ConsentId Id,
@@ -32,4 +33,10 @@ public sealed record ApplicationDetailsResponse(
         DateTime ProvidedAt,
         ConsentMethod Method,
         string MethodNotes);
+
+    public sealed record Requirement(
+        ConsentRequirementId Id,
+        string Type,
+        string Description,
+        DateOnly EnteredOn);
 }

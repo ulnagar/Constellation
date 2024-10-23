@@ -3,9 +3,11 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record ConsentId(Guid Value)
+public record struct ConsentId(Guid Value)
     : IStronglyTypedId
 {
+    public static ConsentId Empty => new(Guid.Empty);
+
     public static ConsentId FromValue(Guid value) =>
         new(value);
 
