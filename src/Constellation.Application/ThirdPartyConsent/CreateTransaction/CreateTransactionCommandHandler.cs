@@ -9,6 +9,7 @@ using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Enums;
 using Core.Models.ThirdPartyConsent.Errors;
+using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -48,17 +49,21 @@ internal sealed class CreateTransactionCommandHandler
 
     public async Task<Result> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
-        if (request.Responses.Count == 0)
+        List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
+
+        ConsentTransactionId transactionId = new();
+
+        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+
+        if (student is null)
         {
             _logger
                 .ForContext(nameof(CreateTransactionCommand), request, true)
-                .ForContext(nameof(Error), ConsentTransactionErrors.NoResponses, true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
                 .Warning("Failed to create Consent Transaction");
 
-            return Result.Failure(ConsentTransactionErrors.NoResponses);
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
-
-        List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
 
         foreach (KeyValuePair<ApplicationId, bool> entry in request.Responses)
         {
@@ -78,52 +83,34 @@ internal sealed class CreateTransactionCommandHandler
             {
                 _logger
                     .ForContext(nameof(CreateTransactionCommand), request, true)
-                    .ForContext(nameof(Error), ConsentApplicationErrors.NotRequired(application.Id, application.Name), true)
+                    .ForContext(nameof(Error), ConsentApplicationErrors.NotRequired(application.Id, application.Name),
+                        true)
                     .Warning("Failed to create Consent Transaction");
 
                 return Result.Failure(ConsentApplicationErrors.NotRequired(application.Id, application.Name));
             }
+
+            string submissionNotes = request.Notes;
+
+            if (request.SubmissionMethod.Equals(ConsentMethod.PhoneCall))
+            {
+                submissionNotes += Environment.NewLine;
+                submissionNotes += $"Entered by {_currentUserService.EmailAddress}";
+            }
+
+            Consent consent = Consent.Create(
+                transactionId,
+                student.Id,
+                application.Id,
+                entry.Value,
+                request.SubmittedBy,
+                _dateTime.Now,
+                request.SubmissionMethod,
+                submissionNotes);
+
+            application.AddConsentResponse(consent);
         }
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
-
-        if (student is null)
-        {
-            _logger
-                .ForContext(nameof(CreateTransactionCommand), request, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
-                .Warning("Failed to create Consent Transaction");
-
-            return Result.Failure(StudentErrors.NotFound(request.StudentId));
-        }
-
-        string submissionNotes = request.Notes;
-
-        if (request.SubmissionMethod.Equals(ConsentMethod.PhoneCall))
-        {
-            submissionNotes += Environment.NewLine;
-            submissionNotes += $"Entered by {_currentUserService.EmailAddress}";
-        }
-
-        Result<Transaction> transaction = Transaction.Create(
-            student.Id,
-            request.SubmittedBy,
-            _dateTime.Now,
-            request.SubmissionMethod,
-            submissionNotes,
-            request.Responses);
-
-        if (transaction.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(CreateTransactionCommand), request, true)
-                .ForContext(nameof(Error), transaction.Error, true)
-                .Warning("Failed to create Consent Transaction");
-
-            return Result.Failure(transaction.Error);
-        }
-
-        _consentRepository.Insert(transaction.Value);
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

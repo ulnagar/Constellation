@@ -33,8 +33,8 @@ public sealed class Consent
     }
 
     public ConsentId Id { get; private set; }
-    public ApplicationId ApplicationId { get; private set; }
     public ConsentTransactionId TransactionId { get; private set; }
+    public ApplicationId ApplicationId { get; private set; }
     public StudentId StudentId { get; private set; }
     public bool ConsentProvided { get; private set; }
     public string ProvidedBy { get; private set; }

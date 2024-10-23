@@ -101,6 +101,8 @@ public sealed class Application : AggregateRoot, IAuditableEntity
             .ToList();
     }
 
+    public void AddConsentResponse(Consent consent) => _consents.Add(consent);
+
     public void Delete() => IsDeleted = true;
 
     public void Reenable()

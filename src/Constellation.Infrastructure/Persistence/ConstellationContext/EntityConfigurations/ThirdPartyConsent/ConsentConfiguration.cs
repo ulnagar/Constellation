@@ -38,17 +38,11 @@ internal sealed class ConsentConfiguration : IEntityTypeConfiguration<Consent>
 
         builder
             .Property(consent => consent.TransactionId)
+            .IsRequired()
             .HasConversion(
                 id => id.Value,
                 value => ConsentTransactionId.FromValue(value));
-
-        builder
-            .HasOne<Transaction>()
-            .WithMany(transaction => transaction.Consents)
-            .HasForeignKey(consent => consent.TransactionId)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Restrict);
-            
+           
         builder
             .Property(consent => consent.Method)
             .HasConversion(

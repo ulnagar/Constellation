@@ -2,7 +2,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.GetTransactionDetails;
+using Application.ThirdPartyConsent.GetConsentDetails;
 using Core.Abstractions.Services;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -40,21 +39,23 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Consent Response Details";
 
     [BindProperty(SupportsGet = true)]
-    public ConsentTransactionId Id { get; set; } = ConsentTransactionId.Empty;
+    public ConsentId ConsentId { get; set; } = ConsentId.Empty;
+    [BindProperty(SupportsGet = true)]
+    public ApplicationId ApplicationId { get; set; } = ApplicationId.Empty;
 
-    public TransactionDetailsResponse Transaction { get; set; }
+    public ConsentDetailsResponse Transaction { get; set; }
 
     public async Task OnGet()
     {
-        _logger.Information("Requested to retrieve details of Consent Transaction by user {User}", _currentUserService.UserName);
+        _logger.Information("Requested to retrieve details of Consent by user {User}", _currentUserService.UserName);
 
-        Result<TransactionDetailsResponse> result = await _mediator.Send(new GetTransactionDetailsQuery(Id));
+        Result<ConsentDetailsResponse> result = await _mediator.Send(new GetConsentDetailsQuery(ApplicationId, ConsentId));
 
         if (result.IsFailure)
         {
             _logger
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to retrieve details of Consent Transaction by user {User}", _currentUserService.UserName);
+                .Warning("Failed to retrieve details of Consent by user {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(
                 result.Error,
