@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241022220337_UpdateThirdPartyConsentModels")]
+    partial class UpdateThirdPartyConsentModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2475,7 +2478,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Applications", "ThirdParty");
+                    b.ToTable("ThirdParty_Applications", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.Consent", b =>
@@ -2515,63 +2518,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("TransactionId");
 
-                    b.ToTable("Consents", "ThirdParty");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.ConsentRequirement", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ApplicationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ApplicationName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationId");
-
-                    b.ToTable("ConsentRequirements", "ThirdParty");
-
-                    b.HasDiscriminator<string>("Type").HasValue("ConsentRequirement");
-
-                    b.UseTphMappingStrategy();
+                    b.ToTable("ThirdParty_Consents", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.Transaction", b =>
@@ -2601,7 +2548,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Transactions", "ThirdParty");
+                    b.ToTable("ThirdParty_Transactions", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TimetablePeriod", b =>
@@ -3472,40 +3419,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("UpdateEmail");
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.CourseConsentRequirement", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.ThirdPartyConsent.ConsentRequirement");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasDiscriminator().HasValue("Course");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.GradeConsentRequirement", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.ThirdPartyConsent.ConsentRequirement");
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("int");
-
-                    b.HasDiscriminator().HasValue("Grade");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.StudentConsentRequirement", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.ThirdPartyConsent.ConsentRequirement");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasDiscriminator().HasValue("Student");
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.CaseDetailUpdateAction", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.WorkFlow.Action");
@@ -4332,15 +4245,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.ConsentRequirement", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.ThirdPartyConsent.Application", null)
-                        .WithMany()
-                        .HasForeignKey("ApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.Transaction", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
@@ -4538,24 +4442,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasForeignKey("StaffId");
 
                     b.Navigation("Staff");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.CourseConsentRequirement", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.StudentConsentRequirement", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Students.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.CreateSentralEntryAction", b =>

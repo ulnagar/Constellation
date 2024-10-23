@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Enums;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Identifiers;
@@ -80,7 +82,59 @@ internal sealed class ConsentRepository : IConsentRepository
             .Set<Transaction>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<ConsentRequirement>> GetRequirementsForApplication(
+        ApplicationId applicationId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ConsentRequirement>()
+            .Where(requirement => requirement.ApplicationId == applicationId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<ConsentRequirement> GetRequirementById(
+        ConsentRequirementId requirementId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ConsentRequirement>()
+            .Where(requirement => requirement.Id == requirementId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<List<ConsentRequirement>> GetAllRequirements(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ConsentRequirement>()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<CourseConsentRequirement>> GetRequirementsForCourse(
+        CourseId courseId, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ConsentRequirement>()
+            .OfType<CourseConsentRequirement>()
+            .Where(requirement => requirement.CourseId == courseId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<GradeConsentRequirement>> GetRequirementsForGrade(
+        Grade grade, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ConsentRequirement>()
+            .OfType<GradeConsentRequirement>()
+            .Where(requirement => requirement.Grade == grade)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<StudentConsentRequirement>> GetRequirementsForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<ConsentRequirement>()
+            .OfType<StudentConsentRequirement>()
+            .Where(requirement => requirement.StudentId == studentId)
+            .ToListAsync(cancellationToken);
+
+
     public void Insert(Application application) => _context.Set<Application>().Add(application);
 
     public void Insert(Transaction transaction) => _context.Set<Transaction>().Add(transaction);
+
+    public void Insert(ConsentRequirement requirement) => _context.Set<ConsentRequirement>().Add(requirement);
 }

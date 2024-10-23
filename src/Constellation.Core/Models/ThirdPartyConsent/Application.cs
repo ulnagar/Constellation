@@ -1,7 +1,7 @@
-﻿using Constellation.Core.Models.Students.Identifiers;
-
+﻿#nullable enable
 namespace Constellation.Core.Models.ThirdPartyConsent;
 
+using Constellation.Core.Models.Students.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ApplicationId = Identifiers.ApplicationId;
 
-public sealed class Application : IAuditableEntity
+public sealed class Application : AggregateRoot, IAuditableEntity
 {
     private readonly List<Consent> _consents = new();
 

@@ -35,10 +35,10 @@ internal sealed class UpdateApplicationCommandHandler
         {
             _logger
                 .ForContext(nameof(UpdateApplicationCommand), request, true)
-                .ForContext(nameof(Error), ConsentErrors.Application.NotFound(request.Id), true)
+                .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(request.Id), true)
                 .Warning("Failed to update Consent Application");
 
-            return Result.Failure(ConsentErrors.Application.NotFound(request.Id));
+            return Result.Failure(ConsentApplicationErrors.NotFound(request.Id));
         }
 
         application.Update(

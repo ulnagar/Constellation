@@ -8,6 +8,7 @@ using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
 using Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,6 +80,22 @@ internal sealed class GetApplicationDetailsQueryHandler
                 consent.MethodNotes));
         }
 
+        List<ConsentRequirement> requirements = await _consentRepository.GetRequirementsForApplication(application.Id, cancellationToken);
+
+        List<ApplicationDetailsResponse.Requirement> requirementResponses = new();
+
+        foreach (ConsentRequirement requirement in requirements)
+        {
+            if (requirement.IsDeleted)
+                continue;
+
+            requirementResponses.Add(new(
+                requirement.Id,
+                requirement.GetType().ToString(),
+                requirement.Description,
+                DateOnly.FromDateTime(requirement.CreatedAt)));
+        }
+
         return new ApplicationDetailsResponse(
             application.Id,
             application.Name,
@@ -88,6 +105,7 @@ internal sealed class GetApplicationDetailsQueryHandler
             application.SharedWith,
             application.ConsentRequired,
             application.IsDeleted,
-            consentResponses);
+            consentResponses,
+            requirementResponses);
     }
 }
