@@ -1,10 +1,8 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Responses.IndexModel
 
-@using Constellation.Application.Models.Auth
 @using Constellation.Core.Extensions
 @using Constellation.Core.Enums
-@using Microsoft.AspNetCore.Authorization
 
 @inject IAuthorizationService authService
 
@@ -78,32 +76,29 @@
     <tbody>
         @foreach (var entry in Model.Transactions)
         {
-            foreach (var app in entry.Applications.OrderBy(app => app.ApplicationName))
-            {
-                <tr>
-                    <td data-order="@entry.Name.SortOrder">@entry.Name.DisplayName</td>
-                    <td>@entry.Grade.AsName()</td>
-                    <td>@entry.School</td>
-                    <td>@entry.SubmittedAt.ToShortDateString()</td>
-                    <td data-search="@(app.ConsentProvided ? "Granted" : "Denied")">
-                        @if (app.ConsentProvided)
-                        {
-                            <span class="badge badge-success">
-                                <i class="fal fa-check"></i> @app.ApplicationName
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-danger">
-                                <i class="fal fa-times"></i> @app.ApplicationName
-                            </span>
-                        }
-                    </td>
-                    <td>
-                        <a asp-page="/SchoolAdmin/Consent/Responses/Details" asp-area="Staff" asp-route-id="@entry.TransactionId.Value" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
-                    </td>
-                </tr>
-            }
+            <tr>
+                <td data-order="@entry.Student.SortOrder">@entry.Student.DisplayName</td>
+                <td>@entry.Grade.AsName()</td>
+                <td>@entry.School</td>
+                <td>@entry.ReceivedOn.ToShortDateString()</td>
+                <td data-search="@(entry.ConsentProvided ? "Granted" : "Denied")">
+                    @if (entry.ConsentProvided)
+                    {
+                        <span class="badge badge-success">
+                            <i class="fal fa-check"></i> @entry.ApplicationName
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">
+                            <i class="fal fa-times"></i> @entry.ApplicationName
+                        </span>
+                    }
+                </td>
+                <td>
+                    <a asp-page="/SchoolAdmin/Consent/Responses/Details" asp-area="Staff" asp-route-id="@entry.ConsentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
         }
     </tbody>
 </table>

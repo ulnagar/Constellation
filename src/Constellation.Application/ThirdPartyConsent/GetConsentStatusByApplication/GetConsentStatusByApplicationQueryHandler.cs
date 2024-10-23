@@ -92,27 +92,8 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
                 continue;
             }
 
-            List<Transaction> transactions = await _consentRepository.GetTransactionsByStudentId(student.Id, cancellationToken);
-
-            if (!transactions.Any())
-            {
-                response.Add(new(
-                    student.Id,
-                    student.Name,
-                    enrolment.Grade,
-                    enrolment.SchoolName,
-                    application.Name,
-                    ConsentStatusResponse.ConsentStatus.Unknown,
-                    DateOnly.MinValue));
-
-                continue;
-            }
-
-            Consent consent = transactions
-                .SelectMany(transaction =>
-                    transaction.Consents
-                        .Where(consent =>
-                            consent.ApplicationId == request.ApplicationId))
+            Consent consent = application.Consents
+                .Where(consent => consent.StudentId == student.Id)
                 .MaxBy(consent => consent.ProvidedAt);
 
             if (consent is null)

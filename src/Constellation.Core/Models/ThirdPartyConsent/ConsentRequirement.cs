@@ -1,18 +1,17 @@
 ﻿#nullable enable
-using Constellation.Core.Extensions;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects;
-
 namespace Constellation.Core.Models.ThirdPartyConsent;
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Constellation.Core.Models.ThirdPartyConsent.Identifiers;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Extensions;
+using Identifiers;
+using Primitives;
+using Shared;
+using Students;
+using Subjects;
 using System;
-using ApplicationId = Constellation.Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
+using ApplicationId = Identifiers.ApplicationId;
 
 public abstract class ConsentRequirement : IAuditableEntity
 {

@@ -4,7 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Schools.Models;
 using Application.StaffMembers.Models;
-using Application.ThirdPartyConsent.GetTransactionsWithFilter;
+using Application.ThirdPartyConsent.GetConsentsWithFilter;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
 using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
@@ -52,7 +52,7 @@ public class IndexModel : BasePageModel
 
     public Dictionary<StudentId, string> StudentsList { get; set; } = new();
 
-    public List<TransactionSummaryResponse> Transactions { get; set; } = new();
+    public List<ConsentSummaryResponse> Transactions { get; set; } = new();
 
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
@@ -156,7 +156,7 @@ public class IndexModel : BasePageModel
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
-        Result<List<TransactionSummaryResponse>> result = await _mediator.Send(new GetTransactionsWithFilterQuery(
+        Result<List<ConsentSummaryResponse>> result = await _mediator.Send(new GetConsentsWithFilterQuery(
             offeringIds,
             Filter.Grades,
             Filter.Schools,
@@ -175,7 +175,7 @@ public class IndexModel : BasePageModel
 
         Transactions = result.Value
             .OrderBy(entry => entry.Grade)
-            .ThenBy(entry => entry.Name.SortOrder)
+            .ThenBy(entry => entry.Student.SortOrder)
             .ToList();
 
         return Page();
