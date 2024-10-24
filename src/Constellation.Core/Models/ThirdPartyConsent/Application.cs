@@ -12,6 +12,7 @@ using ApplicationId = Identifiers.ApplicationId;
 public sealed class Application : AggregateRoot, IAuditableEntity
 {
     private readonly List<Consent> _consents = new();
+    private readonly List<ConsentRequirement> _requirements = new();
 
     private Application() // Required by EF Core
     { } 
@@ -40,6 +41,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     public string[] SharedWith { get; private set; } = Array.Empty<string>();
     public bool ConsentRequired { get; private set; }
     public IReadOnlyList<Consent> Consents => _consents.ToList();
+    public IReadOnlyList<ConsentRequirement> Requirements => _requirements.ToList();
 
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
@@ -102,7 +104,9 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     }
 
     public void AddConsentResponse(Consent consent) => _consents.Add(consent);
+    public void AddConsentRequirement(ConsentRequirement requirement) => _requirements.Add(requirement);
 
+    // TODO: R1.16.1: Also mark all requirements as deleted
     public void Delete() => IsDeleted = true;
 
     public void Reenable()
