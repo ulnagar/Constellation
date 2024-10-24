@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
+using Application.Assignments.GetRubricAssignmentsFromCourse;
 using Application.Assignments.GetUploadAssignmentsFromCourse;
 using Application.Canvas.ExportCanvasRubricResults;
 using Application.Common.PresentationModels;
@@ -92,7 +93,7 @@ public class DetailsModel : BasePageModel
 
         Offering = query.Value;
 
-        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetUploadAssignmentsFromCourseQuery(Offering.CourseId));
+        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetRubricAssignmentsFromCourseQuery(Offering.CourseId));
 
         if (assignments.IsFailure)
         {
