@@ -1,0 +1,15 @@
+.select-button {
+    margin: 2.5px;
+}
+
+.modal-dialog {
+    max-width: 70vw !important;
+}
+
+.row.nested-row {
+    min-height: 110px;
+}
+
+div.hidden {
+    display: none;
+}

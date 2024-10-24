@@ -5,7 +5,9 @@ using Application.Models.Auth;
 using Application.ThirdPartyConsent.DisableApplication;
 using Application.ThirdPartyConsent.GetApplicationDetails;
 using Application.ThirdPartyConsent.ReenableApplication;
+using Application.ThirdPartyConsent.RevokeRequirement;
 using Core.Abstractions.Services;
+using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -46,28 +48,7 @@ public class DetailsModel : BasePageModel
 
     public ApplicationDetailsResponse Application { get; set; }
 
-    public async Task OnGet()
-    {
-        _logger.Information("Requested to retrieve details for Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
-
-        Result<ApplicationDetailsResponse> applicationRequest = await _mediator.Send(new GetApplicationDetailsQuery(Id));
-
-        if (applicationRequest.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), applicationRequest.Error, true)
-                .Warning("Failed to retrieve details for Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
-            
-            ModalContent = new ErrorDisplay(
-                applicationRequest.Error,
-                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Index", values: new { area = "Staff" }));
-
-            return;
-        }
-
-        Application = applicationRequest.Value;
-        PageTitle = $"Details - {Application.Name}";
-    }
+    public async Task OnGet() => await PreparePage();
 
     public async Task<IActionResult> OnGetDeactivate()
     {
@@ -88,6 +69,8 @@ public class DetailsModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 applicationRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id }));
+
+            await PreparePage();
 
             return Page();
         }
@@ -115,9 +98,54 @@ public class DetailsModel : BasePageModel
                 applicationRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetRevokeRequirement(ConsentRequirementId requirementId)
+    {
+        Result result = await _mediator.Send(new RevokeRequirementCommand(Id, requirementId));
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to revoke Consent Requirement by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    private async Task PreparePage()
+    {
+        _logger.Information("Requested to retrieve details for Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+        Result<ApplicationDetailsResponse> applicationRequest = await _mediator.Send(new GetApplicationDetailsQuery(Id));
+
+        if (applicationRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), applicationRequest.Error, true)
+                .Warning("Failed to retrieve details for Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                applicationRequest.Error,
+                _linkGenerator.GetPathByPage("/SchoolAdmin/Consent/Applications/Index", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        Application = applicationRequest.Value;
+        PageTitle = $"Details - {Application.Name}";
     }
 }

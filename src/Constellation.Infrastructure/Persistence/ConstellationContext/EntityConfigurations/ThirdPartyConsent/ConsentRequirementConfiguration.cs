@@ -24,7 +24,7 @@ internal sealed class ConsentRequirementConfiguration : IEntityTypeConfiguration
 
         builder
             .HasOne<Application>()
-            .WithMany()
+            .WithMany(application => application.Requirements)
             .HasForeignKey(requirement => requirement.ApplicationId);
 
         builder

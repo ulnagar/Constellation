@@ -22,7 +22,11 @@ internal sealed class ApplicationConfiguration : IEntityTypeConfiguration<Applic
         
         builder
             .Navigation(application => application.Consents)
-        .AutoInclude();
+            .AutoInclude();
+        
+        builder
+            .Navigation(application => application.Requirements)
+            .AutoInclude();
 
         builder
             .Property(application => application.InformationCollected)

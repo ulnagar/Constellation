@@ -89,9 +89,17 @@ internal sealed class GetApplicationDetailsQueryHandler
             if (requirement.IsDeleted)
                 continue;
 
+            var type = requirement switch
+            {
+                CourseConsentRequirement => "Course",
+                GradeConsentRequirement => "Grade",
+                StudentConsentRequirement => "Student",
+                _ => "Unknown"
+            };
+
             requirementResponses.Add(new(
                 requirement.Id,
-                requirement.GetType().ToString(),
+                type,
                 requirement.Description,
                 DateOnly.FromDateTime(requirement.CreatedAt)));
         }
