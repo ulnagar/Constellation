@@ -16,6 +16,7 @@ public sealed record ApplicationDetailsResponse(
     string[] InformationCollected,
     string StoredCountry,
     string[] SharedWith,
+    string Link,
     bool ConsentRequired,
     bool IsDeleted,
     List<ApplicationDetailsResponse.ConsentResponse> Consents,
