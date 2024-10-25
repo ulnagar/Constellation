@@ -115,6 +115,7 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
                 application.InformationCollected.ToList(),
                 application.StoredCountry,
                 application.SharedWith.ToList(),
+                application.ApplicationLink,
                 consent?.Id ?? ConsentId.Empty,
                 consent?.TransactionId ?? ConsentTransactionId.Empty,
                 request.StudentId,

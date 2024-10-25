@@ -9,5 +9,6 @@ public sealed record CreateApplicationCommand(
     string[] InformationCollected,
     string StoredCountry,
     string[] SharedWith,
+    string ApplicationLink,
     bool ConsentRequired)
     : ICommand<ApplicationId>;

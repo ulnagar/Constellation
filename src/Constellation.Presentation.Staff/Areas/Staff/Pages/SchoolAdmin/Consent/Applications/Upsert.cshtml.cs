@@ -62,7 +62,10 @@ public class UpsertModel : BasePageModel
 
     [BindProperty] 
     public List<string> SharedWith { get; set; } = new() { string.Empty };
-    
+
+    [BindProperty]
+    public string ApplicationLink { get; set; } = string.Empty;
+
     [BindProperty]
     public bool ConsentRequired { get; set; }
 
@@ -131,6 +134,7 @@ public class UpsertModel : BasePageModel
                 informationCollected,
                 StoredCountry,
                 sharedWith,
+                ApplicationLink,
                 ConsentRequired);
 
             _logger
@@ -160,6 +164,7 @@ public class UpsertModel : BasePageModel
                 informationCollected,
                 StoredCountry,
                 sharedWith,
+                ApplicationLink,
                 ConsentRequired);
 
             _logger

@@ -47,6 +47,7 @@ internal sealed class UpdateApplicationCommandHandler
             request.InformationCollected,
             request.StoredCountry,
             request.SharedWith,
+            request.ApplicationLink,
             request.ConsentRequired);
 
         await _unitOfWork.CompleteAsync(cancellationToken);

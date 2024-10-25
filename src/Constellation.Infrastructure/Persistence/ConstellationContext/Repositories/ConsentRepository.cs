@@ -60,6 +60,14 @@ internal sealed class ConsentRepository : IConsentRepository
             .Set<Application>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Application>> GetApplicationsWithoutRequiredConsent(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .Where(application =>
+                !application.IsDeleted &&
+                !application.ConsentRequired)
+            .ToListAsync(cancellationToken);
     public async Task<List<Application>> GetApplicationWithConsentForStudent(
         StudentId studentId,
         CancellationToken cancellationToken = default) =>

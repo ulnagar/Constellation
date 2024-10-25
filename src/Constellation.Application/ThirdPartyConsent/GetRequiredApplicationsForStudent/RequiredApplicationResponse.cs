@@ -14,6 +14,7 @@ public sealed record RequiredApplicationResponse(
     IReadOnlyList<string> InformationCollected,
     string StoredCountry,
     IReadOnlyList<string> SharedWith,
+    string Link,
     ConsentId Id,
     ConsentTransactionId TransactionId,
     StudentId StudentId,

@@ -85,6 +85,14 @@
         </div>
         
         <div class="form-group row">
+            <label asp-for="ApplicationLink" class="col-md-2">Application Link</label>
+            <div class="col-md-8">
+                <input asp-for="ApplicationLink" class="form-control"/>
+                <span asp-validation-for="ApplicationLink" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
             <label asp-for="ConsentRequired" class="col-md-2">Consent Required</label>
             <div class="col-md-8">
                 <input asp-for="ConsentRequired" class="form-control"/>

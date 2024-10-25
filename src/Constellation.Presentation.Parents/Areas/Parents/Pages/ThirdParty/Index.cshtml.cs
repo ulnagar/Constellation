@@ -1,7 +1,11 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.ThirdParty;
 
+using Application.Common.PresentationModels;
+using Application.ThirdPartyConsent.GetApplicationsWithoutRequiredConsent;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Contacts;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,8 +37,28 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.ThirdParty;
 
+    public List<ApprovedApplicationResponse> Applications { get; set; } = new();
 
-    public void OnGet()
+    public async Task OnGet()
     {
+        _logger
+            .Information("Requested to retrieve approved Applications by user {User}", _currentUserService.UserName);
+
+        Result<List<ApprovedApplicationResponse>> applications = await _mediator.Send(new GetApplicationsWithoutRequiredConsentQuery());
+
+        if (applications.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), applications.Error, true)
+                .Warning("Failed to retrieve approved Applications by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                applications.Error,
+                _linkGenerator.GetPathByPage("/Index", values: new { area = "Parents" }));
+
+            return;
+        }
+
+        Applications = applications.Value.OrderBy(app => app.Name).ToList();
     }
 }

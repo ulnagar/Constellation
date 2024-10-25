@@ -4,7 +4,6 @@
 @{
 }
 
-
 <h2>Applications</h2>
 
 @if (Model.SelectedStudent is null)
@@ -40,6 +39,15 @@ else
         </span>
     </div>
 
+    <hr />
+
+
+    <div class="row">
+        <div class="col">
+            <p>Please review the applications below carefully. Each has been selected by Aurora College for their valuable contribution to our virtual learning environment. If you have any concerns about a particular application, please contact our Technology Manager, Ben Hillsley, at <a href="mailto:support@aurora.nsw.edu.au">support@aurora.nsw.edu.au</a> or on <span class="fw-bold">1300 610 733</span></p>
+        </div>
+    </div>
+
     <div class="row row-cols-1 row-cols-lg-2 g-4">
         @foreach (var application in Model.Applications)
         {
@@ -48,7 +56,7 @@ else
             <div class="col">
                 <div class="card" id="accordion-@applicationId">
                     <div class="row g-0 card-header">
-                        <div class="col-3 col-sm-4 col-xl-3 d-flex vertical-center-content">
+                        <div class="col-4 col-sm-4 col-xl-3 d-flex vertical-center-content">
                             @if (application.Id == ConsentId.Empty)
                             {
                                 <i class="fad fa-question-square fa-card-icon-sizing app-theme pending"></i>
@@ -62,7 +70,7 @@ else
                                 <i class="fad fa-times-square fa-card-icon-sizing app-theme failure"></i>
                             }
                         </div>
-                        <div class="col-8 col-sm-7 col-xl-8">
+                        <div class="col-7 col-sm-7 col-xl-8">
                             <h4 class="card-title">@application.ApplicationName</h4>
                             <p class="card-text fst-italic">@application.Purpose</p>
                             <p class="card-text">
@@ -106,6 +114,12 @@ else
                                         }
                                     </ul>
                                 </dd>
+                                
+                                @if (!string.IsNullOrWhiteSpace(application.Link))
+                                {
+                                    <dt>Link</dt>
+                                    <dd><a href="@application.Link" target="_blank">@application.Link</a></dd>
+                                }
                             </dl>
                         </div>
                         <div class="card-footer">
@@ -113,21 +127,21 @@ else
                                 <div class="col-6 d-grid">
                                     @if (application.Id != ConsentId.Empty && application.ConsentProvided)
                                     {
-                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-success">Approved</button>
+                                        <button data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-success">I consent</button>
                                     }
                                     else
                                     {
-                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-outline-success">Approve</button>
+                                        <button data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-outline-success">I consent</button>
                                     }
                                 </div>
                                 <div class="col-6 d-grid">
                                     @if (application.Id != ConsentId.Empty && !application.ConsentProvided)
                                     {
-                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-danger">Rejected</button>
+                                        <button data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-danger">I do not consent</button>
                                     }
                                     else
                                     {
-                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-outline-danger">Reject</button>
+                                        <button data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-outline-danger">I do not consent</button>
                                     }
                                 </div>
                             </div>
@@ -137,14 +151,54 @@ else
             </div>
         }
     </div>
-}
+    
+    <hr/>
 
-<form method="post">
-    <div id="responses">
+    <h3>Consent to use third-party software</h3>
 
+    <div class="row mt-3">
+        <form method="post">
+            <div id="responses">
+
+            </div>
+
+            <div class="row d-none" id="approveBlock">
+                <div class="col">
+                    <p><span class="fw-bold fst-italic">I consent</span> to @Model.SelectedStudent.FirstName using the following applications:</p>
+                    <ul id="approveList">
+
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row d-none" id="rejectBlock">
+                <div class="col">
+                    <p><span class="fw-bold fst-italic">I do not consent</span> to @Model.SelectedStudent.FirstName using the following applications:</p>
+                    <ul id="rejectList">
+
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <p>By clicking submit, I confirm:</p>
+                    <ul>
+                        <li>This consent remain effective until I advise the school otherwise, either in writing or by submitting this form again.</li>
+                        <li>I acknowledge that my child must abide by the conditions of acceptable usage set out in the department's <a href="https://education.nsw.gov.au/policy-library/policies/pd-2020-0471" target="_blank">Digital Devices and Online Services for Students policy</a>, and that any breach of this policy may, at the school's discretion, result in disciplinary action in accordance with the school's behaviour policy.</li>
+                    </ul>
+                    <p>A receipt for this transaction will be generated outlining all the information provided and your responses. This receipt will be emailed to your registered email address for your records.</p>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col col-md-4 d-grid">
+                    <button type="submit" class="btn btn-success py-3 mb-3" disabled="disabled" id="formSubmit">Submit Responses</button>
+                </div>
+            </div>
+        </form>
     </div>
-    <button type="submit" class="btn btn-success">Submit</button>
-</form>
+}
 
 @section scripts {
     <script>
@@ -158,15 +212,15 @@ else
 
         function toggleApp(appId, action) {
             if (action == 'approve'){
+                var appName = $('.btn-outline-success[data-application-id=' + appId + ']').data('appName');
+
                 $('.btn-danger[data-application-id=' + appId + ']')
                     .removeClass('btn-danger')
-                    .addClass('btn-outline-danger')
-                    .html('Reject');
+                    .addClass('btn-outline-danger');
 
                 $('.btn-outline-success[data-application-id=' + appId + ']')
                     .removeClass('btn-outline-success')
-                    .addClass('btn-success')
-                    .html('Approved');
+                    .addClass('btn-success');
 
                 var existingInput = $('#' + appId);
 
@@ -177,18 +231,41 @@ else
                     var input = '<input type="hidden" class="form-control" name="responses[' + appId + ']" id="' + appId + '" value="true">';
                     $('#responses').append(input);
                 }
+
+                var existingApproveListItem = $('#approveList li[data-application-id=' + appId + ']');
+
+                if (!existingApproveListItem.length)
+                {
+                    var listItem = '<li data-application-id="' + appId + '">' + appName + '</li>';
+                    $('#approveList').append(listItem);
+
+                    $('#approveBlock')
+                        .removeClass('d-none');
+                }
+
+                var existingRejectListItem = $('#rejectList li[data-application-id=' + appId + ']');
+
+                if (existingRejectListItem.length)
+                {
+                    existingRejectListItem.remove();
+
+                    if ($('#rejectList').children().length == 0){
+                        $('#rejectBlock')
+                            .addClass('d-none');
+                    }
+                }
             }
 
             if (action == 'reject') {
+                var appName = $('.btn-outline-danger[data-application-id=' + appId + ']').data('appName');
+
                 $('.btn-outline-danger[data-application-id=' + appId + ']')
                     .removeClass('btn-outline-danger')
-                    .addClass('btn-danger')
-                    .html('Rejected');
+                    .addClass('btn-danger');
 
                 $('.btn-success[data-application-id=' + appId + ']')
                     .removeClass('btn-success')
-                    .addClass('btn-outline-success')
-                    .html('Approve');
+                    .addClass('btn-outline-success');
 
                 var existingInput = $('#' + appId);
 
@@ -199,6 +276,38 @@ else
                     var input = '<input type="hidden" class="form-control" name="responses[' + appId + ']" id="' + appId + '" value="false">';
                     $('#responses').append(input);
                 }
+
+                var existingApproveListItem = $('#approveList li[data-application-id=' + appId + ']');
+
+                if (existingApproveListItem.length)
+                {
+                    existingApproveListItem.remove();
+
+                    if ($('#approveList').children().length == 0){
+                        $('#approveBlock')
+                            .addClass('d-none');
+                    }
+                }
+
+                var existingRejectListItem = $('#rejectList li[data-application-id=' + appId + ']');
+
+                if (!existingRejectListItem.length)
+                {
+                    var listItem = '<li data-application-id="' + appId + '">' + appName + '</li>';
+                    $('#rejectList').append(listItem);
+
+                    $('#rejectBlock')
+                        .removeClass('d-none');
+                }
+            }
+
+            if ($('#rejectList').children().length == 0 && $('#approveList').children().length == 0)
+            {
+                $('#formSubmit').prop('disabled', true);
+            }
+            else 
+            {
+                $('#formSubmit').prop('disabled', false);
             }
         }
     </script>

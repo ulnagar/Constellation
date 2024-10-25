@@ -35,6 +35,7 @@ internal sealed class CreateApplicationCommandHandler
             request.InformationCollected,
             request.StoredCountry,
             request.SharedWith,
+            request.ApplicationLink,
             request.ConsentRequired);
 
         _consentRepository.Insert(application);

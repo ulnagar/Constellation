@@ -56,16 +56,28 @@ public class ApplicationsModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        Result result = await _mediator.Send(new CreateTransactionCommand(
+        CreateTransactionCommand command = new(
             StudentId,
             _currentUserService.EmailAddress,
             ConsentMethod.Portal, 
             string.Empty,
-            Responses.ToDictionary(k => ApplicationId.FromValue(Guid.Parse(k.Key)), k => k.Value)));
+            Responses.ToDictionary(k => ApplicationId.FromValue(Guid.Parse(k.Key)), k => k.Value));
+
+        _logger
+            .ForContext(nameof(CreateTransactionCommand), command, true)
+            .Information("Requested to submit Consent Responses by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
 
         if (result.IsFailure)
         {
-            // Log this
+            _logger
+                .ForContext(nameof(CreateTransactionCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to submit Consent Responses by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
             return Page();
         }
 

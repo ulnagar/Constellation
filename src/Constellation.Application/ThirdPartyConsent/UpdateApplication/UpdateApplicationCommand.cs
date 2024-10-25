@@ -10,5 +10,6 @@ public sealed record UpdateApplicationCommand(
     string[] InformationCollected,
     string StoredCountry,
     string[] SharedWith,
+    string ApplicationLink,
     bool ConsentRequired)
     : ICommand;
