@@ -101,6 +101,9 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
                 continue;
             }
 
+            if (!application.ConsentRequired)
+                continue;
+
             Consent consent = application.Consents
                 .Where(consent => consent.StudentId == request.StudentId)
                 .MaxBy(consent => consent.ProvidedAt);

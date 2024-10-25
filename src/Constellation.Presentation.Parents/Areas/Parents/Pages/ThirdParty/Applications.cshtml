@@ -1,0 +1,205 @@
+﻿@page
+@using Constellation.Core.Models.ThirdPartyConsent.Identifiers
+@model Constellation.Presentation.Parents.Areas.Parents.Pages.ThirdParty.ApplicationsModel
+@{
+}
+
+
+<h2>Applications</h2>
+
+@if (Model.SelectedStudent is null)
+{
+    // Show list of students in boxes to allow them to select a different student
+    <h4>Select student to display:</h4>
+    <ul class="list-group mb-2">
+        @foreach (var student in Model.Students)
+        {
+            <button class="list-group-item list-group-item-action student-select-button" data-student-id="@student.StudentId">
+                @student.DisplayName (@student.CurrentGrade)
+            </button>
+        }
+    </ul>
+}
+else
+{
+    <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+        <span class="row d-flex align-items-center">
+            @*Display as flex to enable vertical centering of the button in the second div*@
+            <div class="col-lg">
+                <div class="h4">Applications for @Model.SelectedStudent?.DisplayName</div>
+                @*If the view has collapsed and the button below is hidden, turn the entire entry into a clickable element*@
+                @if (Model.Students.Count > 1)
+                {
+                    <span class="fst-italic">Click or tap to change</span>
+
+                    <div class="d-block">
+                        <a asp-route-studentId="" class="stretched-link"></a>
+                    </div>
+                }
+            </div>
+        </span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-lg-2 g-4">
+        @foreach (var application in Model.Applications)
+        {
+            var applicationId = "x" + application.ApplicationId.ToString().Replace("-", string.Empty);
+
+            <div class="col">
+                <div class="card" id="accordion-@applicationId">
+                    <div class="row g-0 card-header">
+                        <div class="col-3 col-sm-4 col-xl-3 d-flex vertical-center-content">
+                            @if (application.Id == ConsentId.Empty)
+                            {
+                                <i class="fad fa-question-square fa-card-icon-sizing app-theme pending"></i>
+                            }
+                            else if (application.ConsentProvided)
+                            {
+                                <i class="fad fa-check-square fa-card-icon-sizing app-theme success"></i>
+                            }
+                            else
+                            {
+                                <i class="fad fa-times-square fa-card-icon-sizing app-theme failure"></i>
+                            }
+                        </div>
+                        <div class="col-8 col-sm-7 col-xl-8">
+                            <h4 class="card-title">@application.ApplicationName</h4>
+                            <p class="card-text fst-italic">@application.Purpose</p>
+                            <p class="card-text">
+                                Required by
+                                <ul>
+                                    @foreach (var entry in application.Requirements)
+                                    {
+                                        <li>@entry.Value</li>
+                                    }
+                                </ul>
+                            </p>
+                        </div>
+                        <div class="col-1 d-flex vertical-center-content expando">
+                            <a class="collapsed d-block" data-bs-toggle="collapse" data-parent="#accordion-@applicationId" href="#@applicationId">
+                                <i class="fa fa-chevron-down fa-2x"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div id="@applicationId" class="collapse">
+                        <div class="card-body">
+                            <dl>
+                                <dt>Information Stored</dt>
+                                <dd>
+                                    <ul>
+                                        @foreach (var item in application.InformationCollected)
+                                        {
+                                            <li>@item</li>
+                                        }
+                                    </ul>
+                                </dd>
+
+                                <dt>Location Stored</dt>
+                                <dd>@application.StoredCountry</dd>
+
+                                <dt>Shared With</dt>
+                                <dd>
+                                    <ul>
+                                        @foreach (var item in application.SharedWith)
+                                        {
+                                            <li>@item</li>
+                                        }
+                                    </ul>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-6 d-grid">
+                                    @if (application.Id != ConsentId.Empty && application.ConsentProvided)
+                                    {
+                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-success">Approved</button>
+                                    }
+                                    else
+                                    {
+                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-outline-success">Approve</button>
+                                    }
+                                </div>
+                                <div class="col-6 d-grid">
+                                    @if (application.Id != ConsentId.Empty && !application.ConsentProvided)
+                                    {
+                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-danger">Rejected</button>
+                                    }
+                                    else
+                                    {
+                                        <button data-application-id="@application.ApplicationId" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-outline-danger">Reject</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<form method="post">
+    <div id="responses">
+
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>
+
+@section scripts {
+    <script>
+        $('.student-select-button').on('click', function (e) {
+            var studentId = $(this).data('studentId');
+
+            var params = new URLSearchParams(location.search);
+            params.set('StudentId', studentId);
+            window.location.search = params.toString();
+        });
+
+        function toggleApp(appId, action) {
+            if (action == 'approve'){
+                $('.btn-danger[data-application-id=' + appId + ']')
+                    .removeClass('btn-danger')
+                    .addClass('btn-outline-danger')
+                    .html('Reject');
+
+                $('.btn-outline-success[data-application-id=' + appId + ']')
+                    .removeClass('btn-outline-success')
+                    .addClass('btn-success')
+                    .html('Approved');
+
+                var existingInput = $('#' + appId);
+
+                if (existingInput.length) {
+                    existingInput.prop('value', 'true');
+                }
+                else {
+                    var input = '<input type="hidden" class="form-control" name="responses[' + appId + ']" id="' + appId + '" value="true">';
+                    $('#responses').append(input);
+                }
+            }
+
+            if (action == 'reject') {
+                $('.btn-outline-danger[data-application-id=' + appId + ']')
+                    .removeClass('btn-outline-danger')
+                    .addClass('btn-danger')
+                    .html('Rejected');
+
+                $('.btn-success[data-application-id=' + appId + ']')
+                    .removeClass('btn-success')
+                    .addClass('btn-outline-success')
+                    .html('Approve');
+
+                var existingInput = $('#' + appId);
+
+                if (existingInput.length) {
+                    existingInput.prop('value', 'false');
+                }
+                else {
+                    var input = '<input type="hidden" class="form-control" name="responses[' + appId + ']" id="' + appId + '" value="false">';
+                    $('#responses').append(input);
+                }
+            }
+        }
+    </script>
+}
