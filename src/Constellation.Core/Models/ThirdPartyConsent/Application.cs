@@ -23,6 +23,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
         string[] informationCollected,
         string storedCountry,
         string[] sharedWith,
+        string applicationLink,
         bool consentRequired)
     {
         Name = name;
@@ -30,6 +31,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
         InformationCollected = informationCollected;
         StoredCountry = storedCountry;
         SharedWith = sharedWith;
+        ApplicationLink = applicationLink;
         ConsentRequired = consentRequired;
     }
 
@@ -40,6 +42,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     public string StoredCountry { get; private set; } = string.Empty;
     public string[] SharedWith { get; private set; } = Array.Empty<string>();
     public bool ConsentRequired { get; private set; }
+    public string ApplicationLink { get; private set; } = string.Empty;
     public IReadOnlyList<Consent> Consents => _consents.ToList();
     public IReadOnlyList<ConsentRequirement> Requirements => _requirements.ToList();
 
@@ -57,6 +60,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
         string[] informationCollected,
         string storedCountry,
         string[] sharedWith,
+        string applicationLink,
         bool consentRequired)
     {
         Application application = new(
@@ -65,6 +69,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
             informationCollected,
             storedCountry,
             sharedWith,
+            applicationLink,
             consentRequired);
 
         return application;
@@ -76,6 +81,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
         string[] informationCollected,
         string storedCountry,
         string[] sharedWith,
+        string applicationLink,
         bool consentRequired)
     {
         Name = name;
@@ -83,6 +89,7 @@ public sealed class Application : AggregateRoot, IAuditableEntity
         InformationCollected = informationCollected;
         StoredCountry = storedCountry;
         SharedWith = sharedWith;
+        ApplicationLink = applicationLink;
         ConsentRequired = consentRequired;
 
         return Result.Success();

@@ -1,9 +1,8 @@
-﻿using Constellation.Core.Enums;
-using Constellation.Core.Models.Subjects.Identifiers;
+﻿namespace Constellation.Core.Models.ThirdPartyConsent.Repositories;
 
-namespace Constellation.Core.Models.ThirdPartyConsent.Repositories;
-
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,6 +14,7 @@ public interface IConsentRepository
     Task<Application> GetApplicationById(ApplicationId applicationId, CancellationToken cancellationToken = default);
     Task<List<Application>> GetAllActiveApplications(CancellationToken cancellationToken = default);
     Task<List<Application>> GetAllApplications(CancellationToken cancellationToken = default);
+    Task<List<Application>> GetApplicationsWithoutRequiredConsent(CancellationToken cancellationToken = default);
 
     Task<List<Application>> GetApplicationWithConsentForStudent(StudentId studentId, CancellationToken cancellationToken = default);
 
