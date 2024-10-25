@@ -111,6 +111,7 @@ internal sealed class GetApplicationDetailsQueryHandler
             application.InformationCollected,
             application.StoredCountry,
             application.SharedWith,
+            application.ApplicationLink,
             application.ConsentRequired,
             application.IsDeleted,
             consentResponses,

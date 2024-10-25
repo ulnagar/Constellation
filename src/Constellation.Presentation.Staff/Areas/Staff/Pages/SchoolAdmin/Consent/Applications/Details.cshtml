@@ -93,6 +93,13 @@
         </dd>
         
         <dt class="col-md-2">
+            <label asp-for="Application.Link">Link</label>
+        </dt>
+        <dd class="col-md-10">
+            <span><a href="@Model.Application.Link" target="_blank">@Model.Application.Link</a></span>
+        </dd>
+
+        <dt class="col-md-2">
             <label asp-for="Application.ConsentRequired">Consent Required</label>
         </dt>
         <dd class="col-md-10">
