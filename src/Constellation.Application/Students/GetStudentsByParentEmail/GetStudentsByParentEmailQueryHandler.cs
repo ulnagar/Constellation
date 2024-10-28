@@ -45,7 +45,8 @@ public sealed class GetStudentsByParentEmailQueryHandler
                 student.Id,
                 student.Name.PreferredName,
                 student.Name.LastName,
-                enrolment.Grade.AsName()));
+                enrolment.Grade.AsName(),
+                studentIds.FirstOrDefault(entry => entry.Key == student.Id).Value));
         }
 
         return response;
