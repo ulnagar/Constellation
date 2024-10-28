@@ -51,7 +51,7 @@ internal sealed class GetStudentsWithAbsenceSettingsQueryHandler
             StudentAbsenceSettingsResponse entry = new(
                 student.StudentReferenceNumber.Number,
                 student.Name.DisplayName,
-                student.Gender.Value,
+                student.PreferredGender.Value,
                 enrolment.Grade,
                 enrolment.SchoolName,
                 absenceConfigurationResponses);

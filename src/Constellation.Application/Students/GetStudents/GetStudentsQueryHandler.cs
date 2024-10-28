@@ -63,7 +63,7 @@ internal sealed class GetStudentsQueryHandler
                 student.Id,
                 student.StudentReferenceNumber,
                 student.Name,
-                student.Gender,
+                student.PreferredGender,
                 enrolment?.Grade,
                 student.EmailAddress,
                 enrolment?.SchoolName,

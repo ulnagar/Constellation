@@ -6,7 +6,8 @@ public sealed record StudentResponse(
     StudentId StudentId,
     string FirstName,
     string LastName,
-    string CurrentGrade)
+    string CurrentGrade,
+    bool ResidentialFamily)
 {
     public string DisplayName => $"{FirstName} {LastName}";
 }

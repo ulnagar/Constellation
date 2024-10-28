@@ -41,11 +41,14 @@ public sealed class GetStudentsByParentEmailQueryHandler
             if (enrolment is null)
                 continue;
 
+            bool isResidential = studentIds.FirstOrDefault(entry => entry.Key == student.Id).Value;
+
             response.Add(new(
                 student.Id,
                 student.Name.PreferredName,
                 student.Name.LastName,
-                enrolment.Grade.AsName()));
+                enrolment.Grade.AsName(),
+                isResidential));
         }
 
         return response;

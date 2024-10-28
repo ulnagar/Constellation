@@ -13,13 +13,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class GetStudentsFromSchoolQueryHandler 
+internal sealed class GetCurrentStudentsFromSchoolQueryHandler 
     : IQueryHandler<GetCurrentStudentsFromSchoolQuery, List<StudentResponse>>
 {
     private readonly IStudentRepository _studentRepository;
     private readonly ILogger _logger;
 
-    public GetStudentsFromSchoolQueryHandler(
+    public GetCurrentStudentsFromSchoolQueryHandler(
         IStudentRepository studentRepository,
         ILogger logger)
     {

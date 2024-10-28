@@ -89,7 +89,7 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
                 student.Id,
                 student.StudentReferenceNumber,
                 student.Name,
-                student.Gender,
+                student.PreferredGender,
                 schoolEnrolment?.SchoolName,
                 schoolEnrolment?.Grade,
                 studentOfferings,
