@@ -1,6 +1,15 @@
 @page
 @model Constellation.Presentation.Parents.Areas.Parents.Pages.IndexModel
 
+@if (Model.PendingApplications)
+{
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Third-party consent required</h4>
+        <p>Aurora College requires your response for required third-party applications used in your students learning.</p>
+        <p class="mb-0">Click here to <a asp-page="/ThirdParty/Index" asp-area="Parents" class="alert-link">view third-party applications</a>.</p>
+    </div>
+}
+
 <h1>Welcome to the Aurora College Parents Portal</h1>
 
 <p>This portal can be used to access information from Aurora College about your child.</p>
