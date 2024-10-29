@@ -35,4 +35,9 @@ public interface ISentralGateway
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week);
     Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date);
     Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default);
+
+
+    // API methods
+    Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default);
+    Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default);
 }

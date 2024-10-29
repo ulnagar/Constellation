@@ -1,111 +1,112 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Gateways;
 using BaseModels;
-using Constellation.Application.StaffMembers.CreateStaffMember;
-using Core.Abstractions.Clock;
-using Core.Enums;
-using Core.Models;
-using Core.Models.StaffMembers.Repositories;
+using Constellation.Application.DTOs;
 using Core.Models.Students;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Repositories;
-using Core.Models.Students.ValueObjects;
-using Core.Shared;
-using Core.ValueObjects;
 using MediatR;
+using Serilog;
+using System.Diagnostics;
 
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly IStudentRepository _studentRepository;
-    private readonly ISchoolRepository _schoolRepository;
-    private readonly IStaffRepository _staffRepository;
-    private readonly IDateTimeProvider _dateTime;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ISentralGateway _gateway;
+    private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         IStudentRepository studentRepository,
-        ISchoolRepository schoolRepository,
-        IStaffRepository staffRepository,
-        IDateTimeProvider dateTime,
-        IUnitOfWork unitOfWork)
+        ISentralGateway gateway,
+        ILogger logger)
     {
         _mediator = mediator;
         _studentRepository = studentRepository;
-        _schoolRepository = schoolRepository;
-        _staffRepository = staffRepository;
-        _dateTime = dateTime;
-        _unitOfWork = unitOfWork;
+        _gateway = gateway;
+        _logger = logger;
     }
+
+    public List<string> Indexers { get; set; } = new();
+    public List<FamilyDetailsDto> OldMethodResults { get; set; } = new();
+    public List<FamilyDetailsDto> NewMethodResults { get; set; } = new();
 
 
     public async Task OnGet()
     {
-        School? school = await _schoolRepository.GetById("8912");
+        List<Student> students = await _studentRepository.GetCurrentStudents();
 
-        if (school is null)
+        Stopwatch oldWatch = Stopwatch.StartNew();
+        List<FamilyDetailsDto> oldReturn = await OldMethod(students);
+        oldWatch.Stop();
+        long oldTime = oldWatch.ElapsedMilliseconds;
+
+        Stopwatch newWatch = Stopwatch.StartNew();
+        List<FamilyDetailsDto> newReturn = await NewMethod(students);
+        newWatch.Stop();
+        long newTime = newWatch.ElapsedMilliseconds;
+
+        List<string> oldIndex = oldReturn.Select(entry => entry.FamilyId).ToList();
+        List<string> newIndex = newReturn.Select(entry => entry.FamilyId).ToList();
+
+        List<string> jointIndex = new();
+        jointIndex.AddRange(oldIndex);
+        jointIndex.AddRange(newIndex);
+        jointIndex = jointIndex.Distinct().OrderBy(entry => entry).ToList();
+
+        Indexers = jointIndex;
+
+        OldMethodResults = oldReturn;
+        NewMethodResults = newReturn;
+    }
+
+    private async Task<List<FamilyDetailsDto>> OldMethod(List<Student> students, CancellationToken token = default)
+    {
+        // Get the CSV file from Sentral
+        List<FamilyDetailsDto> families = new();
+
+        Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
+        
+        foreach (KeyValuePair<string, List<string>> family in familyGroups)
         {
-            school = new()
+            Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
+
+            if (firstStudent is null)
+                continue;
+
+            SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+
+            if (link is null)
+                continue;
+
+            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
+
+            entry.StudentReferenceNumbers = family.Value;
+            entry.FamilyId = family.Key;
+
+            foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
             {
-                Code = "8912",
-                Name = "Aurora College",
-                Address = "100 Eton Road",
-                Town = "Lindfield",
-                State = "NSW",
-                PostCode = "2070",
-                EmailAddress = "auroracoll-h.school@det.nsw.edu.au",
-                PhoneNumber = "1300287629"
-            };
+                string name = contact.FirstName.Contains(' ')
+                    ? contact.FirstName.Split(' ')[0]
+                    : contact.FirstName;
 
-            _schoolRepository.Insert(school);
+                name = name.Length > 8 ? name[..8] : name;
 
-            await _unitOfWork.CompleteAsync();
+                contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
+            }
+
+            families.Add(entry);
         }
 
-        Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create("1234567890");
+        return families;
+    }
 
-        Student student = await _studentRepository.GetBySRN(studentReferenceNumber.Value);
+    private async Task<List<FamilyDetailsDto>> NewMethod(List<Student> students, CancellationToken token = default)
+    {
+        ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReportFromApi(_logger, token);
 
-        if (student is null)
-        {
-            Result<Name> name = Name.Create("John", "Johnny", "Doe");
-
-            Result<EmailAddress> email = EmailAddress.Create("john.doe13@det.nsw.edu.au");
-
-            Result<Student> studentRequest = Student.Create(
-                studentReferenceNumber.Value,
-                name.Value,
-                email.Value,
-                Grade.Y09,
-                school,
-                Gender.Male,
-                _dateTime);
-
-            _studentRepository.Insert(studentRequest.Value);
-
-            await _unitOfWork.CompleteAsync();
-
-            student = studentRequest.Value;
-        }
-
-        Staff staff = await _staffRepository.GetById("1206070");
-
-        if (staff is null)
-        {
-            // Create new student
-            CreateStaffMemberCommand createCommand = new(
-                "1206070",
-                "Ben",
-                "Hillsley",
-                "benjamin.hillsley",
-                "8912",
-                false);
-
-            Result createResult = await _mediator.Send(createCommand);
-
-            staff = await _staffRepository.GetById("1206070");
-        }
+        return families.ToList();
     }
 }
