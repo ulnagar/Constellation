@@ -46,7 +46,7 @@
 
                     if (student is not null)
                     {
-                        <button type="button" id="studentSelect-@student.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@student.StudentId)">@student.Name.DisplayName</button>
+                        <button type="button" id="studentSelect-@student.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent('@student.StudentId')">@student.Name.DisplayName</button>
                     }
                 }
             </div>
@@ -79,7 +79,7 @@
                     }
                     else
                     {
-                        <button type="button" id="studentSelect-@entry.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent(@entry.StudentId)">@entry.Name.DisplayName</button>
+                        <button type="button" id="studentSelect-@entry.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent('@entry.StudentId')">@entry.Name.DisplayName</button>
                     }
                 }
             </div>
