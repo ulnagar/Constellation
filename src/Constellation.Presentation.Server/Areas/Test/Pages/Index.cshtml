@@ -7,11 +7,11 @@
 
 @foreach (var index in Model.Indexers)
 {
-    <div class="row border-1">
-        <div class="col-2 border-1">
+    <div class="row border border-1">
+        <div class="col-2 border border-1">
             @index
         </div>
-        <div class="col-5 border-1">
+        <div class="col-5 border border-1">
             @{
                 var oldItem = Model.OldMethodResults.FirstOrDefault(entry => entry.FamilyId == index);
             }
@@ -45,7 +45,7 @@
                 </dl>
             }
         </div>
-        <div class="col-5 border-1">
+        <div class="col-5 border border-1">
             @{
                 var newItem = Model.NewMethodResults.FirstOrDefault(entry => entry.FamilyId == index);
             }
