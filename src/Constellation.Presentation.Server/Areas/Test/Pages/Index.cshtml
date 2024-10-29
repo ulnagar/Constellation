@@ -4,3 +4,80 @@
 @inject EndpointDataSource EndpointsDataSource
 
 <h2>Test Page</h2>
+
+@foreach (var index in Model.Indexers)
+{
+    <div class="row border-1">
+        <div class="col-2 border-1">
+            @index
+        </div>
+        <div class="col-5 border-1">
+            @{
+                var oldItem = Model.OldMethodResults.FirstOrDefault(entry => entry.FamilyId == index);
+            }
+            
+            @if (oldItem is not null)
+            {
+                <dl>
+                    <dt>Family</dt>
+                    <dd>
+                        @oldItem.AddressName<br/>
+                        @oldItem.AddressLine1<br/>
+                        @oldItem.AddressLine2<br/>
+                        @oldItem.AddressTown @oldItem.AddressState @oldItem.AddressPostCode
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        @oldItem.FamilyEmail
+                    </dd>
+
+                    @foreach (var parent in oldItem.Contacts)
+                    {
+                        <dt>Parent</dt>
+                        <dd>
+                            @parent.FirstName @parent.LastName<br/>
+                            @parent.Email<br/>
+                            @parent.Mobile<br/>
+                            @parent.SentralId
+                        </dd>
+                    }
+                </dl>
+            }
+        </div>
+        <div class="col-5 border-1">
+            @{
+                var newItem = Model.NewMethodResults.FirstOrDefault(entry => entry.FamilyId == index);
+            }
+            
+            @if (newItem is not null)
+            {
+                <dl>
+                    <dt>Family</dt>
+                    <dd>
+                        @newItem.AddressName<br/>
+                        @newItem.AddressLine1<br/>
+                        @newItem.AddressLine2<br/>
+                        @newItem.AddressTown @newItem.AddressState @newItem.AddressPostCode
+                    </dd>
+
+                    <dt>Email</dt>
+                    <dd>
+                        @newItem.FamilyEmail
+                    </dd>
+
+                    @foreach (var parent in newItem.Contacts)
+                    {
+                        <dt>Parent</dt>
+                        <dd>
+                            @parent.FirstName @parent.LastName<br/>
+                            @parent.Email<br/>
+                            @parent.Mobile<br/>
+                            @parent.SentralId
+                        </dd>
+                    }
+                </dl>
+            }
+        </div>
+    </div>
+}

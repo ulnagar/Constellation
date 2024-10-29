@@ -6,6 +6,8 @@ using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
+using Constellation.Infrastructure.Extensions;
+using Constellation.Infrastructure.ExternalServices.Sentral.Models;
 using Core.Abstractions.Clock;
 using Core.Models.Families;
 using Core.Shared;
@@ -17,6 +19,7 @@ using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
@@ -28,6 +31,7 @@ public class Gateway : ISentralGateway
     private readonly ILogger _logger;
     private readonly bool _logOnly = true;
     private readonly HttpClient _client;
+    private readonly HttpClient _apiClient;
 
     private HtmlDocument _studentListPage;
 
@@ -52,7 +56,255 @@ public class Gateway : ISentralGateway
         }
 
         _client = factory.CreateClient("sentral");
+
+
+        _apiClient = factory.CreateClient("sentral");
+        _apiClient.DefaultRequestHeaders.Add("X-API-KEY", settings.Value.ApiKey);
+        _apiClient.DefaultRequestHeaders.Add("X-API-TENANT", settings.Value.ApiTenant);
     }
+
+    #region API Operations
+
+    private enum JsonSection
+    {
+        Data,
+        Includes,
+        Meta,
+        Error,
+        Links
+    }
+
+    private async Task<Dictionary<JsonSection, List<JsonElement>>> GetApiResponse(Uri path, CancellationToken cancellationToken = default)
+    {
+        Dictionary<JsonSection, List<JsonElement>> completeResponse = new();
+        completeResponse.Add(JsonSection.Data, new());
+        completeResponse.Add(JsonSection.Includes, new());
+
+        bool nextPageExists = true;
+
+        while (nextPageExists)
+        {
+            HttpResponseMessage response = await _apiClient.GetAsync(path, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return completeResponse;
+            }
+
+            string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            using JsonDocument document = JsonDocument.Parse(responseText);
+            JsonElement root = document.RootElement;
+            bool errorsExist = root.TryGetProperty("errors", out JsonElement errors);
+
+            if (errorsExist)
+            {
+                // do something with the errors
+                foreach (JsonElement item in errors.EnumerateArray())
+                    completeResponse[JsonSection.Error].Add(item.Clone());
+
+                return completeResponse;
+            }
+
+            bool linksExist = root.TryGetProperty("links", out JsonElement links);
+
+            if (!linksExist)
+            {
+                nextPageExists = false;
+            }
+            else
+            {
+                // do something with the links
+                bool nextLinkExists = links.TryGetProperty("next", out JsonElement nextLink);
+
+                if (nextLinkExists)
+                    path = new Uri(nextLink.GetString()!);
+                else
+                    nextPageExists = false;
+            }
+
+            bool dataExists = root.TryGetProperty("data", out JsonElement data);
+
+            switch (dataExists)
+            {
+                case true when data.ValueKind == JsonValueKind.Array:
+                    {
+                        foreach (JsonElement item in data.EnumerateArray())
+                            completeResponse[JsonSection.Data].Add(item.Clone());
+                        break;
+                    }
+                case true when data.ValueKind == JsonValueKind.Object:
+                    completeResponse[JsonSection.Data].Add(data.Clone());
+                    break;
+            }
+
+            bool includesExists = root.TryGetProperty("included", out JsonElement includes);
+
+            if (includesExists)
+            {
+                foreach (JsonElement item in includes.EnumerateArray())
+                    completeResponse[JsonSection.Includes].Add(item.Clone());
+            }
+        }
+
+        return completeResponse;
+    }
+
+    public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student?includeInactive=0");
+
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiResponse(path, cancellationToken);
+
+        List<FamilyDetailsDto> familyDetails = new();
+
+        foreach (JsonElement entry in studentResponse[JsonSection.Data])
+        {
+            string sentralId = entry.ExtractString("id");
+
+            FamilyDetailsDto response = await GetParentContactEntryFromApi(sentralId, cancellationToken);
+
+            FamilyDetailsDto existingEntry = familyDetails.FirstOrDefault(dto => dto.FamilyId == response.FamilyId);
+
+            if (existingEntry is not null)
+            {
+                existingEntry.StudentReferenceNumbers.AddRange(response.StudentReferenceNumbers);
+            }
+            else
+            {
+                familyDetails.Add(response);
+            }
+        }
+
+        return familyDetails;
+    }
+
+    public async Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
+
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiResponse(path, cancellationToken);
+
+        List<CoreStudent> students = new();
+        List<CoreStudentRelationship> people = new();
+        List<CoreStudentPersonRelation> relationships = new();
+        CoreFamily family = new();
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreStudent> student = CoreStudent.ConvertFromJson(entry);
+
+                            if (student.IsFailure)
+                                continue;
+
+                            students.Add(student.Value);
+                        }
+
+                        break;
+                    }
+                case JsonSection.Includes:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            string type = entry.ExtractString("type");
+
+                            switch (type)
+                            {
+                                case "coreStudentRelationship":
+                                    {
+                                        Result<CoreStudentRelationship> relationship = CoreStudentRelationship.ConvertFromJson(entry);
+                                        if (relationship.IsFailure)
+                                            continue;
+
+                                        people.Add(relationship.Value);
+                                        break;
+                                    }
+                                case "coreStudentPersonRelation":
+                                    {
+                                        Result<CoreStudentPersonRelation> relationship = CoreStudentPersonRelation.ConvertFromJson(entry);
+                                        if (relationship.IsFailure)
+                                            continue;
+
+                                        relationships.Add(relationship.Value);
+                                        break;
+                                    }
+                            }
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        string? familyId = students.FirstOrDefault()?.FamilyId;
+
+        if (string.IsNullOrWhiteSpace(familyId))
+            return new FamilyDetailsDto();
+
+        path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-family/{familyId}");
+
+        Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetApiResponse(path, cancellationToken);
+
+        foreach (JsonElement entry in familyResponse.Where(entry => entry.Key == JsonSection.Data).SelectMany(entry => entry.Value))
+        {
+            Result<CoreFamily> familyResult = CoreFamily.ConvertFromJson(entry);
+
+            if (familyResult.IsFailure)
+                continue;
+
+            family = familyResult.Value;
+        }
+
+        if (family is null)
+            return new FamilyDetailsDto();
+
+        FamilyDetailsDto familyDetails = new()
+        {
+            FamilyId = family.FamilyId,
+            AddressName = family.AddressTitle,
+            AddressLine1 = family.AddressStreetNo,
+            AddressLine2 = family.AddressStreet,
+            AddressTown = family.AddressSuburb,
+            AddressState = family.AddressState,
+            AddressPostCode = family.AddressPostCode,
+            FamilyEmail = family.EmailAddress
+        };
+
+        foreach (CoreStudentRelationship person in people.Where(person => person.IsResidentialGuardian))
+        {
+            familyDetails.Contacts.Add(new()
+            {
+                Title = person.Title,
+                FirstName = person.FirstName,
+                LastName = person.LastName,
+                SentralId = person.PersonId,
+                Email = person.EmailAddress,
+                Mobile = person.Mobile,
+                Sequence = person.Sequence,
+                SentralReference = person.Gender switch
+                {
+                    "M" => Parent.SentralReference.Father,
+                    "F" => Parent.SentralReference.Mother,
+                    _ => Parent.SentralReference.Other
+                }
+            });
+        }
+
+        foreach (CoreStudent student in students.Where(student => student.IsActive))
+        {
+            familyDetails.StudentReferenceNumbers.Add(student.StudentReferenceNumber);
+        }
+
+        return familyDetails;
+    }
+
+    #endregion
 
     private async Task Login(CancellationToken cancellationToken)
     {
