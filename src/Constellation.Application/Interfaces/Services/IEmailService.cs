@@ -105,4 +105,7 @@ public interface IEmailService
 
     // Student Portal Emails
     Task SendSupportTicketRequest(EmailRecipient submitter, string subject, string description, CancellationToken cancellationToken = default);
+
+    // Third Party Consent Emails
+    Task SendConsentTransactionReceiptToParent(List<EmailRecipient> recipients, string studentName, DateOnly submittedOn, Attachment attachment, CancellationToken cancellationToken = default);
 }

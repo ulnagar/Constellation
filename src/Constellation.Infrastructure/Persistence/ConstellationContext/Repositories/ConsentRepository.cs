@@ -77,6 +77,15 @@ internal sealed class ConsentRepository : IConsentRepository
                 consent.StudentId == studentId))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Application>> GetApplicationsByTransactionId(
+        ConsentTransactionId transactionId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Application>()
+            .Where(application => application.Consents.Any(consent =>
+                consent.TransactionId == transactionId))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<ConsentRequirement>> GetRequirementsForApplication(
         ApplicationId applicationId, 
         CancellationToken cancellationToken = default) =>
@@ -126,8 +135,18 @@ internal sealed class ConsentRepository : IConsentRepository
             .Where(requirement => requirement.StudentId == studentId)
             .ToListAsync(cancellationToken);
 
+    public async Task<Transaction> GetTransactionById(
+        ConsentTransactionId transactionId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Transaction>()
+            .FirstOrDefaultAsync(
+                transaction => transaction.Id == transactionId,
+                cancellationToken);
 
     public void Insert(Application application) => _context.Set<Application>().Add(application);
     
     public void Insert(ConsentRequirement requirement) => _context.Set<ConsentRequirement>().Add(requirement);
+
+    public void Insert(Transaction transaction) => _context.Set<Transaction>().Add(transaction);
 }

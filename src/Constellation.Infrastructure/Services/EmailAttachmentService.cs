@@ -10,7 +10,9 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
+using Core.Models.ThirdPartyConsent;
 using System.Net.Mail;
+using Templates.Views.Documents.ThirdParty;
 
 internal sealed class EmailAttachmentService : IEmailAttachmentService
 {
@@ -104,5 +106,39 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         var timetableAttachment = _pdfService.StringToPdfAttachment(timetableBodyString, timetableHeaderString, $"{offering.Name} Timetable.pdf");
 
         return timetableAttachment;
+    }
+
+    public async Task<Attachment> GenerateConsentTransactionReceipt(Transaction transaction, CancellationToken cancellationToken = default)
+    {
+        var viewModel = new TransactionViewModel()
+        {
+            Id = transaction.Id,
+            Student = transaction.Student,
+            Grade = transaction.Grade,
+            Method = transaction.Method,
+            MethodNotes = transaction.MethodNotes,
+            ProvidedAt = transaction.ProvidedAt,
+            ProvidedBy = transaction.ProvidedBy,
+            Responses = transaction.Responses
+                .Select(response =>
+                    new TransactionViewModel.ConsentItem()
+                    {
+                        ApplicationId = response.ApplicationId,
+                        ApplicationName = response.ApplicationName,
+                        Purpose = response.Purpose,
+                        InformationCollected = response.InformationCollected,
+                        StoredCountry = response.StoredCountry,
+                        SharedWith = response.SharedWith,
+                        Link = response.Link,
+                        RequiredBy = response.RequiredBy,
+                        ConsentProvided = response.ConsentProvided
+                    })
+                .ToList()
+        };
+
+        var pageString = await _razorService.RenderViewToStringAsync("/Views/Documents/ThirdParty/Transaction.cshtml", viewModel);
+        var pageAttachment = _pdfService.StringToPdfAttachment(pageString, $"{viewModel.Student.DisplayName} - Third-party consent - {viewModel.ProvidedAt:yyyy-MM-dd}.pdf");
+
+        return pageAttachment;
     }
 }

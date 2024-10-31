@@ -15,8 +15,8 @@ public interface IConsentRepository
     Task<List<Application>> GetAllActiveApplications(CancellationToken cancellationToken = default);
     Task<List<Application>> GetAllApplications(CancellationToken cancellationToken = default);
     Task<List<Application>> GetApplicationsWithoutRequiredConsent(CancellationToken cancellationToken = default);
-
     Task<List<Application>> GetApplicationWithConsentForStudent(StudentId studentId, CancellationToken cancellationToken = default);
+    Task<List<Application>> GetApplicationsByTransactionId(ConsentTransactionId transactionId, CancellationToken cancellationToken = default);
 
     Task<bool?> IsMostRecentResponse(ConsentId consentId, CancellationToken cancellationToken = default);
 
@@ -28,6 +28,9 @@ public interface IConsentRepository
     Task<List<GradeConsentRequirement>> GetRequirementsForGrade(Grade grade, CancellationToken cancellationToken = default);
     Task<List<StudentConsentRequirement>> GetRequirementsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
 
+    Task<Transaction> GetTransactionById(ConsentTransactionId transactionId, CancellationToken cancellationToken = default);
+
     void Insert(Application application);
     void Insert(ConsentRequirement requirement);
+    void Insert(Transaction transaction);
 }

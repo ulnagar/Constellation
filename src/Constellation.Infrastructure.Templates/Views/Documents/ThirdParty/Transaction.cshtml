@@ -4,3 +4,76 @@
     Layout = null;
 }
 
+<h2>Consent to use third-party software</h2>
+
+<p>The Department of Education has entered into contracts for a range of essential student education and administration software. The department has assessed the privacy impacts and data security controls as compliant with NSW privacy requirements and a list of that software is avialable at https://education.nsw.gov.au/public-schools/going-to-a-public-school/privacy-information.</p>
+
+<p>Additionally, this year Aurora College will use the third-party software listed in the table below. Your consent for each application as submitted to the school is recorded below. If the information is incorrect, please contact the school immediately on 1300 287 629.</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Software Name</th>
+        <th>Student information captured</th>
+        <th>Country information is stored</th>
+        <th>Information shared</th>
+        <th>Your consent</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var response in Model.Responses)
+    {
+        <tr>
+            <td>
+                <strong>@response.ApplicationName</strong>
+                <p>@response.Purpose</p>
+                <p>@response.Link</p>
+            </td>
+            <td>
+                <ul>
+                    @foreach (var item in response.InformationCollected)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </td>
+            <td>
+                @response.StoredCountry
+            </td>
+            <td>
+                <ul>
+                    @foreach (var item in response.SharedWith)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </td>
+            <td>
+                @if (response.ConsentProvided)
+                {
+                    <strong>Yes</strong>
+                }
+                else
+                {
+                    <strong>No</strong>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<p>This consent remains effective until I advise the school otherwise in writing or via the Parent Portal.</p>
+
+<p>I acknowledge that my child must abide by the conditions of acceptable usage set out in the department's <em>Student use of digital devices and online services</em> policy (https://education.nsw.gov.au/policy-library/policies/pd-2020-0471) and that any breach of this policy may, at the school's discretion, result in disciplinary action in accordance with the school's behaviour policy.</p>
+
+<dl>
+    <dt>Student full name:</dt>
+    <dd>@Model.Student.DisplayName</dd>
+    
+    <dt>Parent/Carer email address:</dt>
+    <dd>@Model.ProvidedBy</dd>
+    
+    <dt>Date of submission:</dt>
+    <dd>@Model.ProvidedAt.ToLongDateString()</dd>
+</dl>

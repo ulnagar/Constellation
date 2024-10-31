@@ -1,0 +1,10 @@
+﻿@model Constellation.Infrastructure.Templates.Views.Emails.ThirdParty.TransactionReceiptParentEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
