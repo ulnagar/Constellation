@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Application.Interfaces.Repositories;
+using Core.Primitives;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -11,8 +12,10 @@ public class UnitOfWork : IUnitOfWork
     {
         _context = context;
     }
-    
-    public async Task CompleteAsync(CancellationToken token) => await _context.SaveChangesAsync(token);
 
+    public async Task AddIntegrationEvent(IIntegrationEvent integrationEvent) =>
+        await _context.AddIntegrationEvent(integrationEvent);
+
+    public async Task CompleteAsync(CancellationToken token) => await _context.SaveChangesAsync(token);
     public async Task CompleteAsync() => await _context.SaveChangesAsync();
 }

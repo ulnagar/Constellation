@@ -113,8 +113,15 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     public void AddConsentResponse(Consent consent) => _consents.Add(consent);
     public void AddConsentRequirement(ConsentRequirement requirement) => _requirements.Add(requirement);
 
-    // TODO: R1.16.1: Also mark all requirements as deleted
-    public void Delete() => IsDeleted = true;
+    public void Delete()
+    {
+        IsDeleted = true;
+
+        foreach (ConsentRequirement requirement in _requirements.Where(entry => !entry.IsDeleted))
+        {
+            requirement.Delete();
+        }
+    }
 
     public void Reenable()
     {

@@ -5,8 +5,11 @@ using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
+using Core.Primitives;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Outbox;
 using System.Reflection;
 
 public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
@@ -29,5 +32,25 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbCon
             t => t.GetTypeInfo().Namespace.Contains("ConstellationContext")); // Only include the local EntityConfigurations
 
         base.OnModelCreating(builder);
+    }
+
+    public Task AddIntegrationEvent(IIntegrationEvent integrationEvent)
+    {
+        OutboxMessage eventMessage = new()
+        {
+            Id = Guid.NewGuid(),
+            OccurredOn = integrationEvent.DelayUntil?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now,
+            Type = integrationEvent.GetType().Name,
+            Content = JsonConvert.SerializeObject(
+                integrationEvent,
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                })
+        };
+
+        Set<OutboxMessage>().Add(eventMessage);
+
+        return Task.CompletedTask;
     }
 }

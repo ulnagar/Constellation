@@ -9,29 +9,25 @@ using System.Collections.Generic;
 
 public sealed class TransactionViewModel
 {
-    public ConsentTransactionId Id { get; set; }
-    public string SubmittedBy { get; set; }
-    public DateTime SubmittedAt { get; set; }
-    public ConsentMethod SubmissionMethod { get; set; }
-    public string SubmissionNotes { get; set; }
-
-    public string StudentId { get; set; }
-    public Name Name { get; set; }
-    public string School { get; set; }
-    public Grade Grade { get; set; }
-
-    public List<ConsentItem> Consents { get; set; } = new();
-
+    public ConsentTransactionId Id { get; init; }
+    public Name Student { get; init; }
+    public Grade Grade { get; init; }
+    public string ProvidedBy { get; init; } = string.Empty;
+    public DateTime ProvidedAt { get; init; }
+    public ConsentMethod Method { get; init; } = ConsentMethod.PhoneCall;
+    public string MethodNotes { get; init; } = string.Empty;
+    public List<ConsentItem> Responses { get; init; } = new();
+    
     public class ConsentItem
     {
-        public Core.Models.ThirdPartyConsent.Identifiers.ApplicationId Id { get; set; }
-        public string Name { get; set; }
-        public string Purpose { get; set; }
-        public string[] InformationCollected { get; set; }
-        public string StoredCountry { get; set; }
-        public string[] SharedWith { get; set; }
-        public bool IsDeleted { get; set; }
-
-        public bool ConsentProvided { get; set; }
+        public Core.Models.ThirdPartyConsent.Identifiers.ApplicationId ApplicationId { get; init; }
+        public string ApplicationName { get; init; }
+        public string Purpose { get; init; }
+        public List<string> InformationCollected { get; init; }
+        public string StoredCountry { get; init; }
+        public List<string> SharedWith { get; init; }
+        public string Link { get; init; }
+        public List<string> RequiredBy { get; init; }
+        public bool ConsentProvided { get; init; }
     }
 }

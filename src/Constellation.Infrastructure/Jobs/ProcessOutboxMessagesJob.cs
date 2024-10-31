@@ -37,8 +37,8 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
         foreach (OutboxMessage message in messages)
         {
-            var domainEvent = JsonConvert
-                .DeserializeObject<IDomainEvent>(
+            var eventItem = JsonConvert
+                .DeserializeObject<IEvent>(
                     message.Content,
                     new JsonSerializerSettings
                     {
@@ -46,7 +46,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
                         TypeNameHandling = TypeNameHandling.All
                     });
 
-            if (domainEvent is null)
+            if (eventItem is null)
             {
                 // TODO: Handle properly
                 _logger.Warning("Failed to deserialize job: {@message}", message);
@@ -62,12 +62,12 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
             // To Prevent Circular Dependency Issues: https://www.davidguida.net/mediatr-how-to-use-decorators-to-add-retry-policies/
             PolicyResult result = await policy.ExecuteAndCaptureAsync(() => 
-                _publisher.Publish(domainEvent, token));
+                _publisher.Publish(eventItem, token));
 
             if (result.FinalException is not null)
             {
                 // TODO: Log error or report somewhere
-                _logger.Warning("Failed to process job {@job} with error {@error}", domainEvent, result.FinalException);
+                _logger.Warning("Failed to process job {@job} with error {@error}", eventItem, result.FinalException);
 
                 message.Error = result.FinalException.ToString();
             }

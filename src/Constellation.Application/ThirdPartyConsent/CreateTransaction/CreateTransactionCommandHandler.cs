@@ -1,9 +1,17 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.CreateTransaction;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Enrolments.Repositories;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Subjects.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Enums;
+using Core.IntegrationEvents;
+using Core.Models.Enrolments;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
@@ -26,6 +34,8 @@ internal sealed class CreateTransactionCommandHandler
 {
     private readonly IConsentRepository _consentRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
@@ -34,6 +44,8 @@ internal sealed class CreateTransactionCommandHandler
     public CreateTransactionCommandHandler(
         IConsentRepository consentRepository,
         IStudentRepository studentRepository,
+        IEnrolmentRepository enrolmentRepository,
+        ICourseRepository courseRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
@@ -41,6 +53,8 @@ internal sealed class CreateTransactionCommandHandler
     {
         _consentRepository = consentRepository;
         _studentRepository = studentRepository;
+        _enrolmentRepository = enrolmentRepository;
+        _courseRepository = courseRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _dateTime = dateTime;
@@ -49,9 +63,13 @@ internal sealed class CreateTransactionCommandHandler
 
     public async Task<Result> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
+        DateTime submittedTime = _dateTime.Now;
+
         List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
 
         ConsentTransactionId transactionId = new();
+
+        List<Transaction.ConsentResponse> transactionConsents = new();
 
         Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
@@ -59,10 +77,26 @@ internal sealed class CreateTransactionCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateTransactionCommand), request, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
+            .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
                 .Warning("Failed to create Consent Transaction");
 
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
+        }
+
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+
+        List<OfferingId> offeringIds = enrolments.Select(enrolment => enrolment.OfferingId).ToList();
+
+        List<CourseId> courseIds = new();
+
+        foreach (OfferingId offeringId in offeringIds)
+        {
+            Course course = await _courseRepository.GetByOfferingId(offeringId, cancellationToken);
+
+            if (course is null)
+                continue;
+
+            courseIds.Add(course.Id);
         }
 
         foreach (KeyValuePair<ApplicationId, bool> entry in request.Responses)
@@ -83,11 +117,42 @@ internal sealed class CreateTransactionCommandHandler
             {
                 _logger
                     .ForContext(nameof(CreateTransactionCommand), request, true)
-                    .ForContext(nameof(Error), ConsentApplicationErrors.NotRequired(application.Id, application.Name),
-                        true)
+                    .ForContext(nameof(Error), ConsentApplicationErrors.NotRequired(application.Id, application.Name), true)
                     .Warning("Failed to create Consent Transaction");
 
                 return Result.Failure(ConsentApplicationErrors.NotRequired(application.Id, application.Name));
+            }
+
+            List<string> requiredBy = new();
+
+            foreach (var requirement in application.Requirements.Where(requirement => !requirement.IsDeleted))
+            {
+                switch (requirement)
+                {
+                    case CourseConsentRequirement courseConsentRequirement:
+                        if (courseIds.Contains(courseConsentRequirement.CourseId))
+                        {
+                            requiredBy.Add($"Course: {courseConsentRequirement.Description}");
+                        }
+
+                        break;
+
+                    case GradeConsentRequirement gradeConsentRequirement:
+                        if (gradeConsentRequirement.Grade == student.CurrentEnrolment?.Grade)
+                        {
+                            requiredBy.Add($"Grade: {gradeConsentRequirement.Description}");
+                        }
+
+                        break;
+
+                    case StudentConsentRequirement studentConsentRequirement:
+                        if (studentConsentRequirement.StudentId == student.Id)
+                        {
+                            requiredBy.Add($"Student: {studentConsentRequirement.Description}");
+                        }
+
+                        break;
+                }
             }
 
             string submissionNotes = request.Notes;
@@ -104,12 +169,37 @@ internal sealed class CreateTransactionCommandHandler
                 application.Id,
                 entry.Value,
                 request.SubmittedBy,
-                _dateTime.Now,
+                submittedTime,
                 request.SubmissionMethod,
                 submissionNotes);
 
             application.AddConsentResponse(consent);
+
+            transactionConsents.Add(new(
+                application.Id,
+                application.Name,
+                application.Purpose,
+                application.InformationCollected,
+                application.StoredCountry,
+                application.SharedWith,
+                application.ApplicationLink,
+                requiredBy,
+                entry.Value));
         }
+
+        Transaction transaction = Transaction.Create(
+            transactionId,
+            student.Name,
+            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+            request.SubmittedBy,
+            submittedTime,
+            request.SubmissionMethod,
+            request.Notes,
+            transactionConsents);
+
+        _consentRepository.Insert(transaction);
+
+        await _unitOfWork.AddIntegrationEvent(new ConsentTransactionReceivedIntegrationEvent(new(), transactionId));
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

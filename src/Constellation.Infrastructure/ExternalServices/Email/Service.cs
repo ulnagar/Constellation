@@ -37,6 +37,7 @@ using Templates.Views.Emails.Covers;
 using Templates.Views.Emails.Lessons;
 using Templates.Views.Emails.Reports;
 using Templates.Views.Emails.RollMarking;
+using Templates.Views.Emails.ThirdParty;
 using Templates.Views.Emails.WorkFlow;
 using Action = Core.Models.WorkFlow.Action;
 
@@ -95,6 +96,28 @@ public sealed class Service : IEmailService
 
             await _emailSender.Send(recipients, null, viewModel.Title, body, attachments, cancellationToken);
         }
+    }
+
+    public async Task SendConsentTransactionReceiptToParent(
+        List<EmailRecipient> recipients,
+        string studentName,
+        DateOnly submittedOn,
+        Attachment attachment,
+        CancellationToken cancellationToken = default)
+    {
+        TransactionReceiptParentEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Third-party consent receipt - {studentName} {submittedOn:dd-MM-yyyy}",
+            StudentName = studentName,
+            SubmittedOn = submittedOn
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(TransactionReceiptParentEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, [ attachment ], cancellationToken);
     }
 
     public async Task<bool> SendParentAttendanceReportEmail(
