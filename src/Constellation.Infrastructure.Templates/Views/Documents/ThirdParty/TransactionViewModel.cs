@@ -13,6 +13,7 @@ public sealed class TransactionViewModel
     public Name Student { get; init; }
     public Grade Grade { get; init; }
     public string ProvidedBy { get; init; } = string.Empty;
+    public EmailAddress ProvidedByEmail { get; init; }
     public DateTime ProvidedAt { get; init; }
     public ConsentMethod Method { get; init; } = ConsentMethod.PhoneCall;
     public string MethodNotes { get; init; } = string.Empty;

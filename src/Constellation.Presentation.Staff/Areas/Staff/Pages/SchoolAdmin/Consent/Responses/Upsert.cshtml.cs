@@ -138,6 +138,7 @@ public class UpsertModel : BasePageModel
         CreateTransactionCommand command = new(
             StudentId,
             contactName,
+            contact.EmailAddress?.Email,
             ConsentMethod.FromValue(Method),
             Notes,
             responses);

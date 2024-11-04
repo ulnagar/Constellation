@@ -4,6 +4,113 @@
     Layout = null;
 }
 
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Aurora College Class Roll</title>
+    <style>
+        body {
+            font-size: 16px;
+        }
+
+        .mt-2 {
+            margin-top: 0.5em;
+        }
+
+        .mt-3 {
+            margin-top: 1em;
+        }
+
+        .mt-4 {
+            margin-top: 1.25em;
+        }
+
+        .w-25 {
+            width: 25%;
+        }
+
+        td.app-card {
+            padding: 1rem .25rem .25rem .5rem;
+            vertical-align: top;
+            border-bottom: 1px solid;
+        }
+
+        tr th {
+            width: 30%;
+        }
+
+        tr td {
+            width: 70%;
+        }
+
+        tr td, tr th {
+            padding: 1em;
+            border: 1px solid;
+        }
+
+        th {
+            text-align: left;
+        }
+
+        .table-roll {
+            width: 95%;
+            font-size: 12px;
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        .offset-1 {
+            margin-left: 5%;
+        }
+
+        .col-10 {
+            -ms-flex: 0 0 83.333333%;
+            flex: 0 0 83.333333%;
+            /*max-width: 83.333333%*/
+        }
+
+        .row {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px
+        }
+
+        .logo {
+            width: 50%;
+            margin-top: 1.5em;
+            margin-right: 5%;
+        }
+
+        .right-align {
+            text-align: right;
+        }
+
+        .heading-row {
+            display: block;
+            font-weight: bold;
+            text-align: center;
+            margin-left: 6.25%;
+            margin-top: 1.5em;
+        }
+
+        .legend {
+            display: block;
+            margin-left: 6.25%;
+        }
+
+        .legend-box {
+            float: left;
+            padding-right: 1.5em;
+        }
+    </style>
+</head>
+<body>
 <h2>Consent to use third-party software</h2>
 
 <p>The Department of Education has entered into contracts for a range of essential student education and administration software. The department has assessed the privacy impacts and data security controls as compliant with NSW privacy requirements and a list of that software is avialable at https://education.nsw.gov.au/public-schools/going-to-a-public-school/privacy-information.</p>
@@ -71,9 +178,15 @@
     <dt>Student full name:</dt>
     <dd>@Model.Student.DisplayName</dd>
     
-    <dt>Parent/Carer email address:</dt>
+    <dt>Parent/Carer name:</dt>
     <dd>@Model.ProvidedBy</dd>
+
+    <dt>Parent/Carer email address:</dt>
+    <dd>@Model.ProvidedByEmail.Email</dd>
     
     <dt>Date of submission:</dt>
     <dd>@Model.ProvidedAt.ToLongDateString()</dd>
 </dl>
+
+</body>
+</html>

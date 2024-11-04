@@ -49,7 +49,7 @@ internal class SendTransactionReceipt
 
         Attachment document = await _attachmentService.GenerateConsentTransactionReceipt(transaction, cancellationToken);
 
-        Result<EmailRecipient> parentRecipient = EmailRecipient.Create(transaction.ProvidedBy, transaction.ProvidedBy);
+        Result<EmailRecipient> parentRecipient = EmailRecipient.Create(transaction.ProvidedBy, transaction.ProvidedByEmailAddress.Email);
 
         if (parentRecipient.IsFailure)
         {

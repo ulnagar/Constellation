@@ -20,6 +20,7 @@ using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System;
@@ -187,11 +188,24 @@ internal sealed class CreateTransactionCommandHandler
                 entry.Value));
         }
 
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.SubmittedByEmail);
+
+        if (emailAddress.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateTransactionCommand), request, true)
+                .ForContext(nameof(Error), emailAddress.Error, true)
+                .Warning("Failed to create Consent Transaction");
+
+            return Result.Failure(emailAddress.Error);
+        }
+
         Transaction transaction = Transaction.Create(
             transactionId,
             student.Name,
             student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
             request.SubmittedBy,
+            emailAddress.Value,
             submittedTime,
             request.SubmissionMethod,
             request.Notes,
