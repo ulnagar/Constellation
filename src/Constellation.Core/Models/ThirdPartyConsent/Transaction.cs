@@ -17,6 +17,7 @@ public sealed class Transaction
     public Name Student { get; init; }
     public Grade Grade { get; init; }
     public string ProvidedBy { get; init; } = string.Empty;
+    public EmailAddress ProvidedByEmailAddress { get; init; }
     public DateTime ProvidedAt { get; init; }
     public ConsentMethod Method { get; init; } = ConsentMethod.PhoneCall;
     public string MethodNotes { get; init; } = string.Empty;
@@ -64,6 +65,7 @@ public sealed class Transaction
         Name student,
         Grade grade,
         string providedBy,
+        EmailAddress providedByEmail,
         DateTime providedAt,
         ConsentMethod method,
         string notes,
@@ -75,6 +77,7 @@ public sealed class Transaction
             Student = student,
             Grade = grade,
             ProvidedBy = providedBy,
+            ProvidedByEmailAddress = providedByEmail,
             ProvidedAt = providedAt,
             Method = method,
             MethodNotes = notes,

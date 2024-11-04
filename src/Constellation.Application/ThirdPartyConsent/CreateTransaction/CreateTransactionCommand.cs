@@ -9,6 +9,7 @@ using ApplicationId = Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
 public sealed record CreateTransactionCommand(
     StudentId StudentId,
     string SubmittedBy,
+    string SubmittedByEmail,
     ConsentMethod SubmissionMethod,
     string Notes,
     Dictionary<ApplicationId, bool> Responses)

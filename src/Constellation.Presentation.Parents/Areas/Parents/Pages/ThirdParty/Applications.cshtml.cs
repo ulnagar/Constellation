@@ -58,6 +58,7 @@ public class ApplicationsModel : BasePageModel
     {
         CreateTransactionCommand command = new(
             StudentId,
+            _currentUserService.UserName,
             _currentUserService.EmailAddress,
             ConsentMethod.Portal, 
             string.Empty,

@@ -54,5 +54,11 @@ internal sealed class TransactionConfiguration : IEntityTypeConfiguration<Transa
             .HasConversion(
                 method => method.Value,
                 value => ConsentMethod.FromValue(value));
+
+        builder
+            .Property(transaction => transaction.ProvidedByEmailAddress)
+            .HasConversion(
+                email => email.Email,
+                value => EmailAddress.FromValue(value));
     }
 }

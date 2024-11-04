@@ -118,6 +118,7 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
             Method = transaction.Method,
             MethodNotes = transaction.MethodNotes,
             ProvidedAt = transaction.ProvidedAt,
+            ProvidedByEmail = transaction.ProvidedByEmailAddress,
             ProvidedBy = transaction.ProvidedBy,
             Responses = transaction.Responses
                 .Select(response =>
