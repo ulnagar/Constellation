@@ -5,12 +5,14 @@ using Abstractions;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.IntegrationEvents;
 using Core.Models.ThirdPartyConsent;
+using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Services;
 using Serilog;
 using System;
+using System.Linq;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,14 +38,17 @@ internal class SendTransactionReceipt
             .ForContext<ConsentTransactionReceivedIntegrationEvent>();
     }
 
-    //TODO: R1.16.1: Send email to parent with responses in the transaction
     public async Task Handle(ConsentTransactionReceivedIntegrationEvent notification, CancellationToken cancellationToken)
     {
         Transaction? transaction = await _consentRepository.GetTransactionById(notification.TransactionId, cancellationToken);
 
         if (transaction is null)
         {
-            // Log error
+            _logger
+                .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
+                .ForContext(nameof(Error), ConsentTransactionErrors.NotFound(notification.TransactionId), true)
+                .Error("Failed to generate and send Consent Transaction receipt");
+
             return;
         }
 
@@ -53,7 +58,11 @@ internal class SendTransactionReceipt
 
         if (parentRecipient.IsFailure)
         {
-            // Log error
+            _logger
+                .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
+                .ForContext(nameof(Error), parentRecipient.Error, true)
+                .Error("Failed to generate and send Consent Transaction receipt");
+
             return;
         }
 
@@ -63,11 +72,6 @@ internal class SendTransactionReceipt
             DateOnly.FromDateTime(transaction.ProvidedAt),
             document,
             cancellationToken);
-
-        // Generate and send email with attachment to:
-        //  1. Parent listed on transaction
-        //  2. Front office for records?
-        //  3. Classroom teachers/Head teachers/Instructional Leader if any consents are denied
     }
 }
  

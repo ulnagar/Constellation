@@ -10,112 +10,131 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Aurora College Class Roll</title>
+    <title></title>
     <style>
         body {
-            font-size: 16px;
+            line-height: 1.5rem;
+            font-size: 18px;
+            font-family: sans-serif;
         }
 
-        .mt-2 {
-            margin-top: 0.5em;
+        h2 {
+            font-size: 38px;
+            color: white;
         }
 
-        .mt-3 {
-            margin-top: 1em;
+        table {
+            width: 100%;
+            border: 1px solid black;
+            border-collapse: collapse;
         }
 
-        .mt-4 {
-            margin-top: 1.25em;
-        }
-
-        .w-25 {
-            width: 25%;
-        }
-
-        td.app-card {
-            padding: 1rem .25rem .25rem .5rem;
-            vertical-align: top;
-            border-bottom: 1px solid;
-        }
-
-        tr th {
-            width: 30%;
-        }
-
-        tr td {
-            width: 70%;
+        thead {
+            display: table-header-group;
         }
 
         tr td, tr th {
             padding: 1em;
-            border: 1px solid;
+            border: 1px solid black;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         th {
             text-align: left;
-        }
-
-        .table-roll {
-            width: 95%;
-            font-size: 12px;
-            border: 1px solid;
-            border-collapse: collapse;
-        }
-
-        .offset-1 {
-            margin-left: 5%;
-        }
-
-        .col-10 {
-            -ms-flex: 0 0 83.333333%;
-            flex: 0 0 83.333333%;
-            /*max-width: 83.333333%*/
-        }
-
-        .row {
-            display: -ms-flexbox;
-            display: flex;
-            -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-            margin-right: -15px;
-            margin-left: -15px
-        }
-
-        .logo {
-            width: 50%;
-            margin-top: 1.5em;
-            margin-right: 5%;
-        }
-
-        .right-align {
-            text-align: right;
-        }
-
-        .heading-row {
-            display: block;
+            font-size: 18px;
             font-weight: bold;
-            text-align: center;
-            margin-left: 6.25%;
-            margin-top: 1.5em;
+            background-color: cornflowerblue;
+            color: white;
         }
 
-        .legend {
-            display: block;
-            margin-left: 6.25%;
+        td {
+            vertical-align: top;
+            font-size: 16px;
         }
 
-        .legend-box {
-            float: left;
-            padding-right: 1.5em;
+        td ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        dl {
+            width: 100%;
+            font-size: 20px;
+            display: flex;
+            flex-flow: row wrap;
+        }
+
+        dt {
+            font-size: 20px;
+            flex-basis: 35%;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        dd {
+            font-size: 20px;
+            flex-basis: 50%;
+            flex-grow: 1;
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+            font-weight: bold;
+            color: black;
+        }
+
+        .declaration {
+            page-break-inside: avoid;
+        }
+
+        .header {
+            background-color: #00505C;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row;
+        }
+
+        .header-text {
+            flex-grow: 1;
+            padding: 1rem 1rem 0;
+            height: 9rem;
+            display: flex;
+        }
+
+        .header-text * {
+            /* vertical-align: bottom; */
+            display: inline-block;
+            align-self: flex-end;
+        }
+
+        .header-logo {
+            width: 33%;
+            padding-top: 1rem;
+        }
+
+        .header-logo img {
+            height: 100%;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-<h2>Consent to use third-party software</h2>
+<div class="header">
+    <div class="header-text">
+        <h2>Consent to use third-party software</h2>
+    </div>
+    <div class="header-logo">
+        <img src="@Constellation.Infrastructure.Templates.Views.Documents.ThirdParty.TransactionViewModel.SchoolLogo" />
+    </div>
+</div>
 
-<p>The Department of Education has entered into contracts for a range of essential student education and administration software. The department has assessed the privacy impacts and data security controls as compliant with NSW privacy requirements and a list of that software is avialable at https://education.nsw.gov.au/public-schools/going-to-a-public-school/privacy-information.</p>
+<p>The Department of Education has entered into contracts for a range of essential student education and administration software. The department has assessed the privacy impacts and data security controls as compliant with NSW privacy requirements and a list of that software is available at <a href="https://education.nsw.gov.au/public-schools/going-to-a-public-school/privacy-information" target="_blank">https://education.nsw.gov.au/public-schools/going-to-a-public-school/privacy-information</a>.</p>
 
-<p>Additionally, this year Aurora College will use the third-party software listed in the table below. Your consent for each application as submitted to the school is recorded below. If the information is incorrect, please contact the school immediately on 1300 287 629.</p>
+<p>Additionally, this year Aurora College will use the third-party software listed in the table below. Your consent for each application as submitted to the school is recorded below. If the information is incorrect, please contact the school immediately on <strong>1300 287 629</strong>.</p>
 
 <table>
     <thead>
@@ -128,65 +147,67 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var response in Model.Responses)
-    {
-        <tr>
-            <td>
-                <strong>@response.ApplicationName</strong>
-                <p>@response.Purpose</p>
-                <p>@response.Link</p>
-            </td>
-            <td>
-                <ul>
-                    @foreach (var item in response.InformationCollected)
+        @foreach (var response in Model.Responses)
+        {
+            <tr>
+                <td>
+                    <strong>@response.ApplicationName</strong>
+                    <p>@response.Purpose</p>
+                    <p>@response.Link</p>
+                </td>
+                <td>
+                    <ul>
+                        @foreach (var item in response.InformationCollected)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                </td>
+                <td>
+                    @response.StoredCountry
+                </td>
+                <td>
+                    <ul>
+                        @foreach (var item in response.SharedWith)
+                        {
+                            <li>@item</li>
+                        }
+                    </ul>
+                </td>
+                <td>
+                    @if (response.ConsentProvided)
                     {
-                        <li>@item</li>
+                        <strong>Yes</strong>
                     }
-                </ul>
-            </td>
-            <td>
-                @response.StoredCountry
-            </td>
-            <td>
-                <ul>
-                    @foreach (var item in response.SharedWith)
+                    else
                     {
-                        <li>@item</li>
+                        <strong>No</strong>
                     }
-                </ul>
-            </td>
-            <td>
-                @if (response.ConsentProvided)
-                {
-                    <strong>Yes</strong>
-                }
-                else
-                {
-                    <strong>No</strong>
-                }
-            </td>
-        </tr>
-    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
-<p>This consent remains effective until I advise the school otherwise in writing or via the Parent Portal.</p>
+<div class="declaration">
+    <p>This consent remains effective until I advise the school otherwise in writing or via the Parent Portal.</p>
 
-<p>I acknowledge that my child must abide by the conditions of acceptable usage set out in the department's <em>Student use of digital devices and online services</em> policy (https://education.nsw.gov.au/policy-library/policies/pd-2020-0471) and that any breach of this policy may, at the school's discretion, result in disciplinary action in accordance with the school's behaviour policy.</p>
+    <p>I acknowledge that my child must abide by the conditions of acceptable usage set out in the department's <em>Student use of digital devices and online services</em> policy (<a href="https://education.nsw.gov.au/policy-library/policies/pd-2020-0471" target="_blank">https://education.nsw.gov.au/policy-library/policies/pd-2020-0471</a>) and that any breach of this policy may, at the school's discretion, result in disciplinary action in accordance with the school's behaviour policy.</p>
 
-<dl>
-    <dt>Student full name:</dt>
-    <dd>@Model.Student.DisplayName</dd>
-    
-    <dt>Parent/Carer name:</dt>
-    <dd>@Model.ProvidedBy</dd>
+    <dl>
+        <dt>Student full name:</dt>
+        <dd>@Model.Student.DisplayName</dd>
 
-    <dt>Parent/Carer email address:</dt>
-    <dd>@Model.ProvidedByEmail.Email</dd>
-    
-    <dt>Date of submission:</dt>
-    <dd>@Model.ProvidedAt.ToLongDateString()</dd>
-</dl>
+        <dt>Parent/Carer name:</dt>
+        <dd>@Model.ProvidedBy</dd>
+
+        <dt>Parent/Carer email address:</dt>
+        <dd>@Model.ProvidedByEmail.Email</dd>
+
+        <dt>Date of submission:</dt>
+        <dd>@Model.ProvidedAt.ToString("dd/MM/yyyy h:mm tt")</dd>
+    </dl>
+</div>
 
 </body>
 </html>

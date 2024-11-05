@@ -64,6 +64,7 @@ public sealed class AppConfiguration
         public Dictionary<Grade, List<string>> LearningSupportIds { get; set; }
         public Dictionary<Grade, List<string>> DeputyPrincipalIds { get; set; }
         public string PrincipalId { get; set; }
+        public string InstructionalLeader { get; set; }
     }
 
     public class AttachmentsConfiguration

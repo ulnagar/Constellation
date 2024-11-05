@@ -82,7 +82,7 @@ public class ApplicationsModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage();
+        return RedirectToPage("/ThirdParty/Index", new { area = "Parents"});
     }
 
     public async Task PreparePage()
