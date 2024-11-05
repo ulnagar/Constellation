@@ -15,6 +15,7 @@ using Constellation.Core.ValueObjects;
 using Core.Models.Assignments;
 using Core.Models.SchoolContacts;
 using Core.Models.Subjects;
+using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
 using Org.BouncyCastle.Cms;
 using System;
@@ -108,4 +109,5 @@ public interface IEmailService
 
     // Third Party Consent Emails
     Task SendConsentTransactionReceiptToParent(List<EmailRecipient> recipients, string studentName, DateOnly submittedOn, Attachment attachment, CancellationToken cancellationToken = default);
+    Task SendConsentRefusedNotification(List<EmailRecipient> recipients, string studentName, DateOnly submittedOn, List<Transaction.ConsentResponse> responses, CancellationToken cancellationToken = default);
 }

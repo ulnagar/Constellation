@@ -1,112 +1,47 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Interfaces.Gateways;
+using Application.Abstractions;
 using BaseModels;
-using Constellation.Application.DTOs;
-using Core.Models.Students;
-using Core.Models.Students.Enums;
-using Core.Models.Students.Repositories;
+using Constellation.Core.Models.Attachments.Services;
+using Core.Models.ThirdPartyConsent;
+using Core.Models.ThirdPartyConsent.Identifiers;
+using Core.Models.ThirdPartyConsent.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Parents.Areas.Parents.Pages.Contacts;
 using Serilog;
-using System.Diagnostics;
+using System.Net.Mime;
+using System.Threading;
 
 public class IndexModel : BasePageModel
 {
-    private readonly ISender _mediator;
-    private readonly IStudentRepository _studentRepository;
-    private readonly ISentralGateway _gateway;
+    private readonly IMediator _mediator;
+    private readonly IConsentRepository _consentRepository;
+    private readonly IEmailAttachmentService _attachmentService;
     private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator,
-        IStudentRepository studentRepository,
-        ISentralGateway gateway,
+        IMediator mediator,
+        IConsentRepository consentRepository,
+        IEmailAttachmentService attachmentService,
         ILogger logger)
     {
         _mediator = mediator;
-        _studentRepository = studentRepository;
-        _gateway = gateway;
+        _consentRepository = consentRepository;
+        _attachmentService = attachmentService;
         _logger = logger;
     }
-
-    public List<string> Indexers { get; set; } = new();
-    public List<FamilyDetailsDto> OldMethodResults { get; set; } = new();
-    public List<FamilyDetailsDto> NewMethodResults { get; set; } = new();
+    public async Task OnGet() { }
 
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGetDownload()
     {
-        List<Student> students = await _studentRepository.GetCurrentStudents();
+        ConsentTransactionId transactionId = ConsentTransactionId.FromValue(new Guid("570419F2-E5D1-43C2-8BDA-ABBE0A579231"));
 
-        Stopwatch oldWatch = Stopwatch.StartNew();
-        List<FamilyDetailsDto> oldReturn = await OldMethod(students);
-        oldWatch.Stop();
-        long oldTime = oldWatch.ElapsedMilliseconds;
+        Transaction transaction = await _consentRepository.GetTransactionById(transactionId);
 
-        Stopwatch newWatch = Stopwatch.StartNew();
-        List<FamilyDetailsDto> newReturn = await NewMethod(students);
-        newWatch.Stop();
-        long newTime = newWatch.ElapsedMilliseconds;
+        var document = await _attachmentService.GenerateConsentTransactionReceipt(transaction);
 
-        List<string> oldIndex = oldReturn.Select(entry => entry.FamilyId).ToList();
-        List<string> newIndex = newReturn.Select(entry => entry.FamilyId).ToList();
-
-        List<string> jointIndex = new();
-        jointIndex.AddRange(oldIndex);
-        jointIndex.AddRange(newIndex);
-        jointIndex = jointIndex.Distinct().OrderBy(entry => entry).ToList();
-
-        Indexers = jointIndex;
-
-        OldMethodResults = oldReturn;
-        NewMethodResults = newReturn;
-    }
-
-    private async Task<List<FamilyDetailsDto>> OldMethod(List<Student> students, CancellationToken token = default)
-    {
-        // Get the CSV file from Sentral
-        List<FamilyDetailsDto> families = new();
-
-        Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
-        
-        foreach (KeyValuePair<string, List<string>> family in familyGroups)
-        {
-            Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
-
-            if (firstStudent is null)
-                continue;
-
-            SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
-
-            if (link is null)
-                continue;
-
-            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
-
-            entry.StudentReferenceNumbers = family.Value;
-            entry.FamilyId = family.Key;
-
-            foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
-            {
-                string name = contact.FirstName.Contains(' ')
-                    ? contact.FirstName.Split(' ')[0]
-                    : contact.FirstName;
-
-                name = name.Length > 8 ? name[..8] : name;
-
-                contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
-            }
-
-            families.Add(entry);
-        }
-
-        return families;
-    }
-
-    private async Task<List<FamilyDetailsDto>> NewMethod(List<Student> students, CancellationToken token = default)
-    {
-        ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReportFromApi(_logger, token);
-
-        return families.ToList();
+        return File(document.ContentStream, MediaTypeNames.Application.Pdf, document.Name);
     }
 }

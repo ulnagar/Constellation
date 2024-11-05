@@ -1,0 +1,26 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.ThirdParty.ConsentRefusedNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+@if (Model.RefusedConsents.Count > 1)
+{
+    <p>A Consent response has been received for @Model.Student and some applications have been refused consent by the parent/carer.</p>
+}
+else
+{
+    <p>A Consent response has been received for @Model.Student and an application has been refused consent by the parent/carer.</p>
+}
+
+<ul>
+    @foreach (var entry in Model.RefusedConsents)
+    {
+        <li>@entry</li>
+    }
+</ul>

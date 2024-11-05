@@ -19,6 +19,7 @@ using Core.Models.Offerings;
 using Core.Models.SchoolContacts;
 using Core.Models.Students;
 using Core.Models.Subjects;
+using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
@@ -118,6 +119,29 @@ public sealed class Service : IEmailService
         string body = await _razorService.RenderViewToStringAsync(TransactionReceiptParentEmailViewModel.ViewLocation, viewModel);
 
         await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, [ attachment ], cancellationToken);
+    }
+
+    public async Task SendConsentRefusedNotification(
+        List<EmailRecipient> recipients,
+        string studentName,
+        DateOnly submittedOn,
+        List<Transaction.ConsentResponse> responses,
+        CancellationToken cancellationToken = default)
+    {
+        ConsentRefusedNotificationEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Student = studentName,
+            SubmittedOn = submittedOn,
+            RefusedConsents = responses.Select(entry => entry.ApplicationName).ToList(),
+            Title = $"[Aurora College] Third-party consent refused - {studentName} {submittedOn:dd-MM-yyyy}"
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(ConsentRefusedNotificationEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
     }
 
     public async Task<bool> SendParentAttendanceReportEmail(
