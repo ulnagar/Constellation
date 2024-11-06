@@ -41,7 +41,8 @@
     
     @if (authCheck.Succeeded)
     {
-        <a asp-page="/SchoolAdmin/Consent/Applications/Upsert" asp-area="Staff" class="btn btn-success">New</a>
+        <a asp-page="/SchoolAdmin/Consent/Applications/Upsert" asp-area="Staff" class="btn btn-success">New Application</a>
+        <a asp-page="/SchoolAdmin/Consent/Responses/Upsert" asp-area="Staff" class="btn btn-primary">New Response</a>
     }
 </div>
 

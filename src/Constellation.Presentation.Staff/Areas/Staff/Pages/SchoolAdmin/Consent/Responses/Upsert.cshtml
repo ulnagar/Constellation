@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Responses.UpsertModel
 
 @using Constellation.Core.Models.ThirdPartyConsent.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 <h2>Add Consent Response</h2>
 
@@ -34,7 +35,7 @@
                         <option value=""> -- Select Parent -- </option>
                         @foreach (var parent in Model.Parents.Where(entry => entry.ParentId != null))
                         {
-                            if (Model.Submitter == parent.ParentId?.Value)
+                            if (Model.Submitter == parent.ParentId)
                             {
                                 <option value="@parent.ParentId.Value" selected="selected">@parent.Name</option>
                             }
@@ -66,83 +67,14 @@
 
 
         <div class="form-group row">
-            <label asp-for="Responses" class="col-md-2">Consent Responses</label>
-            <div class="col-md-8">
-                <button type="button" class="btn btn-success" onclick="addApplicationRow()">Add Application</button>
-                <span asp-validation-for="Responses" class="text-danger"></span>
-                <div id="consent-rows" class="mt-1">
-                    @foreach (var response in Model.Responses)
-                    {
-                        var index = Model.Responses.IndexOf(response);
-
-                        <div class="input-group mt-2" id="consent-@index">
-                            <div class="input-group-prepend">
-                                <button class="btn btn-outline-danger" type="button">
-                                    <i class="fal fa-do-not-enter"></i>
-                                </button>
-                            </div>
-                            <select class="custom-select form-control combo" name="Responses[@index].ApplicationId">
-                                @if (response.ApplicationId == Guid.Empty)
-                                {
-                                    <option value="@Guid.Empty" selected="selected"> -- Select Application -- </option>
-                                }
-                                else
-                                {
-                                    <option value="@Guid.Empty"> -- Select Application -- </option>
-                                }
-
-                                @foreach (var entry in Model.Applications.OrderBy(entry => entry.Name))
-                                {
-                                    if (entry.Id.Value == response.ApplicationId)
-                                    {
-                                        if (entry.ConsentRequired)
-                                        {
-                                            <option value="@entry.Id.Value" selected="selected">@entry.Name</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@entry.Id.Value" selected="selected">@entry.Name (Not Required)</option>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (entry.ConsentRequired)
-                                        {
-                                            <option value="@entry.Id.Value">@entry.Name</option>
-                                        }
-                                        else
-                                        {
-                                            <option value="@entry.Id.Value">@entry.Name (Not Required)</option>
-                                        }
-                                    }
-                                }
-                            </select>
-                            <div class="input-group-append">
-                                <input type="hidden" name="Responses[@index].Consent" value="@response.Consent"/>
-                                @if (response.Consent)
-                                {
-                                    <button class="btn btn-success" type="button">
-                                        <i class="fal fa-check"></i> Granted
-                                    </button>
-                                    <button class="btn btn-outline-danger" type="button">
-                                        <i class="fal fa-times"></i> Denied
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-outline-success" type="button">
-                                        <i class="fal fa-check"></i> Granted
-                                    </button>
-                                    <button class="btn btn-danger" type="button">
-                                        <i class="fal fa-times"></i> Denied
-                                    </button>
-                                }
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
+            <label asp-for="Consents" class="col-md-2">Consent Responses</label>
         </div>
+        
+        <div id="consent-cards">
+ 
+        </div>
+        
+        <div id="responses"></div>
 
         <div class="form-group row">
             <label asp-for="Notes" class="col-md-2">Notes</label>
@@ -158,148 +90,18 @@
             </div>
         </div>
     </div>
-    
-    <div class="d-none">
-        <div class="input-group mt-2" id="consent-template">
-            <div class="input-group-prepend">
-                <button class="btn btn-outline-danger" type="button" id="consent-template-remove">
-                    <i class="fal fa-do-not-enter"></i>
-                </button>
-            </div>
-            <select class="custom-select form-control" name="Responses[999].ApplicationId">
-                <option value="@Guid.Empty"> -- Select Application -- </option>
-                @foreach (var entry in Model.Applications.OrderBy(entry => entry.Name))
-                {
-                    if (entry.ConsentRequired)
-                    {
-                        <option value="@entry.Id.Value">@entry.Name</option>
-                    }
-                    else
-                    {
-                        <option value="@entry.Id.Value">@entry.Name (Not Required)</option>
-                    }
-                }
-            </select>
-            <div class="input-group-append">
-                <input type="hidden" name="Responses[999].Consent"/>
-                <button class="btn btn-outline-success" type="button" id="consent-template-granted">
-                    <i class="fal fa-check"></i> Granted
-                </button>
-                <button class="btn btn-outline-danger" type="button" id="consent-template-denied">
-                    <i class="fal fa-times"></i> Denied
-                </button>
-            </div>
-        </div>
-    </div>
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        function consentProvided(event) {
-            var index = event.data.index;
-
-            // Update hidden field to have value of true
-            $('#consent-' + index + ' .input-group-append input:hidden').val('true');
-            
-            // Update buttons to have solid check and outline times
-            $('#consent-' + index + '-granted')
-                .addClass('btn-success')
-                .removeClass('btn-outline-success');
-
-            $('#consent-' + index + '-denied')
-                .addClass('btn-outline-danger')
-                .removeClass('btn-danger');
-        }
-
-        function consentDenied(event) {
-            var index = event.data.index;
-
-            // Update hidden field to have value of true
-            $('#consent-' + index + ' .input-group-append input:hidden').val('false');
-
-            // Update buttons to have solid check and outline times
-            $('#consent-' + index + '-granted')
-                .addClass('btn-outline-success')
-                .removeClass('btn-success');
-
-            $('#consent-' + index + '-denied')
-                .addClass('btn-danger')
-                .removeClass('btn-outline-danger');
-        }
-
-        function removeConsent(event) {
-            var index = event.data.index;
-
-            // Remove current item
-            $('#consent-' + index).remove();
-
-            // Re-index remaining items
-            var i = 0;
-            $('#consent-rows').children().each(function () {
-                $(this).prop('id', 'consent-' + i);
-
-                $(this).find('.custom-select')
-                    .select2('destroy')
-                    .prop('name', 'Responses[' + i + '].ApplicationId')
-                    .select2({ theme: 'bootstrap' });
-
-                $(this).find('input:hidden').prop('name', 'Responses[' + i + '].Consent');
-
-                $(this).find('#consent-' + index + '-granted')
-                    .prop('id', 'consent-' + i + '-granted')
-                    .off('click')
-                    .on('click', { index: i }, consentProvided);
-
-                $(this).find('#consent-' + index + '-denied')
-                    .prop('id', 'consent-' + i + '-denied')
-                    .off('click')
-                    .on('click', { index: i }, consentDenied);
-
-                $(this).find('#consent-' + index + '-remove')
-                    .prop('id', 'consent-' + i + '-remove')
-                    .off('click')
-                    .on('click', { index: i }, removeConsent);
-
-                i++;
-            });
-        }
-
-        function addApplicationRow() {
-            var index = $('#consent-rows').children().length;
-
-            // Clone hidden template group
-            var clone = $('#consent-template').clone(true, true);
-            
-            clone.prop('id', 'consent-' + index);
-            
-            clone.find('.custom-select')
-                .prop('name', 'Responses[' + index + '].ApplicationId')
-                .select2({ theme: 'bootstrap' });
-            
-            clone.find('input:hidden')
-            .prop('name', 'Responses[' + index + '].Consent');
-
-            clone.find('#consent-template-granted')
-                .prop('id', 'consent-' + index + '-granted')
-                .on('click', { index: index }, consentProvided);
-
-            clone.find('#consent-template-denied')
-                .prop('id', 'consent-' + index + '-denied')
-                .on('click', { index: index }, consentDenied);
-            
-            clone.find('#consent-template-remove')
-                .prop('id', 'consent-' + index + '-remove')
-                .on('click', { index: index }, removeConsent);
-            
-            $('#consent-rows').append(clone);
-        }
-
         $(document).ready(function() {
             $('#StudentId').on('select2:select', function (e) {
                 var studentId = e.params.data.id;
                 var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+                toggleLoader();
 
                 $('#Submitter')
                     .empty()
@@ -308,32 +110,94 @@
                         text: " -- Select Parent -- "
                     }));
 
-                $.ajax({
-                    url: "?handler=AjaxGetParents",
-                    type: "POST",
-                    data: {
-                        studentId: studentId,
-                        __RequestVerificationToken: xsrfHeader
-                    }
-                }).done(function (contacts) {
-                    if (contacts != null && !jQuery.isEmptyObject(contacts)) {
-                        console.log(contacts);
+                $.when(
+                    $.ajax({
+                        url: "?handler=AjaxGetParents",
+                        type: "POST",
+                        data: {
+                            studentId: studentId,
+                            __RequestVerificationToken: xsrfHeader
+                        }
+                    }).done(function (contacts) {
+                        if (contacts != null && !jQuery.isEmptyObject(contacts)) {
+                            console.log(contacts);
                         
-                        $.each(contacts, function (index, contact) {
-                            if (!jQuery.isEmptyObject(contact.parentId))
-                            {
-                                $('#Submitter').append($('<option/>', {
-                                    value: contact.parentId.value,
-                                    text: contact.name
-                                }));
-                            }
-                        });
+                            $.each(contacts, function (index, contact) {
+                                if (!jQuery.isEmptyObject(contact.parentId))
+                                {
+                                    $('#Submitter').append($('<option/>', {
+                                        value: contact.parentId.value,
+                                        text: contact.name
+                                    }));
+                                }
+                            });
 
-                        $('#Submitter')
-                            .select2({ theme: 'bootstrap' });
-                    }
+                            $('#Submitter')
+                                .select2({ theme: 'bootstrap' });
+                        }
+                    }),
+
+                    $.ajax({
+                        url: "?handler=AjaxGetRequiredApplications",
+                        type: "POST",
+                        data: {
+                            studentId: studentId,
+                            __RequestVerificationToken: xsrfHeader
+                        }
+                    }).done(function (applications) {
+                        $('#consent-cards').html(applications);
+                    })
+                )
+                .then(function() {
+                    toggleLoader();
                 });
             });
-        })
+        });
+
+        function toggleApp(appId, action) {
+            if (action == 'approve'){
+                var appName = $('.btn-outline-success[data-application-id=' + appId + ']').data('appName');
+
+                $('.btn-danger[data-application-id=' + appId + ']')
+                    .removeClass('btn-danger')
+                    .addClass('btn-outline-danger');
+
+                $('.btn-outline-success[data-application-id=' + appId + ']')
+                    .removeClass('btn-outline-success')
+                    .addClass('btn-success');
+
+                var existingInput = $('#' + appId);
+
+                if (existingInput.length) {
+                    existingInput.prop('value', 'true');
+                }
+                else {
+                    var input = '<input type="hidden" class="form-control" name="consents[' + appId + ']" id="' + appId + '" value="true">';
+                    $('#responses').append(input);
+                }
+            }
+
+            if (action == 'reject') {
+                var appName = $('.btn-outline-danger[data-application-id=' + appId + ']').data('appName');
+
+                $('.btn-outline-danger[data-application-id=' + appId + ']')
+                    .removeClass('btn-outline-danger')
+                    .addClass('btn-danger');
+
+                $('.btn-success[data-application-id=' + appId + ']')
+                    .removeClass('btn-success')
+                    .addClass('btn-outline-success');
+
+                var existingInput = $('#' + appId);
+
+                if (existingInput.length) {
+                    existingInput.prop('value', 'false');
+                }
+                else {
+                    var input = '<input type="hidden" class="form-control" name="consents[' + appId + ']" id="' + appId + '" value="false">';
+                    $('#responses').append(input);
+                }
+            }
+        }
     </script>
 }

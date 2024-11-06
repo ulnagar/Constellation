@@ -1,0 +1,45 @@
+.app-theme {
+    --fa-primary-color: #0076A8;
+}
+
+    .app-theme.success {
+        --fa-secondary-color: #55e43b;
+    }
+
+    .app-theme.failure {
+        --fa-secondary-color: #f83a3a;
+    }
+
+    .app-theme.pending {
+        --fa-secondary-color: #009B77;
+    }
+
+.fa-icon-sizing {
+    width: 60px;
+}
+
+.fa-card-icon-sizing {
+    font-size: 100px;
+}
+
+.vertical-center-content {
+    justify-content: center;
+    align-items: center;
+}
+
+.card .expando .fa {
+    transition: .3s transform ease-in-out;
+}
+
+.card .expando .collapsed .fa {
+    transform: rotate(180deg);
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.col {
+    margin-bottom: 1rem;
+}

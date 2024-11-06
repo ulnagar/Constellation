@@ -1,0 +1,107 @@
+@model List<Constellation.Application.ThirdPartyConsent.GetRequiredApplicationsForStudent.RequiredApplicationResponse>
+
+@using Constellation.Core.Models.ThirdPartyConsent.Identifiers
+
+<div class="row row-cols-1 row-cols-lg-2 g-4">
+@foreach (var application in Model)
+{
+    var applicationId = "x" + application.ApplicationId.ToString().Replace("-", string.Empty);
+
+    <div class="col">
+        <div class="card" id="accordion-@applicationId">
+            <div class="row g-0 card-header">
+                <div class="col-4 col-sm-4 col-xl-3 d-flex vertical-center-content">
+                    @if (application.Id == ConsentId.Empty)
+                    {
+                        <i class="fad fa-question-square fa-card-icon-sizing app-theme pending"></i>
+                    }
+                    else if (application.ConsentProvided)
+                    {
+                        <i class="fad fa-check-square fa-card-icon-sizing app-theme success"></i>
+                    }
+                    else
+                    {
+                        <i class="fad fa-times-square fa-card-icon-sizing app-theme failure"></i>
+                    }
+                </div>
+                <div class="col-7 col-sm-7 col-xl-8">
+                    <h4 class="card-title">@application.ApplicationName</h4>
+                    <p class="card-text fst-italic">@application.Purpose</p>
+                    <p class="card-text">
+                        Required by
+                        <ul>
+                            @foreach (var entry in application.Requirements)
+                            {
+                                <li>@entry.Value</li>
+                            }
+                        </ul>
+                    </p>
+                </div>
+                <div class="col-1 d-flex vertical-center-content expando">
+                    <a class="collapsed d-block" data-toggle="collapse" data-parent="#accordion-@applicationId" href="#@applicationId">
+                        <i class="fa fa-chevron-down fa-2x"></i>
+                    </a>
+                </div>
+            </div>
+            <div id="@applicationId" class="collapse">
+                <div class="card-body">
+                    <dl>
+                        <dt>Information Stored</dt>
+                        <dd>
+                            <ul>
+                                @foreach (var item in application.InformationCollected)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ul>
+                        </dd>
+
+                        <dt>Location Stored</dt>
+                        <dd>@application.StoredCountry</dd>
+
+                        <dt>Shared With</dt>
+                        <dd>
+                            <ul>
+                                @foreach (var item in application.SharedWith)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ul>
+                        </dd>
+
+                        @if (!string.IsNullOrWhiteSpace(application.Link))
+                        {
+                            <dt>Link</dt>
+                            <dd><a href="@application.Link" target="_blank">@application.Link</a></dd>
+                        }
+                    </dl>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-6 d-grid">
+                            @if (application.Id != ConsentId.Empty && application.ConsentProvided)
+                            {
+                                <button type="button" data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-block btn-success">I consent</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'approve')" class="btn btn-block btn-outline-success">I consent</button>
+                            }
+                        </div>
+                        <div class="col-6 d-grid">
+                            @if (application.Id != ConsentId.Empty && !application.ConsentProvided)
+                            {
+                                <button type="button" data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-block btn-danger">I do not consent</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-application-id="@application.ApplicationId" data-app-name="@application.ApplicationName" onclick="toggleApp('@application.ApplicationId', 'reject')" class="btn btn-block btn-outline-danger">I do not consent</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>

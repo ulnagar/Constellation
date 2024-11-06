@@ -1,23 +1,13 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetConsentStatusByApplication;
 
-using Core.Enums;
-using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
-using System;
+using System.Collections.Generic;
+using ApplicationId = Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
 
 public sealed record ConsentStatusResponse(
-    StudentId StudentId,
-    Name Student,
-    Grade Grade,
-    string School,
+    ApplicationId ApplicationId,
     string ApplicationName,
-    ConsentStatusResponse.ConsentStatus Status,
-    DateOnly ResponseDate)
-{
-    public enum ConsentStatus
-    {
-        Unknown,
-        Granted,
-        Denied
-    }
-}
+    bool ConsentRequired,
+    List<Name> ConsentGranted,
+    List<Name> ConsentDenied,
+    List<Name> ConsentPending);

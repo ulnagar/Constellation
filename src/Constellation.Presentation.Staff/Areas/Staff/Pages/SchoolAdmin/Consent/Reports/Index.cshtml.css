@@ -13,3 +13,38 @@
 div.hidden {
     display: none;
 }
+
+td.consent {
+    display: flex;
+    flex-direction: row;
+}
+
+.badge {
+    padding: 0.25em 0.6em;
+    font-size: 100%;
+}
+
+div.granted, div.pending, div.denied {
+    width: 35px;
+    height: 35px;
+    color: white;
+    align-content: center;
+    text-align: center;
+    cursor: default;
+}
+
+div.granted {
+    background-color: green;
+}
+
+div.pending {
+    background-color: gray;
+}
+
+div.denied {
+    background-color: red;
+}
+
+.none {
+    opacity: .5;
+}

@@ -2,18 +2,14 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.GetApplications;
 using Application.ThirdPartyConsent.GetConsentStatusByApplication;
 using Constellation.Application.Offerings.GetOfferingsForSelectionList;
-using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
-using Constellation.Application.Schools.Models;
 using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
-using Core.Models.ThirdPartyConsent.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,42 +44,31 @@ public class IndexModel : BasePageModel
     
     public List<ConsentStatusResponse> Statuses { get; set; } = new();
 
-    public List<ApplicationSummaryResponse> ApplicationList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
-    public List<SchoolSelectionListResponse> SchoolsList { get; set; } = new();
     
     public async Task<IActionResult> OnGet() => await PreparePage();
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken)
     {
         _logger.Information("Requested to retrieve filtered Consent data by user {User}", _currentUserService.UserName);
+        
+        Result<List<ConsentStatusResponse>> response = await _mediator.Send(new GetConsentStatusByApplicationQuery(
+                Filter.Offerings,
+                Filter.Grades),
+            cancellationToken);
 
-        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
-
-        foreach (Guid id in Filter.Applications)
+        if (response.IsFailure)
         {
-            ApplicationId applicationId = ApplicationId.FromValue(id);
+            _logger
+                .ForContext(nameof(Error), response.Error, true)
+                .Warning("Failed to retrieve filtered Consent data by user {User}", _currentUserService.UserName);
 
-            Result<List<ConsentStatusResponse>> response = await _mediator.Send(new GetConsentStatusByApplicationQuery(
-                applicationId,
-                offeringIds,
-                Filter.Grades,
-                Filter.Schools),
-                cancellationToken);
+            ModalContent = new ErrorDisplay(response.Error);
 
-            if (response.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(Error), response.Error, true)
-                    .Warning("Failed to retrieve filtered Consent data by user {User}", _currentUserService.UserName);
-                
-                ModalContent = new ErrorDisplay(response.Error);
-
-                return await PreparePage(cancellationToken);
-            }
-
-            Statuses.AddRange(response.Value);
+            return Page();
         }
+
+        Statuses = response.Value;
 
         return await PreparePage(cancellationToken);
     }
@@ -145,44 +130,12 @@ public class IndexModel : BasePageModel
                 $"Year {course.Name[..2]}"));
         }
 
-        Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
-
-        if (schoolsRequest.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), schoolsRequest.Error, true)
-                .Warning("Failed to retrieve reports for Consent data by user {User}", _currentUserService.UserName);
-
-            ModalContent = new ErrorDisplay(schoolsRequest.Error);
-
-            return Page();
-        }
-
-        SchoolsList = schoolsRequest.Value;
-
-        Result<List<ApplicationSummaryResponse>> applicationsRequest = await _mediator.Send(new GetApplicationsQuery(), cancellationToken);
-
-        if (applicationsRequest.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), applicationsRequest.Error, true)
-                .Warning("Failed to retrieve reports for Consent data by user {User}", _currentUserService.UserName);
-
-            ModalContent = new ErrorDisplay(applicationsRequest.Error);
-
-            return Page();
-        }
-
-        ApplicationList = applicationsRequest.Value;
-
         return Page();
     }
 
     public class FilterDefinition
     {
-        public List<Guid> Offerings { get; set; } = new();
+        public List<OfferingId> Offerings { get; set; } = new();
         public List<Grade> Grades { get; set; } = new();
-        public List<string> Schools { get; set; } = new();
-        public List<Guid> Applications { get; set; } = new();
     }
 }

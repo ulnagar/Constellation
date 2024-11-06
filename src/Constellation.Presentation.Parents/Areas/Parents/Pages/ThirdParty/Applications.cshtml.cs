@@ -89,8 +89,7 @@ public class ApplicationsModel : BasePageModel
     {
         _logger.Information("Requested to retrieve student list by user {user}", _currentUserService.UserName);
 
-        Result<List<StudentResponse>> studentsRequest =
-            await _mediator.Send(new GetStudentsByParentEmailQuery(_currentUserService.EmailAddress));
+        Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetStudentsByParentEmailQuery(_currentUserService.EmailAddress));
 
         if (studentsRequest.IsFailure)
         {
