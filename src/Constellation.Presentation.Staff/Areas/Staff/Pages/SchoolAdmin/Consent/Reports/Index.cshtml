@@ -3,7 +3,6 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Consent.Reports.IndexModel
 
 @using Constellation.Core.Extensions
-@using Constellation.Application.ThirdPartyConsent.GetConsentStatusByApplication
 @using Constellation.Core.Enums
 
 <h2>Consent Report</h2>
@@ -18,30 +17,18 @@
             <div class="col-md-10">
                 <div class="row nested-row">
                     <div class="col-md-6">
-                        <label asp-for="Filter.Schools">Schools</label>
-                        <div id="SelectedSchoolsList"> </div>
-                    </div>
-                    <div class="col-md-6">
                         <label asp-for="Filter.Grades">Grades</label>
                         <div id="SelectedGradesList"> </div>
                     </div>
-                </div>
-                <div class="row nested-row">
                     <div class="col-md-6">
                         <label asp-for="Filter.Offerings">Classes</label>
                         <div id="SelectedClassesList"> </div>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="Filter.Applications">Applications</label>
-                        <div id="SelectedApplicationsList"> </div>
-                    </div>
                 </div>
             </div>
             <div class="col-md-2">
-                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary btn-block">Add Schools</button>
                 <button id="ShowGradeSelectList" type="button" class="btn btn-primary btn-block">Add Grades</button>
                 <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
-                <button id="ShowApplicationsSelectList" type="button" class="btn btn-primary btn-block">Add Application</button>
 
                 <button id="SubmitFormAsFilter" type="button" class="btn btn-success btn-block mt-3">Filter</button>
             </div>
@@ -54,41 +41,60 @@
 <table class="table-striped table-hover data-table">
     <thead>
     <tr>
-        <th>Student</th>
-        <th>Grade</th>
-        <th>School</th>
         <th>Application</th>
+        <th>Consent Required</th>
         <th>Consent</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
     @foreach (var entry in Model.Statuses)
     {
         <tr>
-            <td data-order="@entry.Student.SortOrder">@entry.Student.DisplayName</td>
-            <td>@entry.Grade.AsName()</td>
-            <td>@entry.School</td>
             <td>@entry.ApplicationName</td>
-            <td data-search="@(entry.Status == ConsentStatusResponse.ConsentStatus.Granted ? "Granted"
-                                 : entry.Status == ConsentStatusResponse.ConsentStatus.Denied ? "Denied"
-                                 : "Unknown")">
-                @switch (entry.Status){
-                    case ConsentStatusResponse.ConsentStatus.Unknown:
-                        <span class="badge badge-secondary">
-                            <i class="fal fa-eye-slash"></i> No Response
-                        </span>
-                        break;
-                    case ConsentStatusResponse.ConsentStatus.Granted:
-                        <span class="badge badge-success">
-                            <i class="fal fa-check"></i> @entry.ResponseDate.ToShortDateString()
-                        </span>
-                        break;
-                    case ConsentStatusResponse.ConsentStatus.Denied:
-                        <span class="badge badge-danger">
-                            <i class="fal fa-times"></i> @entry.ResponseDate.ToShortDateString()
-                        </span>
-                        break;
+            <td>
+                @if (entry.ConsentRequired)
+                {
+                    <span class="badge badge-warning">Yes</span> 
                 }
+                else
+                {
+                    <span class="badge badge-success">No</span>
+                }
+            </td>
+            <td class="consent">
+                @if (entry.ConsentRequired)
+                {
+                    if (entry.ConsentGranted.Count == 0)
+                    {
+                        <div class="granted none" title="Consent Granted">@entry.ConsentGranted.Count</div>
+                    }
+                    else
+                    {
+                        <div class="granted" title="Consent Granted">@entry.ConsentGranted.Count</div>
+                    }
+
+                    if (entry.ConsentPending.Count == 0)
+                    {
+                        <div class="pending none" title="Consent Pending">@entry.ConsentPending.Count</div>
+                    }
+                    else
+                    {
+                        <div class="pending" title="Consent Pending">@entry.ConsentPending.Count</div>
+                    }
+                    
+                    if (entry.ConsentDenied.Count == 0)
+                    {
+                        <div class="denied none" title="Consent Denied">@entry.ConsentDenied.Count</div>
+                    }
+                    else
+                    {
+                        <div class="denied" title="Consent Denied">@entry.ConsentDenied.Count</div>
+                    }
+                }
+            </td>
+            <td>
+                <a asp-page="/SchoolAdmin/Consent/Applications/Details" asp-route-id="@entry.ApplicationId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
             </td>
         </tr>
     }
@@ -151,38 +157,6 @@
     </div>
 </div>
 
-<div class="modal" id="SchoolListModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Select Schools for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">School</span>
-                            <select asp-items="@(new SelectList(Model.SchoolsList, "Code", "Name"))" id="custom-school-combo" style="width:100%">
-                                <option value="">-- Select --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <h5 class="col-md-12">Selected Schools:</h5>
-                        <div class="col-md-12" id="ModalSelectedSchoolsList"> </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="modal" id="ClassListModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
@@ -221,51 +195,6 @@
     </div>
 </div>
 
-<div class="modal" id="ApplicationListModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Select Applications for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">Application</span>
-                            <select asp-items="@(new SelectList(Model.ApplicationList, "Id.Value", "Name"))" id="custom-application-combo" style="width:100%">
-                                <option value="">-- Select --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <h5 class="col-md-12">Selected Applications:</h5>
-                        <div class="col-md-12" id="ModalSelectedApplicationsList"> </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="hidden">
-    @foreach (var school in Model.SchoolsList)
-    {
-        <button id="schoolSelect-@school.Code" type="button" class="btn btn-outline-info select-button" onClick="toggleSchool('@school.Code')">@school.Name</button>
-    }
-
-    @foreach (var application in Model.ApplicationList)
-    {
-        <button id="applicationSelect-@application.Id.Value" type="button" class="btn btn-outline-info select-button" onclick="toggleApplication('@application.Id.Value')">@application.Name</button>
-    }
-</div>
-
 @section scripts
 {
     <script>
@@ -277,70 +206,29 @@
                     }
                 });
 
-        @foreach (var grade in Model.Filter.Grades)
-        {
-            @:toggleGrade('@grade');
-        }
+                @foreach (var grade in Model.Filter.Grades)
+                {
+                    @:toggleGrade('@grade');
+                }
 
-        @foreach (var application in Model.Filter.Applications)
-        {
-            @:toggleApplication('@application');
-        }
+                @foreach (var offering in Model.Filter.Offerings)
+                {
+                    @:toggleClass('@offering');
+                }
 
-        @foreach (var offering in Model.Filter.Offerings)
-        {
-            @:toggleClass('@offering');
-        }
-
-        @foreach (var school in Model.Filter.Schools)
-        {
-            @:toggleSchool('@school');
-        }
-                    });
+            });
 
         $('#ShowGradeSelectList').on('click', function () {
             $('#GradeListModal').modal('show');
-        });
-
-        $('#ShowApplicationsSelectList').on('click', function () {
-            $('#ApplicationListModal').modal('show');
         });
 
         $('#ShowClassSelectList').on('click', function () {
             $('#ClassListModal').modal('show');
         });
 
-        $('#ShowSchoolSelectList').on('click', function () {
-            $('#SchoolListModal').modal('show');
-        });
-
         $('#SubmitFormAsFilter').on('click', function () {
             $('#filterAction').val(0);
             $('#filterForm').submit();
-        });
-
-        var $schoolOption = $("#custom-school-combo").select2({ theme: 'bootstrap' });
-
-        $schoolOption.on('select2:select', function (e) {
-            var code = e.params.data.id;
-            toggleSchool(code);
-        });
-
-        $schoolOption.on('select2:unselect', function (e) {
-            var code = e.params.data.id;
-            toggleSchool(code);
-        });
-
-        var $applicationOption = $("#custom-application-combo").select2({ theme: 'bootstrap' });
-
-        $applicationOption.on('select2:select', function (e) {
-            var code = e.params.data.id;
-            toggleApplication(code);
-        });
-
-        $applicationOption.on('select2:unselect', function (e) {
-            var code = e.params.data.id;
-            toggleApplication(code);
         });
 
         function toggleGrade(grade) {
@@ -370,75 +258,6 @@
                 input.val(grade);
                 var classInputDiv = $('#SelectedGradesList');
                 classInputDiv.append(input);
-            }
-        }
-
-        function toggleSchool(code) {
-            var selectDiv = $('#schoolSelect-' + code);
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv.removeClass('btn-info');
-                selectDiv.addClass('btn-outline-info')
-
-                $('#pd-schoolSelect-' + code).remove();
-                $('#md-schoolSelect-' + code).remove();
-                $('#i-schoolSelect-' + code).remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv.addClass('btn-info');
-                selectDiv.removeClass('btn-outline-info')
-
-                var pageDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'pd-schoolSelect-' + code);
-                pageDisplayDiv.appendTo('#SelectedSchoolsList');
-                var modalDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'md-schoolSelect-' + code);
-                modalDisplayDiv.appendTo('#ModalSelectedSchoolsList');
-
-                var input = $('<input>').attr('id', 'i-schoolSelect-' + code)
-                    .attr('name', 'Filter.Schools')
-                    .attr('type', "hidden");
-                input.val(code);
-                var classInputDiv = $('#SelectedSchoolsList');
-                classInputDiv.append(input);
-            }
-        }
-
-        function toggleApplication(code) {
-            var selectDiv = $('#applicationSelect-' + code);
-            if (selectDiv.hasClass('btn-info')) {
-                // Selected, need to deselect
-                selectDiv
-                    .removeClass('btn-info')
-                    .addClass('btn-outline-info');
-
-                $('#pd-applicationSelect-' + code).remove();
-                $('#md-applicationSelect-' + code).remove();
-                $('#i-applicationSelect-' + code).remove();
-            }
-            else {
-                // Deselected, need to select
-                selectDiv
-                    .addClass('btn-info')
-                    .removeClass('btn-outline-info');
-
-                var pageDisplayDiv = $('#applicationSelect-' + code)
-                    .clone()
-                    .prop('id', 'pd-applicationSelect-' + code)
-                    .appendTo('#SelectedApplicationsList');
-
-                var modalDisplayDiv = $('#applicationSelect-' + code)
-                    .clone()
-                    .prop('id', 'md-applicationSelect-' + code)
-                    .appendTo('#ModalSelectedApplicationsList');
-
-                var input = $('<input>')
-                    .attr('id', 'i-applicationSelect-' + code)
-                    .attr('name', 'Filter.Applications')
-                    .attr('type', "hidden")
-                    .val(code);
-
-                $('#SelectedApplicationsList')
-                    .append(input);
             }
         }
 

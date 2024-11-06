@@ -67,3 +67,12 @@ function showLoader() {
         }, 10000);
     }
 };
+
+function toggleLoader() {
+    var overlay = $('.spinner-overlay');
+
+    if (overlay.hasClass('d-none'))
+        $('.spinner-overlay').removeClass('d-none');
+    else
+        $('.spinner-overlay').addClass('d-none');
+}

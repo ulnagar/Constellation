@@ -2,16 +2,14 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
-using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -43,17 +41,15 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
 
         List<Student> students = new();
 
-        if (request.OfferingCodes.Any() ||
-            request.Grades.Any() ||
-            request.SchoolCodes.Any())
-            students.AddRange(await _studentRepository
-                .GetFilteredStudents(
-                    request.OfferingCodes,
-                    request.Grades,
-                    request.SchoolCodes,
-                    cancellationToken));
+        if (request.OfferingCodes.Count > 0 ||
+            request.Grades.Count > 0)
+            students = await _studentRepository.GetFilteredStudents(
+                request.OfferingCodes,
+                request.Grades,
+                new(),
+                cancellationToken);
 
-        if (!students.Any())
+        if (students.Count == 0)
         {
             _logger
                 .ForContext(nameof(GetConsentStatusByApplicationQuery), request, true)
@@ -63,61 +59,44 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
             return Result.Failure<List<ConsentStatusResponse>>(StudentErrors.NoneFoundFilter);
         }
 
-        Application application = await _consentRepository.GetApplicationById(request.ApplicationId, cancellationToken);
+        List<Application> applications = await _consentRepository.GetAllActiveApplications(cancellationToken);
 
-        if (application is null)
+        foreach (Application application in applications)
         {
-            _logger
-                .ForContext(nameof(GetConsentStatusByApplicationQuery), request, true)
-                .ForContext(nameof(ApplicationId), request.ApplicationId, true)
-                .ForContext(nameof(Error), ConsentApplicationErrors.NotFound(request.ApplicationId), true)
-                .Warning("Failed to retrieve application while building list of Consent Statuses");
+            List<Name> consentGranted = new();
+            List<Name> consentDenied = new();
+            List<Name> consentPending = new();
 
-            return Result.Failure<List<ConsentStatusResponse>>(ConsentApplicationErrors.NotFound(request.ApplicationId));
-        }
+            if (application.ConsentRequired)
+            {
+                foreach (Student student in students)
+                {
+                    Consent? consent = application.Consents
+                        .Where(consent => consent.StudentId == student.Id)
+                        .MaxBy(consent => consent.ProvidedAt);
 
-        List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
-
-        foreach (Student student in students)
-        {
-            SchoolEnrolment? enrolment = student.CurrentEnrolment;
+                    switch (consent?.ConsentProvided)
+                    {
+                        case true:
+                            consentGranted.Add(student.Name);
+                            break;
+                        case false:
+                            consentDenied.Add(student.Name);
+                            break;
+                        default:
+                            consentPending.Add(student.Name);
+                            break;
+                    }
+                }
+            }
             
-            if (enrolment is null)
-            {
-                _logger
-                    .ForContext(nameof(GetConsentStatusByApplicationQuery), request, true)
-                    .ForContext(nameof(Error), SchoolEnrolmentErrors.NotFound, true)
-                    .Warning("Failed to retrieve application while building list of Consent Statuses");
-
-                continue;
-            }
-
-            Consent consent = application.Consents
-                .Where(consent => consent.StudentId == student.Id)
-                .MaxBy(consent => consent.ProvidedAt);
-
-            if (consent is null)
-            {
-                response.Add(new(
-                    student.Id,
-                    student.Name,
-                    enrolment.Grade,
-                    enrolment.SchoolName,
-                    application.Name,
-                    ConsentStatusResponse.ConsentStatus.Unknown,
-                    DateOnly.MinValue));
-
-                continue;
-            }
-
             response.Add(new(
-                student.Id,
-                student.Name,
-                enrolment.Grade,
-                enrolment.SchoolName,
+                application.Id,
                 application.Name,
-                consent.ConsentProvided ? ConsentStatusResponse.ConsentStatus.Granted : ConsentStatusResponse.ConsentStatus.Denied,
-                DateOnly.FromDateTime(consent.ProvidedAt)));
+                application.ConsentRequired,
+                consentGranted,
+                consentDenied,
+                consentPending));
         }
 
         return response;
