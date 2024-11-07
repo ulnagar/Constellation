@@ -48,7 +48,7 @@ public class IndexModel : BasePageModel
 
         foreach (StudentResponse student in studentsRequest.Value)
         {
-            if (!student.ResidentialParent)
+            if (!student.ResidentialFamily)
                 continue;
 
             Result<bool> hasPendingApplicationConsents = await _mediator.Send(new DoesStudentHaveRequiredApplicationWithoutConsentQuery(student.StudentId));

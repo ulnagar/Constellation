@@ -99,7 +99,7 @@ public class ApplicationsModel : BasePageModel
         }
 
         Students = studentsRequest.Value
-            .Where(student => student.ResidentialParent)
+            .Where(student => student.ResidentialFamily)
             .OrderBy(student => student.CurrentGrade)
             .ThenBy(student => student.LastName)
             .ThenBy(student => student.FirstName)
