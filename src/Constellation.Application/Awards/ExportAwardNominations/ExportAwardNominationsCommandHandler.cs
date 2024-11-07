@@ -6,6 +6,7 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
+using Core.Models.Awards.Errors;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
@@ -47,7 +48,7 @@ internal sealed class ExportAwardNominationsCommandHandler
         {
             _logger.Warning("Could not find Award Nomination Period with Id {id}", request.PeriodId);
 
-            return Result.Failure<FileDto>(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId));
+            return Result.Failure<FileDto>(AwardNominationPeriodErrors.NotFound(request.PeriodId));
         }
 
         return request.Category switch
@@ -60,7 +61,7 @@ internal sealed class ExportAwardNominationsCommandHandler
                 await GroupBySubject(period, request.ShowGrade, request.ShowClass, cancellationToken),
             _ when request.Category == ExportAwardNominationsCommand.GroupCategory.None =>
                 await NoGrouping(period, request.ShowGrade, request.ShowClass, cancellationToken),
-            _ => Result.Failure<FileDto>(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId))
+            _ => Result.Failure<FileDto>(AwardNominationPeriodErrors.NotFound(request.PeriodId))
         };
     }
 

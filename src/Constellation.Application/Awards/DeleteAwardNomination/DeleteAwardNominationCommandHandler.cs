@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Shared;
+using Core.Models.Awards.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -36,7 +37,7 @@ internal sealed class DeleteAwardNominationCommandHandler
         {
             _logger.Warning("Could not find Award Nomination Period with Id {id}", request.PeriodId);
 
-            return Result.Failure(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId));
+            return Result.Failure(AwardNominationPeriodErrors.NotFound(request.PeriodId));
         }
 
         Nomination nomination = period.Nominations.FirstOrDefault(nomination => nomination.Id == request.NominationId);
@@ -45,7 +46,7 @@ internal sealed class DeleteAwardNominationCommandHandler
         {
             _logger.Warning("Could not find Award Nomination with Id {id} within Period", request.NominationId);
 
-            return Result.Failure(DomainErrors.Awards.Nomination.NotFound(request.NominationId));
+            return Result.Failure(AwardNominationErrors.NotFound(request.NominationId));
         }
 
         nomination.Delete();

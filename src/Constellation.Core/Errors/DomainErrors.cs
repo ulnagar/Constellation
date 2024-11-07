@@ -74,43 +74,6 @@ public static class DomainErrors
             "The current user is not authorised to complete this action");
     }
 
-    public static class Awards
-    {
-        public static class NominationPeriod
-        {
-            public static readonly Func<AwardNominationPeriodId, Error> NotFound = id => new(
-                "Awards.NominationPeriod.NotFound",
-                $"Could not find a nomination period with the id {id}");
-
-            public static readonly Error PastDate = new(
-                "Awards.NominationPeriod.PastDate",
-                "The specified Lockout Date for the Nomination Period is in the past and invalid");
-        }
-
-        public static class Nomination
-        {
-            public static readonly Error NotRecognised = new(
-                "Awards.Nomination.NotRecognised",
-                "Could not identify award type being nominated");
-
-            public static readonly Func<AwardNominationId, Error> NotFound = id => new(
-                "Awards.Nomination.NotFound",
-                $"Could not find a nomination with the id {id}");
-
-            public static readonly Error InvalidCourseId = new(
-                "Awards.Nomination.InvalidCourseId",
-                "Could not identify the Course from the Course Id provided");
-
-            public static readonly Error InvalidOfferingId = new(
-                "Awards.Nomination.InvalidOfferingId",
-                "Could not identify the Offering from the Offering Id provided");
-
-            public static readonly Error DuplicateFound = new(
-                "Awards.Nomination.DuplicateFound",
-                "A nomination for this award and student already exists in the period");
-        }
-    }
-
     public static class Casuals
     {
         public static class Casual

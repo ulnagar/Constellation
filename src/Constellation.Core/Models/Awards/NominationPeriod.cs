@@ -6,6 +6,7 @@ using Identifiers;
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public sealed class NominationPeriod
 {
@@ -40,15 +41,110 @@ public sealed class NominationPeriod
         DateOnly lockoutDate)
     {
         if (lockoutDate < DateOnly.FromDateTime(DateTime.Today))
-            return Result.Failure<NominationPeriod>(DomainErrors.Awards.NominationPeriod.PastDate);
+            return Result.Failure<NominationPeriod>(AwardNominationPeriodErrors.PastDate);
 
         return Result.Success(new NominationPeriod(name, lockoutDate, grades));
     }
 
-    public void AddNomination(Nomination nomination) =>
+    public Result AddNomination(Nomination nomination)
+    {
+        if (HasDuplicateEntry(nomination))
+            return Result.Failure(AwardNominationErrors.DuplicateFound);
+
         _nominations.Add(nomination);
+        return Result.Success();
+    }
 
     public void UpdateName(string name) => Name = name;
     public void UpdateLockoutDate(DateOnly date) => LockoutDate = date;
     private void AddGrade(Grade grade) => _grades.Add(new(Id, grade));
+
+    private bool HasDuplicateEntry(Nomination newAward) =>
+        newAward switch
+        {
+            FirstInSubjectNomination fis =>
+                Nominations
+                    .OfType<FirstInSubjectNomination>()
+                    .Any(entry =>
+                        entry.StudentId == fis.StudentId &&
+                        entry.CourseId == fis.CourseId &&
+                        !entry.IsDeleted),
+
+            AcademicExcellenceNomination ae =>
+                Nominations
+                    .OfType<AcademicExcellenceNomination>()
+                    .Any(entry =>
+                        entry.StudentId == ae.StudentId &&
+                        entry.CourseId == ae.CourseId &&
+                        entry.OfferingId == ae.OfferingId &&
+                        !entry.IsDeleted),
+
+            AcademicExcellenceMathematicsNomination aem =>
+                Nominations
+                    .OfType<AcademicExcellenceMathematicsNomination>()
+                    .Any(entry =>
+                        entry.StudentId == aem.StudentId &&
+                        entry.CourseId == aem.CourseId &&
+                        entry.OfferingId == aem.OfferingId &&
+                        !entry.IsDeleted),
+
+            AcademicExcellenceScienceTechnologyNomination aest =>
+                Nominations
+                    .OfType<AcademicExcellenceScienceTechnologyNomination>()
+                    .Any(entry =>
+                        entry.StudentId == aest.StudentId &&
+                        entry.CourseId == aest.CourseId &&
+                        entry.OfferingId == aest.OfferingId &&
+                        !entry.IsDeleted),
+
+            AcademicAchievementNomination aa =>
+                Nominations
+                    .OfType<AcademicAchievementNomination>()
+                    .Any(entry =>
+                        entry.StudentId == aa.StudentId &&
+                        entry.CourseId == aa.CourseId &&
+                        entry.OfferingId == aa.OfferingId &&
+                        !entry.IsDeleted),
+
+            AcademicAchievementMathematicsNomination aam =>
+                Nominations
+                    .OfType<AcademicAchievementMathematicsNomination>()
+                    .Any(entry =>
+                        entry.StudentId == aam.StudentId &&
+                        entry.CourseId == aam.CourseId &&
+                        entry.OfferingId == aam.OfferingId &&
+                        !entry.IsDeleted),
+
+            AcademicAchievementScienceTechnologyNomination aast =>
+                Nominations
+                    .OfType<AcademicAchievementScienceTechnologyNomination>()
+                    .Any(entry =>
+                        entry.StudentId == aast.StudentId &&
+                        entry.CourseId == aast.CourseId &&
+                        entry.OfferingId == aast.OfferingId &&
+                        !entry.IsDeleted),
+
+            PrincipalsAwardNomination pa =>
+                Nominations
+                    .OfType<PrincipalsAwardNomination>()
+                    .Any(entry =>
+                        entry.StudentId == pa.StudentId &&
+                        !entry.IsDeleted),
+
+            GalaxyMedalNomination ga =>
+                Nominations
+                    .OfType<GalaxyMedalNomination>()
+                    .Any(entry =>
+                        entry.StudentId == ga.StudentId &&
+                        !entry.IsDeleted),
+
+            UniversalAchieverNomination ua =>
+                Nominations
+                    .OfType<UniversalAchieverNomination>()
+                    .Any(entry =>
+                        entry.StudentId == ua.StudentId &&
+                        !entry.IsDeleted),
+
+            _ => throw new NotImplementedException()
+        };
 }

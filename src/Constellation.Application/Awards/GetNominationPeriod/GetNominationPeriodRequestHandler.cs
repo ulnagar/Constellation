@@ -6,6 +6,7 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
+using Core.Models.Awards.Errors;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ internal sealed class GetNominationPeriodRequestHandler
         {
             _logger.Warning("Could not find Award Nomination Period with Id {id}", request.PeriodId);
 
-            return Result.Failure<NominationPeriodDetailResponse>(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId));
+            return Result.Failure<NominationPeriodDetailResponse>(AwardNominationPeriodErrors.NotFound(request.PeriodId));
         }
 
         List<NominationPeriodDetailResponse.NominationResponse> nominations = new();

@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Shared;
+using Core.Models.Awards.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ internal sealed class UpdateNominationPeriodCommandHandler
         {
             _logger.Warning("Could not find Nomination Period with Id {id}", request.PeriodId);
 
-            return Result.Failure(DomainErrors.Awards.NominationPeriod.NotFound(request.PeriodId));
+            return Result.Failure(AwardNominationPeriodErrors.NotFound(request.PeriodId));
         }
 
         if (period.Name != request.Name)
