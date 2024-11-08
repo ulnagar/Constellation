@@ -1,8 +1,6 @@
 ﻿@page
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Rollover.ImportModel
 
-@using Constellation.Core.Extensions
-
 <h2>Import New Enrolments</h2>
 
 <hr />
@@ -27,10 +25,7 @@
         <thead>
         <tr>
             <th></th>
-            <th>SRN</th>
-            <th>Name</th>
-            <th>School</th>
-            <th>Grade</th>
+            <th>Row</th>
             <th>Error</th>
         </tr>
         </thead>
@@ -39,21 +34,24 @@
         {
             <tr>
                 <td>
-                    @if (item.Result.IsFailure)
+                    @if (!item.Succeeded)
                     {
                         <i class="fas fa-cross" />
                     }
                     
-                    @if (item.Result.IsSuccess)
+                    @if (item.Succeeded)
                     {
                         <i class="fas fa-check" />
                     }
                 </td>
-                <td>@item.Record.StudentReferenceNumber</td>
-                <td>@item.Record.FirstName @item.Record.LastName</td>
-                <td>@item.Record.SchoolCode</td>
-                <td>@item.Record.Grade.AsName()</td>
-                <td>@item.Result?.Error</td>
+                <td>@item.RowNumber</td>
+                <td>
+                    @if (item.Error is not null)
+                    {
+                        @item.Error.Code<br/>
+                        @item.Error.Message
+                    }
+                </td>
             </tr>
         }
         </tbody>

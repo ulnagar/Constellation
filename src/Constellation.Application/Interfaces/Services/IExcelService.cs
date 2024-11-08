@@ -21,6 +21,7 @@ using GroupTutorials.GenerateTutorialAttendanceReport;
 using Rollover.ImportStudents;
 using SchoolContacts.GetContactsBySchool;
 using SciencePracs.GenerateOverdueReport;
+using Students.ImportStudentsFromFile;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,6 +61,7 @@ public interface IExcelService
     Task<MemoryStream> CreateWorkFlowReport(List<CaseReportItem> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSchoolContactExport(List<SchoolWithContactsResponse> records, CancellationToken cancellationToken = default);
     Task<List<ImportAssetDto>> ImportAssetsFromFile(MemoryStream stream, CancellationToken cancellationToken = default);
+    Task<List<ImportStudentDto>> ImportStudentsFromFile(MemoryStream stream, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAssetExportFile(List<Asset> assets, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCanvasRubricResultExport(RubricEntry rubric, List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, List<Student> students, CancellationToken cancellationToken = default);
 }

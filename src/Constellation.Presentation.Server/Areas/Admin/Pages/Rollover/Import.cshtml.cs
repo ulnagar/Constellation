@@ -1,34 +1,40 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Rollover;
 
 using Application.Common.PresentationModels;
-using Application.Interfaces.Services;
+using Application.DTOs;
 using Application.Models.Auth;
-using Application.Rollover.ImportStudents;
+using Application.Students.ImportStudentsFromFile;
 using BaseModels;
+using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class ImportModel : BasePageModel
 {
     private readonly ISender _mediator;
-    private readonly IExcelService _excelService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public ImportModel(
         ISender mediator,
-        IExcelService excelService)
+        ICurrentUserService currentUserService,
+        ILogger logger)
     {
         _mediator = mediator;
-        _excelService = excelService;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<ImportModel>();
     }
 
     [BindProperty]
     public IFormFile FormFile { get; set; }
 
-    public List<ImportResult> Results { get; set; } = new();
+    public List<ImportStatusDto> Results { get; set; } = new();
     
     public async Task OnGet() { }
 
@@ -51,23 +57,20 @@ public class ImportModel : BasePageModel
 
                 return Page();
             }
-            
+
             await using MemoryStream target = new();
             await FormFile.CopyToAsync(target, cancellationToken);
 
-            Result<List<StudentImportRecord>> outputRequest = await _excelService.ConvertStudentImportFile(target, cancellationToken);
+            _logger.Information("Requested to import Students from file by user {User}", _currentUserService.UserName);
 
-            if (outputRequest.IsFailure)
-            {
-                ModalContent = new ErrorDisplay(outputRequest.Error);
-
-                return Page();
-            }
-
-            Result<List<ImportResult>> processRequest = await _mediator.Send(new ImportStudentsCommand(outputRequest.Value), cancellationToken);
+            Result<List<ImportStatusDto>> processRequest = await _mediator.Send(new ImportStudentsFromFileCommand(target), cancellationToken);
 
             if (processRequest.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(Error), processRequest.Error, true)
+                    .Warning("Failed to import Students from file by user {User}", _currentUserService.UserName);
+
                 ModalContent = new ErrorDisplay(processRequest.Error);
 
                 return Page();

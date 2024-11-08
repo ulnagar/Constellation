@@ -1,4 +1,5 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
+﻿#nullable enable
+namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 
 using Core.Models.Students.ValueObjects;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -12,8 +13,10 @@ internal sealed class StudentReferenceNumberConverter : ValueConverter<StudentRe
             new ConverterMappingHints())
     { }
 
-    private static string? StudentReferenceNumberToString(StudentReferenceNumber number) =>
-        number == StudentReferenceNumber.Empty ? null : number.Number;
+    private static string? StudentReferenceNumberToString(StudentReferenceNumber? number) =>
+        number is null ? null
+            : number == StudentReferenceNumber.Empty ? null 
+            : number.Number;
 
     private static StudentReferenceNumber StringToStudentReferenceNumber(string? value) =>
         value == null ? StudentReferenceNumber.Empty : StudentReferenceNumber.FromValue(value);

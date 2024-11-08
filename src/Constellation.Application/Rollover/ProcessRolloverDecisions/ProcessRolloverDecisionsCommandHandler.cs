@@ -77,8 +77,7 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
 
             if (decision.Decision == RolloverStatus.Rollover)
             {
-                SchoolEnrolment? enrolment = student.SchoolEnrolments
-                    .SingleOrDefault(entry => !entry.IsDeleted && entry.Year == _dateTime.CurrentYear - 1);
+                SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
                 if (enrolment is null)
                 {
@@ -106,23 +105,7 @@ internal sealed class ProcessRolloverDecisionsCommandHandler
 
                 if (enrolment.Grade == Grade.Y06)
                 {
-                    Result newEnrolment = student.AddSchoolEnrolment(
-                        "8912",
-                        "Aurora College",
-                        enrolment.Grade + 1,
-                        _dateTime);
-
-                    if (newEnrolment.IsFailure)
-                    {
-                        _logger
-                            .ForContext(nameof(RolloverDecision), decision, true)
-                            .ForContext(nameof(Error), newEnrolment.Error, true)
-                            .Warning("Could not process Rollover Decision for student");
-
-                        results.Add(new(decision, Result.Failure(newEnrolment.Error)));
-
-                        continue;
-                    }
+                    student.RemoveSchoolEnrolment(enrolment, _dateTime);
                 }
                 else
                 {

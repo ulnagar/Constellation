@@ -1,0 +1,45 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.ImportModel
+@{
+}
+
+<h2>Import Students from file</h2>
+
+<hr />
+
+<form method="post" asp-page-handler="ImportFile" enctype="multipart/form-data">
+    <div class="form-group row">
+        <label asp-for="UploadFile" class="col-md-2">Excel File</label>
+        <div class="col-md-6">
+            <div class="custom-file">
+                <input asp-for="UploadFile" type="file" class="custom-file-input" />
+                <label class="custom-file-label" asp-for="UploadFile">Choose file</label>
+            </div>
+        </div>
+        <div class="col-md-2 offset-md-1">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</form>
+
+@if (Model.Statuses.Count > 0)
+{
+    <dl>
+        @foreach (var status in Model.Statuses.Where(status => !status.Succeeded))
+        {
+            <dt>Line @status.RowNumber</dt>
+            <dd>@status.Error!.Code: @status.Error.Message</dd>
+        }
+    </dl>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+    </script>
+}

@@ -21,6 +21,7 @@ using Application.SciencePracs.GenerateOverdueReport;
 using Application.Training.Models;
 using Application.WorkFlows.ExportOpenCaseReport;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Students.ImportStudentsFromFile;
 using Constellation.Application.Training.GenerateOverallReport;
 using Constellation.Core.Models.Assets;
 using Core.Abstractions.Clock;
@@ -67,6 +68,36 @@ public class ExcelService : IExcelService
         IDateTimeProvider dateTime)
     {
         _dateTime = dateTime;
+    }
+
+    public Task<List<ImportStudentDto>> ImportStudentsFromFile(
+        MemoryStream stream,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new(stream);
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
+
+        int numRows = worksheet.Dimension.Rows;
+
+        List<ImportStudentDto> students = new();
+
+        for (int row = 2; row <= numRows; row++)
+        {
+            ImportStudentDto entry = new(
+                row,
+                worksheet.Cells[row, 1].GetCellValue<string>(),
+                worksheet.Cells[row, 2].GetCellValue<string>(),
+                worksheet.Cells[row, 3].GetCellValue<string>(),
+                worksheet.Cells[row, 4].GetCellValue<string>(),
+                worksheet.Cells[row, 5].GetCellValue<string>(),
+                worksheet.Cells[row, 6].GetCellValue<string>(),
+                worksheet.Cells[row, 7].GetCellValue<string>());
+
+            students.Add(entry);
+        }
+
+        excel.Dispose();
+        return Task.FromResult(students);
     }
 
     public Task<List<ImportAssetDto>> ImportAssetsFromFile(

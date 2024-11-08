@@ -45,7 +45,7 @@ public class UpsertModel : BasePageModel
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Transactions;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Consent_Applications;
     [ViewData] public string PageTitle { get; set; } = "New Consent Response";
 
     [BindProperty]

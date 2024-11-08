@@ -39,4 +39,8 @@ public static class StudentErrors
     public static readonly Error GenderInvalid = new(
         "Student.GenderInvalid",
         "The provided Gender is not valid");
+
+    public static readonly Error InvalidEnrolmentDetails = new(
+        "Student.InvalidEnrolmentDetails",
+        "Cannot reinstate student without valid school and grade");
 }

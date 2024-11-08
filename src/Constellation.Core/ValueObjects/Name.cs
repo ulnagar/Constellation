@@ -6,7 +6,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 
-public sealed class Name : ValueObject, IComparable
+public sealed class Name : ValueObject, IComparable, IEquatable<Name>
 {
     private Name() { }
 
@@ -67,4 +67,24 @@ public sealed class Name : ValueObject, IComparable
 
     public static implicit operator string(Name name) =>
         name is null ? string.Empty : name.ToString();
+
+    public bool Equals(Name other)
+    {
+        if (other is null)
+            return false;
+
+        if (ReferenceEquals(this, other))
+            return true;
+
+        return base.Equals(other) && 
+               FirstName == other.FirstName && 
+               PreferredName == other.PreferredName && 
+               LastName == other.LastName;
+    }
+
+    public override bool Equals(object obj) => 
+        ReferenceEquals(this, obj) || obj is Name other && Equals(other);
+
+    public override int GetHashCode() => 
+        HashCode.Combine(base.GetHashCode(), FirstName, PreferredName, LastName);
 }
