@@ -142,8 +142,6 @@ internal sealed class ImportStudentsFromFileCommandHandler
                 continue;
             }
 
-            Student? existing = students.FirstOrDefault(student => student.StudentReferenceNumber == studentReferenceNumber.Value);
-
             Result<EmailAddress> emailAddress = EmailAddress.Create(entry.EmailAddress);
 
             if (emailAddress.IsFailure)
@@ -160,7 +158,11 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
                 continue;
             }
-            
+
+            Student? existing = students.FirstOrDefault(student => 
+                student.StudentReferenceNumber == studentReferenceNumber.Value ||
+                student.EmailAddress == emailAddress.Value);
+
             if (existing is null)
             {
                 Result<Student> student = Student.Create(
