@@ -18,7 +18,6 @@ using DTOs;
 using DTOs.CSV;
 using ExternalDataConsistency;
 using GroupTutorials.GenerateTutorialAttendanceReport;
-using Rollover.ImportStudents;
 using SchoolContacts.GetContactsBySchool;
 using SciencePracs.GenerateOverdueReport;
 using Students.ImportStudentsFromFile;
@@ -52,7 +51,6 @@ public interface IExcelService
     List<StudentAttendanceData> ExtractPerMinuteYearToDateAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     List<StudentAttendanceData> ExtractPerDayWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
     List<StudentAttendanceData> ExtractPerMinuteWeekAttendanceData(SystemAttendanceData systemData, List<StudentAttendanceData> data);
-    Task<List<StudentImportRecord>> ConvertStudentImportFile(MemoryStream importFile, CancellationToken cancellationToken = default);
     Task<List<SentralIncidentDetails>> ConvertSentralIncidentReport(Stream reportFile, Stream detailFile, List<DateOnly> excludedDates, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateWellbeingExportFile(List<SentralIncidentDetails> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateStudentAttendanceReport(string periodLabel, List<AttendanceRecord> records, List<AbsenceRecord> absenceRecords, CancellationToken cancellationToken = default);

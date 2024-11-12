@@ -34,6 +34,9 @@ public class ImportModel : BasePageModel
     [BindProperty]
     public IFormFile FormFile { get; set; }
 
+    [BindProperty]
+    public bool RemoveExcess { get; set; }
+
     public List<ImportStatusDto> Results { get; set; } = new();
     
     public async Task OnGet() { }
@@ -63,7 +66,7 @@ public class ImportModel : BasePageModel
 
             _logger.Information("Requested to import Students from file by user {User}", _currentUserService.UserName);
 
-            Result<List<ImportStatusDto>> processRequest = await _mediator.Send(new ImportStudentsFromFileCommand(target), cancellationToken);
+            Result<List<ImportStatusDto>> processRequest = await _mediator.Send(new ImportStudentsFromFileCommand(target, RemoveExcess), cancellationToken);
 
             if (processRequest.IsFailure)
             {

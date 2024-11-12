@@ -13,7 +13,6 @@ using Core.Models.Students.Enums;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Core.ValueObjects;
-using CreateStudent;
 using DTOs;
 using Interfaces.Repositories;
 using Interfaces.Services;
@@ -57,12 +56,20 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
         List<ImportStudentDto> importedStudents = await _excelService.ImportStudentsFromFile(request.ImportFile, cancellationToken);
 
+        _logger
+            .Information("Requested to initiate bulk import of {count} students", importedStudents.Count);
+
         List<School> schools = await _schoolRepository.GetAll(cancellationToken);
 
         List<Student> students = await _studentRepository.GetAll(cancellationToken);
+        List<Student> updatedStudents = new();
 
         foreach (var entry in importedStudents)
         {
+            _logger
+                .ForContext(nameof(ImportStudentDto), entry, true)
+                .Information("Processing student with name {firstName} {lastName}", entry.FirstName, entry.LastName);
+
             Result<Name> name = Name.Create(entry.FirstName, string.Empty, entry.LastName);
 
             if (name.IsFailure)
@@ -88,6 +95,10 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
             if (studentReferenceNumber.IsFailure)
             {
+                _logger
+                    .ForContext(nameof(ImportStudentDto), entry, true)
+                    .Information("Detected new student, creating...");
+
                 Result<Student> student = Student.Create(
                     name.Value,
                     gender,
@@ -113,7 +124,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     if (school is null)
                     {
                         _logger
-                            .ForContext(nameof(CreateStudentCommand), request, true)
+                            .ForContext(nameof(ImportStudentDto), entry, true)
                             .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(entry.School), true)
                             .Warning("Failed to create new student");
 
@@ -124,6 +135,11 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
                         continue;
                     }
+
+                    _logger
+                        .ForContext(nameof(ImportStudentDto), entry, true)
+                        .ForContext(nameof(Student), student.Value, true)
+                        .Information("Adding school enrolment details to student");
 
                     student.Value.AddSchoolEnrolment(
                         school.Code,
@@ -147,7 +163,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
             if (emailAddress.IsFailure)
             {
                 _logger
-                    .ForContext(nameof(CreateStudentCommand), request, true)
+                    .ForContext(nameof(ImportStudentDto), entry, true)
                     .ForContext(nameof(Error), emailAddress.Error, true)
                     .Warning("Failed to create new student");
 
@@ -159,12 +175,16 @@ internal sealed class ImportStudentsFromFileCommandHandler
                 continue;
             }
 
-            Student? existing = students.FirstOrDefault(student => 
+            Student? existing = students.SingleOrDefault(student => 
                 student.StudentReferenceNumber == studentReferenceNumber.Value ||
                 student.EmailAddress == emailAddress.Value);
 
             if (existing is null)
             {
+                _logger
+                    .ForContext(nameof(ImportStudentDto), entry, true)
+                    .Information("Detected new student, creating...");
+
                 Result<Student> student = Student.Create(
                     studentReferenceNumber.Value,
                     name.Value,
@@ -177,7 +197,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                 if (student.IsFailure)
                 {
                     _logger
-                        .ForContext(nameof(CreateStudentCommand), request, true)
+                        .ForContext(nameof(ImportStudentDto), entry, true)
                         .ForContext(nameof(Error), student.Error, true)
                         .Warning("Failed to create new student");
 
@@ -194,7 +214,7 @@ internal sealed class ImportStudentsFromFileCommandHandler
                     if (school is null)
                     {
                         _logger
-                            .ForContext(nameof(CreateStudentCommand), request, true)
+                            .ForContext(nameof(ImportStudentDto), entry, true)
                             .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(entry.School), true)
                             .Warning("Failed to create new student");
 
@@ -205,6 +225,11 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
                         continue;
                     }
+
+                    _logger
+                        .ForContext(nameof(ImportStudentDto), entry, true)
+                        .ForContext(nameof(Student), student.Value, true)
+                        .Information("Adding school enrolment details to student");
 
                     student.Value.AddSchoolEnrolment(
                         school.Code,
@@ -222,8 +247,20 @@ internal sealed class ImportStudentsFromFileCommandHandler
             }
             else
             {
+                _logger
+                    .ForContext(nameof(ImportStudentDto), entry, true)
+                    .ForContext(nameof(Student), existing, true)
+                    .Information("Detected existing student, updating...");
+
+                updatedStudents.Add(existing);
+
                 if (existing.IsDeleted)
                 {
+                    _logger
+                        .ForContext(nameof(ImportStudentDto), entry, true)
+                        .ForContext(nameof(Student), existing, true)
+                        .Information("Existing student is marked withdrawn, updating...");
+
                     if (school is not null && grade != Grade.SpecialProgram)
                     {
                         existing.Reinstate(school, grade, _dateTime);
@@ -248,6 +285,11 @@ internal sealed class ImportStudentsFromFileCommandHandler
 
                 if (school is null && enrolment is not null)
                 {
+                    _logger
+                        .ForContext(nameof(ImportStudentDto), entry, true)
+                        .ForContext(nameof(Student), existing, true)
+                        .Information("Detected expired school enrolment details, removing...");
+
                     // Remove current SchoolEnrolment
                     existing.RemoveSchoolEnrolment(enrolment, _dateTime);
                 }
@@ -256,13 +298,40 @@ internal sealed class ImportStudentsFromFileCommandHandler
                 {
                     if (enrolment is not null &&
                         (enrolment.SchoolCode != school.Code || enrolment.Grade != grade))
+                    {
+                        _logger
+                            .ForContext(nameof(ImportStudentDto), entry, true)
+                            .ForContext(nameof(Student), existing, true)
+                            .Information("Adding school enrolment details to student");
+
                         existing.AddSchoolEnrolment(school.Code, school.Name, grade, _dateTime);
+                    }
                 }
 
                 response.Add(new(
                     entry.RowNumber,
                     true,
                     null));
+            }
+        }
+
+        if (request.RemoveExcess)
+        {
+            List<Student> excessStudents = students.Where(entry =>
+                    !entry.IsDeleted &&
+                    !updatedStudents.Contains(entry))
+                .ToList();
+
+            _logger
+                .Information("Requested to remove {count} students not included in import", excessStudents.Count);
+
+            foreach (var student in excessStudents)
+            {
+                _logger
+                    .ForContext(nameof(Student), student, true)
+                    .Information("Detected excess student {name}, withdrawing...", student.Name.DisplayName);
+
+                student.Withdraw(_dateTime);
             }
         }
 

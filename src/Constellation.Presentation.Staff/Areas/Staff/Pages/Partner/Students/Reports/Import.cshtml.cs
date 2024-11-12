@@ -44,6 +44,9 @@ public class ImportModel : BasePageModel
     [AllowExtensions(FileExtensions: "xlsx", ErrorMessage = "You can only upload XLSX files")]
     public IFormFile? UploadFile { get; set; }
 
+    [BindProperty]
+    public bool RemoveExcess { get; set; }
+
     public List<ImportStatusDto> Statuses { get; set; } = new();
 
     public void OnGet() { }
@@ -65,7 +68,7 @@ public class ImportModel : BasePageModel
             _logger
                 .Information("Requested to import Assets from file by user {User}", _currentUserService.UserName);
 
-            Result<List<ImportStatusDto>> request = await _mediator.Send(new ImportStudentsFromFileCommand(target));
+            Result<List<ImportStatusDto>> request = await _mediator.Send(new ImportStudentsFromFileCommand(target, RemoveExcess));
 
             if (request.IsFailure)
             {

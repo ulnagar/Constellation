@@ -6,5 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 
 public sealed record ImportStudentsFromFileCommand(
-    MemoryStream ImportFile)
+    MemoryStream ImportFile,
+    bool RemoveExcess = false)
     : ICommand<List<ImportStatusDto>>;

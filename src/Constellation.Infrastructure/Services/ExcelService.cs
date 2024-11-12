@@ -15,7 +15,6 @@ using Application.Extensions;
 using Application.ExternalDataConsistency;
 using Application.GroupTutorials.GenerateTutorialAttendanceReport;
 using Application.Helpers;
-using Application.Rollover.ImportStudents;
 using Application.SchoolContacts.GetContactsBySchool;
 using Application.SciencePracs.GenerateOverdueReport;
 using Application.Training.Models;
@@ -78,6 +77,50 @@ public class ExcelService : IExcelService
         ExcelWorksheet worksheet = excel.Workbook.Worksheets[0];
 
         int numRows = worksheet.Dimension.Rows;
+        int numCols = worksheet.Dimension.Columns;
+
+        int srnRow = 1;
+        int firstNameRow = 2;
+        int lastNameRow = 3;
+        int emailRow = 4;
+        int genderRow = 5;
+        int gradeRow = 6;
+        int schoolRow = 7;
+
+        for (int col = 1; col <= numCols; col++)
+        {
+            string value = worksheet.Cells[1, col].GetCellValue<string>();
+
+            if (string.IsNullOrEmpty(value))
+                continue;
+
+            value = value.Trim();
+
+            switch (value)
+            {
+                case "Student No.":
+                    srnRow = col;
+                    break;
+                case "Student_First":
+                    firstNameRow = col;
+                    break;
+                case "Student_Last":
+                    lastNameRow = col;
+                    break;
+                case "Gender":
+                    genderRow = col;
+                    break;
+                case "Cohort":
+                    gradeRow = col;
+                    break;
+                case "School":
+                    schoolRow = col;
+                    break;
+                case "Student_Email":
+                    emailRow = col;
+                    break;
+            }
+        }
 
         List<ImportStudentDto> students = new();
 
@@ -85,13 +128,13 @@ public class ExcelService : IExcelService
         {
             ImportStudentDto entry = new(
                 row,
-                worksheet.Cells[row, 1].GetCellValue<string>(),
-                worksheet.Cells[row, 2].GetCellValue<string>(),
-                worksheet.Cells[row, 3].GetCellValue<string>(),
-                worksheet.Cells[row, 4].GetCellValue<string>(),
-                worksheet.Cells[row, 5].GetCellValue<string>(),
-                worksheet.Cells[row, 6].GetCellValue<string>(),
-                worksheet.Cells[row, 7].GetCellValue<string>());
+                worksheet.Cells[row, srnRow].GetCellValue<string>()?.Trim(),
+                worksheet.Cells[row, firstNameRow].GetCellValue<string>()?.Trim(),
+                worksheet.Cells[row, lastNameRow].GetCellValue<string>()?.Trim(),
+                worksheet.Cells[row, emailRow].GetCellValue<string>()?.Trim(),
+                worksheet.Cells[row, genderRow].GetCellValue<string>()?.Trim(),
+                worksheet.Cells[row, gradeRow].GetCellValue<string>()?.Trim(),
+                worksheet.Cells[row, schoolRow].GetCellValue<string>()?.Trim());
 
             students.Add(entry);
         }
@@ -1524,67 +1567,6 @@ public class ExcelService : IExcelService
         }
 
         return Task.FromResult(response);
-    }
-
-    public Task<List<StudentImportRecord>> ConvertStudentImportFile(
-        MemoryStream importFile, 
-        CancellationToken cancellationToken = default)
-    {
-        List<StudentImportRecord> results = new();
-
-        using IExcelDataReader reader = ExcelReaderFactory.CreateReader(importFile);
-
-        DataSet sheet = reader.AsDataSet();
-        DataRowCollection rows = sheet.Tables[0].Rows;
-        foreach (DataRow row in rows)
-        {
-            if (row[0].ToString() == "StudentId")
-                continue;
-
-            string srn = row[0].ToString() ?? string.Empty;
-            string firstName = row[1].ToString() ?? string.Empty;
-            string preferredName = row[2].ToString() ?? string.Empty;
-            string lastName = row[3].ToString() ?? string.Empty;
-            string emailAddress = row[4].ToString() ?? string.Empty;
-            string grade = row[5].ToString() ?? string.Empty;
-            string schoolCode = row[6].ToString() ?? string.Empty;
-            string gender = row[7].ToString() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(srn) ||
-                string.IsNullOrWhiteSpace(firstName) ||
-                string.IsNullOrWhiteSpace(lastName) ||
-                string.IsNullOrWhiteSpace(emailAddress) ||
-                string.IsNullOrWhiteSpace(grade) ||
-                string.IsNullOrWhiteSpace(schoolCode) ||
-                string.IsNullOrWhiteSpace(gender))
-            {
-                continue;
-            }
-
-            bool success = Enum.TryParse(grade, true, out Grade gradeVal);
-
-            if (!success)
-            {
-                continue;
-            }
-
-            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
-
-            if (studentReferenceNumber.IsFailure)
-                continue;
-
-            results.Add(new(
-                studentReferenceNumber.Value,
-                firstName,
-                preferredName,
-                lastName,
-                emailAddress,
-                gradeVal,
-                schoolCode,
-                gender));
-        }
-
-        return Task.FromResult(results);
     }
 
     public async Task<MemoryStream> CreateWellbeingExportFile(

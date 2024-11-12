@@ -5,14 +5,27 @@
 
 <hr />
 
-<form method="post" enctype="multipart/form-data">
-    <div class="form-row">
-        <div class="col-6 my-auto">
-            <label asp-for="FormFile">File</label>
-            <input asp-for="FormFile" type="file" />
+<form method="post"  enctype="multipart/form-data">
+    <div class="form-group row">
+        <label asp-for="FormFile" class="col-md-2">Excel File</label>
+        <div class="col-md-6">
+            <div class="custom-file">
+                <input asp-for="FormFile" type="file" class="custom-file-input" />
+                <label class="custom-file-label" asp-for="FormFile">Choose file</label>
+            </div>
         </div>
-        <div class="col-3">
-            <button type="submit" class="btn btn-primary">Upload and Process</button>
+    </div>
+    
+    <div class="form-group row">
+        <div class="form-check col">
+            <input asp-for="RemoveExcess" type="checkbox" class="form-check-input">
+            <label asp-for="RemoveExcess" class="form-check-label" >Remove students not in file?</label>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-2 offset-md-1">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
         </div>
     </div>
 </form>
