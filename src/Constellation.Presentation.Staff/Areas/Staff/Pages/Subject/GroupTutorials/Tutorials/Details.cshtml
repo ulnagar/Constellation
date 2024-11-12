@@ -84,6 +84,7 @@
             @if (canEditTest.Succeeded)
             {
                 <button class="btn btn-warning" data-toggle="modal" data-target="#studentEnrolmentModal">Add Student</button>
+                <a asp-page="/Subject/GroupTutorials/Tutorials/AddStudents" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Bulk Enrol</a>
             }
 
             <hr />

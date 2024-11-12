@@ -20,4 +20,11 @@
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Areas\Staff\Pages\Subject\GroupTutorials\Tutorials\AddStudents.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
