@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
+using Application.Students.GetCurrentStudentsFromGrade;
+using Application.Students.Models;
 using Constellation.Application.Enrolments.EnrolMultipleStudentsInOffering;
 using Constellation.Application.Enrolments.GetCurrentEnrolmentsForOffering;
 using Constellation.Application.Models.Auth;
@@ -11,6 +13,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Enums;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -46,6 +49,9 @@ public class AddStudentsModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     public OfferingId Id { get; set; } = OfferingId.Empty;
+
+    [BindProperty(SupportsGet = true)] 
+    public Grade? Grade { get; set; } = null;
 
     public string CourseName { get; set; }
     public string OfferingName { get; set; }
@@ -84,6 +90,7 @@ public class AddStudentsModel : BasePageModel
 
         return RedirectToPage("/Subject/Offerings/Details", new { area = "Staff", Id = Id });
     }
+
     private async Task PreparePage()
     {
         _logger.Information("Requested to retrieve defaults to add bulk Students to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
@@ -105,22 +112,47 @@ public class AddStudentsModel : BasePageModel
 
         ExistingEnrolments = enrolmentRequest.Value;
 
-        Result<List<StudentFromGradeResponse>> studentsRequest = await _mediator.Send(new GetStudentsFromOfferingGradeQuery(Id));
-
-        if (studentsRequest.IsFailure)
+        if (Grade is null)
         {
-            _logger
-                .ForContext(nameof(Error), studentsRequest.Error, true)
-                .Warning("Failed to retrieve defaults to add bulk Students to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
+            Result<List<StudentFromGradeResponse>> studentsRequest = await _mediator.Send(new GetStudentsFromOfferingGradeQuery(Id));
 
-            ModalContent = new ErrorDisplay(
-                studentsRequest.Error,
-                _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
+            if (studentsRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), studentsRequest.Error, true)
+                    .Warning("Failed to retrieve defaults to add bulk Students to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            return;
+                ModalContent = new ErrorDisplay(
+                    studentsRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
+
+                return;
+            }
+
+            Students = studentsRequest.Value;
         }
+        else
+        {
+            Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetCurrentStudentsFromGradeQuery(Grade.Value));
 
-        Students = studentsRequest.Value;
+            if (studentsRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), studentsRequest.Error, true)
+                    .Warning("Failed to retrieve defaults to add bulk Students to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
+
+                ModalContent = new ErrorDisplay(
+                    studentsRequest.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
+
+                return;
+            }
+
+            Students = studentsRequest.Value
+                .Select(entry => 
+                    new StudentFromGradeResponse(entry.StudentId, entry.Name))
+                .ToList();
+        }
 
         Result<OfferingSummaryResponse> offeringRequest = await _mediator.Send(new GetOfferingSummaryQuery(Id));
 
