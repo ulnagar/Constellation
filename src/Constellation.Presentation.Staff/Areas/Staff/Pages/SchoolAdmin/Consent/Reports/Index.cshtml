@@ -65,31 +65,33 @@
             <td class="consent">
                 @if (entry.ConsentRequired)
                 {
+                    var appId = "x" + entry.ApplicationId.ToString().Replace("-", string.Empty);
+
                     if (entry.ConsentGranted.Count == 0)
                     {
-                        <div class="granted none" title="Consent Granted">@entry.ConsentGranted.Count</div>
+                        <div class="granted none" data-toggle="modal" data-target="#@appId-granted" title="Consent Granted">@entry.ConsentGranted.Count</div>
                     }
                     else
                     {
-                        <div class="granted" title="Consent Granted">@entry.ConsentGranted.Count</div>
+                        <div class="granted" data-toggle="modal" data-target="#@appId-granted" title="Consent Granted">@entry.ConsentGranted.Count</div>
                     }
 
                     if (entry.ConsentPending.Count == 0)
                     {
-                        <div class="pending none" title="Consent Pending">@entry.ConsentPending.Count</div>
+                        <div class="pending none" data-toggle="modal" data-target="#@appId-pending" title="Consent Pending">@entry.ConsentPending.Count</div>
                     }
                     else
                     {
-                        <div class="pending" title="Consent Pending">@entry.ConsentPending.Count</div>
+                        <div class="pending" data-toggle="modal" data-target="#@appId-pending" title="Consent Pending">@entry.ConsentPending.Count</div>
                     }
                     
                     if (entry.ConsentDenied.Count == 0)
                     {
-                        <div class="denied none" title="Consent Denied">@entry.ConsentDenied.Count</div>
+                        <div class="denied none" data-toggle="modal" data-target="#@appId-denied" title="Consent Denied">@entry.ConsentDenied.Count</div>
                     }
                     else
                     {
-                        <div class="denied" title="Consent Denied">@entry.ConsentDenied.Count</div>
+                        <div class="denied" data-toggle="modal" data-target="#@appId-denied" title="Consent Denied">@entry.ConsentDenied.Count</div>
                     }
                 }
             </td>
@@ -194,6 +196,110 @@
         </div>
     </div>
 </div>
+
+@foreach (var entry in Model.Statuses)
+{
+    var appId = "x" + entry.ApplicationId.ToString().Replace("-", string.Empty);
+
+    <div class="modal" id="@appId-granted">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@entry.ApplicationName - Consent Granted</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body row">
+                    @{
+                        var grantedList = entry.ConsentGranted.OrderBy(student => student.SortOrder).Partition(entry.ConsentGranted.Count / 3);
+                    }
+
+                    @foreach (var list in grantedList)
+                    {
+                        <div class="col-4 button-list">
+                            <ul>
+                                @foreach (var student in list)
+                                {
+                                    <li>@student.DisplayName</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="@appId-pending">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@entry.ApplicationName - Consent Pending</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body row">
+                    @{
+                        var pendingList = entry.ConsentPending.OrderBy(student => student.SortOrder).Partition(entry.ConsentPending.Count / 3);
+                    }
+
+                    @foreach (var list in pendingList)
+                    {
+                        <div class="col-4 button-list">
+                            <ul>
+                                @foreach (var student in list)
+                                {
+                                    <li>@student.DisplayName</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="@appId-denied">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@entry.ApplicationName - Denied Consent</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body row">
+                    @{
+                        var deniedList = entry.ConsentDenied.OrderBy(student => student.SortOrder).Partition(entry.ConsentDenied.Count / 3);
+                    }
+
+                    @foreach (var list in deniedList)
+                    {
+                        <div class="col-4 button-list">
+                            <ul>
+                                @foreach (var student in list)
+                                {
+                                    <li>@student.DisplayName</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @section scripts
 {
