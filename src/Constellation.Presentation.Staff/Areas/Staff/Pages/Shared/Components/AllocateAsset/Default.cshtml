@@ -23,7 +23,7 @@
                         <div class="form-group row">
                             <label asp-for="SchoolCode" class="col-md-3">Partner School</label>
                             <div class="col-md-9">
-                                <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="combo">
+                                <select asp-for="SchoolCode" id="AllocateSchoolCode" asp-items="@Model.SchoolList" class="combo">
                                     <option value=""> -- Select Partner School -- </option>
                                 </select>
                             </div>
@@ -115,6 +115,6 @@
     });
 
     $(document).ready(function () {
-        $('#SchoolCode').select2({ theme: 'bootstrap' });
+        $('#AllocateSchoolCode').select2({ theme: 'bootstrap' });
     });
 </script>
