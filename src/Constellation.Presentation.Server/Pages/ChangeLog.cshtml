@@ -28,7 +28,7 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.16.0 (Build @version)</h3>
+<h3>Current version: Release V1.16.1 (Build @version)</h3>
 
 <div class="changelog">
     <ul>
@@ -61,6 +61,7 @@
                         <li>Update SchoolRegisterJob to use new data.nsw sources and file layouts</li>
                         <li>Update AttachmentManagementJob to remove expired attachments as required</li>
                         <li>Update filtering options on CanvasGateway to ensure that all current courses are returned</li>
+                        <li>Update Sentral Gateway to use API for syncing Parent Contact details</li>
                     </ul>
                 </li>
             </ul>
@@ -73,15 +74,21 @@
                         <li>Update Auth dashboard to include student users</li>
                     </ul>
                 </li>
-                <li>Award Nominations
+                <li>Assignments
+                    <ul>
+                        <li>Assignments list now include future assignments</li>
+                    </ul>
+                </li>
+                <li>
+                    Award Nominations
                     <ul>
                         <li>Update to reject duplicate nominations as they are entered</li>
                         <li>Expand reporting options for award nominations, including grouping options by school, by student, and by subject</li>
                     </ul>
                 </li>
-                <li>Assignments
+                <li>Group Tutorials
                     <ul>
-                        <li>Assignments list now include future assignments</li>
+                        <li>Add ability to bulk enrol students</li>
                     </ul>
                 </li>
                 <li>Science Pracs
@@ -89,6 +96,12 @@
                         <li>Update to allow for bulk cancel of Rolls</li>
                         <li>Allow addition of custom comments when cancelling Rolls</li>
                         <li>Add report for Rolls submitted without students marked present</li>
+                    </ul>
+                </li>
+                <li>Third Party Consent
+                    <ul>
+                        <li>Added ability to set applications as required for a course, grade, or individual student</li>
+                        <li>Updated reports to show status of consent for each student for each application</li>
                     </ul>
                 </li>
                 <li>Workflows
@@ -109,6 +122,17 @@
                 <li>Attendance
                     <ul>
                         <li>Update Attendance Report button to actually generate report</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>Parents Portal
+            <ul>
+                <li>Third Party Consent
+                    <ul>
+                        <li>Added section to display third party consent details</li>
+                        <li>Added form for parents to respond to third party consent requests</li>
+                        <li>Added banner on dashboard to indicate if there are outstanding third party consent requests</li>
                     </ul>
                 </li>
             </ul>
