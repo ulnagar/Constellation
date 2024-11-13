@@ -22,6 +22,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Offerings.Errors;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -243,14 +244,11 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.AssignmentType is null)
         {
-            //TODO: R1.15.2: Move this error to a helper class
-            Error error = new("Offering.TeacherAssignment.AssignmentType", "Invalid Assignment Type");
-
             _logger
-                .ForContext(nameof(Error), error, true)
+                .ForContext(nameof(Error), TeacherAssignmentErrors.InvalidType, true)
                 .Warning("Failed to add Teacher to Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(error);
+            ModalContent = new ErrorDisplay(TeacherAssignmentErrors.InvalidType);
 
             await PreparePage();
 

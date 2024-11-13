@@ -95,11 +95,16 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
             tutorial.EndDate,
             rolls);
 
-        MemoryStream fileStream = await _excelService.CreateGroupTutorialAttendanceFile(dto);
+        Result<MemoryStream> fileStream = await _excelService.CreateGroupTutorialAttendanceFile(dto);
+
+        if (fileStream.IsFailure)
+        {
+            return Result.Failure<FileDto>(fileStream.Error);
+        }
 
         FileDto response = new()
         {
-            FileData = fileStream.ToArray(),
+            FileData = fileStream.Value.ToArray(),
             FileType = FileContentTypes.ExcelModernFile,
             FileName = "Tutorial Report.xlsx"
         };

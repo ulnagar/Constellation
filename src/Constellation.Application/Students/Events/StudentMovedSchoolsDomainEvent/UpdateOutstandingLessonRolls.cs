@@ -46,7 +46,9 @@ internal sealed class UpdateOutstandingLessonRolls
 
     public async Task Handle(StudentMovedSchoolsDomainEvent notification, CancellationToken cancellationToken)
     {
-        _logger.Information("Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
+        _logger.Information(
+            "Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}",
+            notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
         Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
@@ -67,7 +69,8 @@ internal sealed class UpdateOutstandingLessonRolls
             .Distinct()
             .ToList();
 
-        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(notification.StudentId, cancellationToken);
+        List<SciencePracLesson> lessons =
+            await _lessonRepository.GetAllForStudent(notification.StudentId, cancellationToken);
 
         List<SciencePracLessonId> updatedLessonIds = new();
 
@@ -88,7 +91,8 @@ internal sealed class UpdateOutstandingLessonRolls
 
                 if (roll.Attendance.Count == 1)
                 {
-                    _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Name, roll.SchoolCode);
+                    _logger.Information("Removing empty roll for lesson {lesson} at school {school}", lesson.Name,
+                        roll.SchoolCode);
 
                     // This is the last student in the class from this school
                     // The roll is no longer needed and should be cancelled
@@ -103,57 +107,69 @@ internal sealed class UpdateOutstandingLessonRolls
                     _lessonRepository.Delete(attendance);
                 }
 
-                _logger.Information("Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools", student.Name.DisplayName, lesson.Name, notification.PreviousSchoolCode);
+                _logger.Information(
+                    "Removing student {student} from lesson roll for {lesson} at school {school} due to moving schools",
+                    student.Name.DisplayName, lesson.Name, notification.PreviousSchoolCode);
 
                 updatedLessonIds.Add(lesson.Id);
             }
         }
 
-        List<SciencePracRoll> existingRollsAtNewSchool = lessons
-            .Where(lesson => lesson.Offerings.Any(record => offeringIds.Contains(record.OfferingId)))
-            .SelectMany(lesson => lesson.Rolls)
-            .Where(roll =>
-                roll.SchoolCode == notification.CurrentSchoolCode &&
-                roll.Status == LessonStatus.Active)
-            .ToList();
-
-        foreach (SciencePracRoll roll in existingRollsAtNewSchool)
+        // The CurrentSchoolCode item may be blank if there was no active current school when the transfer was created.
+        if (!string.IsNullOrWhiteSpace(notification.CurrentSchoolCode))
         {
-            SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
+            List<SciencePracRoll> existingRollsAtNewSchool = lessons
+                .Where(lesson => lesson.Offerings.Any(record => offeringIds.Contains(record.OfferingId)))
+                .SelectMany(lesson => lesson.Rolls)
+                .Where(roll =>
+                    roll.SchoolCode == notification.CurrentSchoolCode &&
+                    roll.Status == LessonStatus.Active)
+                .ToList();
 
-            _logger.Information("Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools", student.Name.DisplayName, lesson.Name, notification.CurrentSchoolCode);
+            foreach (SciencePracRoll roll in existingRollsAtNewSchool)
+            {
+                SciencePracLesson lesson = lessons.First(lesson => lesson.Id == roll.LessonId);
 
-            roll.AddStudent(notification.StudentId);
+                _logger.Information(
+                    "Adding student {student} to lesson roll for {lesson} at school {school} due to moving schools",
+                    student.Name.DisplayName, lesson.Name, notification.CurrentSchoolCode);
 
-            updatedLessonIds.Remove(roll.LessonId);
-        }
+                roll.AddStudent(notification.StudentId);
 
-        if (updatedLessonIds.Count == 0)
-        {
-            await _unitOfWork.CompleteAsync(cancellationToken);
+                updatedLessonIds.Remove(roll.LessonId);
+            }
 
-            _logger.Information("Lesson rolls updated successfully for student ({studentId}) move notification from {oldSchool} to {newSchool}", notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
+            if (updatedLessonIds.Count == 0)
+            {
+                await _unitOfWork.CompleteAsync(cancellationToken);
 
-            return;
-        }
+                _logger.Information(
+                    "Lesson rolls updated successfully for student ({studentId}) move notification from {oldSchool} to {newSchool}",
+                    notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
-        List<SciencePracLesson> newRolls = lessons
-            .Where(lesson =>
-                updatedLessonIds.Contains(lesson.Id) &&
-                lesson.DueDate >= DateOnly.FromDateTime(DateTime.Today))
-            .ToList();
+                return;
+            }
 
-        foreach (SciencePracLesson lesson in newRolls)
-        {
-            SciencePracRoll roll = new(
-                lesson.Id,
-                notification.CurrentSchoolCode);
+            List<SciencePracLesson> newRolls = lessons
+                .Where(lesson =>
+                    updatedLessonIds.Contains(lesson.Id) &&
+                    lesson.DueDate >= DateOnly.FromDateTime(DateTime.Today))
+                .ToList();
 
-            roll.AddStudent(student.Id);
+            foreach (SciencePracLesson lesson in newRolls)
+            {
+                SciencePracRoll roll = new(
+                    lesson.Id,
+                    notification.CurrentSchoolCode);
 
-            lesson.AddRoll(roll);
+                roll.AddStudent(student.Id);
 
-            _logger.Information("Creating new roll for lesson {lesson} at school {school} as it did not already exist", lesson.Name, notification.CurrentSchoolCode);
+                lesson.AddRoll(roll);
+
+                _logger.Information(
+                    "Creating new roll for lesson {lesson} at school {school} as it did not already exist",
+                    lesson.Name, notification.CurrentSchoolCode);
+            }
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

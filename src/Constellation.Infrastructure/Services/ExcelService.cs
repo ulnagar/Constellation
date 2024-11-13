@@ -667,21 +667,14 @@ public class ExcelService : IExcelService
         return modules;
     }
 
-    public async Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data)
+    public async Task<Result<MemoryStream>> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data)
     {
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Sheet 1");
 
         if (data is null)
         {
-            //TODO: R1.14.4: Update to return Result error
-
-            MemoryStream earlyExitStream = new();
-            await excel.SaveAsAsync(earlyExitStream);
-            earlyExitStream.Position = 0;
-
-            excel.Dispose();
-            return earlyExitStream;
+            return Result.Failure<MemoryStream>(new("Application.Error", "No data provided"));
         }
 
         ExcelRichText nameDetail = workSheet.Cells[1, 1].RichText.Add(data.Name);

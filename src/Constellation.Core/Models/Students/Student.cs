@@ -169,12 +169,11 @@ public class Student : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    // TODO: R1.16: What happens if the active enrolment is removed, but a new one is not created?
-    // The student should be removed from Science Prac rolls for the old school. This does not currently happen.
-    // Perhaps a new domain event that is only used when there is no new active School Enrolment during the deletion process.
     public void RemoveSchoolEnrolment(SchoolEnrolment enrolment, IDateTimeProvider dateTime)
     {
         enrolment.Delete(dateTime.Today, dateTime);
+
+        RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, enrolment.SchoolCode, string.Empty, dateTime.Today));
     }
 
     public Result AddSystemLink(

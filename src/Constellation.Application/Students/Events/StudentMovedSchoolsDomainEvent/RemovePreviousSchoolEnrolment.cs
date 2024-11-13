@@ -37,6 +37,10 @@ internal sealed class RemovePreviousSchoolEnrolment
 
     public async Task Handle(StudentMovedSchoolsDomainEvent notification, CancellationToken cancellationToken)
     {
+        // This event is only for post-dated events. These cannot occur without a previousSchoolCode and currentSchoolCode entry.
+        if (string.IsNullOrEmpty(notification.PreviousSchoolCode) || string.IsNullOrEmpty(notification.CurrentSchoolCode))
+            return;
+
         _logger
             .ForContext(nameof(StudentMovedSchoolsDomainEvent), notification, true)
             .Information("Updating school enrolments for student");

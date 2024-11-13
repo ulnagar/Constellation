@@ -14,6 +14,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Infrastructure.Jobs;
 using Core.Models.Assets;
 using Core.Models.Training;
+using Core.Shared;
 using DTOs;
 using DTOs.CSV;
 using ExternalDataConsistency;
@@ -37,7 +38,7 @@ public interface IExcelService
     Task<MemoryStream> CreateTrainingModuleReportFile(ModuleDetailsDto data);
     Task<MemoryStream> CreateTrainingModuleStaffReportFile(StaffCompletionListDto data);
     List<TrainingModule> ImportMandatoryTrainingDataFromFile(MemoryStream excelFile);
-    Task<MemoryStream> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data);
+    Task<Result<MemoryStream>> CreateGroupTutorialAttendanceFile(TutorialDetailsDto data);
     Task<MemoryStream> CreateFamilyContactDetailsChangeReport(List<ParentContactChangeDto> changes, CancellationToken cancellationToken = default);
     Task<List<MasterFileSchool>> GetSchoolsFromMasterFile(MemoryStream stream);
     Task<List<MasterFileStudent>> GetStudentsFromMasterFile(MemoryStream stream);

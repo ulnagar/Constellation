@@ -60,8 +60,10 @@ public class Response
         string verifier,
         string comment)
     {
-        //TODO: Add check to ensure this is a student response that requires verification first
-
+        //check to ensure this is a student response that requires verification first
+        if (VerificationStatus.Equals(ResponseVerificationStatus.NotRequired))
+            return;
+        
         VerificationStatus = ResponseVerificationStatus.Verified;
         VerificationComment = comment;
         Verifier = verifier;
@@ -72,7 +74,9 @@ public class Response
         string verifier,
         string comment)
     {
-        //TODO: Add check to ensure this is a student response that requires verification first
+        //check to ensure this is a student response that requires verification first
+        if (VerificationStatus.Equals(ResponseVerificationStatus.NotRequired))
+            return;
 
         VerificationStatus = ResponseVerificationStatus.Rejected;
         VerificationComment = comment;

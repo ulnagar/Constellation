@@ -17,9 +17,14 @@ public readonly record struct CanvasCourseCode : IComparable
 
         return new($"{year}-{offering.Name.Value[..^2]}");
     }
-    
-    public static CanvasCourseCode FromValue(string value) =>
-        new(value);
+
+    public static CanvasCourseCode FromValue(string value)
+    {
+        if (value.Length > 10)
+            return new(value[..10]);
+
+        return new(value);
+    }
 
     public override string ToString() => _value;
 
