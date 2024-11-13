@@ -87,7 +87,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
             {
                 _logger.Information("Adding {user} to {course} in section {section}", missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.SectionId);
 
-                bool enrolAttempt = _configuration.UseSections switch
+                Result enrolAttempt = _configuration.UseSections switch
                 {
                     true when missingEnrolment.PermissionLevel == CanvasPermissionLevel.Student =>
                         await _gateway.EnrolToSection(missingEnrolment.UserId, missingEnrolment.SectionId, missingEnrolment.PermissionLevel, cancellationToken),
@@ -97,11 +97,12 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                         await _gateway.EnrolToCourse(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.PermissionLevel, cancellationToken),
                 };
 
-                if (!enrolAttempt)
+                if (enrolAttempt.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CanvasCourseCode), canvasCourse.CourseCode)
                         .ForContext(nameof(CanvasCourseMembership), missingEnrolment, true)
+                        .ForContext(nameof(Error), enrolAttempt.Error, true)
                         .Warning("Failed to enrol missing member into Canvas Course");
 
                     continue;
@@ -111,13 +112,14 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                 _logger.Information("Adding {user} to group {group} in course {course}", missingEnrolment.UserId, missingEnrolment.SectionId, canvasCourse.CourseCode);
                 
-                bool addToGroupAttempt = await _gateway.AddUserToGroup(missingEnrolment.UserId, missingEnrolment.SectionId, cancellationToken);
+                Result addToGroupAttempt = await _gateway.AddUserToGroup(missingEnrolment.UserId, missingEnrolment.SectionId, cancellationToken);
 
-                if (!addToGroupAttempt)
+                if (addToGroupAttempt.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CanvasCourseCode), canvasCourse.CourseCode)
                         .ForContext(nameof(CanvasCourseMembership), missingEnrolment, true)
+                        .ForContext(nameof(Error), addToGroupAttempt.Error, true)
                         .ForContext("GroupCode", missingEnrolment.SectionId)
                         .Warning("Failed to add missing member to Course Group");
                 }
@@ -132,13 +134,14 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
             {
                 _logger.Information("Removing {user} from {course}", canvasEnrolment.UserId, canvasCourse.CourseCode);
 
-                bool unenrolAttempt = await _gateway.UnenrolUser(canvasEnrolment.UserId, canvasEnrolment.CourseCode, cancellationToken);
+                Result unenrolAttempt = await _gateway.UnenrolUser(canvasEnrolment.UserId, canvasEnrolment.CourseCode, cancellationToken);
 
-                if (!unenrolAttempt)
+                if (unenrolAttempt.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CanvasCourseCode), canvasCourse.CourseCode)
                         .ForContext(nameof(CourseEnrolmentEntry), canvasEnrolment, true)
+                        .ForContext(nameof(Error), unenrolAttempt.Error, true)
                         .Warning("Failed to remove extra member from Canvas Course");
                 }
             }
@@ -150,27 +153,37 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                     if (group.Key == CanvasSectionCode.Empty)
                         continue;
 
-                    List<string> usersInGroup = await _gateway.GetGroupMembers(group.Key, cancellationToken);
+                    Result<List<string>> usersInGroup = await _gateway.GetGroupMembers(group.Key, cancellationToken);
+
+                    if (usersInGroup.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(CanvasCourseCode), canvasCourse.CourseCode)
+                            .ForContext(nameof(Error), usersInGroup.Error, true)
+                            .ForContext("GroupCode", group.Key)
+                            .Warning("Failed to add missing member to Course Group");
+                    }
 
                     List<CanvasCourseMembership> missingGroupMembers = group
-                        .Where(entry => !usersInGroup.Contains(entry.UserId))
+                        .Where(entry => !usersInGroup.Value.Contains(entry.UserId))
                         .ToList();
 
                     foreach (CanvasCourseMembership missingGroupMember in missingGroupMembers)
                     {
                         _logger.Information("Adding {user} to group {group} in course {course}", missingGroupMember.UserId, group.Key, canvasCourse.CourseCode);
                         
-                        bool addToGroupAttempt = await _gateway.AddUserToGroup(missingGroupMember.UserId, group.Key, cancellationToken);
+                        Result addToGroupAttempt = await _gateway.AddUserToGroup(missingGroupMember.UserId, group.Key, cancellationToken);
 
-                        if (!addToGroupAttempt)
+                        if (addToGroupAttempt.IsFailure)
                             _logger
                                 .ForContext(nameof(CanvasCourseCode), canvasCourse.CourseCode)
                                 .ForContext(nameof(CanvasCourseMembership), missingGroupMember, true)
                                 .ForContext("GroupCode", group.Key)
+                                .ForContext(nameof(Error), addToGroupAttempt.Error, true)
                                 .Warning("Failed to add missing member to Course Group");
                     }
 
-                    List<string> extraGroupMembers = usersInGroup
+                    List<string> extraGroupMembers = usersInGroup.Value
                         .Where(entry => group.All(user => user.UserId != entry))
                         .ToList();
 
@@ -178,13 +191,14 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                     {
                         _logger.Information("Removing {user} from group {group} in course {course}", extraGroupMember, group.Key, canvasCourse.CourseCode);
                         
-                        bool removeFromGroupAttempt = await _gateway.RemoveUserFromGroup(extraGroupMember, group.Key, cancellationToken);
+                        Result removeFromGroupAttempt = await _gateway.RemoveUserFromGroup(extraGroupMember, group.Key, cancellationToken);
 
-                        if (!removeFromGroupAttempt)
+                        if (removeFromGroupAttempt.IsFailure)
                             _logger
                                 .ForContext(nameof(CanvasCourseCode), canvasCourse.CourseCode)
                                 .ForContext(nameof(extraGroupMember), extraGroupMember)
                                 .ForContext("GroupCode", group.Key)
+                                .ForContext(nameof(Error), removeFromGroupAttempt.Error, true)
                                 .Warning("Failed to remove extra member from Course Group");
                     }
                 }
@@ -207,16 +221,17 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                     _logger.Information("Removing {user} from section {section} in course {course}", calculatedMember.First().UserId, matchingCanvasEnrolment.SectionCode, matchingCanvasEnrolment.CourseCode);
                     
-                    bool removedFromSection = await _gateway.UnenrolUser(
+                    Result removedFromSection = await _gateway.UnenrolUser(
                         matchingCanvasEnrolment.EnrollmentId,
                         matchingCanvasEnrolment.CourseCode,
                         cancellationToken);
 
-                    if (!removedFromSection)
+                    if (removedFromSection.IsFailure)
                     {
                         _logger
                             .ForContext(nameof(CanvasSectionCode), matchingCanvasEnrolment.SectionCode)
                             .ForContext(nameof(CourseEnrolmentEntry), matchingCanvasEnrolment, true)
+                            .ForContext(nameof(Error), removedFromSection.Error, true)
                             .Warning("Failed to remove member from Course Section");
                     }
                 }
@@ -227,17 +242,18 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                     _logger.Information("Adding {user} to section {section} in course {course}", calculatedMemberRecord.UserId, calculatedMemberRecord.SectionId, calculatedMemberRecord.CanvasCourseCode);
 
-                    bool addedToSection = await _gateway.EnrolToSection(
+                    Result addedToSection = await _gateway.EnrolToSection(
                         calculatedMemberRecord.UserId,
                         calculatedMemberRecord.SectionId,
                         calculatedMemberRecord.PermissionLevel,
                         cancellationToken);
 
-                    if (!addedToSection)
+                    if (addedToSection.IsFailure)
                     {
                         _logger
                             .ForContext(nameof(CanvasSectionCode), calculatedMemberRecord.SectionId)
                             .ForContext(nameof(CanvasCourseMembership), calculatedMember, true)
+                            .ForContext(nameof(Error), addedToSection.Error, true)
                             .Warning("Failed to add user to Course Section");
                     }
                 }

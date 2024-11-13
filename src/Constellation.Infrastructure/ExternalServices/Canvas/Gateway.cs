@@ -1,10 +1,12 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.Canvas;
+﻿#nullable enable
+namespace Constellation.Infrastructure.ExternalServices.Canvas;
 
 using Application.DTOs;
 using Application.DTOs.Canvas;
 using Application.Interfaces.Gateways;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Canvas.Models;
+using Core.Shared;
 using Microsoft.Extensions.Options;
 using Models;
 using Newtonsoft.Json;
@@ -54,8 +56,7 @@ internal sealed class Gateway : ICanvasGateway
         config.UseProxy = true;
         config.Proxy = proxy;
 
-        ServicePointManager.SecurityProtocol =
-            SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
         _client = new HttpClient(config);
     }
 
@@ -130,7 +131,7 @@ internal sealed class Gateway : ICanvasGateway
         return response;
     }
 
-    private async Task<int?> SearchForUserLogin(
+    private async Task<Result<int>> SearchForUserLogin(
         string userId,
         CancellationToken cancellationToken = default)
     {
@@ -144,17 +145,26 @@ internal sealed class Gateway : ICanvasGateway
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+        
         if (!response.IsSuccessStatusCode)
-            return null;
+            return Result.Failure<int>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        List<UserLoginResult> logins = JsonConvert.DeserializeObject<List<UserLoginResult>>(responseText);
+        List<UserLoginResult>? logins = JsonConvert.DeserializeObject<List<UserLoginResult>>(responseText);
 
-        return logins.FirstOrDefault(login => login.SISId == userId)?.Id;
+        if (logins is null)
+            return Result.Failure<int>(CanvasGatewayErrors.InvalidData);
+
+        UserLoginResult? login = logins.FirstOrDefault(login => login.SISId == userId);
+
+        if (login is null)
+            return Result.Failure<int>(CanvasGatewayErrors.UserLoginNotFound(userId));
+
+        return login.Id;
     }
 
-    private async Task<int?> SearchForUser(
+    private async Task<Result<int>> SearchForUser(
         string userId,
         CancellationToken cancellationToken = default)
     {
@@ -168,17 +178,23 @@ internal sealed class Gateway : ICanvasGateway
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+
         if (!response.IsSuccessStatusCode)
-            return null;
+            return Result.Failure<int>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
         List<UserResult> users = JsonConvert.DeserializeObject<List<UserResult>>(responseText);
 
-        return users.FirstOrDefault(login => login.SISId == userId)?.Id;
+        UserResult user = users.FirstOrDefault(login => login.SISId == userId);
+
+        if (user is null)
+            return Result.Failure<int>(CanvasGatewayErrors.UserNotFound(userId));
+
+        return user.Id;
     }
 
-    private async Task<List<(int, string)>> SearchForCourseEnrolment(
+    private async Task<Result<List<(int, string)>>> SearchForCourseEnrolment(
         string userId,
         CanvasCourseCode courseId,
         CancellationToken cancellationToken = default)
@@ -196,12 +212,16 @@ internal sealed class Gateway : ICanvasGateway
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+        
         if (!response.IsSuccessStatusCode)
-            return null;
+            return Result.Failure<List<(int, string)>>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        List<EnrolmentResult> enrolments = JsonConvert.DeserializeObject<List<EnrolmentResult>>(responseText);
+        List<EnrolmentResult>? enrolments = JsonConvert.DeserializeObject<List<EnrolmentResult>>(responseText);
+
+        if (enrolments is null)
+            return Result.Failure<List<(int, string)>>(CanvasGatewayErrors.InvalidData);
 
         foreach (EnrolmentResult enrolment in enrolments)
             data.Add(new (enrolment.Id, enrolment.SectionId));
@@ -209,7 +229,7 @@ internal sealed class Gateway : ICanvasGateway
         return data;
     }
 
-    private async Task<List<AssignmentResult>> SearchForCourseAssignment(
+    private async Task<Result<List<AssignmentResult>>> SearchForCourseAssignment(
         string userId,
         CanvasCourseCode courseId,
         CancellationToken cancellationToken = default)
@@ -221,21 +241,25 @@ internal sealed class Gateway : ICanvasGateway
             _logger.Information("SearchForCourseAssignment: UserId={userId}, CourseId={courseId}, path={path}", userId,
                 courseId, path);
 
-            return new();
+            return new List<AssignmentResult>();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+
         if (!response.IsSuccessStatusCode)
-            return null;
+            return Result.Failure<List<AssignmentResult>>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        List<AssignmentResult> assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+        List<AssignmentResult>? assignments = JsonConvert.DeserializeObject<List<AssignmentResult>>(responseText);
+
+        if (assignments is null)
+            return Result.Failure<List<AssignmentResult>>(CanvasGatewayErrors.InvalidData);
 
         return assignments;
     }
 
-    public async Task<bool> UploadAssignmentSubmission(
+    public async Task<Result> UploadAssignmentSubmission(
         CanvasCourseCode courseId,
         int canvasAssignmentId,
         string studentReferenceNumber,
@@ -259,21 +283,24 @@ internal sealed class Gateway : ICanvasGateway
                 "UploadAssignmentSubmission: CourseId={courseId}, CanvasAssignmentId={canvasAssignmentId}, StudentId={studentId}, Attachment={@file}, stepOnePath={stepOnePath}, stepOnePayload={@stepOnePayload}",
                 courseId, canvasAssignmentId, studentReferenceNumber, file, stepOnePath, stepOnePayload);
 
-            return true;
+            return Result.Success();
         }
 
-        HttpResponseMessage stepOneResponse = await RequestAsync(stepOnePath, HttpVerb.Post, stepOnePayload,
-            cancellationToken: cancellationToken);
+        HttpResponseMessage stepOneResponse = await RequestAsync(stepOnePath, HttpVerb.Post, stepOnePayload, cancellationToken: cancellationToken);
+        
         if (!stepOneResponse.IsSuccessStatusCode)
         {
             _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step one with response {@response}",
                 stepOneResponse);
-            return false;
+        
+            return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
         }
 
         string stepOneResponseText = await stepOneResponse.Content.ReadAsStringAsync(cancellationToken);
-        FileUploadLocationResult fileUploadLocation =
-            JsonConvert.DeserializeObject<FileUploadLocationResult>(stepOneResponseText);
+        FileUploadLocationResult? fileUploadLocation = JsonConvert.DeserializeObject<FileUploadLocationResult>(stepOneResponseText);
+
+        if (fileUploadLocation is null)
+            return Result.Failure(CanvasGatewayErrors.InvalidData);
 
         _logger.Information("CanvasGateway.UploadAssignmentSubmission: Succeeded on step one with response {@response}",
             fileUploadLocation);
@@ -291,19 +318,22 @@ internal sealed class Gateway : ICanvasGateway
             fileStreamContent.Headers.ContentType = new(file.FileType);
             stepTwoContent.Add(fileStreamContent, name: "file", fileName: file.FileName);
 
-            HttpResponseMessage stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent,
-                cancellationToken: cancellationToken);
+            HttpResponseMessage stepTwoResponse = await _client.PostAsync(fileUploadLocation.UploadUrl, stepTwoContent, cancellationToken);
+            
             if (!stepTwoResponse.IsSuccessStatusCode)
             {
                 _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step two with response {@response}",
                     stepTwoResponse);
 
-                return false;
+                return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
             }
 
             string stepTwoResponseText = await stepTwoResponse.Content.ReadAsStringAsync(cancellationToken);
-            FileUploadConfirmationResult fileUploadConfirmation =
-                JsonConvert.DeserializeObject<FileUploadConfirmationResult>(stepTwoResponseText);
+            FileUploadConfirmationResult? fileUploadConfirmation = JsonConvert.DeserializeObject<FileUploadConfirmationResult>(stepTwoResponseText);
+
+            if (fileUploadConfirmation is null)
+                return Result.Failure(CanvasGatewayErrors.InvalidData);
+
             fileId = fileUploadConfirmation.Id;
 
             _logger.Information(
@@ -311,7 +341,7 @@ internal sealed class Gateway : ICanvasGateway
                 fileUploadConfirmation);
         }
 
-        int? canvasUserId = await SearchForUser(studentReferenceNumber, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(studentReferenceNumber, cancellationToken);
 
         string stepThreePath = $"/courses/sis_course_id:{courseId}/assignments/{canvasAssignmentId}/submissions";
         var stepThreePayload = new
@@ -324,21 +354,18 @@ internal sealed class Gateway : ICanvasGateway
             }
         };
 
-        HttpResponseMessage stepThreeResponse =
-            await RequestAsync(stepThreePath, HttpVerb.Post, stepThreePayload, cancellationToken);
+        HttpResponseMessage stepThreeResponse = await RequestAsync(stepThreePath, HttpVerb.Post, stepThreePayload, cancellationToken);
+
         if (!stepThreeResponse.IsSuccessStatusCode)
         {
-            _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step three with response {@response}",
-                stepThreeResponse);
+            _logger.Error("CanvasGateway.UploadAssignmentSubmission: Failed on step three with response {@response}", stepThreeResponse);
 
-            return false;
+            return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
         }
 
-        _logger.Information(
-            "CanvasGateway.UploadAssignmentSubmission: Succeeded on step three with response {@response}",
-            stepThreeResponse);
+        _logger.Information("CanvasGateway.UploadAssignmentSubmission: Succeeded on step three with response {@response}", stepThreeResponse);
 
-        return true;
+        return Result.Success();
     }
 
     public async Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(
@@ -458,7 +485,7 @@ internal sealed class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<RubricEntry> GetCourseAssignmentDetails(
+    public async Task<Result<RubricEntry>> GetCourseAssignmentDetails(
         CanvasCourseCode courseId,
         int assignmentId,
         CancellationToken cancellationToken = default)
@@ -469,20 +496,25 @@ internal sealed class Gateway : ICanvasGateway
         {
             _logger.Information("GetAllCourseAssignments: CourseId={courseId}, path={path}", courseId, path);
 
-            return null;
+            return Result.Failure<RubricEntry>(CanvasGatewayErrors.FailureResponseCode);
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
+        
         if (!response.IsSuccessStatusCode)
-            return null;
+            return Result.Failure<RubricEntry>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        AssignmentSettingsResult assessmentSettings = JsonConvert.DeserializeObject<AssignmentSettingsResult>(responseText);
+        AssignmentSettingsResult? assessmentSettings = JsonConvert.DeserializeObject<AssignmentSettingsResult>(responseText);
+
+        if (assessmentSettings is null)
+            return Result.Failure<RubricEntry>(CanvasGatewayErrors.InvalidData);
 
         List<RubricEntry.RubricCriterion> criteria = new();
 
-        if (assessmentSettings.Rubric is null) return null;
+        if (assessmentSettings.Rubric is null)
+            return Result.Failure<RubricEntry>(CanvasGatewayErrors.RubricNotIncluded);
 
         foreach (AssignmentSettingsResult.RubricItem criterion in assessmentSettings.Rubric)
         {
@@ -555,7 +587,7 @@ internal sealed class Gateway : ICanvasGateway
         return results;
     } 
 
-    public async Task<bool> CreateUser(
+    public async Task<Result> CreateUser(
         string userId,
         string firstName,
         string lastName,
@@ -563,16 +595,16 @@ internal sealed class Gateway : ICanvasGateway
         string userEmail,
         CancellationToken cancellationToken = default)
     {
-        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(userId, cancellationToken);
 
         if (_logOnly)
         {
             // The SearchForUser function will always return 1,
             // but we here want to return null instead to cover the whole method code.
-            canvasUserId = null;
+            canvasUserId = Result.Failure<int>(CanvasGatewayErrors.FailureResponseCode);
         }
 
-        if (canvasUserId != null)
+        if (canvasUserId.IsFailure)
             return await ReactivateUser(userId, cancellationToken);
 
         // If not, create a new user
@@ -611,15 +643,17 @@ internal sealed class Gateway : ICanvasGateway
                     UserEmail = userEmail
                 }, payload, path);
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode 
+            ? Result.Success() 
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<bool> UpdateUserEmail(
+    public async Task<Result> UpdateUserEmail(
         string userId,
         string emailAddress,
         CancellationToken cancellationToken = default)
@@ -629,16 +663,17 @@ internal sealed class Gateway : ICanvasGateway
             .ForContext(nameof(emailAddress), emailAddress)
             .Information("Requested to update user email address");
 
-        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (canvasUserId is null)
+        if (canvasUserId.IsFailure)
         {
             _logger
                 .ForContext(nameof(userId), userId)
                 .ForContext(nameof(emailAddress), emailAddress)
+                .ForContext(nameof(Error), canvasUserId.Error, true)
                 .Warning("Failed to find existing user at Canvas");
 
-            return false;
+            return Result.Failure(canvasUserId.Error);
         }
 
         // Update communication email address
@@ -661,20 +696,20 @@ internal sealed class Gateway : ICanvasGateway
                 .ForContext(nameof(emailAddress), emailAddress)
                 .Warning("Failed to update communication email field of existing user at Canvas");
 
-            return false;
+            return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
         }
 
         // Update login email address
-        int? canvasUserLogin = await SearchForUserLogin(userId, cancellationToken);
+        Result<int> canvasUserLogin = await SearchForUserLogin(userId, cancellationToken);
 
-        if (canvasUserLogin is null)
+        if (canvasUserLogin.IsFailure)
         {
             _logger
                 .ForContext(nameof(userId), userId)
                 .ForContext(nameof(emailAddress), emailAddress)
                 .Warning("Failed to find logins for existing user at Canvas");
 
-            return false;
+            return Result.Failure(canvasUserLogin.Error);
         }
 
         path = $"accounts/1/logins/{canvasUserLogin.Value}";
@@ -696,22 +731,22 @@ internal sealed class Gateway : ICanvasGateway
                 .ForContext(nameof(emailAddress), emailAddress)
                 .Error("Failed to update login email field of existing user at Canvas");
 
-            return false;
+            return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
         }
 
-        return true;
+        return Result.Success();
     }
 
-    public async Task<bool> EnrolToCourse(
+    public async Task<Result> EnrolToCourse(
         string userId,
         CanvasCourseCode courseId,
         CanvasPermissionLevel permissionLevel,
         CancellationToken cancellationToken = default)
     {
-        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (canvasUserId == null)
-            return false;
+        if (canvasUserId.IsFailure)
+            return canvasUserId;
         
         string path = $"courses/sis_course_id:{courseId}/enrollments";
 
@@ -731,15 +766,17 @@ internal sealed class Gateway : ICanvasGateway
                 "EnrolUser: UserId={userId}, CourseId={courseId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}",
                 userId, courseId, permissionLevel, path, payload);
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<bool> EnrolToSection(
+    public async Task<Result> EnrolToSection(
         string userId,
         CanvasSectionCode sectionId,
         CanvasPermissionLevel permissionLevel,
@@ -753,22 +790,22 @@ internal sealed class Gateway : ICanvasGateway
                 .ForContext(nameof(userId), userId, true)
                 .Warning("Failed to enrol user to section");
 
-            return false;
+            return Result.Failure(CanvasGatewayErrors.InvalidSectionCode(sectionId));
         }
 
-        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (canvasUserId == null)
-            return false;
+        if (canvasUserId.IsFailure)
+            return canvasUserId;
 
-        bool sectionExists = await CheckSectionExists(sectionId, cancellationToken);
+        Result sectionExists = await CheckSectionExists(sectionId, cancellationToken);
 
-        if (!sectionExists)
+        if (sectionExists.IsFailure)
         {
-            bool sectionCreated = await CreateSection(sectionId, cancellationToken);
+            Result sectionCreated = await CreateSection(sectionId, cancellationToken);
 
-            if (!sectionCreated)
-                return false;
+            if (sectionCreated.IsFailure)
+                return sectionCreated;
         }
 
         string path = $"sections/sis_section_id:{sectionId}/enrollments";
@@ -789,36 +826,41 @@ internal sealed class Gateway : ICanvasGateway
                 "EnrolUser: UserId={userId}, SectionId={sectionId}, PermissionLevel={permissionLevel}, path={path}, payload={@payload}",
                 userId, sectionId, permissionLevel, path, payload);
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<bool> UnenrolUser(
+    public async Task<Result> UnenrolUser(
         string userId,
         CanvasCourseCode courseId,
         CancellationToken cancellationToken = default)
     {
-        List<(int Id, string Section)> canvasEnrolments = await SearchForCourseEnrolment(userId, courseId, cancellationToken);
+        Result<List<(int, string)>> canvasEnrolments = await SearchForCourseEnrolment(userId, courseId, cancellationToken);
 
-        if (canvasEnrolments.Count == 0)
-            return false;
+        if (canvasEnrolments.IsFailure)
+            return canvasEnrolments;
 
-        foreach ((int Id, string Section) enrolment in canvasEnrolments)
+        if (canvasEnrolments.Value.Count == 0)
+            return Result.Failure(CanvasGatewayErrors.UserNotFoundInCourse(userId, courseId));
+
+        foreach ((int Id, string Section) enrolment in canvasEnrolments.Value)
         {
-            bool unenrolSuccess = await UnenrolUser(enrolment.Id, courseId, cancellationToken);
+            Result unenrolSuccess = await UnenrolUser(enrolment.Id, courseId, cancellationToken);
 
-            if (!unenrolSuccess)
-                return false;
+            if (unenrolSuccess.IsFailure)
+                return unenrolSuccess;
         }
 
-        return true;
+        return Result.Success();
     }
 
-    public async Task<bool> UnenrolUser(
+    public async Task<Result> UnenrolUser(
         int enrollmentId,
         CanvasCourseCode courseId,
         CancellationToken cancellationToken = default)
@@ -829,22 +871,24 @@ internal sealed class Gateway : ICanvasGateway
         {
             _logger.Information("UnenrolUser: EnrollmentId={enrollmentId}, CourseId={courseId}, path={path}", enrollmentId, courseId, path);
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Delete, cancellationToken: cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<bool> ReactivateUser(
+    public async Task<Result> ReactivateUser(
         string userId,
         CancellationToken cancellationToken = default)
     {
-        int? canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
+        Result<int> canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
 
-        if (canvasLoginId == null)
-            return false;
+        if (canvasLoginId.IsFailure)
+            return Result.Failure(CanvasGatewayErrors.UserNotFound(userId));
 
         string path = $"accounts/1/logins/{canvasLoginId}";
 
@@ -861,22 +905,25 @@ internal sealed class Gateway : ICanvasGateway
             _logger.Information("ReactivateUser: UserId={userId}, path={path}, payload={@payload}", userId, path,
                 payload);
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Put, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        if (response.IsSuccessStatusCode)
+            return Result.Success();
+        else
+            return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<bool> DeactivateUser(
+    public async Task<Result> DeactivateUser(
         string userId,
         CancellationToken cancellationToken = default)
     {
-        int? canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
+        Result<int> canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
 
-        if (canvasLoginId == null)
-            return false;
+        if (canvasLoginId.IsFailure)
+            return canvasLoginId;
 
         string path = $"accounts/1/logins/{canvasLoginId}";
 
@@ -893,27 +940,29 @@ internal sealed class Gateway : ICanvasGateway
             _logger.Information("DeactivateUser: UserId={userId}, path={path}, payload={@payload}", userId, path,
                 payload);
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Put, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<bool> DeleteUser(
+    public async Task<Result> DeleteUser(
         string userId,
         CancellationToken cancellationToken = default)
     {
-        int? canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
+        Result<int> canvasLoginId = await SearchForUserLogin(userId, cancellationToken);
 
-        if (canvasLoginId == null)
-            return false;
+        if (canvasLoginId.IsFailure)
+            return canvasLoginId;
 
-        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (canvasUserId == null)
-            return false;
+        if (canvasUserId.IsFailure)
+            return canvasUserId;
 
         // Change the users SIS_USER_ID to prepend the deletion year (making it unique)
         string path = $"accounts/1/logins/{canvasLoginId}";
@@ -940,7 +989,7 @@ internal sealed class Gateway : ICanvasGateway
         }
 
         if (!response.IsSuccessStatusCode)
-            return false;
+            return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
 
         path = $"accounts/1/users/{canvasUserId}";
 
@@ -948,12 +997,14 @@ internal sealed class Gateway : ICanvasGateway
         {
             _logger.Information("DeleteUser: UserId={userId}, path={path}", userId, path);
 
-            return true;
+            return Result.Success();
         }
 
         response = await RequestAsync(path, HttpVerb.Delete, cancellationToken: cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
     public async Task<List<CourseListEntry>> GetAllCourses(
@@ -1074,35 +1125,35 @@ internal sealed class Gateway : ICanvasGateway
         return returnData;
     }
 
-    public async Task<bool> AddUserToGroup(
+    public async Task<Result> AddUserToGroup(
         string userId,
         CanvasSectionCode groupId,
         CancellationToken cancellationToken = default)
     {
-        int? canvasUserId = await SearchForUser(userId, cancellationToken);
+        Result<int> canvasUserId = await SearchForUser(userId, cancellationToken);
 
-        if (canvasUserId == null)
-            return false;
+        if (canvasUserId.IsFailure)
+            return canvasUserId;
 
         // Confirm group exists
-        bool groupExists = await CheckGroupExists(groupId, cancellationToken);
+        Result groupExists = await CheckGroupExists(groupId, cancellationToken);
 
-        if (!groupExists)
+        if (groupExists.IsFailure)
         {
-            bool categoryExists = await CheckGroupCategoryExists(groupId.ToString()[..^2], cancellationToken);
+            Result categoryExists = await CheckGroupCategoryExists(groupId.ToString()[..^2], cancellationToken);
 
-            if (!categoryExists)
+            if (categoryExists.IsFailure)
             {
-                bool categoryCreated = await CreateGroupCategory(groupId.ToString()[..^2], cancellationToken);
+                Result categoryCreated = await CreateGroupCategory(groupId.ToString()[..^2], cancellationToken);
 
-                if (!categoryCreated)
-                    return false;
+                if (categoryCreated.IsFailure)
+                    return categoryCreated;
             }
 
-            bool groupCreated = await CreateGroup(groupId, cancellationToken);
+            var groupCreated = await CreateGroup(groupId, cancellationToken);
 
-            if (!groupCreated)
-                return false;
+            if (groupCreated.IsFailure)
+                return groupCreated;
         }
 
         string path = $"groups/sis_group_id:{groupId}/memberships";
@@ -1121,15 +1172,17 @@ internal sealed class Gateway : ICanvasGateway
                 .ForContext(nameof(path), path)
                 .Information("AddUserToGroup");
 
-            return true;
+            return Result.Success();
         }
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    private async Task<bool> CheckSectionExists(
+    private async Task<Result> CheckSectionExists(
         CanvasSectionCode sectionId,
         CancellationToken cancellationToken = default)
     {
@@ -1137,10 +1190,12 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    private async Task<bool> CreateSection(
+    private async Task<Result> CreateSection(
         CanvasSectionCode sectionId,
         CancellationToken cancellationToken = default)
     {
@@ -1156,10 +1211,12 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    private async Task<bool> CheckGroupExists(
+    private async Task<Result> CheckGroupExists(
         CanvasSectionCode groupId,
         CancellationToken cancellationToken = default)
     {
@@ -1167,10 +1224,12 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    private async Task<bool> CheckGroupCategoryExists(
+    private async Task<Result> CheckGroupCategoryExists(
         string categoryId,
         CancellationToken cancellationToken = default)
     {
@@ -1178,10 +1237,12 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    private async Task<bool> CreateGroupCategory(
+    private async Task<Result> CreateGroupCategory(
         string categoryId,
         CancellationToken cancellationToken = default)
     {
@@ -1195,10 +1256,12 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    private async Task<bool> CreateGroup(
+    private async Task<Result> CreateGroup(
         CanvasSectionCode groupId,
         CancellationToken cancellationToken = default)
     {
@@ -1213,10 +1276,12 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Post, payload, cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 
-    public async Task<List<string>> GetGroupMembers(
+    public async Task<Result<List<string>>> GetGroupMembers(
         CanvasSectionCode groupId,
         CancellationToken cancellationToken = default)
     {
@@ -1231,23 +1296,25 @@ internal sealed class Gateway : ICanvasGateway
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        List<GroupMembershipListResult> groupMembers =
-            JsonConvert.DeserializeObject<List<GroupMembershipListResult>>(responseText);
+        List<GroupMembershipListResult>? groupMembers = JsonConvert.DeserializeObject<List<GroupMembershipListResult>>(responseText);
+
+        if (groupMembers is null)
+            return Result.Failure<List<string>>(CanvasGatewayErrors.InvalidData);
 
         foreach (GroupMembershipListResult member in groupMembers)
         {
-            string userId = await GetUserData(member.CanvasUserId, cancellationToken);
+            Result<string> userId = await GetUserData(member.CanvasUserId, cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(userId))
+            if (userId.IsFailure)
                 continue;
 
-            returnData.Add(userId);
+            returnData.Add(userId.Value);
         }
 
         return returnData;
     }
 
-    private async Task<string> GetUserData(
+    private async Task<Result<string>> GetUserData(
         int canvasUserId,
         CancellationToken cancellationToken = default)
     {
@@ -1256,16 +1323,19 @@ internal sealed class Gateway : ICanvasGateway
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Get, cancellationToken: cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            return string.Empty;
+            return Result.Failure<string>(CanvasGatewayErrors.FailureResponseCode);
 
         string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        UserDetailsEntry userDetails = JsonConvert.DeserializeObject<UserDetailsEntry>(responseText);
+        UserDetailsEntry? userDetails = JsonConvert.DeserializeObject<UserDetailsEntry>(responseText);
 
-        return userDetails is not null ? userDetails.UserId : string.Empty;
+        if (userDetails is null)
+            return Result.Failure<string>(CanvasGatewayErrors.InvalidData);
+
+        return userDetails.UserId;
     }
 
-    public async Task<bool> RemoveUserFromGroup(
+    public async Task<Result> RemoveUserFromGroup(
         string userId,
         CanvasSectionCode groupId,
         CancellationToken cancellationToken = default)
@@ -1274,6 +1344,8 @@ internal sealed class Gateway : ICanvasGateway
 
         HttpResponseMessage response = await RequestAsync(path, HttpVerb.Delete, cancellationToken: cancellationToken);
 
-        return response.IsSuccessStatusCode;
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(CanvasGatewayErrors.FailureResponseCode);
     }
 }

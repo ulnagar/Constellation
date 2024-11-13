@@ -2,6 +2,7 @@
 
 using Core.Models.Attachments.DTOs;
 using Core.Models.Canvas.Models;
+using Core.Shared;
 using DTOs;
 using DTOs.Canvas;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 public interface ICanvasGateway
 {
-    Task<bool> CreateUser(string userId, string firstName, string lastName, string loginEmail, string userEmail, CancellationToken cancellationToken = default);
+    Task<Result> CreateUser(string userId, string firstName, string lastName, string loginEmail, string userEmail, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Update existing user account for changed email address
@@ -19,11 +20,11 @@ public interface ICanvasGateway
     /// <param name="emailAddress">string: new EmailAddress of user</param>
     /// <param name="cancellationToken">CancellationToken</param>
     /// <returns></returns>
-    Task<bool> UpdateUserEmail(string userId, string emailAddress, CancellationToken cancellationToken = default);
-    Task<bool> DeactivateUser(string userId, CancellationToken cancellationToken = default);
-    Task<bool> EnrolToCourse(string userId, CanvasCourseCode courseId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
-    Task<bool> EnrolToSection(string userId, CanvasSectionCode sectionId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
-    Task<bool> ReactivateUser(string userId, CancellationToken cancellationToken = default);
+    Task<Result> UpdateUserEmail(string userId, string emailAddress, CancellationToken cancellationToken = default);
+    Task<Result> DeactivateUser(string userId, CancellationToken cancellationToken = default);
+    Task<Result> EnrolToCourse(string userId, CanvasCourseCode courseId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
+    Task<Result> EnrolToSection(string userId, CanvasSectionCode sectionId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
+    Task<Result> ReactivateUser(string userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Mark all existing enrolments for the user in the Canvas Course as INACTIVE
@@ -32,7 +33,7 @@ public interface ICanvasGateway
     /// <param name="courseId">SIS_COURSE_ID: CanvasCourseCode</param>
     /// <param name="cancellationToken">CancellationToken</param>
     /// <returns></returns>
-    Task<bool> UnenrolUser(string userId, CanvasCourseCode courseId, CancellationToken cancellationToken = default);
+    Task<Result> UnenrolUser(string userId, CanvasCourseCode courseId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Mark a single enrolment for the user in the Canvas Course as INACTIVE, specifically targeting a Section enrolment
@@ -41,19 +42,19 @@ public interface ICanvasGateway
     /// <param name="courseId">SIS_COURSE_ID: CanvasCourseCode</param>
     /// <param name="cancellationToken">CancellationToken</param>
     /// <returns></returns>
-    Task<bool> UnenrolUser(int enrollmentId, CanvasCourseCode courseId, CancellationToken cancellationToken = default);
-    Task<bool> DeleteUser(string userId, CancellationToken cancellationToken = default);
+    Task<Result> UnenrolUser(int enrollmentId, CanvasCourseCode courseId, CancellationToken cancellationToken = default);
+    Task<Result> DeleteUser(string userId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllUploadCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
     Task<List<CanvasAssignmentDto>> GetAllRubricCourseAssignments(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
 
-    Task<RubricEntry> GetCourseAssignmentDetails(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
-    Task<bool> UploadAssignmentSubmission(CanvasCourseCode courseId, int canvasAssignmentId, string studentReferenceNumber, AttachmentResponse file, CancellationToken cancellationToken = default);
+    Task<Result<RubricEntry>> GetCourseAssignmentDetails(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
+    Task<Result> UploadAssignmentSubmission(CanvasCourseCode courseId, int canvasAssignmentId, string studentReferenceNumber, AttachmentResponse file, CancellationToken cancellationToken = default);
     Task<List<AssignmentResultEntry>> GetCourseAssignmentSubmissions(CanvasCourseCode courseId, int assignmentId, CancellationToken cancellationToken = default);
 
     Task<List<CourseListEntry>> GetAllCourses(string year, CancellationToken cancellationToken = default);
     Task<List<CourseEnrolmentEntry>> GetEnrolmentsForCourse(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
-    Task<bool> AddUserToGroup(string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
-    Task<List<string>> GetGroupMembers(CanvasSectionCode groupId, CancellationToken cancellationToken = default);
-    Task<bool> RemoveUserFromGroup(string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
+    Task<Result> AddUserToGroup(string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
+    Task<Result<List<string>>> GetGroupMembers(CanvasSectionCode groupId, CancellationToken cancellationToken = default);
+    Task<Result> RemoveUserFromGroup(string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
 }

@@ -70,13 +70,13 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
 
         CanvasCourseCode courseCode = CanvasCourseCode.FromOffering(offering);
         
-        RubricEntry rubric = await _gateway.GetCourseAssignmentDetails(courseCode, request.CanvasAssignmentId, cancellationToken);
+        Result<RubricEntry> rubric = await _gateway.GetCourseAssignmentDetails(courseCode, request.CanvasAssignmentId, cancellationToken);
 
-        if (rubric is null)
+        if (rubric.IsFailure)
         {
             _logger
                 .ForContext(nameof(ExportCanvasRubricResultsQuery), request, true)
-                .ForContext(nameof(Error), CanvasErrors.Rubric.NotFound, true)
+                .ForContext(nameof(Error), rubric.Error, true)
                 .Warning("Failed to export Canvas Assignment Rubric data");
 
             return Result.Failure<FileDto>(CanvasErrors.Rubric.NotFound);
@@ -87,7 +87,7 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
 
         List<Student> students = await _studentRepository.GetCurrentEnrolmentsForCourse(offering.CourseId, cancellationToken);
 
-        MemoryStream stream = await _excelService.CreateCanvasRubricResultExport(rubric, enrolments, submissions, students, cancellationToken);
+        MemoryStream stream = await _excelService.CreateCanvasRubricResultExport(rubric.Value, enrolments, submissions, students, cancellationToken);
 
         FileDto result = new FileDto()
         {

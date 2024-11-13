@@ -70,12 +70,12 @@ internal class AssignmentService : IAssignmentService
 
         // Upload file to Canvas
         // Include error checking/retry on failure
-        bool result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, student.StudentReferenceNumber.Number, fileRequest.Value, cancellationToken);
+        Result result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, student.StudentReferenceNumber.Number, fileRequest.Value, cancellationToken);
 
-        if (!result)
+        if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(Error), SubmissionErrors.UploadFailed)
+                .ForContext(nameof(Error), result.Error, true)
                 .Error("Failed to upload Assignment Submission to Canvas");
 
             await _emailService.SendAssignmentUploadFailedNotification(

@@ -8,8 +8,8 @@ using Core.Models.Operations.Enums;
 using Core.Shared;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
-using Microsoft.Extensions.Options;
 using Serilog;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -58,9 +58,9 @@ internal sealed class ProcessCanvasOperationCommandHandler
 
                 _logger
                     .ForContext(nameof(CreateUserCanvasOperation), createOperation, true)
-                    .Information("Creating Canvas user for {name}", $"{createOperation.FirstName} {createOperation.LastName}");
+                    .Information("Creating Canvas user for {name}", $"{createOperation!.FirstName} {createOperation.LastName}");
 
-                bool createSuccess = await _canvasGateway.CreateUser(
+                Result createSuccess = await _canvasGateway.CreateUser(
                     createOperation.UserId, 
                     createOperation.FirstName, 
                     createOperation.LastName, 
@@ -68,7 +68,7 @@ internal sealed class ProcessCanvasOperationCommandHandler
                     createOperation.EmailAddress, 
                     cancellationToken);
 
-                if (createSuccess)
+                if (createSuccess.IsSuccess)
                 {
                     _logger
                         .ForContext(nameof(CreateUserCanvasOperation), createOperation, true)
@@ -92,13 +92,11 @@ internal sealed class ProcessCanvasOperationCommandHandler
 
                 _logger
                     .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
-                    .Information("Updating Canvas user {UserId} to new Email Address", updateOperation.UserId);
+                    .Information("Updating Canvas user {UserId} to new Email Address", updateOperation!.UserId);
 
-                bool updateSuccess = await _canvasGateway.UpdateUserEmail(
-                    updateOperation.UserId,
-                    $"{updateOperation.PortalUsername}@education.nsw.gov.au");
+                Result updateSuccess = await _canvasGateway.UpdateUserEmail(updateOperation.UserId, $"{updateOperation.PortalUsername}@education.nsw.gov.au", cancellationToken);
 
-                if (updateSuccess)
+                if (updateSuccess.IsSuccess)
                 {
                     _logger
                         .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
@@ -113,18 +111,19 @@ internal sealed class ProcessCanvasOperationCommandHandler
 
                 _logger
                     .ForContext(nameof(UpdateUserEmailCanvasOperation), updateOperation, true)
+                    .ForContext(nameof(Error), updateSuccess.Error, true)
                     .Warning("Failed to update Canvas user {UserId} to new Email Address", updateOperation.UserId);
 
-                return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
+                return Result.Failure(updateSuccess.Error);
 
             case nameof(ModifyEnrolmentCanvasOperation):
                 ModifyEnrolmentCanvasOperation modifyOperation = operation as ModifyEnrolmentCanvasOperation;
 
                 _logger
                     .ForContext(nameof(ModifyEnrolmentCanvasOperation), modifyOperation, true)
-                    .Information("Modifying Canvas enrollment for {name}", $"{modifyOperation.UserId}");
+                    .Information("Modifying Canvas enrollment for {name}", $"{modifyOperation!.UserId}");
 
-                bool modifySuccess = modifyOperation.Action switch
+                Result modifySuccess = modifyOperation.Action switch
                 {
                     _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Teacher) =>
                         await _canvasGateway.EnrolToCourse(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Teacher, cancellationToken),
@@ -134,10 +133,10 @@ internal sealed class ProcessCanvasOperationCommandHandler
                         await _canvasGateway.EnrolToCourse(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Student, cancellationToken),
                     _ when modifyOperation.Action.Equals(CanvasAction.Remove) =>
                         await _canvasGateway.UnenrolUser(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), cancellationToken),
-                    _ => false
+                    _ => throw new NotImplementedException()
                 };
                 
-                if (modifySuccess)
+                if (modifySuccess.IsSuccess)
                 {
                     _logger
                         .ForContext(nameof(ModifyEnrolmentCanvasOperation), modifyOperation, true)
@@ -152,20 +151,21 @@ internal sealed class ProcessCanvasOperationCommandHandler
 
                 _logger
                     .ForContext(nameof(ModifyEnrolmentCanvasOperation), modifyOperation, true)
+                    .ForContext(nameof(Error), modifySuccess.Error, true)
                     .Warning("Failed to modify Canvas enrollment for {name}", $"{modifyOperation.UserId}");
 
-                return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
+                return Result.Failure(modifySuccess.Error);
 
             case nameof(DeleteUserCanvasOperation):
                 DeleteUserCanvasOperation deleteOperation = operation as DeleteUserCanvasOperation;
 
                 _logger
                     .ForContext(nameof(DeleteUserCanvasOperation), deleteOperation, true)
-                    .Information("Deleting Canvas user for {name}", $"{deleteOperation.UserId}");
+                    .Information("Deleting Canvas user for {name}", $"{deleteOperation!.UserId}");
 
-                bool deleteSuccess = await _canvasGateway.DeactivateUser(deleteOperation.UserId, cancellationToken);
+                Result deleteSuccess = await _canvasGateway.DeactivateUser(deleteOperation.UserId, cancellationToken);
 
-                if (deleteSuccess)
+                if (deleteSuccess.IsSuccess)
                 {
                     _logger
                         .ForContext(nameof(DeleteUserCanvasOperation), deleteOperation, true)
@@ -180,9 +180,10 @@ internal sealed class ProcessCanvasOperationCommandHandler
 
                 _logger
                     .ForContext(nameof(DeleteUserCanvasOperation), deleteOperation, true)
+                    .ForContext(nameof(Error), deleteSuccess.Error, true)
                     .Warning("Failed to delete Canvas user for {name}", $"{deleteOperation.UserId}");
 
-                return Result.Failure(DomainErrors.Operations.Canvas.ProcessFailed);
+                return Result.Failure(deleteSuccess.Error);
         }
 
         return Result.Failure(DomainErrors.Operations.Canvas.Invalid);
