@@ -70,6 +70,22 @@ public sealed class NominationPeriod
                         entry.CourseId == fis.CourseId &&
                         !entry.IsDeleted),
 
+            FirstInSubjectMathematicsNomination fism =>
+                Nominations
+                    .OfType<FirstInSubjectMathematicsNomination>()
+                    .Any(entry =>
+                        entry.StudentId == fism.StudentId &&
+                        entry.CourseId == fism.CourseId &&
+                        !entry.IsDeleted),
+
+            FirstInSubjectScienceTechnologyNomination fisst =>
+                Nominations
+                    .OfType<FirstInSubjectScienceTechnologyNomination>()
+                    .Any(entry =>
+                        entry.StudentId == fisst.StudentId &&
+                        entry.CourseId == fisst.CourseId &&
+                        !entry.IsDeleted),
+
             AcademicExcellenceNomination ae =>
                 Nominations
                     .OfType<AcademicExcellenceNomination>()
@@ -124,26 +140,10 @@ public sealed class NominationPeriod
                         entry.OfferingId == aast.OfferingId &&
                         !entry.IsDeleted),
 
-            PrincipalsAwardNomination pa =>
-                Nominations
-                    .OfType<PrincipalsAwardNomination>()
-                    .Any(entry =>
-                        entry.StudentId == pa.StudentId &&
-                        !entry.IsDeleted),
-
-            GalaxyMedalNomination ga =>
-                Nominations
-                    .OfType<GalaxyMedalNomination>()
-                    .Any(entry =>
-                        entry.StudentId == ga.StudentId &&
-                        !entry.IsDeleted),
-
-            UniversalAchieverNomination ua =>
-                Nominations
-                    .OfType<UniversalAchieverNomination>()
-                    .Any(entry =>
-                        entry.StudentId == ua.StudentId &&
-                        !entry.IsDeleted),
+            // There is no reason that this award cannot be given twice to the same person
+            PrincipalsAwardNomination pa => false,
+            GalaxyMedalNomination ga => false,
+            UniversalAchieverNomination ua => false,
 
             _ => throw new NotImplementedException()
         };

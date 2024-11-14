@@ -10,6 +10,9 @@ using Constellation.Core.Models.Subjects;
 using Core.Errors;
 using Core.Models.Awards.Errors;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Students;
+using Core.Models.Students.Errors;
+using Core.Models.Students.Repositories;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
@@ -25,6 +28,7 @@ internal sealed class CreateAwardNominationCommandHandler
     private readonly IAwardNominationRepository _nominationRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly IStudentRepository _studentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -32,12 +36,14 @@ internal sealed class CreateAwardNominationCommandHandler
         IAwardNominationRepository nominationRepository,
         ICourseRepository courseRepository,
         IOfferingRepository offeringRepository,
+        IStudentRepository studentRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _nominationRepository = nominationRepository;
         _courseRepository = courseRepository;
         _offeringRepository = offeringRepository;
+        _studentRepository = studentRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<CreateAwardNominationCommand>();
     }
@@ -54,7 +60,27 @@ internal sealed class CreateAwardNominationCommandHandler
 
             return Result.Failure(AwardNominationPeriodErrors.NotFound(request.PeriodId));
         }
-        
+
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(request), request, true)
+                .Warning("Could not find Student when attempting to create nomination");
+
+            return Result.Failure(StudentErrors.NotFound(request.StudentId));
+        }
+
+        if (student.CurrentEnrolment is null)
+        {
+            _logger
+                .ForContext(nameof(request), request, true)
+                .Warning("Could not find Student enrolment when attempting to create nomination");
+
+            return Result.Failure(SchoolEnrolmentErrors.NotFound);
+        }
+
         Course? course = request.CourseId != CourseId.Empty ? await _courseRepository.GetById(request.CourseId, cancellationToken) : null;
         Offering? offering = request.OfferingId != OfferingId.Empty ? await _offeringRepository.GetById(request.OfferingId, cancellationToken) : null;
 
@@ -75,31 +101,34 @@ internal sealed class CreateAwardNominationCommandHandler
                 return Result.Failure(AwardNominationErrors.InvalidOfferingId);
         }
 
-        Nomination? nomination = request.AwardType switch
+        Result<Nomination> nomination = request.AwardType switch
         {
-            _ when request.AwardType == AwardType.FirstInSubject => new FirstInSubjectNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Grade, course.Name),
-            _ when request.AwardType == AwardType.AcademicExcellence => new AcademicExcellenceNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name),
-            _ when request.AwardType == AwardType.AcademicExcellenceMathematics => new AcademicExcellenceMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name),
-            _ when request.AwardType == AwardType.AcademicExcellenceScienceTechnology => new AcademicExcellenceScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name),
-            _ when request.AwardType == AwardType.AcademicAchievement => new AcademicAchievementNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name.Value),
-            _ when request.AwardType == AwardType.AcademicAchievementMathematics => new AcademicAchievementMathematicsNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name.Value),
-            _ when request.AwardType == AwardType.AcademicAchievementScienceTechnology => new AcademicAchievementScienceTechnologyNomination(request.PeriodId, request.StudentId, request.CourseId, course!.Name, request.OfferingId, offering!.Name.Value),
-            _ when request.AwardType == AwardType.PrincipalsAward => new PrincipalsAwardNomination(request.PeriodId, request.StudentId),
-            _ when request.AwardType == AwardType.GalaxyMedal => new GalaxyMedalNomination(request.PeriodId, request.StudentId),
-            _ when request.AwardType == AwardType.UniversalAchiever => new UniversalAchieverNomination(request.PeriodId, request.StudentId),
-            _ => null
+            _ when request.AwardType == AwardType.FirstInSubject => FirstInSubjectNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Grade, course.Name),
+            _ when request.AwardType == AwardType.FirstInSubjectMathematics => FirstInSubjectMathematicsNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Grade, course.Name),
+            _ when request.AwardType == AwardType.FirstInSubjectScienceTechnology => FirstInSubjectScienceTechnologyNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Grade, course.Name),
+            _ when request.AwardType == AwardType.AcademicExcellence => AcademicExcellenceNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Name, course!.Grade, request.OfferingId, offering!.Name),
+            _ when request.AwardType == AwardType.AcademicExcellenceMathematics => AcademicExcellenceMathematicsNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Name, course!.Grade, request.OfferingId, offering!.Name),
+            _ when request.AwardType == AwardType.AcademicExcellenceScienceTechnology => AcademicExcellenceScienceTechnologyNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Name, course!.Grade, request.OfferingId, offering!.Name),
+            _ when request.AwardType == AwardType.AcademicAchievement => AcademicAchievementNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Name, course!.Grade, request.OfferingId, offering!.Name.Value),
+            _ when request.AwardType == AwardType.AcademicAchievementMathematics => AcademicAchievementMathematicsNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Name, course!.Grade, request.OfferingId, offering!.Name.Value),
+            _ when request.AwardType == AwardType.AcademicAchievementScienceTechnology => AcademicAchievementScienceTechnologyNomination.Create(request.PeriodId, request.StudentId, request.CourseId, course!.Name, course!.Grade, request.OfferingId, offering!.Name.Value),
+            _ when request.AwardType == AwardType.PrincipalsAward => PrincipalsAwardNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
+            _ when request.AwardType == AwardType.GalaxyMedal => GalaxyMedalNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
+            _ when request.AwardType == AwardType.UniversalAchiever => UniversalAchieverNomination.Create(request.PeriodId, request.StudentId, student.CurrentEnrolment!.Grade),
+            _ => Result.Failure<Nomination>(AwardNominationErrors.NotRecognised)
         };
         
-        if (nomination is null)
+        if (nomination.IsFailure)
         {
             _logger
                 .ForContext(nameof(request), request, true)
-                .Warning("Unknown award type: could not be created");
+                .ForContext(nameof(Error), nomination.Error, true)
+                .Warning("Failed to create new award");
 
-            return Result.Failure(AwardNominationErrors.NotRecognised);
+            return Result.Failure(nomination.Error);
         }
 
-        Result addNomination = period.AddNomination(nomination);
+        Result addNomination = period.AddNomination(nomination.Value);
 
         if (addNomination.IsFailure)
         {

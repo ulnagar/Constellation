@@ -4,10 +4,13 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Enums;
+using Errors;
 using Extensions;
 using Identifiers;
 using Primitives;
+using Shared;
 using System;
+using System.Linq;
 using ValueObjects;
 
 public abstract class Nomination : IFullyAuditableEntity
@@ -37,7 +40,7 @@ public abstract class Nomination : IFullyAuditableEntity
 
 public sealed class FirstInSubjectNomination : Nomination
 {
-    public FirstInSubjectNomination(
+    private FirstInSubjectNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId, 
@@ -52,6 +55,24 @@ public sealed class FirstInSubjectNomination : Nomination
         CourseId = courseId;
         Grade = grade;
         CourseName = courseName;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        Grade grade,
+        string courseName)
+    {
+        if (AwardType.FirstInSubject.Grades.Any() && !AwardType.FirstInSubject.Grades.Contains(grade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.FirstInSubject, grade));
+
+        return new FirstInSubjectNomination(
+            periodId,
+            studentId,
+            courseId,
+            grade,
+            courseName);
     }
 
     public CourseId CourseId { get; private set; }
@@ -72,9 +93,119 @@ public sealed class FirstInSubjectNomination : Nomination
             : $"First in Course";
 }
 
+public sealed class FirstInSubjectMathematicsNomination : Nomination
+{
+    private FirstInSubjectMathematicsNomination(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        Grade grade,
+        string courseName)
+    {
+        Id = new();
+        PeriodId = periodId;
+        StudentId = studentId;
+        AwardType = AwardType.FirstInSubjectMathematics;
+
+        CourseId = courseId;
+        Grade = grade;
+        CourseName = courseName;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        Grade grade,
+        string courseName)
+    {
+        if (AwardType.FirstInSubjectMathematics.Grades.Any() && !AwardType.FirstInSubjectMathematics.Grades.Contains(grade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.FirstInSubjectMathematics, grade));
+
+        return new FirstInSubjectMathematicsNomination(
+            periodId,
+            studentId,
+            courseId,
+            grade,
+            courseName);
+    }
+
+    public CourseId CourseId { get; private set; }
+    public string CourseName { get; private set; }
+    public Grade Grade { get; private set; }
+
+    public void UpdateCourseName(string courseName) => CourseName = courseName;
+
+    public override string ToString() => $"{AwardType.ToString()} in {Grade.AsName()} {CourseName}";
+
+    public override string GetDescription(bool showGrade = true, bool showClass = true) =>
+        (showClass && showGrade)
+            ? $"First in Course - Mathematics - {Grade.AsName()} {CourseName}"
+            : (showClass)
+                ? $"First in Course - Mathematics - {CourseName}"
+                : (showGrade)
+                    ? $"First in Course - Mathematics - {Grade.AsName()}"
+                    : $"First in Course - Mathematics";
+}
+
+public sealed class FirstInSubjectScienceTechnologyNomination : Nomination
+{
+    private FirstInSubjectScienceTechnologyNomination(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        Grade grade,
+        string courseName)
+    {
+        Id = new();
+        PeriodId = periodId;
+        StudentId = studentId;
+        AwardType = AwardType.FirstInSubjectScienceTechnology;
+
+        CourseId = courseId;
+        Grade = grade;
+        CourseName = courseName;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        Grade grade,
+        string courseName)
+    {
+        if (AwardType.FirstInSubjectScienceTechnology.Grades.Any() && !AwardType.FirstInSubjectScienceTechnology.Grades.Contains(grade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.FirstInSubjectScienceTechnology, grade));
+
+        return new FirstInSubjectScienceTechnologyNomination(
+            periodId,
+            studentId,
+            courseId,
+            grade,
+            courseName);
+    }
+
+    public CourseId CourseId { get; private set; }
+    public string CourseName { get; private set; }
+    public Grade Grade { get; private set; }
+
+    public void UpdateCourseName(string courseName) => CourseName = courseName;
+
+    public override string ToString() => $"{AwardType.ToString()} in {Grade.AsName()} {CourseName}";
+
+    public override string GetDescription(bool showGrade = true, bool showClass = true) =>
+        (showClass && showGrade)
+            ? $"First in Course - Science and Technology - {Grade.AsName()} {CourseName}"
+            : (showClass)
+                ? $"First in Course - Science and Technology - {CourseName}"
+                : (showGrade)
+                    ? $"First in Course - Science and Technology - {Grade.AsName()}"
+                    : $"First in Course - Science and Technology";
+}
+
 public sealed class AcademicExcellenceNomination : Nomination
 {
-    public AcademicExcellenceNomination(
+    private AcademicExcellenceNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId,
@@ -91,6 +222,27 @@ public sealed class AcademicExcellenceNomination : Nomination
         CourseName = courseName;
         OfferingId = offeringId;
         ClassName = className;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        string courseName,
+        Grade courseGrade,
+        OfferingId offeringId,
+        string className)
+    {
+        if (AwardType.AcademicExcellence.Grades.Any() && !AwardType.AcademicExcellence.Grades.Contains(courseGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicExcellence, courseGrade));
+
+        return new AcademicExcellenceNomination(
+            periodId,
+            studentId,
+            courseId,
+            courseName,
+            offeringId,
+            className);
     }
 
     public CourseId CourseId { get; private set; }
@@ -111,7 +263,7 @@ public sealed class AcademicExcellenceNomination : Nomination
 
 public sealed class AcademicExcellenceMathematicsNomination : Nomination
 {
-    public AcademicExcellenceMathematicsNomination(
+    private AcademicExcellenceMathematicsNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId,
@@ -128,6 +280,27 @@ public sealed class AcademicExcellenceMathematicsNomination : Nomination
         CourseName = courseName;
         OfferingId = offeringId;
         ClassName = className;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        string courseName,
+        Grade courseGrade,
+        OfferingId offeringId,
+        string className)
+    {
+        if (AwardType.AcademicExcellenceMathematics.Grades.Any() && !AwardType.AcademicExcellenceMathematics.Grades.Contains(courseGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicExcellenceMathematics, courseGrade));
+
+        return new AcademicExcellenceMathematicsNomination(
+            periodId,
+            studentId,
+            courseId,
+            courseName,
+            offeringId,
+            className);
     }
 
     public CourseId CourseId { get; private set; }
@@ -148,7 +321,7 @@ public sealed class AcademicExcellenceMathematicsNomination : Nomination
 
 public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
 {
-    public AcademicExcellenceScienceTechnologyNomination(
+    private AcademicExcellenceScienceTechnologyNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId,
@@ -165,6 +338,27 @@ public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
         CourseName = courseName;
         OfferingId = offeringId;
         ClassName = className;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        string courseName,
+        Grade courseGrade,
+        OfferingId offeringId,
+        string className)
+    {
+        if (AwardType.AcademicExcellenceScienceTechnology.Grades.Any() && !AwardType.AcademicExcellenceScienceTechnology.Grades.Contains(courseGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicExcellenceScienceTechnology, courseGrade));
+
+        return new AcademicExcellenceScienceTechnologyNomination(
+            periodId,
+            studentId,
+            courseId,
+            courseName,
+            offeringId,
+            className);
     }
 
     public CourseId CourseId { get; private set; }
@@ -185,7 +379,7 @@ public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
 
 public sealed class AcademicAchievementNomination : Nomination
 {
-    public AcademicAchievementNomination(
+    private AcademicAchievementNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId,
@@ -202,6 +396,27 @@ public sealed class AcademicAchievementNomination : Nomination
         CourseName = courseName;
         OfferingId = offeringId;
         ClassName = className;
+    }
+    
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        string courseName,
+        Grade courseGrade,
+        OfferingId offeringId,
+        string className)
+    {
+        if (AwardType.AcademicAchievement.Grades.Any() && !AwardType.AcademicAchievement.Grades.Contains(courseGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicAchievement, courseGrade));
+
+        return new AcademicAchievementNomination(
+            periodId,
+            studentId,
+            courseId,
+            courseName,
+            offeringId,
+            className);
     }
 
     public CourseId CourseId { get; private set; }
@@ -221,7 +436,7 @@ public sealed class AcademicAchievementNomination : Nomination
 
 public sealed class AcademicAchievementMathematicsNomination : Nomination
 {
-    public AcademicAchievementMathematicsNomination(
+    private AcademicAchievementMathematicsNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId,
@@ -238,6 +453,27 @@ public sealed class AcademicAchievementMathematicsNomination : Nomination
         CourseName = courseName;
         OfferingId = offeringId;
         ClassName = className;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        string courseName,
+        Grade courseGrade,
+        OfferingId offeringId,
+        string className)
+    {
+        if (AwardType.AcademicAchievementMathematics.Grades.Any() && !AwardType.AcademicAchievementMathematics.Grades.Contains(courseGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicAchievementMathematics, courseGrade));
+
+        return new AcademicAchievementMathematicsNomination(
+            periodId,
+            studentId,
+            courseId,
+            courseName,
+            offeringId,
+            className);
     }
 
     public CourseId CourseId { get; private set; }
@@ -257,7 +493,7 @@ public sealed class AcademicAchievementMathematicsNomination : Nomination
 
 public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
 {
-    public AcademicAchievementScienceTechnologyNomination(
+    private AcademicAchievementScienceTechnologyNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId,
         CourseId courseId,
@@ -274,6 +510,27 @@ public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
         CourseName = courseName;
         OfferingId = offeringId;
         ClassName = className;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        CourseId courseId,
+        string courseName,
+        Grade courseGrade,
+        OfferingId offeringId,
+        string className)
+    {
+        if (AwardType.AcademicAchievementScienceTechnology.Grades.Any() && !AwardType.AcademicAchievementScienceTechnology.Grades.Contains(courseGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicAchievementScienceTechnology, courseGrade));
+
+        return new AcademicAchievementScienceTechnologyNomination(
+            periodId,
+            studentId,
+            courseId,
+            courseName,
+            offeringId,
+            className);
     }
 
     public CourseId CourseId { get; private set; }
@@ -293,7 +550,7 @@ public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
 
 public sealed class PrincipalsAwardNomination : Nomination
 {
-    public PrincipalsAwardNomination(
+    private PrincipalsAwardNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId)
     {
@@ -303,6 +560,19 @@ public sealed class PrincipalsAwardNomination : Nomination
         AwardType = AwardType.PrincipalsAward;
     }
 
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        Grade studentGrade)
+    {
+        if (AwardType.PrincipalsAward.Grades.Any() && !AwardType.PrincipalsAward.Grades.Contains(studentGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.PrincipalsAward, studentGrade));
+
+        return new PrincipalsAwardNomination(
+            periodId,
+            studentId);
+    }
+
     public override string ToString() => $"{AwardType.ToString()}";
 
     public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Principals Award";
@@ -310,7 +580,7 @@ public sealed class PrincipalsAwardNomination : Nomination
 
 public sealed class GalaxyMedalNomination : Nomination
 {
-    public GalaxyMedalNomination(
+    private GalaxyMedalNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId)
     {
@@ -320,6 +590,19 @@ public sealed class GalaxyMedalNomination : Nomination
         AwardType = AwardType.GalaxyMedal;
     }
 
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        Grade studentGrade)
+    {
+        if (AwardType.GalaxyMedal.Grades.Any() && !AwardType.GalaxyMedal.Grades.Contains(studentGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.GalaxyMedal, studentGrade));
+
+        return new GalaxyMedalNomination(
+            periodId,
+            studentId);
+    }
+
     public override string ToString() => $"{AwardType.ToString()}";
 
     public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Galaxy Medal";
@@ -327,7 +610,7 @@ public sealed class GalaxyMedalNomination : Nomination
 
 public sealed class UniversalAchieverNomination : Nomination
 {
-    public UniversalAchieverNomination(
+    private UniversalAchieverNomination(
         AwardNominationPeriodId periodId,
         StudentId studentId)
     {
@@ -335,6 +618,19 @@ public sealed class UniversalAchieverNomination : Nomination
         PeriodId = periodId;
         StudentId = studentId;
         AwardType = AwardType.UniversalAchiever;
+    }
+
+    public static Result<Nomination> Create(
+        AwardNominationPeriodId periodId,
+        StudentId studentId,
+        Grade studentGrade)
+    {
+        if (AwardType.UniversalAchiever.Grades.Any() && !AwardType.UniversalAchiever.Grades.Contains(studentGrade))
+            return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.UniversalAchiever, studentGrade));
+
+        return new UniversalAchieverNomination(
+            periodId,
+            studentId);
     }
 
     public override string ToString() => $"{AwardType.ToString()}";

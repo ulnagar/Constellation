@@ -1,8 +1,11 @@
 ﻿namespace Constellation.Core.Models.Awards.Errors;
 
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Shared;
+using Enums;
+using Extensions;
+using Identifiers;
+using Shared;
 using System;
+using ValueObjects;
 
 public static class AwardNominationErrors
 {
@@ -25,4 +28,8 @@ public static class AwardNominationErrors
     public static readonly Error DuplicateFound = new(
         "Awards.Nomination.DuplicateFound",
         "A nomination for this award and student already exists in the period");
+
+    public static readonly Func<AwardType, Grade, Error> InvalidGrade = (type, grade) => new(
+        "Awards.Nomination.InvalidGrade",
+        $"The grade {grade.AsName()} is not valid for award type {type.Value}");
 }
