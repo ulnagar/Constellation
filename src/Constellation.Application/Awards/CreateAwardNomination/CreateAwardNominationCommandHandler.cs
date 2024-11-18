@@ -95,6 +95,8 @@ internal sealed class CreateAwardNominationCommandHandler
         if (offering is null)
         {
             if (request.AwardType != AwardType.FirstInSubject &&
+                request.AwardType != AwardType.FirstInSubjectMathematics &&
+                request.AwardType != AwardType.FirstInSubjectScienceTechnology &&
                 request.AwardType != AwardType.PrincipalsAward &&
                 request.AwardType != AwardType.GalaxyMedal &&
                 request.AwardType != AwardType.UniversalAchiever)

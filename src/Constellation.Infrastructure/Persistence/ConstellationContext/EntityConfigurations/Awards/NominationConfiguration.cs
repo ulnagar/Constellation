@@ -38,6 +38,8 @@ internal sealed class NominationConfiguration
         builder
             .HasDiscriminator(nomination => nomination.AwardType)
             .HasValue<FirstInSubjectNomination>(AwardType.FirstInSubject)
+            .HasValue<FirstInSubjectMathematicsNomination>(AwardType.FirstInSubjectMathematics)
+            .HasValue<FirstInSubjectScienceTechnologyNomination>(AwardType.FirstInSubjectScienceTechnology)
             .HasValue<AcademicExcellenceNomination>(AwardType.AcademicExcellence)
             .HasValue<AcademicExcellenceMathematicsNomination>(AwardType.AcademicExcellenceMathematics)
             .HasValue<AcademicExcellenceScienceTechnologyNomination>(AwardType.AcademicExcellenceScienceTechnology)

@@ -66,7 +66,8 @@
             var type = $('#Type').val();
             var courseId = $(this).val();
 
-            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value' || type == '@AwardType.FirstInSubject.Value') {
+            if (type == '@AwardType.GalaxyMedal.Value' || type == '@AwardType.PrincipalsAward.Value' || type == '@AwardType.UniversalAchiever.Value' ||
+                type == '@AwardType.FirstInSubject.Value' || type == '@AwardType.FirstInSubjectMathematics.Value' || type =='@AwardType.FirstInSubjectScienceTechnology.Value'.replace("&amp;", "&")) {
                 $('.spinner-overlay').removeClass('d-none');
                 $('#step4')
                     .append('<input type="text" name="Type" value="' + type + '" />')

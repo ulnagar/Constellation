@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Parents.Areas.Parents.Pages;
 
+using Application.Interfaces.Configuration;
 using Application.Models.Auth;
 using Application.ThirdPartyConsent.DoesStudentHaveRequiredApplicationWithoutConsent;
 using Constellation.Application.Common.PresentationModels;
@@ -9,6 +10,7 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Models;
 using Serilog;
 
@@ -16,15 +18,18 @@ using Serilog;
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly IOptions<ParentPortalConfiguration> _configuration;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
+        IOptions<ParentPortalConfiguration> configuration,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
+        _configuration = configuration;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
@@ -37,6 +42,9 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        if (!_configuration.Value.ShowConsent)
+            return;
+
         Result<List<StudentResponse>> studentsRequest = await _mediator.Send(new GetStudentsByParentEmailQuery(_currentUserService.EmailAddress));
 
         if (studentsRequest.IsFailure)

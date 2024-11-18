@@ -11,8 +11,8 @@ using System.Reflection;
 public sealed class AwardType : ValueObject
 {
     public static readonly AwardType FirstInSubject = new("First in Course");
-    public static readonly AwardType FirstInSubjectMathematics = new("First in Course", [Grade.Y05, Grade.Y06]);
-    public static readonly AwardType FirstInSubjectScienceTechnology = new("First in Course", [Grade.Y05, Grade.Y06]);
+    public static readonly AwardType FirstInSubjectMathematics = new("First in Course - Mathematics", [Grade.Y05, Grade.Y06]);
+    public static readonly AwardType FirstInSubjectScienceTechnology = new("First in Course - Science & Technology", [Grade.Y05, Grade.Y06]);
     public static readonly AwardType AcademicAchievement = new("Academic Achievement");
     public static readonly AwardType AcademicAchievementMathematics = new("Academic Achievement - Mathematics", [Grade.Y05, Grade.Y06]);
     public static readonly AwardType AcademicAchievementScienceTechnology = new("Academic Achievement - Science & Technology", [Grade.Y05, Grade.Y06]);

@@ -72,7 +72,7 @@ public class Step3Model : BasePageModel
         if (Type == AwardType.GalaxyMedal || Type == AwardType.PrincipalsAward || Type == AwardType.UniversalAchiever)
             return RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step4", new { area = "Staff", PeriodId, Type });
 
-        if (Type == AwardType.FirstInSubject)
+        if (Type == AwardType.FirstInSubject || Type == AwardType.FirstInSubjectMathematics || Type == AwardType.FirstInSubjectScienceTechnology)
             return RedirectToPage("/SchoolAdmin/Awards/Nominations/Nominate/Step4", new { area = "Staff", PeriodId, Type, CourseId });
 
         _logger.Information("Requested to create new Award Nomination by user {User}", _currentUserService.UserName);

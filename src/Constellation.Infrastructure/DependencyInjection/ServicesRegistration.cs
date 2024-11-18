@@ -34,6 +34,8 @@ public static class ServicesRegistration
         // Add IOptions
         services.AddOptions<AppConfiguration>();
         services.Configure<AppConfiguration>(configuration.GetSection(AppConfiguration.Section));
+        services.AddOptions<ParentPortalConfiguration>();
+        services.Configure<ParentPortalConfiguration>(configuration.GetSection(ParentPortalConfiguration.Section));
 
         // Add Constellation Context
 

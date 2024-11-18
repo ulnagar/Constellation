@@ -1,4 +1,4 @@
-﻿@model string
+﻿@model ParentNavViewModel
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -12,37 +12,40 @@
 <div class="collapse navbar-collapse" id="nav-sidebar">
     <nav class="flex-column">
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Dashboard ? "active" : "")" asp-page="/Index" asp-area="Parents" onclick="showLoader()">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Dashboard ? "active" : "")" asp-page="/Index" asp-area="Parents" onclick="showLoader()">
                 <i class="fas fa-home-lg" aria-hidden="true"></i> Home
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Attendance ? "active" : "")" asp-page="/Attendance/Index" asp-area="Parents">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Attendance ? "active" : "")" asp-page="/Attendance/Index" asp-area="Parents">
                 <i class="fas fa-calendar-day" aria-hidden="true"></i> Attendance
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Parents">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Awards ? "active" : "")" asp-page="/Awards/Index" asp-area="Parents">
                 <i class="fas fa-award" aria-hidden="true"></i> Awards
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Parents">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Reports ? "active" : "")" asp-page="/Reports/Index" asp-area="Parents">
                 <i class="fas fa-file-chart-line" aria-hidden="true"></i> Reports
             </a>
         </div>
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Parents">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Timetables ? "active" : "")" asp-page="/Timetables/Index" asp-area="Parents">
                 <i class="fas fa-clock" aria-hidden="true"></i> Timetable
             </a>
         </div>
+        @if (Model.ShowConsent)
+        {
+            <div class="nav-item px-3">
+                <a class="nav-link @(Model.ActivePage == ActivePage.ThirdParty ? "active" : "")" asp-page="/ThirdParty/Index" asp-area="Parents">
+                    <i class="fas fa-user-shield" aria-hidden="true"></i> Third Party Consent
+                </a>
+            </div>
+        }
         <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.ThirdParty ? "active" : "")" asp-page="/ThirdParty/Index" asp-area="Parents">
-                <i class="fas fa-user-shield" aria-hidden="true"></i> Third Party Consent
-            </a>
-        </div>
-        <div class="nav-item px-3">
-            <a class="nav-link @(Model == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Parents">
+            <a class="nav-link @(Model.ActivePage == ActivePage.Contacts ? "active" : "")" asp-page="/Contacts/Index" asp-area="Parents">
                 <i class="fas fa-mail-bulk" aria-hidden="true"></i> Contacts
             </a>
         </div>
