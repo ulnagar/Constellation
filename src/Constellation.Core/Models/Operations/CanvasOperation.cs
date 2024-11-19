@@ -1,4 +1,6 @@
-﻿namespace Constellation.Core.Models.Operations;
+﻿using Constellation.Core.Models.Canvas.Models;
+
+namespace Constellation.Core.Models.Operations;
 
 using Enums;
 using System;
@@ -46,13 +48,15 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
 
     public ModifyEnrolmentCanvasOperation(
         string userId,
-        string courseId,
+        CanvasCourseCode courseId,
+        CanvasSectionCode sectionId,
         CanvasAction action,
         CanvasUserType userType,
         DateTime? scheduledFor)
     {
             UserId = userId;
             CourseId = courseId;
+            SectionId = sectionId;
             Action = action;
             UserType = userType;
 
@@ -63,7 +67,8 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
     }
 
     public CanvasUserType UserType { get; private set; } = CanvasUserType.Student;
-    public string CourseId { get; private set; } = string.Empty;
+    public CanvasCourseCode CourseId { get; private set; } = CanvasCourseCode.Empty;
+    public CanvasSectionCode SectionId { get; private set; } = CanvasSectionCode.Empty;
     public CanvasAction Action { get; private set; } = CanvasAction.Add;
 }
 

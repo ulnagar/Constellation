@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 
 using Constellation.Core.Models.Operations;
+using Core.Models.Canvas.Models;
 using Core.Models.Operations.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -44,6 +45,18 @@ public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfigurat
             .HasConversion(
                 user => user.Value,
                 value => CanvasUserType.FromValue(value));
+
+        builder
+            .Property(operation => operation.CourseId)
+            .HasConversion(
+                courseId => courseId.ToString(),
+                value => CanvasCourseCode.FromValue(value));
+
+        builder
+            .Property(operation => operation.SectionId)
+            .HasConversion(
+                sectionId => sectionId.ToString(),
+                value => CanvasSectionCode.FromValue(value));
     }
 }
 

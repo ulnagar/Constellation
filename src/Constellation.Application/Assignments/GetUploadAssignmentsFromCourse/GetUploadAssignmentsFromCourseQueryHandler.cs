@@ -72,6 +72,7 @@ internal sealed class GetUploadAssignmentsFromCourseQueryHandler
 
                 response.Add(new(
                     assignment.Name,
+                    courseId,
                     assignment.CanvasId,
                     assignment.DueDate,
                     assignment.LockDate,

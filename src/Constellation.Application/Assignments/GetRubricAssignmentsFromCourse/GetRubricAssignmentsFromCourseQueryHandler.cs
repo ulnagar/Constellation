@@ -56,9 +56,8 @@ internal sealed class GetRubricAssignmentsFromCourseQueryHandler
         }
         List<CanvasCourseCode> canvasCourseIds = offerings
             .SelectMany(offering => offering.Resources)
-            .Where(resource => resource.Type == ResourceType.CanvasCourse)
-        .Select(resource => resource as CanvasCourseResource)
-        .Select(resource => resource.CourseId)
+            .OfType<CanvasCourseResource>()
+            .Select(resource => resource.CourseId)
             .Distinct()
             .ToList();
 
@@ -72,6 +71,7 @@ internal sealed class GetRubricAssignmentsFromCourseQueryHandler
 
                 response.Add(new(
                     assignment.Name,
+                    courseId,
                     assignment.CanvasId,
                     assignment.DueDate,
                     assignment.LockDate,

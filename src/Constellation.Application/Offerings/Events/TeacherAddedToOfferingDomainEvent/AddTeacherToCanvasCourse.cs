@@ -12,6 +12,7 @@ using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
 using Core.Models.Operations.Enums;
 using Serilog;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,11 +66,16 @@ internal sealed class AddTeacherToCanvasCourse
             return;
         }
 
-        foreach (Resource resource in offering.Resources.Where(resource => resource.Type == ResourceType.CanvasCourse))
+        List<CanvasCourseResource> resources = offering.Resources
+            .OfType<CanvasCourseResource>()
+            .ToList();
+
+        foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 assignment.StaffId,
-                resource.ResourceId,
+                resource.CourseId,
+                resource.SectionId,
                 CanvasAction.Add,
                 CanvasUserType.Teacher,
                 _dateTime.Now);

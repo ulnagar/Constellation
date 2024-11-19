@@ -1,4 +1,5 @@
-﻿namespace Constellation.Core.Models.Offerings;
+﻿#nullable enable
+namespace Constellation.Core.Models.Offerings;
 
 using Canvas.Models;
 using Errors;
@@ -93,7 +94,7 @@ public sealed class Offering : AggregateRoot
         string staffId,
         AssignmentType type)
     {
-        TeacherAssignment assignment = _teachers.FirstOrDefault(assignment =>
+        TeacherAssignment? assignment = _teachers.FirstOrDefault(assignment =>
             assignment.StaffId == staffId &&
             assignment.Type == type &&
             !assignment.IsDeleted);
@@ -128,7 +129,7 @@ public sealed class Offering : AggregateRoot
 
     public Result RemoveSession(SessionId sessionId)
     {
-        Session session = _sessions.FirstOrDefault(session => session.Id == sessionId);
+        Session? session = _sessions.FirstOrDefault(session => session.Id == sessionId);
 
         if (session is null)
             return Result.Failure(OfferingErrors.RemoveSession.NotFound);
@@ -140,10 +141,8 @@ public sealed class Offering : AggregateRoot
 
     public void RemoveAllSessions()
     {
-        foreach (Session session in _sessions)
+        foreach (Session session in _sessions.Where(session => !session.IsDeleted))
         {
-            if (session.IsDeleted) continue;
-
             session.Delete();
         }
     }
@@ -153,12 +152,12 @@ public sealed class Offering : AggregateRoot
         string resourceId,
         string name,
         string url,
-        string additional = "")
+        string? additional = null)
     {
         if (_resources.Any(resource => resource.Type == type && resource.ResourceId == resourceId))
             return Result.Success();
 
-        Resource resource = type switch
+        Resource? resource = type switch
         {
             _ when type == ResourceType.MicrosoftTeam => new MicrosoftTeamResource(Id, resourceId, name, url),
             _ when type == ResourceType.CanvasCourse => new CanvasCourseResource(Id, CanvasCourseCode.FromValue(resourceId), string.IsNullOrWhiteSpace(additional) ? CanvasSectionCode.Empty : CanvasSectionCode.FromValue(additional), name, url),
@@ -178,7 +177,7 @@ public sealed class Offering : AggregateRoot
     public Result<Resource> RemoveResource(
         ResourceId resourceId)
     {
-        Resource resource = _resources.FirstOrDefault(resource =>
+        Resource? resource = _resources.FirstOrDefault(resource =>
             resource.Id == resourceId);
 
         if (resource is null)

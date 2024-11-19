@@ -64,7 +64,10 @@ internal sealed class RemoveTeachersFromCanvasCourseResource
 
         CanvasCourseResource resource = notification.Resource as CanvasCourseResource;
 
-        List<string> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
+        List<string> staffIds = offering.Teachers
+            .Where(assignment => !assignment.IsDeleted)
+            .Select(assignment => assignment.StaffId)
+            .ToList();
 
         List<Staff> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
 
@@ -72,7 +75,8 @@ internal sealed class RemoveTeachersFromCanvasCourseResource
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 staffMember.StaffId,
-                resource.CourseId.ToString(),
+                resource!.CourseId, 
+                resource.SectionId,
                 CanvasAction.Remove,
                 CanvasUserType.Teacher,
                 _dateTime.Now);

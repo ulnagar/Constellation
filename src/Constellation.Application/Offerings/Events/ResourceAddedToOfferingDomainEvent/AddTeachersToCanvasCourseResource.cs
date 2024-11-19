@@ -82,7 +82,8 @@ internal sealed class AddTeachersToCanvasCourseResource
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 staffMember.StaffId,
-                resource.CourseId.ToString(),
+                resource.CourseId,
+                resource.SectionId,
                 CanvasAction.Add,
                 CanvasUserType.Teacher,
                 _dateTime.Now);

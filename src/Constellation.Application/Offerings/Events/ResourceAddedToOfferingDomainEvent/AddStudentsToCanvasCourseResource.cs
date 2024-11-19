@@ -66,7 +66,7 @@ internal sealed class AddStudentsToCanvasCourseResource
         }
 
         CanvasCourseResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as CanvasCourseResource;
-
+        
         if (resource is null)
         {
             _logger
@@ -83,7 +83,8 @@ internal sealed class AddStudentsToCanvasCourseResource
         {
             ModifyEnrolmentCanvasOperation operation = new(
                 student.StudentReferenceNumber.Number,
-                resource.CourseId.ToString(),
+                resource.CourseId,
+                resource.SectionId,
                 CanvasAction.Add,
                 CanvasUserType.Student,
                 _dateTime.Now);

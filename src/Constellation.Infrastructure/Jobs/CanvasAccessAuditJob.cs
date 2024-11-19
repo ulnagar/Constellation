@@ -89,7 +89,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                 Result enrolAttempt = _configuration.UseSections switch
                 {
-                    true when missingEnrolment.PermissionLevel == CanvasPermissionLevel.Student =>
+                    true when missingEnrolment.PermissionLevel == CanvasPermissionLevel.Student && missingEnrolment.SectionId != CanvasSectionCode.Empty =>
                         await _gateway.EnrolToSection(missingEnrolment.UserId, missingEnrolment.SectionId, missingEnrolment.PermissionLevel, cancellationToken),
                     true =>
                         await _gateway.EnrolToCourse(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.PermissionLevel, cancellationToken),
