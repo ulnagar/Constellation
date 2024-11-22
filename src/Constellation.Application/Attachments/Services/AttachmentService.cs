@@ -119,7 +119,9 @@ internal sealed class AttachmentService : IAttachmentService
             };
 
             // Store file on disk
-            string filePath = $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
+            string filePath = attachment.LinkType == AttachmentType.TempFile ?
+                $"{basePath}/{attachment.LinkType.Value}/{attachment.Id}.{extension}" :
+                $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
 
             Result attempt = attachment.AttachPath(filePath, fileData.Length, BitConverter.ToString(checksum).Replace("-", string.Empty), overwrite);
 
