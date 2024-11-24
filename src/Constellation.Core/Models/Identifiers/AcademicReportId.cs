@@ -1,13 +1,13 @@
-﻿namespace Constellation.Core.Models.Reports.Identifiers;
+﻿namespace Constellation.Core.Models.Identifiers;
 
 using Constellation.Core.Primitives;
 using System;
 
-public readonly record struct AcademicReportId(Guid Value)
+public sealed record AcademicReportId(Guid Value)
     : IStronglyTypedId
 {
-    public static AcademicReportId FromValue(Guid value) =>
-        new(value);
+    public static AcademicReportId FromValue(Guid Value) =>
+        new(Value);
 
     public AcademicReportId()
         : this(Guid.NewGuid()) { }

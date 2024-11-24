@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Reports.GetAcademicReportList;
 
-using Constellation.Core.Models.Reports.Identifiers;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record AcademicReportResponse(
     AcademicReportId Id,

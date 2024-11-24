@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Reports.GetStudentReportsForSchool;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Reports.Identifiers;
+using Constellation.Core.Models.Identifiers;
 
 public sealed record SchoolStudentReportResponse(
         string StudentId,

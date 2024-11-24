@@ -3,11 +3,9 @@
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Reports.Events;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
-using Constellation.Core.Models.Reports.Events;
-using Constellation.Core.Models.Reports.Identifiers;
-using Constellation.Core.Models.Reports.Repositories;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Errors;
@@ -19,7 +17,7 @@ using Moq;
 
 public class EmailToNonResidentialParentsTests
 {
-    private readonly Mock<IReportRepository> _reportRepositoryMock;
+    private readonly Mock<IAcademicReportRepository> _reportRepositoryMock;
     private readonly Mock<IStudentRepository> _studentRepositoryMock;
     private readonly Mock<IFamilyRepository> _familyRepositoryMock;
     private readonly Mock<IAttachmentService> _attachmentServiceMock;
@@ -45,7 +43,7 @@ public class EmailToNonResidentialParentsTests
         var notification = new AcademicReportCreatedDomainEvent(new DomainEventId(), new AcademicReportId());
 
         _reportRepositoryMock.Setup(
-            x => x.GetAcademicReportById(
+            x => x.GetById(
                 It.IsAny<AcademicReportId>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => null)
@@ -100,7 +98,7 @@ public class EmailToNonResidentialParentsTests
             "Year 7, Semester 1, 2023");
 
         _reportRepositoryMock.Setup(
-            x => x.GetAcademicReportById(
+            x => x.GetById(
                 It.IsAny<AcademicReportId>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => academicReport)
@@ -155,7 +153,7 @@ public class EmailToNonResidentialParentsTests
             "Year 7, Semester 1, 2023");
 
         _reportRepositoryMock.Setup(
-            x => x.GetAcademicReportById(
+            x => x.GetById(
                 It.IsAny<AcademicReportId>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => academicReport)

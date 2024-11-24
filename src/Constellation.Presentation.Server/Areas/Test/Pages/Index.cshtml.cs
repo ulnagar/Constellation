@@ -2,14 +2,9 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Interfaces.Gateways;
 using BaseModels;
-using Constellation.Core.Models.Attachments.Repository;
-using Constellation.Core.Models.Attachments.Services;
 using Constellation.Core.Models.Students;
-using Constellation.Presentation.Shared.Helpers.Attributes;
-using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
-using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;
@@ -17,20 +12,13 @@ using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using System;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Net.Mail;
-using System.Net.Mime;
 using System.Text;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly IAttachmentService _attachmentService;
-    private readonly IAttachmentRepository _attachmentRepository;
-    private readonly IDateTimeProvider _dateTime;
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IEmailGateway _emailGateway;
@@ -38,115 +26,19 @@ public class IndexModel : BasePageModel
 
     public IndexModel(
         IMediator mediator,
-        IAttachmentService attachmentService,
-        IAttachmentRepository attachmentRepository,
-        IDateTimeProvider dateTime,
-
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         IEmailGateway emailGateway,
         ILogger logger)
     {
         _mediator = mediator;
-        _attachmentService = attachmentService;
-        _attachmentRepository = attachmentRepository;
-        _dateTime = dateTime;
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _emailGateway = emailGateway;
         _logger = logger;
     }
 
-    [AllowExtensions(FileExtensions: "zip", ErrorMessage = "You can only upload zip files")]
-    [BindProperty]
-    public IFormFile? FormFile { get; set; }
-
-    public List<Core.Models.Attachments.Attachment> Files { get; set; } = new();
-    public List<string> Messages { get; set; } = new();
-
-    public async Task OnGet()
-    {
-        List<Core.Models.Attachments.Attachment> existingFiles = await _attachmentRepository.GetTempFiles();
-    }
-
-    // 1. Upload ZIP file of reports
-    // 2. Auto match each file to a student
-    // 3. User manual match any other files
-    // 4. User select files
-    // 4.1 Files are emailed to parents with ?custom? email body
-    // 4.2 Files are saved as reports to be downloaded in parent portal
-    // 5. Remaining files are flushed from db and disk
-    // 5.1 User selects purge
-    // 5.2 AttachmentManagementJob purges automatically after 1 month
-
-    public async Task OnPost()
-    {
-        if (FormFile is null)
-            return;
-        
-        try
-        {
-            await using MemoryStream target = new();
-            await FormFile.CopyToAsync(target);
-
-            using ZipArchive archive = new(target, ZipArchiveMode.Read);
-            foreach (var entry in archive.Entries)
-            {
-                StudentId studentId = await MatchFile(entry.Name);
-
-                Core.Models.Attachments.Attachment tempFile;
-
-                if (studentId == StudentId.Empty)
-                    tempFile = Core.Models.Attachments.Attachment.CreateTempFileAttachment(entry.Name, MediaTypeNames.Application.Zip, string.Empty, _dateTime.Now);
-                else
-                    tempFile = Core.Models.Attachments.Attachment.CreateTempFileAttachment(entry.Name, MediaTypeNames.Application.Zip,  studentId.ToString(), _dateTime.Now);
-
-                Stream entryData = entry.Open();
-                using MemoryStream tempStream = new();
-                await entryData.CopyToAsync(tempStream);
-                byte[] fileData = tempStream.ToArray();
-
-                Result attempt = await _attachmentService.StoreAttachmentData(tempFile, fileData, true);
-
-                if (attempt.IsFailure)
-                {
-                    // Log file that was not extracted
-                    _logger
-                        .ForContext(nameof(ZipArchiveEntry), entry.Name)
-                        .ForContext(nameof(Error), attempt.Error, true)
-                        .Warning("Failed to extract file from archive");
-
-                    Messages.Add($"Could not save file: {entry.Name}");
-
-                    continue;
-                }
-
-                _attachmentRepository.Insert(tempFile);
-            }
-        }
-        catch (Exception ex)
-        {
-            return;
-        }
-        
-        return;
-    }
-
-    private async Task<StudentId> MatchFile(string fileName)
-    {
-        var splitName = fileName.Split('-');
-
-        var index = Array.IndexOf(splitName, "patm");
-        if (index == -1)
-            index = Array.IndexOf(splitName, "patr");
-        if (index == -1)
-            return StudentId.Empty;
-
-        var names = splitName[..index];
-
-        return await _studentRepository.GetStudentIdFromNameFragments(names);
-    }
-
+    public async Task OnGet() { }
     
     public async Task<IActionResult> OnGetDownload()
     {
