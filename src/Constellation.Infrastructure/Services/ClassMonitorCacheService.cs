@@ -1,158 +1,163 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Infrastructure.Services;
+
+using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Casuals;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Core.Models;
+using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Constellation.Infrastructure.Services
+// Reviewed for ASYNC Operations
+public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonService
 {
-    // Reviewed for ASYNC Operations
-    public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonService
+    private readonly IServiceScopeFactory _scopeFactory;
+    private ClassMonitorDtos Cache { get; set; }
+
+    private ICollection<ClassMonitorDtos.MonitorCourse> Statuses { get; set; }
+
+    public ClassMonitorCacheService(IServiceScopeFactory scopeFactory)
     {
-        private readonly IServiceScopeFactory _scopeFactory;
-        private ClassMonitorDtos Cache { get; set; }
+        _scopeFactory = scopeFactory;
+        Statuses = new List<ClassMonitorDtos.MonitorCourse>();
+    }
 
-        private ICollection<ClassMonitorDtos.MonitorCourse> Statuses { get; set; }
-
-        public ClassMonitorCacheService(IServiceScopeFactory scopeFactory)
+    public async Task<ClassMonitorDtos> GetData()
+    {
+        if (Cache == null || DateTime.Now.Subtract(Cache.Refreshed) > new TimeSpan(1, 0, 0))
         {
-            _scopeFactory = scopeFactory;
-            Statuses = new List<ClassMonitorDtos.MonitorCourse>();
+            await InitCache();
         }
 
-        public async Task<ClassMonitorDtos> GetData()
+        return Cache;
+    }
+
+    public void UpdateScan(ICollection<ClassMonitorDtos.MonitorCourse> courses)
+    {
+        Statuses = courses;
+    }
+
+    public async Task<ICollection<ClassMonitorDtos.MonitorCourse>> GetCurrentStatus()
+    {
+        return await Task.FromResult(Statuses);
+    }
+
+    private async Task InitCache()
+    {
+        Cache = new ClassMonitorDtos();
+
+        var cacheTasks = new List<Task>
         {
-            if (Cache == null || DateTime.Now.Subtract(Cache.Refreshed) > new TimeSpan(1, 0, 0))
+            GetCourses(),
+            GetPeriods(),
+            GetUsers()
+        };
+
+        await Task.WhenAll(cacheTasks);
+        Cache.Refreshed = DateTime.Now;
+    }
+
+    private async Task GetUsers()
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var students = await context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var staff = await context
+            .Set<Staff>()
+            .Where(teacher => !teacher.IsDeleted)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var casuals = await context
+            .Set<Casual>()
+            .Where(casual => !casual.IsDeleted)
+            .AsNoTracking()
+            .ToListAsync();
+
+        foreach (var student in students)
+        {
+            //var dto = new ClassMonitorDtos.MonitorUser
+            //{
+            //    Id = student.StudentId,
+            //    DisplayName = student.DisplayName,
+            //    Gender = student.Gender,
+            //    UserType = "Student",
+            //    UserPrincipalId = student.AdobeConnectPrincipalId,
+            //    IsDeleted = student.IsDeleted
+            //};
+
+            //Cache.Users.Add(dto);
+        }
+
+        foreach (var teacher in staff)
+        {
+            var dto = new ClassMonitorDtos.MonitorUser
             {
-                await InitCache();
-            }
-
-            return Cache;
-        }
-
-        public void UpdateScan(ICollection<ClassMonitorDtos.MonitorCourse> courses)
-        {
-            Statuses = courses;
-        }
-
-        public async Task<ICollection<ClassMonitorDtos.MonitorCourse>> GetCurrentStatus()
-        {
-            return await Task.FromResult(Statuses);
-        }
-
-        private async Task InitCache()
-        {
-            Cache = new ClassMonitorDtos();
-
-            var cacheTasks = new List<Task>
-            {
-                GetCourses(),
-                GetPeriods(),
-                GetUsers()
+                Id = teacher.StaffId,
+                DisplayName = teacher.DisplayName,
+                UserType = "Staff",
+                UserPrincipalId = teacher.AdobeConnectPrincipalId,
+                IsDeleted = teacher.IsDeleted
             };
 
-            await Task.WhenAll(cacheTasks);
-            Cache.Refreshed = DateTime.Now;
+            Cache.Users.Add(dto);
         }
 
-        private async Task GetUsers()
+        foreach (var casual in casuals)
         {
-            using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            var students = await context.Students
-                .Where(student => !student.IsDeleted)
-                .AsNoTracking()
-                .ToListAsync();
-
-            var staff = await context.Staff
-                .Where(teacher => !teacher.IsDeleted)
-                .AsNoTracking()
-                .ToListAsync();
-
-            var casuals = await context.Set<Casual>()
-                .Where(casual => !casual.IsDeleted)
-                .AsNoTracking()
-                .ToListAsync();
-
-            foreach (var student in students)
+            var dto = new ClassMonitorDtos.MonitorUser
             {
-                //var dto = new ClassMonitorDtos.MonitorUser
-                //{
-                //    Id = student.StudentId,
-                //    DisplayName = student.DisplayName,
-                //    Gender = student.Gender,
-                //    UserType = "Student",
-                //    UserPrincipalId = student.AdobeConnectPrincipalId,
-                //    IsDeleted = student.IsDeleted
-                //};
+                Id = casual.Id.ToString(),
+                DisplayName = casual.DisplayName,
+                UserType = "Casual",
+                UserPrincipalId = casual.AdobeConnectId,
+                IsDeleted = casual.IsDeleted
+            };
 
-                //Cache.Users.Add(dto);
-            }
-
-            foreach (var teacher in staff)
-            {
-                var dto = new ClassMonitorDtos.MonitorUser
-                {
-                    Id = teacher.StaffId,
-                    DisplayName = teacher.DisplayName,
-                    UserType = "Staff",
-                    UserPrincipalId = teacher.AdobeConnectPrincipalId,
-                    IsDeleted = teacher.IsDeleted
-                };
-
-                Cache.Users.Add(dto);
-            }
-
-            foreach (var casual in casuals)
-            {
-                var dto = new ClassMonitorDtos.MonitorUser
-                {
-                    Id = casual.Id.ToString(),
-                    DisplayName = casual.DisplayName,
-                    UserType = "Casual",
-                    UserPrincipalId = casual.AdobeConnectId,
-                    IsDeleted = casual.IsDeleted
-                };
-
-                Cache.Users.Add(dto);
-            }
+            Cache.Users.Add(dto);
         }
+    }
 
-        private async Task GetPeriods()
+    private async Task GetPeriods()
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var periods = await context
+            .Set<TimetablePeriod>()
+            .AsNoTracking()
+            .ToListAsync();
+
+        foreach (var period in periods)
         {
-            using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            var periods = await context.Periods
-                .AsNoTracking()
-                .ToListAsync();
-
-            foreach (var period in periods)
+            var dto = new ClassMonitorDtos.MonitorPeriod
             {
-                var dto = new ClassMonitorDtos.MonitorPeriod
-                {
-                    Id = period.Id,
-                    Name = period.Name,
-                    Timetable = period.Timetable,
-                    Day = period.Day,
-                    Type = period.Type,
-                    StartTime = period.StartTime,
-                    EndTime = period.EndTime,
-                    IsCurrent = period.Day == DateTime.Now.GetDayNumber() && period.StartTime <= DateTime.Now.TimeOfDay && period.EndTime >= DateTime.Now.TimeOfDay,
-                    IsDeleted = period.IsDeleted
-                };
+                Id = period.Id,
+                Name = period.Name,
+                Timetable = period.Timetable,
+                Day = period.Day,
+                Type = period.Type,
+                StartTime = period.StartTime,
+                EndTime = period.EndTime,
+                IsCurrent = period.Day == DateTime.Now.GetDayNumber() && period.StartTime <= DateTime.Now.TimeOfDay && period.EndTime >= DateTime.Now.TimeOfDay,
+                IsDeleted = period.IsDeleted
+            };
 
-                Cache.Periods.Add(dto);
-            }
+            Cache.Periods.Add(dto);
         }
+    }
 
-        private async Task GetCourses()
-        {
+    private async Task GetCourses()
+    {
 
-        }
     }
 }

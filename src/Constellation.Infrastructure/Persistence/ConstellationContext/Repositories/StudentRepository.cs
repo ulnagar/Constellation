@@ -312,6 +312,30 @@ public class StudentRepository : IStudentRepository
                 student.AwardTally.UniversalAchievers < student.AwardTally.Astras / 125)
             .CountAsync(cancellationToken);
 
+    public async Task<StudentId> GetStudentIdFromNameFragments(
+        string[] names,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<Student> matchedStudents = _context.Set<Student>()
+            .Where(student => !student.IsDeleted);
+
+        foreach (var name in names)
+        {
+            matchedStudents = matchedStudents.Where(student =>
+                student.Name.FirstName.Contains(name) ||
+                student.Name.PreferredName.Contains(name) ||
+                student.Name.LastName.Contains(name));
+        }
+
+        if (matchedStudents.Count() == 0)
+            return StudentId.Empty;
+
+        if (matchedStudents.Count() > 1)
+            return StudentId.Empty;
+
+        return matchedStudents.First().Id;
+    }
+
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 
     public async Task<List<Student>> ForInterviewsExportAsync(
@@ -346,7 +370,8 @@ public class StudentRepository : IStudentRepository
             : offeringStudentIds.Count > 0 ? offeringStudentIds
             : gradeStudentIds;
 
-        return await _context.Students
+        return await _context
+            .Set<Student>()
             .Where(student => 
                 !student.IsDeleted &&
                 combinedIdList.Contains(student.Id))

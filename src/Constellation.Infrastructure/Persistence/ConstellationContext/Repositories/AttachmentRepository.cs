@@ -112,6 +112,14 @@ internal class AttachmentRepository : IAttachmentRepository
                 file.LinkId == linkId,
                 cancellationToken);
 
+    public async Task<List<Attachment>> GetTempFiles(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Attachment>()
+            .Where(file =>
+                file.LinkType == AttachmentType.TempFile)
+            .ToListAsync(cancellationToken);
+
     public void Insert(Attachment file) =>
         _context.Set<Attachment>().Add(file);
 

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Students.Events.StudentWithdrawnDomainEvent;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Reports.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Repository;
@@ -27,7 +28,7 @@ internal sealed class RemoveAttachments
     private readonly IAttachmentService _attachmentService;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IStudentAwardRepository _awardRepository;
-    private readonly IAcademicReportRepository _reportRepository;
+    private readonly IReportRepository _reportRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -36,7 +37,7 @@ internal sealed class RemoveAttachments
         IAttachmentService attachmentService,
         IAttachmentRepository attachmentRepository,
         IStudentAwardRepository awardRepository,
-        IAcademicReportRepository reportRepository,
+        IReportRepository reportRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -92,7 +93,7 @@ internal sealed class RemoveAttachments
             }
         }
 
-        List<AcademicReport> reportRecords = await _reportRepository.GetForStudent(student.Id, cancellationToken);
+        List<AcademicReport> reportRecords = await _reportRepository.GetAcademicReportsForStudent(student.Id, cancellationToken);
 
         foreach (AcademicReport reportRecord in reportRecords)
         {
