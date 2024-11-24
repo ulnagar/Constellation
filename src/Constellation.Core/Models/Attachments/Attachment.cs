@@ -131,6 +131,22 @@ public sealed class Attachment
         return attachment;
     }
 
+    public static Attachment CreateTempFileAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.TempFile,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
     public Result AttachData(byte[] fileData, string checksum, bool overwrite = false)
     {
         if (!string.IsNullOrWhiteSpace(FilePath) && overwrite is false)

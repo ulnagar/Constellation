@@ -6,6 +6,7 @@ using Application.Interfaces.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Reports.Repositories;
 using Constellation.Core.Models.Students;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
@@ -27,7 +28,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
     private readonly IAttachmentService _attachmentService;
     private readonly IStudentRepository _studentRepository;
     private readonly IStudentAwardRepository _awardRepository;
-    private readonly IAcademicReportRepository _reportRepository;
+    private readonly IReportRepository _reportRepository;
     private readonly IAssignmentRepository _assignmentRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
@@ -39,7 +40,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
         IAttachmentService attachmentService,
         IStudentRepository studentRepository,
         IStudentAwardRepository awardRepository,
-        IAcademicReportRepository reportRepository,
+        IReportRepository reportRepository,
         IAssignmentRepository assignmentRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
@@ -191,7 +192,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
                 }
             }
 
-            List<AcademicReport> reportRecords = await _reportRepository.GetForStudent(student.Id, cancellationToken);
+            List<AcademicReport> reportRecords = await _reportRepository.GetAcademicReportsForStudent(student.Id, cancellationToken);
 
             foreach (AcademicReport reportRecord in reportRecords)
             {

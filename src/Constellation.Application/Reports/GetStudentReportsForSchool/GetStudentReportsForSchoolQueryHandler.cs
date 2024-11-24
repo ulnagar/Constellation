@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Reports.GetStudentReportsForSchool;
 
 using Abstractions.Messaging;
-using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Reports.Repositories;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Reports;
 using Core.Models.Students;
@@ -14,11 +14,11 @@ internal sealed class GetStudentReportsForSchoolQueryHandler
     : IQueryHandler<GetStudentReportsForSchoolQuery, List<SchoolStudentReportResponse>>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly IAcademicReportRepository _reportRepository;
+    private readonly IReportRepository _reportRepository;
 
     public GetStudentReportsForSchoolQueryHandler(
         IStudentRepository studentRepository,
-        IAcademicReportRepository reportRepository)
+        IReportRepository reportRepository)
     {
         _studentRepository = studentRepository;
         _reportRepository = reportRepository;
@@ -40,7 +40,7 @@ internal sealed class GetStudentReportsForSchoolQueryHandler
             if (enrolment is null)
                 continue;
 
-            List<AcademicReport> reports = await _reportRepository.GetForStudent(student.Id, cancellationToken);
+            List<AcademicReport> reports = await _reportRepository.GetAcademicReportsForStudent(student.Id, cancellationToken);
 
             if (reports is null || reports.Count == 0)
                 continue;

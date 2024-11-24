@@ -2,6 +2,8 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Reports.Events;
+using Constellation.Core.Models.Reports.Repositories;
 using Constellation.Core.Models.Students.Repositories;
 using Core.DomainEvents;
 using Core.Models.Attachments.DTOs;
@@ -23,7 +25,7 @@ using System.Threading.Tasks;
 internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialParents
     : IDomainEventHandler<AcademicReportCreatedDomainEvent>
 {
-    private readonly IAcademicReportRepository _reportRepository;
+    private readonly IReportRepository _reportRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IAttachmentService _attachmentService;
@@ -31,7 +33,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
     private readonly ILogger _logger;
 
     public AcademicReportCreatedDomainEvent_EmailToNonResidentialParents(
-        IAcademicReportRepository reportRepository,
+        IReportRepository reportRepository,
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         IAttachmentService attachmentService,
@@ -48,7 +50,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
 
     public async Task Handle(AcademicReportCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        AcademicReport reportEntry = await _reportRepository.GetById(notification.ReportId, cancellationToken);
+        AcademicReport reportEntry = await _reportRepository.GetAcademicReportById(notification.ReportId, cancellationToken);
 
         if (reportEntry is null)
         {

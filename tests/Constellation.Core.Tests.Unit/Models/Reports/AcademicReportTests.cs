@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Core.Tests.Unit.Models.Reports;
 
-using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
-using Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Reports.Events;
 
 public class AcademicReportTests
 {
@@ -12,8 +10,8 @@ public class AcademicReportTests
     {
         // Arrange
         var sut = AcademicReport.Create(
-            new AcademicReportId(),
-            new StudentId(),
+            new(),
+            new(),
             "1234",
             "2023",
             "Year 7, Semester 1, 2023");

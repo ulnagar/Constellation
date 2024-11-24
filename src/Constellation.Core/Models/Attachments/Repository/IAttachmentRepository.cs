@@ -18,6 +18,7 @@ public interface IAttachmentRepository
     Task<Attachment?> GetTrainingCertificateByLinkId(string linkId, CancellationToken cancellationToken = default);
     Task<Attachment?> GetAcademicReportByLinkId(string linkId, CancellationToken cancellationToken = default);
     Task<bool> DoesAwardCertificateExistInDatabase(string linkId, CancellationToken cancellationToken = default);
+    Task<List<Attachment>> GetTempFiles(CancellationToken cancellationToken = default);
 
     void Insert(Attachment file);
     void Remove(Attachment file);

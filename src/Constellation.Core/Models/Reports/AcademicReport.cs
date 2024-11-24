@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Reports;
 
 using Constellation.Core.Models.Students.Identifiers;
-using DomainEvents;
+using Events;
 using Identifiers;
 using Primitives;
 
@@ -41,7 +41,7 @@ public sealed class AcademicReport : AggregateRoot
             year,
             reportingPeriod);
 
-        report.RaiseDomainEvent(new AcademicReportCreatedDomainEvent(new DomainEventId(), id));
+        report.RaiseDomainEvent(new AcademicReportCreatedDomainEvent(new(), id));
 
         return report;
     }

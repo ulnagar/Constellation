@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Reports;
 
-using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
+using Constellation.Core.Models.Reports.Identifiers;
 using Constellation.Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -10,7 +10,7 @@ internal class AcademicReportConfiguration : IEntityTypeConfiguration<AcademicRe
 {
     public void Configure(EntityTypeBuilder<AcademicReport> builder)
     {
-        builder.ToTable("Reports_AcademicReports");
+        builder.ToTable("AcademicReports", "Reports");
 
         builder
             .HasKey(report => report.Id);
