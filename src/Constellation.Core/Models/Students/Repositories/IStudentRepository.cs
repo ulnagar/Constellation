@@ -48,8 +48,6 @@ public interface IStudentRepository
     Task<int> GetCountCurrentStudentsWithAwardOverages(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsWithPendingAwards(CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStudentsFromSchool(string schoolCode, CancellationToken cancellationToken = default);
-    Task<StudentId> GetStudentIdFromNameFragments(string[] names, CancellationToken cancellationToken = default);
-
 
     Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, CancellationToken cancellationToken = default);
 

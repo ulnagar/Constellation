@@ -4,6 +4,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Models;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Students;
 using Core.Primitives;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,10 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbCon
 
     public DbSet<MSTeamOperation> MSTeamOperations { get; set; }
     public DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
+    public DbSet<School> Schools { get; set; }
+    public DbSet<Student> Students { get; set; }
     public DbSet<Staff> Staff { get; set; }
+    public DbSet<TimetablePeriod> Periods { get; set; }
     public DbSet<JobActivation> JobActivations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

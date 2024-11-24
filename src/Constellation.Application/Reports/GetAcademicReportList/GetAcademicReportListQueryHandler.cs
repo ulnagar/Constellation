@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Reports.GetAcademicReportList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Models.Reports.Repositories;
+using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 internal sealed class GetAcademicReportListQueryHandler
     : IQueryHandler<GetAcademicReportListQuery, List<AcademicReportResponse>>
 {
-    private readonly IReportRepository _reportRepository;
+    private readonly IAcademicReportRepository _reportRepository;
 
     public GetAcademicReportListQueryHandler(
-        IReportRepository reportRepository)
+        IAcademicReportRepository reportRepository)
     {
         _reportRepository = reportRepository;
     }
@@ -22,7 +22,7 @@ internal sealed class GetAcademicReportListQueryHandler
     {
         List<AcademicReportResponse> results = new();
         
-        var reports = await _reportRepository.GetAcademicReportsForStudent(request.StudentId, cancellationToken);
+        var reports = await _reportRepository.GetForStudent(request.StudentId, cancellationToken);
 
         foreach (var report in reports)
         {

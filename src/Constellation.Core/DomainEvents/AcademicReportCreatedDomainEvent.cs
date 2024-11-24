@@ -1,8 +1,6 @@
-﻿namespace Constellation.Core.Models.Reports.Events;
+﻿namespace Constellation.Core.DomainEvents;
 
 using Constellation.Core.Models.Identifiers;
-using DomainEvents;
-using Identifiers;
 
 public sealed record AcademicReportCreatedDomainEvent(
     DomainEventId Id,

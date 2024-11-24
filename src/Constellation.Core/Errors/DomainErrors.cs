@@ -339,6 +339,16 @@ public static class DomainErrors
         }
     }
 
+    public static class Reports
+    {
+        public static class AcademicReport
+        {
+            public static readonly Func<string, Error> NotFoundByPublishId = id => new(
+                "Reports.AcademicReport.NotFoundByPublishId",
+                $"An academic report with the publish Id of {id} could not be found");
+        }
+    }
+
     public static class SciencePracs
     {
         public static class Lesson
