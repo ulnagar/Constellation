@@ -8,6 +8,8 @@ public class TimetablePeriodConfiguration : IEntityTypeConfiguration<TimetablePe
 {
     public void Configure(EntityTypeBuilder<TimetablePeriod> builder)
     {
+        builder.ToTable("Periods");
+
         builder
             .HasKey(p => p.Id);
 

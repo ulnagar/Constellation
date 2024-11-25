@@ -9,6 +9,8 @@ public class SchoolConfiguration : IEntityTypeConfiguration<School>
 {
     public void Configure(EntityTypeBuilder<School> builder)
     {
+        builder.ToTable("Schools");
+
         builder.HasKey(s => s.Code);
 
         builder.Property(s => s.Code)
