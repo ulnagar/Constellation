@@ -87,59 +87,62 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
             endDate = value.EndDate;
         }
 
-        foreach (AttendanceRecord record in records.Where(record => record.Group == "Below 50% Attendance"))
+        List<AttendanceRecord> belowFiftyPercent = records
+            .Where(record => record.Group == "Below 50% Attendance")
+            .ToList();
+
+        foreach (AttendanceRecord record in belowFiftyPercent)
         {
             List<Absence> absences = await _absenceRepository.GetForStudentFromDateRange(record.StudentId, startDate, endDate, cancellationToken);
 
             foreach (Absence absence in absences)
             {
-                if (absence.Type.Equals(AbsenceType.Partial) && absence.AbsenceReason.Equals(AbsenceReason.SharedEnrolment))
-                    continue;
-
-                Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
-
-                string reason = absence.Type.Equals(AbsenceType.Partial)
-                    ? $"{absence.AbsenceReason} ({absence.Type.Value} - {absence.AbsenceLength} min)"
-                    : $"{absence.AbsenceReason} ({absence.Type.Value})";
-
-                absenceRecords.Add(new(
-                    absence.StudentId,
-                    reason,
-                    absence.Date,
-                    offering?.Name.ToString(),
-                    1));
+                AbsenceRecord? absenceRecord = CreateAbsenceRecord(absence, offerings, 1);
+                if (absenceRecord is not null)
+                    absenceRecords.Add(absenceRecord);
             }
         }
 
-        foreach (AttendanceRecord record in records.Where(record => record.Group == "50% - 75% Attendance"))
+        List<AttendanceRecord> fiftyToSeventyFivePercent = records
+            .Where(record => record.Group == "50% - 75% Attendance")
+            .ToList();
+
+        foreach (AttendanceRecord record in fiftyToSeventyFivePercent)
         {
-            List<Absence> absences =
-                await _absenceRepository.GetForStudentFromDateRange(record.StudentId, startDate, endDate,
-                    cancellationToken);
+            List<Absence> absences = await _absenceRepository.GetForStudentFromDateRange(record.StudentId, startDate, endDate, cancellationToken);
 
             foreach (Absence absence in absences)
             {
-                if (absence.Type.Equals(AbsenceType.Partial) && absence.AbsenceReason.Equals(AbsenceReason.SharedEnrolment))
-                    continue;
-
-                Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
-
-                string reason = absence.Type.Equals(AbsenceType.Partial)
-                    ? $"{absence.AbsenceReason} ({absence.Type.Value} - {absence.AbsenceLength} min)"
-                    : $"{absence.AbsenceReason} ({absence.Type.Value})";
-                
-                absenceRecords.Add(new(
-                    absence.StudentId,
-                    reason,
-                    absence.Date,
-                    offering?.Name.ToString(),
-                    2));
+                AbsenceRecord? absenceRecord = CreateAbsenceRecord(absence, offerings, 2);
+                if (absenceRecord is not null)
+                    absenceRecords.Add(absenceRecord);
             }
         }
 
         MemoryStream result = await _excelService.CreateStudentAttendanceReport(values.First().PeriodLabel, records, absenceRecords, cancellationToken);
 
         return result;
+    }
+
+    private static AbsenceRecord? CreateAbsenceRecord(Absence absence, List<Offering> offerings, int severity)
+    {
+        if (absence.Type.Equals(AbsenceType.Partial) && absence.AbsenceReason.Equals(AbsenceReason.SharedEnrolment))
+            return null;
+
+        Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
+
+        string reason = absence.Type.Equals(AbsenceType.Partial)
+            ? $"{absence.AbsenceReason} ({absence.Type.Value} - {absence.AbsenceLength} min)"
+            : $"{absence.AbsenceReason} ({absence.Type.Value})";
+
+        AbsenceRecord absenceRecord = new(
+            absence.StudentId,
+            reason,
+            absence.Date,
+            offering?.Name.ToString(),
+            severity);
+
+        return absenceRecord;
     }
 
     private decimal NormalisedPerMinuteWeekPercentage(AttendanceValue value)
