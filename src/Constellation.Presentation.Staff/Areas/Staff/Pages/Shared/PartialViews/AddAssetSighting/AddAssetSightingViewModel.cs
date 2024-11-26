@@ -9,12 +9,14 @@ using System.ComponentModel.DataAnnotations;
 public sealed class AddAssetSightingViewModel
 {
     [ModelBinder(typeof(AssetNumberBinder))]
-    public AssetNumber AssetNumber { get; set; }
-    public string StaffId { get; set; }
+    public AssetNumber AssetNumber { get; set; } = AssetNumber.Empty;
+
+    public string StaffId { get; set; } = string.Empty;
+
     [DataType(DataType.DateTime)] //, DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
     public DateTime SightedAt { get; set; }
 
-    public string Note { get; set; }
+    public string Note { get; set; } = string.Empty;
 
-    public SelectList StaffList { get; set; }
+    public SelectList? StaffList { get; set; }
 }

@@ -9,36 +9,6 @@
 <nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
     <div class="sidebar-sticky pt-3">
         <div class="card">
-            <div class="card-header" id="absencesHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#absences" role="button">
-                    Absences
-                </h4>
-            </div>
-
-            <div id="absences" class="collapse @(module == "Absences" ? "show" : "")" data-parent="#accordion">
-                <div class="card-body">
-                    <ul class="nav flex-column mx-2">
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Absences_List ? "active" : "")" asp-page="/SchoolAdmin/Absences/List" asp-area="Staff">
-                                List
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Absences_Audit ? "active" : "")" asp-page="/SchoolAdmin/Absences/Audit" asp-area="Staff">
-                                Student Settings
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Absences_Report ? "active" : "")" asp-page="/SchoolAdmin/Absences/Report" asp-area="Staff">
-                                Reports
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
             <div class="card-header" id="awardsHeading">
                 <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#awards" aria-expanded="true" aria-controls="awards" role="button">
                     Awards
@@ -49,28 +19,8 @@
                 <div class="card-body">
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_List ? "active" : "")" asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff">
-                                List
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Dashboard ? "active" : "")" asp-page="/SchoolAdmin/Awards/Dashboard" asp-area="Staff">
-                                Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Leaderboard ? "active" : "")" asp-page="/SchoolAdmin/Awards/Leaderboard" asp-area="Staff">
-                                Leaderboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Changes ? "active" : "")" asp-page="/SchoolAdmin/Awards/Changes" asp-area="Staff">
-                                Recent Changes
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Nominations ? "active" : "")" asp-page="/SchoolAdmin/Awards/Nominations/Index" asp-area="Staff">
-                                Award Nominations
+                                Nominations
                             </a>
                         </li>
                     </ul>
@@ -106,36 +56,6 @@
                         <li class="nav-item">
                             <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Compliance_MasterFile ? "active" : "")" asp-page="/SchoolAdmin/Compliance/MasterFile/Index" asp-area="Staff">
                                 MasterFile Check
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header" id="consentHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#consent" role="button">
-                    Consent
-                </h4>
-            </div>
-
-            <div id="consent" class="collapse @(module == "Consent" ? "show" : "")" data-parent="#accordion">
-                <div class="card-body">
-                    <ul class="nav flex-column mx-2">
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Consent_Applications ? "active" : "")" asp-page="/SchoolAdmin/Consent/Applications/Index" asp-area="Staff">
-                                Applications
-                            </a>
-                        </li>
-                        @* <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Consent_Transactions ? "active" : "")" asp-page="/SchoolAdmin/Consent/Responses/Index" asp-area="Staff">
-                                Responses
-                            </a>
-                        </li> *@
-                        <li class="nav-item">
-                            <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Consent_Reports ? "active" : "")" asp-page="/SchoolAdmin/Consent/Reports/Index" asp-area="Staff">
-                                Reports
                             </a>
                         </li>
                     </ul>

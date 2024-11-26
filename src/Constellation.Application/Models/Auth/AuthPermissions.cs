@@ -1,6 +1,9 @@
 ﻿namespace Constellation.Application.Models.Auth;
 
-public class AuthPermissions
+// ReSharper disable InconsistentNaming
+#pragma warning disable CA1034
+
+public static class AuthPermissions
 {
     public static class SchoolAdmin
     {
@@ -14,6 +17,14 @@ public class AuthPermissions
         public static class Compliance
         {
             public const string Manage = "SchoolAdmin.Compliance.Manage";
+        }
+    }
+
+    public static class StudentAdmin
+    {
+        public static class Reports
+        {
+            public const string Manage = "StudentAdmin.Reports.Manage";
         }
     }
 

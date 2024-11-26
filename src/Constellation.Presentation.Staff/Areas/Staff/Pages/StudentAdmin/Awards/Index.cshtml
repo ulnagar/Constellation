@@ -1,0 +1,78 @@
+﻿@page
+@model IndexModel
+
+@using Constellation.Core.Extensions
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Awards
+
+@inject IAuthorizationService authService
+
+@{
+    var authorisedTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+}
+
+<h2>Awards List</h2>
+
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var recent_style = all_style;
+        var thisYear_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Recent:
+                recent_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.ThisYear:
+                thisYear_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff" asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff" asp-route-filter="@IndexModel.FilterDto.Recent" class="btn @recent_style">Recent (20)</a>
+        <a asp-page="/SchoolAdmin/Awards/Index" asp-area="Staff" asp-route-filter="@IndexModel.FilterDto.ThisYear" class="btn @thisYear_style">This Year</a>
+    </div>
+
+    @if (authorisedTest.Succeeded)
+    {
+        <a asp-page-handler="RefreshAwards" class="btn btn-warning">Refresh Awards</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-stroped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>School</th>
+            <th>Award</th>
+            <th>Issued By</th>
+            <th>Issued On</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Awards)
+        {
+            <tr>
+                <td>@item.StudentName.DisplayName (@item.StudentGrade.AsName())</td>
+                <td>@item.SchoolName</td>
+                <td>@item.Type</td>
+                <td>@item.TeacherName?.DisplayName</td>
+                <td>@item.AwardedOn.ToShortDateString()</td>
+                <td>
+                    @if (item.HasCertificate)
+                    {
+                        <a asp-page-handler="AttemptDownload" asp-route-id="@item.AwardId" class="btn btn-sm btn-warning btn-show-hover">Download</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

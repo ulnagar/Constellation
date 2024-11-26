@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Common.PresentationModels;
 
 using Constellation.Core.Shared;
+using System;
 
 public abstract class ModalContent
 {
@@ -29,6 +30,28 @@ public sealed class ErrorDisplay : ModalContent
         Content = $@"<div>{error.Code}</div><span>{error.Message}</span>";
         ButtonText = "Ok";
         ButtonColour = "btn-warning";
+        ButtonHasLink = true;
+        ButtonLink = link;
+    }
+}
+
+public sealed class ExceptionDisplay : ModalContent
+{
+    public ExceptionDisplay(Exception ex)
+    {
+        Title = "Exception";
+        Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>";
+        ButtonColour = "btn-warning";
+        ButtonText = "Ok";
+        ButtonHasLink = false;
+    }
+
+    public ExceptionDisplay(Exception ex, string link)
+    {
+        Title = "Exception";
+        Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>";
+        ButtonColour = "btn-warning";
+        ButtonText = "Ok";
         ButtonHasLink = true;
         ButtonLink = link;
     }

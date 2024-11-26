@@ -1,0 +1,129 @@
+﻿@page "{applicationId:Guid}/{consentId:Guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Responses.DetailsModel
+
+@using Constellation.Core.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Consent Response</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col">
+        <dt class="col-md-2">
+            <label asp-for="Transaction.StudentName">Student</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Transaction.StudentName.DisplayName</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Transaction.StudentGrade">Grade</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Transaction.StudentGrade.AsName()</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Transaction.SchoolName">School</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Transaction.SchoolName</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Transaction.ConsentProvided">Consent Provided?</label>
+        </dt>
+        <dd class="col-md-10">
+            @if (Model.Transaction.ConsentProvided)
+            {
+                <h2><span class="badge badge-success">Yes</span></h2>
+            }
+            else
+            {
+                <h2><span class="badge badge-warning">No</span></h2>
+            }
+        </dd>
+    </div>
+
+    <div class="col">
+        <dt class="col-md-2">
+            <label asp-for="Transaction.ApplicationName">Application</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Transaction.ApplicationName</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Transaction.ApplicationPurpose">Purpose</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Transaction.ApplicationPurpose</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Transaction.ApplicationInformationCollected">Information Collected</label>
+        </dt>
+        <dd class="col-md-10">
+            <ul>
+                @foreach (var entry in Model.Transaction.ApplicationInformationCollected)
+                {
+                    <li>@entry</li>
+                }
+            </ul>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Transaction.ApplicationStoredCountry">Stored Country</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Transaction.ApplicationStoredCountry</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Transaction.ApplicationSharedWith">Shared With</label>
+        </dt>
+        <dd class="col-md-10">
+            <ul>
+                @foreach (var entry in Model.Transaction.ApplicationSharedWith)
+                {
+                    <li>@entry</li>
+                }
+            </ul>
+        </dd>
+    </div>
+</div>
+    
+<div class="col">
+    <dt class="col-md-2">
+        <label asp-for="Transaction.ProvidedBy">Submitted By</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.ProvidedBy</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.ProvidedAt">Submitted At</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.ProvidedAt.ToLongDateString()</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.Method">Submission Method</label>
+    </dt>
+    <dd class="col-md-10">
+        <span>@Model.Transaction.Method.Name</span>
+    </dd>
+    
+    <dt class="col-md-2">
+        <label asp-for="Transaction.MethodNotes">Notes</label>
+    </dt>
+    <dd class="col-md-2">
+        <span>@Model.Transaction.MethodNotes</span>
+    </dd>
+</div>
