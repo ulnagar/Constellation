@@ -99,6 +99,22 @@ public sealed class Attachment
         return attachment;
     }
 
+    public static Attachment CreateExternalReportAttachment(
+        string name,
+        string fileType,
+        string recordLinkId,
+        DateTime createdAt)
+    {
+        Attachment attachment = new(
+            name,
+            fileType,
+            AttachmentType.ExternalReport,
+            recordLinkId,
+            createdAt);
+
+        return attachment;
+    }
+
     public static Attachment CreateWorkFlowEmailAttachment(
         string name,
         string fileType,

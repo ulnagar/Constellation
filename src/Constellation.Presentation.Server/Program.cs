@@ -12,6 +12,7 @@ using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
@@ -114,6 +115,17 @@ builder.Services.Configure<RazorViewEngineOptions>(options =>
     options.AreaPageViewLocationFormats.Add("/Pages/Shared/PartialViews/{1}/{1}" + RazorViewEngine.ViewExtension);
 
     options.AreaPageViewLocationFormats.Add("/Areas/{2}/Pages/Shared/PartialViews/{0}/{0}" + RazorViewEngine.ViewExtension);
+});
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = null;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.ValueLengthLimit = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue;
 });
 
 builder.WebHost.UseStaticWebAssets();

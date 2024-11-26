@@ -1,4 +1,5 @@
 ﻿namespace Constellation.Application.Models.Auth;
+// ReSharper disable InconsistentNaming
 
 public static class AuthRoles
 {

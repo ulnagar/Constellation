@@ -11,6 +11,7 @@ public sealed class AttachmentType : ValueObject, IComparable
     public static readonly AttachmentType Unset = new("Unset");
     public static readonly AttachmentType CanvasAssignmentSubmission = new("Canvas Assignment Submission");
     public static readonly AttachmentType StudentReport = new("Student Report");
+    public static readonly AttachmentType ExternalReport = new("External Report");
     public static readonly AttachmentType TrainingCertificate = new("Training Certificate");
     public static readonly AttachmentType AwardCertificate = new("Award Certificate");
     public static readonly AttachmentType WorkFlowEmailAttachment = new("WorkFlow Email Attachment");

@@ -1,0 +1,218 @@
+﻿@page "{id:Guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Applications.DetailsModel
+
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.ThirdPartyConsent.Enums
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+}
+
+<h2>Application Details</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        @if (Model.Application.IsDeleted)
+        {
+            <a asp-page-handler="Reactivate" class="btn btn-warning">Reactivate</a>
+        }
+        else
+        {
+            <a asp-page="/StudentAdmin/Consent/Applications/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+            <a asp-page-handler="Deactivate" class="btn btn-warning">Deactivate</a>
+        }
+    }
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@if (Model.Application.IsDeleted)
+{
+    <div class="alert alert-warning">
+        This Application has been marked inactive.
+    </div>
+}
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Application.Id">Id</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Application.Id.Value</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Application.Name"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Application.Name</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Application.Purpose"></label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Application.Purpose</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Application.InformationCollected">Information Collected</label>
+        </dt>
+        <dd class="col-md-10">
+            <ul>
+                @foreach (var entry in Model.Application.InformationCollected)
+                {
+                    <li>@entry</li>
+                }
+            </ul>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Application.StoredCountry">Stored Country</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Application.StoredCountry</span>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Application.SharedWith">Shared With</label>
+        </dt>
+        <dd class="col-md-10">
+            <ul>
+                @foreach (var entry in Model.Application.SharedWith)
+                {
+                    <li>@entry</li>
+                }
+            </ul>
+        </dd>
+        
+        <dt class="col-md-2">
+            <label asp-for="Application.Link">Link</label>
+        </dt>
+        <dd class="col-md-10">
+            <span><a href="@Model.Application.Link" target="_blank">@Model.Application.Link</a></span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Application.ConsentRequired">Consent Required</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Application.ConsentRequired</span>
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item">
+            <a class="nav-link active" href="#consents" data-toggle="tab" role="tab">
+                Consents
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#requirements" data-toggle="tab" role="tab">
+                Requirements
+            </a>
+        </li>
+    </ul>
+    
+    <div class="tab-content">
+        <div id="consents" class="tab-pane active">
+            <h4>Current Responses</h4>
+
+            <table class="table table-striped table-hover data-table">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>School</th>
+                    <th>Consent</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var consent in Model.Application.Consents)
+                {
+                    <tr>
+                        <td>
+                            @if (consent.Method.Equals(ConsentMethod.Email))
+                            {
+                                <i class="fal fa-at" title="Email"></i>
+                            }
+                            else if (consent.Method.Equals(ConsentMethod.PhoneCall))
+                            {
+                                <i class="fal fa-phone-alt" title="Phone"></i>
+                            }
+                            else
+                            {
+                                <i class="fal fa-browser" title="Parent Portal"></i>
+                            }
+                        </td>
+                        <td data-order="@consent.Name.SortOrder">@consent.Name.DisplayName</td>
+                        <td>@consent.Grade.AsName()</td>
+                        <td>@consent.SchoolName</td>
+                        <td>
+                            @if (consent.ConsentProvided)
+                            {
+                                <span class="badge badge-success">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-danger">No</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/StudentAdmin/Consent/Responses/Details" asp-area="Staff" asp-route-consentId="@consent.Id" asp-route-applicationId="@Model.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="requirements" class="tab-pane">
+            <h4>Current Requirements</h4>
+            
+            @if (canEditTest.Succeeded)
+            {
+                <a asp-page="/StudentAdmin/Consent/Applications/Requirement" asp-area="Staff" asp-route-id="@Model.Application.Id" class="btn btn-warning">Create</a>
+            }
+
+            <table class="table table-striped table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Applies To</th>
+                        <th>Applies From</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var requirement in Model.Application.Requirements)
+                    {
+                        <tr>
+                            <td>@requirement.Type</td>
+                            <td>@requirement.Description</td>
+                            <td data-order="@requirement.EnteredOn.ToString("yyyy-MM-dd")">@requirement.EnteredOn.ToShortDateString()</td>
+                            <td>
+                                @if (canEditTest.Succeeded)
+                                {
+                                    <a asp-page-handler="RevokeRequirement" asp-route-requirementId="@requirement.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

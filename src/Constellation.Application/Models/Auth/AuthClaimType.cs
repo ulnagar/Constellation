@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Models.Auth;
+// ReSharper disable InconsistentNaming
 
-public class AuthClaimType
+public static class AuthClaimType
 {
     public const string Permission = "Permission";
     public const string StaffEmployeeId = "StaffId";

@@ -45,6 +45,11 @@ internal sealed class ReportRepository : IReportRepository
             .Where(report => report.StudentId == StudentId)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<ExternalReport>> GetAllExternalReports(
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<ExternalReport>()
+            .ToListAsync(cancellationToken);
+
     public async Task<ExternalReport?> GetExternalReportById(
         ExternalReportId id,
         CancellationToken cancellationToken = default) =>

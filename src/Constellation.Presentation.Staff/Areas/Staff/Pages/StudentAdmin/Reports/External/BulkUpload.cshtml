@@ -1,0 +1,149 @@
+@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External.BulkUploadModel
+
+<h2>Bulk Upload External Reports</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<div class="accordion" id="page-accordion">
+    <div class="card">
+        <div class="card-header" id="upload">
+            <h4 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#uploadContent">Step 1: Upload Zip File</button>
+            </h4>
+        </div>
+        
+        <div id="uploadContent" class="collapse show">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div class="form-group row">
+                            <label class="col-md-2">Zip File</label>
+                            <div class="col-md-8">
+                                <div class="custom-file">
+                                    <input id="file" type="file" name="file" class="custom-file-input" />
+                                    <label class="custom-file-label">Choose file</label>
+                                </div>
+                                <div class="font-italic">
+                                    Only accepts ZIP files.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                @if (Model.Messages.Any())
+                {
+                    <span>Upload Errors:</span>
+                    <ul>
+                        @foreach (var message in Model.Messages)
+                        {
+                            <li>@message</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header" id="match">
+            <h4 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#matchContent">Step 2: Match Files to Students</button>
+            </h4>
+        </div>
+
+        <div id="matchContent" class="collapse show">
+            <div class="card-body">
+                
+                <button class="btn btn-success">Accept All and Email</button>
+
+                <hr />
+
+                <table class="table table-striped data-table">
+                    <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Student</th>
+                        <th>Report Type</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var file in Model.Files)
+                    {
+                        <tr>
+                            <td>@file.FileName</td>
+                            <td>@file.StudentName?.DisplayName</td>
+                            <td>@file.ReportType</td>
+                            <td>
+                                <div class="btn-group btn-show-hover" role="group">
+                                    <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item update-button" data-attachment-id="@file.AttachmentId">Update</a>
+                                        <a class="dropdown-item" href="#">Accept</a>
+                                        <a class="dropdown-item" href="#">Reject</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+
+        $('.update-button').click(function (event) {
+            var attachmentId = $(this).data('attachmentId');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxUpdate",
+                type: "POST",
+                data: {
+                    attachmentId: attachmentId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+
+                $('#page-modal .combo').select2({ theme: 'bootstrap' });
+            });
+        });
+    </script>
+}

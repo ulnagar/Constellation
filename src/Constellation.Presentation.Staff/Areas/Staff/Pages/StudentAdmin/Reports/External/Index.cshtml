@@ -1,0 +1,42 @@
+@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External.IndexModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEdit = await authService.AuthorizeAsync(User, AuthPolicies.CanManageReports);
+}
+
+<h2>External Student Reports</h2>
+
+<div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="/StudentAdmin/Reports/External/BulkUpload" class="btn btn-primary">Bulk Upload</a>
+    }
+</div>
+
+<hr />
+
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Student</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Reports)
+        {
+            <tr>
+                <td>@entry.Type</td>
+                <td data-sort="@entry.StudentName.SortOrder">@entry.StudentName.DisplayName</td>
+                <td data-sort="@entry.IssuedDate.ToString("yyyy-mm")">@entry.IssuedDate.ToString("MMM yyyy")</td>
+                <td></td>
+            </tr>
+        }
+    </tbody>
+</table>

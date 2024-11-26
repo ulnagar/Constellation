@@ -1,0 +1,127 @@
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu
+@model string
+
+@{
+    var segments = Model.Split('.');
+    var module = segments[1];
+}
+
+<nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+    <div class="sidebar-sticky pt-3">
+        <div class="card">
+            <div class="card-header" id="absencesHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#absences" role="button">
+                    Absences
+                </h4>
+            </div>
+
+            <div id="absences" class="collapse @(module == "Absences" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Absences_List ? "active" : "")" asp-page="/StudentAdmin/Absences/List" asp-area="Staff">
+                                List
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Absences_Audit ? "active" : "")" asp-page="/StudentAdmin/Absences/Audit" asp-area="Staff">
+                                Student Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Absences_Report ? "active" : "")" asp-page="/StudentAdmin/Absences/Report" asp-area="Staff">
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" id="awardsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#awards" aria-expanded="true" aria-controls="awards" role="button">
+                    Awards
+                </h4>
+            </div>
+
+            <div id="awards" class="collapse @(module == "Awards" ? "show" : "")" aria-labelledby="awardsHeading" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Awards_List ? "active" : "")" asp-page="/StudentAdmin/Awards/Index" asp-area="Staff">
+                                List
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Awards_Dashboard ? "active" : "")" asp-page="/StudentAdmin/Awards/Dashboard" asp-area="Staff">
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Awards_Leaderboard ? "active" : "")" asp-page="/StudentAdmin/Awards/Leaderboard" asp-area="Staff">
+                                Leaderboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Awards_Changes ? "active" : "")" asp-page="/StudentAdmin/Awards/Changes" asp-area="Staff">
+                                Recent Changes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header" id="consentHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#consent" role="button">
+                    Consent
+                </h4>
+            </div>
+
+            <div id="consent" class="collapse @(module == "Consent" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Consent_Applications ? "active" : "")" asp-page="/StudentAdmin/Consent/Applications/Index" asp-area="Staff">
+                                Applications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Consent_Reports ? "active" : "")" asp-page="/StudentAdmin/Consent/Reports/Index" asp-area="Staff">
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header" id="reportsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#reports" role="button">
+                    Reports
+                </h4>
+            </div>
+
+            <div id="reports" class="collapse @(module == "Reports" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Reports_Academic ? "active" : "")" asp-page="/StudentAdmin/Reports/Academic/Index" asp-area="Staff">
+                                Academic Reports
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Reports_External ? "active" : "")" asp-page="/StudentAdmin/Reports/External/Index" asp-area="Staff">
+                                External Reports
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</nav>

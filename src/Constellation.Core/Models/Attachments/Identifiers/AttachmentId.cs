@@ -3,7 +3,7 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record AttachmentId(Guid Value)
+public readonly record struct AttachmentId(Guid Value)
     : IStronglyTypedId
 {
     public static AttachmentId FromValue(Guid value) =>

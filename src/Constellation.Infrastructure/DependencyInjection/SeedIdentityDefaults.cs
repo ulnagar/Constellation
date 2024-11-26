@@ -1,9 +1,9 @@
-﻿using Constellation.Application.Models.Auth;
+﻿namespace Constellation.Infrastructure.DependencyInjection;
+
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-
-namespace Constellation.Infrastructure.DependencyInjection;
 
 public static class IdentityDefaults
 {
@@ -14,7 +14,8 @@ public static class IdentityDefaults
         await CreateRoleWithPermission(roleManager, AuthRoles.ExecStaffMember,
             new[]
             {
-                AuthPermissions.SchoolAdmin.Awards.Add
+                AuthPermissions.SchoolAdmin.Awards.Add,
+                AuthPermissions.StudentAdmin.Reports.Manage
             });
 
         await CreateRoleWithPermission(roleManager, AuthRoles.Admin, 
@@ -23,6 +24,7 @@ public static class IdentityDefaults
                 AuthPermissions.SchoolAdmin.Awards.View,
                 AuthPermissions.SchoolAdmin.Awards.Manage,
                 AuthPermissions.SchoolAdmin.Compliance.Manage,
+                AuthPermissions.StudentAdmin.Reports.Manage,
                 AuthPermissions.AssignmentsEdit,
                 AuthPermissions.AssignmentsSubmit,
                 AuthPermissions.ContactsEdit,
