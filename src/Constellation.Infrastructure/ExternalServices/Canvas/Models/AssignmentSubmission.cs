@@ -18,6 +18,8 @@ internal sealed class AssignmentSubmission
     public string WorkflowState { get; set; }
     [JsonProperty("rubric_assessment")]
     public Dictionary<string, RubricValue> RubricAssessment { get; set; } = new();
+    [JsonProperty("submission_comments")]
+    public List<SubmissionComments> Comments { get; set; } = new();
 
     internal sealed class RubricValue
     {
@@ -27,5 +29,15 @@ internal sealed class AssignmentSubmission
         public string Comments { get; set; }
         [JsonProperty("points")]
         public double? Points { get; set; }
+    }
+
+    internal sealed class SubmissionComments
+    {
+        [JsonProperty("author_name")]
+        public string Author { get; set; }
+        [JsonProperty("created_at")]
+        public DateTime CreatedAt { get; set; }
+        [JsonProperty("comment")]
+        public string Comment { get; set; }
     }
 }

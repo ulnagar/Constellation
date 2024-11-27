@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Assignments.GetRubricAssignmentsFromCourse;
 using Application.Assignments.GetUploadAssignmentsFromCourse;
+using Application.Canvas.ExportCanvasAssignmentComments;
 using Application.Canvas.ExportCanvasRubricResults;
 using Application.Common.PresentationModels;
 using Application.DTOs;
@@ -455,6 +456,35 @@ public class DetailsModel : BasePageModel
             _logger
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to export Canvas Assignment Rubric Results for Offering by User {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(request.Error);
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return File(request.Value.FileData, request.Value.FileType, request.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetDownloadComments(
+        [ModelBinder(typeof(FromValueBinder))] CanvasCourseCode courseCode,
+        int assignmentId,
+        string assignmentName)
+    {
+        ExportCanvasAssignmentCommentsQuery command = new(Id, courseCode, assignmentId, assignmentName);
+
+        _logger
+            .ForContext(nameof(ExportCanvasAssignmentCommentsQuery), command, true)
+            .Information("Requested to export Canvas Assignment Comments for Offering by User {User}", _currentUserService.UserName);
+
+        Result<FileDto> request = await _sender.Send(command);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to export Canvas Assignment Comments for Offering by User {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(request.Error);
 
