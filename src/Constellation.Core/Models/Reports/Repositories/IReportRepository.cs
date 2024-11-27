@@ -21,6 +21,12 @@ public interface IReportRepository
     Task<List<ExternalReport>> GetExternalReportsByType(ReportType type, CancellationToken cancellationToken = default);
     Task<List<ExternalReport>> GetExternalReportsForStudent(StudentId studentId, CancellationToken cancellationToken = default);
 
+    Task<List<TempExternalReport>> GetTempExternalReports(CancellationToken cancellationToken = default);
+    Task<TempExternalReport?> GetTempExternalReportById(ExternalReportId id, CancellationToken cancellationToken = default);
+
+    void Insert(TempExternalReport entity);
+    void Remove(TempExternalReport entity);
+
     void Insert(AcademicReport entity);
     void Insert(ExternalReport entity);
     void Remove(AcademicReport entity);

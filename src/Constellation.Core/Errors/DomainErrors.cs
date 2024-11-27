@@ -154,6 +154,10 @@ public static class DomainErrors
             public static readonly Error InvalidAddress = new(
                 "Families.Address.InvalidAddress",
                 "The Address supplied is incomplete or invalid");
+
+            public static readonly Error NoneFound = new(
+                "Families.Family.NoneFound",
+                "Could not find any families");
         }
 
         public static class Parents

@@ -1,7 +1,7 @@
-﻿using Constellation.Core.Shared;
-using System;
+﻿namespace Constellation.Core.Models.Reports.Errors;
 
-namespace Constellation.Core.Models.Reports.Errors;
+using Constellation.Core.Shared;
+using System;
 
 public static class AcademicReportErrors
 {

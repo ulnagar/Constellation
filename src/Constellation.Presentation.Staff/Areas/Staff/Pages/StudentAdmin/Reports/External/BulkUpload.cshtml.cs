@@ -1,19 +1,28 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External;
 
+using Application.Attachments.EmailExternalReports;
+using Application.Attachments.GetTemporaryFileById;
 using Application.Models.Auth;
+using Application.Reports.UpdateTempReportDetails;
 using Constellation.Application.Attachments.GetTemporaryFiles;
+using Constellation.Application.Attachments.Models;
 using Constellation.Application.Attachments.ProcessPATReportZipFile;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Models.Attachments.Identifiers;
+using Core.Models.Reports.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
+using Shared.Components.EmailExternalReports;
+using Shared.PartialViews.UpdateTempReportDetails;
 using System.Net.Mime;
 using System.Threading.Tasks;
 
@@ -39,11 +48,8 @@ public class BulkUploadModel : BasePageModel
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData]
-    public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Reports_External;
-
-    [ViewData]
-    public string PageTitle => "External Report Upload";
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Reports_External;
+    [ViewData] public string PageTitle => "External Report Upload";
 
     public List<ExternalReportTemporaryFileResponse> Files { get; set; } = new();
     public List<string> Messages { get; set; } = new();
@@ -73,7 +79,8 @@ public class BulkUploadModel : BasePageModel
 
         try
         {
-            if (file.ContentType != MediaTypeNames.Application.Zip)
+            if (file.ContentType != MediaTypeNames.Application.Zip &&
+                file.ContentType != "application/x-zip-compressed")
             {
                 var error = new Error("Page Upload", "Only ZIP files are accepted");
 
@@ -119,9 +126,68 @@ public class BulkUploadModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostAjaxUpdate(
-        AttachmentId attachmentId)
+        ExternalReportId reportId)
     {
+        Result<ExternalReportTemporaryFileResponse> report = await _mediator.Send(new GetTemporaryFileByIdQuery(reportId));
 
+        if (report.IsFailure)
+            return Content(string.Empty);
+
+        UpdateTempReportDetailsViewModel viewModel = new();
+
+        viewModel.ReportId = reportId;
+        viewModel.StudentId = report.Value.StudentId;
+        viewModel.FileName = report.Value.FileName;
+        viewModel.ReportType = report.Value.ReportType;
+        viewModel.IssuedDate = report.Value.IssuedDate;
+
+        Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+
+        if (students.IsFailure)
+            return Content(string.Empty);
+
+        viewModel.Students = new SelectList(students.Value, "Key", "Value", report.Value.StudentId);
+        
+        return Partial("UpdateTempReportDetails", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostUpdateReport(
+        UpdateTempReportDetailsViewModel viewModel)
+    {
+        UpdateTempReportDetailsCommand command = new(
+            viewModel.ReportId,
+            viewModel.StudentId,
+            viewModel.ReportType,
+            viewModel.IssuedDate);
+
+        _logger
+            .ForContext(nameof(UpdateTempReportDetailsCommand), command, true)
+            .Information("Requested to update Temporary External Report by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to update Temporary External Report by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEmailReports(
+        EmailExternalReportsSelection viewModel)
+    {
+        await _mediator.Send(new EmailExternalReportsCommand(viewModel.Subject, viewModel.Body));
+
+        return RedirectToPage();
     }
 
     private async Task PreparePage()

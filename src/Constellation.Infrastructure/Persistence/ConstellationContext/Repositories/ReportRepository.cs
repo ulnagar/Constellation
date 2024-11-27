@@ -71,6 +71,19 @@ internal sealed class ReportRepository : IReportRepository
             .Where(entry => entry.StudentId == studentId)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<TempExternalReport>> GetTempExternalReports(
+        CancellationToken cancellationToken = default) =>
+        await _context.Set<TempExternalReport>()
+            .ToListAsync(cancellationToken);
+
+    public async Task<TempExternalReport?> GetTempExternalReportById(
+        ExternalReportId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<TempExternalReport>()
+            .Where(entry => entry.Id == id)
+            .SingleOrDefaultAsync(cancellationToken);
+
     public void Insert(AcademicReport entity) =>
         _context.Add(entity);
 
@@ -83,4 +96,12 @@ internal sealed class ReportRepository : IReportRepository
 
     public void Remove(ExternalReport entity) =>
         _context.Remove(entity);
+
+
+    public void Insert(TempExternalReport entity) =>
+        _context.Add(entity);
+
+    public void Remove(TempExternalReport entity) =>
+        _context.Remove(entity);
+
 }

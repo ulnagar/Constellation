@@ -1,0 +1,74 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.UpdateTempReportDetails.UpdateTempReportDetailsViewModel
+
+@using Constellation.Core.Models.Reports.Enums
+
+<form asp-page-handler="UpdateReport" method="post">
+    <div class="modal-header">
+        <h5 class="modal-title">Update Report Details</h5>
+    </div>
+    <div class="modal-body">
+        <div class="form-group row">
+            <label class="col-md-3">File Name</label>
+            <div class="col-md-9">
+                @Html.HiddenFor(model => model.ReportId)
+                @Model.FileName
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="StudentId" class="col-md-3">Student</label>
+            <div class="col-md-9">
+                <select asp-for="StudentId" asp-items="@Model.Students" class="combo" style="width:100%">
+                    <option value="">-- Select --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ReportType" class="col-md-3">Report Type</label>
+            <div class="col-md-9">
+                <select asp-for="ReportType" class="combo" style="width:100%">
+                    <option value="">-- Select --</option>
+                    @if (Model.ReportType.Equals(ReportType.Unknown))
+                    {
+                        <option value="@ReportType.Unknown" selected="selected">Unknown</option>
+                    }
+                    else
+                    {
+                        <option value="@ReportType.Unknown">Unknown</option>
+                    }
+
+                    @if (Model.ReportType.Equals(ReportType.PATM))
+                    {
+                        <option value="@ReportType.PATM" selected="selected">PAT Mathematics Adaptive</option>
+                    }
+                    else
+                    {
+                        <option value="@ReportType.PATM">PAT Mathematics Adaptive</option>
+                    }
+                    
+                    @if (Model.ReportType.Equals(ReportType.PATR))
+                    {
+                        <option value="@ReportType.PATR" selected="selected">PAT Reading Adaptive</option>
+                    }
+                    else
+                    {
+                        <option value="@ReportType.PATR">PAT Reading Adaptive</option>
+                    }
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <label asp-for="IssuedDate" class="col-md-3">Issued Date</label>
+            <div class="col-md-9">
+                <input asp-for="IssuedDate" class="form-control" />
+                <span asp-validation-for="IssuedDate" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Update Report</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>

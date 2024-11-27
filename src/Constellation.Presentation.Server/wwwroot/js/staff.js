@@ -15,6 +15,9 @@
         tags: true
     });
 
+    // Active any Summernote text areas
+    $('.summernote').summernote();
+
     // Format dates in datatables for AUS
     $.fn.dataTable.moment('D/M/YYYY');
 
