@@ -551,7 +551,7 @@ internal sealed class Gateway : ICanvasGateway
     {
         List<AssignmentResultEntry> results = new();
         
-        string path = $"courses/sis_course_id:{courseId}/assignments/{assignmentId}/submissions?include[]=rubric_assessment";
+        string path = $"courses/sis_course_id:{courseId}/assignments/{assignmentId}/submissions?include[]=rubric_assessment&include[]=submission_comments";
 
         if (_logOnly)
         {
@@ -574,12 +574,23 @@ internal sealed class Gateway : ICanvasGateway
                     mark.Value.Comments,
                     mark.Value.Points));
             }
-            
+
+            List<AssignmentResultEntry.AssignmentComment> comments = new();
+
+            foreach (AssignmentSubmission.SubmissionComments comment in submission.Comments)
+            {
+                comments.Add(new(
+                    comment.Author,
+                    comment.CreatedAt,
+                    comment.Comment));
+            }
+
             results.Add(new(
                 submission.AssignmentId,
                 courseId,
                 submission.UserId,
                 marks,
+                comments,
                 submission.Mark,
                 submission.Grade));
         }

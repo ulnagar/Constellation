@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.DTOs.Canvas;
 
 using Core.Models.Canvas.Models;
+using System;
 using System.Collections.Generic;
 
 public sealed record AssignmentResultEntry(
@@ -8,6 +9,7 @@ public sealed record AssignmentResultEntry(
     CanvasCourseCode CourseCode,
     int UserId,
     List<AssignmentResultEntry.AssignmentRubricResult> Marks,
+    List<AssignmentResultEntry.AssignmentComment> Comments,
     double? OverallPoints,
     string OverallGrade)
 {
@@ -16,4 +18,9 @@ public sealed record AssignmentResultEntry(
         string RatingId,
         string Comments,
         double? Points);
+
+    public sealed record AssignmentComment(
+        string Author,
+        DateTime CreatedAt,
+        string Comment);
 }
