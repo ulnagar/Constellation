@@ -162,5 +162,29 @@
                 $('#page-modal .combo').select2({ theme: 'bootstrap' });
             });
         });
+
+        $(document).ready(function() {
+            $('.summernote-mailmerge').summernote({
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ['table', ['table']],
+                    ['insert', ['mailmerge', 'media', 'link', 'hr']],
+                    ['view', ['fullscreen', 'codeview']],
+                    ['help', ['help']]
+                ],
+                mailmerge: {
+                    menu: [
+                        ['Parent Name', '::parent_name::'],
+                        ['Report Type', '::report_type::'],
+                        ['Report Date', '::report_month::']
+                    ]
+                }
+            });
+        });
     </script>
 }
