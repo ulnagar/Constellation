@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public sealed class ReportType : StringEnumeration<ReportType>
 {
+    public static readonly ReportType Unknown = new("");
     public static readonly ReportType PATM = new("PAT Mathematics Adaptive");
     public static readonly ReportType PATR = new("PAT Reading Adaptive");
 

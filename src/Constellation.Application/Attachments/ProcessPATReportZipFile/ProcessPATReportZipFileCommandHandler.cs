@@ -8,12 +8,16 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Services;
+using Core.Models.Reports;
+using Core.Models.Reports.Enums;
+using Core.Models.Reports.Repositories;
 using Core.Shared;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +27,7 @@ internal sealed class ProcessPATReportZipFileCommandHandler
 {
     private readonly IAttachmentService _attachmentService;
     private readonly IAttachmentRepository _attachmentRepository;
+    private readonly IReportRepository _reportRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
@@ -31,6 +36,7 @@ internal sealed class ProcessPATReportZipFileCommandHandler
     public ProcessPATReportZipFileCommandHandler(
         IAttachmentService attachmentService,
         IAttachmentRepository attachmentRepository,
+        IReportRepository reportRepository,
         IStudentRepository studentRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
@@ -38,6 +44,7 @@ internal sealed class ProcessPATReportZipFileCommandHandler
     {
         _attachmentService = attachmentService;
         _attachmentRepository = attachmentRepository;
+        _reportRepository = reportRepository;
         _studentRepository = studentRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
@@ -58,12 +65,19 @@ internal sealed class ProcessPATReportZipFileCommandHandler
         {
             if (entry.Length == 0 || entry.Name.EndsWith('/'))
                 continue;
+            
+            TempExternalReport tempReport = TempExternalReport.Create();
+            
+            StudentId studentId = await GetStudentIdFromFileName(entry.Name);
+            tempReport.UpdateStudentId(studentId);
 
-            StudentId studentId = await MatchFile(entry.Name);
+            ReportType reportType = GetReportTypeFromFileName(entry.Name);
+            tempReport.UpdateReportType(reportType);
 
-            Attachment tempFile = studentId == StudentId.Empty
-                ? Attachment.CreateTempFileAttachment(entry.Name, MediaTypeNames.Application.Pdf, string.Empty, _dateTime.Now)
-                : Attachment.CreateTempFileAttachment(entry.Name, MediaTypeNames.Application.Pdf, studentId.ToString(), _dateTime.Now);
+            DateOnly issuedDate = GetIssuedDateFromFileName(entry.Name);
+            tempReport.UpdateIssuedDate(issuedDate);
+
+            Attachment tempFile = Attachment.CreateTempFileAttachment(entry.Name, MediaTypeNames.Application.Pdf, tempReport.Id.ToString(), _dateTime.Now);
 
             Stream entryData = entry.Open();
             using MemoryStream tempStream = new();
@@ -85,6 +99,7 @@ internal sealed class ProcessPATReportZipFileCommandHandler
                 continue;
             }
 
+            _reportRepository.Insert(tempReport);
             _attachmentRepository.Insert(tempFile);
         }
 
@@ -93,17 +108,47 @@ internal sealed class ProcessPATReportZipFileCommandHandler
         return messages;
     }
 
-    private async Task<StudentId> MatchFile(string fileName)
+    private async Task<StudentId> GetStudentIdFromFileName(string fileName)
     {
-        var splitName = fileName.Split('-');
+        string[] splitName = fileName.Split('-');
 
-        var index = Array.IndexOf(splitName, "patm");
-        if (index == -1)
-            index = Array.IndexOf(splitName, "patr");
+        int index = Array.IndexOf(splitName, "patm") != -1
+            ? Array.IndexOf(splitName, "patm")
+            : Array.IndexOf(splitName, "patr") != -1
+                ? Array.IndexOf(splitName, "patr")
+                : -1;
+
         if (index == -1)
             return StudentId.Empty;
-        var names = splitName[..index];
+        
+        string[] names = splitName[..index];
 
         return await _studentRepository.GetStudentIdFromNameFragments(names);
+    }
+
+    private static ReportType GetReportTypeFromFileName(string fileName)
+    {
+        string[] splitName = fileName.Split('-');
+
+        return Array.IndexOf(splitName, "patm") != -1
+            ? ReportType.PATM
+            : Array.IndexOf(splitName, "patr") != -1
+                ? ReportType.PATR
+                : ReportType.Unknown;
+    }
+
+    private static DateOnly GetIssuedDateFromFileName(string fileName)
+    {
+        string[] splitName = fileName.Split('-');
+
+        string dateFragment = splitName[^2];
+
+        if (!dateFragment.All(char.IsAsciiDigit))
+            return DateOnly.MinValue;
+
+        int month = Convert.ToInt32(dateFragment[3..4]);
+        int year = Convert.ToInt32(dateFragment[4..]);
+
+        return new(year, month, 1);
     }
 }

@@ -1,16 +1,19 @@
 ﻿namespace Constellation.Core.Models.Reports;
 
-using Constellation.Core.Models.Reports.Enums;
-using Constellation.Core.Models.Students.Identifiers;
+using Enums;
 using Identifiers;
 using Primitives;
+using Students.Identifiers;
 using System;
 
-public sealed class ExternalReport : AggregateRoot
+public sealed class TempExternalReport : AggregateRoot
 {
-    private ExternalReport() { }
+    private TempExternalReport()
+    {
+        Id = new();
+    }
 
-    private ExternalReport(
+    private TempExternalReport(
         StudentId studentId,
         ReportType type,
         DateOnly issuedDate)
@@ -26,7 +29,9 @@ public sealed class ExternalReport : AggregateRoot
     public ReportType Type { get; private set; }
     public DateOnly IssuedDate { get; private set; }
 
-    public static ExternalReport Create(
+    public static TempExternalReport Create() => new();
+
+    public static TempExternalReport Create(
         StudentId studentId,
         ReportType type,
         DateOnly issuedDate)
@@ -37,15 +42,12 @@ public sealed class ExternalReport : AggregateRoot
             issuedDate);
     }
 
-    public static ExternalReport ConvertFromTempExternalReport(
-        TempExternalReport tempReport)
-    {
-        return new()
-        {
-            Id = tempReport.Id,
-            StudentId = tempReport.StudentId,
-            Type = tempReport.Type,
-            IssuedDate = tempReport.IssuedDate
-        };
-    }
+    public void UpdateStudentId(StudentId studentId) 
+        => StudentId = studentId;
+
+    public void UpdateReportType(ReportType reportType)
+        => Type = reportType;
+
+    public void UpdateIssuedDate(DateOnly issuedDate)
+        => IssuedDate = issuedDate;
 }

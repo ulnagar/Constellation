@@ -1,4 +1,5 @@
 @page
+@using Constellation.Core.Models.Students.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External.BulkUploadModel
 
 <h2>Bulk Upload External Reports</h2>
@@ -17,7 +18,7 @@
             </h4>
         </div>
         
-        <div id="uploadContent" class="collapse show">
+        <div id="uploadContent" class="collapse @(Model.Files.Any() ? "" : "show")">
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
                     <div class="form-horizontal">
@@ -65,10 +66,10 @@
             </h4>
         </div>
 
-        <div id="matchContent" class="collapse show">
+        <div id="matchContent" class="collapse @(Model.Files.Any() ? "show" : "")">
             <div class="card-body">
                 
-                <button class="btn btn-success">Accept All and Email</button>
+                <button class="btn btn-success">Publish All</button>
 
                 <hr />
 
@@ -78,6 +79,7 @@
                         <th>File Name</th>
                         <th>Student</th>
                         <th>Report Type</th>
+                        <th>Date</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -86,17 +88,18 @@
                     {
                         <tr>
                             <td>@file.FileName</td>
-                            <td>@file.StudentName?.DisplayName</td>
+                            <td data-order="@file.StudentName?.SortOrder">@file.StudentName?.DisplayName</td>
                             <td>@file.ReportType</td>
+                            <td data-order="@file.IssuedDate.ToString("yyyy-MM")">@file.IssuedDate.ToString("MMM yyyy")</td>
                             <td>
                                 <div class="btn-group btn-show-hover" role="group">
                                     <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown">
                                         Actions
                                     </button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item update-button" data-attachment-id="@file.AttachmentId">Update</a>
-                                        <a class="dropdown-item" href="#">Accept</a>
-                                        <a class="dropdown-item" href="#">Reject</a>
+                                        <a class="dropdown-item update-button" data-report-id="@file.ReportId">Update</a>
+                                        <a class="dropdown-item" href="#">Publish</a>
+                                        <a class="dropdown-item" href="#">Delete</a>
                                     </div>
                                 </div>
                             </td>
@@ -104,6 +107,20 @@
                     }
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header" id="email">
+            <h4 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#emailContent">Step 3: Email Files to Parents</button>
+            </h4>
+        </div>
+
+        <div id="emailContent" class="collapse @(Model.Files.Count(entry => entry.StudentId != StudentId.Empty) > 0 ? "show" : "")">
+            <div class="card-body">
+                <vc:email-external-reports />
             </div>
         </div>
     </div>
@@ -119,7 +136,7 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
 
     <script>
         $(".custom-file-input").on("change", function () {
@@ -128,14 +145,14 @@
         });
 
         $('.update-button').click(function (event) {
-            var attachmentId = $(this).data('attachmentId');
+            var reportId = $(this).data('reportId');
             var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
 
             $.ajax({
                 url: "?handler=AjaxUpdate",
                 type: "POST",
                 data: {
-                    attachmentId: attachmentId,
+                    reportId: reportId,
                     __RequestVerificationToken: xsrfHeader
                 }
             }).done(function (data) {

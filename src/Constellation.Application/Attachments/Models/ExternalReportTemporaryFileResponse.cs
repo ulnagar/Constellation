@@ -1,13 +1,15 @@
-﻿namespace Constellation.Application.Attachments.GetTemporaryFiles;
+﻿namespace Constellation.Application.Attachments.Models;
 
-using Core.Models.Attachments.Identifiers;
 using Core.Models.Reports.Enums;
+using Core.Models.Reports.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.ValueObjects;
+using System;
 
 public sealed record ExternalReportTemporaryFileResponse(
-    AttachmentId AttachmentId,
+    ExternalReportId ReportId,
     string FileName,
     StudentId StudentId,
     Name StudentName,
-    ReportType? ReportType);
+    ReportType ReportType,
+    DateOnly IssuedDate);

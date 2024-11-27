@@ -1,0 +1,37 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.EmailExternalReports.EmailExternalReportsSelection
+
+<form asp-page-handler="EmailReports" method="post">
+    
+    <button type="submit" class="btn btn-success">Email and Publish</button>
+
+    <hr />
+
+    <div class="form-group row">
+        <label asp-for="Subject" class="col-md-2">Subject Line</label>
+        <div class="col-md-10">
+            <input asp-for="Subject" class="form-control" />
+            <span asp-validation-for="Subject" class="text-danger"></span>
+        </div>
+    </div>
+            
+    <div class="form-group row">
+        <div class="col-md-2">
+            <label asp-for="Body">Body</label>
+            <p>Use the following codes to replace text in the final email:</p>
+            <dl>
+                <dt>::parent_name::</dt>
+                <dd>Parents name, e.g. Joshua Kemp</dd>
+                        
+                <dt>::report_type::</dt>
+                <dd>Report type, e.g. PAT Mathematics Adaptive</dd>
+                
+                <dt>::report_month::</dt>
+                <dd>Report Month, e.g. August 2024</dd>
+            </dl>
+        </div>
+        <div class="col-md-10">
+            <textarea asp-for="Body" cols="100" rows="5" class="form-control summernote">@Model.Body</textarea>
+            <span asp-validation-for="Body" class="text-danger"></span>
+        </div>
+    </div>
+</form>
