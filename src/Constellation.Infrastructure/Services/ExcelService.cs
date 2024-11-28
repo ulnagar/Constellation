@@ -1987,7 +1987,7 @@ public class ExcelService : IExcelService
     public async Task<MemoryStream> CreateCanvasAssignmentCommentExport(
         List<CourseEnrolmentEntry> enrolments,
         List<AssignmentResultEntry> results,
-        List<Student> students,
+        Dictionary<string, List<Student>> students,
         CancellationToken cancellationToken = default)
     {
         ExcelPackage excel = new();
@@ -1997,10 +1997,13 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 1].Value = "Student Id";
         worksheet.Cells[1, 2].Value = "Student First Name";
         worksheet.Cells[1, 3].Value = "Student Last Name";
-        worksheet.Cells[1, 4].Value = "Comment";
+        worksheet.Cells[1, 4].Value = "Class";
         worksheet.Cells[1, 5].Value = "Overall Mark";
         worksheet.Cells[1, 6].Value = "Overall Grade";
-
+        worksheet.Cells[1, 7].Value = "Comment";
+        worksheet.Cells[1, 8].Value = "Comment Date";
+        worksheet.Cells[1, 9].Value = "Comment Author";
+        
         int row = 2;
 
         foreach (CourseEnrolmentEntry enrolment in enrolments)
@@ -2008,36 +2011,59 @@ public class ExcelService : IExcelService
             if (enrolment.Role != CourseEnrolmentEntry.EnrolmentRole.Student)
                 continue;
 
-            worksheet.Cells[row, 1].Value = enrolment.UserId;
-
             Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(enrolment.UserId);
 
             if (studentReferenceNumber.IsFailure)
                 continue;
 
-            Student student = students.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
+            KeyValuePair<string, List<Student>> group = students.FirstOrDefault(entry => entry.Value.Any(item => item.StudentReferenceNumber == studentReferenceNumber.Value));
+
+            Student student = group.Value.FirstOrDefault(entry => entry.StudentReferenceNumber == studentReferenceNumber.Value);
+
+            AssignmentResultEntry resultEntry = results.FirstOrDefault(entry => entry.UserId == enrolment.CanvasUserId);
+
+            worksheet.Cells[row, 1].Value = enrolment.UserId;
 
             if (student is not null)
             {
                 worksheet.Cells[row, 2].Value = student.Name.PreferredName;
                 worksheet.Cells[row, 3].Value = student.Name.LastName;
+                worksheet.Cells[row, 4].Value = group.Key;
             }
 
-            AssignmentResultEntry resultEntry = results.FirstOrDefault(entry => entry.UserId == enrolment.CanvasUserId);
-
-            if (resultEntry is not null)
+            if (resultEntry is null)
             {
+                row++;
+                continue;
+            }
+
+            worksheet.Cells[row, 5].Value = resultEntry.OverallPoints;
+            worksheet.Cells[row, 6].Value = resultEntry.OverallGrade;
+
+            if (resultEntry.Comments.Count == 0)
+            {
+                row++;
+                continue;
+            }
+
+            foreach (var comment in resultEntry.Comments)
+            {
+                worksheet.Cells[row, 1].Value = enrolment.UserId;
+
+                if (student is not null)
+                {
+                    worksheet.Cells[row, 2].Value = student.Name.PreferredName;
+                    worksheet.Cells[row, 3].Value = student.Name.LastName;
+                    worksheet.Cells[row, 4].Value = group.Key;
+                }
+
                 worksheet.Cells[row, 5].Value = resultEntry.OverallPoints;
                 worksheet.Cells[row, 6].Value = resultEntry.OverallGrade;
 
-                foreach (var comment in resultEntry.Comments)
-                {
-                    worksheet.Cells[row, 4].Value = $"{comment.Author} @ {comment.CreatedAt.ToString("g")} : {comment.Comment}";
-                    row++;
-                }
-            }
-            else
-            {
+                worksheet.Cells[row, 7].Value = comment.Comment;
+                worksheet.Cells[row, 8].Value = comment.CreatedAt.ToString("g");
+                worksheet.Cells[row, 9].Value = comment.Author;
+
                 row++;
             }
         }

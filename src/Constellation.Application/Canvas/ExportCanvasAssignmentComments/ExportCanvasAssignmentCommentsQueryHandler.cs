@@ -11,7 +11,9 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using DTOs;
 using Serilog;
@@ -67,11 +69,10 @@ internal sealed class ExportCanvasAssignmentCommentsQueryHandler
             return Result.Failure<FileDto>(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        Result<RubricEntry> rubric = await _gateway.GetCourseAssignmentDetails(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
         List<CourseEnrolmentEntry> enrolments = await _gateway.GetEnrolmentsForCourse(request.CourseCode, cancellationToken);
         List<AssignmentResultEntry> submissions = await _gateway.GetCourseAssignmentSubmissions(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
 
-        List<Student> students = await _studentRepository.GetCurrentEnrolmentsForCourse(offering.CourseId, cancellationToken);
+        Dictionary<string, List<Student>> students = await _studentRepository.GetCurrentEnrolmentsForCourseWithOfferingName(offering.CourseId, cancellationToken);
 
         MemoryStream stream = await _excelService.CreateCanvasAssignmentCommentExport(enrolments, submissions, students, cancellationToken);
 

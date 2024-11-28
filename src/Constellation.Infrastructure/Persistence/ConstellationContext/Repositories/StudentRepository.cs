@@ -101,7 +101,7 @@ public class StudentRepository : IStudentRepository
     {
         List<OfferingId> offeringIds = await _context
             .Set<Offering>()
-            .Where(offering => 
+            .Where(offering =>
                 offering.CourseId == courseId &&
                 offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today)
@@ -120,6 +120,64 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .Where(student => studentIds.Contains(student.Id))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<string, List<Student>>> GetCurrentEnrolmentsForCourseWithOfferingName(
+        CourseId courseId,
+        CancellationToken cancellationToken = default)
+    {
+        List<Offering> offerings = await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.CourseId == courseId &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .ToListAsync(cancellationToken);
+
+        List<OfferingId> offeringIds = offerings
+            .Select(offering => offering.Id)
+            .ToList();
+
+        List<Enrolment> enrolments = await _context
+            .Set<Enrolment>()
+            .Where(enrolment =>
+                offeringIds.Contains(enrolment.OfferingId) &&
+                !enrolment.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        List<StudentId> studentIds = enrolments
+            .Select(enrolment => enrolment.StudentId)
+            .ToList();
+
+        List<Student> students = await _context
+            .Set<Student>()
+            .Where(student => studentIds.Contains(student.Id))
+            .ToListAsync(cancellationToken);
+
+        Dictionary<string, List<Student>> groupedStudents = new();
+
+        foreach (Student student in students)
+        {
+            List<Enrolment> studentEnrolments = enrolments
+                .Where(entry => entry.StudentId == student.Id)
+                .ToList();
+
+            foreach (Enrolment enrolment in studentEnrolments)
+            {
+                Offering offering = offerings
+                    .FirstOrDefault(entry => entry.Id == enrolment.OfferingId);
+
+                if (offering is null)
+                    continue;
+
+                if (groupedStudents.ContainsKey(offering.Name))
+                    groupedStudents[offering.Name].Add(student);
+                else
+                    groupedStudents.Add(offering.Name, [student]);
+            }
+        }
+
+        return groupedStudents;
     }
 
     public async Task<bool> IsValidStudentId(
