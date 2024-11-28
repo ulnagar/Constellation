@@ -3,7 +3,11 @@
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Reports.GetExternalReportList;
+using Constellation.Application.Attachments.GetAttachmentFile;
+using Constellation.Core.Models.Attachments.DTOs;
+using Constellation.Core.Models.Attachments.ValueObjects;
 using Core.Abstractions.Services;
+using Core.Models.Reports.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -62,5 +66,20 @@ public class IndexModel : BasePageModel
         }
 
         Reports = reports.Value;
+    }
+
+    public async Task<IActionResult> OnGetDownload(
+        ExternalReportId id)
+    {
+        Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.ExternalReport, id.ToString()));
+
+        if (fileResponse.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(fileResponse.Error, null);
+
+            return Page();
+        }
+
+        return File(fileResponse.Value.FileData, fileResponse.Value.FileType, fileResponse.Value.FileName);
     }
 }

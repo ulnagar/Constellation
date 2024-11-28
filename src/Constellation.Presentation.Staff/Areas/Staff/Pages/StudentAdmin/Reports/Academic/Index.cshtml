@@ -26,7 +26,7 @@
             <td>@entry.ReportPeriod</td>
             <td data-sort="@entry.StudentName.SortOrder">@entry.StudentName.DisplayName</td>
             <td>
-                <a asp-page-handler="DownloadReport" asp-route-id="@entry.ReportId" class="btn btn-show-hover btn-success">Download</a>
+                <a asp-page-handler="DownloadReport" asp-route-id="@entry.ReportId" class="btn btn-show-hover btn-success show-loader-10">Download</a>
             </td>
         </tr>
     }

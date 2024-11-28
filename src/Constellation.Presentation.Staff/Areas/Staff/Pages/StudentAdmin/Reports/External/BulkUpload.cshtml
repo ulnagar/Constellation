@@ -6,7 +6,7 @@
 <h2>Bulk Upload External Reports</h2>
 
 <div class="page-menu">
-    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right show-loader">Go Back</a>
 </div>
 
 <hr />
@@ -40,7 +40,7 @@
 
                         <div class="form-group">
                             <div class="col-md-3">
-                                <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                                <input type="submit" value="Upload" class="btn btn-primary btn-block btn-lg show-loader" />
                             </div>
                         </div>
                     </div>
@@ -98,9 +98,9 @@
                                         Actions
                                     </button>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item update-button" data-report-id="@file.ReportId">Update</a>
-                                        <a class="dropdown-item publish-button" data-report-id="@file.ReportId" data-file-name="@file.FileName">Publish</a>
-                                        <a class="dropdown-item delete-button" data-report-id="@file.ReportId" data-file-name="@file.FileName">Delete</a>
+                                        <a class="dropdown-item update-button no-loader" data-report-id="@file.ReportId">Update</a>
+                                        <a class="dropdown-item publish-button no-loader" data-report-id="@file.ReportId" data-file-name="@file.FileName">Publish</a>
+                                        <a class="dropdown-item delete-button no-loader" data-report-id="@file.ReportId" data-file-name="@file.FileName">Delete</a>
                                     </div>
                                 </div>
                             </td>

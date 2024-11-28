@@ -12,7 +12,7 @@
 <div class="page-menu">
     @if (canEdit.Succeeded)
     {
-        <a asp-page="/StudentAdmin/Reports/External/BulkUpload" class="btn btn-primary">Bulk Upload</a>
+        <a asp-page="/StudentAdmin/Reports/External/BulkUpload" class="btn btn-primary show-loader">Bulk Upload</a>
     }
 </div>
 
@@ -35,7 +35,9 @@
                 <td>@entry.Type</td>
                 <td data-sort="@entry.StudentName.SortOrder">@entry.StudentName.DisplayName</td>
                 <td data-sort="@entry.IssuedDate.ToString("yyyy-MM")">@entry.IssuedDate.ToString("MMM yyyy")</td>
-                <td></td>
+                <td>
+                    <a asp-page-handler="Download" asp-route-id="@entry.Id" class="btn btn-show-hover btn-success show-loader-10">Download</a>
+                </td>
             </tr>
         }
     </tbody>

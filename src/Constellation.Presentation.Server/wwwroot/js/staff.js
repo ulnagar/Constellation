@@ -1,10 +1,25 @@
-﻿$(document).ready(function () {
+﻿$(function () {
     // Add the showLoader function to any nav links
-    $('a.showLoader').on('click', showLoader);
-    $('input.showLoader').on('click', showLoader);
-    $('a.nav-link:not(.dropdown-toggle):not([role="tab"])').on('click', showLoader);
-    $('a.dropdown-item').on('click', showLoader);
-    $('a.btn').on('click', showLoader);
+    $('a.showLoader:not(.no-loader):not(.show-loader):not(.show-loader-5):not(.show-loader-10)').on('click', showLoader);
+    $('input.showLoader:not(.no-loader):not(.show-loader):not(.show-loader-5):not(.show-loader-10)').on('click', showLoader);
+    $('a.nav-link:not(.no-loader):not(.dropdown-toggle):not([role="tab"]):not(.show-loader):not(.show-loader-5):not(.show-loader-10)').on('click', showLoader);
+    $('a.dropdown-item:not(.no-loader):not(.show-loader):not(.show-loader-5):not(.show-loader-10)').on('click', showLoader);
+    $('a.btn:not(.no-loader):not(.show-loader):not(.show-loader-5):not(.show-loader-10)').on('click', showLoader);
+
+    // Start to replace the above automatic registration of loader display with explicit calls to show the loader in particular lengths
+    // Show loader until page refresh
+    // Use the delegated selector $(document).on('click', 'target', function()) to ensure that dynamic content is also able to trigger the function.
+    $(document).on('click', '.show-loader', function () {
+        showLoader()
+    });
+    // Show loader for 5 seconds
+    $(document).on('click', '.show-loader-5', function () {
+        showLoader(5000)
+    });
+    // Show loader for 10 seconds
+    $(document).on('click', '.show-loader-10', function () {
+        showLoader(10000)
+    }); 
 
     // Activate any comboboxes
     $(".combo").select2({ theme: 'bootstrap' });
@@ -62,14 +77,15 @@
         });
 });
 
-function showLoader() {
-    if ($('.spinner-overlay').length > 0) {
-        $('.spinner-overlay').removeClass('d-none');
+function showLoader(delay = 0) {
+    $('.spinner-overlay').removeClass('d-none');
+
+    if (delay > 0) {
         setTimeout(function () {
             $('.spinner-overlay').addClass('d-none');
-        }, 10000);
+        }, delay);
     }
-};
+}
 
 function toggleLoader() {
     var overlay = $('.spinner-overlay');

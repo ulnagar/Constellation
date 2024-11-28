@@ -2,22 +2,20 @@ namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Reports;
 
 using Application.Attachments.GetAttachmentFile;
 using Application.Models.Auth;
+using Application.Reports.GetCombinedReportListForStudent;
 using Application.Students.GetStudentsByParentEmail;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Reports.GetAcademicReportList;
 using Constellation.Core.Models.Reports.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
-using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]
@@ -51,13 +49,31 @@ public class IndexModel : BasePageModel
 
     public List<StudentResponse> Students { get; set; } = new();
 
-    public List<AcademicReportResponse> Reports { get; set; } = new();
+    public List<ReportResponse> Reports { get; set; } = new();
 
     public async Task OnGet() => await PreparePage();
 
-    public async Task<IActionResult> OnGetDownload(AcademicReportId reportId)
+    public async Task<IActionResult> OnGetDownloadAcademicReport(AcademicReportId reportId)
     {
         Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.StudentReport, reportId.ToString()));
+
+        if (fileResponse.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                fileResponse.Error,
+                _linkGenerator.GetPathByPage("/Reports/Index", values: new { area = "Parents" }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return File(fileResponse.Value.FileData, fileResponse.Value.FileType, fileResponse.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetDownloadExternalReport(ExternalReportId reportId)
+    {
+        Result<AttachmentResponse> fileResponse = await _mediator.Send(new GetAttachmentFileQuery(AttachmentType.ExternalReport, reportId.ToString()));
 
         if (fileResponse.IsFailure)
         {
@@ -99,7 +115,7 @@ public class IndexModel : BasePageModel
         {
             _logger.Information("Requested to retrieve reports by user {user} for student {student}", _currentUserService.UserName, StudentId);
 
-            Result<List<AcademicReportResponse>> reportsRequest = await _mediator.Send(new GetAcademicReportListQuery(StudentId));
+            Result<List<ReportResponse>> reportsRequest = await _mediator.Send(new GetCombinedReportListForStudentQuery(StudentId));
 
             if (reportsRequest.IsFailure)
             {

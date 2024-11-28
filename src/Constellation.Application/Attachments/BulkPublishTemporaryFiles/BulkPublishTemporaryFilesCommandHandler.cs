@@ -63,7 +63,7 @@ internal sealed class BulkPublishTemporaryFilesCommandHandler
                     .ForContext(nameof(Error), ExternalReportErrors.NoLinkedStudent, true)
                     .Warning("Failed to bulk publish Temporary External Report");
 
-                return Result.Failure(ExternalReportErrors.NoLinkedStudent);
+                continue;
             }
 
             Attachment? attachment = attachments.FirstOrDefault(entry => entry.LinkId == report.Id.ToString());
@@ -76,7 +76,7 @@ internal sealed class BulkPublishTemporaryFilesCommandHandler
                     .ForContext(nameof(Error), AttachmentErrors.NotFound(AttachmentType.TempFile, report.Id.ToString()), true)
                     .Warning("Failed to bulk publish Temporary External Report");
 
-                return Result.Failure(AttachmentErrors.NotFound(AttachmentType.TempFile, report.Id.ToString()));
+                continue;
             }
 
             Result<AttachmentResponse> fileData = await _attachmentService.GetAttachmentFile(AttachmentType.TempFile, report.Id.ToString(), cancellationToken);
@@ -89,7 +89,7 @@ internal sealed class BulkPublishTemporaryFilesCommandHandler
                     .ForContext(nameof(Error), fileData.Error, true)
                     .Warning("Failed to bulk publish Temporary External Report");
 
-                return fileData;
+                continue;
             }
 
             // Convert to External Report
@@ -106,7 +106,7 @@ internal sealed class BulkPublishTemporaryFilesCommandHandler
                     .ForContext(nameof(Error), attempt.Error, true)
                     .Warning("Failed to bulk publish Temporary External Report");
 
-                return Result.Failure(attempt.Error);
+                continue;
             }
 
             _attachmentRepository.Insert(newAttachment);
