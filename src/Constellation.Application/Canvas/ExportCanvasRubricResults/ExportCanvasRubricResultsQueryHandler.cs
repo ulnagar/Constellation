@@ -6,6 +6,7 @@ using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Offerings.Repositories;
+using Core.Models.Offerings.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Shared;
@@ -17,6 +18,7 @@ using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,9 +70,7 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
             return Result.Failure<FileDto>(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        CanvasCourseCode courseCode = CanvasCourseCode.FromOffering(offering);
-        
-        Result<RubricEntry> rubric = await _gateway.GetCourseAssignmentDetails(courseCode, request.CanvasAssignmentId, cancellationToken);
+        Result<RubricEntry> rubric = await _gateway.GetCourseAssignmentDetails(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
 
         if (rubric.IsFailure)
         {
@@ -82,8 +82,8 @@ internal sealed class ExportCanvasRubricResultsQueryHandler
             return Result.Failure<FileDto>(CanvasErrors.Rubric.NotFound);
         }
 
-        List<CourseEnrolmentEntry> enrolments = await _gateway.GetEnrolmentsForCourse(courseCode, cancellationToken);
-        List<AssignmentResultEntry> submissions = await _gateway.GetCourseAssignmentSubmissions(courseCode, request.CanvasAssignmentId, cancellationToken);
+        List<CourseEnrolmentEntry> enrolments = await _gateway.GetEnrolmentsForCourse(request.CourseCode, cancellationToken);
+        List<AssignmentResultEntry> submissions = await _gateway.GetCourseAssignmentSubmissions(request.CourseCode, request.CanvasAssignmentId, cancellationToken);
 
         List<Student> students = await _studentRepository.GetCurrentEnrolmentsForCourse(offering.CourseId, cancellationToken);
 

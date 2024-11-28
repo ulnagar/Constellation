@@ -96,11 +96,10 @@ internal sealed class AddToCanvas
 
         foreach (CanvasCourseResource resource in resources)
         {
-            string canvasSectionId = resource.CourseId + offering.Name.Value[^2..];
-
             ModifyEnrolmentCanvasOperation operation = new(
                 student.StudentReferenceNumber.Number,
-                canvasSectionId,
+                resource.CourseId,
+                resource.SectionId,
                 CanvasAction.Add,
                 CanvasUserType.Student,
                 offering.IsCurrent ? _dateTime.Now : offering.StartDate.ToDateTime(TimeOnly.MinValue));

@@ -126,13 +126,13 @@ internal sealed class ProcessCanvasOperationCommandHandler
                 Result modifySuccess = modifyOperation.Action switch
                 {
                     _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Teacher) =>
-                        await _canvasGateway.EnrolToCourse(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Teacher, cancellationToken),
-                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) && request.UseSections =>
-                        await _canvasGateway.EnrolToSection(modifyOperation.UserId, CanvasSectionCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Student, cancellationToken),
-                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) && !request.UseSections =>
-                        await _canvasGateway.EnrolToCourse(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), CanvasPermissionLevel.Student, cancellationToken),
+                        await _canvasGateway.EnrolToCourse(modifyOperation.UserId, modifyOperation.CourseId, CanvasPermissionLevel.Teacher, cancellationToken),
+                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) && request.UseSections && modifyOperation.SectionId != CanvasSectionCode.Empty =>
+                        await _canvasGateway.EnrolToSection(modifyOperation.UserId, modifyOperation.SectionId, CanvasPermissionLevel.Student, cancellationToken),
+                    _ when modifyOperation.Action.Equals(CanvasAction.Add) && modifyOperation.UserType.Equals(CanvasUserType.Student) =>
+                        await _canvasGateway.EnrolToCourse(modifyOperation.UserId, modifyOperation.CourseId, CanvasPermissionLevel.Student, cancellationToken),
                     _ when modifyOperation.Action.Equals(CanvasAction.Remove) =>
-                        await _canvasGateway.UnenrolUser(modifyOperation.UserId, CanvasCourseCode.FromValue(modifyOperation.CourseId), cancellationToken),
+                        await _canvasGateway.UnenrolUser(modifyOperation.UserId, modifyOperation.CourseId, cancellationToken),
                     _ => throw new NotImplementedException()
                 };
                 

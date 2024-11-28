@@ -22,6 +22,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Canvas.Models;
 using Core.Models.Offerings.Errors;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -437,10 +438,11 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetDownloadRubricResults(
+        [ModelBinder(typeof(FromValueBinder))] CanvasCourseCode courseCode,
         int assignmentId,
         string assignmentName)
     {
-        ExportCanvasRubricResultsQuery command = new(Id, assignmentId, assignmentName);
+        ExportCanvasRubricResultsQuery command = new(Id, courseCode, assignmentId, assignmentName);
 
         _logger
             .ForContext(nameof(ExportCanvasRubricResultsQuery), command, true)

@@ -84,15 +84,16 @@ public class SchoolRepository : ISchoolRepository
                 !student.IsDeleted &&
                 student.SchoolEnrolments
                     .Any(enrolment =>
+                        enrolment.SchoolCode == schoolCode &&
                         !enrolment.IsDeleted &&
                         enrolment.StartDate <= _dateTime.Today &&
                         (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today)))
             .ToListAsync(cancellationToken);
         
-        if (students.All(student => student.CurrentEnrolment?.Grade >= Grade.Y07))
+        if (students.All(student => student.CurrentEnrolment.Grade >= Grade.Y07))
             return SchoolType.Secondary;
 
-        if (students.All(student => student.CurrentEnrolment?.Grade <= Grade.Y06))
+        if (students.All(student => student.CurrentEnrolment.Grade <= Grade.Y06))
             return SchoolType.Primary;
 
         return SchoolType.Central;
