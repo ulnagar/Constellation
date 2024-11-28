@@ -1,11 +1,12 @@
 @page
-@using Constellation.Core.Models.Students.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External.BulkUploadModel
+
+@using Constellation.Core.Models.Students.Identifiers
 
 <h2>Bulk Upload External Reports</h2>
 
 <div class="page-menu">
-
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
 <hr />
@@ -69,7 +70,7 @@
         <div id="matchContent" class="collapse @(Model.Files.Any() ? "show" : "")">
             <div class="card-body">
                 
-                <button class="btn btn-success">Publish All</button>
+                <button class="btn btn-success bulk-publish-button">Publish All</button>
 
                 <hr />
 
@@ -98,8 +99,8 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item update-button" data-report-id="@file.ReportId">Update</a>
-                                        <a class="dropdown-item" href="#">Publish</a>
-                                        <a class="dropdown-item" href="#">Delete</a>
+                                        <a class="dropdown-item publish-button" data-report-id="@file.ReportId" data-file-name="@file.FileName">Publish</a>
+                                        <a class="dropdown-item delete-button" data-report-id="@file.ReportId" data-file-name="@file.FileName">Delete</a>
                                     </div>
                                 </div>
                             </td>
@@ -162,6 +163,78 @@
                 $('#page-modal .combo').select2({ theme: 'bootstrap' });
             });
         });
+
+        $('.bulk-publish-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxBulkPublish",
+                type: "POST",
+                data: {
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.publish-button').click(function (event) {
+            var reportId = $(this).data('reportId');
+            var fileName = $(this).data('fileName');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxPublish",
+                type: "POST",
+                data: {
+                    reportId: reportId,
+                    fileName: fileName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.delete-button').click(function (event) {
+            var reportId = $(this).data('reportId');
+            var fileName = $(this).data('fileName');
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDelete",
+                type: "POST",
+                data: {
+                    reportId: reportId,
+                    fileName: fileName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.email-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxEmailReports",
+                type: "POST",
+                data: {
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        function submitEmailForm() {
+            $('#EmailReportsForm').submit();
+        };
 
         $(document).ready(function() {
             $('.summernote-mailmerge').summernote({

@@ -27,4 +27,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Staff\Pages\Shared\PartialViews\ConfirmTempReportBulkPublishModal\" />
+    <Folder Include="Areas\Staff\Pages\Shared\PartialViews\ConfirmTempReportEmailModal\" />
+  </ItemGroup>
+
 </Project>
