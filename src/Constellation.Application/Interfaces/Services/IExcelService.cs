@@ -63,5 +63,5 @@ public interface IExcelService
     Task<List<ImportStudentDto>> ImportStudentsFromFile(MemoryStream stream, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateAssetExportFile(List<Asset> assets, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCanvasRubricResultExport(RubricEntry rubric, List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, List<Student> students, CancellationToken cancellationToken = default);
-    Task<MemoryStream> CreateCanvasAssignmentCommentExport(List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, List<Student> students, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateCanvasAssignmentCommentExport(List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, Dictionary<string, List<Student>> students, CancellationToken cancellationToken = default);
 }
