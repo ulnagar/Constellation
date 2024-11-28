@@ -8,3 +8,27 @@
 </div>
 
 <hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>Year</th>
+        <th>Period</th>
+        <th>Student</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var entry in Model.Reports)
+    {
+        <tr>
+            <td>@entry.Year</td>
+            <td>@entry.ReportPeriod</td>
+            <td data-sort="@entry.StudentName.SortOrder">@entry.StudentName.DisplayName</td>
+            <td>
+                <a asp-page-handler="DownloadReport" asp-route-id="@entry.ReportId" class="btn btn-show-hover btn-success">Download</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,7 +1,10 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External;
 
+using Application.Attachments.BulkPublishTemporaryFiles;
+using Application.Attachments.DeleteTemporaryFile;
 using Application.Attachments.EmailExternalReports;
 using Application.Attachments.GetTemporaryFileById;
+using Application.Attachments.PublishTemporaryFile;
 using Application.Models.Auth;
 using Application.Reports.UpdateTempReportDetails;
 using Constellation.Application.Attachments.GetTemporaryFiles;
@@ -22,9 +25,12 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 using Shared.Components.EmailExternalReports;
+using Shared.PartialViews.ConfirmTempReportDeleteModal;
+using Shared.PartialViews.ConfirmTempReportPublishModal;
 using Shared.PartialViews.UpdateTempReportDetails;
 using System.Net.Mime;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 [Authorize(Policy = AuthPolicies.CanManageReports)]
 public class BulkUploadModel : BasePageModel
@@ -182,10 +188,122 @@ public class BulkUploadModel : BasePageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPostAjaxEmailReports()
+    {
+        return Partial("ConfirmTempReportEmailModal");
+    }
+
     public async Task<IActionResult> OnPostEmailReports(
         EmailExternalReportsSelection viewModel)
     {
         await _mediator.Send(new EmailExternalReportsCommand(viewModel.Subject, viewModel.Body));
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxBulkPublish()
+    {
+        return Partial("ConfirmTempReportBulkPublishModal");
+    }
+
+    public async Task<IActionResult> OnGetBulkPublish()
+    {
+        _logger.Information("Requested to bulk publish temporary files by user {User}", _currentUserService.UserName);
+
+        Result attempt = await _mediator.Send(new BulkPublishTemporaryFilesCommand());
+        if (attempt.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), attempt.Error, true)
+                .Warning("Failed to bulk publish temporary file by user {User}", _currentUserService.UserName);
+
+
+            ModalContent = new ErrorDisplay(
+                attempt.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxPublish(
+        ExternalReportId reportId,
+        string fileName)
+    {
+        ConfirmTempReportPublishModalViewModel viewModel = new(
+            reportId,
+            fileName);
+
+        return Partial("ConfirmTempReportPublishModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnGetPublishReport(
+        ExternalReportId reportId)
+    {
+        PublishTemporaryFileCommand command = new(reportId);
+
+        _logger
+            .ForContext(nameof(PublishTemporaryFileCommand), command, true)
+            .Information("Requested to publish temporary file by user {User}", _currentUserService.UserName);
+
+        Result attempt = await _mediator.Send(command);
+
+        if (attempt.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(PublishTemporaryFileCommand), command, true)
+                .ForContext(nameof(Error), attempt.Error, true)
+                .Warning("Failed to publish temporary file by user {User}", _currentUserService.UserName);
+
+
+            ModalContent = new ErrorDisplay(
+                attempt.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxDelete(
+        ExternalReportId reportId,
+        string fileName)
+    {
+        ConfirmTempReportDeleteModalViewModel viewModel = new(
+            reportId,
+            fileName);
+
+        return Partial("ConfirmTempReportDeleteModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnGetDeleteReport(
+        ExternalReportId reportId)
+    {
+        DeleteTemporaryFileCommand command = new(reportId);
+
+        _logger
+            .ForContext(nameof(DeleteTemporaryFileCommand), command, true)
+            .Information("Requested to delete temporary file by user {User}", _currentUserService.UserName);
+
+        Result attempt = await _mediator.Send(command);
+
+        if (attempt.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(DeleteTemporaryFileCommand), command, true)
+                .ForContext(nameof(Error), attempt.Error, true)
+                .Warning("Failed to delete temporary file by user {User}", _currentUserService.UserName);
+
+
+            ModalContent = new ErrorDisplay(
+                attempt.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
+
+            return Page();
+        }
 
         return RedirectToPage();
     }
