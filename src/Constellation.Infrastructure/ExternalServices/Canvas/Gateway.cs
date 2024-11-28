@@ -350,7 +350,7 @@ internal sealed class Gateway : ICanvasGateway
             {
                 submission_type = "online_upload", 
                 file_ids = new[] { fileId }, 
-                user_id = canvasUserId
+                user_id = canvasUserId.Value
             }
         };
 
@@ -604,7 +604,7 @@ internal sealed class Gateway : ICanvasGateway
             canvasUserId = Result.Failure<int>(CanvasGatewayErrors.FailureResponseCode);
         }
 
-        if (canvasUserId.IsFailure)
+        if (canvasUserId.IsSuccess)
             return await ReactivateUser(userId, cancellationToken);
 
         // If not, create a new user
@@ -890,7 +890,7 @@ internal sealed class Gateway : ICanvasGateway
         if (canvasLoginId.IsFailure)
             return Result.Failure(CanvasGatewayErrors.UserNotFound(userId));
 
-        string path = $"accounts/1/logins/{canvasLoginId}";
+        string path = $"accounts/1/logins/{canvasLoginId.Value}";
 
         var payload = new
         {
@@ -925,7 +925,7 @@ internal sealed class Gateway : ICanvasGateway
         if (canvasLoginId.IsFailure)
             return canvasLoginId;
 
-        string path = $"accounts/1/logins/{canvasLoginId}";
+        string path = $"accounts/1/logins/{canvasLoginId.Value}";
 
         var payload = new
         {
@@ -965,7 +965,7 @@ internal sealed class Gateway : ICanvasGateway
             return canvasUserId;
 
         // Change the users SIS_USER_ID to prepend the deletion year (making it unique)
-        string path = $"accounts/1/logins/{canvasLoginId}";
+        string path = $"accounts/1/logins/{canvasLoginId.Value}";
 
         var payload = new
         {
@@ -991,7 +991,7 @@ internal sealed class Gateway : ICanvasGateway
         if (!response.IsSuccessStatusCode)
             return Result.Failure(CanvasGatewayErrors.FailureResponseCode);
 
-        path = $"accounts/1/users/{canvasUserId}";
+        path = $"accounts/1/users/{canvasUserId.Value}";
 
         if (_logOnly)
         {
@@ -1160,7 +1160,7 @@ internal sealed class Gateway : ICanvasGateway
 
         var payload = new
         {
-            user_id = canvasUserId
+            user_id = canvasUserId.Value
         };
 
         if (_logOnly)
