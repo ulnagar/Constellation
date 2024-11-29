@@ -37,10 +37,10 @@
     </div>
 
     <div class="main-content">
-        <div class="alert alert-info alert-dismissible fade show feature-alert d-none" data-version="1.16.0">
+        <div class="alert alert-info alert-dismissible fade show feature-alert d-none" data-version="1.16.2">
             <h4 class="alert-heading">New Features!</h4>
-            <p>Changes to students have been implemented in this new version. Students can now be entered without an SRN, Email Address, School, or Grade.</p>
-            <p>Additionally, students can now have preferred first names as well as legal first names, and a preferred gender as well.</p>
+            <p>Changes to grouping of features in Constellation have been applied. The SchoolAdmin area has been split into SchoolAdmin and StudentAdmin. Features specific to students are in the StudentAdmin area, while features around school processes are in the SchoolAdmin area.</p>
+            <p>E.g. Student Awards are in the StudentAdmin area, while Award Nominations are in the SchoolAdmin area.</p>
             <p>If you have any questions, please contact the Technology Support Team at <a href="mailto:support@aurora.nsw.edu.au" class="alert-link">support@aurora.nsw.edu.au</a></p>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
@@ -68,7 +68,7 @@
 @section Scripts
 {
     <script>
-        $(document).ready(function () {
+        $(function () {
             $('#sortable-cards').sortable({
                 group: 'dashboard-cards',
                 store: {
