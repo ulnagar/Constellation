@@ -1,0 +1,64 @@
+﻿@page
+@using Constellation.Application.Reports.GetCombinedReportListForStudent
+@model Constellation.Presentation.Students.Areas.Students.Pages.Reports.IndexModel
+@{
+}
+
+<h2>Reports</h2>
+
+<div class="d-flex flex-column justify-content-around">
+    <div class="accordion" id="accordion">
+
+        @foreach (var group in Model.Reports.GroupBy(report => report.Year).OrderByDescending(group => group.Key))
+        {
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="accordion-header-@group.Key">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-@group.Key" aria-expanded="false" aria-controls="accordion-item-@group.Key">
+                        @group.Key
+                    </button>
+                </h2>
+                <div id="accordion-item-@group.Key" class="accordion-collapse collapse" aria-labelledby="accordion-header-@group.Key" data-bs-parent="#accordion">
+                    <div class="accordion-body">
+                        @foreach (var entry in group.OfType<AcademicReportResponse>().OrderBy(report => Convert.ToInt32(report.PublishId)))
+                        {
+                            <div class="w-auto p-3 mb-2 shadow position-relative">
+                                <div class="row d-flex align-items-center">
+                                    @*Display as flex to enable vertical centering of the button in the second div*@
+                                    <div class="col-lg-8">
+                                        <div class="h5">@entry.ReportingPeriod</div>
+
+                                        @*Turn the entire entry into a clickable element*@
+                                        <span class="fst-italic">Click or tap to download</span>
+
+                                        <div class="d-block">
+                                            <a asp-page-handler="DownloadAcademicReport" asp-route-reportId="@entry.Id" class="stretched-link"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        
+                        @foreach (var entry in group.OfType<ExternalReportResponse>().OrderBy(report => report.IssuedDate))
+                        {
+                            <div class="w-auto p-3 mb-2 shadow position-relative">
+                                <div class="row d-flex align-items-center">
+                                    @*Display as flex to enable vertical centering of the button in the second div*@
+                                    <div class="col-lg-8">
+                                        <div class="h5">@entry.Type - @entry.IssuedDate.ToString("MMM yyyy")</div>
+
+                                        @*Turn the entire entry into a clickable element*@
+                                        <span class="fst-italic">Click or tap to download</span>
+
+                                        <div class="d-block">
+                                            <a asp-page-handler="DownloadExternalReport" asp-route-reportId="@entry.Id" class="stretched-link"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
