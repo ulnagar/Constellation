@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Periods.GetPeriodsForVisualSelection;
 
+using Core.Models.Timetables.Identifiers;
 using System;
 
 public sealed record PeriodVisualSelectResponse(
-    int PeriodId,
+    PeriodId PeriodId,
     string Timetable,
     int Day,
     int Period,

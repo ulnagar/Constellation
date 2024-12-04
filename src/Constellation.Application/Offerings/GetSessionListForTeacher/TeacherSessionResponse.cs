@@ -2,12 +2,13 @@
 
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.Timetables.Identifiers;
 
 public sealed record TeacherSessionResponse(
     OfferingId OfferingId,
     OfferingName OfferingName,
     SessionId SessionId,
-    int PeriodId,
+    PeriodId PeriodId,
     string PeriodSortOrder,
     string PeriodName,
     decimal Duration);

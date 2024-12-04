@@ -5,6 +5,7 @@ using Application.Models.Auth;
 using Application.Periods.GetPeriodById;
 using Application.Periods.UpsertPeriod;
 using Core.Abstractions.Services;
+using Core.Models.Timetables.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,8 +40,8 @@ public class UpsertModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Periods;
     [ViewData] public string PageTitle { get; set; } = "New Period";
 
-    [BindProperty(SupportsGet = true)]
-    public int? Id { get; set; }
+    [BindProperty(SupportsGet = true)] 
+    public PeriodId Id { get; set; } = PeriodId.Empty;
 
     public int Day { get; set; }
     public int Period { get; set; }
@@ -54,12 +55,12 @@ public class UpsertModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (Id is null)
+        if (Id == PeriodId.Empty)
             return;
 
         _logger.Information("Requested to retrieve details of Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-        Result<PeriodResponse> request = await _mediator.Send(new GetPeriodByIdQuery(Id.Value));
+        Result<PeriodResponse> request = await _mediator.Send(new GetPeriodByIdQuery(Id));
 
         if (request.IsFailure)
         {

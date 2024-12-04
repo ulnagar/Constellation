@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Timetables.ValueObjects;
 
 public interface IOfferingRepository
 {
@@ -38,7 +39,7 @@ public interface IOfferingRepository
     void Insert(Offering offering);
     void Remove(Resource resource);
 
-    Task<List<string>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<Timetable>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedTeamResource(string teamName, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedCanvasResource(CanvasCourseCode courseCode, CancellationToken cancellationToken = default);
 }

@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Offerings.GetSessionListForTeacher;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +16,12 @@ internal sealed class GetSessionListForTeacherQueryHandler
     : IQueryHandler<GetSessionListForTeacherQuery, List<TeacherSessionResponse>>
 {
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetSessionListForTeacherQueryHandler(
         IOfferingRepository offeringRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
@@ -42,7 +42,7 @@ internal sealed class GetSessionListForTeacherQueryHandler
 
         foreach (Session session in sessions)
         {
-            TimetablePeriod period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
             if (period is null)
                 continue;

@@ -15,6 +15,9 @@ using Core.Models.Covers;
 using Core.Models.Offerings;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using Core.ValueObjects;
 using CoverEndDateChangedDomainEvent;
@@ -39,7 +42,7 @@ internal sealed class SendCoverUpdatedEmailHandle
     private readonly ICasualRepository _casualRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ITeamRepository _teamRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailAttachmentService _emailAttachmentService;
     private readonly IEmailService _emailService;
@@ -52,7 +55,7 @@ internal sealed class SendCoverUpdatedEmailHandle
         ICasualRepository casualRepository,
         IStudentRepository studentRepository,
         ITeamRepository teamRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         UserManager<AppUser> userManager,
         IEmailAttachmentService emailAttachmentService,
         IEmailService emailService,
@@ -204,15 +207,15 @@ internal sealed class SendCoverUpdatedEmailHandle
 
         if (cover.StartDate == cover.EndDate)
         {
-            List<TimetablePeriod> periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.ToDateTime(TimeOnly.MinValue).GetDayNumber(), cover.OfferingId, cancellationToken);
+            List<Period> periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.GetDayNumber(), cover.OfferingId, cancellationToken);
 
             startTime = TimeOnly.FromTimeSpan(periods.Min(period => period.StartTime));
             endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));
         }
         else
         {
-            List<string> relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
-            List<TimetablePeriod> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
+            List<Timetable> relevantTimetables = await _offeringRepository.GetTimetableByOfferingId(cover.OfferingId, cancellationToken);
+            List<Period> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
             Attachment timetableAttachment = await _emailAttachmentService.GenerateClassTimetableDocument(offering, relevantPeriods, cancellationToken);
 

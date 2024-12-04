@@ -12,6 +12,9 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Students.Identifiers;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
@@ -131,9 +134,9 @@ public class OfferingRepository : IOfferingRepository
     {
         DateOnly absenceDateOnly = DateOnly.FromDateTime(absenceDate);
 
-        List<int> periodIds = await _context
-            .Set<TimetablePeriod>()
-            .Where(period => period.Day == dayNumber)
+        List<PeriodId> periodIds = await _context
+            .Set<Period>()
+            .Where(period => period.DayNumber == dayNumber)
             .Select(period => period.Id)
             .ToListAsync(cancellationToken);
 
@@ -242,11 +245,11 @@ public class OfferingRepository : IOfferingRepository
     }
         
 
-    public async Task<List<string>> GetTimetableByOfferingId(
+    public async Task<List<Timetable>> GetTimetableByOfferingId(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        List<int> periodIds = await _context
+        List<PeriodId> periodIds = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .SelectMany(offering => offering.Sessions)
@@ -256,7 +259,7 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
         return await _context
-            .Set<TimetablePeriod>()
+            .Set<Period>()
             .Where(period => periodIds.Contains(period.Id))
             .Select(period => period.Timetable)
             .ToListAsync(cancellationToken);

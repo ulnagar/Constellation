@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingSummary;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Offerings.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
@@ -15,6 +14,8 @@ using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ internal sealed class GetOfferingSummaryQueryHandler
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ILogger _logger;
@@ -34,7 +35,7 @@ internal sealed class GetOfferingSummaryQueryHandler
     public GetOfferingSummaryQueryHandler(
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         ICourseRepository courseRepository,
         IFacultyRepository facultyRepository,
         ILogger logger)
@@ -66,7 +67,7 @@ internal sealed class GetOfferingSummaryQueryHandler
         List<string> teacherNames = teachers.Select(teacher => teacher.DisplayName).ToList();
 
         // Calculate minPerFn
-        List<int> periodIds = offering.Sessions
+        List<PeriodId> periodIds = offering.Sessions
             .Where(session => !session.IsDeleted)
             .Select(session => session.PeriodId)
             .ToList();

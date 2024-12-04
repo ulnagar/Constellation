@@ -9,8 +9,9 @@ using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,14 +24,14 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetSessionDetailsForStudentQueryHandler(
         IEnrolmentRepository enrolmentRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         ILogger logger)
     {
         _enrolmentRepository = enrolmentRepository;
@@ -75,7 +76,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
             
             foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
             {
-                TimetablePeriod period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+                Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
                 if (period is null)
                 {

@@ -13,6 +13,8 @@ using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -30,7 +32,7 @@ internal sealed class GetStaffDetailsQueryHandler
     private readonly ICourseRepository _courseRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetStaffDetailsQueryHandler(
@@ -40,7 +42,7 @@ internal sealed class GetStaffDetailsQueryHandler
         ICourseRepository courseRepository,
         IFacultyRepository facultyRepository,
         ISchoolContactRepository contactRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         ILogger logger)
     {
         _staffRepository = staffRepository;
@@ -99,7 +101,7 @@ internal sealed class GetStaffDetailsQueryHandler
 
         List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(request.StaffId, cancellationToken);
         
-        List<TimetablePeriod> periods = await _periodRepository.GetAll(cancellationToken);
+        List<Period> periods = await _periodRepository.GetAll(cancellationToken);
         List<Course> courses = await _courseRepository.GetAll(cancellationToken);
 
         List<StaffDetailsResponse.OfferingResponse> linkedOfferings = new();
@@ -128,7 +130,7 @@ internal sealed class GetStaffDetailsQueryHandler
 
             foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
             {
-                TimetablePeriod period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
+                Period period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
 
                 if (period is null)
                     continue;

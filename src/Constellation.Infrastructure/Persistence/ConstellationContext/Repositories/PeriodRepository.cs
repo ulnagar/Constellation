@@ -1,9 +1,9 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Timetables.ValueObjects;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Timetables;
-using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,7 @@ public class PeriodRepository : IPeriodRepository
     public async Task<List<Period>> GetForOfferingOnDay(    
         OfferingId offeringId,
         DateTime absenceDate,
-        PeriodDay day,
+        int day,
         CancellationToken cancellationToken = default)
     {
         List<Session> sessions = await _context
@@ -43,7 +43,7 @@ public class PeriodRepository : IPeriodRepository
         return await _context
             .Set<Period>()
             .Where(period =>
-                period.Day == day &&
+                period.DayNumber == day &&
                 sessions.Select(session => session.PeriodId).Contains(period.Id))
             .ToListAsync(cancellationToken);
     }
@@ -52,7 +52,7 @@ public class PeriodRepository : IPeriodRepository
     public Task<List<Period>> GetForOfferingOnDay(
         OfferingId offeringId,
         DateOnly absenceDate,
-        PeriodDay day,
+        int day,
         CancellationToken cancellationToken = default) =>
         GetForOfferingOnDay(offeringId, absenceDate.ToDateTime(TimeOnly.MinValue), day, cancellationToken);
 
@@ -77,7 +77,7 @@ public class PeriodRepository : IPeriodRepository
     }
 
     public async Task<List<Period>> GetByDayAndOfferingId(
-        PeriodDay day,
+        int day,
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
@@ -92,7 +92,7 @@ public class PeriodRepository : IPeriodRepository
         return await _context
             .Set<Period>()
             .Where(period => 
-                period.Day == day &&
+                period.DayNumber == day &&
                 sessions.Any(session => session.PeriodId == period.Id))
             .ToListAsync(cancellationToken);
     }

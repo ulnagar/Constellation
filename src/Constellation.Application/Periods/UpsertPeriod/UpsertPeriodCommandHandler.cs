@@ -3,21 +3,27 @@
 using Abstractions.Messaging;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Errors;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
+using ThirdPartyConsent.GetRequiredApplicationsForStudent;
 
 internal sealed class UpsertPeriodCommandHandler
 : ICommandHandler<UpsertPeriodCommand>
 {
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public UpsertPeriodCommandHandler(
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -28,27 +34,37 @@ internal sealed class UpsertPeriodCommandHandler
 
     public async Task<Result> Handle(UpsertPeriodCommand request, CancellationToken cancellationToken)
     {
-        TimetablePeriod period = request.Id is null
-            ? new TimetablePeriod()
-            : await _periodRepository.GetById(request.Id.Value, cancellationToken);
+        if (request.Id == PeriodId.Empty)
+        {
+            _logger
+                .ForContext(nameof(UpsertPeriodCommand), request, true)
+                .ForContext(nameof(Error), PeriodErrors.InvalidId, true)
+                .Warning("Failed to update Period");
+
+            return Result.Failure(PeriodErrors.InvalidId);
+        }
+
+        Period period = await _periodRepository.GetById(request.Id, cancellationToken);
 
         if (period is null)
         {
             _logger
                 .ForContext(nameof(UpsertPeriodCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Period.NotFound(request.Id.Value), true)
+                .ForContext(nameof(Error), PeriodErrors.NotFound(request.Id), true)
                 .Warning("Failed to update Period");
 
-            return Result.Failure(DomainErrors.Period.NotFound(request.Id.Value));
+            return Result.Failure(PeriodErrors.NotFound(request.Id));
         }
-
-        period.Day = request.Day;
-        period.Timetable = request.Timetable;
-        period.Period = request.Period;
-        period.StartTime = request.StartTime;
-        period.EndTime = request.EndTime;
-        period.Name = request.Name;
-        period.Type = request.Type;
+        
+        period.Update(
+            request.Timetable,
+            request.Week,
+            request.Day,
+            request.DaySequence,
+            request.Name,
+            request.Type,
+            request.StartTime,
+            request.EndTime);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

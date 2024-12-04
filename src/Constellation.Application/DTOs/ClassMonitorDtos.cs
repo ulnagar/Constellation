@@ -5,6 +5,10 @@ using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
 {
+    using Core.Models.Timetables.Enums;
+    using Core.Models.Timetables.Identifiers;
+    using Core.Models.Timetables.ValueObjects;
+
     public class ClassMonitorDtos
     {
         public ClassMonitorDtos()
@@ -75,7 +79,7 @@ namespace Constellation.Application.DTOs
         public class MonitorCourseSession
         {
             public SessionId Id { get; set; }
-            public int PeriodId { get; set; }
+            public PeriodId PeriodId { get; set; }
             public bool IsDeleted { get; set; }
         }
 
@@ -101,10 +105,10 @@ namespace Constellation.Application.DTOs
 
         public class MonitorPeriod
         {
-            public int Id { get; set; }
+            public PeriodId Id { get; set; }
             public string Name { get; set; }
-            public string Timetable { get; set; }
-            public string Type { get; set; }
+            public Timetable Timetable { get; set; }
+            public PeriodType Type { get; set; }
             public int Day { get; set; }
             public TimeSpan StartTime { get; set; }
             public TimeSpan EndTime { get; set; }

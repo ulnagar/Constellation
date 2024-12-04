@@ -5,11 +5,8 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -17,6 +14,9 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Core.Extensions;
 using Core.Models.Students.Enums;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
@@ -28,7 +28,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IAbsenceRepository _absenceRepository;
 
     private Student _student;
@@ -39,7 +39,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
     public AbsenceProcessingJob(
         IOptions<AppConfiguration> configuration,
         IOfferingRepository offeringRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IAbsenceRepository absenceRepository,
         ISentralGateway sentralGateway,
         IEmailService emailService, 
@@ -200,17 +200,17 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 }
 
                 // Get list of periods for this class on this day
-                List<TimetablePeriod> periods = await _periodRepository.GetForOfferingOnDay(enrolledOffering.Id, group.Key, cycleDay, cancellationToken);
+                List<Period> periods = await _periodRepository.GetForOfferingOnDay(enrolledOffering.Id, group.Key, cycleDay, cancellationToken);
                     
                 // Find all contiguous periods
-                IEnumerable<IEnumerable<TimetablePeriod>> periodGroups = periods.GroupConsecutive();
+                IEnumerable<IEnumerable<Period>> periodGroups = periods.GroupConsecutive();
 
-                foreach (IEnumerable<TimetablePeriod> periodGroup in periodGroups)
+                foreach (IEnumerable<Period> periodGroup in periodGroups)
                 {
                     if (cancellationToken.IsCancellationRequested)
                         return returnAbsences;
 
-                    List<TimetablePeriod> coursePeriods = periodGroup
+                    List<Period> coursePeriods = periodGroup
                         .OrderBy(period => period.StartTime)
                         .ToList();
 
@@ -227,7 +227,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     List<SentralPeriodAbsenceDto> absencesToProcess = group
                         .Where(absence => 
                             coursePeriods.Any(period => 
-                                period.GetPeriodDescriptor() == absence.Period))
+                                period.SentralPeriodName() == absence.Period))
                         .ToList();
 
                     if (absencesToProcess.Count == 0)
@@ -243,9 +243,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     {
                         if (absenceTime.Type == SentralPeriodAbsenceDto.Whole)
                         {
-                            TimetablePeriod period = coursePeriods
-                                .First(timetableperiod => 
-                                    timetableperiod.GetPeriodDescriptor() == absenceTime.Period);
+                            Period period = coursePeriods
+                                .First(period => period.SentralPeriodName() == absenceTime.Period);
 
                             absenceTime.MinutesAbsent = (int)period.EndTime.Subtract(period.StartTime).TotalMinutes;
                         }
@@ -343,7 +342,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                                 existingAbsence.UpdateLastSeen();
 
                                 // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                                if (existingAbsences.All(innerabsence => !innerabsence.Explained) && newAbsence.Responses.Any())
+                                if (existingAbsences.All(innerAbsence => !innerAbsence.Explained) && newAbsence.Responses.Any())
                                 {
                                     _logger.Information("{id}: Student {student} ({grade}): Found external explaination for {Type} absence on {Date} - {PeriodName}", JobId, student.Name.DisplayName, student.CurrentEnrolment?.Grade.AsName(), newAbsence.Type, newAbsence.Date.ToShortDateString(), newAbsence.PeriodName);
 
@@ -391,9 +390,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private static void CalculatePxPAbsenceTimes(
         SentralPeriodAbsenceDto absence, 
-        List<TimetablePeriod> periodGroup)
+        List<Period> periodGroup)
     {
-        TimetablePeriod? period = (absence.Period.Contains('S'))
+        Period? period = (absence.Period.Contains('S'))
             ? periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period.Remove(0, 1)))
             : periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period));
 
@@ -422,9 +421,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private static void CalculateWebAttendAbsencePeriod(
         SentralPeriodAbsenceDto absence, 
-        List<TimetablePeriod> periodGroup)
+        List<Period> periodGroup)
     {
-        foreach (TimetablePeriod period in periodGroup)
+        foreach (Period period in periodGroup)
         {
             TimeOnly pStart = TimeOnly.FromTimeSpan(period.StartTime);
             TimeOnly pEnd = TimeOnly.FromTimeSpan(period.EndTime);
@@ -539,12 +538,10 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             {
                 // How do we tell these apart?
                 // Can we match the period for the WebAttend absences to the PxP absence entry?
+                
+                Timetable timetable = Timetable.FromPrefix(absence.Period.TakeWhile(c => !Char.IsLetter(c)).FirstOrDefault());
 
-                string timetable = (_student.CurrentEnrolment?.Grade == Grade.Y05 || _student.CurrentEnrolment?.Grade == Grade.Y06)
-                    ? "PRIMARY"
-                    : "SECONDARY";
-
-                List<TimetablePeriod> periods = await _periodRepository.GetAllFromTimetable(new List<string> { timetable }, cancellationToken);
+                List<Period> periods = await _periodRepository.GetAllFromTimetable([timetable], cancellationToken);
 
                 IEnumerable<SentralPeriodAbsenceDto> bestGuessWebAttendAbsences = webAttendAbsences
                     .Where(aa =>
@@ -656,7 +653,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         SentralPeriodAbsenceDto absence, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
         OfferingId courseEnrolmentId, 
-        List<TimetablePeriod> periodGroup,
+        List<Period> periodGroup,
         CancellationToken cancellationToken)
     {
         // Can we figure out when the (PxP) absence starts and ends?
@@ -741,7 +738,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         List<SentralPeriodAbsenceDto> absencesToProcess, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
         OfferingId courseEnrolmentId, 
-        List<TimetablePeriod> periodGroup, 
+        List<Period> periodGroup, 
         int totalAbsenceTime, 
         CancellationToken cancellationToken)
     {
@@ -904,7 +901,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         OfferingId courseEnrolmentId, 
         AbsenceType type, 
         AbsenceReason reason, 
-        List<TimetablePeriod> periodGroup)
+        List<Period> periodGroup)
     {
         string periodName, periodTimeframe = string.Empty;
         TimeOnly startTime, endTime = TimeOnly.MinValue;

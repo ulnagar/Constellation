@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Periods.GetPeriodById;
 
+using Core.Models.Timetables.Identifiers;
 using System;
 
 public sealed record PeriodResponse(
-    int Id,
+    PeriodId Id,
     int Day,
     int Period,
     string Timetable,

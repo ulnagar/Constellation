@@ -4,13 +4,14 @@ using Constellation.Application.Abstractions;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.StaffMembers.GetStaffById;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Documents.Covers;
 using Core.Models.ThirdPartyConsent;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
 using System.Net.Mail;
 using Templates.Views.Documents.ThirdParty;
 
@@ -52,7 +53,7 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         return rollAttachment;
     }
 
-    public async Task<Attachment> GenerateClassTimetableDocument(Offering offering, List<TimetablePeriod> relevantPeriods, CancellationToken cancellationToken = default)
+    public async Task<Attachment> GenerateClassTimetableDocument(Offering offering, List<Period> relevantPeriods, CancellationToken cancellationToken = default)
     {
         var timetableData = new ClassTimetableDataDto
         {
@@ -61,18 +62,18 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
 
         foreach (var period in relevantPeriods)
         {
-            if (period.Type == "Other")
+            if (period.Type == PeriodType.Offline)
                 continue;
 
             var entry = new TimetableDataDto.TimetableData
             {
-                Day = period.Day,
+                Day = period.DayNumber,
                 StartTime = period.StartTime,
                 EndTime = period.EndTime,
                 TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.Period,
-                Type = period.Type
+                Period = period.DaySequence,
+                Type = period.Type.Name
             };
 
             if (offering.Sessions.Any(session => session.PeriodId == period.Id))

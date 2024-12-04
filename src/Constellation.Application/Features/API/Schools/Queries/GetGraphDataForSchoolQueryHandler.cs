@@ -5,6 +5,9 @@ using Core.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
 using DTOs;
 using Extensions;
 using Interfaces.Gateways;
@@ -21,14 +24,14 @@ internal sealed class GetGraphDataForSchoolQueryHandler : IRequestHandler<GetGra
     private readonly INetworkStatisticsGateway _gateway;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IStudentRepository _studentRepository;
 
     public GetGraphDataForSchoolQueryHandler(
         INetworkStatisticsGateway gateway,
         ISchoolRepository schoolRepository,
         IOfferingRepository offeringRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IStudentRepository studentRepository)
     {
         _gateway = gateway;
@@ -68,27 +71,27 @@ internal sealed class GetGraphDataForSchoolQueryHandler : IRequestHandler<GetGra
         // What day of the cycle is this?
         int cyclicalDay = dateDay.GetDayNumber();
 
-        List<TimetablePeriod> periods = new();
+        List<Period> periods = new();
 
         // Get the periods for all students at this school
         foreach (Student student in students)
         {
             List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
-            List<int> periodIds = offerings
+            List<PeriodId> periodIds = offerings
                 .SelectMany(offering =>
                     offering.Sessions
                         .Where(session => !session.IsDeleted)
                         .Select(session => session.PeriodId))
                 .ToList();
 
-            List<TimetablePeriod> studentPeriods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
+            List<Period> studentPeriods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
 
             periods.AddRange(studentPeriods);
         }
 
         // Which of these periods are on the right day?
-        periods = periods.Where(p => p.Day == cyclicalDay).ToList();
+        periods = periods.Where(p => p.DayNumber == cyclicalDay).ToList();
 
         returnData.Date = dateDay.ToString("D");
         returnData.IntlDate = dateDay.ToString("yyyy-MM-dd");
