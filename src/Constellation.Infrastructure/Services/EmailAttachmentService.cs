@@ -72,7 +72,7 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
                 EndTime = period.EndTime,
                 TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.DaySequence,
+                Period = period.PeriodCode,
                 Type = period.Type.Name
             };
 

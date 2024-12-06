@@ -10,10 +10,10 @@ public class Timetable : ValueObject
 {
     private static readonly Dictionary<string, Timetable> _enumerations = CreateEnumerations();
 
-    public static readonly Timetable Primary = new("PRI", "Primary", 'P');
-    public static readonly Timetable Junior6 = new("JU6", "Junior 6", default);
-    public static readonly Timetable Junior8 = new("JU8", "Junior8", 'A');
-    public static readonly Timetable Senior = new("SEN", "Senior", 'S');
+    public static Timetable Primary => new("PRI", "Primary", 'P');
+    public static Timetable Junior6 => new("JU6", "Junior 6", default);
+    public static Timetable Junior8 => new("JU8", "Junior8", 'A');
+    public static Timetable Senior => new("SEN", "Senior", 'S');
 
     private Timetable() { }
 
@@ -95,15 +95,25 @@ public class Timetable : ValueObject
         Type enumerationType = typeof(Timetable);
 
         IEnumerable<Timetable> fieldsForType = enumerationType
-            .GetFields(
+            .GetProperties(
                 BindingFlags.Public |
                 BindingFlags.Static |
                 BindingFlags.FlattenHierarchy)
             .Where(fieldInfo =>
-                enumerationType.IsAssignableFrom(fieldInfo.FieldType))
+                enumerationType.IsAssignableFrom(fieldInfo.PropertyType))
             .Select(fieldInfo =>
                 (Timetable)fieldInfo.GetValue(default)!);
 
         return fieldsForType.ToDictionary(x => x.Code);
+
+        //Dictionary<string, Timetable> dictionary = new()
+        //{
+        //    { Primary.Code, Primary },
+        //    { Junior6.Code, Junior6 },
+        //    { Junior8.Code, Junior8 },
+        //    { Senior.Code, Senior }
+        //};
+
+        //return dictionary;
     }
 }

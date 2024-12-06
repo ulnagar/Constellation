@@ -7,8 +7,9 @@ using System;
 
 public sealed record PeriodResponse(
     PeriodId Id,
-    int Day,
-    int Period,
+    PeriodWeek Week,
+    PeriodDay Day,
+    char PeriodCode,
     Timetable Timetable,
     TimeSpan StartTime,
     TimeSpan EndTime,

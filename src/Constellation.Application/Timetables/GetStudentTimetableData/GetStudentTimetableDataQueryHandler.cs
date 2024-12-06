@@ -7,7 +7,6 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Extensions;
 using Core.Models.Offerings.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -20,7 +19,6 @@ using Core.Models.Timetables.Repositories;
 using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using DTOs;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,7 +131,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
                 EndTime = period.EndTime,
                 TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.DaySequence,
+                Period = period.PeriodCode,
                 Type = period.Type.Name
             };
 

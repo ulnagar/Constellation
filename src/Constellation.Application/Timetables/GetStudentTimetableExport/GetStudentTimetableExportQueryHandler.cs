@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Timetables.GetStudentTimetableExport;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Extensions;
 using Core.Models;
 using Core.Models.Offerings;
@@ -145,7 +144,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
                 EndTime = period.EndTime,
                 TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.DaySequence,
+                Period = period.PeriodCode,
                 Type = period.Type.Name
             };
 

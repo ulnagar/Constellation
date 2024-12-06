@@ -46,9 +46,8 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)] 
     public PeriodId Id { get; set; } = PeriodId.Empty;
-
-    public int Day { get; set; }
-    public int Period { get; set; }
+    public ValidDays Day { get; set; }
+    public char PeriodCode { get; set; }
     [ModelBinder(typeof(FromValueBinder))]
     public Timetable Timetable { get; set; }
     [DataType(DataType.Time)]
@@ -83,9 +82,9 @@ public class UpsertModel : BasePageModel
 
             return;
         }
-
-        Day = request.Value.Day;
-        Period = request.Value.Period;
+        
+        Day = FromWeekAndDay(request.Value.Week, request.Value.Day);
+        PeriodCode = request.Value.PeriodCode;
         Timetable = request.Value.Timetable;
         StartTime = request.Value.StartTime;
         EndTime = request.Value.EndTime;
@@ -100,11 +99,13 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        (PeriodWeek week, PeriodDay day) convertDay = FromValidDay(Day);
+
         UpsertPeriodCommand command = new(
             Id,
-            (Day / 5) + 1,
-            PeriodDay.FromValue(Day % 5),
-            Period,
+            convertDay.week,
+            convertDay.day,
+            PeriodCode,
             Timetable,
             StartTime,
             EndTime,
@@ -163,4 +164,34 @@ public class UpsertModel : BasePageModel
         [Display(Name = "Week B - Friday")]
         FridayWeekB = 10
     }
+
+    private (PeriodWeek week, PeriodDay day) FromValidDay(ValidDays validDay) =>
+        validDay switch
+        {
+            ValidDays.MondayWeekA => (PeriodWeek.WeekA, PeriodDay.Monday),
+            ValidDays.TuesdayWeekA => (PeriodWeek.WeekA, PeriodDay.Tuesday),
+            ValidDays.WednesdayWeekA => (PeriodWeek.WeekA, PeriodDay.Wednesday),
+            ValidDays.ThursdayWeekA => (PeriodWeek.WeekA, PeriodDay.Thursday),
+            ValidDays.FridayWeekA => (PeriodWeek.WeekA, PeriodDay.Friday),
+            ValidDays.MondayWeekB => (PeriodWeek.WeekB, PeriodDay.Monday),
+            ValidDays.TuesdayWeekB => (PeriodWeek.WeekB, PeriodDay.Tuesday),
+            ValidDays.WednesdayWeekB => (PeriodWeek.WeekB, PeriodDay.Wednesday),
+            ValidDays.ThursdayWeekB => (PeriodWeek.WeekB, PeriodDay.Thursday),
+            ValidDays.FridayWeekB => (PeriodWeek.WeekB, PeriodDay.Friday)
+        };
+
+    private ValidDays FromWeekAndDay(PeriodWeek week, PeriodDay day) =>
+        (week, day) switch
+        {
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Monday => ValidDays.MondayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Tuesday => ValidDays.TuesdayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Wednesday => ValidDays.WednesdayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Thursday => ValidDays.ThursdayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Friday => ValidDays.FridayWeekA,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Monday => ValidDays.MondayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Tuesday => ValidDays.TuesdayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Wednesday => ValidDays.WednesdayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Thursday => ValidDays.ThursdayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Friday => ValidDays.FridayWeekB
+        };
 }

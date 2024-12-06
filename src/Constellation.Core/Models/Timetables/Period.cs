@@ -5,17 +5,18 @@ using Constellation.Core.Models.Timetables.ValueObjects;
 using Enums;
 using Identifiers;
 using Primitives;
-using Shared;
 using System;
 using System.Linq;
 
 public sealed class Period : AggregateRoot, IAuditableEntity
 {
+    private Period() { } // Required by EF Core
+
     private Period(
         Timetable timetable,
-        int week,
+        PeriodWeek week,
         PeriodDay day,
-        int sequence,
+        char periodCode,
         string name,
         PeriodType type,
         TimeSpan startTime,
@@ -23,8 +24,9 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     {
         Id = new();
         Timetable = timetable;
+        Week = week;
         Day = day;
-        DaySequence = sequence;
+        PeriodCode = periodCode;
         Name = name;
         Type = type;
         StartTime = startTime;
@@ -33,18 +35,24 @@ public sealed class Period : AggregateRoot, IAuditableEntity
 
     public PeriodId Id { get; private set; }
     public Timetable Timetable { get; private set; }
-    public int Week { get; private set; }
-    public int DayNumber => ((Week - 1) * 5) + Day.Value;
+    public PeriodWeek Week { get; private set; }
+    
+    /// <summary>
+    /// Day of the cycle
+    /// </summary>
+    public int DayNumber => ((Week.Value - 1) * 5) + Day.Value;
     public PeriodDay Day { get; private set; }
-    public int DaySequence { get; private set; }
+    
+    /// <summary>
+    ///  Period Code. e.g. 1 for Period 1, 0 for Period 0, R for Recess, etc
+    /// </summary>
+    public char PeriodCode { get; private set; }
     public string Name { get; private set; }
     public PeriodType Type { get; private set; }
     public TimeSpan StartTime { get; private set; }
     public TimeSpan EndTime { get; private set; }
     public int Duration => (int)EndTime.Subtract(StartTime).TotalMinutes;
     public string SortOrder => $"{Timetable.Code}.{Day.Value.ToString().PadLeft(2, '0')}.{StartTime.ToString("g")}";
-    public string WeekName => $"Week {"AB"[Week - 1]}";
-
 
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
@@ -56,9 +64,9 @@ public sealed class Period : AggregateRoot, IAuditableEntity
 
     public static Period Create(
         Timetable timetable,
-        int week,
+        PeriodWeek week,
         PeriodDay day,
-        int sequence,
+        char periodCode,
         string name,
         PeriodType type,
         TimeSpan startTime,
@@ -68,7 +76,7 @@ public sealed class Period : AggregateRoot, IAuditableEntity
             timetable,
             week,
             day,
-            sequence,
+            periodCode,
             name,
             type,
             startTime,
@@ -77,9 +85,9 @@ public sealed class Period : AggregateRoot, IAuditableEntity
 
     public void Update(
         Timetable timetable,
-        int week,
+        PeriodWeek week,
         PeriodDay day,
-        int sequence,
+        char periodCode,
         string name,
         PeriodType type,
         TimeSpan startTime,
@@ -88,7 +96,7 @@ public sealed class Period : AggregateRoot, IAuditableEntity
         Timetable = timetable;
         Week = week;
         Day = day;
-        DaySequence = sequence;
+        PeriodCode = periodCode;
         Name = name;
         Type = type;
         StartTime = startTime;
@@ -96,7 +104,7 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     }
     
     public string GroupName() => 
-        $"{Timetable.Name} {WeekName} {Day.Name}";
+        $"{Timetable.Name} {Week.Name} {Day.Name}";
 
     public override string ToString() =>
         $"{GroupName()} - {Name}";
@@ -104,7 +112,7 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     public string SentralPeriodName()
     {
         char prefix = Timetable.Prefix;
-
-        return $"{prefix}{DaySequence}";
+        
+        return $"{prefix}{PeriodCode}";
     }
 }

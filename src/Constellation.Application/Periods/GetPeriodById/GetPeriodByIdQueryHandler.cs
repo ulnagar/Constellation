@@ -39,8 +39,9 @@ internal sealed class GetPeriodByIdQueryHandler
 
         return new PeriodResponse(
             period.Id,
-            period.DayNumber,
-            period.DaySequence,
+            period.Week,
+            period.Day,
+            period.PeriodCode,
             period.Timetable,
             period.StartTime,
             period.EndTime,

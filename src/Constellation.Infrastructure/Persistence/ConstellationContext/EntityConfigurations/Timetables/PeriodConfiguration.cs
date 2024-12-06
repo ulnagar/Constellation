@@ -23,6 +23,12 @@ internal sealed class PeriodConfiguration : IEntityTypeConfiguration<Period>
                 value => PeriodId.FromValue(value));
 
         builder
+            .Property(period => period.Week)
+            .HasConversion(
+                week => week.Value,
+                value => PeriodWeek.FromValue(value));
+
+        builder
             .Property(period => period.Timetable)
             .HasConversion(
                 timetable => timetable.Code,

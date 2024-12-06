@@ -8,9 +8,9 @@ using System;
 
 public sealed record UpsertPeriodCommand(
     PeriodId Id,
-    int Week,
+    PeriodWeek Week,
     PeriodDay Day,
-    int DaySequence,
+    char PeriodCode,
     Timetable Timetable,
     TimeSpan StartTime,
     TimeSpan EndTime,

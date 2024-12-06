@@ -32,7 +32,7 @@ internal sealed class GetPeriodsForVisualSelectionQueryHandler
                 period.Id,
                 period.Timetable,
                 period.DayNumber,
-                period.DaySequence,
+                period.PeriodCode,
                 period.StartTime,
                 period.EndTime,
                 period.Name,

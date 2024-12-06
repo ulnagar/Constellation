@@ -1,10 +1,7 @@
 ﻿namespace Constellation.Application.Periods.UpsertPeriod;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Timetables;
-using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Errors;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
@@ -13,7 +10,6 @@ using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
-using ThirdPartyConsent.GetRequiredApplicationsForStudent;
 
 internal sealed class UpsertPeriodCommandHandler
 : ICommandHandler<UpsertPeriodCommand>
@@ -60,7 +56,7 @@ internal sealed class UpsertPeriodCommandHandler
             request.Timetable,
             request.Week,
             request.Day,
-            request.DaySequence,
+            request.PeriodCode,
             request.Name,
             request.Type,
             request.StartTime,
