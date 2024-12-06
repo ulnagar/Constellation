@@ -42,7 +42,7 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     public TimeSpan StartTime { get; private set; }
     public TimeSpan EndTime { get; private set; }
     public int Duration => (int)EndTime.Subtract(StartTime).TotalMinutes;
-    public string SortOrder => $"{Timetable.Code}.{Day.Value.ToString().PadLeft(2, '0')}.{DaySequence.ToString().PadLeft(2, '0')}";
+    public string SortOrder => $"{Timetable.Code}.{Day.Value.ToString().PadLeft(2, '0')}.{StartTime.ToString("g")}";
     public string WeekName => $"Week {"AB"[Week - 1]}";
 
 
@@ -105,12 +105,6 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     {
         char prefix = Timetable.Prefix;
 
-        if (Name.Contains("Period"))
-        {
-            string periodNum = Name.Split(' ').Last();
-            return $"{prefix}{periodNum}";
-        }
-
-        return Name[..1];
+        return $"{prefix}{DaySequence}";
     }
 }

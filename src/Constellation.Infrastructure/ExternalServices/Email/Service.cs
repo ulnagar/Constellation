@@ -299,7 +299,7 @@ public sealed class Service : IEmailService
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
             StudentName = student.Name.DisplayName,
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{student.Id}",
+            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{student.Id}", //TODO: R1.16.2: Update link to Student Portal instead of old absence pages
             Absences = absences
         };
 

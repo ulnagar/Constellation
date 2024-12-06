@@ -5,13 +5,17 @@ using Application.Models.Auth;
 using Application.Periods.GetPeriodById;
 using Application.Periods.UpsertPeriod;
 using Core.Abstractions.Services;
+using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
@@ -45,13 +49,18 @@ public class UpsertModel : BasePageModel
 
     public int Day { get; set; }
     public int Period { get; set; }
-    public string Timetable { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public Timetable Timetable { get; set; }
     [DataType(DataType.Time)]
     public TimeSpan StartTime { get; set; }
     [DataType(DataType.Time)]
     public TimeSpan EndTime { get; set; }
     public string Name { get; set; }
-    public string Type { get; set; }
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public PeriodType Type { get; set; }
+
+    public SelectList Timetables { get; set; }
+    public SelectList PeriodTypes { get; set; }
 
     public async Task OnGet()
     {
@@ -84,13 +93,17 @@ public class UpsertModel : BasePageModel
         Type = request.Value.Type;
 
         PageTitle = $"Edit - {Name}";
+
+        Timetables = new SelectList(Timetable.GetEnumerable, Timetable);
+        PeriodTypes = new SelectList(PeriodType.GetEnumerable, Type);
     }
 
     public async Task<IActionResult> OnPost()
     {
         UpsertPeriodCommand command = new(
             Id,
-            Day,
+            (Day / 5) + 1,
+            PeriodDay.FromValue(Day % 5),
             Period,
             Timetable,
             StartTime,

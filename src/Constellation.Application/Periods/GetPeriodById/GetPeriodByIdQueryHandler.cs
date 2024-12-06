@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Periods.GetPeriodById;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Errors;
 using Core.Models.Timetables.Repositories;
@@ -46,6 +45,6 @@ internal sealed class GetPeriodByIdQueryHandler
             period.StartTime,
             period.EndTime,
             period.Name,
-            period.Type.Name);
+            period.Type);
     }
 }
