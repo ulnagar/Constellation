@@ -48,7 +48,7 @@
             <div class="card-body">
                 <h3 class="card-title card-title-large">@Model.PartialScanDisabled</h3>
                 <p class="card-text">students with Partial Absence Scanning disabled</p>
-                <a asp-page="/SchoolAdmin/Absences/Audit" asp-area="Staff" class="stretched-link"></a>
+                <a asp-page="/StudentAdmin/Absences/Audit" asp-area="Staff" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -59,7 +59,7 @@
             <div class="card-body">
                 <h3 class="card-title card-title-large">@Model.WholeScanDisabled</h3>
                 <p class="card-text">students with Whole Absence Scanning disabled</p>
-                <a asp-page="/SchoolAdmin/Absences/Audit" asp-area="Staff" class="stretched-link"></a>
+                <a asp-page="/StudentAdmin/Absences/Audit" asp-area="Staff" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -73,7 +73,7 @@
             <div class="card-body">
                 <h3 class="card-title card-title-large">@Model.AwardAdditions</h3>
                 <p class="card-text">students with Pending Award Additions</p>
-                <a asp-page="/SchoolAdmin/Awards/Changes" asp-area="Staff" asp-route-filter="@AwardsFilter.Additions" class="stretched-link"></a>
+                <a asp-page="/StudentAdmin/Awards/Changes" asp-area="Staff" asp-route-filter="@AwardsFilter.Additions" class="stretched-link"></a>
             </div>
         </div>
     </div>
@@ -84,7 +84,7 @@
             <div class="card-body">
                 <h3 class="card-title card-title-large">@Model.AwardOverages</h3>
                 <p class="card-text">students with Award Overages</p>
-                <a asp-page="/SchoolAdmin/Awards/Changes" asp-area="Staff" asp-route-filter="@AwardsFilter.Overages" class="stretched-link"></a>
+                <a asp-page="/StudentAdmin/Awards/Changes" asp-area="Staff" asp-route-filter="@AwardsFilter.Overages" class="stretched-link"></a>
             </div>
         </div>
     </div>
