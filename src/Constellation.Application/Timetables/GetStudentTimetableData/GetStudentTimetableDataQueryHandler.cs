@@ -126,13 +126,14 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
             TimetableDataDto.TimetableData entry = new()
             {
-                Day = period.DayNumber,
+                Timetable = period.Timetable,
+                Week = period.Week,
+                Day = period.Day,
                 StartTime = period.StartTime,
                 EndTime = period.EndTime,
-                TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.PeriodCode,
-                Type = period.Type.Name
+                PeriodCode = period.PeriodCode,
+                Type = period.Type
             };
 
             if (periodIds.Contains(period.Id))

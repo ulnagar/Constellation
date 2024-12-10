@@ -31,12 +31,13 @@ internal sealed class GetPeriodsForVisualSelectionQueryHandler
             response.Add(new(
                 period.Id,
                 period.Timetable,
-                period.DayNumber,
+                period.Week,
+                period.Day,
                 period.PeriodCode,
                 period.StartTime,
                 period.EndTime,
                 period.Name,
-                period.Type.Name,
+                period.Type,
                 period.Duration));
         }
 

@@ -9,7 +9,7 @@ using System.Reflection;
 public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
     where TEnum : IntEnumeration<TEnum>
 {
-    private static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
+    protected static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
 
     protected IntEnumeration(int value, string name)
     {

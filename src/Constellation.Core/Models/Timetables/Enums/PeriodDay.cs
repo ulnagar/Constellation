@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Core.Models.Timetables.Enums;
 
 using Common;
+using System.Collections.Generic;
+using System.Linq;
 
 public class PeriodDay : IntEnumeration<PeriodDay>
 {
@@ -13,4 +15,7 @@ public class PeriodDay : IntEnumeration<PeriodDay>
     private PeriodDay(int value, string name)
         : base(value, name)
     { }
+
+    public static IEnumerable<PeriodDay> GetOptions 
+        => Enumerations.Select(entry => entry.Value);
 }

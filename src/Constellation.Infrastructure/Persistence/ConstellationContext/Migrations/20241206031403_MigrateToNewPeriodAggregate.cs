@@ -117,6 +117,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 nullable: false,
                 defaultValue: "");
 
+            migrationBuilder.Sql(
+                @"UPDATE [Timetables].[Periods]
+                    SET [PeriodCode] = RIGHT([Name], 1)
+                    WHERE Name like 'Period%';");
+
+            migrationBuilder.Sql(
+                @"UPDATE [Timetables].[Periods]
+                    SET [PeriodCode] = UPPER(LEFT([Name], 1))
+                    WHERE Name not like 'Period%';");
+
             migrationBuilder.RenameColumn(
                 name: "Type",
                 table: "Periods",
@@ -132,8 +142,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.Sql(
                 @"UPDATE [Timetables].[Periods]
-                    SET [Type] = 'O'
-                    WHERE [xType] = 'Offline';");
+                    SET [Type] = [xType];");
+
+            migrationBuilder.Sql(
+                @"UPDATE [Timetables].[Periods]
+                    SET [Type] = 'Offline'
+                    WHERE [Type] = 'Other';");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Type",

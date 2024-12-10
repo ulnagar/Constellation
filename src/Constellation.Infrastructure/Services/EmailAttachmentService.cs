@@ -67,13 +67,14 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
 
             var entry = new TimetableDataDto.TimetableData
             {
-                Day = period.DayNumber,
+                Timetable = period.Timetable,
+                Week = period.Week,
+                Day = period.Day,
                 StartTime = period.StartTime,
                 EndTime = period.EndTime,
-                TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.PeriodCode,
-                Type = period.Type.Name
+                PeriodCode = period.PeriodCode,
+                Type = period.Type
             };
 
             if (offering.Sessions.Any(session => session.PeriodId == period.Id))
