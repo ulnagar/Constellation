@@ -17,4 +17,8 @@ public static class PeriodErrors
     public static readonly Error InvalidId = new(
         "Timetables.Period.InvalidId",
         "An invalid Id was provided");
+
+    public static readonly Error IsNull = new(
+        "Timetables.Period.IsNull",
+        "A Period is required, but none supplied");
 }
