@@ -15,8 +15,8 @@ public interface IPeriodRepository
     Task<List<Period>> GetByDayAndOfferingId(int day, OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Period>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Period>> GetAllFromTimetable(List<Timetable> timetables, CancellationToken cancellationToken = default);
-    Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateTime absenceDate, int day, CancellationToken cancellationToken = default);
-    Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateOnly absenceDate, int day, CancellationToken cancellationToken = default);
+    Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateTime absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
+    Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<Period> GetById(PeriodId id, CancellationToken cancellationToken = default);
     Task<List<Period>> GetListFromIds(List<PeriodId> periodIds, CancellationToken cancellationToken = default);
     Task<List<Period>> GetCurrent(CancellationToken cancellationToken = default);

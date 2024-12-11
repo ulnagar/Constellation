@@ -15,6 +15,7 @@ using Constellation.Core.Models.Students;
 using Core.Extensions;
 using Core.Models.Students.Enums;
 using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Repositories;
 using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
@@ -175,12 +176,16 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             // Given the date, figure out what day of the cycle we are looking at.
             int cycleDay = group.Key.GetDayNumber();
 
+            PeriodWeek week = PeriodWeek.FromDayNumber(cycleDay);
+            PeriodDay day = PeriodDay.FromDayNumber(cycleDay);
+
             // Get all enrolments for this student that were active on that date using the day of the cycle we identified above
             List<Offering> enrolledOfferings = await _offeringRepository
                 .GetCurrentEnrolmentsFromStudentForDate(
                     student.Id, 
                     group.Key, 
-                    cycleDay, 
+                    week,
+                    day,
                     cancellationToken);
             
             foreach (Offering enrolledOffering in enrolledOfferings)
@@ -200,7 +205,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 }
 
                 // Get list of periods for this class on this day
-                List<Period> periods = await _periodRepository.GetForOfferingOnDay(enrolledOffering.Id, group.Key, cycleDay, cancellationToken);
+                List<Period> periods = await _periodRepository.GetForOfferingOnDay(enrolledOffering.Id, group.Key, week, day, cancellationToken);
                     
                 // Find all contiguous periods
                 IEnumerable<IEnumerable<Period>> periodGroups = periods.GroupConsecutive();
@@ -216,10 +221,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
                     // Calculate the length of the timetabled lesson
                     int totalBlockMinutes = coursePeriods
-                        .Select(period => 
-                            (int)period.EndTime
-                                .Subtract(period.StartTime)
-                                .TotalMinutes)
+                        .Select(period => period.Duration)
                         .Sum();
 
                     // This should be a single contiguous block of periods for the day.
@@ -246,7 +248,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             Period period = coursePeriods
                                 .First(period => period.SentralPeriodName() == absenceTime.Period);
 
-                            absenceTime.MinutesAbsent = (int)period.EndTime.Subtract(period.StartTime).TotalMinutes;
+                            absenceTime.MinutesAbsent = period.Duration;
                         }
 
                         totalAbsenceTime += absenceTime.MinutesAbsent;

@@ -108,15 +108,5 @@ public class Timetable : ValueObject, IComparable<Timetable>
                 (Timetable)fieldInfo.GetValue(default)!);
 
         return fieldsForType.ToDictionary(x => x.Code);
-
-        //Dictionary<string, Timetable> dictionary = new()
-        //{
-        //    { Primary.Code, Primary },
-        //    { Junior6.Code, Junior6 },
-        //    { Junior8.Code, Junior8 },
-        //    { Senior.Code, Senior }
-        //};
-
-        //return dictionary;
     }
 }

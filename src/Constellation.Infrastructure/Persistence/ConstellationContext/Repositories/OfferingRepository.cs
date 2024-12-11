@@ -13,6 +13,7 @@ using Core.Abstractions.Clock;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -129,14 +130,17 @@ public class OfferingRepository : IOfferingRepository
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         StudentId studentId,
         DateTime absenceDate,
-        int dayNumber,
+        PeriodWeek week,
+        PeriodDay day,
         CancellationToken cancellationToken = default)
     {
         DateOnly absenceDateOnly = DateOnly.FromDateTime(absenceDate);
 
         List<PeriodId> periodIds = await _context
             .Set<Period>()
-            .Where(period => period.DayNumber == dayNumber)
+            .Where(period => 
+                period.Week == week && 
+                period.Day == day)
             .Select(period => period.Id)
             .ToListAsync(cancellationToken);
 
@@ -174,9 +178,10 @@ public class OfferingRepository : IOfferingRepository
     public Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         StudentId studentId,
         DateOnly absenceDate,
-        int dayNumber,
+        PeriodWeek week,
+        PeriodDay day,
         CancellationToken cancellationToken = default) =>
-        GetCurrentEnrolmentsFromStudentForDate(studentId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
+        GetCurrentEnrolmentsFromStudentForDate(studentId, absenceDate.ToDateTime(TimeOnly.MinValue), week, day, cancellationToken);
 
     public async Task<List<Offering>> GetByStudentId(
         StudentId studentId, 

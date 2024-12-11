@@ -53,11 +53,11 @@ public class IndexModel : BasePageModel
     public IEnumerable<PeriodWeek> Weeks { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(BaseFromValueBinder))]
+    [ModelBinder(typeof(IntEnumBinder))]
     public PeriodDay? Day { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(BaseFromValueBinder))]
+    [ModelBinder(typeof(IntEnumBinder))]
     public PeriodWeek? Week { get; set; }
 
     public async Task OnGet() => await PreparePage();

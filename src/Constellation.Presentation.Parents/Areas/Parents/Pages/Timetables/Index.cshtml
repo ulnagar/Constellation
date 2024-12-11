@@ -1,7 +1,8 @@
 ﻿@page
-@using Constellation.Application.DTOs
-@using Constellation.Core.Models.Timetables.Enums
 @model Constellation.Presentation.Parents.Areas.Parents.Pages.Timetables.IndexModel
+
+@using Constellation.Core.Models.Timetables.Enums
+
 @{
 }
 
@@ -48,14 +49,26 @@ else
         <div class="w-auto d-flex">
             <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
                 <span class="row d-flex flex-column align-items-center">
-                    @if (Model.Week is null)
+                    @if (Model.Week is null && Model.Day is null)
                     {
                         @foreach (var entry in Model.Weeks)
                         {
                             <div class="col w-auto position-relative p-2">
-                                <div class="h4">@entry.Value</div>
+                                <div class="h4">@entry.Name</div>
                                 <div class="d-block">
-                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@entry.Value" asp-route-day="@Model.Day.Value" class="stretched-link"></a>
+                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@entry.Value" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else if (Model.Week is null)
+                    {
+                        @foreach (var entry in Model.Weeks)
+                        {
+                            <div class="col w-auto position-relative p-2">
+                                <div class="h4">@entry.Name</div>
+                                <div class="d-block">
+                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@entry.Value" asp-route-day="@Model.Day!.Value" class="stretched-link"></a>
                                 </div>
                             </div>
                         }
@@ -67,7 +80,7 @@ else
                             <span class="fst-italic">Click or tap to change</span>
 
                             <div class="d-block">
-                                <a asp-route-studentId="@Model.StudentId" asp-route-week="" asp-route-day="@Model.Day.Value" class="stretched-link"></a>
+                                <a asp-route-studentId="@Model.StudentId" asp-route-day="@Model.Day?.Value" class="stretched-link"></a>
                             </div>
                         </div>
                     }
@@ -76,14 +89,26 @@ else
 
             <div class="w-50 p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
                 <span class="row d-flex flex-column align-items-center">
-                    @if (Model.Day is null)
+                    @if (Model.Day is null && Model.Week is null) 
                     {
                         @foreach (var day in PeriodDay.GetOptions)
                         {
                             <div class="col w-auto position-relative p-2 select-item">
                                 <div class="h4">@day.Name</div>
                                 <div class="d-block">
-                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week.Value" asp-route-day="@day.Value" class="stretched-link"></a>
+                                    <a asp-route-studentId="@Model.StudentId" asp-route-day="@day.Value" class="stretched-link"></a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else if (Model.Day is null)
+                    {
+                        @foreach (var day in PeriodDay.GetOptions)
+                        {
+                            <div class="col w-auto position-relative p-2 select-item">
+                                <div class="h4">@day.Name</div>
+                                <div class="d-block">
+                                    <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week!.Value" asp-route-day="@day.Value" class="stretched-link"></a>
                                 </div>
                             </div>
                         }
@@ -95,7 +120,7 @@ else
                             <span class="fst-italic">Click or tap to change</span>
 
                             <div class="d-block">
-                                <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week.Value" asp-route-day="" class="stretched-link"></a>
+                                <a asp-route-studentId="@Model.StudentId" asp-route-week="@Model.Week?.Value" class="stretched-link"></a>
                             </div>
                         </div>
                     }
@@ -106,7 +131,9 @@ else
         @{
             var entries = Model.Day is not null
                 ? Model.TimetableData!.Timetables
-                    .Where(entry => entry.Day == Model.Day)
+                    .Where(entry => 
+                        entry.Day == Model.Day &&
+                        entry.Week == Model.Week)
                     .OrderBy(entry => entry.StartTime)
                     .ToList()
                 : new();
@@ -164,7 +191,14 @@ else
                                 <div class="Timetable-Day-Title"></div>
                                 @foreach (var period in periods)
                                 {
-                                    <div class="Timetable-Day-Period @period.Type.Name">
+                                    var style = " period-inactive";
+
+                                    if (period.Type == PeriodType.Break)
+                                    {
+                                        style += " period-break";
+                                    }
+
+                                    <div class="Timetable-Day-Period @style">
                                         @period.Name<br />
                                         @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
                                     </div>
@@ -172,34 +206,38 @@ else
                             </div>
                         }
 
-                        @foreach (var period in periods)
-                        {
-                            var style = "";
-
-                            if (string.IsNullOrWhiteSpace(period.ClassName))
-                            {
-                                style += " period-inactive";
-                            }
-                            else
-                            {
-                                style += " period-active";
-                            }
-
-                            if (period.Type == PeriodType.Break)
-                            {
-                                style += " period-break";
-                            }
-
-                            <div class="Timetable-Day-Period @style">
-                                <span class="h5">@period.Name</span>
-                                <span class="d-block">&nbsp; @period.ClassName</span>
-                                <span class="d-block">&nbsp; @period.ClassTeacher</span>
+                        <div class="Timetable-Day">
+                            <div class="Timetable-Day-Title">
+                                @week.Key.Name @day.Key.Name
                             </div>
-                        }
+                            @foreach (var period in periods)
+                            {
+                                var style = "";
+
+                                if (string.IsNullOrWhiteSpace(period.ClassName))
+                                {
+                                    style += " period-inactive";
+                                }
+                                else
+                                {
+                                    style += " period-active";
+                                }
+
+                                if (period.Type == PeriodType.Break)
+                                {
+                                    style += " period-break";
+                                }
+
+                                <div class="Timetable-Day-Period @style">
+                                    <span class="d-block">&nbsp; @period.ClassName</span>
+                                    <span class="d-block">&nbsp; @period.ClassTeacher</span>
+                                </div>
+                            }
+                        </div>
+                        
+                        firstDay = false;
                     }
                 </div>
-
-                firstDay = false;
             }
         </div>
     </div>

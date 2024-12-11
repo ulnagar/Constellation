@@ -2,6 +2,7 @@
 
 @using Constellation.Application.DTOs
 @using Constellation.Application.Extensions
+@using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Core.Models.Timetables.ValueObjects
 
 @{
@@ -96,6 +97,11 @@
                     var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
                     var firstDay = true;
 
+                    if (week.Key.Value > 1)
+                    {
+                        <div style="page-break-after: always; border: none;"></div>
+                    }
+
                     <div class="Timetable-Week">
                         @foreach (var day in days)
                         {
@@ -121,7 +127,23 @@
                                 </div>
                                 @foreach (var period in periods)
                                 {
-                                    <div class="Timetable-Day-Period @period.Type.Name">
+                                    var style = "";
+
+                                    if (string.IsNullOrWhiteSpace(period.ClassName))
+                                    {
+                                        style += " Inactive";
+                                    }
+                                    else
+                                    {
+                                        style += " Active";
+                                    }
+
+                                    if (period.Type == PeriodType.Break)
+                                    {
+                                        style += " Break";
+                                    }
+
+                                    <div class="Timetable-Day-Period @style">
                                         @if (!string.IsNullOrWhiteSpace(period.ClassName))
                                         {
                                             @period.ClassName

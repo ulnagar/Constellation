@@ -1,5 +1,6 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Timetables.Enums;
 using Constellation.Core.Models.Timetables.ValueObjects;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Identifiers;
@@ -27,7 +28,8 @@ public class PeriodRepository : IPeriodRepository
     public async Task<List<Period>> GetForOfferingOnDay(    
         OfferingId offeringId,
         DateTime absenceDate,
-        int day,
+        PeriodWeek week, 
+        PeriodDay day,
         CancellationToken cancellationToken = default)
     {
         List<Session> sessions = await _context
@@ -43,7 +45,8 @@ public class PeriodRepository : IPeriodRepository
         return await _context
             .Set<Period>()
             .Where(period =>
-                period.DayNumber == day &&
+                period.Week == week &&
+                period.Day == day &&
                 sessions.Select(session => session.PeriodId).Contains(period.Id))
             .ToListAsync(cancellationToken);
     }
@@ -52,9 +55,10 @@ public class PeriodRepository : IPeriodRepository
     public Task<List<Period>> GetForOfferingOnDay(
         OfferingId offeringId,
         DateOnly absenceDate,
-        int day,
+        PeriodWeek week, 
+        PeriodDay day,
         CancellationToken cancellationToken = default) =>
-        GetForOfferingOnDay(offeringId, absenceDate.ToDateTime(TimeOnly.MinValue), day, cancellationToken);
+        GetForOfferingOnDay(offeringId, absenceDate.ToDateTime(TimeOnly.MinValue), week, day, cancellationToken);
 
     public async Task<List<Period>> GetCurrent(
         CancellationToken cancellationToken = default) =>

@@ -112,6 +112,9 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     public string SentralPeriodName()
     {
         char prefix = Timetable.Prefix;
+
+        if (prefix == default)
+            return PeriodCode.ToString();
         
         return $"{prefix}{PeriodCode}";
     }

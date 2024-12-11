@@ -12,6 +12,13 @@ public class PeriodWeek : IntEnumeration<PeriodWeek>
     private PeriodWeek(int value, string name)
         : base(value, name) { }
 
+    public static PeriodWeek FromDayNumber(int dayNumber) =>
+        dayNumber switch
+        {
+            <= 5 => WeekA,
+            >= 6 => WeekB
+        };
+
     public static IEnumerable<PeriodWeek> GetOptions 
         => Enumerations.Select(entry => entry.Value).ToList();
 }

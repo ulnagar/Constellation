@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Students.Areas.Students.Pages.Timetables.IndexModel
 
 @using Constellation.Application.DTOs
+@using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Core.Models.Timetables.ValueObjects
 
 <h2>Student Timetables</h2>
@@ -44,7 +45,7 @@
                             if (firstDay)
                             {
                                 <div class="Timetable-Day">
-                                    <div class="Timetable-Day-Title"></div>
+                                    <div class="Timetable-Day-Title">&nbsp;</div>
                                     @foreach (var period in periods)
                                     {
                                         <div class="Timetable-Day-Period @period.Type.Name">
@@ -55,22 +56,43 @@
                                 </div>
                             }
 
-                            @foreach (var period in periods)
-                            {
-                                <div class="Timetable-Day-Period @period.Type.Name">
-                                    @if (!string.IsNullOrWhiteSpace(period.ClassName))
-                                    {
-                                        @period.ClassName
-
-                                        <br />
-                                        @period.ClassTeacher
-                                    }
+                            <div class="Timetable-Day">
+                                <div class="Timetable-Day-Title">
+                                    @week.Key.Name - @day.Key.Name
                                 </div>
-                            }
+                                @foreach (var period in periods)
+                                {
+                                    var style = "";
+
+                                    if (string.IsNullOrWhiteSpace(period.ClassName))
+                                    {
+                                        style += " Inactive";
+                                    }
+                                    else
+                                    {
+                                        style += " Active";
+                                    }
+
+                                    if (period.Type == PeriodType.Break)
+                                    {
+                                        style += " Break";
+                                    }
+
+                                    <div class="Timetable-Day-Period @style">
+                                        @if (!string.IsNullOrWhiteSpace(period.ClassName))
+                                        {
+                                            @period.ClassName
+
+                                            <br />
+                                            @period.ClassTeacher
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            firstDay = false;
                         }
                     </div>
-
-                    firstDay = false;
                 }
             </div>
         }

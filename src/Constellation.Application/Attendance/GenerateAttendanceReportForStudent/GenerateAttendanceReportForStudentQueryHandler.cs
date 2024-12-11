@@ -16,6 +16,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Repositories;
 using DTOs;
 using System;
@@ -116,14 +117,20 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
         foreach (DateOnly date in reportableDates)
         {
-            List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.Id, date, date.GetDayNumber(), cancellationToken);
+            if (excludedDates.Contains(date) || date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                continue;
+
+            PeriodWeek week = PeriodWeek.FromDayNumber(date.GetDayNumber());
+            PeriodDay day = PeriodDay.FromDayNumber(date.GetDayNumber());
+
+            List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.Id, date, week, day, cancellationToken);
             List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
 
             foreach (Offering offering in offerings)
             {
                 Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-                List<Period> periods = await _periodRepository.GetForOfferingOnDay(offering.Id, date, date.GetDayNumber(), cancellationToken);
+                List<Period> periods = await _periodRepository.GetForOfferingOnDay(offering.Id, date, week, day, cancellationToken);
                 Period firstPeriod = periods.First(period => period.StartTime == periods.Min(p => p.StartTime));
                 Period lastPeriod = periods.First(period => period.EndTime == periods.Max(p => p.EndTime));
 

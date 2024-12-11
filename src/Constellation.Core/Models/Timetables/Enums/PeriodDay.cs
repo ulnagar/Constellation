@@ -16,6 +16,16 @@ public class PeriodDay : IntEnumeration<PeriodDay>
         : base(value, name)
     { }
 
+    public static PeriodDay FromDayNumber(int dayNumber) =>
+        dayNumber switch
+        {
+            1 or 6 => Monday,
+            2 or 7 => Tuesday,
+            3 or 8 => Wednesday,
+            4 or 9 => Thursday,
+            5 or 10 => Friday
+        };
+
     public static IEnumerable<PeriodDay> GetOptions 
         => Enumerations.Select(entry => entry.Value);
 }
