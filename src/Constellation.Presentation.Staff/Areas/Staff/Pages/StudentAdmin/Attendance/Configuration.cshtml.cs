@@ -1,28 +1,28 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Absences;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
-using Application.Common.PresentationModels;
+using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.GetStudentsWithAbsenceSettings;
+using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
-using Core.Abstractions.Services;
+using Constellation.Presentation.Staff.Areas.Staff.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
-public class AuditModel : BasePageModel
+public class ConfigurationModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
-    public AuditModel(
+    public ConfigurationModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
@@ -32,12 +32,12 @@ public class AuditModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<AuditModel>()
+            .ForContext<ConfigurationModel>()
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Absences_Audit;
-    [ViewData] public string PageTitle => "Student Absence Settings";
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Configuration;
+    [ViewData] public string PageTitle => "Attendance Configuration";
     
     [BindProperty(SupportsGet = true)]
     public FilterDto Filter { get; set; } = FilterDto.All;

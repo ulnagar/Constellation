@@ -1,8 +1,9 @@
 ﻿@page
-@model AuditModel
+@model ConfigurationModel
 
 @using Constellation.Core.Models.Absences;
-@using Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Absences
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authorisationService
 
@@ -15,10 +16,10 @@
 
     switch (Model.Filter)
     {
-        case AuditModel.FilterDto.Enabled:
+        case ConfigurationModel.FilterDto.Enabled:
             enabledStyle = "btn-primary";
             break;
-        case AuditModel.FilterDto.Disabled:
+        case ConfigurationModel.FilterDto.Disabled:
             disabledStyle = "btn-primary";
             break;
         default:
@@ -31,9 +32,9 @@
 
 <div class="page-menu">
     <div class="btn-group" role="group">
-        <a asp-route-filter="@AuditModel.FilterDto.All" class="btn @allStyle">All</a>
-        <a asp-route-filter="@AuditModel.FilterDto.Enabled" class="btn @enabledStyle">Enabled</a>
-        <a asp-route-filter="@AuditModel.FilterDto.Disabled" class="btn @disabledStyle">Disabled</a>
+        <a asp-route-filter="@ConfigurationModel.FilterDto.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@ConfigurationModel.FilterDto.Enabled" class="btn @enabledStyle">Enabled</a>
+        <a asp-route-filter="@ConfigurationModel.FilterDto.Disabled" class="btn @disabledStyle">Disabled</a>
     </div>
 
     @if (authorised.Succeeded)

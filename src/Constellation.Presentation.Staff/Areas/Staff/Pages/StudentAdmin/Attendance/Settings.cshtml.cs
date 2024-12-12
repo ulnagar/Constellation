@@ -1,24 +1,24 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Absences;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
-using Application.Common.PresentationModels;
-using Application.Schools.Models;
 using Constellation.Application.Absences.SetAbsenceConfigurationForStudent;
+using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
+using Constellation.Application.Schools.Models;
 using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
-using Core.Abstractions.Clock;
-using Core.Abstractions.Services;
-using Core.Models.Students.Identifiers;
-using Core.Shared;
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Staff.Areas.Staff.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Serilog;
 using System.Threading;
 
@@ -47,7 +47,7 @@ public class SettingsModel : BasePageModel
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Absences_Audit;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Configuration;
     [ViewData] public string PageTitle => "Student Absence Settings";
 
     public SelectList Schools { get; set; }
@@ -111,7 +111,7 @@ public class SettingsModel : BasePageModel
 
                 ModalContent = new ErrorDisplay(
                     partialRequest.Error,
-                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Audit", values: new { area = "Staff" }));
+                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Configuration", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -138,7 +138,7 @@ public class SettingsModel : BasePageModel
 
                 ModalContent = new ErrorDisplay(
                     wholeRequest.Error,
-                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Audit", values: new { area = "Staff" }));
+                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Configuration", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -167,13 +167,13 @@ public class SettingsModel : BasePageModel
 
                 ModalContent = new ErrorDisplay(
                     request.Error,
-                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Audit", values: new { area = "Staff" }));
+                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Configuration", values: new { area = "Staff" }));
 
                 return Page();
             }
         }
 
-        return RedirectToPage("/StudentAdmin/Absences/Audit", new { area = "Staff" });
+        return RedirectToPage("/StudentAdmin/Absences/Configuration", new { area = "Staff" });
     }
 
     private async Task PreparePage(CancellationToken cancellationToken)

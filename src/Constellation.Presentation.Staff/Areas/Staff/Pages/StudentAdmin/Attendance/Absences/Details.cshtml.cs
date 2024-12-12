@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Absences;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Absences;
 
 using Constellation.Application.Absences.GetAbsenceDetails;
 using Constellation.Application.Absences.SendAbsenceNotificationToParent;
@@ -42,9 +42,9 @@ public class DetailsModel : BasePageModel
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Absences_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Absences;
     [ViewData] public string PageTitle { get; set; } = "Absence Details";
-    
+
     [BindProperty(SupportsGet = true)]
     public AbsenceId Id { get; set; }
 
@@ -74,7 +74,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetSendNotification(
-        StudentId studentId, 
+        StudentId studentId,
         CancellationToken cancellationToken = default)
     {
         _logger.Information("Requested to send notification for Absence with id {Id} by user {User}", Id, _currentUserService.UserName);
@@ -93,7 +93,7 @@ public class DetailsModel : BasePageModel
         }
 
         await _mediator.Send(new SendAbsenceNotificationToParentCommand(Guid.NewGuid(), studentId, new List<AbsenceId> { Id }), cancellationToken);
-        
+
         return RedirectToPage();
     }
 }

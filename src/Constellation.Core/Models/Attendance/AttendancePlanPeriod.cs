@@ -1,13 +1,14 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Attendance;
 
+using Errors;
 using Identifiers;
 using Offerings;
 using Offerings.Identifiers;
+using Shared;
 using Subjects;
 using Subjects.Identifiers;
 using System;
-using System.Runtime.InteropServices.Marshalling;
 using Timetables;
 using Timetables.Enums;
 using Timetables.Identifiers;
@@ -68,11 +69,28 @@ public sealed class AttendancePlanPeriod
     public TimeOnly ExitTime { get; private set; } = TimeOnly.MinValue;
     public double MinutesPresent => (ExitTime - EntryTime).TotalMinutes;
     
-    public void UpdateDetails(
+    internal Result UpdateDetails(
         TimeOnly entryTime,
         TimeOnly exitTime)
     {
+        if (entryTime < StartTime)
+            return Result.Failure(AttendancePlanErrors.EntryTimeBeforeStartTime);
+
+        if (entryTime > EndTime)
+            return Result.Failure(AttendancePlanErrors.EntryTimeAfterEndTime);
+
+        if (exitTime < StartTime)
+            return Result.Failure(AttendancePlanErrors.ExitTimeBeforeStartTime);
+
+        if (exitTime > EndTime)
+            return Result.Failure(AttendancePlanErrors.ExitTimeAfterEndTime);
+
+        if (entryTime > exitTime)
+            return Result.Failure(AttendancePlanErrors.EntryTimeAfterExitTime);
+
         EntryTime = entryTime;
         ExitTime = exitTime;
+
+        return Result.Success();
     }
 }

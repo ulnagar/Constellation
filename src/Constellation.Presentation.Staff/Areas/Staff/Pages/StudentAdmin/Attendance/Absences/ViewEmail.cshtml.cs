@@ -1,15 +1,15 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Absences;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Absences;
 
 using Constellation.Application.Absences.GetAbsenceNotificationDetails;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
-using Core.Abstractions.Services;
+using Constellation.Presentation.Staff.Areas.Staff.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Models;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]

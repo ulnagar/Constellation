@@ -2,7 +2,10 @@ namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Interfaces.Repositories;
 using BaseModels;
+using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Models.Attendance;
+using Core.Models.Attendance.Identifiers;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Offerings.Repositories;
@@ -11,7 +14,9 @@ using Core.Models.Students.ValueObjects;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
+using Core.Shared;
 using MediatR;
 using Serilog;
 
@@ -24,6 +29,8 @@ public class IndexModel : BasePageModel
     private readonly IPeriodRepository _periodRepository;
     private readonly IAttendancePlanRepository _attendancePlanRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public IndexModel(
@@ -34,6 +41,8 @@ public class IndexModel : BasePageModel
         IPeriodRepository periodRepository,
         IAttendancePlanRepository attendancePlanRepository,
         IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _mediator = mediator;
@@ -43,6 +52,8 @@ public class IndexModel : BasePageModel
         _periodRepository = periodRepository;
         _attendancePlanRepository = attendancePlanRepository;
         _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
+        _dateTime = dateTime;
         _logger = logger;
     }
 
@@ -51,6 +62,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
+        await SavePlansToDb();
+
         var plans = await _attendancePlanRepository.GetAll();
 
         Plan = plans.First();
@@ -60,17 +73,20 @@ public class IndexModel : BasePageModel
 
     private async Task SavePlansToDb()
     {
-        var leo = await LeoWoolacott();
+        AttendancePlan? leo = await LeoWoolacott();
 
-        _attendancePlanRepository.Insert(leo);
+        if (leo is not null)
+            _attendancePlanRepository.Insert(leo);
 
-        var mackenzie = await MackenzieJohnson();
+        AttendancePlan? mackenzie = await MackenzieJohnson();
 
-        _attendancePlanRepository.Insert(mackenzie);
+        if (mackenzie is not null)
+            _attendancePlanRepository.Insert(mackenzie);
 
-        var lincoln = await LincolnPackham();
+        AttendancePlan? lincoln = await LincolnPackham();
 
-        _attendancePlanRepository.Insert(lincoln);
+        if (lincoln is not null)
+            _attendancePlanRepository.Insert(lincoln);
 
         await _unitOfWork.CompleteAsync();
     }
@@ -111,7 +127,7 @@ public class IndexModel : BasePageModel
         }
     }
 
-    private async Task<AttendancePlan> LeoWoolacott()
+    private async Task<AttendancePlan?> LeoWoolacott()
     {
         var srn = StudentReferenceNumber.Create("451054805");
 
@@ -135,6 +151,8 @@ public class IndexModel : BasePageModel
             attendancePlan.AddPeriods(periods, offering, course);
         }
 
+        List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
+
         foreach (var period in attendancePlan.Periods)
         {
             if (period.StartTime == new TimeOnly(9, 10, 0))
@@ -143,25 +161,40 @@ public class IndexModel : BasePageModel
 
             if (period.StartTime == new TimeOnly(11, 30, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(11, 50, 0),
-                    new TimeOnly(13, 10, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id, 
+                    EntryTime = new(11, 50, 0), 
+                    ExitTime = new(13, 10, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(14, 10, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(14, 10, 0),
-                    new TimeOnly(15, 00, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(14, 10, 0),
+                    ExitTime = new(15, 00, 0)
+                });
             }
         }
 
-        var percentages = attendancePlan.Percentages;
+        Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
+
+        if (periodUpdate.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), periodUpdate.Error, true)
+                .Warning("Failed to update Attendance Plan Period with supplied values");
+
+            return null;
+        }
 
         return attendancePlan;
     }
 
-    private async Task<AttendancePlan> MackenzieJohnson()
+    private async Task<AttendancePlan?> MackenzieJohnson()
     {
         var srn = StudentReferenceNumber.Create("449757173");
 
@@ -185,57 +218,88 @@ public class IndexModel : BasePageModel
             attendancePlan.AddPeriods(periods, offering, course);
         }
 
+        List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
+        
         foreach (var period in attendancePlan.Periods)
         {
             if (period.StartTime == new TimeOnly(8, 55, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(9, 0, 0),
-                    new TimeOnly(9, 45, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(9, 0, 0),
+                    ExitTime = new(9, 45, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(9, 45, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(9, 45, 0),
-                    new TimeOnly(10, 35, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(9, 45, 0),
+                    ExitTime = new(10, 35, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(11, 20, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(11, 30, 0),
-                    new TimeOnly(12, 10, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(11, 30, 0),
+                    ExitTime = new(12, 10, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(12, 10, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(12, 10, 0),
-                    new TimeOnly(13, 0, 0));
-
-                if (period.Day == PeriodDay.Wednesday)
+                if (period.Day.Equals(PeriodDay.Wednesday))
                 {
-                    period.UpdateDetails(
-                        new TimeOnly(12, 10, 0),
-                        new TimeOnly(12, 34, 0));
+                    periodUpdates.Add(new()
+                    {
+                        PeriodId = period.Id,
+                        EntryTime = new(12, 10, 0),
+                        ExitTime = new(12, 34, 0)
+                    });
+                }
+                else
+                {
+                    periodUpdates.Add(new()
+                    {
+                        PeriodId = period.Id,
+                        EntryTime = new(12, 10, 0),
+                        ExitTime = new(13, 0, 0)
+                    });
                 }
             }
 
             if (period.StartTime == new TimeOnly(14, 20, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(14, 20, 0),
-                    new TimeOnly(15, 10, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(14, 20, 0),
+                    ExitTime = new(15, 10, 0)
+                });
             }
         }
 
-        var percentages = attendancePlan.Percentages;
+        Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
+
+        if (periodUpdate.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), periodUpdate.Error, true)
+                .Warning("Failed to update Attendance Plan Period with supplied values");
+
+            return null;
+        }
 
         return attendancePlan;
     }
 
-    private async Task<AttendancePlan> LincolnPackham()
+    private async Task<AttendancePlan?> LincolnPackham()
     {
         var srn = StudentReferenceNumber.Create("449946332");
 
@@ -259,45 +323,71 @@ public class IndexModel : BasePageModel
             attendancePlan.AddPeriods(periods, offering, course);
         }
 
+        List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
+
         foreach (var period in attendancePlan.Periods)
         {
             if (period.StartTime == new TimeOnly(8, 55, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(9, 0, 0),
-                    new TimeOnly(9, 45, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(9, 0, 0),
+                    ExitTime = new(9, 45, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(9, 45, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(9, 45, 0),
-                    new TimeOnly(10, 35, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(9, 45, 0),
+                    ExitTime = new(10, 35, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(11, 20, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(11, 20, 0),
-                    new TimeOnly(12, 10, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(11, 20, 0),
+                    ExitTime = new(12, 10, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(12, 10, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(12, 10, 0),
-                    new TimeOnly(13, 0, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(12, 10, 0),
+                    ExitTime = new(13, 0, 0)
+                });
             }
 
             if (period.StartTime == new TimeOnly(14, 20, 0))
             {
-                period.UpdateDetails(
-                    new TimeOnly(14, 20, 0),
-                    new TimeOnly(15, 10, 0));
+                periodUpdates.Add(new()
+                {
+                    PeriodId = period.Id,
+                    EntryTime = new(14, 20, 0),
+                    ExitTime = new(15, 10, 0)
+                });
             }
         }
 
-        var percentages = attendancePlan.Percentages;
+        Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
+
+        if (periodUpdate.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), periodUpdate.Error, true)
+                .Warning("Failed to update Attendance Plan Period with supplied values");
+
+            return null;
+        }
 
         return attendancePlan;
     }

@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Absences;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
 using Constellation.Application.Absences.ExportAbsencesReport;
 using Constellation.Application.Absences.GetAbsencesWithFilterForReport;
@@ -24,14 +24,14 @@ using Microsoft.AspNetCore.Routing;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
-public class ListModel : BasePageModel
+public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
-    public ListModel(
+    public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
@@ -41,12 +41,12 @@ public class ListModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<ListModel>()
+            .ForContext<IndexModel>()
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Absences_List;
-    [ViewData] public string PageTitle => "Absence Lists";
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Absences;
+    [ViewData] public string PageTitle => "Absences";
 
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();

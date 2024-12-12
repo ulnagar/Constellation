@@ -1,6 +1,8 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Attendance;
 
+using Abstractions.Clock;
+using Abstractions.Services;
 using Core.Enums;
 using Enums;
 using Errors;
@@ -47,6 +49,9 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     public IReadOnlyList<AttendancePlanPeriod> Periods => _periods.AsReadOnly();
     public IDictionary<string, double> Percentages => Status.Equals(AttendancePlanStatus.Pending) ? new() : CalculatePercentages();
 
+    public string? SubmittedBy { get; private set; }
+    public DateTime? SubmittedAt { get; private set; }
+
     public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public string? ModifiedBy { get; set; } = string.Empty;
@@ -79,6 +84,29 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 
             _periods.Add(planPeriod);
         }
+    }
+
+    public Result UpdatePeriods(
+        List<(AttendancePlanPeriodId Id, TimeOnly EntryTime, TimeOnly ExitTime)> periods,
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTime)
+    {
+        foreach ((AttendancePlanPeriodId Id, TimeOnly EntryTime, TimeOnly ExitTime) entry in periods)
+        {
+            AttendancePlanPeriod? period = _periods.FirstOrDefault(period => period.Id == entry.Id);
+
+            if (period is null)
+                return Result.Failure(AttendancePlanErrors.PeriodNotFound(entry.Id));
+
+            period.UpdateDetails(entry.EntryTime, entry.ExitTime);
+        }
+
+        SubmittedBy = currentUserService.UserName;
+        SubmittedAt = dateTime.Now;
+
+        Status = AttendancePlanStatus.Processing;
+
+        return Result.Success();
     }
 
     public Result UpdateStatus(AttendancePlanStatus newStatus)
