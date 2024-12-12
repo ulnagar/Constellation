@@ -269,4 +269,30 @@ public class OfferingRepository : IOfferingRepository
             .Select(period => period.Timetable)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Offering>> GetOfferingsFromSameGroup(
+        OfferingId offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        OfferingName offeringName = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .Select(offering => offering.Name)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        string grade = offeringName.Value[..2];
+        string line = offeringName.Value[^2..^1];
+        string searchTerm = $"{grade}%{line}_";
+
+        List<Offering> offerings = await _context
+            .Set<Offering>()
+            .Where(offering => 
+                EF.Functions.Like(offering.Name, searchTerm) &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .ToListAsync(cancellationToken);
+
+        return offerings;
+    }
+   
 }

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Attendance;
 
 using Constellation.Core.Models.Students.Identifiers;
-using Enums;
+using Core.Enums;
 using Errors;
 using Identifiers;
 using Primitives;

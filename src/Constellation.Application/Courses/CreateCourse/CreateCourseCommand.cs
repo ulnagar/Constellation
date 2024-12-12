@@ -9,5 +9,6 @@ public sealed record CreateCourseCommand(
     string Code,
     Grade Grade,
     FacultyId FacultyId,
-    decimal FTEValue)
+    decimal FTEValue,
+    double Target)
     : ICommand;

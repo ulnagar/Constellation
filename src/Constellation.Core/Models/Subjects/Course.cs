@@ -21,7 +21,7 @@ public sealed class Course : AggregateRoot
         Grade grade,
         FacultyId facultyId,
         decimal fteValue,
-        decimal targetMinutesPerCycle)
+        double targetMinutesPerCycle)
     {
         Id = new();
         Name = name;
@@ -47,7 +47,7 @@ public sealed class Course : AggregateRoot
         Grade grade,
         FacultyId facultyId,
         decimal fteValue,
-        decimal targetMinutesPerCycle)
+        double targetMinutesPerCycle)
     {
         if (string.IsNullOrWhiteSpace(code))
             return Result.Failure<Course>(CourseErrors.CodeEmpty);
@@ -70,7 +70,7 @@ public sealed class Course : AggregateRoot
         Grade grade,
         FacultyId facultyId,
         decimal fteValue,
-        decimal targetMinutesPerCycle)
+        double targetMinutesPerCycle)
     {
         if (string.IsNullOrWhiteSpace(code))
             return Result.Failure<Course>(CourseErrors.CodeEmpty);

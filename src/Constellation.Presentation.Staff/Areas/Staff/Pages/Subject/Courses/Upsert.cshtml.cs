@@ -55,6 +55,8 @@ public class UpsertModel : BasePageModel
     public FacultyId FacultyId { get; set; } = FacultyId.Empty;
     [BindProperty]
     public decimal FTEValue { get; set; }
+    [BindProperty]
+    public double TargetPerCycle { get; set; }
 
     public List<FacultySummaryResponse> Faculties { get; set; } = new();
 
@@ -82,6 +84,7 @@ public class UpsertModel : BasePageModel
             Grade = courseRequest.Value.Grade;
             FacultyId = courseRequest.Value.CourseFaculty.FacultyId;
             FTEValue = courseRequest.Value.FTEValue;
+            TargetPerCycle = courseRequest.Value.TargetPerCycle;
 
             PageTitle = $"Edit - {Name}";
         }
@@ -103,7 +106,8 @@ public class UpsertModel : BasePageModel
             Code,
             Grade,
             FacultyId,
-            FTEValue);
+            FTEValue,
+            TargetPerCycle);
 
         _logger
             .ForContext(nameof(CreateCourseCommand), command, true)
@@ -142,7 +146,8 @@ public class UpsertModel : BasePageModel
             Code,
             Grade,
             FacultyId,
-            FTEValue);
+            FTEValue,
+            TargetPerCycle);
 
         _logger
             .ForContext(nameof(UpdateCourseCommand), command, true)

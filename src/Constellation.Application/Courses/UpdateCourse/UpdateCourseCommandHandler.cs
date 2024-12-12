@@ -46,7 +46,8 @@ internal class UpdateCourseCommandHandler
             request.Code,
             request.Grade,
             request.FacultyId,
-            request.FTEValue);
+            request.FTEValue,
+            request.Target);
 
         if (updateRequest.IsFailure)
         {

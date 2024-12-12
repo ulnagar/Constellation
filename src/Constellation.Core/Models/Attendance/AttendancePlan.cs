@@ -1,11 +1,13 @@
 ﻿#nullable enable
 namespace Constellation.Core.Models.Attendance;
 
+using Core.Enums;
 using Enums;
+using Errors;
 using Identifiers;
 using Offerings;
-using Offerings.Identifiers;
 using Primitives;
+using Shared;
 using Students;
 using Students.Identifiers;
 using Subjects;
@@ -14,9 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Timetables;
-using Timetables.Enums;
-using Timetables.Identifiers;
-using Timetables.ValueObjects;
 using ValueObjects;
 
 public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
@@ -29,6 +28,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         Student student)
     {
         Id = new();
+        Status = AttendancePlanStatus.Pending;
 
         StudentId = student.Id;
         Student = student.Name;
@@ -38,20 +38,21 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     }
 
     public AttendancePlanId Id { get; private set; }
+    public AttendancePlanStatus Status { get; private set; }
     public StudentId StudentId { get; private set; }
     public Name Student { get; private set; }
     public Grade Grade { get; private set; }
     public string SchoolCode { get; private set; }
     public string School { get; private set; }
     public IReadOnlyList<AttendancePlanPeriod> Periods => _periods.AsReadOnly();
-    public IDictionary<string, double> Percentages => CalculatePercentages();
+    public IDictionary<string, double> Percentages => Status.Equals(AttendancePlanStatus.Pending) ? new() : CalculatePercentages();
 
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static AttendancePlan Create(
@@ -71,12 +72,28 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         foreach (Period period in periods)
         {
             AttendancePlanPeriod planPeriod = new(
+                Id,
                 period,
                 offering,
                 course);
 
             _periods.Add(planPeriod);
         }
+    }
+
+    public Result UpdateStatus(AttendancePlanStatus newStatus)
+    {
+        if (Status.Equals(AttendancePlanStatus.Accepted) || 
+            Status.Equals(AttendancePlanStatus.Rejected) ||
+            Status.Equals(AttendancePlanStatus.Superseded))
+            return Result.Failure(AttendancePlanErrors.InvalidCurrentStatus(Status));
+
+        if (newStatus.Equals(AttendancePlanStatus.Pending))
+            return Result.Failure(AttendancePlanErrors.InvalidNewStatus(newStatus));
+
+        Status = newStatus;
+
+        return Result.Success();
     }
 
     private Dictionary<string, double> CalculatePercentages()
@@ -91,70 +108,11 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 
             double total = periodGroup.Sum(period => period.MinutesPresent);
 
-            double percentage = (target / total) * 100;
+            double percentage = (total / target);
 
             percentages.Add(periodGroup.First().CourseName, percentage);
         }
 
         return percentages;
-    }
-}
-
-public sealed class AttendancePlanPeriod
-{
-    private AttendancePlanPeriod() { } // Required for EF Core
-
-    internal AttendancePlanPeriod(
-        Period period,
-        Offering offering,
-        Course course)
-    {
-        PeriodId = period.Id;
-        Timetable = period.Timetable;
-        Week = period.Week;
-        Day = period.Day;
-        PeriodName = period.Name;
-        PeriodType = period.Type;
-        StartTime = period.StartTime;
-        EndTime = period.EndTime;
-
-        OfferingId = offering.Id;
-        OfferingName = offering.Name;
-
-        CourseId = course.Id;
-        CourseName = course.Name;
-        TargetMinutesPerCycle = course.TargetMinutesPerCycle;
-    }
-
-    public AttendancePlanId PlanId { get; private set; }
-
-    // Period Details
-    public PeriodId PeriodId { get; private set; }
-    public Timetable Timetable { get; private set; }
-    public PeriodWeek Week { get; private set; }
-    public PeriodDay Day { get; private set; }
-    public string PeriodName { get; private set; }
-    public PeriodType PeriodType { get; private set; }
-    public TimeSpan StartTime { get; private set; }
-    public TimeSpan EndTime { get; private set; }
-
-    // Offering Details
-    public OfferingId OfferingId { get; private set; }
-    public string OfferingName { get; private set; }
-    public CourseId CourseId { get; private set; }
-    public string CourseName { get; private set; }
-    public double TargetMinutesPerCycle { get; private set; }
-
-    // Local Details
-    public TimeOnly EntryTime { get; private set; } = TimeOnly.MinValue;
-    public TimeOnly ExitTime { get; private set; } = TimeOnly.MinValue;
-    public double MinutesPresent => (ExitTime - EntryTime).TotalMinutes;
-    
-    public void UpdateDetails(
-        TimeOnly entryTime,
-        TimeOnly exitTime)
-    {
-        EntryTime = entryTime;
-        ExitTime = exitTime;
     }
 }

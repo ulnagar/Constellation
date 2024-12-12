@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241211224447_AddCycleMinutesToCourse")]
+    partial class AddCycleMinutesToCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -752,148 +755,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasKey("Id");
 
                     b.ToTable("Attachments_Attachments", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlan", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Grade")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("ModifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("School")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolCode")
-                        .IsRequired()
-                        .HasMaxLength(4)
-                        .HasColumnType("nvarchar(4)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ComplexProperty<Dictionary<string, object>>("Student", "Constellation.Core.Models.Attendance.AttendancePlan.Student#Name", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("PreferredName")
-                                .HasColumnType("nvarchar(max)");
-                        });
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Plans", "Attendance");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlanPeriod", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CourseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CourseName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Day")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeOnly>("EntryTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeOnly>("ExitTime")
-                        .HasColumnType("time");
-
-                    b.Property<Guid>("OfferingId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("OfferingName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PeriodId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("PeriodName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PeriodType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PlanId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("time");
-
-                    b.Property<double>("TargetMinutesPerCycle")
-                        .HasPrecision(2)
-                        .HasColumnType("float(2)");
-
-                    b.Property<string>("Timetable")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Week")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.HasIndex("OfferingId");
-
-                    b.HasIndex("PeriodId");
-
-                    b.HasIndex("PlanId");
-
-                    b.ToTable("PlanPeriods", "Attendance");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendanceValue", b =>
@@ -4215,42 +4076,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlan", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Students.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlanPeriod", b =>
-                {
-                    b.HasOne("Constellation.Core.Models.Subjects.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
-                        .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Timetables.Period", null)
-                        .WithMany()
-                        .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Constellation.Core.Models.Attendance.AttendancePlan", null)
-                        .WithMany("Periods")
-                        .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendanceValue", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
@@ -4999,11 +4824,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             modelBuilder.Entity("Constellation.Core.Models.Assignments.CanvasAssignment", b =>
                 {
                     b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlan", b =>
-                {
-                    b.Navigation("Periods");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Awards.NominationPeriod", b =>

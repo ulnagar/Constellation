@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Attendance.Repositories;
 
 using Constellation.Core.Models.Students.Identifiers;
-using Enums;
+using Core.Enums;
 using Identifiers;
 using System;
 using System.Collections.Generic;

@@ -43,4 +43,6 @@ public interface IOfferingRepository
     Task<List<Timetable>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedTeamResource(string teamName, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedCanvasResource(CanvasCourseCode courseCode, CancellationToken cancellationToken = default);
+
+    Task<List<Offering>> GetOfferingsFromSameGroup(OfferingId offeringId, CancellationToken cancellationToken = default);
 }

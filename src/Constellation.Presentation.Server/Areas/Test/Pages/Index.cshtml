@@ -2,3 +2,27 @@
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 <h2>Test Page</h2>
+
+<div class="row">
+    @{
+        var groupedPercentages = Model.Percentages.GroupBy(entry => entry.Course);
+    }
+
+    @foreach (var group in groupedPercentages)
+    {
+        <div class="col-4 mt-3">
+            <span>@group.Key</span>
+
+            @foreach (var item in group.OrderBy(entry => entry.Class))
+            {
+                var selected = Model.Plan.Periods.Any(period => period.OfferingId == item.OfferingId);
+
+                <div class="row @(selected ? "font-weight-bold" : "")">
+                    <div class="col-4">@item.Class</div>
+                    <div class="col-4">@item.MinutesPresent</div>
+                    <div class="col-4">@item.Percentage.ToString("P2")</div>
+                </div>
+            }
+        </div>
+    }
+</div>
