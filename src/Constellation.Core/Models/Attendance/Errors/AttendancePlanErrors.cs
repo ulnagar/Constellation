@@ -7,6 +7,10 @@ using System;
 
 public static class AttendancePlanErrors
 {
+    public static readonly Func<AttendancePlanId, Error> NotFound = id => new(
+        "AttendancePlan.NotFound",
+        $"Could not find an Attendance Plan with the id {id}");
+
     public static readonly Func<AttendancePlanStatus, Error> InvalidCurrentStatus = currentStatus => new(
         "AttendancePlans.UpdateStatus.InvalidCurrentStatus",
         $"Cannot update status when the current status is {currentStatus.Name}");

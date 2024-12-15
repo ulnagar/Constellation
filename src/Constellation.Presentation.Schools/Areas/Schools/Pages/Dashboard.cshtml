@@ -5,6 +5,15 @@
 
 <h1>Aurora College Schools Portal</h1>
 
+@if (Model.CountPendingAttendancePlans > 0)
+{
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading">Pending Attendance Plans</h4>
+        <p>Aurora College requires your response to confirm the availability of our shared students.</p>
+        <p class="mb-0">Click here to <a asp-page="/Absences/Plans/Index" asp-area="Schools" class="alert-link">view pending Attendance Plans</a>.</p>
+    </div>
+}
+
 @foreach (var group in Model.Students.GroupBy(student => student.Grade))
 {
     <h4>@group.Key?.AsName()</h4>
