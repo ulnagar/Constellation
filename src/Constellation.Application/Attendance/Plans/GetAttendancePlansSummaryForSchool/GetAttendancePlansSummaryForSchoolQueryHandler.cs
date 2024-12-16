@@ -29,7 +29,7 @@ internal sealed class GetAttendancePlansSummaryForSchoolQueryHandler
     {
         List<AttendancePlanSummaryResponse> response = new();
 
-        List<AttendancePlan> plans = await _planRepository.GetPendingForSchool(request.SchoolCode, cancellationToken);
+        List<AttendancePlan> plans = await _planRepository.GetForSchool(request.SchoolCode, cancellationToken);
 
         foreach (AttendancePlan plan in plans)
         {

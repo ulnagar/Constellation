@@ -15,7 +15,7 @@
                 <thead>
                 <tr>
                     <th>Student</th>
-                    <th>Grade</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
                 </thead>
@@ -42,10 +42,10 @@
                         @foreach (var item in group)
                         {
                             <tr>
-                                <td>@item.Grade.AsName()</td>
                                 <td data-order="@item.Student.SortOrder">@item.Student.DisplayName</td>
+                                <td data-order="@item.Status.Order">@item.Status.Name</td>
                                 <td>
-                            
+                                    <a asp-page="/Absences/Plans/Details" asp-route-id="@item.PlanId" class="btn btn-info btn-sm btn-show-hover">More Details...</a>
                                 </td>
                             </tr>
                         }

@@ -1,0 +1,114 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans.DetailsModel
+
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.Timetables.Enums
+
+@{
+}
+
+<h2>Attendance Plan</h2>
+
+<div class="page-menu">
+    // go back link
+</div>
+
+<hr />
+
+<div>
+    <dl>
+        <dt>Student</dt>
+        <dd>@Model.Plan.Student.DisplayName</dd>
+
+        <dt>Grade</dt>
+        <dd>@Model.Plan.Grade.AsName()</dd>
+    </dl>
+</div>
+
+<div>
+    @{
+        var weeks = Model.Plan.Periods.OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+
+        <div>
+            @foreach (var week in weeks)
+            {
+                var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+                var firstDay = true;
+
+                <div class="Timetable-Week">
+                    @foreach (var day in days)
+                    {
+                        var periods = day.OrderBy(p => p.StartTime).ToList();
+
+                        if (firstDay)
+                        {
+                            <div class="Timetable-Day">
+                                <div class="Timetable-Day-Title"></div>
+                                @foreach (var period in periods)
+                                {
+                                    <div class="Timetable-Day-Period @period.PeriodType.Name">
+                                        @period.PeriodName<br />
+                                        @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <div class="Timetable-Day">
+                            <div class="Timetable-Day-Title">
+                                @week.Key.Name - @day.Key.Name
+                            </div>
+                            @foreach (var period in periods)
+                            {
+                                var style = "";
+
+                                if (string.IsNullOrWhiteSpace(period.OfferingName))
+                                {
+                                    style += " Inactive";
+                                }
+                                else
+                                {
+                                    style += " Active";
+                                }
+
+                                if (period.PeriodType == PeriodType.Break)
+                                {
+                                    style += " Break";
+                                }
+
+                                <div class="Timetable-Day-Period @style">
+                                    @if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                    {
+                                        var options = Model.CalculateOptions(period.StartTime, period.EndTime);
+                                        
+                                        @period.OfferingName
+
+                                        <span>Entry Time</span>
+                                        <select>
+                                            @foreach (var minute in options)
+                                            {
+                                                <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                            }
+                                        </select>
+
+                                        options.Reverse();
+
+                                        <span>Exit Time</span>
+                                        <select>
+                                            @foreach (var minute in options)
+                                            {
+                                                <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                            }
+                                        </select>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        firstDay = false;
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

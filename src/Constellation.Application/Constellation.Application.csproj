@@ -28,6 +28,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Attendance\Plans\GetAttendancePlanDetails\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactCreated\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactRoleDeleted\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactReinstated\" />

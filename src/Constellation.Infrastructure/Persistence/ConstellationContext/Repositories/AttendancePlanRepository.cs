@@ -51,5 +51,14 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
                 plan.SchoolCode == schoolCode)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<AttendancePlan>> GetForSchool(
+        string schoolCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendancePlan>()
+            .Where(plan =>
+                plan.SchoolCode == schoolCode)
+            .ToListAsync(cancellationToken);
+
     public void Insert(AttendancePlan plan) => _context.Set<AttendancePlan>().Add(plan);
 }
