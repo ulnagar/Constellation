@@ -26,12 +26,16 @@
 
 .Timetable-Day-Period {
     border: 1px solid green;
-    height: 7rem;
+    height: 9rem;
     margin: 2px;
     padding: 0.5rem;
     text-align: center;
-    width: 10vw;
+    /*width: 10vw;*/
+    min-width: 160px;
+    max-width: 170px;
     background-color: azure;
+    display: flex;
+    flex-direction: column;
 }
 
     .Timetable-Day-Period.Inactive {
@@ -50,3 +54,7 @@
     .Timetable-Day-Period.Offline {
         background-color: lightgray;
     }
+
+select {
+    width: 75%;
+}

@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans;
 
 using Application.Attendance.Plans.GetAttendancePlanForSubmit;
+using Application.Attendance.Plans.SubmitAttendancePlan;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -46,7 +47,53 @@ public class DetailsModel : BasePageModel
 
     public AttendancePlanEntry Plan { get; set; }
 
-    public async Task OnGet()
+    public async Task OnGet() => await PreparePage();
+
+    public async Task<IActionResult> OnPost(List<FormPeriod> periods)
+    {
+        if (!ModelState.IsValid)
+        {
+            ModalContent = new FeedbackDisplay(
+                "Form Error",
+                "You must select an Entry Time and Exit Time for each period",
+                "Ok",
+                "btn-warning");
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        List<SubmitAttendancePlanCommand.PlanPeriod> periodList = new();
+
+        foreach (FormPeriod period in periods)
+        {
+            periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
+        }
+
+        SubmitAttendancePlanCommand command = new(
+            Id,
+            periodList);
+
+        _logger
+            .ForContext(nameof(SubmitAttendancePlanCommand), command, true)
+            .Information("Requested to submit attendance plan by user {user}", _currentUserService.UserName);
+
+        Result attempt = await _mediator.Send(command);
+
+        if (attempt.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                attempt.Error,
+                _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage("/Absences/Plans/Index", new { area = "Schools" });
+    }
+
+    private async Task PreparePage()
     {
         Result<AttendancePlanEntry> plan = await _mediator.Send(new GetAttendancePlanForSubmitQuery(Id));
 
@@ -80,5 +127,13 @@ public class DetailsModel : BasePageModel
         }
 
         return response;
+    }
+
+    public sealed class FormPeriod
+    {
+        public AttendancePlanPeriodId PlanPeriodId { get; set; }
+
+        public TimeOnly EntryTime { get; set; }
+        public TimeOnly ExitTime { get; set; }
     }
 }
