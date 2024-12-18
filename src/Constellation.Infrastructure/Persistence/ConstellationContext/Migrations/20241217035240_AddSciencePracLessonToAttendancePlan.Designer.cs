@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217035240_AddSciencePracLessonToAttendancePlan")]
+    partial class AddSciencePracLessonToAttendancePlan
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4231,77 +4234,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanFreePeriod", "FreePeriods", b1 =>
-                        {
-                            b1.Property<Guid>("AttendancePlanId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            b1.Property<string>("Activity")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Day")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<double>("Minutes")
-                                .HasColumnType("float");
-
-                            b1.Property<string>("Period")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Week")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("AttendancePlanId", "Id");
-
-                            b1.ToTable("Plans", "Attendance");
-
-                            b1.ToJson("FreePeriods");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AttendancePlanId");
-                        });
-
-                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanMissedLesson", "MissedLessons", b1 =>
-                        {
-                            b1.Property<Guid>("AttendancePlanId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            b1.Property<double>("MinutesMissedPerCycle")
-                                .HasColumnType("float");
-
-                            b1.Property<string>("Subject")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<double>("TotalMinutesPerCycle")
-                                .HasColumnType("float");
-
-                            b1.HasKey("AttendancePlanId", "Id");
-
-                            b1.ToTable("Plans", "Attendance");
-
-                            b1.ToJson("MissedLessons");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AttendancePlanId");
-                        });
-
-                    b.Navigation("FreePeriods");
-
-                    b.Navigation("MissedLessons");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Attendance.AttendancePlanPeriod", b =>

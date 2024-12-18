@@ -2,6 +2,8 @@
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Reflection;
 
 internal sealed class JsonColumnConverter<T> : ValueConverter<T, string?>
 {
@@ -26,8 +28,32 @@ internal sealed class JsonColumnConverter<T> : ValueConverter<T, string?>
             value,
             new JsonSerializerSettings
             {
+                ContractResolver = new PrivateMemberContractResolver(),
                 ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
                 TypeNameHandling = TypeNameHandling.All,
                 NullValueHandling = NullValueHandling.Ignore
             });
+}
+
+internal sealed class PrivateMemberContractResolver
+    : DefaultContractResolver
+{
+    protected override JsonProperty CreateProperty(
+        MemberInfo member,
+        MemberSerialization memberSerialization)
+    {
+        JsonProperty prop = base.CreateProperty(member, memberSerialization);
+
+        if (!prop.Writable)
+        {
+            PropertyInfo property = member as PropertyInfo;
+            if (property != null)
+            {
+                bool hasPrivateSetter = property.GetSetMethod(true) != null;
+                prop.Writable = hasPrivateSetter;
+            }
+        }
+
+        return prop;
+    }
 }

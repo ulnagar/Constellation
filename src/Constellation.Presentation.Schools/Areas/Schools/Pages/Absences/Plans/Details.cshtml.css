@@ -26,12 +26,12 @@
 
 .Timetable-Day-Period {
     border: 1px solid green;
-    height: 9rem;
+    height: 12rem;
     margin: 2px;
     padding: 0.5rem;
     text-align: center;
     /*width: 10vw;*/
-    min-width: 160px;
+    min-width: 170px;
     max-width: 170px;
     background-color: azure;
     display: flex;
@@ -55,6 +55,6 @@
         background-color: lightgray;
     }
 
-select {
+/*select {
     width: 75%;
-}
+}*/

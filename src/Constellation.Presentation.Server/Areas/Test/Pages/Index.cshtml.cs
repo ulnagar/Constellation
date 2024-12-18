@@ -5,6 +5,7 @@ using BaseModels;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Attendance;
+using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Identifiers;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings.Identifiers;
@@ -14,7 +15,6 @@ using Core.Models.Students.ValueObjects;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables.Enums;
-using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using MediatR;
@@ -57,18 +57,17 @@ public class IndexModel : BasePageModel
         _logger = logger;
     }
 
-    public AttendancePlan Plan { get; set; }
+    public List<AttendancePlan> Plans { get; set; }
     public List<ProjectedPercentage> Percentages { get; set; } = new();
 
     public async Task OnGet()
     {
-        await SavePlansToDb();
+        //await SavePlansToDb();
 
-        var plans = await _attendancePlanRepository.GetAll();
+        Plans = await _attendancePlanRepository.GetAll();
 
-        Plan = plans.First();
-
-        await ExtendPlans(Plan);
+        foreach (var plan in Plans)
+            await ExtendPlans(plan);
     }
 
     private async Task SavePlansToDb()
@@ -93,6 +92,9 @@ public class IndexModel : BasePageModel
 
     private async Task ExtendPlans(AttendancePlan plan)
     {
+        if (plan.Status == AttendancePlanStatus.Pending)
+            return;
+
         var offeringId = plan.Periods.First().OfferingId;
 
         var offerings = await _offeringRepository.GetOfferingsFromSameGroup(offeringId);
@@ -117,6 +119,7 @@ public class IndexModel : BasePageModel
 
             Percentages.Add(new()
             {
+                PlanId = plan.Id,
                 CourseId = course.Id,
                 Course = course.Name,
                 OfferingId = offering.Id,
@@ -151,45 +154,45 @@ public class IndexModel : BasePageModel
             attendancePlan.AddPeriods(periods, offering, course);
         }
 
-        List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
+        //List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
 
-        foreach (var period in attendancePlan.Periods)
-        {
-            if (period.StartTime == new TimeOnly(9, 10, 0))
-            {
-            }
+        //foreach (var period in attendancePlan.Periods)
+        //{
+        //    if (period.StartTime == new TimeOnly(9, 10, 0))
+        //    {
+        //    }
 
-            if (period.StartTime == new TimeOnly(11, 30, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id, 
-                    EntryTime = new(11, 50, 0), 
-                    ExitTime = new(13, 10, 0)
-                });
-            }
+        //    if (period.StartTime == new TimeOnly(11, 30, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id, 
+        //            EntryTime = new(11, 50, 0), 
+        //            ExitTime = new(13, 10, 0)
+        //        });
+        //    }
 
-            if (period.StartTime == new TimeOnly(14, 10, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id,
-                    EntryTime = new(14, 10, 0),
-                    ExitTime = new(15, 00, 0)
-                });
-            }
-        }
+        //    if (period.StartTime == new TimeOnly(14, 10, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id,
+        //            EntryTime = new(14, 10, 0),
+        //            ExitTime = new(15, 00, 0)
+        //        });
+        //    }
+        //}
 
-        Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
+        //Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
 
-        if (periodUpdate.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), periodUpdate.Error, true)
-                .Warning("Failed to update Attendance Plan Period with supplied values");
+        //if (periodUpdate.IsFailure)
+        //{
+        //    _logger
+        //        .ForContext(nameof(Error), periodUpdate.Error, true)
+        //        .Warning("Failed to update Attendance Plan Period with supplied values");
 
-            return null;
-        }
+        //    return null;
+        //}
 
         return attendancePlan;
     }
@@ -219,7 +222,7 @@ public class IndexModel : BasePageModel
         }
 
         List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
-        
+
         foreach (var period in attendancePlan.Periods)
         {
             if (period.StartTime == new TimeOnly(8, 55, 0))
@@ -296,6 +299,20 @@ public class IndexModel : BasePageModel
             return null;
         }
 
+        Result scienceLessonUpdate = attendancePlan.UpdateSciencePracLesson(PeriodWeek.WeekA, PeriodDay.Wednesday, "Period 3");
+
+        if (scienceLessonUpdate.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), scienceLessonUpdate.Error, true)
+                .Warning("Failed to update Attendance Plan Period with supplied values");
+
+            return null;
+        }
+
+        attendancePlan.AddMissedLesson("History", 60, 60);
+        attendancePlan.AddFreePeriod(PeriodWeek.WeekA, PeriodDay.Monday, "6", 60, "Science flipped lesson");
+
         return attendancePlan;
     }
 
@@ -323,77 +340,78 @@ public class IndexModel : BasePageModel
             attendancePlan.AddPeriods(periods, offering, course);
         }
 
-        List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
+        //List<(AttendancePlanPeriodId PeriodId, TimeOnly EntryTime, TimeOnly ExitTime)> periodUpdates = new();
 
-        foreach (var period in attendancePlan.Periods)
-        {
-            if (period.StartTime == new TimeOnly(8, 55, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id,
-                    EntryTime = new(9, 0, 0),
-                    ExitTime = new(9, 45, 0)
-                });
-            }
+        //foreach (var period in attendancePlan.Periods)
+        //{
+        //    if (period.StartTime == new TimeOnly(8, 55, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id,
+        //            EntryTime = new(9, 0, 0),
+        //            ExitTime = new(9, 45, 0)
+        //        });
+        //    }
 
-            if (period.StartTime == new TimeOnly(9, 45, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id,
-                    EntryTime = new(9, 45, 0),
-                    ExitTime = new(10, 35, 0)
-                });
-            }
+        //    if (period.StartTime == new TimeOnly(9, 45, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id,
+        //            EntryTime = new(9, 45, 0),
+        //            ExitTime = new(10, 35, 0)
+        //        });
+        //    }
 
-            if (period.StartTime == new TimeOnly(11, 20, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id,
-                    EntryTime = new(11, 20, 0),
-                    ExitTime = new(12, 10, 0)
-                });
-            }
+        //    if (period.StartTime == new TimeOnly(11, 20, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id,
+        //            EntryTime = new(11, 20, 0),
+        //            ExitTime = new(12, 10, 0)
+        //        });
+        //    }
 
-            if (period.StartTime == new TimeOnly(12, 10, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id,
-                    EntryTime = new(12, 10, 0),
-                    ExitTime = new(13, 0, 0)
-                });
-            }
+        //    if (period.StartTime == new TimeOnly(12, 10, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id,
+        //            EntryTime = new(12, 10, 0),
+        //            ExitTime = new(13, 0, 0)
+        //        });
+        //    }
 
-            if (period.StartTime == new TimeOnly(14, 20, 0))
-            {
-                periodUpdates.Add(new()
-                {
-                    PeriodId = period.Id,
-                    EntryTime = new(14, 20, 0),
-                    ExitTime = new(15, 10, 0)
-                });
-            }
-        }
+        //    if (period.StartTime == new TimeOnly(14, 20, 0))
+        //    {
+        //        periodUpdates.Add(new()
+        //        {
+        //            PeriodId = period.Id,
+        //            EntryTime = new(14, 20, 0),
+        //            ExitTime = new(15, 10, 0)
+        //        });
+        //    }
+        //}
 
-        Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
+        //Result periodUpdate = attendancePlan.UpdatePeriods(periodUpdates, _currentUserService, _dateTime);
 
-        if (periodUpdate.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(Error), periodUpdate.Error, true)
-                .Warning("Failed to update Attendance Plan Period with supplied values");
+        //if (periodUpdate.IsFailure)
+        //{
+        //    _logger
+        //        .ForContext(nameof(Error), periodUpdate.Error, true)
+        //        .Warning("Failed to update Attendance Plan Period with supplied values");
 
-            return null;
-        }
+        //    return null;
+        //}
 
         return attendancePlan;
     }
 
     public class ProjectedPercentage
     {
+        public AttendancePlanId PlanId { get; set; }
         public CourseId CourseId { get; set; }
         public string Course { get; set; }
         public OfferingId OfferingId { get; set; }

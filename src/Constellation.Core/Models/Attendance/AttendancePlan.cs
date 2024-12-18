@@ -18,11 +18,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Timetables;
+using Timetables.Enums;
 using ValueObjects;
 
 public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 {
     private readonly List<AttendancePlanPeriod> _periods = new();
+    private readonly List<AttendancePlanMissedLesson> _missedLessons = new();
+    private readonly List<AttendancePlanFreePeriod> _freePeriods = new();
 
     private AttendancePlan() { } // Required for EF Core
 
@@ -47,6 +50,9 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     public string SchoolCode { get; private set; }
     public string School { get; private set; }
     public IReadOnlyList<AttendancePlanPeriod> Periods => _periods.AsReadOnly();
+    public IReadOnlyList<AttendancePlanFreePeriod> FreePeriods => _freePeriods.AsReadOnly();
+    public IReadOnlyList<AttendancePlanMissedLesson> MissedLessons => _missedLessons.AsReadOnly();
+    public AttendancePlanSciencePracLesson? SciencePracLesson { get; private set; }
     public IDictionary<string, double> Percentages => Status.Equals(AttendancePlanStatus.Pending) ? new() : CalculatePercentages();
 
     public string? SubmittedBy { get; private set; }
@@ -108,6 +114,35 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 
         return Result.Success();
     }
+
+    public Result UpdateSciencePracLesson(
+        PeriodWeek week,
+        PeriodDay day,
+        string period)
+    {
+        AttendancePlanSciencePracLesson lesson = new(
+            week,
+            day,
+            period);
+
+        SciencePracLesson = lesson;
+
+        return Result.Success();
+    }
+
+    public void AddMissedLesson(
+        string subject,
+        double totalMinutes,
+        double missedMinutes) =>
+        _missedLessons.Add(new(subject, totalMinutes, missedMinutes));
+
+    public void AddFreePeriod(
+        PeriodWeek week,
+        PeriodDay day,
+        string period,
+        double minutes,
+        string activity) =>
+        _freePeriods.Add(new(week, day, period, minutes, activity));
 
     public Result UpdateStatus(AttendancePlanStatus newStatus)
     {

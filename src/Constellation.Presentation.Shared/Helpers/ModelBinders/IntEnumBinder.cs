@@ -29,7 +29,7 @@ public sealed class IntEnumBinder : IModelBinder
 
     private object? TryParse(Type enumerableType, string? rawValue)
     {
-        if (rawValue is null)
+        if (rawValue is null || string.IsNullOrWhiteSpace(rawValue))
             return null;
 
         int convertedValue = Convert.ToInt32(rawValue);

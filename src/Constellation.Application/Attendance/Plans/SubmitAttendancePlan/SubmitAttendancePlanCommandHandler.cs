@@ -89,6 +89,43 @@ internal sealed class SubmitAttendancePlanCommandHandler
             return Result.Failure(updateAttempt.Error);
         }
 
+        if (request.SciencePracLesson is not null)
+        {
+            Result updateScienceLesson = plan.UpdateSciencePracLesson(
+                request.SciencePracLesson.Week,
+                request.SciencePracLesson.Day,
+                request.SciencePracLesson.Period);
+
+            if (updateScienceLesson.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SubmitAttendancePlanCommand), request, true)
+                    .ForContext(nameof(AttendancePlan), plan, true)
+                    .ForContext(nameof(Error), updateScienceLesson.Error, true)
+                    .Warning("Failed to update Attendance Plan with supplied times");
+
+                return Result.Failure(updateScienceLesson.Error);
+            }
+        }
+
+        foreach (var lesson in request.MissedLessons)
+        {
+            plan.AddMissedLesson(
+                lesson.Subject,
+                lesson.TotalMinutesPerCycle,
+                lesson.MinutesMissedPerCycle);
+        }
+
+        foreach (var period in request.FreePeriods)
+        {
+            plan.AddFreePeriod(
+                period.Week,
+                period.Day,
+                period.Period,
+                period.Minutes,
+                period.Activity);
+        }
+
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

@@ -11,6 +11,11 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
 {
     protected static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
 
+    /// <summary>
+    /// Do not use. For serialization purposes only.
+    /// </summary>
+    protected IntEnumeration() { }
+
     protected IntEnumeration(int value, string name)
     {
         Value = value;

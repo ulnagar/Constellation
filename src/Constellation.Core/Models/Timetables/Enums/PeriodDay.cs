@@ -11,7 +11,12 @@ public class PeriodDay : IntEnumeration<PeriodDay>
     public static readonly PeriodDay Wednesday = new(3, "Wednesday");
     public static readonly PeriodDay Thursday = new(4, "Thursday");
     public static readonly PeriodDay Friday = new(5, "Friday");
-    
+
+    /// <summary>
+    /// Do not use. For serialization purposes only.
+    /// </summary>
+    private PeriodDay() { }
+
     private PeriodDay(int value, string name)
         : base(value, name)
     { }

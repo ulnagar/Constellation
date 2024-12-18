@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Attendance;
 
+using Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Identifiers;
 using Core.Models.Students;
+using Core.Models.Timetables.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +13,8 @@ internal sealed class AttendancePlanConfiguration : IEntityTypeConfiguration<Att
 {
     public void Configure(EntityTypeBuilder<AttendancePlan> builder)
     {
+        builder.UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.ToTable("Plans", "Attendance");
 
         builder
@@ -32,6 +36,35 @@ internal sealed class AttendancePlanConfiguration : IEntityTypeConfiguration<Att
             .HasOne<Student>()
             .WithMany()
             .HasForeignKey(plan => plan.StudentId);
+
+        builder
+            .Property(plan => plan.SciencePracLesson)
+            .IsRequired(false)
+            .HasConversion(new JsonColumnConverter<AttendancePlanSciencePracLesson>());
+
+        builder
+            .OwnsMany<AttendancePlanFreePeriod>(nameof(AttendancePlan.FreePeriods), config =>
+            {
+                config.ToJson();
+
+                config
+                    .Property(period => period.Week)
+                    .HasConversion(
+                        week => week.Name,
+                        name => PeriodWeek.FromName(name));
+
+                config
+                    .Property(period => period.Day)
+                    .HasConversion(
+                        day => day.Name,
+                        name => PeriodDay.FromName(name));
+            });
+
+        builder
+            .OwnsMany<AttendancePlanMissedLesson>(nameof(AttendancePlan.MissedLessons), config =>
+            {
+                config.ToJson();
+            });
 
         builder
             .ComplexProperty(plan => plan.Student)

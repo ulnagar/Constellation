@@ -6,13 +6,16 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
+using Core.Models.Timetables.Enums;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -47,9 +50,12 @@ public class DetailsModel : BasePageModel
 
     public AttendancePlanEntry Plan { get; set; }
 
+    public SelectList Weeks { get; set; }
+    public SelectList Days { get; set; }
+
     public async Task OnGet() => await PreparePage();
 
-    public async Task<IActionResult> OnPost(List<FormPeriod> periods)
+    public async Task<IActionResult> OnPost(FormData formData)
     {
         if (!ModelState.IsValid)
         {
@@ -66,14 +72,21 @@ public class DetailsModel : BasePageModel
 
         List<SubmitAttendancePlanCommand.PlanPeriod> periodList = new();
 
-        foreach (FormPeriod period in periods)
+        foreach (FormPeriod period in formData.Periods)
         {
             periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
         }
 
+        SubmitAttendancePlanCommand.ScienceLesson? scienceLesson = (formData.ScienceLessonWeek is not null && formData.ScienceLessonDay is not null)
+                ? new SubmitAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
+                : null;
+
         SubmitAttendancePlanCommand command = new(
             Id,
-            periodList);
+            periodList,
+            scienceLesson,
+            new(),
+            new());
 
         _logger
             .ForContext(nameof(SubmitAttendancePlanCommand), command, true)
@@ -111,6 +124,9 @@ public class DetailsModel : BasePageModel
         }
 
         Plan = plan.Value;
+
+        Weeks = new(PeriodWeek.GetOptions, nameof(PeriodWeek.Value), nameof(PeriodWeek.Name));
+        Days = new(PeriodDay.GetOptions, nameof(PeriodDay.Value), nameof(PeriodWeek.Name));
     }
 
     internal List<TimeOnly> CalculateOptions(TimeOnly start, TimeOnly end)
@@ -129,11 +145,42 @@ public class DetailsModel : BasePageModel
         return response;
     }
 
+    public sealed class FormData
+    {
+        public List<FormPeriod> Periods { get; set; } = new();
+
+        [ModelBinder(typeof(IntEnumBinder))]
+        public PeriodWeek? ScienceLessonWeek { get; set; }
+        [ModelBinder(typeof(IntEnumBinder))]
+        public PeriodDay? ScienceLessonDay { get; set; }
+        public string ScienceLessonPeriod { get; set; } = string.Empty;
+        public List<FormMissedLesson> MissedLessons { get; set; } = new();
+        public List<FormFreePeriods> FreePeriods { get; set; } = new();
+    }
+
     public sealed class FormPeriod
     {
         public AttendancePlanPeriodId PlanPeriodId { get; set; }
 
         public TimeOnly EntryTime { get; set; }
         public TimeOnly ExitTime { get; set; }
+    }
+
+    public sealed class FormMissedLesson
+    {
+        public string Subject { get; set; }
+        public double TotalMinutesPerCycle { get; set; }
+        public double MinutesMissedPerCycle { get; set; }
+    }
+
+    public sealed class FormFreePeriods
+    {
+        [ModelBinder(typeof(IntEnumBinder))]
+        public PeriodDay Day { get; set; }
+        [ModelBinder(typeof(IntEnumBinder))]
+        public PeriodWeek Week { get; set; }
+        public string Period { get; set; }
+        public double Minutes { get; set; }
+        public string Activity { get; set; }
     }
 }
