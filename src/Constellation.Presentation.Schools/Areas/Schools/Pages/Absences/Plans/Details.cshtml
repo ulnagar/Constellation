@@ -16,18 +16,31 @@
 
 <hr />
 
-<div>
-    <dl>
-        <dt>Student</dt>
-        <dd>@Model.Plan.Student.DisplayName</dd>
+<div class="row">
+    <div class="mb-3 row mt-3">
+        <div class="col"><h3>Student Details</h3></div>
+    </div>
 
-        <dt>Grade</dt>
-        <dd>@Model.Plan.Grade.AsName()</dd>
-    </dl>
+    <div class="col-3"><label class="form-label">Student</label></div>
+    <div class="col-9">@Model.Plan.Student.DisplayName</div>
+
+    <div class="col-3"><label class="form-label">Grade</label></div>
+    <div class="col-9">@Model.Plan.Grade.AsName()</div>
 </div>
 
 <form id="pageForm" method="post">
     <div>
+
+        <div class="mb-3 row mt-3">
+            <div class="col"><h3>Class Alignment</h3></div>
+        </div>
+
+        <div class="mb-3 row mt-3">
+            <div class="col">
+                For each period where the student has an Aurora College lesson, select the time when the student will enter the Aurora College class, and the time the student will leave the Aurora College class. If the student is unable to attend the lesson in this period, select the same value for the entry and exit times.
+            </div>
+        </div>
+
         @{
             var fieldIndex = 0;
             var weeks = Model.Plan.Periods.Where(p => p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
@@ -49,9 +62,13 @@
                                     <div class="Timetable-Day-Title"></div>
                                     @foreach (var period in periods)
                                     {
-                                        <div class="Timetable-Day-Period @period.PeriodType.Name">
-                                            @period.PeriodName<br />
-                                            @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                        var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                        <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
+                                            <span class="w-100">
+                                                @period.PeriodName<br/>
+                                                @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                            </span>
                                         </div>
                                     }
                                 </div>
@@ -79,19 +96,21 @@
                                         style += " Break";
                                     }
 
-                                    <div class="Timetable-Day-Period @style">
+                                    var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                    <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
                                         @if (!string.IsNullOrWhiteSpace(period.OfferingName))
                                         {
                                             var options = Model.CalculateOptions(period.StartTime, period.EndTime);
 
                                             <div>
                                                 <span>@period.OfferingName</span>
-                                                <input type="hidden" name="Periods[@fieldIndex].PlanPeriodId" id="Periods[@fieldIndex].PlanPeriodId" value="@period.PlanPeriodId" />
+                                                <input type="hidden" name="Periods[@fieldIndex].PlanPeriodId" id="Periods[@fieldIndex].PlanPeriodId" value="@period.PlanPeriodId"/>
                                             </div>
 
                                             <div class="mt-2">
                                                 <span>Entry Time</span>
-                                                <select name="Periods[@fieldIndex].EntryTime" id="Periods[@fieldIndex].EntryTime" class="form-control">
+                                                <select name="Periods[@fieldIndex].EntryTime" id="Periods[@fieldIndex].EntryTime" class="form-control" required>
                                                     <option value=""> ---- </option>
                                                     @foreach (var minute in options)
                                                     {
@@ -103,7 +122,7 @@
                                             options.Reverse();
                                             <div class="mt-2">
                                                 <span>Exit Time</span>
-                                                <select name="Periods[@fieldIndex].ExitTime" id="Periods[@fieldIndex].ExitTime" class="form-control">
+                                                <select name="Periods[@fieldIndex].ExitTime" id="Periods[@fieldIndex].ExitTime" class="form-control" required>
                                                     <option value=""> ---- </option>
                                                     @foreach (var minute in options)
                                                     {
@@ -122,12 +141,13 @@
                         }
                     </div>
                 }
-            </div>
-        }
+            </div>}
     </div>
     
     @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
     {
+        <hr class="my-3" />
+
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
@@ -135,36 +155,50 @@
                 </div>
 
                 <div class="mb-3 row mt-3">
-                    <div class="col-3"><label>Week</label></div>
+                    <div class="col-3"><label class="form-label">Week</label></div>
                     <div class="col font-weight-bold">
-                        <select name="ScienceLessonWeek" asp-items="Model.Weeks" class="form-control">
-                            <option value="">-- Select --</option>
+                        <select name="ScienceLessonWeek" class="form-control" required>
+                            <option value=""> ---- </option>
+                            @foreach (var item in Model.Weeks)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
                         </select>
                     </div>
                 </div>
 
                 <div class="mb-3 row mt-3">
-                    <div class="col-3">Day</div>
+                    <div class="col-3"><label class="form-label">Day</label></div>
                     <div class="col font-weight-bold">
-                        <select name="ScienceLessonDay" asp-items="Model.Days" class="form-control">
-                            <option value="">-- Select --</option>
+                        <select name="ScienceLessonDay" class="form-control" required>
+                            <option value=""> ---- </option>
+                            @foreach (var item in Model.Days)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
                         </select>
                     </div>
                 </div>
 
                 <div class="mb-3 row mt-3">
-                    <div class="col-3"><label>Period</label></div>
+                    <div class="col-3"><label class="form-label">Period</label></div>
                     <div class="col font-weight-bold">
-                        <input name="ScienceLessonPeriod" class="form-control"/>
+                        <input name="ScienceLessonPeriod" class="form-control" required />
                     </div>
                 </div>
             </div>
         </div>
 
+        <hr class="my-3" />
+        
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
                     <div class="col"><h3>Missed Home School Lessons</h3></div>
+                </div>
+                
+                <div class="mb-3 row mt-3">
+                    <div class="col">If the student is not able to attend 100% of home school lessons, enter the details of the missed lessons here.</div>
                 </div>
 
                 <div class="mb-3 row mt-3">
@@ -172,15 +206,35 @@
                 </div>
 
                 <div class="mb-3 row mt-3">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Total Timetabled Minutes</th>
+                            <th>Missed Minutes</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="missed-lessons-table">
 
+                        </tbody>
+                    </table>
+
+                    <div id="missed-lessons-list"></div>
                 </div>
             </div>
         </div>
 
+        <hr class="my-3" />
+        
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
                     <div class="col"><h3>Free Periods</h3></div>
+                </div>
+                
+                <div class="mb-3 row mt-3">
+                    <div class="col">If the student has any period where there is no timetabled Aurora College lesson AND no timetabled home school lesson, enter the details of the periods here.</div>
                 </div>
                 
                 <div class="mb-3 row mt-3">
@@ -208,9 +262,11 @@
         </div>
     }
     
+    <hr class="my-3" />
+
     <div class="row">
-        <div class="col-8 mb-3 mt-3">
-            <button type="submit" class="btn btn-success">Save</button>
+        <div class="col-4 mb-3 mt-3 d-grid">
+            <button type="submit" class="btn btn-success btn-lg py-3">Submit Plan</button>
         </div>
     </div>
 
@@ -220,30 +276,30 @@
     <div class="modal-dialog" style="max-width: 600px;">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Missed Subject</h5>
+                <h5 class="modal-title">Add Missed Lesson</h5>
             </div>
             <div class="modal-body">
                 <form id="missed-lesson-modal-form">
                     <div class="row m-3">
                         <div class="col w-auto">
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Subject</label></div>
+                                <div class="col-12"><label class="form-label">Subject</label></div>
                                 <div class="col font-weight-bold">
-                                    <input id="missed-lesson-modal-subject"/>
+                                    <input id="missed-lesson-modal-subject" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Timetable Minutes per Cycle</label></div>
+                                <div class="col-12"><label class="form-label">Timetable Minutes per Cycle</label></div>
                                 <div class="col font-weight-bold">
-                                    <input id="missed-lesson-modal-total-length" type="number"/>
+                                    <input id="missed-lesson-modal-total-length" type="number" class="form-control" />
                                 </div>
                             </div>
 
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Missed Minutes per Cycle</label></div>
+                                <div class="col-12"><label class="form-label">Missed Minutes per Cycle</label></div>
                                 <div class="col font-weight-bold">
-                                    <input id="missed-lesson-modal-missed-length" type="number"/>
+                                    <input id="missed-lesson-modal-missed-length" type="number" class="form-control" />
                                 </div>
                             </div>
                         </div>
@@ -269,7 +325,7 @@
                     <div class="row m-3">
                         <div class="col w-auto">
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Week</label></div>
+                                <div class="col-12"><label class="form-label">Week</label></div>
                                 <div class="col font-weight-bold">
                                     <select id="free-period-modal-week" asp-items="Model.Weeks" class="form-control">
                                         <option value="">-- Select --</option>
@@ -278,7 +334,7 @@
                             </div>
 
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Day</label></div>
+                                <div class="col-12"><label class="form-label">Day</label></div>
                                 <div class="col font-weight-bold">
                                     <select id="free-period-modal-day" asp-items="Model.Days" class="form-control">
                                         <option value="">-- Select --</option>
@@ -287,21 +343,21 @@
                             </div>
 
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Period</label></div>
+                                <div class="col-12"><label class="form-label">Period</label></div>
                                 <div class="col font-weight-bold">
                                     <input id="free-period-modal-period" class="form-control"/>
                                 </div>
                             </div>
 
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Length (Minutes)</label></div>
+                                <div class="col-12"><label class="form-label">Length (Minutes)</label></div>
                                 <div class="col font-weight-bold">
                                     <input id="free-period-modal-minutes" class="form-control"/>
                                 </div>
                             </div>
 
                             <div class="mb-3 row mt-3">
-                                <div class="col-3"><label>Activity</label></div>
+                                <div class="col-12"><label class="form-label">Activity</label></div>
                                 <div class="col font-weight-bold">
                                     <textarea id="free-period-modal-activity" cols="50" rows="5" class="form-control"></textarea>
                                 </div>
@@ -354,7 +410,28 @@
 
         function submitMissedLessonForm()
         {
+            var subject = $('#missed-lesson-modal-subject').val();
+            var total = $('#missed-lesson-modal-total-length').val();
+            var missed = $('#missed-lesson-modal-missed-length').val();
 
+            var tableEntry = '<tr name="MissedLessons[' + missedLessonIndex + ']"><td>';
+            tableEntry += subject;
+            tableEntry += '</td><td>';
+            tableEntry += total;
+            tableEntry += '</td><td>';
+            tableEntry += missed;
+            tableEntry += '</td><td>';
+            tableEntry += '<button type="button" class="btn btn-danger" onclick="removeMissedLesson(' + missedLessonIndex + ')">Remove</button>';
+            tableEntry += '</td></tr>';
+            $('#missed-lessons-table').append(tableEntry);
+
+            var fields = '<input type="hidden" name="MissedLessons['+ missedLessonIndex + '].Subject" value="' + subject +'" />';
+            fields += '<input type="hidden" name="MissedLessons['+ missedLessonIndex + '].TotalMinutesPerCycle" value="' + total +'" />';
+            fields += '<input type="hidden" name="MissedLessons['+ missedLessonIndex + '].MinutesMissedPerCycle" value="' + missed +'" />';
+            $('#missed-lessons-list').append(fields);
+
+            hideModal('missed');
+            missedLessonIndex++;
         }
 
         function submitFreePeriodForm()
@@ -396,7 +473,14 @@
             $('#free-periods-list > input[name*="FreePeriods[' + index + ']"]').remove();
         }
 
-        $('#pageForm').submit(function () {
+        function removeMissedLesson(index)
+        {
+            $('tr[name="MissedLessons[' + index + ']"]').remove();
+
+            $('#missed-lessons-list > input[name*="MissedLessons[' + index + ']"]').remove();
+        }
+
+        $('#pageForm').submit(function (e) {
             var i = 0;
             $('#free-periods-list input').each(function () {
                 var names = $(this).attr("name").split('.');
@@ -411,7 +495,49 @@
             });
 
             i = 0;
-            return true;
+            $('#missed-lessons-list input').each(function () {
+                var names = $(this).attr("name").split('.');
+                var name = names[names.length - 1];
+
+                $(this).attr("name", "MissedLessons[" + i + "]." + name);
+
+                if (name == 'MinutesMissedPerCycle')
+                {
+                    i++;
+                }
+            });
+
+            let lastElementName = $('select[name*="Periods"]').last().attr("name");
+            let startIndex = lastElementName.indexOf("[") + 1;
+            let endIndex = lastElementName.indexOf("]");
+            let maxIndex = lastElementName.substring(startIndex, endIndex);
+
+            for (v = 0; v <= maxIndex; v++)
+            {
+                let entryTime = Date.parseExact($('select[name*="Periods[' + v + '].EntryTime"]').val(), "h:mm tt");
+                let exitTime = Date.parseExact($('select[name*="Periods[' + v + '].ExitTime"]').val(), "h:mm tt");
+
+                if (exitTime < entryTime)
+                {
+                    console.log("INVALID:", entryTime, exitTime);
+                    
+                    $('#Periods[' + v + '].EntryTime]').get(0).setCustomValidity("Times must not overlap");
+                    $('#Periods[' + v + '].ExitTime]').get(0).setCustomValidity("Times must not overlap");
+                }
+                else {
+                    console.log("VALID:", entryTime, exitTime);
+
+                    entryTime = $('#Periods[' + v + '].EntryTime]')
+                    console.log(entry);
+                    console.log(entry.get(0));
+
+                    $('#Periods[' + v + '].EntryTime]').get(0).setCustomValidity("");
+                    $('#Periods[' + v + '].ExitTime]').get(0).setCustomValidity("");
+                }
+            }
+
+            e.preventDefault();
+            return false;
         })
     </script>
 }

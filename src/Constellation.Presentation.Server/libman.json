@@ -82,9 +82,12 @@
       "destination": "wwwroot/lib/jquery-sortablejs/"
     },
     {
-      "provider": "cdnjs",
       "library": "bootstrap@5.3.3",
       "destination": "wwwroot/lib/bootstrap5/"
+    },
+    {
+      "library": "datejs@1.0",
+      "destination": "wwwroot/lib/datejs/"
     }
   ]
 }

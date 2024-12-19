@@ -38,6 +38,15 @@
     flex-direction: column;
 }
 
+.Timetable-Day-Period.collapsed {
+    height: 6rem;
+}
+
+.Timetable-Day-Period.align-middle {
+    align-items: center;
+    flex-direction: row;
+}
+
     .Timetable-Day-Period.Inactive {
         /*background-color: cornflowerblue;*/
     }
@@ -49,6 +58,7 @@
 
     .Timetable-Day-Period.Break {
         background-color: lightyellow;
+        height: 6rem;
     }
 
     .Timetable-Day-Period.Offline {
@@ -58,3 +68,12 @@
 /*select {
     width: 75%;
 }*/
+
+.form-label {
+    font-weight: bold;
+}
+
+.form-control:invalid {
+    border-color: red;
+    border-width: 5px;
+}

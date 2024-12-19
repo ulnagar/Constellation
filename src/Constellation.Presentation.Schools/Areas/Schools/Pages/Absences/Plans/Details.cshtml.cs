@@ -71,7 +71,6 @@ public class DetailsModel : BasePageModel
         }
 
         List<SubmitAttendancePlanCommand.PlanPeriod> periodList = new();
-
         foreach (FormPeriod period in formData.Periods)
         {
             periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
@@ -81,12 +80,32 @@ public class DetailsModel : BasePageModel
                 ? new SubmitAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
                 : null;
 
+        List<SubmitAttendancePlanCommand.FreePeriod> freePeriods = new();
+        foreach (FormFreePeriods period in formData.FreePeriods)
+        {
+            freePeriods.Add(new(
+                period.Week,
+                period.Day,
+                period.Period,
+                period.Minutes,
+                period.Activity));
+        }
+
+        List<SubmitAttendancePlanCommand.MissedLesson> missedLessons = new();
+        foreach (FormMissedLesson missedLesson in formData.MissedLessons)
+        {
+            missedLessons.Add(new(
+                missedLesson.Subject,
+                missedLesson.TotalMinutesPerCycle,
+                missedLesson.MinutesMissedPerCycle));
+        }
+
         SubmitAttendancePlanCommand command = new(
             Id,
             periodList,
             scienceLesson,
-            new(),
-            new());
+            missedLessons, 
+            freePeriods);
 
         _logger
             .ForContext(nameof(SubmitAttendancePlanCommand), command, true)
@@ -168,7 +187,7 @@ public class DetailsModel : BasePageModel
 
     public sealed class FormMissedLesson
     {
-        public string Subject { get; set; }
+        public string Subject { get; set; } = string.Empty;
         public double TotalMinutesPerCycle { get; set; }
         public double MinutesMissedPerCycle { get; set; }
     }
@@ -179,8 +198,8 @@ public class DetailsModel : BasePageModel
         public PeriodDay Day { get; set; }
         [ModelBinder(typeof(IntEnumBinder))]
         public PeriodWeek Week { get; set; }
-        public string Period { get; set; }
+        public string Period { get; set; } = string.Empty;
         public double Minutes { get; set; }
-        public string Activity { get; set; }
+        public string Activity { get; set; } = string.Empty;
     }
 }
