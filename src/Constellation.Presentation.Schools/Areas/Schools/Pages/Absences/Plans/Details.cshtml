@@ -266,7 +266,7 @@
 
     <div class="row">
         <div class="col-4 mb-3 mt-3 d-grid">
-            <button type="submit" class="btn btn-success btn-lg py-3">Submit Plan</button>
+            <input id="submit" type="submit" class="btn btn-success btn-lg py-3" value="Submit Plan" />
         </div>
     </div>
 
@@ -480,7 +480,7 @@
             $('#missed-lessons-list > input[name*="MissedLessons[' + index + ']"]').remove();
         }
 
-        $('#pageForm').submit(function (e) {
+        $('#submit').on('click', function (e) {
             var i = 0;
             $('#free-periods-list input').each(function () {
                 var names = $(this).attr("name").split('.');
@@ -514,30 +514,31 @@
 
             for (v = 0; v <= maxIndex; v++)
             {
-                let entryTime = Date.parseExact($('select[name*="Periods[' + v + '].EntryTime"]').val(), "h:mm tt");
-                let exitTime = Date.parseExact($('select[name*="Periods[' + v + '].ExitTime"]').val(), "h:mm tt");
+                let entryField = document.getElementById("Periods[" + v + "].EntryTime");
+                let exitField = document.getElementById("Periods[" + v + "].ExitTime");
+
+                let entryTime = Date.parseExact(entryField.options[entryField.selectedIndex].text, "h:mm tt");
+                let exitTime = Date.parseExact(exitField.options[exitField.selectedIndex].text, "h:mm tt");
 
                 if (exitTime < entryTime)
                 {
                     console.log("INVALID:", entryTime, exitTime);
-                    
-                    $('#Periods[' + v + '].EntryTime]').get(0).setCustomValidity("Times must not overlap");
-                    $('#Periods[' + v + '].ExitTime]').get(0).setCustomValidity("Times must not overlap");
+
+                    entryField.setCustomValidity("Times must not overlap");
+                    exitField.setCustomValidity("Times must not overlap");
                 }
-                else {
+                else
+                {
                     console.log("VALID:", entryTime, exitTime);
 
-                    entryTime = $('#Periods[' + v + '].EntryTime]')
-                    console.log(entry);
-                    console.log(entry.get(0));
-
-                    $('#Periods[' + v + '].EntryTime]').get(0).setCustomValidity("");
-                    $('#Periods[' + v + '].ExitTime]').get(0).setCustomValidity("");
+                    entryField.setCustomValidity("");
+                    exitField.setCustomValidity("");
                 }
             }
 
-            e.preventDefault();
-            return false;
+            console.log($('#pageForm'))
+
+            return true;
         })
     </script>
 }
