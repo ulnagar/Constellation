@@ -5,6 +5,7 @@ using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
 using Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,13 +33,18 @@ internal sealed class GetAttendancePlansSummaryQueryHandler
 
         foreach (AttendancePlan plan in plans)
         {
+            var overallPercentage = (plan.Periods.Sum(period => period.MinutesPresent)) / (plan.Periods.DistinctBy(period => period.CourseId).Sum(period => period.TargetMinutesPerCycle));
+
+            if (overallPercentage is Double.NaN)
+                overallPercentage = Double.PositiveInfinity;
+
             response.Add(new(
                 plan.Id,
                 plan.Student,
                 plan.Grade,
                 plan.School,
                 plan.Status,
-                (plan.Periods.Sum(period => period.MinutesPresent)) / (plan.Periods.DistinctBy(period => period.CourseId).Sum(period => period.TargetMinutesPerCycle))));
+                overallPercentage));
         }
 
         return response;

@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Attendance\Plans\GetAttendancePlanDetails\**" />
+    <EmbeddedResource Remove="Attendance\Plans\GetAttendancePlanDetails\**" />
+    <None Remove="Attendance\Plans\GetAttendancePlanDetails\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
@@ -28,7 +34,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Attendance\Plans\GetAttendancePlanDetails\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactCreated\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactRoleDeleted\" />
 	  <Folder Include="SchoolContacts\Events\SchoolContactReinstated\" />
