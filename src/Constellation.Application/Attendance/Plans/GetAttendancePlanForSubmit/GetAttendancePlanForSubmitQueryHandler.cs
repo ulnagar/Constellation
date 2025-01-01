@@ -89,6 +89,36 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             }
         }
 
+        List<AttendancePlanEntry.FreePeriod> freePeriods = new();
+
+        foreach (var period in plan.FreePeriods)
+        {
+            freePeriods.Add(new(
+                period.Week,
+                period.Day,
+                period.Period,
+                period.Minutes,
+                period.Activity));
+        }
+
+        List<AttendancePlanEntry.MissedPeriod> missedPeriods = new();
+
+        foreach (var period in plan.MissedLessons)
+        {
+            missedPeriods.Add(new(
+                period.Subject,
+                period.TotalMinutesPerCycle,
+                period.MinutesMissedPerCycle,
+                period.PercentMissed));
+        }
+
+        AttendancePlanEntry.SciencePracLesson? scienceLesson = (plan.SciencePracLesson is not null)
+            ? new(
+                plan.SciencePracLesson.Week,
+                plan.SciencePracLesson.Day,
+                plan.SciencePracLesson.Period)
+            : null;
+
         AttendancePlanEntry response = new(
             plan.Id,
             plan.Status,
@@ -97,7 +127,10 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             plan.Grade,
             plan.SchoolCode,
             plan.School,
-            periods);
+            periods,
+            freePeriods,
+            missedPeriods,
+            scienceLesson);
 
         return response;
     }

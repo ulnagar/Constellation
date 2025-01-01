@@ -18,7 +18,10 @@ public sealed record AttendancePlanEntry(
     Grade Grade,
     string SchoolCode,
     string School,
-    List<AttendancePlanEntry.PlanPeriod> Periods)
+    List<AttendancePlanEntry.PlanPeriod> Periods,
+    List<AttendancePlanEntry.FreePeriod> FreePeriods,
+    List<AttendancePlanEntry.MissedPeriod> MissedPeriods,
+    AttendancePlanEntry.SciencePracLesson? SciencePrac)
 {
 
     public sealed record PlanPeriod(
@@ -34,4 +37,22 @@ public sealed record AttendancePlanEntry(
         string CourseName,
         TimeOnly EntryTime,
         TimeOnly ExitTime);
+
+    public sealed record FreePeriod(
+        PeriodWeek Week,
+        PeriodDay Day,
+        string Period,
+        double Minutes,
+        string Activity);
+
+    public sealed record MissedPeriod(
+        string Subject,
+        double TotalMinutesPerCycle,
+        double MinutesMissedPerCycle,
+        double PercentMissed);
+
+    public sealed record SciencePracLesson(
+        PeriodWeek Week,
+        PeriodDay Day,
+        string Period);
 }

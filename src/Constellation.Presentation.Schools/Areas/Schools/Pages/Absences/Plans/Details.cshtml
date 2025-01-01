@@ -3,9 +3,11 @@
 
 @using Constellation.Core.Enums
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 
 @{
+    var isDisplayOnly = !Model.Plan.Status.Equals(AttendancePlanStatus.Pending);
 }
 
 <h2>Attendance Plan</h2>
@@ -99,7 +101,7 @@
                                     var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
 
                                     <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
-                                        @if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                        @if (!string.IsNullOrWhiteSpace(period.OfferingName) && !isDisplayOnly)
                                         {
                                             var options = Model.CalculateOptions(period.StartTime, period.EndTime);
 
@@ -133,6 +135,22 @@
 
                                             fieldIndex++;
                                         }
+                                        else if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                        {
+                                                <div>
+                                                    <span>@period.OfferingName</span>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <span class="d-block">Entry Time</span>
+                                                    <span>@period.EntryTime.ToString("h:mm tt")</span>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <span class="d-block">Exit Time</span>
+                                                    <span>@period.ExitTime.ToString("h:mm tt")</span>
+                                                </div>
+                                        }
                                     </div>
                                 }
                             </div>
@@ -157,33 +175,54 @@
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Week</label></div>
                     <div class="col font-weight-bold">
-                        <select name="ScienceLessonWeek" class="form-control" required>
-                            <option value=""> ---- </option>
-                            @foreach (var item in Model.Weeks)
-                            {
-                                <option value="@item.Value">@item.Text</option>
-                            }
-                        </select>
+                        @if (isDisplayOnly && Model.Plan.SciencePrac is not null)
+                        {
+                            <span>@Model.Plan.SciencePrac.Week.Name</span>
+                        }
+                        else
+                        {
+                            <select name="ScienceLessonWeek" class="form-control" required>
+                                <option value=""> ---- </option>
+                                @foreach (var item in Model.Weeks)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        }
                     </div>
                 </div>
 
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Day</label></div>
                     <div class="col font-weight-bold">
-                        <select name="ScienceLessonDay" class="form-control" required>
-                            <option value=""> ---- </option>
-                            @foreach (var item in Model.Days)
-                            {
-                                <option value="@item.Value">@item.Text</option>
-                            }
-                        </select>
+                        @if (isDisplayOnly && Model.Plan.SciencePrac is not null)
+                        {
+                            <span>@Model.Plan.SciencePrac.Day.Name</span>
+                        }
+                        else
+                        {
+                            <select name="ScienceLessonDay" class="form-control" required>
+                                <option value=""> ---- </option>
+                                @foreach (var item in Model.Days)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        }
                     </div>
                 </div>
 
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Period</label></div>
                     <div class="col font-weight-bold">
-                        <input name="ScienceLessonPeriod" class="form-control" required />
+                        @if (isDisplayOnly && Model.Plan.SciencePrac is not null)
+                        {
+                            <span>@Model.Plan.SciencePrac.Period</span>
+                        }
+                        else
+                        {
+                            <input name="ScienceLessonPeriod" class="form-control" required/>
+                        }
                     </div>
                 </div>
             </div>
@@ -200,11 +239,16 @@
                 <div class="mb-3 row mt-3">
                     <div class="col">If the student is not able to attend 100% of home school lessons, enter the details of the missed lessons here.</div>
                 </div>
-
-                <div class="mb-3 row mt-3">
-                    <div class="col"><button type="button" class="btn btn-warning" onclick="showModal('missed')">Add Missed Lesson</button></div>
-                </div>
-
+                
+                @if (!isDisplayOnly)
+                {
+                    <div class="mb-3 row mt-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-warning" onclick="showModal('missed')">Add Missed Lesson</button>
+                        </div>
+                    </div>
+                }
+                
                 <div class="mb-3 row mt-3">
                     <table class="table">
                         <thead>
@@ -216,7 +260,18 @@
                         </tr>
                         </thead>
                         <tbody id="missed-lessons-table">
-
+                            @if (isDisplayOnly)
+                            {
+                                foreach (var entry in Model.Plan.MissedPeriods)
+                                {
+                                    <tr>
+                                        <td>@entry.Subject</td>
+                                        <td>@entry.TotalMinutesPerCycle</td>
+                                        <td>@entry.MinutesMissedPerCycle</td>
+                                        <td>@entry.PercentMissed.ToString("P")</td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
                     </table>
 
@@ -237,9 +292,14 @@
                     <div class="col">If the student has any period where there is no timetabled Aurora College lesson AND no timetabled home school lesson, enter the details of the periods here.</div>
                 </div>
                 
-                <div class="mb-3 row mt-3">
-                    <div class="col"><button type="button" class="btn btn-warning" onclick="showModal('free')">Add Free Period</button></div>
-                </div>
+                @if (!isDisplayOnly)
+                {
+                    <div class="mb-3 row mt-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-warning" onclick="showModal('free')">Add Free Period</button>
+                        </div>
+                    </div>
+                }
                 
                 <div class="mb-3 row mt-3">
                     <table class="table">
@@ -252,7 +312,18 @@
                         </tr>
                         </thead>
                         <tbody id="free-periods-table">
-
+                            @if (isDisplayOnly)
+                            {
+                                foreach (var entry in Model.Plan.FreePeriods)
+                                {
+                                    <tr>
+                                        <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
+                                        <td>@entry.Minutes</td>
+                                        <td>@entry.Activity</td>
+                                        <td></td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
                     </table>
 
@@ -263,116 +334,123 @@
     }
     
     <hr class="my-3" />
-
-    <div class="row">
-        <div class="col-4 mb-3 mt-3 d-grid">
-            <input id="submit" type="submit" class="btn btn-success btn-lg py-3" value="Submit Plan" />
+    
+    @if (!isDisplayOnly)
+    {
+        <div class="row">
+            <div class="col-4 mb-3 mt-3 d-grid">
+                <input id="submit" type="submit" class="btn btn-success btn-lg py-3" value="Submit Plan" />
+            </div>
         </div>
-    </div>
 
+    }
 </form>
 
-<div class="modal fade" tabindex="-1" id="missed-lesson-modal">
-    <div class="modal-dialog" style="max-width: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Missed Lesson</h5>
-            </div>
-            <div class="modal-body">
-                <form id="missed-lesson-modal-form">
-                    <div class="row m-3">
-                        <div class="col w-auto">
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Subject</label></div>
-                                <div class="col font-weight-bold">
-                                    <input id="missed-lesson-modal-subject" class="form-control" />
-                                </div>
-                            </div>
+@if (!isDisplayOnly)
+{
 
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Timetable Minutes per Cycle</label></div>
-                                <div class="col font-weight-bold">
-                                    <input id="missed-lesson-modal-total-length" type="number" class="form-control" />
+    <div class="modal fade" tabindex="-1" id="missed-lesson-modal">
+        <div class="modal-dialog" style="max-width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Missed Lesson</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="missed-lesson-modal-form">
+                        <div class="row m-3">
+                            <div class="col w-auto">
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Subject</label></div>
+                                    <div class="col font-weight-bold">
+                                        <input id="missed-lesson-modal-subject" class="form-control"/>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Missed Minutes per Cycle</label></div>
-                                <div class="col font-weight-bold">
-                                    <input id="missed-lesson-modal-missed-length" type="number" class="form-control" />
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Timetable Minutes per Cycle</label></div>
+                                    <div class="col font-weight-bold">
+                                        <input id="missed-lesson-modal-total-length" type="number" class="form-control"/>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Missed Minutes per Cycle</label></div>
+                                    <div class="col font-weight-bold">
+                                        <input id="missed-lesson-modal-missed-length" type="number" class="form-control"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary me-3" onclick="submitMissedLessonForm()">Add</button>
-                <button type="button" class="btn btn-secondary" onclick="hideModal('missed')">Close</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary me-3" onclick="submitMissedLessonForm()">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('missed')">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade" tabindex="-1" id="free-period-modal">
-    <div class="modal-dialog" style="max-width: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Free Period</h5>
-            </div>
-            <div class="modal-body">
-                <form id="free-period-modal-form">
-                    <div class="row m-3">
-                        <div class="col w-auto">
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Week</label></div>
-                                <div class="col font-weight-bold">
-                                    <select id="free-period-modal-week" asp-items="Model.Weeks" class="form-control">
-                                        <option value="">-- Select --</option>
-                                    </select>
+    <div class="modal fade" tabindex="-1" id="free-period-modal">
+        <div class="modal-dialog" style="max-width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Free Period</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="free-period-modal-form">
+                        <div class="row m-3">
+                            <div class="col w-auto">
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Week</label></div>
+                                    <div class="col font-weight-bold">
+                                        <select id="free-period-modal-week" asp-items="Model.Weeks" class="form-control">
+                                            <option value="">-- Select --</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Day</label></div>
-                                <div class="col font-weight-bold">
-                                    <select id="free-period-modal-day" asp-items="Model.Days" class="form-control">
-                                        <option value="">-- Select --</option>
-                                    </select>
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Day</label></div>
+                                    <div class="col font-weight-bold">
+                                        <select id="free-period-modal-day" asp-items="Model.Days" class="form-control">
+                                            <option value="">-- Select --</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Period</label></div>
-                                <div class="col font-weight-bold">
-                                    <input id="free-period-modal-period" class="form-control"/>
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Period</label></div>
+                                    <div class="col font-weight-bold">
+                                        <input id="free-period-modal-period" class="form-control"/>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Length (Minutes)</label></div>
-                                <div class="col font-weight-bold">
-                                    <input id="free-period-modal-minutes" class="form-control"/>
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Length (Minutes)</label></div>
+                                    <div class="col font-weight-bold">
+                                        <input id="free-period-modal-minutes" class="form-control"/>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-3 row mt-3">
-                                <div class="col-12"><label class="form-label">Activity</label></div>
-                                <div class="col font-weight-bold">
-                                    <textarea id="free-period-modal-activity" cols="50" rows="5" class="form-control"></textarea>
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Activity</label></div>
+                                    <div class="col font-weight-bold">
+                                        <textarea id="free-period-modal-activity" cols="50" rows="5" class="form-control"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary me-3" onclick="submitFreePeriodForm()">Add</button>
-                <button type="button" class="btn btn-secondary" onclick="hideModal('free')">Close</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary me-3" onclick="submitFreePeriodForm()">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('free')">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
 
 @section scripts
 {
@@ -480,6 +558,14 @@
             $('#missed-lessons-list > input[name*="MissedLessons[' + index + ']"]').remove();
         }
 
+        $('#pageForm').on('submit', function(e){
+            var blockSubmit = @isDisplayOnly;
+           
+            if (blockSubmit == true)
+                e.preventDefault();
+                return false;
+        });
+
         $('#submit').on('click', function (e) {
             var i = 0;
             $('#free-periods-list input').each(function () {
@@ -522,21 +608,15 @@
 
                 if (exitTime < entryTime)
                 {
-                    console.log("INVALID:", entryTime, exitTime);
-
                     entryField.setCustomValidity("Times must not overlap");
                     exitField.setCustomValidity("Times must not overlap");
                 }
                 else
                 {
-                    console.log("VALID:", entryTime, exitTime);
-
                     entryField.setCustomValidity("");
                     exitField.setCustomValidity("");
                 }
             }
-
-            console.log($('#pageForm'))
 
             return true;
         })

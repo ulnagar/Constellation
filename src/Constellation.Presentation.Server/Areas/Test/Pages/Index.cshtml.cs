@@ -62,7 +62,7 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        //await SavePlansToDb();
+        await SavePlansToDb();
 
         Plans = await _attendancePlanRepository.GetAll();
 
