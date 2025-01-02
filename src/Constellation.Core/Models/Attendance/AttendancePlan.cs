@@ -26,6 +26,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     private readonly List<AttendancePlanPeriod> _periods = new();
     private readonly List<AttendancePlanMissedLesson> _missedLessons = new();
     private readonly List<AttendancePlanFreePeriod> _freePeriods = new();
+    private readonly List<AttendancePlanNote> _notes = new();
 
     private AttendancePlan() { } // Required for EF Core
 
@@ -52,6 +53,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     public IReadOnlyList<AttendancePlanPeriod> Periods => _periods.AsReadOnly();
     public IReadOnlyList<AttendancePlanFreePeriod> FreePeriods => _freePeriods.AsReadOnly();
     public IReadOnlyList<AttendancePlanMissedLesson> MissedLessons => _missedLessons.AsReadOnly();
+    public IReadOnlyList<AttendancePlanNote> Notes => _notes.AsReadOnly();
     public AttendancePlanSciencePracLesson? SciencePracLesson { get; private set; }
     public IDictionary<string, double> Percentages => Status.Equals(AttendancePlanStatus.Pending) ? new() : CalculatePercentages();
 
@@ -154,6 +156,13 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         if (newStatus.Equals(AttendancePlanStatus.Pending))
             return Result.Failure(AttendancePlanErrors.InvalidNewStatus(newStatus));
 
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, $"Updated Status from {Status} to {newStatus}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
         Status = newStatus;
 
         return Result.Success();
@@ -178,4 +187,6 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 
         return percentages;
     }
+
+    public void AddNote(AttendancePlanNote note) => _notes.Add(note);
 }

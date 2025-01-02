@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Core.Models.Timetables.Enums;
 
 using Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class PeriodDay : IntEnumeration<PeriodDay>
+public class PeriodDay : IntEnumeration<PeriodDay>, IComparable<PeriodDay>
 {
     public static readonly PeriodDay Monday = new(1, "Monday");
     public static readonly PeriodDay Tuesday = new(2, "Tuesday");
@@ -33,4 +34,7 @@ public class PeriodDay : IntEnumeration<PeriodDay>
 
     public static IEnumerable<PeriodDay> GetOptions 
         => Enumerations.Select(entry => entry.Value);
+
+    public int CompareTo(PeriodDay other) =>
+        Value.CompareTo(other.Value);
 }

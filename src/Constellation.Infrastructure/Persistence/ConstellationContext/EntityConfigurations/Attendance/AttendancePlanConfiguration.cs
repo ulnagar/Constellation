@@ -38,6 +38,13 @@ internal sealed class AttendancePlanConfiguration : IEntityTypeConfiguration<Att
             .HasForeignKey(plan => plan.StudentId);
 
         builder
+            .HasMany<AttendancePlanNote>()
+            .WithOne()
+            .HasForeignKey(note => note.PlanId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
+        
+        builder
             .Property(plan => plan.SciencePracLesson)
             .IsRequired(false)
             .HasConversion(new JsonColumnConverter<AttendancePlanSciencePracLesson>());
@@ -91,6 +98,10 @@ internal sealed class AttendancePlanConfiguration : IEntityTypeConfiguration<Att
 
         builder
             .Navigation(plan => plan.Periods)
+            .AutoInclude();
+
+        builder
+            .Navigation(plan => plan.Notes)
             .AutoInclude();
     }
 }

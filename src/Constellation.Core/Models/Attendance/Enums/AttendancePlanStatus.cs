@@ -4,12 +4,12 @@ using Common;
 
 public sealed class AttendancePlanStatus : StringEnumeration<AttendancePlanStatus>
 {
-    public static readonly AttendancePlanStatus Pending = new("Pending");
-    public static readonly AttendancePlanStatus Processing = new("Processing");
-    public static readonly AttendancePlanStatus Accepted = new("Accepted");
-    public static readonly AttendancePlanStatus Rejected = new("Rejected");
-    public static readonly AttendancePlanStatus Superseded = new("Superseded");
+    public static readonly AttendancePlanStatus Pending = new("Pending", 1);
+    public static readonly AttendancePlanStatus Processing = new("Processing", 2);
+    public static readonly AttendancePlanStatus Accepted = new("Accepted", 3);
+    public static readonly AttendancePlanStatus Rejected = new("Rejected", 4);
+    public static readonly AttendancePlanStatus Superseded = new("Superseded", 5);
 
-    private AttendancePlanStatus(string value)
-        : base(value, value) { }
+    private AttendancePlanStatus(string value, int order)
+        : base(value, value, order) { }
 }
