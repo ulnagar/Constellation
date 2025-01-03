@@ -144,7 +144,11 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
         List<AttendancePlanDetailsResponse.AlternatePercentage> alternatePercentages = new();
 
-        OfferingId offeringId = plan.Periods.First().OfferingId;
+        OfferingId offeringId = plan.Periods
+            .GroupBy(entry => entry.OfferingId)
+            .OrderByDescending(group => group.Count())
+            .First()
+            .Key;
 
         List<Offering> offerings = await _offeringRepository.GetOfferingsFromSameGroup(offeringId, cancellationToken);
 

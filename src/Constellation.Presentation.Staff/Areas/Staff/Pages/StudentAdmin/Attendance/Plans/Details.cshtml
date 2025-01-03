@@ -3,6 +3,7 @@
 
 @using Constellation.Core.Enums
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 
 @{
@@ -11,6 +12,18 @@
 <h2>Attendance Plan</h2>
 
 <div class="page-menu">
+    @if (Model.Plan.Status.Order < 3)
+    {
+        <button type="button" data-toggle="modal" data-target="#update-status-modal" class="btn btn-warning">Update Status</button>
+    }
+
+    <button type="button" data-toggle="modal" data-target="#add-note-modal" class="btn btn-warning">Add Note</button>
+
+    @if (Model.Plan.Status == AttendancePlanStatus.Pending)
+    {
+        <a asp-page="/StudentAdmin/Attendance/Plans/Edit" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    }
+
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
@@ -26,56 +39,61 @@
 
     <div class="col-3"><label class="form-label">Grade</label></div>
     <div class="col-9">@Model.Plan.Grade.AsName()</div>
+    
+    <div class="col-3"><label class="form-label">Status</label></div>
+    <div class="col-9">@Model.Plan.Status.Name</div>
 </div>
 
-<div>
-    <div class="mb-3 row mt-3">
-        <div class="col">
-            <h3>Class Alignment</h3>
-        </div>
-    </div>
-
+@if (Model.Plan.Status != AttendancePlanStatus.Pending)
+{
     <div>
-        <ul class="nav nav-pills">
-            <li class="nav-item">
-                <a class="nav-link active" href="#listView" data-toggle="tab" role="tab">
-                    List View
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#timetableView" data-toggle="tab" role="tab">
-                    Timetable View
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#alternateView" data-toggle="tab" role="tab">
-                    Alternate Class View
-                </a>
-            </li>
-        </ul>
+        <div class="mb-3 row mt-3">
+            <div class="col">
+                <h3>Class Alignment</h3>
+            </div>
+        </div>
 
-        <div class="tab-content">
-            <div id="listView" class="tab-pane active">
-                <div class="mb-3 col mt-3">
-                    <h4>List View</h4>
-                </div>
+        <div>
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#listView" data-toggle="tab" role="tab">
+                        List View
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#timetableView" data-toggle="tab" role="tab">
+                        Timetable View
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#alternateView" data-toggle="tab" role="tab">
+                        Alternate Class View
+                    </a>
+                </li>
+            </ul>
 
-                <table class="table data-table">
-                    <thead>
+            <div class="tab-content">
+                <div id="listView" class="tab-pane active">
+                    <div class="mb-3 col mt-3">
+                        <h4>List View</h4>
+                    </div>
+
+                    <table class="table data-table">
+                        <thead>
                         <tr>
                             <th>Period</th>
                             <th>Start Times</th>
                             <th>End Times</th>
                             <th>Missed Min / Percent</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         @{
                             var periodList = Model.Plan.Periods
-                            .Where(period => !string.IsNullOrWhiteSpace(period.CourseName))
-                            .OrderBy(period => period.Week.Value)
-                            .ThenBy(period => period.Day.Value)
-                            .ThenBy(period => period.StartTime);
+                                .Where(period => !string.IsNullOrWhiteSpace(period.CourseName))
+                                .OrderBy(period => period.Week.Value)
+                                .ThenBy(period => period.Day.Value)
+                                .ThenBy(period => period.StartTime);
 
                             foreach (var period in periodList)
                             {
@@ -91,17 +109,17 @@
                                 </tr>
                             }
                         }
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="timetableView" class="tab-pane">
-                <div class="mb-3 col mt-3">
-                    <h4>Timetable View</h4>
+                        </tbody>
+                    </table>
                 </div>
 
-                @{
-                    var weeks = Model.Plan.Periods.Where(p => !p.PeriodType.Equals(PeriodType.Offline)).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+                <div id="timetableView" class="tab-pane">
+                    <div class="mb-3 col mt-3">
+                        <h4>Timetable View</h4>
+                    </div>
+
+                    @{
+                        var weeks = Model.Plan.Periods.Where(p => !p.PeriodType.Equals(PeriodType.Offline)).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
 
                     <div>
                         @foreach (var week in weeks)
@@ -156,6 +174,10 @@
 
                                             var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
 
+                                            var calculatedTotal = (period.EndTime - period.StartTime).TotalMinutes;
+                                            var calculatedMissed = calculatedTotal - (period.ExitTime - period.EntryTime).TotalMinutes;
+                                            var calculatedPercent = calculatedMissed / calculatedTotal;
+
                                             <div class="Plan-Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
                                                 @if (!string.IsNullOrWhiteSpace(period.OfferingName))
                                                 {
@@ -172,6 +194,10 @@
                                                         <span class="d-block">Exit Time</span>
                                                         <span>@period.ExitTime.ToString("h:mm tt")</span>
                                                     </div>
+
+                                                    <div class="mt-2">
+                                                        <span class="d-block">Missed: @calculatedPercent.ToString("P0")</span>
+                                                    </div>
                                                 }
                                             </div>
                                         }
@@ -182,182 +208,184 @@
                             </div>
                         }
                     </div>}
-            </div>
-
-            <div id="alternateView" class="tab-pane">
-                <div class="mb-3 col mt-3">
-                    <h4>Alternate Class View</h4>
                 </div>
-                @{
-                    var lineGroup = Model.Plan.AlternatePercentages.GroupBy(entry => entry.Class[^2..]);
-                    var subjectOptions = Model.Plan.AlternatePercentages.Select(entry => entry.Course).Distinct().OrderBy(entry => entry).ToList();
-                }
 
-                <table class="table data-table">
-                    <thead>
-                    <tr>
-                        <th>Line</th>
-                        @foreach (var subject in subjectOptions)
-                        {
-                            <th>@subject</th>
-                        }
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var group in lineGroup)
-                    {
-                        var selected = Model.Plan.Periods
-                            .Where(period => !string.IsNullOrWhiteSpace(period.OfferingName))
-                            .Any(period => period.OfferingName[^2..] == group.Key)
-                            ? "current"
-                            : "";
+                <div id="alternateView" class="tab-pane">
+                    <div class="mb-3 col mt-3">
+                        <h4>Alternate Class View</h4>
+                    </div>
+                    @{
+                        var lineGroup = Model.Plan.AlternatePercentages.GroupBy(entry => entry.Class[^2..]);
+                        var subjectOptions = Model.Plan.AlternatePercentages.Select(entry => entry.Course).Distinct().OrderBy(entry => entry).ToList();
+                    }
 
-                        <tr class="@selected">
-                            <td>@group.Key</td>
+                    <table class="table data-table">
+                        <thead>
+                        <tr>
+                            <th>Line</th>
                             @foreach (var subject in subjectOptions)
                             {
-                                var item = group.First(entry => entry.Course == subject);
-
-                                <td>@item.Class - @item.MinutesPresent - @item.Percentage.ToString("P0")</td>
+                                <th>@subject</th>
                             }
                         </tr>
-                    }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        @foreach (var group in lineGroup)
+                        {
+                            var selected = Model.Plan.Periods
+                                .Where(period => !string.IsNullOrWhiteSpace(period.OfferingName))
+                                .Any(period => period.OfferingName[^2..] == group.Key)
+                                ? "current"
+                                : "";
+
+                            <tr class="@selected">
+                                <td>@group.Key</td>
+                                @foreach (var subject in subjectOptions)
+                                {
+                                    var item = group.First(entry => entry.Course == subject);
+
+                                    <td>@item.Class - @item.MinutesPresent - @item.Percentage.ToString("P0")</td>
+                                }
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-@if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
-{
-    <hr />
+    @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
+    {
+        <hr/>
 
-    <div>
-        <div class="mb-3 row mt-3">
-            <div class="col">
-                <h3>Secondary Details</h3>
-            </div>
-        </div>
-            
         <div>
-            <ul class="nav nav-pills">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#sciencePrac" data-toggle="tab" role="tab">
-                        Science Prac Lesson
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#missedLessons" data-toggle="tab" role="tab">
-                        Missed Lessons
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#freePeriods" data-toggle="tab" role="tab">
-                        Free Periods
-                    </a>
-                </li>
-            </ul>
+            <div class="mb-3 row mt-3">
+                <div class="col">
+                    <h3>Secondary Details</h3>
+                </div>
+            </div>
 
-            <div class="tab-content">
-                <div id="sciencePrac" class="tab-pane active">
-                    <div class="col">
-                        <div class="mb-3 mt-3">
-                            <h4>Science Practical Lesson</h4>
-                        </div>
+            <div>
+                <ul class="nav nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#sciencePrac" data-toggle="tab" role="tab">
+                            Science Prac Lesson
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#missedLessons" data-toggle="tab" role="tab">
+                            Missed Lessons
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#freePeriods" data-toggle="tab" role="tab">
+                            Free Periods
+                        </a>
+                    </li>
+                </ul>
 
-                        <div class="mb-3 row mt-3">
-                            <div class="col-3"><label class="form-label">Week</label></div>
-                            <div class="col font-weight-bold">
-                                <span>@Model.Plan.SciencePrac?.Week.Name</span>
+                <div class="tab-content">
+                    <div id="sciencePrac" class="tab-pane active">
+                        <div class="col">
+                            <div class="mb-3 mt-3">
+                                <h4>Science Practical Lesson</h4>
                             </div>
-                        </div>
 
-                        <div class="mb-3 row mt-3">
-                            <div class="col-3"><label class="form-label">Day</label></div>
-                            <div class="col font-weight-bold">
-                                <span>@Model.Plan.SciencePrac?.Day.Name</span>
+                            <div class="mb-3 row mt-3">
+                                <div class="col-3"><label class="form-label">Week</label></div>
+                                <div class="col font-weight-bold">
+                                    <span>@Model.Plan.SciencePrac?.Week.Name</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3 row mt-3">
-                            <div class="col-3"><label class="form-label">Period</label></div>
-                            <div class="col font-weight-bold">
-                                <span>@Model.Plan.SciencePrac?.Period</span>
+                            <div class="mb-3 row mt-3">
+                                <div class="col-3"><label class="form-label">Day</label></div>
+                                <div class="col font-weight-bold">
+                                    <span>@Model.Plan.SciencePrac?.Day.Name</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 row mt-3">
+                                <div class="col-3"><label class="form-label">Period</label></div>
+                                <div class="col font-weight-bold">
+                                    <span>@Model.Plan.SciencePrac?.Period</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="missedLessons" class="tab-pane">
-                    <div class="col">
-                        <div class="mb-3 mt-3">
-                            <h4>Missed Home School Lessons</h4>
-                        </div>
+                    <div id="missedLessons" class="tab-pane">
+                        <div class="col">
+                            <div class="mb-3 mt-3">
+                                <h4>Missed Home School Lessons</h4>
+                            </div>
 
-                        <div class="mb-3 mt-3">
-                            <table class="table table-striped data-table">
-                                <thead>
-                                <tr>
-                                    <th>Subject</th>
-                                    <th>Total Timetabled Minutes</th>
-                                    <th>Missed Minutes</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @foreach (var entry in Model.Plan.MissedPeriods)
-                                {
+                            <div class="mb-3 mt-3">
+                                <table class="table table-striped data-table">
+                                    <thead>
                                     <tr>
-                                        <td>@entry.Subject</td>
-                                        <td>@entry.TotalMinutesPerCycle</td>
-                                        <td>@entry.MinutesMissedPerCycle</td>
-                                        <td>@entry.PercentMissed.ToString("P")</td>
+                                        <th>Subject</th>
+                                        <th>Total Timetabled Minutes</th>
+                                        <th>Missed Minutes</th>
+                                        <th></th>
                                     </tr>
-                                }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                    @foreach (var entry in Model.Plan.MissedPeriods)
+                                    {
+                                        <tr>
+                                            <td>@entry.Subject</td>
+                                            <td>@entry.TotalMinutesPerCycle</td>
+                                            <td>@entry.MinutesMissedPerCycle</td>
+                                            <td>@entry.PercentMissed.ToString("P")</td>
+                                        </tr>
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div id="freePeriods" class="tab-pane">
-                    <div class="col">
-                        <div class="mb-3 mt-3">
-                            <h4>Free Periods</h4>
-                        </div>
+                    <div id="freePeriods" class="tab-pane">
+                        <div class="col">
+                            <div class="mb-3 mt-3">
+                                <h4>Free Periods</h4>
+                            </div>
 
-                        <div class="mb-3 mt-3">
-                            <table class="table table-striped data-table">
-                                <thead>
-                                <tr>
-                                    <th>Period</th>
-                                    <th>Length</th>
-                                    <th>Activity</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @foreach (var entry in Model.Plan.FreePeriods)
-                                {
+                            <div class="mb-3 mt-3">
+                                <table class="table table-striped data-table">
+                                    <thead>
                                     <tr>
-                                        <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
-                                        <td>@entry.Minutes</td>
-                                        <td>@entry.Activity</td>
-                                        <td></td>
+                                        <th>Period</th>
+                                        <th>Length</th>
+                                        <th>Activity</th>
+                                        <th></th>
                                     </tr>
-                                }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                    @foreach (var entry in Model.Plan.FreePeriods)
+                                    {
+                                        <tr>
+                                            <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
+                                            <td>@entry.Minutes</td>
+                                            <td>@entry.Activity</td>
+                                            <td></td>
+                                        </tr>
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    }
 
-<hr />
+    <hr/>
+
+}
 
 <div>
     <div class="mb-3 row mt-3">
@@ -386,3 +414,6 @@
         </tbody>
     </table>
 </div>
+
+<vc:update-attendance-plan-status status="@Model.Plan.Status" />
+<vc:add-attendance-plan-note />

@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Core.Models.Attendance;
 
 using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using Identifiers;
 using System;
 
-public sealed class AttendancePlanNote
+public sealed class AttendancePlanNote : IAuditableEntity
 {
     // Required by EF Core
     private AttendancePlanNote() { }

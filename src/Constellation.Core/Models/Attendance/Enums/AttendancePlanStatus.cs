@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Core.Models.Attendance.Enums;
 
 using Common;
+using Constellation.Core.Models.Assets.Enums;
+using System.Collections.Generic;
 
 public sealed class AttendancePlanStatus : StringEnumeration<AttendancePlanStatus>
 {
@@ -12,4 +14,6 @@ public sealed class AttendancePlanStatus : StringEnumeration<AttendancePlanStatu
 
     private AttendancePlanStatus(string value, int order)
         : base(value, value, order) { }
+
+    public static IEnumerable<AttendancePlanStatus> GetOptions => GetEnumerable;
 }

@@ -102,6 +102,9 @@ internal sealed class GenerateAttendancePlansCommandHandler
                 if (course is null)
                     continue;
 
+                if (course.Code == "TUT")
+                    continue;
+
                 List<PeriodId> periodIds = offering.Sessions
                     .Where(session => !session.IsDeleted)
                     .Select(session => session.PeriodId)
