@@ -6,6 +6,7 @@ using Abstractions.Services;
 using Core.Enums;
 using Enums;
 using Errors;
+using Events;
 using Identifiers;
 using Offerings;
 using Primitives;
@@ -146,7 +147,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         string activity) =>
         _freePeriods.Add(new(week, day, period, minutes, activity));
 
-    public Result UpdateStatus(AttendancePlanStatus newStatus)
+    private Result UpdateStatus(AttendancePlanStatus newStatus)
     {
         if (Status.Equals(AttendancePlanStatus.Accepted) || 
             Status.Equals(AttendancePlanStatus.Rejected) ||
@@ -164,6 +165,44 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         _notes.Add(note.Value);
 
         Status = newStatus;
+
+        return Result.Success();
+    }
+
+    public Result ApprovePlan(string comment)
+    {
+        Result statusUpdate = UpdateStatus(AttendancePlanStatus.Accepted);
+
+        if (statusUpdate.IsFailure)
+            return statusUpdate;
+
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, comment);
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        RaiseDomainEvent(new AttendancePlanAcceptedDomainEvent(new(), Id));
+
+        return Result.Success();
+    }
+
+    public Result RejectPlan(string comment)
+    {
+        Result statusUpdate = UpdateStatus(AttendancePlanStatus.Rejected);
+
+        if (statusUpdate.IsFailure)
+            return statusUpdate;
+
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, comment);
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        RaiseDomainEvent(new AttendancePlanRejectedDomainEvent(new(), Id));
 
         return Result.Success();
     }

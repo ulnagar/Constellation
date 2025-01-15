@@ -14,7 +14,8 @@
 <div class="page-menu">
     @if (Model.Plan.Status.Order < 3)
     {
-        <button type="button" data-toggle="modal" data-target="#update-status-modal" class="btn btn-warning">Update Status</button>
+        <button type="button" data-toggle="modal" data-target="#approve-modal" class="btn btn-success">Approve Plan</button>
+        <button type="button" data-toggle="modal" data-target="#reject-modal" class="btn btn-danger">Reject Plan</button>
     }
 
     <button type="button" data-toggle="modal" data-target="#add-note-modal" class="btn btn-warning">Add Note</button>
@@ -415,5 +416,6 @@
     </table>
 </div>
 
-<vc:update-attendance-plan-status status="@Model.Plan.Status" />
+<vc:approve-attendance-plan-modal />
+<vc:reject-attendance-plan-modal />
 <vc:add-attendance-plan-note />

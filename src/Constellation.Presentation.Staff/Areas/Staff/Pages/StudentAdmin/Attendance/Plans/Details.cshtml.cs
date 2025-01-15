@@ -1,8 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
 using Application.Attendance.Plans.AddAttendancePlanNote;
+using Application.Attendance.Plans.ApproveAttendancePlan;
 using Application.Attendance.Plans.GetAttendancePlanDetails;
-using Application.Attendance.Plans.UpdateAttendancePlanStatus;
+using Application.Attendance.Plans.RejectAttendancePlan;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -15,7 +16,8 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 using Shared.Components.AddAttendancePlanNote;
-using Shared.Components.UpdateAttendancePlanStatus;
+using Shared.Components.ApproveAttendancePlanModal;
+using Shared.Components.RejectAttendancePlanModal;
 
 [Authorize(Policy = AuthPolicies.CanManageAbsences)]
 public class DetailsModel : BasePageModel
@@ -78,23 +80,50 @@ public class DetailsModel : BasePageModel
 
         return Page();
     }
-
-    public async Task<IActionResult> OnPostUpdateStatus(UpdateAttendancePlanStatusSelection viewModel)
+    
+    public async Task<IActionResult> OnPostApprovePlan(ApproveAttendancePlanModalSelection viewModel)
     {
-        UpdateAttendancePlanStatusCommand command = new(Id, viewModel.SelectedStatus);
+        ApproveAttendancePlanCommand command = new(Id, viewModel.Comment);
 
         _logger
-            .ForContext(nameof(UpdateAttendancePlanStatusCommand), command, true)
-            .Information("Requested to update status of Attendance Plan by user {User}", _currentUserService.UserName);
+            .ForContext(nameof(ApproveAttendancePlanCommand), command, true)
+            .Information("Requested to approve Attendance Plan by user {User}", _currentUserService.UserName);
 
         Result update = await _mediator.Send(command);
 
         if (update.IsFailure)
         {
             _logger
-                .ForContext(nameof(UpdateAttendancePlanStatusCommand), command, true)
+                .ForContext(nameof(ApproveAttendancePlanCommand), command, true)
                 .ForContext(nameof(Error), update.Error, true)
-                .Information("Failed to update status of Attendance Plan by user {User}", _currentUserService.UserName);
+                .Information("Failed to approve Attendance Plan by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                update.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Details", values: new { area = "Staff", Id }));
+
+            return await PreparePage();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostRejectPlan(RejectAttendancePlanModalSelection viewModel)
+    {
+        RejectAttendancePlanCommand command = new(Id, viewModel.Comment);
+
+        _logger
+            .ForContext(nameof(RejectAttendancePlanCommand), command, true)
+            .Information("Requested to reject Attendance Plan by user {User}", _currentUserService.UserName);
+
+        Result update = await _mediator.Send(command);
+
+        if (update.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(RejectAttendancePlanCommand), command, true)
+                .ForContext(nameof(Error), update.Error, true)
+                .Information("Failed to reject Attendance Plan by user {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(
                 update.Error,
