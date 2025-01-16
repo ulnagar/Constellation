@@ -3,6 +3,7 @@ namespace Constellation.Core.Models.Attendance;
 
 using Abstractions.Clock;
 using Abstractions.Services;
+using Constellation.Core.Models.Timetables.Identifiers;
 using Core.Enums;
 using Enums;
 using Errors;
@@ -115,6 +116,21 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 
         Status = AttendancePlanStatus.Processing;
 
+        return Result.Success();
+    }
+
+    public Result CopyPeriodValues(
+        AttendancePlanPeriodId id, 
+        TimeOnly entryTime, 
+        TimeOnly exitTime)
+    {
+        AttendancePlanPeriod? period = _periods.FirstOrDefault(period => period.Id == id);
+
+        if (period is null)
+            return Result.Failure(AttendancePlanErrors.PeriodNotFound(id));
+
+        period.UpdateDetails(entryTime, exitTime);
+     
         return Result.Success();
     }
 

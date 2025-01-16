@@ -1,8 +1,6 @@
 ﻿namespace Constellation.Application.Attendance.Plans.CopyAttendancePlanDetails;
 
 using Abstractions.Messaging;
-using Core.Abstractions.Clock;
-using Core.Abstractions.Services;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Errors;
 using Core.Models.Attendance.Repositories;
@@ -17,21 +15,15 @@ internal sealed class CopyAttendancePlanDetailsCommandHandler
 : ICommandHandler<CopyAttendancePlanDetailsCommand>
 {
     private readonly IAttendancePlanRepository _planRepository;
-    private readonly ICurrentUserService _currentUserService;
-    private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public CopyAttendancePlanDetailsCommandHandler(
         IAttendancePlanRepository planRepository,
-        ICurrentUserService currentUserService,
-        IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _planRepository = planRepository;
-        _currentUserService = currentUserService;
-        _dateTime = dateTime;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<CopyAttendancePlanDetailsCommand>();
@@ -70,10 +62,10 @@ internal sealed class CopyAttendancePlanDetailsCommandHandler
             if (sourcePeriod is null)
                 continue;
 
-            destinationPlan.UpdatePeriods(
-                [(period.Id, sourcePeriod.EntryTime, sourcePeriod.ExitTime)],
-                _currentUserService,
-                _dateTime);
+            destinationPlan.CopyPeriodValues(
+                period.Id, 
+                sourcePeriod.EntryTime, 
+                sourcePeriod.ExitTime);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);

@@ -128,15 +128,15 @@ public class DetailsModel : BasePageModel
         return RedirectToPage("/Absences/Plans/Index", new { area = "Schools" });
     }
 
-    public async Task<IActionResult> OnPostCopyPlan(AttendancePlanId planId)
+    public async Task<IActionResult> OnPostCopyPlan([FromBody] AttendancePlanId sourcePlanId)
     {
-        CopyAttendancePlanDetailsCommand command = new(Id, planId);
+        CopyAttendancePlanDetailsCommand command = new(Id, sourcePlanId);
 
         _logger
             .ForContext(nameof(CopyAttendancePlanDetailsCommand), command, true)
             .Information("Requested to copy Attendance Plan details by user {User}", _currentUserService.UserName);
 
-        Result operation = await _mediator.Send(new CopyAttendancePlanDetailsCommand(Id, planId));
+        Result operation = await _mediator.Send(new CopyAttendancePlanDetailsCommand(Id, sourcePlanId));
 
         if (operation.IsFailure)
         {
@@ -193,7 +193,7 @@ public class DetailsModel : BasePageModel
 
         Weeks = new(PeriodWeek.GetOptions, nameof(PeriodWeek.Value), nameof(PeriodWeek.Name));
         Days = new(PeriodDay.GetOptions, nameof(PeriodDay.Value), nameof(PeriodWeek.Name));
-        StudentPlans = new(completedPlans.Value, nameof(CompletedPlansResponse.PlanId), nameof(CompletedPlansResponse.Student.DisplayName));
+        StudentPlans = new(completedPlans.Value, nameof(CompletedPlansResponse.PlanId), nameof(CompletedPlansResponse.Student));
     }
 
     internal List<TimeOnly> CalculateOptions(TimeOnly start, TimeOnly end)

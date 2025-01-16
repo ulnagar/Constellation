@@ -13,9 +13,9 @@
 <h2>Attendance Plan</h2>
 
 <div class="page-menu">
-    @if (!isDisplayOnly)
+    @if (!isDisplayOnly && Model.StudentPlans.Any())
     {
-        <button data-toggle=""></button>
+        <button type="button" class="btn btn-success" onclick="showModal('copy-student')">Copy From Another Plan</button>
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -380,9 +380,14 @@
                         <div class="row m-3">
                             <div class="col w-auto">
                                 <div class="mb-3 row mt-3">
+                                    <div class="col-12">
+                                        <span>Copying a plan from another student will pre-fill the period Entry time and Exit time, where the periods match between both students. You must check all times are correct, as well as enter any other information required before submitting the plan.</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row mt-3">
                                     <div class="col-12"><label class="form-label">Student</label></div>
                                     <div class="col font-weight-bold">
-                                        <select id="planId" asp-items="Model.StudentPlans" class="form-control">
+                                        <select name="sourcePlanId" asp-items="Model.StudentPlans" class="form-control">
                                             <option value="">-- Select --</option>
                                         </select>
                                     </div>
