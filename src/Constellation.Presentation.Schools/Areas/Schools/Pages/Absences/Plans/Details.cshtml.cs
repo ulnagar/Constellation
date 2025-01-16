@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans;
 
+using Application.Attendance.Plans.CopyAttendancePlanDetails;
 using Application.Attendance.Plans.GetAttendancePlanForSubmit;
+using Application.Attendance.Plans.GetRecentlyCompletedPlans;
 using Application.Attendance.Plans.SubmitAttendancePlan;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
@@ -52,6 +54,7 @@ public class DetailsModel : BasePageModel
 
     public SelectList Weeks { get; set; }
     public SelectList Days { get; set; }
+    public SelectList StudentPlans { get; set; }
 
     public async Task OnGet() => await PreparePage();
 
@@ -125,6 +128,35 @@ public class DetailsModel : BasePageModel
         return RedirectToPage("/Absences/Plans/Index", new { area = "Schools" });
     }
 
+    public async Task<IActionResult> OnPostCopyPlan(AttendancePlanId planId)
+    {
+        CopyAttendancePlanDetailsCommand command = new(Id, planId);
+
+        _logger
+            .ForContext(nameof(CopyAttendancePlanDetailsCommand), command, true)
+            .Information("Requested to copy Attendance Plan details by user {User}", _currentUserService.UserName);
+
+        Result operation = await _mediator.Send(new CopyAttendancePlanDetailsCommand(Id, planId));
+
+        if (operation.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CopyAttendancePlanDetailsCommand), command, true)
+                .ForContext(nameof(Error), operation.Error, true)
+                .Warning("Failed to copy Attendance Plan details by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                operation.Error,
+                _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
     private async Task PreparePage()
     {
         Result<AttendancePlanEntry> plan = await _mediator.Send(new GetAttendancePlanForSubmitQuery(Id));
@@ -144,8 +176,24 @@ public class DetailsModel : BasePageModel
 
         Plan = plan.Value;
 
+        Result<List<CompletedPlansResponse>> completedPlans = await _mediator.Send(new GetRecentlyCompletedPlansQuery(plan.Value.SchoolCode, plan.Value.Grade));
+
+        if (completedPlans.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), plan.Error, true)
+                .Warning("Failed to retrieve related Attendance Plans by user {User}", Id, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                plan.Error,
+                _linkGenerator.GetPathByPage("/Absences/Plans/Index", values: new { area = "Schools" }));
+
+            return;
+        }
+
         Weeks = new(PeriodWeek.GetOptions, nameof(PeriodWeek.Value), nameof(PeriodWeek.Name));
         Days = new(PeriodDay.GetOptions, nameof(PeriodDay.Value), nameof(PeriodWeek.Name));
+        StudentPlans = new(completedPlans.Value, nameof(CompletedPlansResponse.PlanId), nameof(CompletedPlansResponse.Student.DisplayName));
     }
 
     internal List<TimeOnly> CalculateOptions(TimeOnly start, TimeOnly end)

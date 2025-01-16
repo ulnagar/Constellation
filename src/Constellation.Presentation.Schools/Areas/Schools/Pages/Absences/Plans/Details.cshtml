@@ -13,6 +13,11 @@
 <h2>Attendance Plan</h2>
 
 <div class="page-menu">
+    @if (!isDisplayOnly)
+    {
+        <button data-toggle=""></button>
+    }
+
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
@@ -32,9 +37,10 @@
 
 <form id="pageForm" method="post">
     <div>
-
         <div class="mb-3 row mt-3">
-            <div class="col"><h3>Class Alignment</h3></div>
+            <div class="col">
+                <h3>Class Alignment</h3>
+            </div>
         </div>
 
         <div class="mb-3 row mt-3">
@@ -116,7 +122,14 @@
                                                     <option value=""> ---- </option>
                                                     @foreach (var minute in options)
                                                     {
-                                                        <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                        if (period.EntryTime == minute)
+                                                        {
+                                                            <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                        }
                                                     }
                                                 </select>
                                             </div>
@@ -128,7 +141,14 @@
                                                     <option value=""> ---- </option>
                                                     @foreach (var minute in options)
                                                     {
-                                                        <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                        if (period.ExitTime == minute)
+                                                        {
+                                                            <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                        }
                                                     }
                                                 </select>
                                             </div>
@@ -137,19 +157,19 @@
                                         }
                                         else if (!string.IsNullOrWhiteSpace(period.OfferingName))
                                         {
-                                                <div>
-                                                    <span>@period.OfferingName</span>
-                                                </div>
+                                            <div>
+                                                <span>@period.OfferingName</span>
+                                            </div>
 
-                                                <div class="mt-2">
-                                                    <span class="d-block">Entry Time</span>
-                                                    <span>@period.EntryTime.ToString("h:mm tt")</span>
-                                                </div>
+                                            <div class="mt-2">
+                                                <span class="d-block">Entry Time</span>
+                                                <span>@period.EntryTime.ToString("h:mm tt")</span>
+                                            </div>
 
-                                                <div class="mt-2">
-                                                    <span class="d-block">Exit Time</span>
-                                                    <span>@period.ExitTime.ToString("h:mm tt")</span>
-                                                </div>
+                                            <div class="mt-2">
+                                                <span class="d-block">Exit Time</span>
+                                                <span>@period.ExitTime.ToString("h:mm tt")</span>
+                                            </div>
                                         }
                                     </div>
                                 }
@@ -159,7 +179,8 @@
                         }
                     </div>
                 }
-            </div>}
+            </div>
+        }
     </div>
     
     @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
@@ -348,6 +369,35 @@
 
 @if (!isDisplayOnly)
 {
+    <form id="copy-student-modal-form" asp-page-handler="CopyPlan">
+        <div class="modal fade" tabindex="-1" id="copy-student-modal">
+            <div class="modal-dialog" style="max-width: 600px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Copy from another student</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row m-3">
+                            <div class="col w-auto">
+                                <div class="mb-3 row mt-3">
+                                    <div class="col-12"><label class="form-label">Student</label></div>
+                                    <div class="col font-weight-bold">
+                                        <select id="planId" asp-items="Model.StudentPlans" class="form-control">
+                                            <option value="">-- Select --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary me-3">Copy Plan</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('copy-student')">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 
     <div class="modal fade" tabindex="-1" id="missed-lesson-modal">
         <div class="modal-dialog" style="max-width: 600px;">
@@ -471,6 +521,12 @@
                 $('#free-period-modal').modal('hide');
                 $('#free-period-modal-form')[0].reset();
             }
+
+            if (selection == 'copy-student')
+            {
+                $('#copy-student-modal').modal('hide');
+                $('#copy-student-modal-form')[0].reset();
+            }
         }
 
         function showModal(selection) 
@@ -483,6 +539,11 @@
             if (selection == 'free')
             {
                 $('#free-period-modal').modal('show');
+            }
+
+            if (selection == 'copy-student')
+            {
+                $('#copy-student-modal').modal('show');
             }
         }
 

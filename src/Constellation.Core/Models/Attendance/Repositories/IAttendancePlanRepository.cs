@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Attendance.Repositories;
 
+using Core.Enums;
 using Identifiers;
 using Students.Identifiers;
 using System.Collections.Generic;
@@ -13,5 +14,6 @@ public interface IAttendancePlanRepository
     Task<List<AttendancePlan>> GetPendingForSchool(string schoolCode, CancellationToken cancellationToken = default);
     Task<List<AttendancePlan>> GetForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<AttendancePlan>> GetForSchool(string schoolCode, CancellationToken cancellationToken = default);
+    Task<List<AttendancePlan>> GetRecentForSchoolAndGrade(string schoolCode, Grade grade, CancellationToken cancellationToken = default);
     void Insert(AttendancePlan plan);
 }

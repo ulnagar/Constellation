@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Enums;
+using Core.Abstractions.Clock;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Identifiers;
@@ -13,11 +15,14 @@ using System.Threading.Tasks;
 public sealed class AttendancePlanRepository : IAttendancePlanRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
     public AttendancePlanRepository(
-        AppDbContext context)
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public async Task<AttendancePlan> GetById(
@@ -58,6 +63,19 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
             .Set<AttendancePlan>()
             .Where(plan =>
                 plan.SchoolCode == schoolCode)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<AttendancePlan>> GetRecentForSchoolAndGrade(
+        string schoolCode,
+        Grade grade,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendancePlan>()
+            .Where(plan =>
+                plan.SchoolCode == schoolCode &&
+                plan.Grade == grade &&
+                plan.CreatedAt.Year == _dateTime.Today.Year &&
+                (plan.Status == AttendancePlanStatus.Accepted || plan.Status == AttendancePlanStatus.Processing))
             .ToListAsync(cancellationToken);
 
     public void Insert(AttendancePlan plan) => _context.Set<AttendancePlan>().Add(plan);
