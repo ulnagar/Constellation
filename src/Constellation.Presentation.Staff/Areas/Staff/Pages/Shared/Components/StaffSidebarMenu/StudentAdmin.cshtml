@@ -9,27 +9,32 @@
 <nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
     <div class="sidebar-sticky pt-3">
         <div class="card">
-            <div class="card-header" id="absencesHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#absences" role="button">
-                    Absences
+            <div class="card-header" id="attendanceHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#attendance" role="button">
+                    Attendance
                 </h4>
             </div>
 
-            <div id="absences" class="collapse @(module == "Absences" ? "show" : "")" data-parent="#accordion">
+            <div id="attendance" class="collapse @(module == "Attendance" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Absences_List ? "active" : "")" asp-page="/StudentAdmin/Absences/List" asp-area="Staff">
-                                List
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_Absences ? "active" : "")" asp-page="/StudentAdmin/Attendance/Absences/Index" asp-area="Staff">
+                                Absences
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Absences_Audit ? "active" : "")" asp-page="/StudentAdmin/Absences/Audit" asp-area="Staff">
-                                Student Settings
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_Plans ? "active" : "")" asp-page="/StudentAdmin/Attendance/Plans/Index" asp-area="Staff">
+                                Plans
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Absences_Report ? "active" : "")" asp-page="/StudentAdmin/Absences/Report" asp-area="Staff">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_Configuration ? "active" : "")" asp-page="/StudentAdmin/Attendance/Configuration" asp-area="Staff">
+                                Configuration
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_Reports ? "active" : "")" asp-page="/StudentAdmin/Attendance/Reports" asp-area="Staff">
                                 Reports
                             </a>
                         </li>

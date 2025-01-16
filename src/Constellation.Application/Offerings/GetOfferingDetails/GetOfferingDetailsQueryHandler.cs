@@ -18,6 +18,8 @@ using Core.Enums;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -33,7 +35,7 @@ internal sealed class GetOfferingDetailsQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly ILessonRepository _lessonRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ILogger _logger;
 
@@ -43,7 +45,7 @@ internal sealed class GetOfferingDetailsQueryHandler
         IStudentRepository studentRepository,
         ISchoolRepository schoolRepository,
         ILessonRepository lessonRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IStaffRepository staffRepository,
         ILogger logger)
     {
@@ -124,7 +126,7 @@ internal sealed class GetOfferingDetailsQueryHandler
             if (session.IsDeleted)
                 continue;
 
-            TimetablePeriod period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
             if (period is null)
             {

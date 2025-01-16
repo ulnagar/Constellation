@@ -12,6 +12,10 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Students.Identifiers;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
@@ -126,14 +130,17 @@ public class OfferingRepository : IOfferingRepository
     public async Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         StudentId studentId,
         DateTime absenceDate,
-        int dayNumber,
+        PeriodWeek week,
+        PeriodDay day,
         CancellationToken cancellationToken = default)
     {
         DateOnly absenceDateOnly = DateOnly.FromDateTime(absenceDate);
 
-        List<int> periodIds = await _context
-            .Set<TimetablePeriod>()
-            .Where(period => period.Day == dayNumber)
+        List<PeriodId> periodIds = await _context
+            .Set<Period>()
+            .Where(period => 
+                period.Week == week && 
+                period.Day == day)
             .Select(period => period.Id)
             .ToListAsync(cancellationToken);
 
@@ -171,9 +178,10 @@ public class OfferingRepository : IOfferingRepository
     public Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
         StudentId studentId,
         DateOnly absenceDate,
-        int dayNumber,
+        PeriodWeek week,
+        PeriodDay day,
         CancellationToken cancellationToken = default) =>
-        GetCurrentEnrolmentsFromStudentForDate(studentId, absenceDate.ToDateTime(TimeOnly.MinValue), dayNumber, cancellationToken);
+        GetCurrentEnrolmentsFromStudentForDate(studentId, absenceDate.ToDateTime(TimeOnly.MinValue), week, day, cancellationToken);
 
     public async Task<List<Offering>> GetByStudentId(
         StudentId studentId, 
@@ -242,11 +250,11 @@ public class OfferingRepository : IOfferingRepository
     }
         
 
-    public async Task<List<string>> GetTimetableByOfferingId(
+    public async Task<List<Timetable>> GetTimetableByOfferingId(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        List<int> periodIds = await _context
+        List<PeriodId> periodIds = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .SelectMany(offering => offering.Sessions)
@@ -256,9 +264,35 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
         return await _context
-            .Set<TimetablePeriod>()
+            .Set<Period>()
             .Where(period => periodIds.Contains(period.Id))
             .Select(period => period.Timetable)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Offering>> GetOfferingsFromSameGroup(
+        OfferingId offeringId,
+        CancellationToken cancellationToken = default)
+    {
+        OfferingName offeringName = await _context
+            .Set<Offering>()
+            .Where(offering => offering.Id == offeringId)
+            .Select(offering => offering.Name)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        string grade = offeringName.Value[..2];
+        string line = offeringName.Value[^2..^1];
+        string searchTerm = $"{grade}%{line}_";
+
+        List<Offering> offerings = await _context
+            .Set<Offering>()
+            .Where(offering => 
+                EF.Functions.Like(offering.Name, searchTerm) &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .ToListAsync(cancellationToken);
+
+        return offerings;
+    }
+   
 }

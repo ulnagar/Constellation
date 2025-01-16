@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Timetables.Enums;
+using Timetables.ValueObjects;
 
 public interface IOfferingRepository
 {
@@ -23,8 +25,8 @@ public interface IOfferingRepository
     Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByGrade(Grade grade, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
-    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateTime AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
-    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly AbsenceDate, int DayNumber, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateTime AbsenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly AbsenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all current Course Offerings that a student is enrolled in
@@ -38,7 +40,9 @@ public interface IOfferingRepository
     void Insert(Offering offering);
     void Remove(Resource resource);
 
-    Task<List<string>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<Timetable>> GetTimetableByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedTeamResource(string teamName, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetWithLinkedCanvasResource(CanvasCourseCode courseCode, CancellationToken cancellationToken = default);
+
+    Task<List<Offering>> GetOfferingsFromSameGroup(OfferingId offeringId, CancellationToken cancellationToken = default);
 }

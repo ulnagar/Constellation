@@ -1,13 +1,15 @@
 ﻿@page "{id?}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.UpsertModel
 
+@using Constellation.Core.Models.Timetables.Identifiers
+@using Constellation.Core.Models.Timetables.ValueObjects
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
 }
 
-<h2>@(Model.Id.HasValue ? "Edit Period" : "New Period")</h2>
+<h2>@(Model.Id != PeriodId.Empty ? "Edit Period" : "New Period")</h2>
 
 <div class="row">
     <a asp-page="/Subject/Periods/Index" asp-area="Staff" class="btn btn-danger btn-pull-right-solo">Go Back</a>
@@ -22,10 +24,8 @@
         <div class="form-group row">
             <label asp-for="Timetable" class="col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="Timetable" class="form-control combo-with-tag">
-                    <option value="">-- Select or Enter --</option>
-                    <option value="PRIMARY">Primary</option>
-                    <option value="SECONDARY">Secondary</option>
+                <select asp-for="Timetable" asp-items="@Model.Timetables" class="form-control combo">
+                    <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="Timetable" class="text-danger"></span>
             </div>
@@ -48,10 +48,10 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="Period" class="col-md-2"></label>
+            <label asp-for="PeriodCode" class="col-md-2"></label>
             <div class="col-md-3">
-                <input asp-for="Period" class="form-control" />
-                <span asp-validation-for="Period" class="text-danger"></span>
+                <input asp-for="PeriodCode" class="form-control" maxlength="1" />
+                <span asp-validation-for="PeriodCode" class="text-danger"></span>
             </div>
         </div>
 
@@ -74,11 +74,8 @@
         <div class="form-group row">
             <label asp-for="Type" class="col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="Type" class="form-control combo-with-tag">
-                    <option value="">-- Select or Enter --</option>
-                    <option value="Teaching">Teaching</option>
-                    <option value="Break">Break</option>
-                    <option value="Other">Other</option>
+                <select asp-for="Type" asp-items="@Model.PeriodTypes" class="form-control combo">
+                    <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="Type" class="text-danger"></span>
             </div>

@@ -1,7 +1,6 @@
-﻿using Constellation.Core.Models.Students.Identifiers;
+﻿namespace Constellation.Core.Models.Offerings.Errors;
 
-namespace Constellation.Core.Models.Offerings.Errors;
-
+using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Identifiers;
 using Shared;
@@ -32,6 +31,10 @@ public static class OfferingErrors
     public static readonly Func<string, Error> NotFoundForResource = id => new(
         "Offerings.Offering.NotFoundForResource",
         $"Could not find any Offering linked with Resource with Id {id}");
+
+    public static readonly Error IsNull = new(
+        "Offerings.Offering.IsNull",
+        "An Offering is required, but none supplied");
 
     public static class Validation
     {

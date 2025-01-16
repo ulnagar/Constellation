@@ -5,12 +5,17 @@ using Application.Models.Auth;
 using Application.Periods.GetPeriodById;
 using Application.Periods.UpsertPeriod;
 using Core.Abstractions.Services;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
@@ -39,27 +44,31 @@ public class UpsertModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Periods;
     [ViewData] public string PageTitle { get; set; } = "New Period";
 
-    [BindProperty(SupportsGet = true)]
-    public int? Id { get; set; }
-
-    public int Day { get; set; }
-    public int Period { get; set; }
-    public string Timetable { get; set; }
+    [BindProperty(SupportsGet = true)] 
+    public PeriodId Id { get; set; } = PeriodId.Empty;
+    public ValidDays Day { get; set; }
+    public char PeriodCode { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public Timetable Timetable { get; set; }
     [DataType(DataType.Time)]
     public TimeSpan StartTime { get; set; }
     [DataType(DataType.Time)]
     public TimeSpan EndTime { get; set; }
     public string Name { get; set; }
-    public string Type { get; set; }
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public PeriodType Type { get; set; }
+
+    public SelectList Timetables { get; set; }
+    public SelectList PeriodTypes { get; set; }
 
     public async Task OnGet()
     {
-        if (Id is null)
+        if (Id == PeriodId.Empty)
             return;
 
         _logger.Information("Requested to retrieve details of Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-        Result<PeriodResponse> request = await _mediator.Send(new GetPeriodByIdQuery(Id.Value));
+        Result<PeriodResponse> request = await _mediator.Send(new GetPeriodByIdQuery(Id));
 
         if (request.IsFailure)
         {
@@ -73,9 +82,9 @@ public class UpsertModel : BasePageModel
 
             return;
         }
-
-        Day = request.Value.Day;
-        Period = request.Value.Period;
+        
+        Day = FromWeekAndDay(request.Value.Week, request.Value.Day);
+        PeriodCode = request.Value.PeriodCode;
         Timetable = request.Value.Timetable;
         StartTime = request.Value.StartTime;
         EndTime = request.Value.EndTime;
@@ -83,14 +92,20 @@ public class UpsertModel : BasePageModel
         Type = request.Value.Type;
 
         PageTitle = $"Edit - {Name}";
+
+        Timetables = new SelectList(Timetable.GetEnumerable, Timetable);
+        PeriodTypes = new SelectList(PeriodType.GetEnumerable, Type);
     }
 
     public async Task<IActionResult> OnPost()
     {
+        (PeriodWeek week, PeriodDay day) convertDay = FromValidDay(Day);
+
         UpsertPeriodCommand command = new(
             Id,
-            Day,
-            Period,
+            convertDay.week,
+            convertDay.day,
+            PeriodCode,
             Timetable,
             StartTime,
             EndTime,
@@ -149,4 +164,34 @@ public class UpsertModel : BasePageModel
         [Display(Name = "Week B - Friday")]
         FridayWeekB = 10
     }
+
+    private (PeriodWeek week, PeriodDay day) FromValidDay(ValidDays validDay) =>
+        validDay switch
+        {
+            ValidDays.MondayWeekA => (PeriodWeek.WeekA, PeriodDay.Monday),
+            ValidDays.TuesdayWeekA => (PeriodWeek.WeekA, PeriodDay.Tuesday),
+            ValidDays.WednesdayWeekA => (PeriodWeek.WeekA, PeriodDay.Wednesday),
+            ValidDays.ThursdayWeekA => (PeriodWeek.WeekA, PeriodDay.Thursday),
+            ValidDays.FridayWeekA => (PeriodWeek.WeekA, PeriodDay.Friday),
+            ValidDays.MondayWeekB => (PeriodWeek.WeekB, PeriodDay.Monday),
+            ValidDays.TuesdayWeekB => (PeriodWeek.WeekB, PeriodDay.Tuesday),
+            ValidDays.WednesdayWeekB => (PeriodWeek.WeekB, PeriodDay.Wednesday),
+            ValidDays.ThursdayWeekB => (PeriodWeek.WeekB, PeriodDay.Thursday),
+            ValidDays.FridayWeekB => (PeriodWeek.WeekB, PeriodDay.Friday)
+        };
+
+    private ValidDays FromWeekAndDay(PeriodWeek week, PeriodDay day) =>
+        (week, day) switch
+        {
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Monday => ValidDays.MondayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Tuesday => ValidDays.TuesdayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Wednesday => ValidDays.WednesdayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Thursday => ValidDays.ThursdayWeekA,
+            (_, _) when week == PeriodWeek.WeekA && day == PeriodDay.Friday => ValidDays.FridayWeekA,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Monday => ValidDays.MondayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Tuesday => ValidDays.TuesdayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Wednesday => ValidDays.WednesdayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Thursday => ValidDays.ThursdayWeekB,
+            (_, _) when week == PeriodWeek.WeekB && day == PeriodDay.Friday => ValidDays.FridayWeekB
+        };
 }

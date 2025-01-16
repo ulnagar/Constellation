@@ -33,7 +33,8 @@ internal class CreateCourseCommandHandler
             request.Code,
             request.Grade,
             request.FacultyId,
-            request.FTEValue);
+            request.FTEValue,
+            request.Target);
 
         if (createRequest.IsFailure)
         {

@@ -5,6 +5,7 @@ using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Timetables.Identifiers;
 
 public class OfferingTests
 {
@@ -41,7 +42,7 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
 
         sut.RemoveAllSessions();
 
@@ -65,7 +66,7 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
 
         // Act
         var result = sut.IsCurrent;
@@ -87,7 +88,7 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today.AddDays(1))
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
 
         // Act
         var result = sut.IsCurrent;
@@ -109,7 +110,7 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
 
         // Act
         var result = sut.IsCurrent;
@@ -131,7 +132,7 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
 
         // Act
         var result = sut.IsCurrent;
@@ -434,7 +435,7 @@ public class OfferingTests
         );
 
         // Act
-        var result = sut.AddSession(1);
+        var result = sut.AddSession(new());
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -452,11 +453,11 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddSession(1);
+        var result = sut.AddSession(new());
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -476,7 +477,7 @@ public class OfferingTests
         );
 
         // Act
-        var result = sut.AddSession(1);
+        var result = sut.AddSession(new());
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -496,7 +497,7 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddSession(1);
+        sut.AddSession(new());
         var session = sut.Sessions.First();
 
         // Act

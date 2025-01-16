@@ -26,6 +26,8 @@ using Core.Errors;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings.Errors;
 using Core.Models.Students.Identifiers;
+using Core.Models.Timetables.Errors;
+using Core.Models.Timetables.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -405,9 +407,9 @@ public class DetailsModel : BasePageModel
     public async Task<IActionResult> OnPostAddSession(
         AddSessionToOfferingSelection viewModel)
     {
-        if (viewModel.PeriodId == 0)
+        if (viewModel.PeriodId == PeriodId.Empty)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Period.NotFound(0));
+            ModalContent = new ErrorDisplay(PeriodErrors.InvalidId);
 
             await PreparePage();
 

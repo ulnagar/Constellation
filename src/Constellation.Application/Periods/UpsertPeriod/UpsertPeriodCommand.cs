@@ -1,15 +1,19 @@
 ﻿namespace Constellation.Application.Periods.UpsertPeriod;
 
 using Abstractions.Messaging;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.ValueObjects;
 using System;
 
 public sealed record UpsertPeriodCommand(
-    int? Id,
-    int Day,
-    int Period,
-    string Timetable,
+    PeriodId Id,
+    PeriodWeek Week,
+    PeriodDay Day,
+    char PeriodCode,
+    Timetable Timetable,
     TimeSpan StartTime,
     TimeSpan EndTime,
     string Name,
-    string Type)
+    PeriodType Type)
     : ICommand;

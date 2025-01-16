@@ -13,6 +13,7 @@ using Core.Extensions;
 using Core.Models;
 using Core.Models.Assignments;
 using Core.Models.Assignments.Identifiers;
+using Core.Models.Attendance;
 using Core.Models.Awards;
 using Core.Models.Covers;
 using Core.Models.Offerings;
@@ -31,6 +32,7 @@ using System.Net.Mail;
 using System.Threading;
 using Templates.Views.Emails.Absences;
 using Templates.Views.Emails.Assignments;
+using Templates.Views.Emails.AttendancePlans;
 using Templates.Views.Emails.Auth;
 using Templates.Views.Emails.Awards;
 using Templates.Views.Emails.Contacts;
@@ -66,6 +68,62 @@ public sealed class Service : IEmailService
         _logger = logger.ForContext<IEmailService>();
         _configuration = configuration.Value;
     }
+
+    public async Task SendAttendancePlanToAdmin(
+        List<EmailRecipient> recipients,
+        AttendancePlan plan,
+        CancellationToken cancellationToken = default)
+    {
+        AttendancePlanDetailsOfUnavailabilityEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Attendance Plan Details",
+            Student = plan.Student.DisplayName,
+            Grade = plan.Grade.AsName(),
+            School = plan.School
+        };
+
+        List<AttendancePlanDetailsOfUnavailabilityEmailViewModel.Unavailability> unavailabilities = new();
+
+        foreach (var period in plan.Periods)
+        {
+            if (period.EntryTime != period.StartTime)
+            {
+                unavailabilities.Add(new()
+                {
+                    Week = period.Week,
+                    Day = period.Day,
+                    Start= period.StartTime,
+                    End = period.EntryTime
+                });
+            }
+
+            if (period.ExitTime != period.EndTime)
+            {
+                unavailabilities.Add(new()
+                {
+                    Week = period.Week,
+                    Day = period.Day,
+                    Start = period.ExitTime,
+                    End = period.EndTime
+                });
+            }
+        }
+
+        viewModel.Unavailabilities = unavailabilities;
+        
+        string body = await _razorService.RenderViewToStringAsync(AttendancePlanDetailsOfUnavailabilityEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(
+            toRecipients: recipients, 
+            fromRecipient: EmailRecipient.AuroraCollege, 
+            subject: viewModel.Title, 
+            body: body, 
+            cancellationToken: cancellationToken);
+    }
+
 
     public async Task SendAcademicReportToNonResidentialParent(
         List<EmailRecipient> recipients, 
@@ -299,7 +357,7 @@ public sealed class Service : IEmailService
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
             StudentName = student.Name.DisplayName,
-            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{student.Id}",
+            Link = $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{student.Id}", //TODO: R1.16.2: Update link to Student Portal instead of old absence pages
             Absences = absences
         };
 
@@ -471,7 +529,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/MissedWorkEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendSupportTicketRequest(
@@ -482,9 +540,7 @@ public sealed class Service : IEmailService
     {
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", description);
 
-        Result<EmailRecipient> toAddress = EmailRecipient.Create("Aurora College Support", "support@aurora.nsw.edu.au");
-        
-        await _emailSender.Send([toAddress.Value], submitter, subject, body, cancellationToken);
+        await _emailSender.Send([ EmailRecipient.SupportQueue ], submitter, subject, body, cancellationToken);
     }
 
     public async Task SendAdminAbsenceSentralAlert(string studentName)
@@ -493,12 +549,9 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
-        };
+        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam];
 
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] Student absence notification", body);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, "[Aurora College] Student absence notification", body);
     }
 
     public async Task SendAdminAbsenceContactAlert(string studentName)
@@ -507,12 +560,9 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
-        };
+        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam];
 
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] Constellation Data Issue Identified", body);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, "[Aurora College] Constellation Data Issue Identified", body);
     }
 
     public async Task SendParentContactChangeReportEmail(
@@ -523,18 +573,14 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
-            { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
-        };
-
+        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege];
+        
         List<Attachment> attachments = new()
         {
             new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
-        await _emailSender.Send(toRecipients, null, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
     }
 
     public async Task SendAdminLowCreditAlert(double credit)
@@ -542,14 +588,10 @@ public sealed class Service : IEmailService
         string viewModel = $"<p>The SMS Global account has a low balance of ${credit:c}.</p><p>Please top up the account immediately!</p>";
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        
+        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege];
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" },
-            { "auroracoll-h.school@det.nsw.edu.au", "auroracoll-h.school@det.nsw.edu.au" }
-        };
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "[Aurora College] SMS Gateway Low Balance Alert", body);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, "[Aurora College] SMS Gateway Low Balance Alert", body);
     }
 
     public async Task SendAssignmentUploadFailedNotification(
@@ -569,14 +611,11 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au" }
-        };
+        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam];
 
         await _emailSender.Send(
             toRecipients,
-            "noreply@aurora.nsw.edu.au",
+            EmailRecipient.NoReply,
             "[Aurora College] Canvas Assignment Upload Failure",
             body,
             cancellationToken);
@@ -701,13 +740,13 @@ public sealed class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
         }
 
     }
@@ -744,7 +783,7 @@ public sealed class Service : IEmailService
             if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
-        await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+        await _emailSender.Send(toRecipients, ccRecipients, EmailRecipient.AuroraCollege.Email, $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
     }
 
     public async Task SendUpdatedCoverEmail(
@@ -795,13 +834,13 @@ public sealed class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
         }
     }
 
@@ -837,7 +876,7 @@ public sealed class Service : IEmailService
             if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
-        await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+        await _emailSender.Send(toRecipients, ccRecipients, EmailRecipient.AuroraCollege.Email, $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
     }
 
     public async Task SendCancelledCoverEmail(
@@ -884,13 +923,13 @@ public sealed class Service : IEmailService
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
             string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, "auroracoll-h.school@det.nsw.edu.au", viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
         }
     }
 
@@ -926,7 +965,7 @@ public sealed class Service : IEmailService
             if (ccRecipients.All(recipient => recipient.Value != entry.Value))
                 ccRecipients.Add(entry.Key, entry.Value);
 
-        await _emailSender.Send(toRecipients, ccRecipients, "auroracoll-h.school@det.nsw.edu.au", $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
+        await _emailSender.Send(toRecipients, ccRecipients, EmailRecipient.AuroraCollege.Email, $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
     }
 
     public async Task SendLessonMissedEmail(LessonMissedNotificationEmail notification)
@@ -1064,7 +1103,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
 
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendServiceLogEmail(ServiceLogEmail notification)
@@ -1076,15 +1115,12 @@ public sealed class Service : IEmailService
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
         List<EmailRecipient> recipients = notification.Recipients;
-        if (recipients.All(entry => entry.Email != "auroracollegeitsupport@det.nsw.edu.au"))
+        if (recipients.All(entry => entry.Email != EmailRecipient.InfoTechTeam.Email))
         {
-            Result<EmailRecipient> address = EmailRecipient.Create("auroracollegeitsupport@det.nsw.edu.au", "auroracollegeitsupport@det.nsw.edu.au");
-
-            if (address.IsSuccess)
-                recipients.Add(address.Value);
+            recipients.Add(EmailRecipient.InfoTechTeam);
         }
         
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", $"[Aurora College] Service Log Output - {notification.Source}", body);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, $"[Aurora College] Service Log Output - {notification.Source}", body);
     }
 
     public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)
@@ -1132,7 +1168,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, EmailRecipient.NoReply, viewModel.Title, body);
     }
 
     public async Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default)
@@ -1179,7 +1215,7 @@ public sealed class Service : IEmailService
         
         foreach (EmailRecipient recipient in recipients)
         {
-            await _emailSender.Send(new List<EmailRecipient> { recipient }, "noreply@aurora.nsw.edu.au", viewModel.Title, body, new List<Attachment> { certificate }, cancellationToken);
+            await _emailSender.Send([ recipient ], EmailRecipient.NoReply.Email, viewModel.Title, body, new List<Attachment> { certificate }, cancellationToken);
         }
     }
 
@@ -1221,7 +1257,7 @@ public sealed class Service : IEmailService
 
         recipients.Add(recipient.Value);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
 
         return true;
     }
@@ -1242,7 +1278,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewACCoordinatorEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendWelcomeEmailToSciencePracTeacher(
@@ -1261,7 +1297,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewSciencePracTeacherEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendActionAssignedEmail(
@@ -1285,7 +1321,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendActionCancelledEmail(
@@ -1309,7 +1345,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ActionCancelledEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendComplianceWorkFlowNotificationEmail(
@@ -1339,7 +1375,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ComplianceWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendTrainingWorkFlowNotificationEmail(
@@ -1363,7 +1399,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TrainingWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendAllActionsCompletedEmail(
@@ -1383,7 +1419,7 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(CaseActionsCompletedEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, "noreply@aurora.nsw.edu.au", viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendEnteredEmailForAction(
@@ -1393,5 +1429,5 @@ public sealed class Service : IEmailService
         string body,
         List<Attachment> attachments,
         CancellationToken cancellationToken = default) =>
-        await _emailSender.Send(new(), new(), recipients, sender.Email, subject, body, attachments, cancellationToken);
+        await _emailSender.Send([], [], recipients, sender.Email, subject, body, attachments, cancellationToken);
 }

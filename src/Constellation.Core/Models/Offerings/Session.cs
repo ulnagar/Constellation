@@ -3,12 +3,13 @@
 using Identifiers;
 using Primitives;
 using System;
+using Timetables.Identifiers;
 
 public sealed class Session : IAuditableEntity
 {
     internal Session(
         OfferingId offeringId,
-        int periodId)
+        PeriodId periodId)
     {
         Id = new();
         OfferingId = offeringId;
@@ -18,7 +19,7 @@ public sealed class Session : IAuditableEntity
     public SessionId Id { get; private set; }
     public OfferingId OfferingId { get; private set; }
     public Offering Offering { get; private set; }
-    public int PeriodId { get; private set; }
+    public PeriodId PeriodId { get; private set; }
     public bool IsDeleted { get; private set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }

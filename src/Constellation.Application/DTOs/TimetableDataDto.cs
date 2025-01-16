@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.DTOs;
 
 using Core.Models.Students.Identifiers;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.ValueObjects;
 using System;
 using System.Collections.Generic;
 
@@ -10,13 +12,14 @@ public abstract class TimetableDataDto
 
     public class TimetableData
     {
-        public string TimetableName { get; set; }
-        public int Day { get; set; }
-        public int Period { get; set; }
+        public Timetable Timetable { get; set; }
+        public PeriodWeek Week { get; set; }
+        public PeriodDay Day { get; set; }
+        public char PeriodCode { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
         public string Name { get; set; }
-        public string Type { get; set; }
+        public PeriodType Type { get; set; }
         public string ClassName { get; set; }
         public string ClassTeacher { get; set; }
     }

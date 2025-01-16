@@ -9,7 +9,12 @@ using System.Reflection;
 public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
     where TEnum : IntEnumeration<TEnum>
 {
-    private static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
+    protected static readonly Dictionary<int, TEnum> Enumerations = CreateEnumerations();
+
+    /// <summary>
+    /// Do not use. For serialization purposes only.
+    /// </summary>
+    protected IntEnumeration() { }
 
     protected IntEnumeration(int value, string name)
     {
@@ -84,7 +89,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
         Order = order;
     }
 
-    protected static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
+    public static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
         .Select(entry => entry.Value)
         .AsEnumerable();
 

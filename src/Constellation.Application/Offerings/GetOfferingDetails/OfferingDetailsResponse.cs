@@ -9,6 +9,7 @@ using Constellation.Core.ValueObjects;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
+using Core.Models.Timetables.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -41,7 +42,7 @@ public sealed record OfferingDetailsResponse(
 
     public sealed record SessionSummary(
         SessionId SessionId,
-        int PeriodId,
+        PeriodId PeriodId,
         string PeriodName,
         string PeriodSortName,
         int Duration);

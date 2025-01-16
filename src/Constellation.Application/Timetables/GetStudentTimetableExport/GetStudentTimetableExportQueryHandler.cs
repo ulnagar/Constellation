@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Timetables.GetStudentTimetableExport;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Extensions;
 using Core.Models;
 using Core.Models.Offerings;
@@ -12,6 +11,12 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Errors;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using DTOs;
 using Interfaces.Repositories;
@@ -31,7 +36,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
     private readonly ISchoolRepository _schoolRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IRazorViewToStringRenderer _renderService;
     private readonly IPDFService _pdfService;
     private readonly ILogger _logger;
@@ -41,7 +46,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
         ISchoolRepository schoolRepository,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IRazorViewToStringRenderer renderService, 
         IPDFService pdfService,
         ILogger logger)
@@ -101,45 +106,46 @@ internal sealed class GetStudentTimetableExportQueryHandler
             return Result.Failure<FileDto>(OfferingErrors.NotFoundForStudent(student.Id));
         }
 
-        List<int> periodIds = offerings
+        List<PeriodId> periodIds = offerings
             .SelectMany(offering => offering.Sessions)
             .Where(session => !session.IsDeleted)
             .Select(session => session.PeriodId)
             .Distinct()
             .ToList();
 
-        List<TimetablePeriod> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
+        List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
 
         if (periods.Count == 0)
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableExportQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Period.NoneFoundForOffering, true)
+                .ForContext(nameof(Error), PeriodErrors.NoneFoundForOffering, true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<FileDto>(DomainErrors.Period.NoneFoundForOffering);
+            return Result.Failure<FileDto>(PeriodErrors.NoneFoundForOffering);
         }
 
-        List<string> relevantTimetables = periods
+        List<Timetable> relevantTimetables = periods
             .Select(period => period.Timetable)
             .Distinct()
             .ToList();
 
-        List<TimetablePeriod> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
+        List<Period> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
-        foreach (TimetablePeriod period in relevantPeriods)
+        foreach (Period period in relevantPeriods)
         {
-            if (period.Type == "Other")
+            if (period.Type == PeriodType.Offline)
                 continue;
 
             TimetableDataDto.TimetableData entry = new()
             {
+                Timetable = period.Timetable,
+                Week = period.Week,
                 Day = period.Day,
                 StartTime = period.StartTime,
                 EndTime = period.EndTime,
-                TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.Period,
+                PeriodCode = period.PeriodCode,
                 Type = period.Type
             };
 

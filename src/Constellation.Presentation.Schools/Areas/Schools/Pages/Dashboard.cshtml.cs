@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages;
 
+using Application.Attendance.Plans.CountPendingPlansForSchool;
 using Application.Common.PresentationModels;
 using Application.Students.GetCurrentStudentsFromSchool;
 using Application.Students.Models;
@@ -44,6 +45,8 @@ public class DashboardModel : BasePageModel
 
     public List<StudentResponse> Students { get; set; } = new();
 
+    public int CountPendingAttendancePlans { get; set; } = 0;
+
     public async Task OnGet()
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
@@ -51,6 +54,18 @@ public class DashboardModel : BasePageModel
             ModalContent = new ErrorDisplay(ApplicationErrors.SchoolInvalid);
 
             return;
+        }
+
+        Result<int> plansRequest = await _mediator.Send(new CountPendingPlansForSchoolQuery(CurrentSchoolCode));
+
+        if (plansRequest.IsFailure)
+        {
+            _logger
+                .Warning("Failed to retrieve count of pending Attendance Plans for school {school} by user {user}", CurrentSchoolCode, _currentUserService.UserName);
+        }
+        else
+        {
+            CountPendingAttendancePlans = plansRequest.Value;
         }
 
         _logger.Information("Requested to retrieve student list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);

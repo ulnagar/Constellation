@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Periods.GetPeriodsForVisualSelection;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 internal sealed class GetPeriodsForVisualSelectionQueryHandler
     : IQueryHandler<GetPeriodsForVisualSelectionQuery, List<PeriodVisualSelectResponse>>
 {
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
 
     public GetPeriodsForVisualSelectionQueryHandler(
-        ITimetablePeriodRepository periodRepository)
+        IPeriodRepository periodRepository)
     {
         _periodRepository = periodRepository;
     }
@@ -24,15 +24,16 @@ internal sealed class GetPeriodsForVisualSelectionQueryHandler
     {
         List<PeriodVisualSelectResponse> response = new();
 
-        List<TimetablePeriod> periods = await _periodRepository.GetCurrent(cancellationToken);
+        List<Period> periods = await _periodRepository.GetCurrent(cancellationToken);
 
-        foreach (TimetablePeriod period in periods)
+        foreach (Period period in periods)
         {
             response.Add(new(
                 period.Id,
                 period.Timetable,
+                period.Week,
                 period.Day,
-                period.Period,
+                period.PeriodCode,
                 period.StartTime,
                 period.EndTime,
                 period.Name,

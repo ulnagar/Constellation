@@ -14,6 +14,7 @@ public sealed record CourseSummaryResponse(
     Grade Grade,
     CourseSummaryResponse.Faculty CourseFaculty,
     decimal FTEValue,
+    double TargetPerCycle,
     List<CourseSummaryResponse.Offering> Offerings)
 {
     public sealed record Faculty(

@@ -9,6 +9,7 @@ using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
+using Core.Models.Timetables.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -49,13 +50,15 @@ public class IndexModel : BasePageModel
     public List<StudentResponse> Students { get; set; } = new();
 
     public StudentTimetableDataDto TimetableData { get; set; }
-    public Dictionary<int, string> Weeks { get; set; } = new();
+    public IEnumerable<PeriodWeek> Weeks { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public SchoolDay? Day { get; set; }
+    [ModelBinder(typeof(IntEnumBinder))]
+    public PeriodDay? Day { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public int? Week { get; set; }
+    [ModelBinder(typeof(IntEnumBinder))]
+    public PeriodWeek? Week { get; set; }
 
     public async Task OnGet() => await PreparePage();
 
@@ -116,49 +119,15 @@ public class IndexModel : BasePageModel
 
             TimetableData = timetableRequest.Value;
 
-            List<int> dayList = TimetableData.Timetables.Select(data => data.Day).Distinct().ToList();
-            int weekList = dayList.Max();
-            int numWeeks = weekList / 5;
-
-            Weeks = new();
-
-            foreach (int entry in Enumerable.Range(1, numWeeks))
-            {
-                switch (entry)
-                {
-                    case 1:
-                        Weeks.Add(1, "Week A");
-                        break;
-                    case 2:
-                        Weeks.Add(2, "Week B");
-                        break;
-                    case 3:
-                        Weeks.Add(3, "Week C");
-                        break;
-                    case 4:
-                        Weeks.Add(4, "Week D");
-                        break;
-                    default:
-                        break;
-                }
-            }
+            Weeks = PeriodWeek.GetOptions;
 
             if (Day is null && Week is null)
             {
-                Day = SchoolDay.Monday;
-                Week = Weeks.First().Key;
+                Day = PeriodDay.Monday;
+                Week = Weeks.First();
             }
 
             SelectedStudent = Students.FirstOrDefault(entry => entry.StudentId == StudentId);
         }
-    }
-
-    public enum SchoolDay
-    {
-        Monday = 1,
-        Tuesday = 2,
-        Wednesday = 3,
-        Thursday = 4,
-        Friday = 5
     }
 }

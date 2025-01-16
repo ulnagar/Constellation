@@ -66,6 +66,7 @@ internal sealed class GetCourseSummaryQueryHandler
                 faculty.Name,
                 faculty.Colour),
             course.FullTimeEquivalentValue,
+            course.TargetMinutesPerCycle,
             new());
     }
 }

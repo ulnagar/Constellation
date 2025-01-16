@@ -61,3 +61,4 @@ public abstract class ValueObject : IEquatable<ValueObject>
         return NotEqualOperator(left, right);
     }
 }
+

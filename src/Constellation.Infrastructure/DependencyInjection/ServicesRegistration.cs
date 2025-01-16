@@ -6,6 +6,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Infrastructure.ExternalServices.Teams;
 using Constellation.Infrastructure.Idempotence;
 using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Jobs;
@@ -121,6 +122,7 @@ public static class ServicesRegistration
         services.AddNetworkStatisticsExternalService(configuration);
         services.AddSentralExternalService(configuration);
         services.AddSMSExternalService(configuration, environment);
+        services.AddTeamsExternalService(configuration);
 
         // Add Email Template Engine
 

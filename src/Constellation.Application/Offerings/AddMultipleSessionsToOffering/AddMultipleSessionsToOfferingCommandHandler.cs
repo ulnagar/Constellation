@@ -5,6 +5,9 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Core.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -16,13 +19,13 @@ internal sealed class AddMultipleSessionsToOfferingCommandHandler
     : ICommandHandler<AddMultipleSessionsToOfferingCommand>
 {
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public AddMultipleSessionsToOfferingCommandHandler(
         IOfferingRepository offeringRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -46,9 +49,9 @@ internal sealed class AddMultipleSessionsToOfferingCommandHandler
             return Result.Failure(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        foreach (int periodId in request.PeriodIds)
+        foreach (PeriodId periodId in request.PeriodIds)
         {
-            TimetablePeriod period = await _periodRepository.GetById(periodId, cancellationToken);
+            Period period = await _periodRepository.GetById(periodId, cancellationToken);
 
             if (period is null)
             {

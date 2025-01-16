@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Periods.GetPeriodById;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Errors;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
-using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 internal sealed class GetPeriodByIdQueryHandler
 : IQueryHandler<GetPeriodByIdQuery, PeriodResponse>
 {
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetPeriodByIdQueryHandler(
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         ILogger logger)
     {
         _periodRepository = periodRepository;
@@ -25,22 +25,23 @@ internal sealed class GetPeriodByIdQueryHandler
 
     public async Task<Result<PeriodResponse>> Handle(GetPeriodByIdQuery request, CancellationToken cancellationToken)
     {
-        TimetablePeriod? period = await _periodRepository.GetById(request.PeriodId, cancellationToken);
+        Period? period = await _periodRepository.GetById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {
             _logger
                 .ForContext(nameof(GetPeriodByIdQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Period.NotFound(request.PeriodId), true)
+                .ForContext(nameof(Error), PeriodErrors.NotFound(request.PeriodId), true)
                 .Warning("Failed to retrieve Period");
 
-            return Result.Failure<PeriodResponse>(DomainErrors.Period.NotFound(request.PeriodId));
+            return Result.Failure<PeriodResponse>(PeriodErrors.NotFound(request.PeriodId));
         }
 
         return new PeriodResponse(
             period.Id,
+            period.Week,
             period.Day,
-            period.Period,
+            period.PeriodCode,
             period.Timetable,
             period.StartTime,
             period.EndTime,

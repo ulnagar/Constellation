@@ -1,0 +1,39 @@
+﻿@page
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans.IndexModel
+
+<h2>Attendance Plans</h2>
+
+<div class="page-menu">
+    <a asp-page="/StudentAdmin/Attendance/Plans/Generate" asp-area="Staff" class="btn btn-success">Generate Plans</a>
+</div>
+
+<hr />
+
+<table class="table-striped data-table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Grade</th>
+            <th>School</th>
+            <th>Status</th>
+            <th>Overall Percentage</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Plans)
+        {
+            <tr>
+                <td data-order="@entry.Student.SortOrder">@entry.Student.DisplayName</td>
+                <td>@entry.Grade.AsName()</td>
+                <td>@entry.School</td>
+                <td data-order="@entry.Status.Order">@entry.Status.Name</td>
+                <td data-order="@entry.OverallPercentage">@entry.OverallPercentage.ToString("P2")</td>
+                <td>
+                    <a asp-page="/StudentAdmin/Attendance/Plans/Details" asp-area="Staff" asp-route-id="@entry.PlanId" class="btn btn-secondary btn-sm btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

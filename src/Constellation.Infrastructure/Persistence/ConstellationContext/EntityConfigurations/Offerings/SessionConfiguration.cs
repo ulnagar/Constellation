@@ -1,8 +1,8 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Offerings;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Models.Timetables;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -33,8 +33,8 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
                 value => OfferingId.FromValue(value));
 
         builder
-            .HasOne<TimetablePeriod>()
-            .WithMany(period => period.OfferingSessions)
+            .HasOne<Period>()
+            .WithMany()
             .HasForeignKey(session => session.PeriodId);
     }
 }

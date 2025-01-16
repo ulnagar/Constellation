@@ -12,6 +12,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Timetables.Identifiers;
 
 public sealed class Offering : AggregateRoot
 {
@@ -113,7 +114,7 @@ public sealed class Offering : AggregateRoot
     }
 
     public Result AddSession(
-        int periodId)
+        PeriodId periodId)
     {
         if (_sessions.Any(session => session.PeriodId == periodId && !session.IsDeleted))
             return Result.Failure(OfferingErrors.AddSession.AlreadyExists);

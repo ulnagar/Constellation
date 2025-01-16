@@ -29,4 +29,8 @@ public static class CourseErrors
     public static readonly Error NoneFound = new(
         "Subjects.Course.NoneFound",
         "No Courses could be found");
+
+    public static readonly Error IsNull = new(
+        "Subjects.Course.IsNull",
+        "A Course is required, but none supplied");
 }

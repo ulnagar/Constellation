@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Offerings.GetAllOfferingSummaries;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Offerings.Models;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
@@ -12,6 +11,8 @@ using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IFacultyRepository _facultyRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetAllOfferingSummariesQueryHandler(
@@ -33,7 +34,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
         IStaffRepository staffRepository,
         ICourseRepository courseRepository,
         IFacultyRepository facultyRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
@@ -69,7 +70,7 @@ internal sealed class GetAllOfferingSummariesQueryHandler
             List<string> teacherNames = teachers.Select(teacher => teacher.DisplayName).ToList();
 
             // Calculate minPerFn
-            List<int> periodIds = offering.Sessions
+            List<PeriodId> periodIds = offering.Sessions
                 .Where(session => !session.IsDeleted)
                 .Select(session => session.PeriodId)
                 .ToList();

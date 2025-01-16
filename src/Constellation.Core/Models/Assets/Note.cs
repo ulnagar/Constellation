@@ -38,7 +38,7 @@ public sealed record Note : IAuditableEntity
         string message)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return Result.Failure<Note>(NoteErrors.MessageEmpty);
+            return Result.Failure<Note>(AssetNoteErrors.MessageEmpty);
 
         Note note = new(
             assetId,

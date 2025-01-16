@@ -1,0 +1,58 @@
+@page
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans.IndexModel
+
+@{
+}
+
+<h2>Attendance Plans</h2>
+
+<div>
+    <div class="mt-3">
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @{
+                    var items = Model.Plans
+                        .OrderBy(plan => plan.Grade)
+                        .GroupBy(plan => plan.Grade)
+                        .ToList();
+
+                    if (items.Count == 0)
+                    {
+                        <tr class="group"><td colspan="100%">Nothing to see here!</td></tr>
+                    }
+            
+                    foreach (var group in items)
+                    {
+                        var first = group.First();
+
+                        <tr class="group">
+                            <td colspan="3">@first.Grade.AsName()</td>
+                        </tr>
+
+                        @foreach (var item in group)
+                        {
+                            <tr>
+                                <td data-order="@item.Student.SortOrder">@item.Student.DisplayName</td>
+                                <td data-order="@item.Status.Order">@item.Status.Name</td>
+                                <td>
+                                    <a asp-page="/Absences/Plans/Details" asp-route-id="@item.PlanId" class="btn btn-info btn-sm btn-show-hover">More Details...</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

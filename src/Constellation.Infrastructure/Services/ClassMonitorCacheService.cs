@@ -8,6 +8,7 @@ using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Models;
 using Core.Models.Students;
+using Core.Models.Timetables;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -133,7 +134,7 @@ public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonSer
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         var periods = await context
-            .Set<TimetablePeriod>()
+            .Set<Period>()
             .AsNoTracking()
             .ToListAsync();
 
@@ -144,11 +145,11 @@ public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonSer
                 Id = period.Id,
                 Name = period.Name,
                 Timetable = period.Timetable,
-                Day = period.Day,
+                Day = period.DayNumber,
                 Type = period.Type,
                 StartTime = period.StartTime,
                 EndTime = period.EndTime,
-                IsCurrent = period.Day == DateTime.Now.GetDayNumber() && period.StartTime <= DateTime.Now.TimeOfDay && period.EndTime >= DateTime.Now.TimeOfDay,
+                IsCurrent = period.DayNumber == DateTime.Now.GetDayNumber() && period.StartTime <= DateTime.Now.TimeOfDay && period.EndTime >= DateTime.Now.TimeOfDay,
                 IsDeleted = period.IsDeleted
             };
 

@@ -23,9 +23,10 @@ internal static class ActivePage
     public const string Partner_Students_Families = "Partner.Students.Families";
     public const string Partner_Students_Reports = "Partner.Students.Reports";
 
-    public const string StudentAdmin_Absences_Audit = "StudentAdmin.Absences.Audit";
-    public const string StudentAdmin_Absences_List = "StudentAdmin.Absences.List";
-    public const string StudentAdmin_Absences_Report = "StudentAdmin.Absences.Report";
+    public const string StudentAdmin_Attendance_Configuration = "StudentAdmin.Attendance.Configuration";
+    public const string StudentAdmin_Attendance_Absences = "StudentAdmin.Attendance.Absences";
+    public const string StudentAdmin_Attendance_Plans = "StudentAdmin.Attendance.Plans";
+    public const string StudentAdmin_Attendance_Reports = "StudentAdmin.Attendance.Reports";
     public const string StudentAdmin_Awards_List = "StudentAdmin.Awards.List";
     public const string StudentAdmin_Awards_Dashboard = "StudentAdmin.Awards.Dashboard";
     public const string StudentAdmin_Awards_Leaderboard = "StudentAdmin.Awards.Leaderboard";

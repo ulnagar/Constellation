@@ -1,0 +1,25 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddAttendancePlanNote.AddAttendancePlanNoteSelection
+
+<form asp-page-handler="AddNote" method="post">
+    <div class="modal fade" tabindex="-1" id="add-note-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Note</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-md-3">Note</label>
+                        <div class="col-md-9">
+                            <textarea asp-for="Note" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Add Note</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

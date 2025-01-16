@@ -1,0 +1,70 @@
+.Plan-Timetable-Week {
+    margin-top: 1rem;
+    /*border: 1px solid red;*/
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Plan-Timetable-Day {
+    /*border: 1px solid green;*/
+    /*margin: 2px;*/
+    display: flex;
+    padding: 0.5rem 0;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Plan-Timetable-Day-Title {
+    height: 2rem;
+    text-align: center;
+    font-weight: bolder;
+    margin: 2px 1px;
+}
+
+.Plan-Timetable-Day-Period {
+    border: 1px solid green;
+    height: 12rem;
+    margin: 2px;
+    padding: 0.5rem;
+    text-align: center;
+    /*width: 10vw;*/
+    min-width: 170px;
+    max-width: 170px;
+    background-color: azure;
+    display: flex;
+    flex-direction: column;
+}
+
+.Plan-Timetable-Day-Period.collapsed {
+    height: 6rem;
+}
+
+.Plan-Timetable-Day-Period.align-middle {
+    align-items: center;
+    flex-direction: row;
+}
+
+    .Plan-Timetable-Day-Period.Inactive {
+        /*background-color: cornflowerblue;*/
+    }
+
+    .Plan-Timetable-Day-Period.Active {
+        background-color: darkseagreen;
+        font-weight: bold;
+    }
+
+    .Plan-Timetable-Day-Period.Break {
+        background-color: lightyellow;
+        height: 6rem;
+    }
+
+    .Plan-Timetable-Day-Period.Offline {
+        background-color: lightgray;
+    }
+
+tr.current {
+    font-weight: bold;
+}

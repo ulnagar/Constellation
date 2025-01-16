@@ -11,6 +11,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Timetables.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +51,7 @@ public class AddSessionsModel : BasePageModel
     public string OfferingName { get; set; }
 
     [BindProperty] 
-    public List<int> Periods { get; set; } = new();
+    public List<PeriodId> Periods { get; set; } = new();
 
     public List<PeriodVisualSelectResponse> ValidPeriods { get; set; } = new();
     public List<SessionListResponse> ExistingSessions { get; set; } = new();

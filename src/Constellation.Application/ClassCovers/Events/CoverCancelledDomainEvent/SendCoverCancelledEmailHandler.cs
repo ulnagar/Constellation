@@ -16,6 +16,8 @@ using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Offerings;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -33,7 +35,7 @@ internal sealed class SendCoverCancelledEmailHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly ITeamRepository _teamRepository;
@@ -44,7 +46,7 @@ internal sealed class SendCoverCancelledEmailHandler
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         UserManager<AppUser> userManager,
         IEmailService emailService,
         ITeamRepository teamRepository,
@@ -191,7 +193,7 @@ internal sealed class SendCoverCancelledEmailHandler
 
         if (cover.StartDate == cover.EndDate)
         {
-            List<TimetablePeriod> periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.ToDateTime(TimeOnly.MinValue).GetDayNumber(), cover.OfferingId, cancellationToken);
+            List<Period> periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.GetDayNumber(), cover.OfferingId, cancellationToken);
 
             startTime = TimeOnly.FromTimeSpan(periods.Min(period => period.StartTime));
             endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));

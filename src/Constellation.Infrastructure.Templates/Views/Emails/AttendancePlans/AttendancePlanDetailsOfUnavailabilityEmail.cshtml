@@ -1,0 +1,22 @@
+@using Constellation.Infrastructure.Templates.Views.Emails.AttendancePlans
+@model AttendancePlanDetailsOfUnavailabilityEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The Attendance Plan for student @Model.Student (@Model.Grade @Model.School) has been accepted. Please enter the following as unavailabilities in Sentral.</p>
+<dl>
+    @foreach (var unavailability in Model.Unavailabilities.OrderBy(entry => entry.Week).ThenBy(entry => entry.Day).ThenBy(entry => entry.Start))
+    {
+        <dt>@unavailability.Week.Name @unavailability.Day.Name:</dt>
+        <dd>
+            @unavailability.Start.ToString("h:mm tt") to @unavailability.End.ToString("h:mm tt")
+        </dd>
+    }
+</dl>

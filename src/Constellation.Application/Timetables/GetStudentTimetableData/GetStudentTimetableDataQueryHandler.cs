@@ -7,14 +7,18 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Extensions;
 using Core.Models.Offerings.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Errors;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Errors;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
+using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using DTOs;
-using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,14 +30,14 @@ internal sealed class GetStudentTimetableDataQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly ITimetablePeriodRepository _periodRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ILogger _logger;
 
     public GetStudentTimetableDataQueryHandler(
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
-        ITimetablePeriodRepository periodRepository,
+        IPeriodRepository periodRepository,
         IStaffRepository staffRepository,
         ILogger logger)
     {
@@ -89,45 +93,46 @@ internal sealed class GetStudentTimetableDataQueryHandler
             return Result.Failure<StudentTimetableDataDto>(OfferingErrors.NotFoundForStudent(student.Id));
         }
 
-        List<int> periodIds = offerings
+        List<PeriodId> periodIds = offerings
             .SelectMany(offering => offering.Sessions)
             .Where(session => !session.IsDeleted)
             .Select(session => session.PeriodId)
             .Distinct()
             .ToList();
 
-        List<TimetablePeriod> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
+        List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
 
         if (periods.Count == 0)
         {
             _logger
                 .ForContext(nameof(GetStudentTimetableDataQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Period.NoneFoundForOffering, true)
+                .ForContext(nameof(Error), PeriodErrors.NoneFoundForOffering, true)
                 .Warning("Failed to retrieve Timetable data for Student");
 
-            return Result.Failure<StudentTimetableDataDto>(DomainErrors.Period.NoneFoundForOffering);
+            return Result.Failure<StudentTimetableDataDto>(PeriodErrors.NoneFoundForOffering);
         }
 
-        List<string> relevantTimetables = periods
+        List<Timetable> relevantTimetables = periods
             .Select(period => period.Timetable)
             .Distinct()
             .ToList();
 
-        List<TimetablePeriod> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
+        List<Period> relevantPeriods = await _periodRepository.GetAllFromTimetable(relevantTimetables, cancellationToken);
 
-        foreach (TimetablePeriod period in relevantPeriods)
+        foreach (Period period in relevantPeriods)
         {
-            if (period.Type == "Other")
+            if (period.Type == PeriodType.Offline)
                 continue;
 
             TimetableDataDto.TimetableData entry = new()
             {
+                Timetable = period.Timetable,
+                Week = period.Week,
                 Day = period.Day,
                 StartTime = period.StartTime,
                 EndTime = period.EndTime,
-                TimetableName = period.Timetable,
                 Name = period.Name,
-                Period = period.Period,
+                PeriodCode = period.PeriodCode,
                 Type = period.Type
             };
 

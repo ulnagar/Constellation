@@ -82,6 +82,7 @@ internal sealed class GetCourseSummaryListQueryHandler
                 course.Grade,
                 responseFaculty,
                 course.FullTimeEquivalentValue,
+                course.TargetMinutesPerCycle,
                 responseOfferings));
         }
 
