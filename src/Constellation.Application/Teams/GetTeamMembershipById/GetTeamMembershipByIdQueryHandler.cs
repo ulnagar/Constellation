@@ -11,6 +11,7 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
@@ -41,6 +42,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IClassCoverRepository _coverRepository;
+    private readonly TeamsGatewayConfiguration _teamsConfiguration;
     private readonly AppConfiguration _configuration;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
     private readonly ICourseRepository _courseRepository;
@@ -58,7 +60,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         UserManager<AppUser> userManager,
         ILogger logger,
         IClassCoverRepository coverRepository,
-        IOptions<AppConfiguration> configuration)
+        IOptions<AppConfiguration> configuration,
+        IOptions<TeamsGatewayConfiguration> teamsConfiguration)
     {
         _teamRepository = teamRepository;
         _offeringRepository = offeringRepository;
@@ -66,6 +69,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _coverRepository = coverRepository;
+        _teamsConfiguration = teamsConfiguration.Value;
         _configuration = configuration.Value;
         _groupTutorialRepository = groupTutorialRepository;
         _courseRepository = courseRepository;
@@ -187,85 +191,39 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                         returnData.Add(entry);
                 }
 
+                if (_configuration is null) continue;
+                
                 Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-                if (course is not null)
+                if (course is null) continue;
+
+                // Deputy Principals
+                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<string> deputyIds);
+
+                if (deputyPrincipals is not false)
                 {
-                    Staff deputyMiddleSchool, deputySecondarySchool;
 
-                    switch (course.Grade)
+                    foreach (var deputyId in deputyIds)
                     {
-                        case Grade.Y05:
-                        case Grade.Y06:
-                            deputyMiddleSchool = await _staffRepository.GetById("1102472", cancellationToken);
+                        Staff deputyPrincipal = await _staffRepository.GetById(deputyId, cancellationToken);
 
-                            if (deputyMiddleSchool is not null)
-                            {
-                                TeamMembershipResponse entry = new(
-                                    team.Id,
-                                    deputyMiddleSchool.EmailAddress,
-                                    TeamsMembershipLevel.Owner.Value);
+                        if (deputyPrincipal is null) continue;
 
-                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                                    returnData.Add(entry);
-                            }
+                        TeamMembershipResponse deputyEntry = new(
+                            team.Id,
+                            deputyPrincipal.EmailAddress,
+                            TeamsMembershipLevel.Owner.Value);
 
-                            break;
-                        case Grade.Y07:
-                            deputyMiddleSchool = await _staffRepository.GetById("1102472", cancellationToken);
-
-                            if (deputyMiddleSchool is not null)
-                            {
-                                TeamMembershipResponse entry = new(
-                                    team.Id,
-                                    deputyMiddleSchool.EmailAddress,
-                                    TeamsMembershipLevel.Owner.Value);
-
-                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                                    returnData.Add(entry);
-                            }
-
-                            deputySecondarySchool = await _staffRepository.GetById("1055721", cancellationToken);
-
-                            if (deputySecondarySchool is not null)
-                            {
-                                TeamMembershipResponse entry = new(
-                                    team.Id,
-                                    deputySecondarySchool.EmailAddress,
-                                    TeamsMembershipLevel.Owner.Value);
-
-                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                                    returnData.Add(entry);
-                            }
-
-                            break;
-                        case Grade.Y08:
-                        case Grade.Y09:
-                        case Grade.Y10:
-                        case Grade.Y11:
-                        case Grade.Y12:
-                            deputySecondarySchool = await _staffRepository.GetById("1055721", cancellationToken);
-
-                            if (deputySecondarySchool is not null)
-                            {
-                                TeamMembershipResponse entry = new(
-                                    team.Id,
-                                    deputySecondarySchool.EmailAddress,
-                                    TeamsMembershipLevel.Owner.Value);
-
-                                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                                    returnData.Add(entry);
-                            }
-
-                            break;
+                        if (returnData.All(value => value.EmailAddress != deputyEntry.EmailAddress))
+                            returnData.Add(deputyEntry);
                     }
+                }
 
-                    if (_configuration is null) continue;
+                // Learning and Support Teachers
+                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<string> lastStaffIds);
 
-                    bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<string> lastStaffIds);
-
-                    if (learningSupport is false) continue;
-
+                if (learningSupport is not false)
+                {
                     foreach (string staffId in lastStaffIds)
                     {
                         Staff learningSupportTeacher = await _staffRepository.GetById(staffId, cancellationToken);
@@ -343,28 +301,50 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         }
 
         // Mandatory Owners
-        List<string> standardOwners = new()
-        {
-            "michael.necovski2@det.nsw.edu.au",
-            "christopher.robertson@det.nsw.edu.au",
-            "virginia.cluff@det.nsw.edu.au",
-            "scott.new@det.nsw.edu.au",
-            "jane.priestley3@det.nsw.edu.au",
-            "julie.dent@det.nsw.edu.au",
-            "benjamin.hillsley@det.nsw.edu.au"
-        };
+        List<string> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
 
-        foreach (string owner in standardOwners)
+        if (mandatoryOwners.Any())
         {
-            TeamMembershipResponse entry = new(
-                team.Id,
-                owner,
-                TeamsMembershipLevel.Owner.Value);
+            foreach (string staffId in mandatoryOwners)
+            {
+                Staff mandatoryOwner = await _staffRepository.GetById(staffId, cancellationToken);
 
-            if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                returnData.Add(entry);
+                if (mandatoryOwner is null) continue;
+
+                TeamMembershipResponse lastEntry = new(
+                    team.Id,
+                    mandatoryOwner.EmailAddress,
+                    TeamsMembershipLevel.Owner.Value);
+
+                if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
+                    returnData.Add(lastEntry);
+            }
         }
+        else
+        {
+            List<string> standardOwners = new()
+            {
+                "michael.necovski2@det.nsw.edu.au",
+                "christopher.robertson@det.nsw.edu.au",
+                "virginia.cluff@det.nsw.edu.au",
+                //"scott.new@det.nsw.edu.au",
+                "jane.priestley3@det.nsw.edu.au",
+                "julie.dent@det.nsw.edu.au",
+                "benjamin.hillsley@det.nsw.edu.au"
+            };
 
+            foreach (string owner in standardOwners)
+            {
+                TeamMembershipResponse entry = new(
+                    team.Id,
+                    owner,
+                    TeamsMembershipLevel.Owner.Value);
+
+                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                    returnData.Add(entry);
+            }
+        }
+        
         return returnData;
     }
 }
