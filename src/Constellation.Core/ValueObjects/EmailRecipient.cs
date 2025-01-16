@@ -7,6 +7,11 @@ using System.Collections.Generic;
 
 public sealed class EmailRecipient : ValueObject
 {
+    public static EmailRecipient AuroraCollege = new("Aurora College", "auroracoll-h.school@det.nsw.edu.au");
+    public static EmailRecipient SupportQueue = new("Aurora College", "support@aurora.nsw.edu.au");
+    public static EmailRecipient InfoTechTeam = new("Aurora College IT Support", "auroracollegeitsupport@det.nsw.edu.au");
+    public static EmailRecipient NoReply = new("Aurora College", "noreply@aurora.nsw.edu.au");
+
     private EmailRecipient() {} // Required by EF Core
 
     private EmailRecipient(string name, string email)

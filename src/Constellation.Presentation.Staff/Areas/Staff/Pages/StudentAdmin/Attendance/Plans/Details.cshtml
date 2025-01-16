@@ -104,8 +104,34 @@
 
                                 <tr>
                                     <td data-order="@period.Week.Value-@period.Day.Value-@period.StartTime">@period.Week.Name @period.Day.Name @period.PeriodName</td>
-                                    <td>@period.StartTime.ToString("h:mm tt") - @period.EntryTime.ToString("h:mm tt")</td>
-                                    <td>@period.EndTime.ToString("h:mm tt") - @period.ExitTime.ToString("h:mm tt")</td>
+                                    <td>
+                                        @if (period.StartTime == period.EntryTime)
+                                        {
+                                            <span title="Period Start Time">@period.StartTime.ToString("h:mm tt")</span>
+                                            <span> - </span>
+                                            <span title="Student Entry Time">@period.EntryTime.ToString("h:mm tt")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="font-weight-bold" title="Period Start Time">@period.StartTime.ToString("h:mm tt")</span>
+                                            <span> - </span>
+                                            <span class="font-weight-bold" title="Student Entry Time">@period.EntryTime.ToString("h:mm tt")</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (period.EndTime == period.ExitTime)
+                                        {
+                                            <span title="Student Exit Time">@period.ExitTime.ToString("h:mm tt")</span>
+                                            <span> - </span>
+                                            <span title="Period End Time">@period.EndTime.ToString("h:mm tt")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="font-weight-bold" title="Student Exit Time">@period.ExitTime.ToString("h:mm tt")</span>
+                                            <span> - </span>
+                                            <span class="font-weight-bold" title="Period End Time">@period.EndTime.ToString("h:mm tt")</span>
+                                        }
+                                    </td>
                                     <td>@calculatedMissed.ToString("F0") / @calculatedPercent.ToString("P0")</td>
                                 </tr>
                             }

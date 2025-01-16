@@ -6,6 +6,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Offerings;
@@ -110,4 +111,7 @@ public interface IEmailService
     // Third Party Consent Emails
     Task SendConsentTransactionReceiptToParent(List<EmailRecipient> recipients, string studentName, DateOnly submittedOn, Attachment attachment, CancellationToken cancellationToken = default);
     Task SendConsentRefusedNotification(List<EmailRecipient> recipients, string studentName, DateOnly submittedOn, List<Transaction.ConsentResponse> responses, CancellationToken cancellationToken = default);
+
+    // Attendance Plan Emails
+    Task SendAttendancePlanToAdmin(List<EmailRecipient> recipients, AttendancePlan plan, CancellationToken cancellationToken = default);
 }

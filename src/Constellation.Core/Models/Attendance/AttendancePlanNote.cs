@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Attendance;
 
-using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using Errors;
 using Identifiers;
 using System;
 
@@ -36,7 +36,7 @@ public sealed class AttendancePlanNote : IAuditableEntity
         string message)
     {
         if (string.IsNullOrWhiteSpace(message))
-            return Result.Failure<AttendancePlanNote>(NoteErrors.MessageEmpty);
+            return Result.Failure<AttendancePlanNote>(AttendancePlanNoteErrors.MessageEmpty);
 
         AttendancePlanNote note = new(
             planId,

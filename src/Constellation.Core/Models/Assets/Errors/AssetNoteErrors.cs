@@ -2,7 +2,7 @@
 
 namespace Constellation.Core.Models.Assets.Errors;
 
-public static class NoteErrors
+public static class AssetNoteErrors
 {
     public static readonly Error MessageEmpty = new(
         "Assets.Note.MessageEmpty",
