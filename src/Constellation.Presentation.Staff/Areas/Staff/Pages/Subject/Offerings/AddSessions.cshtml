@@ -72,15 +72,15 @@
                                             if (Model.ExistingSessions.Any(session => session.PeriodId == period.PeriodId))
                                             {
                                                 <div class="blockLink pt_Selected_Elsewhere">
-                                                    <div class="Timetable-Period Timetable-@period.Type.Name" style="height: @length px;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                    <div class="Timetable-Period Timetable-@period.Type.Name" style="height: @(length)px;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
                                                         @period.Name
                                                     </div>
                                                 </div>
                                             }
                                             else
                                             {
-                                                <div class="blockLink" id="period_table_@period.PeriodId" onClick="toggleSelect(@period.PeriodId)" data-selected="false">
-                                                    <div class="Timetable-Period Timetable-@period.Type.Name" style="height: @length px;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                <div class="blockLink" id="period_table_@period.PeriodId" onClick="toggleSelect('@period.PeriodId')" data-selected="false">
+                                                    <div class="Timetable-Period Timetable-@period.Type.Name" style="height: @(length)px;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
                                                         @period.Name
                                                     </div>
                                                 </div>
