@@ -106,7 +106,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), query.Error, true)
                 .Warning("Failed to retrieve details of Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(assignments.Error);
+            //ModalContent = new ErrorDisplay(assignments.Error);
 
             return;
         }

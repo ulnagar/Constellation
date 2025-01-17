@@ -52,7 +52,7 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     public TimeSpan StartTime { get; private set; }
     public TimeSpan EndTime { get; private set; }
     public int Duration => (int)EndTime.Subtract(StartTime).TotalMinutes;
-    public string SortOrder => $"{Timetable.Code}.{Day.Value.ToString().PadLeft(2, '0')}.{StartTime.ToString("g")}";
+    public string SortOrder => $"{Timetable.Code}.{Week.Value.ToString()}.{Day.Value.ToString().PadLeft(2, '0')}.{StartTime.ToString("g")}";
 
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
