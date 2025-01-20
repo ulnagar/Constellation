@@ -47,16 +47,14 @@ public class UpsertModel : BasePageModel
     [BindProperty(SupportsGet = true)] 
     public PeriodId Id { get; set; } = PeriodId.Empty;
     public ValidDays Day { get; set; }
-    public char PeriodCode { get; set; }
-    [ModelBinder(typeof(FromValueBinder))]
-    public Timetable Timetable { get; set; }
+    public char? PeriodCode { get; set; } = null;
+    public string TimetableCode { get; set; }
     [DataType(DataType.Time)]
     public TimeSpan StartTime { get; set; }
     [DataType(DataType.Time)]
     public TimeSpan EndTime { get; set; }
     public string Name { get; set; }
-    [ModelBinder(typeof(BaseFromValueBinder))]
-    public PeriodType Type { get; set; }
+    public string PeriodTypeCode { get; set; }
 
     public SelectList Timetables { get; set; }
     public SelectList PeriodTypes { get; set; }
@@ -64,7 +62,12 @@ public class UpsertModel : BasePageModel
     public async Task OnGet()
     {
         if (Id == PeriodId.Empty)
+        {
+            Timetables = new SelectList(Timetable.GetEnumerable, nameof(Timetable.Code), nameof(Timetable.Name));
+            PeriodTypes = new SelectList(PeriodType.GetEnumerable, nameof(PeriodType.Value), nameof(PeriodType.Name));
+
             return;
+        }
 
         _logger.Information("Requested to retrieve details of Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
@@ -85,32 +88,35 @@ public class UpsertModel : BasePageModel
         
         Day = FromWeekAndDay(request.Value.Week, request.Value.Day);
         PeriodCode = request.Value.PeriodCode;
-        Timetable = request.Value.Timetable;
+        TimetableCode = request.Value.Timetable.Code;
         StartTime = request.Value.StartTime;
         EndTime = request.Value.EndTime;
         Name = request.Value.Name;
-        Type = request.Value.Type;
+        PeriodTypeCode = request.Value.Type.Value;
 
         PageTitle = $"Edit - {Name}";
 
-        Timetables = new SelectList(Timetable.GetEnumerable, Timetable);
-        PeriodTypes = new SelectList(PeriodType.GetEnumerable, Type);
+        Timetables = new SelectList(Timetable.GetEnumerable, nameof(Timetable.Code), nameof(Timetable.Name), TimetableCode);
+        PeriodTypes = new SelectList(PeriodType.GetEnumerable, nameof(PeriodType.Value), nameof(PeriodType.Name), PeriodTypeCode);
     }
 
     public async Task<IActionResult> OnPost()
     {
         (PeriodWeek week, PeriodDay day) convertDay = FromValidDay(Day);
 
+        Timetable timetable = Timetable.FromValue(TimetableCode);
+        PeriodType type = PeriodType.FromValue(PeriodTypeCode);
+
         UpsertPeriodCommand command = new(
             Id,
             convertDay.week,
             convertDay.day,
-            PeriodCode,
-            Timetable,
+            PeriodCode ?? '\0',
+            timetable,
             StartTime,
             EndTime,
             Name,
-            Type);
+            type);
 
         _logger
             .ForContext(nameof(UpsertPeriodCommand), command, true)

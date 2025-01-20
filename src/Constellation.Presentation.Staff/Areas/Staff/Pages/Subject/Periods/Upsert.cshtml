@@ -2,7 +2,6 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.UpsertModel
 
 @using Constellation.Core.Models.Timetables.Identifiers
-@using Constellation.Core.Models.Timetables.ValueObjects
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -22,12 +21,12 @@
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
         <div class="form-group row">
-            <label asp-for="Timetable" class="col-md-2"></label>
+            <label asp-for="TimetableCode" class="col-md-2">Timetable</label>
             <div class="col-md-3">
-                <select asp-for="Timetable" asp-items="@Model.Timetables" class="form-control combo">
+                <select asp-for="TimetableCode" asp-items="@Model.Timetables" class="form-control">
                     <option value="">-- Select --</option>
                 </select>
-                <span asp-validation-for="Timetable" class="text-danger"></span>
+                <span asp-validation-for="TimetableCode" class="text-danger"></span>
             </div>
         </div>
 
@@ -48,7 +47,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="PeriodCode" class="col-md-2"></label>
+            <label asp-for="PeriodCode" class="col-md-2">Code</label>
             <div class="col-md-3">
                 <input asp-for="PeriodCode" class="form-control" maxlength="1" />
                 <span asp-validation-for="PeriodCode" class="text-danger"></span>
@@ -56,7 +55,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="StartTime" class="col-md-2"></label>
+            <label asp-for="StartTime" class="col-md-2">Start Time</label>
             <div class="col-md-3">
                 <input asp-for="StartTime" class="form-control" />
                 <span asp-validation-for="StartTime" class="text-danger"></span>
@@ -64,7 +63,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="EndTime" class="col-md-2"></label>
+            <label asp-for="EndTime" class="col-md-2">End Time</label>
             <div class="col-md-3">
                 <input asp-for="EndTime" class="form-control" />
                 <span asp-validation-for="EndTime" class="text-danger"></span>
@@ -72,12 +71,12 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="Type" class="col-md-2"></label>
+            <label asp-for="PeriodTypeCode" class="col-md-2">Period Type</label>
             <div class="col-md-3">
-                <select asp-for="Type" asp-items="@Model.PeriodTypes" class="form-control combo">
+                <select asp-for="PeriodTypeCode" asp-items="@Model.PeriodTypes" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
-                <span asp-validation-for="Type" class="text-danger"></span>
+                <span asp-validation-for="PeriodTypeCode" class="text-danger"></span>
             </div>
         </div>
 
