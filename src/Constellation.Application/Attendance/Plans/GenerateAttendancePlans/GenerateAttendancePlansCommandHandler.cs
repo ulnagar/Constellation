@@ -102,7 +102,12 @@ internal sealed class GenerateAttendancePlansCommandHandler
                 if (course is null)
                     continue;
 
+                // Skip all Tutorial courses
                 if (course.Code == "TUT")
+                    continue;
+
+                // Skip all courses from Stage 6
+                if (course.Grade is Grade.Y11 or Grade.Y12)
                     continue;
 
                 List<PeriodId> periodIds = offering.Sessions
@@ -115,7 +120,8 @@ internal sealed class GenerateAttendancePlansCommandHandler
                 attendancePlan.AddPeriods(periods, offering, course);
             }
 
-            _planRepository.Insert(attendancePlan);
+            if (attendancePlan.Periods.Count > 0)
+                _planRepository.Insert(attendancePlan);
         }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
