@@ -1,29 +1,29 @@
-namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
+﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles;
 
-using Application.Common.PresentationModels;
 using Constellation.Application.AdminDashboards.AddUserToRole;
 using Constellation.Application.AdminDashboards.RemoveUserFromRole;
+using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Shared.Pages.Shared.Components.RoleAddUser;
+using Microsoft.EntityFrameworkCore;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
-public class RoleModel : BasePageModel
+public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
     private readonly LinkGenerator _linkGenerator;
 
-    public RoleModel(
+    public IndexModel(
         IMediator mediator,
         UserManager<AppUser> userManager,
         RoleManager<AppRole> roleManager,
@@ -34,9 +34,18 @@ public class RoleModel : BasePageModel
         _roleManager = roleManager;
         _linkGenerator = linkGenerator;
     }
+    
+    public List<UserRoleDetailsDto> Roles { get; set; } = new();
+
+    public class UserRoleDetailsDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public int MemberCount { get; set; }
+    }
 
     [BindProperty(SupportsGet = true)]
-    public Guid RoleId { get; set; }
+    public Guid? RoleId { get; set; }
 
     [BindProperty]
     public RoleAddUserSelection AddUserForm { get; set; }
@@ -44,33 +53,44 @@ public class RoleModel : BasePageModel
     public string RoleName { get; set; }
     public List<RoleMemberDto> Members { get; set; } = new();
 
-    public class RoleMemberDto
-    {
-        public Guid UserId { get; set; }
-        public string DisplayName { get; set; }
-        public string EmailAddress { get; set; }
-    }
+    public record RoleMemberDto(
+        Guid UserId,
+        string DisplayName,
+        string EmailAddress);
 
     public async Task<IActionResult> OnGet()
     {
-        var role = await _roleManager.FindByIdAsync(RoleId.ToString());
+        List<AppRole> roles = await _roleManager.Roles.ToListAsync();
 
-        if (role is null)
+        foreach (AppRole role in roles)
         {
-            return RedirectToPage("Index");
+            IList<AppUser> members = await _userManager.GetUsersInRoleAsync(role!.Name);
+
+            Roles.Add(new UserRoleDetailsDto
+            {
+                Id = role.Id,
+                Name = role.Name,
+                MemberCount = members.Count()
+            });
         }
 
-        RoleName = role.Name;
+        if (RoleId is not null)
+        {
+            AppRole role = await _roleManager.FindByIdAsync(RoleId.ToString());
 
-        var members = await _userManager.GetUsersInRoleAsync(RoleName);
-        Members = members.Select(member => 
-            new RoleMemberDto
-                {
-                    UserId = member.Id,
-                    DisplayName = member.DisplayName,
-                    EmailAddress = member.Email
-                })
-            .ToList();
+            if (role is null)
+                return Page();
+
+            RoleName = role.Name;
+
+            IList<AppUser> members = await _userManager.GetUsersInRoleAsync(RoleName);
+            Members = members.Select(member =>
+                    new RoleMemberDto(
+                        member.Id,
+                        member.DisplayName,
+                        member.Email))
+                .ToList();
+        }
 
         return Page();
     }
@@ -82,14 +102,14 @@ public class RoleModel : BasePageModel
             return ShowError(DomainErrors.Auth.UserNotFound);
         }
 
-        var result = await _mediator.Send(new RemoveUserFromRoleCommand(RoleId, UserId));
+        var result = await _mediator.Send(new RemoveUserFromRoleCommand(RoleId!.Value, UserId));
 
         if (result.IsFailure)
         {
             return ShowError(result.Error);
         }
 
-        return RedirectToPage("Role");
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAddUser()
@@ -100,20 +120,20 @@ public class RoleModel : BasePageModel
         }
 
         var result = await _mediator.Send(new AddUserToRoleCommand(AddUserForm.RoleId, AddUserForm.UserId));
-        
+
         if (result.IsFailure)
         {
             return ShowError(result.Error);
         }
 
-        return RedirectToPage("Role");
+        return RedirectToPage();
     }
 
     private IActionResult ShowError(Error error)
     {
         ModalContent = new ErrorDisplay(
             error,
-            _linkGenerator.GetPathByPage("/Auth/Role", values: new { area = "Admin", RoleId = RoleId }));
+            _linkGenerator.GetPathByPage("/Auth/Role", values: new { area = "Admin", RoleId }));
 
         AddUserForm = null;
 

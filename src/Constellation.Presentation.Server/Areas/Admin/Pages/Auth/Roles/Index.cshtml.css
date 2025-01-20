@@ -1,12 +1,12 @@
 ﻿.quick-links {
-    width: 27%;
-    margin-right: 3%;
-    float: left;
+    /*width: 27%;*/
+    margin-right: 1rem;
+    /*float: left;*/
 }
 
 .user-management {
-    width: 70%;
-    float: right;
+    width: 70rem;
+    /*float: right;*/
 }
 
 .text-center {

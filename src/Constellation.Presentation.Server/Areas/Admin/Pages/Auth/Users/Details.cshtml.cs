@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
+namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users;
 
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
@@ -10,13 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
-public class InfoModel : BasePageModel
+public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<AppRole> _roleManager;
 
-    public InfoModel(IMediator mediator, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+    public DetailsModel(IMediator mediator, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
     {
         _mediator = mediator;
         _userManager = userManager;
@@ -33,7 +33,7 @@ public class InfoModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(EmailAddress))
         {
-            return RedirectToPage("Index");    
+            return RedirectToPage("Index");
         }
 
         AppUser = await _userManager.FindByEmailAsync(EmailAddress);

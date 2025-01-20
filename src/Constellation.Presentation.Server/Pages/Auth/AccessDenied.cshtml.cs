@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages;
+﻿namespace Constellation.Presentation.Server.Pages.Auth;
 
 using Constellation.Presentation.Server.BaseModels;
 using Microsoft.AspNetCore.Authorization;

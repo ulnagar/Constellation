@@ -1,0 +1,63 @@
+﻿@page "{roleId:guid?}"
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles.IndexModel
+
+<h3>Role Management</h3>
+
+<div class="page-menu">
+    @if (Model.RoleId.HasValue)
+    {
+        <button data-toggle="modal" data-target="#addUserModal" class="btn btn-warning">Add User</button>
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="d-flex">
+    <div class="w-25 p-2">
+        <h3>Roles</h3>
+        @foreach (var role in Model.Roles.OrderBy(role => role.Name))
+        {
+            <a asp-page="/Auth/Roles/Index" asp-area="Admin" asp-route-roleId="@role.Id" class="btn btn-success btn-block">@role.Name: @role.MemberCount</a>
+        }
+    </div>
+    
+    <div class="w-75 ms-3 p-3">
+        <thead class="table-striped data-table">
+        <tr>
+            <td>Name</td>
+            <td>Email</td>
+            <td>Action</td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var member in Model.Members.OrderBy(member => member.DisplayName))
+        {
+            <tr>
+                <td>@member.DisplayName</td>
+                <td>@member.EmailAddress</td>
+                <td>
+                    <a asp-page-handler="RemoveUser" asp-route-userId="@member.UserId" asp-route-roleId="@Model.RoleId" class="btn btn-warning btn-sm btn-show-hover">Remove</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </div>
+</div>
+
+@if (Model.RoleId.HasValue)
+{
+    <vc:role-add-user role-id="@Model.RoleId!.Value"></vc:role-add-user>
+}
+
+@section scripts
+{
+    <script>
+        $('#addUserSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#addUserModal').modal('hide');
+            $('#addUserForm').submit();
+        });
+    </script>
+}

@@ -11,7 +11,6 @@ using Constellation.Presentation.Server.Services;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Hangfire;
 using Hangfire.SqlServer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
@@ -52,8 +51,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "Constellation.Identity";
     options.ExpireTimeSpan = TimeSpan.FromHours(7);
-    options.LoginPath = new PathString("/Admin/Login");
-    options.LogoutPath = new PathString("/Admin/Logout");
+    options.LoginPath = new PathString("/Auth/Login");
+    options.LogoutPath = new PathString("/Auth/Logout");
 });
 
 builder.Services

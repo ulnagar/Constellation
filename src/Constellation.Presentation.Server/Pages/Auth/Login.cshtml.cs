@@ -1,10 +1,10 @@
-﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages;
+﻿namespace Constellation.Presentation.Server.Pages.Auth;
 
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
-using Core.ValueObjects;
+using Constellation.Core.ValueObjects;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

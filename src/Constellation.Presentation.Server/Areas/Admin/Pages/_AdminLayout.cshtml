@@ -1,0 +1,147 @@
+﻿@model Constellation.Application.Common.PresentationModels.IBaseModel
+
+@{
+    var pageTitleAvailable = ViewData.TryGetValue("PageTitle", out var pageTitle);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @if (pageTitleAvailable)
+    {
+        <title>CSTLN: @pageTitle</title>
+    }
+    else
+    {
+        <title>Constellation Staff Portal</title>
+    }
+
+    <link rel="icon" type="image/svg" href="~/logo.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap4/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/datatables.net-dt/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="~/lib/select2/css/select2.min.css" />
+    <link rel="stylesheet" href="~/lib/select2-theme-bootstrap4/dist/select2-bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/staff.css" />
+    <link rel="stylesheet" href="~/css/glyphicon.css" />
+    <link rel="stylesheet" href="~/private/font-awesome/css/all.min.css" />
+    <link rel="stylesheet" href="~/Constellation.Presentation.Server.styles.css" />
+
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/bootstrap4/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/datatables.net/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+    <script src="~/lib/moment.js/moment.min.js"></script>
+    <script src="~/lib/datatables-plugins/sorting/datetime-moment.min.js"></script>
+    <script src="~/lib/datatables.net-rowgroup/dataTables.rowGroup.min.js"></script>
+    <script src="~/lib/select2/js/select2.min.js"></script>
+    <script src="~/lib/jquery-sortablejs/jquery-sortable.min.js"></script>
+</head>
+<body>
+    <div class="spinner-overlay">
+        <div class="d-flex justify-content-center h-100">
+            <div class="spinner-grow text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-grow text-info spinner-0" role="status"></div>
+            <div class="spinner-grow text-primary spinner-1" role="status"></div>
+            <div class="spinner-grow text-info spinner-2" role="status"></div>
+            <div class="spinner-grow text-primary spinner-3" role="status"></div>
+            <div class="spinner-grow text-info spinner-4" role="status"></div>
+            <div class="spinner-grow text-primary spinner-5" role="status"></div>
+            <div class="spinner-grow text-info spinner-6" role="status"></div>
+            <div class="spinner-grow text-primary spinner-7" role="status"></div>
+            <div class="spinner-grow text-info spinner-8" role="status"></div>
+        </div>
+    </div>
+
+    <vc:staff-nav-bar />
+
+    <div id="main-container" class="container-fluid">
+        <div class="row sidebar-layout">
+
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                        <span class="w-100">Authentication</span>
+                    </h4>
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Equipment_Assets_Assets ? "active" : "")" asp-page="/Auth/Users/Index" asp-area="Admin">
+                                Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Equipment_Assets_Allocations ? "active" : "")" asp-page="/Auth/Roles/Index" asp-area="Admin">
+                                Roles
+                            </a>
+                        </li>
+                    </ul>
+
+                    <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                        <span class="w-100">Rollover</span>
+                    </h4>
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                                <span class="w-100">
+                                    <a class="nav-link" asp-page="/Rollover/Index" asp-area="Admin">
+                                        Rollover
+                                    </a>
+                                </span>
+                            </h4>
+                        </li>
+                    </ul>
+                    
+                    <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                        <span class="w-100">Automation</span>
+                    </h4>
+                    <ul class="nav flex-column mx-2">
+                        <li class="nav-item">
+                            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                                <span class="w-100">
+                                    <a class="nav-link" asp-page="/Automation/Index" asp-area="Admin">
+                                        Rollover
+                                    </a>
+                                </span>
+                            </h4>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-md-3">
+                @RenderBody()
+            </main>
+        </div>
+
+        @if (Model.ModalContent is not null)
+        {
+            <vc:modal-content-display content="@Model.ModalContent" />
+
+            <script>
+                $(document).ready(function () {
+                    $('#ux-modal').modal('show');
+                });
+            </script>
+        }
+    </div>
+
+    <footer class="footer fixed-bottom">
+        <vc:page-footer />
+    </footer>
+
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('.spinner-overlay').addClass('d-none');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth;
+namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users;
 
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
