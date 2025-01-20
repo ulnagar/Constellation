@@ -32,36 +32,43 @@ internal sealed class UpsertPeriodCommandHandler
     {
         if (request.Id == PeriodId.Empty)
         {
-            _logger
-                .ForContext(nameof(UpsertPeriodCommand), request, true)
-                .ForContext(nameof(Error), PeriodErrors.InvalidId, true)
-                .Warning("Failed to update Period");
+            Period newPeriod = Period.Create(
+                request.Timetable,
+                request.Week,
+                request.Day,
+                request.PeriodCode,
+                request.Name,
+                request.Type,
+                request.StartTime,
+                request.EndTime);
 
-            return Result.Failure(PeriodErrors.InvalidId);
+            _periodRepository.Insert(newPeriod);
         }
-
-        Period period = await _periodRepository.GetById(request.Id, cancellationToken);
-
-        if (period is null)
+        else
         {
-            _logger
-                .ForContext(nameof(UpsertPeriodCommand), request, true)
-                .ForContext(nameof(Error), PeriodErrors.NotFound(request.Id), true)
-                .Warning("Failed to update Period");
+            Period period = await _periodRepository.GetById(request.Id, cancellationToken);
 
-            return Result.Failure(PeriodErrors.NotFound(request.Id));
+            if (period is null)
+            {
+                _logger
+                    .ForContext(nameof(UpsertPeriodCommand), request, true)
+                    .ForContext(nameof(Error), PeriodErrors.NotFound(request.Id), true)
+                    .Warning("Failed to update Period");
+
+                return Result.Failure(PeriodErrors.NotFound(request.Id));
+            }
+
+            period.Update(
+                request.Timetable,
+                request.Week,
+                request.Day,
+                request.PeriodCode,
+                request.Name,
+                request.Type,
+                request.StartTime,
+                request.EndTime);
         }
         
-        period.Update(
-            request.Timetable,
-            request.Week,
-            request.Day,
-            request.PeriodCode,
-            request.Name,
-            request.Type,
-            request.StartTime,
-            request.EndTime);
-
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();

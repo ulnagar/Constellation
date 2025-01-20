@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
@@ -46,14 +45,21 @@ public class UpsertModel : BasePageModel
 
     [BindProperty(SupportsGet = true)] 
     public PeriodId Id { get; set; } = PeriodId.Empty;
+    [BindProperty]
     public ValidDays Day { get; set; }
+    [BindProperty]
     public char? PeriodCode { get; set; } = null;
+    [BindProperty]
     public string TimetableCode { get; set; }
+    [BindProperty]
     [DataType(DataType.Time)]
     public TimeSpan StartTime { get; set; }
+    [BindProperty]
     [DataType(DataType.Time)]
     public TimeSpan EndTime { get; set; }
+    [BindProperty]
     public string Name { get; set; }
+    [BindProperty]
     public string PeriodTypeCode { get; set; }
 
     public SelectList Timetables { get; set; }
@@ -108,7 +114,7 @@ public class UpsertModel : BasePageModel
         PeriodType type = PeriodType.FromValue(PeriodTypeCode);
 
         UpsertPeriodCommand command = new(
-            Id,
+            Id == PeriodId.Empty ? PeriodId.Empty : Id,
             convertDay.week,
             convertDay.day,
             PeriodCode ?? '\0',

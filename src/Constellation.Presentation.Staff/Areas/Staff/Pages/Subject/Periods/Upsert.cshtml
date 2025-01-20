@@ -23,7 +23,7 @@
         <div class="form-group row">
             <label asp-for="TimetableCode" class="col-md-2">Timetable</label>
             <div class="col-md-3">
-                <select asp-for="TimetableCode" asp-items="@Model.Timetables" class="form-control">
+                <select asp-for="TimetableCode" asp-items="@Model.Timetables" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="TimetableCode" class="text-danger"></span>
@@ -41,7 +41,9 @@
         <div class="form-group row">
             <label asp-for="Day" class="col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="Day" asp-items="Html.GetEnumSelectList<UpsertModel.ValidDays>()" class="form-control"></select>
+                <select asp-for="Day" asp-items="Html.GetEnumSelectList<UpsertModel.ValidDays>()" class="form-control combo">
+                    <option value="">-- Select --</option>
+                </select>
                 <span asp-validation-for="Day" class="text-danger"></span>
             </div>
         </div>
