@@ -10,6 +10,7 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,6 +58,9 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
 
             foreach (Student student in students)
             {
+                if (student.StudentReferenceNumber == StudentReferenceNumber.Empty)
+                    continue;
+
                 response.Add(new(
                     request.CourseCode, 
                     student.StudentReferenceNumber.Number, 

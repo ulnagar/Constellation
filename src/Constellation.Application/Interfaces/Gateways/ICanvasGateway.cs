@@ -23,7 +23,7 @@ public interface ICanvasGateway
     Task<Result> UpdateUserEmail(string userId, string emailAddress, CancellationToken cancellationToken = default);
     Task<Result> DeactivateUser(string userId, CancellationToken cancellationToken = default);
     Task<Result> EnrolToCourse(string userId, CanvasCourseCode courseId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
-    Task<Result> EnrolToSection(string userId, CanvasSectionCode sectionId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
+    Task<Result> EnrolToSection(string userId, CanvasCourseCode courseId, CanvasSectionCode sectionId, CanvasPermissionLevel permissionLevel, CancellationToken cancellationToken = default);
     Task<Result> ReactivateUser(string userId, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -54,7 +54,7 @@ public interface ICanvasGateway
 
     Task<List<CourseListEntry>> GetAllCourses(string year, CancellationToken cancellationToken = default);
     Task<List<CourseEnrolmentEntry>> GetEnrolmentsForCourse(CanvasCourseCode courseId, CancellationToken cancellationToken = default);
-    Task<Result> AddUserToGroup(string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
+    Task<Result> AddUserToGroup(CanvasCourseCode courseId, string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
     Task<Result<List<string>>> GetGroupMembers(CanvasSectionCode groupId, CancellationToken cancellationToken = default);
     Task<Result> RemoveUserFromGroup(string userId, CanvasSectionCode groupId, CancellationToken cancellationToken = default);
 }

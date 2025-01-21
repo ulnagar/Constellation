@@ -63,11 +63,9 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
         {
             _logger.Information("Processing course {canvasCourse}", canvasCourse.Name);
 
-            List<CourseEnrolmentEntry> canvasEnrolments =
-                await _gateway.GetEnrolmentsForCourse(canvasCourse.CourseCode, cancellationToken);
+            List<CourseEnrolmentEntry> canvasEnrolments = await _gateway.GetEnrolmentsForCourse(canvasCourse.CourseCode, cancellationToken);
 
-            Result<List<CanvasCourseMembership>> calculatedMembers =
-                await _mediator.Send(new GetCourseMembershipByCourseCodeQuery(canvasCourse.CourseCode), cancellationToken);
+            Result<List<CanvasCourseMembership>> calculatedMembers = await _mediator.Send(new GetCourseMembershipByCourseCodeQuery(canvasCourse.CourseCode), cancellationToken);
 
             if (calculatedMembers.IsFailure)
             {
@@ -80,7 +78,8 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
             List<CanvasCourseMembership> missingCanvasEnrolments = calculatedMembers.Value
                 .Where(entry =>
-                    canvasEnrolments.All(user => user.UserId != entry.UserId))
+                    canvasEnrolments.All(user => 
+                        user.UserId != entry.UserId))
                 .ToList();
 
             foreach (CanvasCourseMembership missingEnrolment in missingCanvasEnrolments)
@@ -90,7 +89,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                 Result enrolAttempt = _configuration.UseSections switch
                 {
                     true when missingEnrolment.PermissionLevel == CanvasPermissionLevel.Student && missingEnrolment.SectionId != CanvasSectionCode.Empty =>
-                        await _gateway.EnrolToSection(missingEnrolment.UserId, missingEnrolment.SectionId, missingEnrolment.PermissionLevel, cancellationToken),
+                        await _gateway.EnrolToSection(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.SectionId, missingEnrolment.PermissionLevel, cancellationToken),
                     true =>
                         await _gateway.EnrolToCourse(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.PermissionLevel, cancellationToken),
                     false =>
@@ -112,7 +111,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                 _logger.Information("Adding {user} to group {group} in course {course}", missingEnrolment.UserId, missingEnrolment.SectionId, canvasCourse.CourseCode);
                 
-                Result addToGroupAttempt = await _gateway.AddUserToGroup(missingEnrolment.UserId, missingEnrolment.SectionId, cancellationToken);
+                Result addToGroupAttempt = await _gateway.AddUserToGroup(canvasCourse.CourseCode, missingEnrolment.UserId, missingEnrolment.SectionId, cancellationToken);
 
                 if (addToGroupAttempt.IsFailure)
                 {
@@ -127,7 +126,8 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
             List<CourseEnrolmentEntry> extraCanvasEnrolments = canvasEnrolments
                 .Where(entry =>
-                    calculatedMembers.Value.All(user => user.UserId != entry.UserId))
+                    calculatedMembers.Value.All(user => 
+                        user.UserId != entry.UserId))
                 .ToList();
 
             foreach (CourseEnrolmentEntry canvasEnrolment in extraCanvasEnrolments)
@@ -172,7 +172,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                     {
                         _logger.Information("Adding {user} to group {group} in course {course}", missingGroupMember.UserId, group.Key, canvasCourse.CourseCode);
                         
-                        Result addToGroupAttempt = await _gateway.AddUserToGroup(missingGroupMember.UserId, group.Key, cancellationToken);
+                        Result addToGroupAttempt = await _gateway.AddUserToGroup(canvasCourse.CourseCode, missingGroupMember.UserId, group.Key, cancellationToken);
 
                         if (addToGroupAttempt.IsFailure)
                             _logger
@@ -244,6 +244,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
                     Result addedToSection = await _gateway.EnrolToSection(
                         calculatedMemberRecord.UserId,
+                        canvasCourse.CourseCode,
                         calculatedMemberRecord.SectionId,
                         calculatedMemberRecord.PermissionLevel,
                         cancellationToken);
