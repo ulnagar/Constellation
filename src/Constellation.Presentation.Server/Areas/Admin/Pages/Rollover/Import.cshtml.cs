@@ -30,6 +30,8 @@ public class ImportModel : BasePageModel
         _logger = logger
             .ForContext<ImportModel>();
     }
+    [ViewData] public string ActivePage => Models.ActivePage.Rollover;
+    [ViewData] public string PageTitle => "Annual Rollover";
 
     [BindProperty]
     public IFormFile FormFile { get; set; }

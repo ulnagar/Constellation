@@ -34,7 +34,10 @@ public class IndexModel : BasePageModel
         _roleManager = roleManager;
         _linkGenerator = linkGenerator;
     }
-    
+
+    [ViewData] public string ActivePage => Models.ActivePage.Auth_Roles;
+    [ViewData] public string PageTitle => "Auth Roles";
+
     public List<UserRoleDetailsDto> Roles { get; set; } = new();
 
     public class UserRoleDetailsDto
@@ -133,7 +136,7 @@ public class IndexModel : BasePageModel
     {
         ModalContent = new ErrorDisplay(
             error,
-            _linkGenerator.GetPathByPage("/Auth/Role", values: new { area = "Admin", RoleId }));
+            _linkGenerator.GetPathByPage("/Auth/Roles/Index", values: new { area = "Admin", RoleId }));
 
         AddUserForm = null;
 

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class IndexModel : BasePageModel
@@ -28,6 +29,9 @@ public class IndexModel : BasePageModel
         _userManager = userManager;
         _linkGenerator = linkGenerator;
     }
+
+    [ViewData] public string ActivePage => Models.ActivePage.Auth_Users;
+    [ViewData] public string PageTitle => "Auth Users";
 
     public int StaffUserCount { get; set; }
     public int SchoolContactUserCount { get; set; }
@@ -53,10 +57,15 @@ public class IndexModel : BasePageModel
     
     public enum UserType
     {
+        [Display(Name = "All Users")]
         All,
+        [Display(Name = "Staff Users")]
         Staff,
+        [Display(Name = "School Contact Users")]
         School,
+        [Display(Name = "Parent Users")]
         Parent,
+        [Display(Name = "Student Users")]
         Student
     }
 
@@ -115,12 +124,12 @@ public class IndexModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(
                 result.Error,
-                _linkGenerator.GetPathByPage("/Auth/Index", values: new { area = "Admin" }));
+                _linkGenerator.GetPathByPage("/Auth/Users/Index", values: new { area = "Admin" }));
 
             return Page();
         }
 
-        return RedirectToPage("Index");
+        return RedirectToPage();
     }
 
     public async Task OnGetAuditAllUsers(CancellationToken cancellationToken = default) => await _mediator.Send(new AuditAllUsersCommand(), cancellationToken);

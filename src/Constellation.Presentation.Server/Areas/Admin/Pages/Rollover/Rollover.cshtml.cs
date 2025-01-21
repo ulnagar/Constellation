@@ -28,6 +28,9 @@ public class RolloverModel : BasePageModel
         _rolloverRepository = rolloverRepository;
     }
 
+    [ViewData] public string ActivePage => Models.ActivePage.Rollover;
+    [ViewData] public string PageTitle => "Annual Rollover";
+
     [BindProperty] 
     public List<RolloverDecision> Statuses { get; set; } = new();
 

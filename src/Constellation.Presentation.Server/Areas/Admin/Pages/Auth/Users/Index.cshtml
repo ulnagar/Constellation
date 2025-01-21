@@ -1,4 +1,5 @@
-﻿@page "{SelectedUserType}"
+﻿@page "{SelectedUserType?}"
+@using Constellation.Application.Helpers
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users.IndexModel
 
 <h3>User Management</h3>
@@ -20,6 +21,8 @@
     </div>
     
     <div class="w-75 ms-3 p-3">
+        <h4>@Model.SelectedUserType.GetDisplayName()</h4>
+
         <table class="data-table table table-striped">
             <thead>
             <tr>
@@ -36,7 +39,7 @@
                 {
                     <tr>
                         <td>
-                            @user.Name<br />
+                            @user.Name<br/>
                             @user.Email
                         </td>
                         <td>
@@ -59,7 +62,7 @@
                         </td>
                     </tr>
                 }
-            } 
+            }
             else
             {
                 <tr>

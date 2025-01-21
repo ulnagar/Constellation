@@ -1,6 +1,8 @@
-﻿@model Constellation.Application.Common.PresentationModels.IBaseModel
+﻿@using Constellation.Presentation.Server.Areas.Admin.Models
+@model Constellation.Application.Common.PresentationModels.IBaseModel
 
 @{
+    var activePageAvailable = ViewData.TryGetValue("ActivePage", out var activePage);
     var pageTitleAvailable = ViewData.TryGetValue("PageTitle", out var pageTitle);
 }
 
@@ -68,12 +70,12 @@
                     </h4>
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Equipment_Assets_Assets ? "active" : "")" asp-page="/Auth/Users/Index" asp-area="Admin">
+                            <a class="nav-link @(activePage?.ToString() == ActivePage.Auth_Users ? "active" : "")" asp-page="/Auth/Users/Index" asp-area="Admin">
                                 Users
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Equipment_Assets_Allocations ? "active" : "")" asp-page="/Auth/Roles/Index" asp-area="Admin">
+                            <a class="nav-link @(activePage?.ToString() == ActivePage.Auth_Roles ? "active" : "")" asp-page="/Auth/Roles/Index" asp-area="Admin">
                                 Roles
                             </a>
                         </li>
@@ -84,13 +86,9 @@
                     </h4>
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
-                                <span class="w-100">
-                                    <a class="nav-link" asp-page="/Rollover/Index" asp-area="Admin">
-                                        Rollover
-                                    </a>
-                                </span>
-                            </h4>
+                            <a class="nav-link @(activePage?.ToString() == ActivePage.Rollover ? "active" : "")" asp-page="/Rollover/Index" asp-area="Admin">
+                                Rollover
+                            </a>
                         </li>
                     </ul>
                     
@@ -99,13 +97,14 @@
                     </h4>
                     <ul class="nav flex-column mx-2">
                         <li class="nav-item">
-                            <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
-                                <span class="w-100">
-                                    <a class="nav-link" asp-page="/Automation/Index" asp-area="Admin">
-                                        Rollover
-                                    </a>
-                                </span>
-                            </h4>
+                            <a class="nav-link @(activePage?.ToString() == ActivePage.Automation ? "active" : "")" asp-page="/Automation/Index" asp-area="Admin">
+                                Task List
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/hangfire">
+                                Hangfire Dashboard
+                            </a>
                         </li>
                     </ul>
                 </div>

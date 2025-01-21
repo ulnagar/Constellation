@@ -23,6 +23,9 @@ public class DetailsModel : BasePageModel
         _roleManager = roleManager;
     }
 
+    [ViewData] public string ActivePage => Models.ActivePage.Auth_Users;
+    [ViewData] public string PageTitle => "Auth Users";
+
     [BindProperty(SupportsGet = true)]
     public string EmailAddress { get; set; }
     public AppUser AppUser { get; set; }

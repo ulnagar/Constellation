@@ -24,25 +24,28 @@
     </div>
     
     <div class="w-75 ms-3 p-3">
-        <thead class="table-striped data-table">
-        <tr>
-            <td>Name</td>
-            <td>Email</td>
-            <td>Action</td>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var member in Model.Members.OrderBy(member => member.DisplayName))
-        {
+        <h4 class="mb-2">@Model.RoleName</h4>
+        <table class="table-striped data-table">
+            <thead>
             <tr>
-                <td>@member.DisplayName</td>
-                <td>@member.EmailAddress</td>
-                <td>
-                    <a asp-page-handler="RemoveUser" asp-route-userId="@member.UserId" asp-route-roleId="@Model.RoleId" class="btn btn-warning btn-sm btn-show-hover">Remove</a>
-                </td>
+                <td>Name</td>
+                <td>Email</td>
+                <td>Action</td>
             </tr>
-        }
-        </tbody>
+            </thead>
+            <tbody>
+            @foreach (var member in Model.Members.OrderBy(member => member.DisplayName))
+            {
+                <tr>
+                    <td>@member.DisplayName</td>
+                    <td>@member.EmailAddress</td>
+                    <td>
+                        <a asp-page-handler="RemoveUser" asp-route-userId="@member.UserId" asp-route-roleId="@Model.RoleId" class="btn btn-warning btn-sm btn-show-hover">Remove</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
     </div>
 </div>
 

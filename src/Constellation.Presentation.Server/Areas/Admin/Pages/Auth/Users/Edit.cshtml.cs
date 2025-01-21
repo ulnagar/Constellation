@@ -21,6 +21,9 @@ public class EditModel : BasePageModel
         _userManager = userManager;
     }
 
+    [ViewData] public string ActivePage => Models.ActivePage.Auth_Users;
+    [ViewData] public string PageTitle => "Auth Users";
+
     [BindProperty(SupportsGet = true)]
     public Guid Id { get; set; }
 
@@ -51,7 +54,7 @@ public class EditModel : BasePageModel
 
         if (user is null)
         {
-            return RedirectToPage("Index");
+            return RedirectToPage("/Auth/Users/Index", new { area = "Admin" });
         }
 
         FirstName = user.FirstName;
@@ -71,7 +74,7 @@ public class EditModel : BasePageModel
 
         if (user is null)
         {
-            return RedirectToPage("Index");
+            return RedirectToPage("/Auth/Users/Index", new { area = "Admin" });
         }
 
         user.FirstName = FirstName;
@@ -84,6 +87,6 @@ public class EditModel : BasePageModel
 
         await _userManager.UpdateAsync(user);
 
-        return RedirectToPage("Info", new { EmailAddress = user.Email });
+        return RedirectToPage("/Auth/Users/Details", new { area = "Admin", EmailAddress = user.Email });
     }
 }

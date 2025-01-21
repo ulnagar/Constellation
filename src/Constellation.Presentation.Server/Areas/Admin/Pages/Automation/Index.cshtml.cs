@@ -8,6 +8,7 @@ using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 [Authorize(Roles = AuthRoles.Admin)]
 public class IndexModel : BasePageModel
@@ -50,6 +51,9 @@ public class IndexModel : BasePageModel
         Type JobType,
         string TypeName,
         string TypeSchedule);
+
+    [ViewData] public string ActivePage => Models.ActivePage.Automation;
+    [ViewData] public string PageTitle => "Automation";
 
     public void OnGet()
     {

@@ -79,11 +79,15 @@
                     </div>
                 </li>
                 
-                @if (Model.CanAccessSchoolPortal || Model.CanAccessParentPortal)
+                @if (Model.CanAccessSchoolPortal || Model.CanAccessParentPortal || isAdmin)
                 {
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Portals <span class="caret"></span></a>
                         <div class="dropdown-menu">
+                            @if (isAdmin)
+                            {
+                                <a class="dropdown-item" asp-area="Admin" asp-page="/Auth/Users/Index">Admin Portal</a>
+                            }
                             @if (Model.CanAccessSchoolPortal)
                             {
                                 <a class="dropdown-item" asp-area="Schools" asp-page="/Dashboard">Schools Portal</a>
@@ -95,18 +99,6 @@
                         </div>
                     </li>
                 }
-                
-                @if (isAdmin)
-                {
-                    <li class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Admin <span class="caret"></span></a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" asp-area="Admin" asp-page="/Auth/Index">Auth Dashboard</a>
-                            <a class="dropdown-item" asp-area="Admin" asp-page="/Rollover/Index">Annual Rollover</a>
-                        </div>
-                    </li>
-                }
-
             </ul>
 
             <ul class="navbar-nav navbar-right">
