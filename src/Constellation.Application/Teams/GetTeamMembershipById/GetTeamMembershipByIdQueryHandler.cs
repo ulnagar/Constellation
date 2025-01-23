@@ -11,8 +11,9 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
+using Core.Extensions;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Offerings;
@@ -46,6 +47,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly AppConfiguration _configuration;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
     private readonly ICourseRepository _courseRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
@@ -57,6 +59,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IStaffRepository staffRepository,
         IGroupTutorialRepository groupTutorialRepository,
         ICourseRepository courseRepository,
+        IDateTimeProvider dateTime,
         UserManager<AppUser> userManager,
         ILogger logger,
         IClassCoverRepository coverRepository,
@@ -73,6 +76,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _configuration = configuration.Value;
         _groupTutorialRepository = groupTutorialRepository;
         _courseRepository = courseRepository;
+        _dateTime = dateTime;
         _userManager = userManager;
         _logger = logger.ForContext<GetTeamMembershipByIdQuery>();
     }
@@ -88,6 +92,70 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             _logger.Warning("Error: Task failed with error {@error}", DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
 
             return Result.Failure<List<TeamMembershipResponse>>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+        }
+
+        if (team.Description.Split(';').Contains("STUDENT"))
+        {
+            List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
+
+            foreach (var student in students)
+            {
+                if (student.EmailAddress == EmailAddress.None)
+                    continue;
+
+                List<TeamMembershipResponse.TeamMembershipChannelResponse> studentChannels = (student.CurrentEnrolment is not null)
+                    ? new() { new ($"{_dateTime.CurrentYear} - {student.CurrentEnrolment.Grade.AsName()}", TeamsMembershipLevel.Member.Value) }
+                    : new();
+
+                TeamMembershipResponse entry = new(
+                    team.Id,
+                    student.EmailAddress.Email,
+                    TeamsMembershipLevel.Member.Value,
+                    studentChannels);
+
+                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                    returnData.Add(entry);
+            }
+
+            List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+
+            foreach (Staff staffMember in staff)
+            {
+                List<TeamMembershipResponse.TeamMembershipChannelResponse> staffChannels = new();
+
+                foreach (var grade in _teamsConfiguration.StudentTeamChannelOwnerIds)
+                {
+                    if (grade.Value.Contains(staffMember.StaffId))
+                        staffChannels.Add(new ($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Owner.Value));
+                    else
+                        staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Member.Value));
+                }
+
+                if (_teamsConfiguration.StudentTeamOwnerIds.Contains(staffMember.StaffId))
+                {
+                    TeamMembershipResponse entry = new(
+                        team.Id,
+                        staffMember.EmailAddress,
+                        TeamsMembershipLevel.Owner.Value,
+                        staffChannels);
+
+                    if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                        returnData.Add(entry);
+                }
+                else
+                {
+                    TeamMembershipResponse entry = new(
+                        team.Id,
+                        staffMember.EmailAddress,
+                        TeamsMembershipLevel.Member.Value,
+                        staffChannels);
+
+                    if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                        returnData.Add(entry);
+                }
+            }
+
+            return returnData;
         }
 
         if (team.Description.Split(';').Contains("CLASS"))

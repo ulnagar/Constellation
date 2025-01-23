@@ -4,7 +4,9 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Teams.Models;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
+using Core.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,18 +22,16 @@ internal sealed class GetAllTeamsQueryHandler
 
     public async Task<Result<List<TeamResource>>> Handle(GetAllTeamsQuery request, CancellationToken cancellationToken)
     {
-        var teams = await _teamRepository.GetAll(cancellationToken);
+        List<Team> teams = await _teamRepository.GetAll(cancellationToken);
 
-        var dataList = new List<TeamResource>();
+        List<TeamResource> dataList = new();
 
-        if (teams is null)
-        {
+        if (teams.Count == 0)
             return dataList;
-        }
 
-        foreach (var team in teams)
+        foreach (Team team in teams.OrderBy(entry => entry.Name))
         {
-            var entry = new TeamResource(
+            TeamResource entry = new(
                 team.Id,
                 team.Name,
                 team.Description,
