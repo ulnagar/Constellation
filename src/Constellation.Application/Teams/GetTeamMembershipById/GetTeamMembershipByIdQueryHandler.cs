@@ -396,7 +396,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 "christopher.robertson@det.nsw.edu.au",
                 "virginia.cluff@det.nsw.edu.au",
                 //"scott.new@det.nsw.edu.au",
-                "jane.priestley3@det.nsw.edu.au",
                 "julie.dent@det.nsw.edu.au",
                 "benjamin.hillsley@det.nsw.edu.au"
             };
