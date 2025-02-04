@@ -2,11 +2,9 @@
 
 using Constellation.Core.Models.Training.Identifiers;
 
-public class ModuleSummaryDto
-{
-    public TrainingModuleId Id { get; set; }
-    public string Name { get; set; }
-    public bool IsActive { get; set; }
-    public string Expiry { get; set; }
-    public string Url { get; set; }
-}
+public sealed record ModuleSummaryDto(
+    TrainingModuleId Id,
+    string Name,
+    bool IsActive,
+    string Expiry,
+    string Url);

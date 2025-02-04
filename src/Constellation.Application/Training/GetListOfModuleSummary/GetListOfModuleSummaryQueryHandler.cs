@@ -32,16 +32,12 @@ internal sealed class GetListOfModuleSummaryQueryHandler
 
         foreach (TrainingModule module in modules)
         {
-            if (module.IsDeleted) continue;
-
-            ModuleSummaryDto entry = new ModuleSummaryDto
-            {
-                Id = module.Id,
-                Name = module.Name,
-                Expiry = module.Expiry.GetDisplayName(),
-                Url = module.Url,
-                IsActive = !module.IsDeleted
-            };
+            ModuleSummaryDto entry = new(
+                module.Id,
+                module.Name,
+                !module.IsDeleted,
+                module.Expiry.GetDisplayName(),
+                module.Url);
 
             data.Add(entry);
         }
