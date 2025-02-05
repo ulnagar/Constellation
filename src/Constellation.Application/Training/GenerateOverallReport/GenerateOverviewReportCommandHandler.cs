@@ -82,6 +82,8 @@ internal sealed class GenerateOverviewReportCommandHandler
 
         foreach (TrainingModule module in modules)
         {
+            if (module.IsDeleted) continue;
+
             moduleDetails.Add(new(
                 module.Id,
                 module.Name,
@@ -111,6 +113,8 @@ internal sealed class GenerateOverviewReportCommandHandler
 
             foreach (TrainingModule module in modules)
             {
+                if (module.IsDeleted) continue;
+
                 bool required = module.Assignees.Any(entry => entry.StaffId == member.StaffId);
 
                 DateOnly? completed = module

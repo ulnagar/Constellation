@@ -1681,6 +1681,25 @@ public class ExcelService : IExcelService
         staffStatuses ??= new();
         moduleDetails ??= new();
 
+        List<TrainingModuleExpiryFrequency> moduleSortOrder =
+        [
+            TrainingModuleExpiryFrequency.Annually,
+            TrainingModuleExpiryFrequency.TwoYears,
+            TrainingModuleExpiryFrequency.ThreeYears,
+            TrainingModuleExpiryFrequency.FourYears,
+            TrainingModuleExpiryFrequency.FiveYears,
+            TrainingModuleExpiryFrequency.OnceOff
+        ];
+
+        moduleDetails = moduleDetails
+            .OrderBy(entry => moduleSortOrder.IndexOf(entry.Expiry))
+            .ThenBy(entry => entry.Name)
+            .ToList();
+
+        staffStatuses = staffStatuses
+            .OrderBy(entry => entry.Name.SortOrder)
+            .ToList();
+
         for (int row = 3; row < staffStatuses.Count + 3; row++)
         {
             worksheet.Cells[row, 1].Value = staffStatuses[row - 3].StaffId;
