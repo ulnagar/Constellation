@@ -5,4 +5,5 @@ using Core.ValueObjects;
 
 public sealed record CompletedPlansResponse(
     AttendancePlanId PlanId,
-    Name Student);
+    Name Student,
+    string DisplayName);

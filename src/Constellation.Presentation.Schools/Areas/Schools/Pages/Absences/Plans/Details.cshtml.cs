@@ -191,9 +191,13 @@ public class DetailsModel : BasePageModel
             return;
         }
 
+        List<CompletedPlansResponse> completedPlansList = completedPlans.Value
+            .OrderBy(entry => entry.DisplayName)
+            .ToList();
+
         Weeks = new(PeriodWeek.GetOptions, nameof(PeriodWeek.Value), nameof(PeriodWeek.Name));
         Days = new(PeriodDay.GetOptions, nameof(PeriodDay.Value), nameof(PeriodWeek.Name));
-        StudentPlans = new(completedPlans.Value, nameof(CompletedPlansResponse.PlanId), nameof(CompletedPlansResponse.Student));
+        StudentPlans = new(completedPlansList, nameof(CompletedPlansResponse.PlanId), nameof(CompletedPlansResponse.DisplayName));
     }
 
     internal List<TimeOnly> CalculateOptions(TimeOnly start, TimeOnly end)

@@ -33,7 +33,8 @@ internal sealed class GetRecentlyCompletedPlansQueryHandler
         {
             response.Add(new(
                 plan.Id,
-                plan.Student));
+                plan.Student,
+                $"{plan.Student.DisplayName} ({plan.CreatedAt:dd/MM/yyyy}) - {plan.Status.Name}"));
         }
 
         return response;

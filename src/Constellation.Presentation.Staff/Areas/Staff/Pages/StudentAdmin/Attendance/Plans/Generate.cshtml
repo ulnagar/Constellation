@@ -14,7 +14,7 @@
 
         <div class="form-group row">
             <label asp-for="StudentId" class="col-md-2">Student</label>
-            <div class="col-md-3">
+            <div class="col-md-5">
                 <select asp-for="StudentId" asp-items="@Model.Students" class="form-control combo">
                     <option value="@StudentId.Empty">-- Select --</option>
                 </select>
@@ -24,7 +24,7 @@
 
         <div class="form-group row">
             <label asp-for="SchoolCode" class="col-md-2">School</label>
-            <div class="col-md-3">
+            <div class="col-md-5">
                 <select asp-for="SchoolCode" asp-items="@Model.Schools" class="form-control combo">
                     <option value="">-- Select --</option>
                 </select>

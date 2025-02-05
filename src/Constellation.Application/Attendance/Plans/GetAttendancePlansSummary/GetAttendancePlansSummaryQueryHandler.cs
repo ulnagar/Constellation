@@ -43,6 +43,7 @@ internal sealed class GetAttendancePlansSummaryQueryHandler
                 plan.Student,
                 plan.Grade,
                 plan.School,
+                plan.CreatedAt,
                 plan.Status,
                 overallPercentage));
         }

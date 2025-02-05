@@ -97,9 +97,9 @@ public class GenerateModel : BasePageModel
             return;
         }
 
-        Schools = new SelectList(schools.Value, "Code", "Name");
+        Schools = new SelectList(schools.Value.OrderBy(entry => entry.Name), nameof(SchoolSelectionListResponse.Code), nameof(SchoolSelectionListResponse.Name));
 
-        Grades = new SelectList(Enum.GetValues(typeof(Grade)).Cast<Grade>().Select(v => new { Text = v.GetDisplayName(), Value = ((int)v).ToString() }).ToList(), "Value", "Text");
+        Grades = new SelectList(Enum.GetValues<Grade>().Select(v => new { Text = v.GetDisplayName(), Value = ((int)v).ToString() }).ToList(), "Value", "Text");
     }
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
