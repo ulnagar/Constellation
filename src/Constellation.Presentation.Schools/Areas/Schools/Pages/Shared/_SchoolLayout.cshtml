@@ -52,11 +52,11 @@
                         <div class="col">
                             @if (User?.Identity is not null && User.Identity.IsAuthenticated)
                             {
-                                <a class="btn btn-sm btn-warning ml-4" asp-area="Admin" asp-page="/Logout">Log Out</a>
+                                <a class="btn btn-sm btn-warning ml-4" asp-area="" asp-page="/Auth/Logout">Log Out</a>
                             }
                             else
                             {
-                                <a class="btn btn-sm btn-success" asp-area="Admin" asp-page="/Login">Log In</a>
+                                <a class="btn btn-sm btn-success" asp-area="" asp-page="/Auth/Login">Log In</a>
                             }
                         </div>
                     </div>
