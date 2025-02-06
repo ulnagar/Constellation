@@ -55,49 +55,55 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
             .Information("Starting Sentral Family Details Scan.");
 
         List<ParentContactChangeDto> changeLog = new();
+        List<Student> students = await _studentRepository.GetCurrentStudents(token);
 
         // Get the CSV file from Sentral
         // Convert to temporary objects
         //ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
-        List<FamilyDetailsDto> families = new();
 
-        Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
+#region 2025-02-06: Converted to API use
+        // 2025-02-06: Converted to API use
+        //List<FamilyDetailsDto> families = new();
 
-        List<Student> students = await _studentRepository.GetCurrentStudents(token);
+        //Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
 
-        foreach (KeyValuePair<string, List<string>> family in familyGroups)
-        {
-            Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
 
-            if (firstStudent is null)
-                continue;
+        //foreach (KeyValuePair<string, List<string>> family in familyGroups)
+        //{
+        //    Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
 
-            SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+        //    if (firstStudent is null)
+        //        continue;
 
-            if (link is null)
-                continue;
+        //    SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
 
-            FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
+        //    if (link is null)
+        //        continue;
 
-            entry.StudentReferenceNumbers = family.Value;
-            entry.FamilyId = family.Key;
+        //    FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
 
-            foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
-            {
-                string name = contact.FirstName.Contains(' ')
-                    ? contact.FirstName.Split(' ')[0]
-                    : contact.FirstName;
+        //    entry.StudentReferenceNumbers = family.Value;
+        //    entry.FamilyId = family.Key;
 
-                name = name.Length > 8 ? name[..8] : name;
+        //    foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
+        //    {
+        //        string name = contact.FirstName.Contains(' ')
+        //            ? contact.FirstName.Split(' ')[0]
+        //            : contact.FirstName;
 
-                contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
-            }
+        //        name = name.Length > 8 ? name[..8] : name;
 
-            families.Add(entry);
-        }
+        //        contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
+        //    }
+
+        //    families.Add(entry);
+        //}
+#endregion
+
+        ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReportFromApi(_logger, token);
 
         _logger
-            .Information("Found {count} families", familyGroups.Count);
+            .Information("Found {count} families", families.Count);
 
         List<Family> dbFamilies = await _familyRepository.GetAll(token);
 
@@ -386,7 +392,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         List<string> dbFamilySentralIds = dbFamilies
             .Where(family => 
                 !family.IsDeleted &&
-                !string.IsNullOrWhiteSpace(family.SentralId))
+                !string.IsNullOrWhiteSpace(family.SentralId)) // No SentralId means these are non-residential families
             .Select(family => family.SentralId)
             .ToList();
 
