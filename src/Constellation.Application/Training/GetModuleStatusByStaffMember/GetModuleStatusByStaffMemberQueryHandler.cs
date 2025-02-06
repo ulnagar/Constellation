@@ -38,6 +38,8 @@ internal sealed class GetModuleStatusByStaffMemberQueryHandler
 
         foreach (TrainingModule module in modules.OrderBy(module => module.Name))
         {
+            if (module.IsDeleted) continue;
+
             bool required = module.Assignees.Any(entry => entry.StaffId == request.StaffId);
 
             TrainingCompletion completedRecord = module

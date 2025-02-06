@@ -38,6 +38,8 @@ internal sealed class GetCountOfExpiringCertificatesForStaffMemberQueryHandler
 
         foreach (TrainingModule module in modules)
         {
+            if (module.IsDeleted) continue;
+
             TrainingCompletion record = module.Completions
                 .Where(record =>
                     record.StaffId == staff.StaffId &&
