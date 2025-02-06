@@ -3,8 +3,8 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Models.Families;
+using Core.Models.Families.Errors;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
@@ -32,7 +32,7 @@ internal sealed class GetFamilyDetailsByIdQueryHandler
         Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
-            return Result.Failure<FamilyDetailsResponse>(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure<FamilyDetailsResponse>(FamilyErrors.NotFound(request.FamilyId));
 
         List<FamilyDetailsResponse.StudentResponse> students = new();
 

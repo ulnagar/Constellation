@@ -39,4 +39,21 @@ public class Service : ISMSService
 
         return await _service.SendSmsAsync(messageContent);
     }
+
+    public async Task SendLoginToken(
+        string token,
+        PhoneNumber phoneNumber,
+        CancellationToken cancellationToken = default)
+    {
+        string messageText = $"Use token {token} for Aurora College Parent Portal. Token will expire in 10 mins.";
+
+        SMSMessageToSend messageContent = new()
+        {
+            origin = "Aurora",
+            destinations = [phoneNumber.ToString(PhoneNumber.Format.None)],
+            message = messageText
+        };
+
+        await _service.SendSmsAsync(messageContent);
+    }
 }

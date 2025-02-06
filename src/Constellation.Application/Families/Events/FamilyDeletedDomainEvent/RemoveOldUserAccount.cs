@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
 using Core.Errors;
+using Core.Models.Families.Errors;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -37,7 +38,7 @@ internal sealed class RemoveUserAccount
         {
             _logger
                 .ForContext(nameof(FamilyDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Families.Family.NotFound(notification.FamilyId), true)
+                .ForContext(nameof(Error), FamilyErrors.NotFound(notification.FamilyId), true)
                 .Warning("Failed to remove user account for deleted family");
 
             return;

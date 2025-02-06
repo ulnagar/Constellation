@@ -11,4 +11,5 @@ using System.Threading.Tasks;
 public interface ISMSService
 {
     Task<SMSMessageCollectionDto> SendAbsenceNotification(List<AbsenceEntry> absences, Student student, List<PhoneNumber> phoneNumbers, CancellationToken cancellationToken = default);
+    Task SendLoginToken(string token, PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
 }

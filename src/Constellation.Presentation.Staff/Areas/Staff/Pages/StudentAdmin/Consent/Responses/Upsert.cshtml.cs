@@ -9,6 +9,7 @@ using Application.ThirdPartyConsent.CreateTransaction;
 using Constellation.Application.ThirdPartyConsent.GetRequiredApplicationsForStudent;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Families.Errors;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.ThirdPartyConsent.Enums;
@@ -110,10 +111,10 @@ public class UpsertModel : BasePageModel
         if (contact is null)
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Families.Parents.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value), true)
+                .ForContext(nameof(Error), ParentErrors.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value), true)
                 .Warning("Failed to create new Consent Response by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(DomainErrors.Families.Parents.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value));
+            ModalContent = new ErrorDisplay(ParentErrors.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value));
 
             return await PreparePage();
         }

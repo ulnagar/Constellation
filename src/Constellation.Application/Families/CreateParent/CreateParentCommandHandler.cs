@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
+using Core.Models.Families.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -28,7 +28,7 @@ internal sealed class CreateParentCommandHandler
         var family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
-            return Result.Failure<Parent>(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure<Parent>(FamilyErrors.NotFound(request.FamilyId));
 
         var result = family.AddParent(
             request.Title,

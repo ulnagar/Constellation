@@ -30,6 +30,16 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Family>()
             .FirstOrDefaultAsync(family => family.FamilyEmail == email.Email, cancellationToken);
 
+    public async Task<List<Family>> GetFamilyByMobileNumber(
+        PhoneNumber phoneNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Family>()
+            .Where(entry =>
+                entry.Parents.Any(parent => 
+                    parent.MobileNumber == phoneNumber.ToString(PhoneNumber.Format.None)))
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Family>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context

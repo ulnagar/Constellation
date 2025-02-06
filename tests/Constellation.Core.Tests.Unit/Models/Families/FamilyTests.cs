@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Core.Tests.Unit.Models.Families;
 
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.Families.Errors;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
 
@@ -296,7 +296,7 @@ public class FamilyTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
-        result.Error.Should().BeEquivalentTo(DomainErrors.Families.Parents.AlreadyExists);
+        result.Error.Should().BeEquivalentTo(ParentErrors.AlreadyExists);
     }
 
     [Fact]

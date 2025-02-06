@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Families.Models;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.Families.Errors;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,7 +27,7 @@ internal sealed class GetFamilyByIdQueryHandler
 
         if (family is null)
         {
-            return Result.Failure<FamilyResponse>(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure<FamilyResponse>(FamilyErrors.NotFound(request.FamilyId));
         }
 
         List<ParentResponse> parents = new();

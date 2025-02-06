@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Families;
+using Core.Models.Families.Errors;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -34,7 +35,7 @@ internal sealed class AddStudentToFamilyCommandHandler
         Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
-            return Result.Failure(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure(FamilyErrors.NotFound(request.FamilyId));
 
         Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 

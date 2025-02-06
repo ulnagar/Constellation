@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Core.Errors;
+using Core.Models.Families.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Configuration;
@@ -40,7 +41,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
         {
             _logger.Warning("Could not find any families associated with student id {id}.", request.StudentId);
 
-            return Result.Failure<List<PhoneNumber>>(DomainErrors.Families.Students.NoLinkedFamilies);
+            return Result.Failure<List<PhoneNumber>>(FamilyStudentErrors.NoLinkedFamilies);
         }
 
         var residentialFamily = studentFamilies.FirstOrDefault(family =>
@@ -52,7 +53,7 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
         {
             _logger.Warning("Could not find a residential family associated with student id {id}.", request.StudentId);
 
-            return Result.Failure<List<PhoneNumber>>(DomainErrors.Families.Students.NoResidentialFamily);
+            return Result.Failure<List<PhoneNumber>>(FamilyStudentErrors.NoResidentialFamily);
         }
 
         var mother = residentialFamily

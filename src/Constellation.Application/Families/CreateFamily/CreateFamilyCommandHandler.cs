@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.Families.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ internal sealed class CreateFamilyCommandHandler
             Family family = await _familyRepository.GetFamilyByEmail(request.FamilyEmail, cancellationToken);
 
             if (!family.IsDeleted) 
-                return Result.Failure<Family>(DomainErrors.Families.Family.EmailAlreadyInUse);
+                return Result.Failure<Family>(FamilyErrors.EmailAlreadyInUse);
 
             family.Reinstate();
             await _unitOfWork.CompleteAsync(cancellationToken);

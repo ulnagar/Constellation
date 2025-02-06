@@ -126,6 +126,53 @@
                 </div>
             }
 
+            @if (Model.Status == LoginModel.LoginStatus.WaitingTokenInput)
+            {
+                <form asp-page-handler="TokenLogin" method="post">
+                    <div class="form-box">
+                        <div class="form-value">
+                            <h2>Login</h2>
+                            <div class="login-text">
+                                <p>Sign in for Aurora College Constellation Portals.</p>
+                            </div>
+                            <div class="inputbox">
+                                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                                <input asp-for="Input.Email" placeholder=" " readonly="readonly" />
+                                <label asp-for="Input.Email">Email</label>
+                            </div>
+                            <div class="inputbox">
+                                <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                                <input asp-for="Input.Password" placeholder=" " required autofocus class="@(!Model.ModelState.IsValid ? "is-invalid" : "")" />
+                                <label asp-for="Input.Password">Token</label>
+                            </div>
+                        </div>
+                        <div class="form-value">
+                            <button type="submit">Log in</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="help-box">
+                    <div class="form-value">
+                        <div class="login-text">
+                            @if (Model.ModelState.ErrorCount > 0)
+                            {
+                                var errors = Model.ModelState
+                                .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
+                                .SelectMany(entry => entry.Value.Errors);
+
+                                foreach (var error in errors)
+                                {
+                                    <p class="warning">@error.ErrorMessage</p>
+                                }
+                            }
+                            <p><strong>Token:</strong> Enter the login token sent via SMS.</p>
+                            <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
+                        </div>
+                    </div>
+                </div>
+            }
+
             @if (Model.Status == LoginModel.LoginStatus.EmailSent)
             {
                 <div class="form-box">

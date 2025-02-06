@@ -7,6 +7,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Shared;
+using Core.Models.Families.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -37,7 +38,7 @@ internal sealed class RemoveParentsAndStudents
         {
             _logger
                 .ForContext(nameof(FamilyDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Families.Family.NotFound(notification.FamilyId), true)
+                .ForContext(nameof(Error), FamilyErrors.NotFound(notification.FamilyId), true)
                 .Warning("Could not find family with Id {familyId}", notification.FamilyId);
 
             return;

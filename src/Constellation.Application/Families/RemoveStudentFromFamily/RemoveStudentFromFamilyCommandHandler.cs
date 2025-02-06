@@ -3,8 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Core.Models.Families.Errors;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,7 +27,7 @@ internal sealed class RemoveStudentFromFamilyCommandHandler
         var family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
-            return Result.Failure(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure(FamilyErrors.NotFound(request.FamilyId));
 
         var result = family.RemoveStudent(request.StudentId);
 

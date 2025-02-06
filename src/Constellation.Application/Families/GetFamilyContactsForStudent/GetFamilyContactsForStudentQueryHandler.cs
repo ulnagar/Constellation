@@ -3,7 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
-using Core.Errors;
+using Core.Models.Families.Errors;
 using Core.Shared;
 using Core.ValueObjects;
 using Models;
@@ -31,7 +31,7 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
 
         if (families is null || !families.Any())
         {
-            return Result.Failure<List<FamilyContactResponse>>(DomainErrors.Families.Students.NoLinkedFamilies);
+            return Result.Failure<List<FamilyContactResponse>>(FamilyStudentErrors.NoLinkedFamilies);
         }
 
         foreach (Family family in families)

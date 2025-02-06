@@ -139,50 +139,6 @@ public static class DomainErrors
         }
     }
 
-    public static class Families
-    {
-        public static class Family
-        {
-            public static readonly Error EmailAlreadyInUse = new(
-                "Families.Family.EmailAlreadyInUse",
-                "Email address is already linked to another family");
-
-            public static readonly Func<FamilyId, Error> NotFound = id => new(
-                "Families.Family.NotFound",
-                $"Could not find a family with Id {id}");
-
-            public static readonly Error InvalidAddress = new(
-                "Families.Address.InvalidAddress",
-                "The Address supplied is incomplete or invalid");
-
-            public static readonly Error NoneFound = new(
-                "Families.Family.NoneFound",
-                "Could not find any families");
-        }
-
-        public static class Parents
-        {
-            public static readonly Func<ParentId, FamilyId, Error> NotFoundInFamily = (parentId, familyId) => new(
-                "Families.Parent.NotFoundInFamily",
-                $"Could not find a parent with Id {parentId} in the family with Id {familyId}");
-
-            public static readonly Error AlreadyExists = new(
-                "Families.Parent.AlreadyExists",
-                "Cannot create a new parent as another parent already exists with these details");
-        }
-
-        public static class Students
-        {
-            public static readonly Error NoLinkedFamilies = new(
-                "Families.Students.NoLinkedFamilies",
-                "The student does not have any linked families in the database");
-
-            public static readonly Error NoResidentialFamily = new(
-                "Families.Students.NoResidentialFamily",
-                "The student does not have any linked family marked as the residential family");
-        }
-    }
-
     public static class GroupTutorials
     {
         public static class GroupTutorial

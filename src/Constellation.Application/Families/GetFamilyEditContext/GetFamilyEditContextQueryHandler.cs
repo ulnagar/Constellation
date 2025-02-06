@@ -3,9 +3,9 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Errors;
 using Core.Extensions;
 using Core.Models.Families;
+using Core.Models.Families.Errors;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
@@ -32,7 +32,7 @@ internal sealed class GetFamilyEditContextQueryHandler
         Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
-            return Result.Failure<FamilyEditContextResponse>(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure<FamilyEditContextResponse>(FamilyErrors.NotFound(request.FamilyId));
 
         List<string> parents = new();
 

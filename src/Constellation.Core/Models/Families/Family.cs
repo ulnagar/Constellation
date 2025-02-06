@@ -1,19 +1,18 @@
 ﻿#nullable enable
-using Constellation.Core.Models.Students.Identifiers;
-using Constellation.Core.Models.Students.ValueObjects;
-
 namespace Constellation.Core.Models.Families;
 
-using DomainEvents;
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Students.ValueObjects;
+using Core.Errors;
 using Errors;
+using Events;
 using Identifiers;
 using Primitives;
 using Shared;
-using ValueObjects;
-using Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ValueObjects;
 
 public sealed class Family : AggregateRoot, IAuditableEntity
 {
@@ -87,7 +86,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Success();
         }
 
-        return Result.Failure(DomainErrors.Families.Family.InvalidAddress);
+        return Result.Failure(FamilyErrors.InvalidAddress);
     }
 
     public Result UpdateFamilyEmail(string email)
@@ -99,7 +98,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             return Result.Failure(familyEmail.Error);
         }
 
-        RaiseDomainEvent(new FamilyEmailAddressChangedDomainEvent(new DomainEventId(), Id, FamilyEmail, familyEmail.Value.Email));
+        RaiseDomainEvent(new FamilyEmailAddressChangedDomainEvent(new(), Id, FamilyEmail, familyEmail.Value.Email));
 
         FamilyEmail = familyEmail.Value.Email;
 
@@ -126,10 +125,10 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         var existingParent = _parents.FirstOrDefault(parent => parent.EmailAddress == parentEmail.Value.Email && parent.SentralLink == sentralLink);
 
         if (existingParent is not null)
-            return Result.Failure<Parent>(DomainErrors.Families.Parents.AlreadyExists);
+            return Result.Failure<Parent>(ParentErrors.AlreadyExists);
 
         var parent = Parent.Create(
-            new ParentId(),
+            new(),
             Id,
             title,
             firstName,
@@ -138,7 +137,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
             parentEmail.Value,
             sentralLink);
 
-        RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new DomainEventId(), Id, parent.Id));
+        RaiseDomainEvent(new ParentAddedToFamilyDomainEvent(new(), Id, parent.Id));
 
         _parents.Add(parent);
 
@@ -164,10 +163,10 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         var existingParent = _parents.FirstOrDefault(parent => parent.Id == parentId);
 
         if (existingParent is null)
-            return Result.Failure<Parent>(DomainErrors.Families.Parents.NotFoundInFamily(parentId, Id));
+            return Result.Failure<Parent>(ParentErrors.NotFoundInFamily(parentId, Id));
 
         if (parentEmail.Value.Email != existingParent.EmailAddress)
-            RaiseDomainEvent(new ParentEmailAddressChangedDomainEvent(new DomainEventId(), Id, existingParent.Id, existingParent.EmailAddress, parentEmail.Value.Email));
+            RaiseDomainEvent(new ParentEmailAddressChangedDomainEvent(new(), Id, existingParent.Id, existingParent.EmailAddress, parentEmail.Value.Email));
 
         existingParent.Update(
             title,
@@ -192,7 +191,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         _parents.Remove(existingParent);
 
-        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new DomainEventId(), Id, existingParent.EmailAddress));
+        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new(), Id, existingParent.EmailAddress));
 
         return Result.Success();
     }
@@ -208,7 +207,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         {
             var membership = StudentFamilyMembership.Create(studentId, Id, isResidential);
 
-            RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new DomainEventId(), membership));
+            RaiseDomainEvent(new StudentAddedToFamilyDomainEvent(new(), membership));
 
             _studentMemberships.Add(membership);
 
@@ -221,7 +220,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
             if (isResidential)
             {
-                RaiseDomainEvent(new StudentResidentialFamilyChangedDomainEvent(new DomainEventId(), existingMembership));
+                RaiseDomainEvent(new StudentResidentialFamilyChangedDomainEvent(new(), existingMembership));
             }
         }
 
@@ -240,7 +239,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         _studentMemberships.Remove(existingMembership);
 
-        RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(new DomainEventId(), existingMembership));
+        RaiseDomainEvent(new StudentRemovedFromFamilyDomainEvent(new(), existingMembership));
 
         return Result.Success();
     }
@@ -249,7 +248,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        RaiseDomainEvent(new FamilyDeletedDomainEvent(new DomainEventId(), Id));
+        RaiseDomainEvent(new FamilyDeletedDomainEvent(new(), Id));
     }
 
     public void Reinstate()
@@ -258,6 +257,6 @@ public sealed class Family : AggregateRoot, IAuditableEntity
         DeletedAt = DateTime.MinValue;
         DeletedBy = string.Empty;
 
-        RaiseDomainEvent(new FamilyReinstatedDomainEvent(new DomainEventId(), Id));
+        RaiseDomainEvent(new FamilyReinstatedDomainEvent(new(), Id));
     }
 }

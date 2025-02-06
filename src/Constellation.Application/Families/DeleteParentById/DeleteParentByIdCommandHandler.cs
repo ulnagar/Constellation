@@ -3,9 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Shared;
+using Core.Models.Families.Errors;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,14 +30,14 @@ internal sealed class DeleteParentByIdCommandHandler
 
         if (family is null)
         {
-            return Result.Failure(DomainErrors.Families.Family.NotFound(request.FamilyId));
+            return Result.Failure(FamilyErrors.NotFound(request.FamilyId));
         }
 
         Parent parent = family.Parents.FirstOrDefault(parent => parent.Id == request.ParentId);
 
         if (parent is null)
         {
-            return Result.Failure(DomainErrors.Families.Parents.NotFoundInFamily(request.ParentId, request.FamilyId));
+            return Result.Failure(ParentErrors.NotFoundInFamily(request.ParentId, request.FamilyId));
         }
 
         Result result = family.RemoveParent(parent.Id);

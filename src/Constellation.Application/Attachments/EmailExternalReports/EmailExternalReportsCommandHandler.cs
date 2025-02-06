@@ -8,12 +8,12 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
-using Core.Errors;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Families;
+using Core.Models.Families.Errors;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Core.ValueObjects;
@@ -85,10 +85,10 @@ internal sealed class EmailExternalReportsCommandHandler
         {
             _logger
                 .ForContext(nameof(EmailExternalReportsCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Families.Family.NoneFound, true)
+                .ForContext(nameof(Error), FamilyErrors.NoneFound, true)
                 .Warning("Failed to send External Report emails to parents");
 
-            return Result.Failure(DomainErrors.Families.Family.NoneFound);
+            return Result.Failure(FamilyErrors.NoneFound);
         }
 
         List<Attachment> attachments = await _attachmentRepository.GetTempFiles(cancellationToken);

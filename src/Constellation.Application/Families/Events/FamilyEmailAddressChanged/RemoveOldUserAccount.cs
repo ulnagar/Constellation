@@ -5,6 +5,7 @@ using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Families;
+using Core.Models.Families.Errors;
 using Core.Models.Families.Events;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -37,7 +38,7 @@ internal sealed class RemoveOldUserAccount
         {
             _logger
                 .ForContext(nameof(FamilyEmailAddressChangedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Families.Family.NotFound(notification.FamilyId), true)
+                .ForContext(nameof(Error), FamilyErrors.NotFound(notification.FamilyId), true)
                 .Warning("Failed to remove old user account for changed family email address");
 
             return;
