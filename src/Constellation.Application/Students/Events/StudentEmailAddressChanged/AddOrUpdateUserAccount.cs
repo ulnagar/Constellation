@@ -44,17 +44,16 @@ internal sealed class AddOrUpdateUserAccount
             return;
         }
 
-        var oldAddress = EmailAddress.Create(notification.OldAddress);
-        var newAddress = EmailAddress.Create(notification.NewAddress);
+        Result<EmailAddress> newAddress = EmailAddress.Create(notification.NewAddress);
 
-        if (oldAddress.IsFailure || newAddress.IsFailure)
+        if (newAddress.IsFailure)
         {
             _logger
                 .Warning("Could not convert email addresses");
             return;
         }
 
-        if (oldAddress.Value == EmailAddress.None)
+        if (string.IsNullOrWhiteSpace(notification.OldAddress))
         {
             // No previous address known. Create new user
             AppUser user = new()
@@ -80,7 +79,7 @@ internal sealed class AddOrUpdateUserAccount
         }
         else
         {
-            AppUser user = await _userManager.FindByEmailAsync(oldAddress.Value.Email);
+            AppUser user = await _userManager.FindByEmailAsync(notification.OldAddress);
 
             if (user is not null)
             {

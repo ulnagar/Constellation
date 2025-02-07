@@ -3,7 +3,6 @@
 using Constellation.Application.Abstractions;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
@@ -211,6 +210,10 @@ internal sealed class SendCoverCreatedEmailHandler
         if (cover.StartDate == cover.EndDate)
         {
             List<Period> periods = await _periodRepository.GetByDayAndOfferingId(cover.StartDate.GetDayNumber(), cover.OfferingId, cancellationToken);
+
+            // If there are no periods for this class on the day, why do we need to send a cover email?
+            if (periods.Count == 0)
+                return;
 
             startTime = TimeOnly.FromTimeSpan(periods.Min(period => period.StartTime));
             endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));

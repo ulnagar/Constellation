@@ -85,6 +85,9 @@ public class PeriodRepository : IPeriodRepository
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
+        PeriodWeek targetWeek = PeriodWeek.FromDayNumber(day);
+        PeriodDay targetDay = PeriodDay.FromDayNumber(day);
+
         List<Session> sessions = await _context
             .Set<Offering>()
             .SelectMany(offering => offering.Sessions)
@@ -93,11 +96,16 @@ public class PeriodRepository : IPeriodRepository
                 session.OfferingId == offeringId)
             .ToListAsync(cancellationToken);
 
+        List<PeriodId> sessionPeriodIds = sessions
+            .Select(session => session.PeriodId)
+            .ToList();
+
         return await _context
             .Set<Period>()
-            .Where(period => 
-                period.DayNumber == day &&
-                sessions.Any(session => session.PeriodId == period.Id))
+            .Where(period =>
+                period.Week == targetWeek &&
+                period.Day == targetDay &&
+                sessionPeriodIds.Contains(period.Id))
             .ToListAsync(cancellationToken);
     }
 
