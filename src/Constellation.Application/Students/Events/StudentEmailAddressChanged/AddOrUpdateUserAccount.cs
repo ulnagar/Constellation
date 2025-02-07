@@ -44,7 +44,17 @@ internal sealed class AddOrUpdateUserAccount
             return;
         }
 
-        if (notification.OldAddress == EmailAddress.None)
+        var oldAddress = EmailAddress.Create(notification.OldAddress);
+        var newAddress = EmailAddress.Create(notification.NewAddress);
+
+        if (oldAddress.IsFailure || newAddress.IsFailure)
+        {
+            _logger
+                .Warning("Could not convert email addresses");
+            return;
+        }
+
+        if (oldAddress.Value == EmailAddress.None)
         {
             // No previous address known. Create new user
             AppUser user = new()
@@ -70,14 +80,14 @@ internal sealed class AddOrUpdateUserAccount
         }
         else
         {
-            AppUser user = await _userManager.FindByEmailAsync(notification.OldAddress.Email);
+            AppUser user = await _userManager.FindByEmailAsync(oldAddress.Value.Email);
 
             if (user is not null)
             {
                 user.IsStudent = true;
                 user.StudentId = student.Id;
-                user.UserName = notification.NewAddress.Email;
-                user.Email = notification.NewAddress.Email;
+                user.UserName = newAddress.Value.Email;
+                user.Email = newAddress.Value.Email;
 
                 IdentityResult update = await _userManager.UpdateAsync(user);
 
@@ -93,7 +103,7 @@ internal sealed class AddOrUpdateUserAccount
                 return;
             }
 
-            user = await _userManager.FindByEmailAsync(notification.NewAddress.Email);
+            user = await _userManager.FindByEmailAsync(newAddress.Value.Email);
 
             if (user is not null)
             {

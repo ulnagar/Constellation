@@ -320,7 +320,7 @@ public class Student : AggregateRoot, IAuditableEntity
 
         if (EmailAddress != emailAddress)
         {
-            RaiseDomainEvent(new StudentEmailAddressChangedDomainEvent(new(), Id, EmailAddress, emailAddress));
+            RaiseDomainEvent(new StudentEmailAddressChangedDomainEvent(new(), Id, EmailAddress.Email, emailAddress.Email));
 
             EmailAddress = emailAddress;
         }

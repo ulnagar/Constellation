@@ -6,6 +6,7 @@ using Constellation.Core.Models.Operations;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students.Events;
+using Core.Shared;
 using Core.ValueObjects;
 using Serilog;
 using System.Threading;
@@ -44,15 +45,24 @@ internal sealed class AddOrUpdateCanvasAccount
             return;
         }
 
-        if (notification.OldAddress == EmailAddress.None)
+        Result<EmailAddress> newAddress = EmailAddress.Create(notification.NewAddress);
+
+        if (newAddress.IsFailure)
+        {
+            _logger
+                .Warning("Could not convert email addresses");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(notification.OldAddress))
         {
             // No account exists, create a new account
             CreateUserCanvasOperation operation = new(
                 student.StudentReferenceNumber.Number,
                 student.Name.FirstName,
                 student.Name.LastName,
-                student.EmailAddress.Email.Substring(0, student.EmailAddress.Email.IndexOf('@')),
-                student.EmailAddress.Email);
+                newAddress.Value.Email.Substring(0, newAddress.Value.Email.IndexOf('@')),
+                newAddress.Value.Email);
 
             _operationsRepository.Insert(operation);
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -63,7 +73,7 @@ internal sealed class AddOrUpdateCanvasAccount
         {
             UpdateUserEmailCanvasOperation operation = new(
                 student.StudentReferenceNumber.Number,
-                notification.NewAddress.Email.Substring(0, notification.NewAddress.Email.IndexOf('@')));
+                newAddress.Value.Email.Substring(0, newAddress.Value.Email.IndexOf('@')));
 
             _operationsRepository.Insert(operation);
             await _unitOfWork.CompleteAsync(cancellationToken);
