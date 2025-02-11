@@ -111,7 +111,7 @@ public class SettingsModel : BasePageModel
 
                 ModalContent = new ErrorDisplay(
                     partialRequest.Error,
-                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Configuration", values: new { area = "Staff" }));
+                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -138,7 +138,7 @@ public class SettingsModel : BasePageModel
 
                 ModalContent = new ErrorDisplay(
                     wholeRequest.Error,
-                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Configuration", values: new { area = "Staff" }));
+                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
 
                 return Page();
             }
@@ -167,13 +167,13 @@ public class SettingsModel : BasePageModel
 
                 ModalContent = new ErrorDisplay(
                     request.Error,
-                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Absences/Configuration", values: new { area = "Staff" }));
+                    _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
 
                 return Page();
             }
         }
 
-        return RedirectToPage("/StudentAdmin/Absences/Configuration", new { area = "Staff" });
+        return RedirectToPage("/StudentAdmin/Attendance/Configuration", new { area = "Staff" });
     }
 
     private async Task PreparePage(CancellationToken cancellationToken)
