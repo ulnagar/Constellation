@@ -9,6 +9,7 @@ using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -33,7 +34,46 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
 
     public async Task<Result> Handle(SetAbsenceConfigurationForStudentCommand request, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(request.SchoolCode))
+
+        // If a StudentId is present, process it first
+        if (request.StudentId != StudentId.Empty)
+        {
+            Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+
+            Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
+                student.Id,
+                request.AbsenceType,
+                request.StartDate,
+                request.EndDate);
+
+            if (configRequest.IsFailure)
+            {
+                _logger
+                    .ForContext("Error", configRequest.Error)
+                    .Warning("Failed to create Absence Configuration for student {student}", student.Name.DisplayName);
+
+                return Result.Failure(configRequest.Error);
+            }
+
+            Result studentRequest = student.AddAbsenceConfiguration(configRequest.Value);
+
+            if (studentRequest.IsFailure)
+            {
+                _logger
+                    .ForContext("Error", studentRequest.Error)
+                    .Warning("Failed to add Absence Configuration for student");
+
+                return Result.Failure(studentRequest.Error);
+            }
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            return Result.Success();
+        }
+
+
+        // If a School and Grade is selected, process it next
+        if (!string.IsNullOrWhiteSpace(request.SchoolCode) && request.GradeFilter is not null)
         {
             List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
@@ -78,34 +118,79 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
             return Result.Success();
         }
 
-        if (request.StudentId != StudentId.Empty)
+        // If only a school is selected, process it next
+        if (!string.IsNullOrWhiteSpace(request.SchoolCode))
         {
-            Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+            List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
-            Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
-                student.Id,
-                request.AbsenceType,
-                request.StartDate,
-                request.EndDate);
-
-            if (configRequest.IsFailure)
+            foreach (var student in students)
             {
-                _logger
-                    .ForContext("Error", configRequest.Error)
-                    .Warning("Failed to create Absence Configuration for student {student}", student.Name.DisplayName);
+                Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
+                    student.Id,
+                    request.AbsenceType,
+                    request.StartDate,
+                    request.EndDate);
 
-                return Result.Failure(configRequest.Error);
+                if (configRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext("Error", configRequest.Error)
+                        .Warning("Failed to create Absence Configuration for student {student}", student.Name.DisplayName);
+
+                    return Result.Failure(configRequest.Error);
+                }
+
+                Result studentRequest = student.AddAbsenceConfiguration(configRequest.Value);
+
+                if (studentRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext("Error", studentRequest.Error)
+                        .Warning("Failed to add Absence Configuration for student");
+
+                    return Result.Failure(studentRequest.Error);
+                }
             }
 
-            Result studentRequest = student.AddAbsenceConfiguration(configRequest.Value);
+            await _unitOfWork.CompleteAsync(cancellationToken);
 
-            if (studentRequest.IsFailure)
+            return Result.Success();
+        }
+
+        // If only a grade is selected, process that last
+        if (request.GradeFilter is not null)
+        {
+            Grade grade = (Grade)request.GradeFilter.Value;
+
+            List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
+
+            foreach (var student in students)
             {
-                _logger
-                    .ForContext("Error", studentRequest.Error)
-                    .Warning("Failed to add Absence Configuration for student");
+                Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
+                    student.Id,
+                    request.AbsenceType,
+                    request.StartDate,
+                    request.EndDate);
 
-                return Result.Failure(studentRequest.Error);
+                if (configRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext("Error", configRequest.Error)
+                        .Warning("Failed to create Absence Configuration for student {student}", student.Name.DisplayName);
+
+                    return Result.Failure(configRequest.Error);
+                }
+
+                Result studentRequest = student.AddAbsenceConfiguration(configRequest.Value);
+
+                if (studentRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext("Error", studentRequest.Error)
+                        .Warning("Failed to add Absence Configuration for student");
+
+                    return Result.Failure(studentRequest.Error);
+                }
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
