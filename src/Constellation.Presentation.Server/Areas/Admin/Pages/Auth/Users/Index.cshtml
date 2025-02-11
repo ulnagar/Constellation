@@ -55,7 +55,7 @@
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                                 <div class="dropdown-menu">
-                                    <a asp-page="Info" asp-route-emailAddress="@user.Email" class="dropdown-item">View Info...</a>
+                                    <a asp-page="/Auth/Users/Details" asp-area="Admin" asp-route-emailAddress="@user.Email" class="dropdown-item">View Info...</a>
                                     <a asp-page-handler="Audit" asp-route-userId="@user.Id" class="dropdown-item">Audit Access</a>
                                 </div>
                             </div>
