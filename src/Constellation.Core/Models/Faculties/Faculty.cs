@@ -70,7 +70,7 @@ public sealed class Faculty : AggregateRoot, IAuditableEntity
             .Where(entry => entry.StaffId == staffId && !entry.IsDeleted)
             .ToList();
 
-        if (!entries.Any())
+        if (entries.Count == 0)
             return Result.Failure<FacultyMembership>(FacultyMembershipErrors.DoesNotExist(staffId));
 
         foreach (FacultyMembership entry in entries)

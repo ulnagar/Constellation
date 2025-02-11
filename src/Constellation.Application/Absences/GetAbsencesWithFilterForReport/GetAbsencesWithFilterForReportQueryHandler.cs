@@ -1,4 +1,5 @@
-﻿namespace Constellation.Application.Absences.GetAbsencesWithFilterForReport;
+﻿#nullable enable
+namespace Constellation.Application.Absences.GetAbsencesWithFilterForReport;
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
@@ -32,22 +33,22 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
 
     public async Task<Result<List<FilteredAbsenceResponse>>> Handle(GetAbsencesWithFilterForReportQuery request, CancellationToken cancellationToken)
     {
-        List<FilteredAbsenceResponse> result = new();
+        List<FilteredAbsenceResponse> result = [];
 
-        if (!request.StudentIds.Any() &&
-            !request.OfferingCodes.Any() &&
-            !request.Grades.Any() &&
-            !request.SchoolCodes.Any())
+        if (request.StudentIds.Count == 0 &&
+            request.OfferingCodes.Count == 0 &&
+            request.Grades.Count == 0 &&
+            request.SchoolCodes.Count == 0)
             return result;
 
-        List<Student> students = new();
+        List<Student> students = [];
 
-        if (request.StudentIds.Any())
+        if (request.StudentIds.Count > 0)
             students.AddRange(await _studentRepository.GetListFromIds(request.StudentIds, cancellationToken));
 
-        if (request.OfferingCodes.Any() ||
-            request.Grades.Any() ||
-            request.SchoolCodes.Any())
+        if (request.OfferingCodes.Count > 0 ||
+            request.Grades.Count > 0 ||
+            request.SchoolCodes.Count > 0)
             students.AddRange(await _studentRepository
                 .GetFilteredStudents(
                     request.OfferingCodes,
@@ -70,7 +71,7 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
             if (enrolment is null)
                 continue;
 
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
             string offeringName = offering?.Name;
 
@@ -85,8 +86,8 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
                 absence.Type,
                 absence.AbsenceTimeframe,
                 absence.PeriodName,
-                absence.Notifications.Count(),
-                absence.Responses.Count()));
+                absence.Notifications.Count,
+                absence.Responses.Count));
         }
 
         return result;

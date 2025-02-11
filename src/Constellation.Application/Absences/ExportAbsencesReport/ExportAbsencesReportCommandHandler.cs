@@ -1,4 +1,5 @@
-﻿namespace Constellation.Application.Absences.ExportAbsencesReport;
+﻿#nullable enable
+namespace Constellation.Application.Absences.ExportAbsencesReport;
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
@@ -46,20 +47,20 @@ internal sealed class ExportAbsencesReportCommandHandler
 
     public async Task<Result<FileDto>> Handle(ExportAbsencesReportCommand request, CancellationToken cancellationToken)
     {
-        List<FilteredAbsenceResponse> result = new();
+        List<FilteredAbsenceResponse> result = [];
 
-        if (!request.StudentIds.Any() &&
-            !request.OfferingCodes.Any() &&
-            !request.Grades.Any() &&
-            !request.SchoolCodes.Any())
+        if (request.StudentIds.Count == 0 &&
+            request.OfferingCodes.Count == 0 &&
+            request.Grades.Count == 0 &&
+            request.SchoolCodes.Count == 0)
             return Result.Failure<FileDto>(DomainErrors.Absences.Report.NoFilterSupplied);
 
-        List<Student> students = new();
+        List<Student> students = [];
 
-        if (request.StudentIds.Any())
+        if (request.StudentIds.Count > 0)
             students.AddRange(await _studentRepository.GetListFromIds(request.StudentIds, cancellationToken));
 
-        if (request.OfferingCodes.Any() || request.Grades.Any() || request.SchoolCodes.Any())
+        if (request.OfferingCodes.Count > 0 || request.Grades.Count > 0 || request.SchoolCodes.Count > 0)
             students.AddRange(await _studentRepository
                 .GetFilteredStudents(
                     request.OfferingCodes,
@@ -82,15 +83,17 @@ internal sealed class ExportAbsencesReportCommandHandler
             if (enrolment is null)
                 continue;
 
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-            string offeringName = offering?.Name;
+            string offeringName = offering?.Name ?? string.Empty;
 
-            School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
+            School? school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
+
+            string schoolName = school?.Name ?? string.Empty;
 
             result.Add(new(
                 student.Name,
-                school.Name,
+                schoolName,
                 enrolment.Grade,
                 offeringName,
                 absence.Id,
@@ -99,8 +102,8 @@ internal sealed class ExportAbsencesReportCommandHandler
                 absence.Type,
                 absence.AbsenceTimeframe,
                 absence.PeriodName,
-                absence.Notifications.Count(),
-                absence.Responses.Count()));
+                absence.Notifications.Count,
+                absence.Responses.Count));
         }
 
         MemoryStream stream = await _excelService.CreateAbsencesReportFile(result, cancellationToken);

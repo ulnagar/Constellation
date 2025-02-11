@@ -64,7 +64,7 @@ public sealed class FirstInSubjectNomination : Nomination
         Grade grade,
         string courseName)
     {
-        if (AwardType.FirstInSubject.Grades.Any() && !AwardType.FirstInSubject.Grades.Contains(grade))
+        if (AwardType.FirstInSubject.Grades.Count > 0 && !AwardType.FirstInSubject.Grades.Contains(grade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.FirstInSubject, grade));
 
         return new FirstInSubjectNomination(
@@ -119,7 +119,7 @@ public sealed class FirstInSubjectMathematicsNomination : Nomination
         Grade grade,
         string courseName)
     {
-        if (AwardType.FirstInSubjectMathematics.Grades.Any() && !AwardType.FirstInSubjectMathematics.Grades.Contains(grade))
+        if (AwardType.FirstInSubjectMathematics.Grades.Count > 0 && !AwardType.FirstInSubjectMathematics.Grades.Contains(grade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.FirstInSubjectMathematics, grade));
 
         return new FirstInSubjectMathematicsNomination(
@@ -174,7 +174,7 @@ public sealed class FirstInSubjectScienceTechnologyNomination : Nomination
         Grade grade,
         string courseName)
     {
-        if (AwardType.FirstInSubjectScienceTechnology.Grades.Any() && !AwardType.FirstInSubjectScienceTechnology.Grades.Contains(grade))
+        if (AwardType.FirstInSubjectScienceTechnology.Grades.Count > 0 && !AwardType.FirstInSubjectScienceTechnology.Grades.Contains(grade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.FirstInSubjectScienceTechnology, grade));
 
         return new FirstInSubjectScienceTechnologyNomination(
@@ -233,7 +233,7 @@ public sealed class AcademicExcellenceNomination : Nomination
         OfferingId offeringId,
         string className)
     {
-        if (AwardType.AcademicExcellence.Grades.Any() && !AwardType.AcademicExcellence.Grades.Contains(courseGrade))
+        if (AwardType.AcademicExcellence.Grades.Count > 0 && !AwardType.AcademicExcellence.Grades.Contains(courseGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicExcellence, courseGrade));
 
         return new AcademicExcellenceNomination(
@@ -291,7 +291,7 @@ public sealed class AcademicExcellenceMathematicsNomination : Nomination
         OfferingId offeringId,
         string className)
     {
-        if (AwardType.AcademicExcellenceMathematics.Grades.Any() && !AwardType.AcademicExcellenceMathematics.Grades.Contains(courseGrade))
+        if (AwardType.AcademicExcellenceMathematics.Grades.Count > 0 && !AwardType.AcademicExcellenceMathematics.Grades.Contains(courseGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicExcellenceMathematics, courseGrade));
 
         return new AcademicExcellenceMathematicsNomination(
@@ -349,7 +349,7 @@ public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
         OfferingId offeringId,
         string className)
     {
-        if (AwardType.AcademicExcellenceScienceTechnology.Grades.Any() && !AwardType.AcademicExcellenceScienceTechnology.Grades.Contains(courseGrade))
+        if (AwardType.AcademicExcellenceScienceTechnology.Grades.Count > 0 && !AwardType.AcademicExcellenceScienceTechnology.Grades.Contains(courseGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicExcellenceScienceTechnology, courseGrade));
 
         return new AcademicExcellenceScienceTechnologyNomination(
@@ -407,7 +407,7 @@ public sealed class AcademicAchievementNomination : Nomination
         OfferingId offeringId,
         string className)
     {
-        if (AwardType.AcademicAchievement.Grades.Any() && !AwardType.AcademicAchievement.Grades.Contains(courseGrade))
+        if (AwardType.AcademicAchievement.Grades.Count > 0 && !AwardType.AcademicAchievement.Grades.Contains(courseGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicAchievement, courseGrade));
 
         return new AcademicAchievementNomination(
@@ -464,7 +464,7 @@ public sealed class AcademicAchievementMathematicsNomination : Nomination
         OfferingId offeringId,
         string className)
     {
-        if (AwardType.AcademicAchievementMathematics.Grades.Any() && !AwardType.AcademicAchievementMathematics.Grades.Contains(courseGrade))
+        if (AwardType.AcademicAchievementMathematics.Grades.Count > 0 && !AwardType.AcademicAchievementMathematics.Grades.Contains(courseGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicAchievementMathematics, courseGrade));
 
         return new AcademicAchievementMathematicsNomination(
@@ -521,7 +521,7 @@ public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
         OfferingId offeringId,
         string className)
     {
-        if (AwardType.AcademicAchievementScienceTechnology.Grades.Any() && !AwardType.AcademicAchievementScienceTechnology.Grades.Contains(courseGrade))
+        if (AwardType.AcademicAchievementScienceTechnology.Grades.Count > 0 && !AwardType.AcademicAchievementScienceTechnology.Grades.Contains(courseGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.AcademicAchievementScienceTechnology, courseGrade));
 
         return new AcademicAchievementScienceTechnologyNomination(
@@ -565,7 +565,7 @@ public sealed class PrincipalsAwardNomination : Nomination
         StudentId studentId,
         Grade studentGrade)
     {
-        if (AwardType.PrincipalsAward.Grades.Any() && !AwardType.PrincipalsAward.Grades.Contains(studentGrade))
+        if (AwardType.PrincipalsAward.Grades.Count > 0 && !AwardType.PrincipalsAward.Grades.Contains(studentGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.PrincipalsAward, studentGrade));
 
         return new PrincipalsAwardNomination(
@@ -595,7 +595,7 @@ public sealed class GalaxyMedalNomination : Nomination
         StudentId studentId,
         Grade studentGrade)
     {
-        if (AwardType.GalaxyMedal.Grades.Any() && !AwardType.GalaxyMedal.Grades.Contains(studentGrade))
+        if (AwardType.GalaxyMedal.Grades.Count > 0 && !AwardType.GalaxyMedal.Grades.Contains(studentGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.GalaxyMedal, studentGrade));
 
         return new GalaxyMedalNomination(
@@ -625,7 +625,7 @@ public sealed class UniversalAchieverNomination : Nomination
         StudentId studentId,
         Grade studentGrade)
     {
-        if (AwardType.UniversalAchiever.Grades.Any() && !AwardType.UniversalAchiever.Grades.Contains(studentGrade))
+        if (AwardType.UniversalAchiever.Grades.Count > 0 && !AwardType.UniversalAchiever.Grades.Contains(studentGrade))
             return Result.Failure<Nomination>(AwardNominationErrors.InvalidGrade(AwardType.UniversalAchiever, studentGrade));
 
         return new UniversalAchieverNomination(

@@ -121,7 +121,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        if (!recipients.Any())
+        if (recipients.Count == 0)
         {
             Result<EmailRecipient> result = EmailRecipient.Create(school.Name, school.EmailAddress);
 
@@ -129,7 +129,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
                 recipients.Add(result.Value);
         }
 
-        if (!recipients.Any())
+        if (recipients.Count == 0)
         {
             _logger.Warning("No recipients could be found or created: {school}", school);
 
