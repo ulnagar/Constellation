@@ -158,6 +158,7 @@ else
 
     <div class="row mt-3">
         <form method="post">
+            <input asp-for="StudentId" type="hidden" value="@Model.SelectedStudent!.StudentId"/>
             <div id="responses">
 
             </div>
@@ -190,7 +191,7 @@ else
                     <p>A receipt for this transaction will be generated outlining all the information provided and your responses. This receipt will be emailed to your registered email address for your records.</p>
                 </div>
             </div>
-            
+
             <div class="row mt-3">
                 <div class="col col-md-4 d-grid">
                     <button type="submit" class="btn btn-success py-3 mb-3" disabled="disabled" id="formSubmit">Submit Responses</button>

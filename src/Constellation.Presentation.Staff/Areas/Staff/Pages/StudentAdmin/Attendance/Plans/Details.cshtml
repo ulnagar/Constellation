@@ -269,9 +269,16 @@
                                 <td>@group.Key</td>
                                 @foreach (var subject in subjectOptions)
                                 {
-                                    var item = group.First(entry => entry.Course == subject);
+                                    var item = group.FirstOrDefault(entry => entry.Course == subject);
 
-                                    <td>@item.Class - @item.MinutesPresent - @item.Percentage.ToString("P0")</td>
+                                    if (item is not null)
+                                    {
+                                        <td>@item.Class - @item.MinutesPresent - @item.Percentage.ToString("P0")</td>
+                                    }
+                                    else
+                                    {
+                                        <td></td>
+                                    }
                                 }
                             </tr>
                         }

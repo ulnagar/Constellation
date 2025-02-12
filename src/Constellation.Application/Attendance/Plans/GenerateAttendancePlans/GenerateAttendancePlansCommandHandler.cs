@@ -63,8 +63,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
             if (student is not null)
                 students.Add(student);
         }
-
-        if (!string.IsNullOrWhiteSpace(request.SchoolCode) || request.Grade.HasValue)
+        else if (!string.IsNullOrWhiteSpace(request.SchoolCode) || request.Grade.HasValue)
         {
             List<Grade> grades = new();
 
