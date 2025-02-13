@@ -104,9 +104,9 @@ public class GenerateModel : BasePageModel
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
-        if (StudentId == StudentId.Empty && string.IsNullOrWhiteSpace(SchoolCode))
+        if (StudentId == StudentId.Empty && string.IsNullOrWhiteSpace(SchoolCode) && !Grade.HasValue)
         {
-            Error error = new("Validation.Page.EmptyValues", "You must select a value for either Student or School to continue");
+            Error error = new("Validation.Page.EmptyValues", "You must select a value for Student, Grade, or School to continue");
 
             _logger
                 .ForContext(nameof(Error), error, true)
