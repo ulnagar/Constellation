@@ -119,7 +119,18 @@ public class GenerateModel : BasePageModel
             return Page();
         }
 
-        Grade? grade = Grade as Grade?;
+        Grade? grade = Grade switch
+        {
+            5 => Core.Enums.Grade.Y05,
+            6 => Core.Enums.Grade.Y06,
+            7 => Core.Enums.Grade.Y07,
+            8 => Core.Enums.Grade.Y08,
+            9 => Core.Enums.Grade.Y09,
+            10 => Core.Enums.Grade.Y10,
+            11 => Core.Enums.Grade.Y11,
+            12 => Core.Enums.Grade.Y12,
+            _ => null
+        };
 
         GenerateAttendancePlansCommand command = new(
             StudentId,
