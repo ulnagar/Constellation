@@ -30,7 +30,7 @@ div.granted, div.pending, div.denied {
     color: white;
     align-content: center;
     text-align: center;
-    cursor: default;
+    cursor: pointer;
 }
 
 div.granted {
