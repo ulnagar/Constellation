@@ -63,6 +63,28 @@
             </div>
         </div>
     </div>
+
+    <div class="col mb-4 sortable" data-id="card-absences-plans-processing">
+        <div class="card h-100 @(Model.ProcessingAttendancePlans > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Attendance Plans</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.ProcessingAttendancePlans</h3>
+                <p class="card-text">attendance plans to process</p>
+                <a asp-page="/StudentAdmin/Attendance/Plans/Index" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-4 sortable" data-id="card-absences-plans-pending">
+        <div class="card h-100 @(Model.PendingAttendancePlans > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Attendance Plans</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.PendingAttendancePlans</h3>
+                <p class="card-text">attendance plans awaiting ACC entry</p>
+                <a asp-page="/StudentAdmin/Attendance/Plans/Index" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
 }
 
 @if (Model.ShowAwardsWidgets)

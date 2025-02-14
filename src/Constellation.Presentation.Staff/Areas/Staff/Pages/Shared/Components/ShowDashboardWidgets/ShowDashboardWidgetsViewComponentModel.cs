@@ -17,4 +17,7 @@ public sealed class ShowDashboardWidgetsViewComponentModel
     public int StudentsWithoutSentralId { get; set; }
 
     public int ActiveWorkFlowActions { get; set; }
+
+    public int PendingAttendancePlans { get; set; }
+    public int ProcessingAttendancePlans { get; set; }
 }

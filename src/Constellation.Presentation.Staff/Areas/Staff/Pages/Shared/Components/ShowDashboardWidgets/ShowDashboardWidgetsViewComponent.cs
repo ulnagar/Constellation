@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets;
 
+using Application.Attendance.Plans.CountAttendancePlansWithStatus;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.CountStudentsWithAbsenceScanDisabled;
 using Constellation.Application.Students.CountStudentsWithAwardOverages;
@@ -60,6 +61,14 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
             {
                 viewModel.WholeScanDisabled = absenceScanRequest.Value.Whole;
                 viewModel.PartialScanDisabled = absenceScanRequest.Value.Partial;
+            }
+
+            Result<(int Pending, int Processing)> attendancePlanRequest = await _mediator.Send(new CountAttendancePlansWithStatusQuery(), cancellationToken);
+
+            if (attendancePlanRequest.IsSuccess)
+            {
+                viewModel.PendingAttendancePlans = attendancePlanRequest.Value.Pending;
+                viewModel.ProcessingAttendancePlans = attendancePlanRequest.Value.Processing;
             }
         }
 

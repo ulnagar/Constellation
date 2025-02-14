@@ -78,5 +78,24 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
                 (plan.Status == AttendancePlanStatus.Accepted || plan.Status == AttendancePlanStatus.Processing))
             .ToListAsync(cancellationToken);
 
+
+    public async Task<int> GetCountOfPending(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendancePlan>()
+            .Where(plan =>
+                plan.CreatedAt.Year == _dateTime.Today.Year &&
+                plan.Status == AttendancePlanStatus.Pending)
+            .CountAsync(cancellationToken);
+
+    public async Task<int> GetCountOfProcessing(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendancePlan>()
+            .Where(plan =>
+                plan.CreatedAt.Year == _dateTime.Today.Year &&
+                plan.Status == AttendancePlanStatus.Processing)
+            .CountAsync(cancellationToken);
+
     public void Insert(AttendancePlan plan) => _context.Set<AttendancePlan>().Add(plan);
 }

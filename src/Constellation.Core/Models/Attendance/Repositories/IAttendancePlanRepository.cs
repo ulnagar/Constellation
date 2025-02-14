@@ -15,5 +15,7 @@ public interface IAttendancePlanRepository
     Task<List<AttendancePlan>> GetForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<AttendancePlan>> GetForSchool(string schoolCode, CancellationToken cancellationToken = default);
     Task<List<AttendancePlan>> GetRecentForSchoolAndGrade(string schoolCode, Grade grade, CancellationToken cancellationToken = default);
+    Task<int> GetCountOfPending(CancellationToken cancellationToken = default);
+    Task<int> GetCountOfProcessing(CancellationToken cancellationToken = default);
     void Insert(AttendancePlan plan);
 }
