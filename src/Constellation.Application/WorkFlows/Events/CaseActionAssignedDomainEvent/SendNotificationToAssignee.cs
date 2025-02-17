@@ -8,12 +8,14 @@ using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Events;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Errors;
+using Core.Models.WorkFlow.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -62,6 +64,10 @@ internal sealed class SendNotificationToAssignee
 
             return;
         }
+
+        // Do not send an email if the action was auto-closed
+        if (action.Status != ActionStatus.Open)
+            return;
 
         Staff assignee = await _staffRepository.GetById(action.AssignedToId, cancellationToken);
 
