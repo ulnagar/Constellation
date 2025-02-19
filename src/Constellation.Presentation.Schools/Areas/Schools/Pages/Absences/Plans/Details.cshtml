@@ -360,7 +360,7 @@
     {
         <div class="row">
             <div class="col-4 mb-3 mt-3 d-grid">
-                <input id="submit" type="submit" class="btn btn-success btn-lg py-3" value="Submit Plan" />
+                <button type="submit" class="btn btn-success btn-lg py-3" onclick="confirmSubmit()">Submit Plan</button>
             </div>
         </div>
 
@@ -405,102 +405,127 @@
     </form>
 
     <div class="modal fade" tabindex="-1" id="missed-lesson-modal">
-        <div class="modal-dialog" style="max-width: 600px;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Missed Lesson</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="missed-lesson-modal-form">
-                        <div class="row m-3">
-                            <div class="col w-auto">
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Subject</label></div>
-                                    <div class="col font-weight-bold">
-                                        <input id="missed-lesson-modal-subject" class="form-control"/>
+        <form id="missed-lesson-modal-form" onsubmit="submitMissedLessonForm()">
+            <div class="modal-dialog" style="max-width: 600px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Missed Lesson</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form id="missed-lesson-modal-form">
+                            <div class="row m-3">
+                                <div class="col w-auto">
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Subject</label></div>
+                                        <div class="col font-weight-bold">
+                                            <input id="missed-lesson-modal-subject" class="form-control" required="required" minlength="3" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Timetable Minutes per Cycle</label></div>
-                                    <div class="col font-weight-bold">
-                                        <input id="missed-lesson-modal-total-length" type="number" class="form-control"/>
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Timetable Minutes per Cycle</label></div>
+                                        <div class="col font-weight-bold">
+                                            <input id="missed-lesson-modal-total-length" type="number" class="form-control" required="required" min="1" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Missed Minutes per Cycle</label></div>
-                                    <div class="col font-weight-bold">
-                                        <input id="missed-lesson-modal-missed-length" type="number" class="form-control"/>
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Missed Minutes per Cycle</label></div>
+                                        <div class="col font-weight-bold">
+                                            <input id="missed-lesson-modal-missed-length" type="number" class="form-control" required="required" min="1" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary me-3" onclick="submitMissedLessonForm()">Add</button>
-                    <button type="button" class="btn btn-secondary" onclick="hideModal('missed')">Close</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary me-3">Add</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('missed')">Close</button>
+                    </div>
                 </div>
             </div>
-        </div>
+            </form>
     </div>
 
     <div class="modal fade" tabindex="-1" id="free-period-modal">
-        <div class="modal-dialog" style="max-width: 600px;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Free Period</h5>
-                </div>
-                <div class="modal-body">
-                    <form id="free-period-modal-form">
-                        <div class="row m-3">
-                            <div class="col w-auto">
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Week</label></div>
-                                    <div class="col font-weight-bold">
-                                        <select id="free-period-modal-week" asp-items="Model.Weeks" class="form-control">
-                                            <option value="">-- Select --</option>
-                                        </select>
+        <form id="free-period-modal-form" onsubmit="submitFreePeriodForm()">
+            <div class="modal-dialog" style="max-width: 600px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Free Period</h5>
+                    </div>
+                    <div class="modal-body">
+                        <form id="free-period-modal-form">
+                            <div class="row m-3">
+                                <div class="col w-auto">
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Week</label></div>
+                                        <div class="col font-weight-bold">
+                                            <select id="free-period-modal-week" asp-items="Model.Weeks" class="form-control" required="required">
+                                                <option value="">-- Select --</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Day</label></div>
-                                    <div class="col font-weight-bold">
-                                        <select id="free-period-modal-day" asp-items="Model.Days" class="form-control">
-                                            <option value="">-- Select --</option>
-                                        </select>
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Day</label></div>
+                                        <div class="col font-weight-bold">
+                                            <select id="free-period-modal-day" asp-items="Model.Days" class="form-control" required="required">
+                                                <option value="">-- Select --</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Period</label></div>
-                                    <div class="col font-weight-bold">
-                                        <input id="free-period-modal-period" class="form-control"/>
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Period</label></div>
+                                        <div class="col font-weight-bold">
+                                            <input id="free-period-modal-period" class="form-control" required="required" minlength="1" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Length (Minutes)</label></div>
-                                    <div class="col font-weight-bold">
-                                        <input id="free-period-modal-minutes" class="form-control"/>
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Length (Minutes)</label></div>
+                                        <div class="col font-weight-bold">
+                                            <input id="free-period-modal-minutes" class="form-control" required="required" type="number" min="1" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 row mt-3">
-                                    <div class="col-12"><label class="form-label">Activity</label></div>
-                                    <div class="col font-weight-bold">
-                                        <textarea id="free-period-modal-activity" cols="50" rows="5" class="form-control"></textarea>
+                                    <div class="mb-3 row mt-3">
+                                        <div class="col-12"><label class="form-label">Activity</label></div>
+                                        <div class="col font-weight-bold">
+                                            <textarea id="free-period-modal-activity" cols="50" rows="5" class="form-control" required="required" minlength="5"></textarea>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary me-3">Add</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('free')">Close</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="confirm-submit-modal">
+        <div class="modal-dialog" style="max-width: 600px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Submit Attendance Plan</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Are you sure you want to submit this attendance plan. Please note that plans cannot be edited once they are submitted.</span>
                         </div>
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary me-3" onclick="submitFreePeriodForm()">Add</button>
-                    <button type="button" class="btn btn-secondary" onclick="hideModal('free')">Close</button>
+                    <button id="submit" type="button" class="btn btn-primary me-3">Yes, Submit!</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
@@ -512,6 +537,16 @@
     <script>
         let missedLessonIndex = 0;
         let freePeriodIndex = 0;
+
+        function confirmSubmit()
+        {
+            event.preventDefault();
+
+            if (document.getElementById('pageForm').checkValidity())
+            {
+                $('#confirm-submit-modal').modal('show');
+            }
+        }
 
         function hideModal(selection)
         {
@@ -554,6 +589,8 @@
 
         function submitMissedLessonForm()
         {
+            event.preventDefault();
+
             var subject = $('#missed-lesson-modal-subject').val();
             var total = $('#missed-lesson-modal-total-length').val();
             var missed = $('#missed-lesson-modal-missed-length').val();
@@ -576,10 +613,14 @@
 
             hideModal('missed');
             missedLessonIndex++;
+
+            return false;
         }
 
         function submitFreePeriodForm()
         {
+            event.preventDefault();
+
             var weekId = $('#free-period-modal-week').find(':selected').val();
             var weekName = $('#free-period-modal-week').find(':selected').text();
             var dayId = $('#free-period-modal-day').find(':selected').val();
@@ -608,6 +649,8 @@
 
             hideModal('free');
             freePeriodIndex++;
+
+            return false;
         }
 
         function removePeriod(index)
@@ -625,11 +668,15 @@
         }
 
         $('#pageForm').on('submit', function(e){
-            var blockSubmit = @isDisplayOnly;
+            var blockSubmit = @isDisplayOnly.ToString().ToLower();
            
             if (blockSubmit == true)
+            {
                 e.preventDefault();
                 return false;
+            }
+
+            return true;
         });
 
         $('#submit').on('click', function (e) {
@@ -684,7 +731,7 @@
                 }
             }
 
-            return true;
+             $('#pageForm').submit();
         })
     </script>
 }
