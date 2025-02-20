@@ -19,7 +19,7 @@ using Shared.Components.AddAttendancePlanNote;
 using Shared.Components.ApproveAttendancePlanModal;
 using Shared.Components.RejectAttendancePlanModal;
 
-[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

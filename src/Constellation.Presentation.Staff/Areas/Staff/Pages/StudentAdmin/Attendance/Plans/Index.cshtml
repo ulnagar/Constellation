@@ -2,10 +2,19 @@
 @using Constellation.Core.Extensions
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans.IndexModel
 
+@inject IAuthorizationService authorizationService
+
+@{
+    var canManageTest = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
+}
+
 <h2>Attendance Plans</h2>
 
 <div class="page-menu">
-    <a asp-page="/StudentAdmin/Attendance/Plans/Generate" asp-area="Staff" class="btn btn-success">Generate Plans</a>
+    @if (canManageTest.Succeeded)
+    {
+        <a asp-page="/StudentAdmin/Attendance/Plans/Generate" asp-area="Staff" class="btn btn-success">Generate Plans</a>
+    }
 </div>
 
 <hr />

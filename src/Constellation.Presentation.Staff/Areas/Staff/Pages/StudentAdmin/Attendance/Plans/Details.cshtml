@@ -6,23 +6,33 @@
 @using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 
+@inject IAuthorizationService authorizationService
+
 @{
+    var canManageTest = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
 }
 
 <h2>Attendance Plan</h2>
 
 <div class="page-menu">
-    @if (Model.Plan.Status.Order < 3)
+    @if (canManageTest.Succeeded)
     {
-        <button type="button" data-toggle="modal" data-target="#approve-modal" class="btn btn-success">Approve Plan</button>
-        <button type="button" data-toggle="modal" data-target="#reject-modal" class="btn btn-danger">Reject Plan</button>
-    }
+        if (Model.Plan.Status == AttendancePlanStatus.Processing)
+        {
+            <button type="button" data-toggle="modal" data-target="#approve-modal" class="btn btn-success">Approve Plan</button>
+        }
 
-    <button type="button" data-toggle="modal" data-target="#add-note-modal" class="btn btn-warning">Add Note</button>
+        if (Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing)
+        {
+            <button type="button" data-toggle="modal" data-target="#reject-modal" class="btn btn-danger">Reject Plan</button>
+        }
 
-    @if (Model.Plan.Status == AttendancePlanStatus.Pending)
-    {
-        <a asp-page="/StudentAdmin/Attendance/Plans/Edit" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        <button type="button" data-toggle="modal" data-target="#add-note-modal" class="btn btn-warning">Add Note</button>
+
+        @if (Model.Plan.Status == AttendancePlanStatus.Pending)
+        {
+            <a asp-page="/StudentAdmin/Attendance/Plans/Edit" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+        }
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -449,6 +459,9 @@
     </table>
 </div>
 
-<vc:approve-attendance-plan-modal />
-<vc:reject-attendance-plan-modal />
-<vc:add-attendance-plan-note />
+@if (canManageTest.Succeeded)
+{
+    <vc:approve-attendance-plan-modal />
+    <vc:reject-attendance-plan-modal />
+    <vc:add-attendance-plan-note />
+}

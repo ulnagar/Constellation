@@ -12,7 +12,7 @@ using Models;
 using Serilog;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
