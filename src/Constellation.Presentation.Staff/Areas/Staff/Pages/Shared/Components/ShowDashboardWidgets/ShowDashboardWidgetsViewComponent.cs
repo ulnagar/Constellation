@@ -25,6 +25,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {
+        //TODO: 1.17.1: Update to AuthorizationService checks against AuthPolicies instead of group memberships
         bool isStaff = User.IsInRole(AuthRoles.StaffMember);
         bool isAdmin = User.IsInRole(AuthRoles.Admin);
         bool isTrainingManager = User.IsInRole(AuthRoles.MandatoryTrainingEditor);

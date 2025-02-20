@@ -15,7 +15,7 @@ using Models;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[Authorize(Policy = AuthPolicies.CanManageAwards)]
 public class ChangesModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -56,24 +56,6 @@ internal sealed class ApproveAttendancePlanCommandHandler
             return update;
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Comment))
-        {
-            Result<AttendancePlanNote> note = AttendancePlanNote.Create(plan.Id, request.Comment);
-
-            if (note.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(ApproveAttendancePlanCommand), request, true)
-                    .ForContext(nameof(AttendancePlan), plan, true)
-                    .ForContext(nameof(Error), update.Error, true)
-                    .Warning("Failed to update status for Attendance Plan");
-
-                return note;
-            }
-
-            plan.AddNote(note.Value);
-        }
-
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return Result.Success();
