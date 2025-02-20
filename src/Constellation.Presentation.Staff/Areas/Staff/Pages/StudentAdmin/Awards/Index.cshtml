@@ -7,7 +7,7 @@
 @inject IAuthorizationService authService
 
 @{
-    var authorisedTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+    var authorisedTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAwards);
 }
 
 <h2>Awards List</h2>
