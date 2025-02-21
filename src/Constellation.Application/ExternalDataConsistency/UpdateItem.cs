@@ -5,4 +5,5 @@ public sealed record UpdateItem(
     string LineDescription,
     string Column,
     string CurrentValue,
-    string NewValue);
+    string NewValue,
+    string Action);

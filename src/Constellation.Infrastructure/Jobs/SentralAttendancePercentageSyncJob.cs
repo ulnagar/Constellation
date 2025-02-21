@@ -132,7 +132,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
                     .ForContext(nameof(Error), modelRequest.Error, true)
                     .Warning("Could not sync the Attendance Percentages");
 
-                return;
+                continue;
             }
 
             _attendanceRepository.Insert(modelRequest.Value);

@@ -73,7 +73,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     fileSchool.Name,
                     "Principal Name",
                     fileSchool.PrincipalName.ToLower(),
-                    collectionSchool.PrincipalName.ToLower()));
+                    collectionSchool.PrincipalName.ToLower(),
+                    "MasterFile value (current) does not match DataCollections value (new)"));
             }
 
             if (fileSchool.PrincipalEmail.ToLower() != collectionSchool.PrincipalEmail.ToLower())
@@ -90,7 +91,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         string.Empty,
                         "Principal Email",
                         collectionSchool.PrincipalEmail.ToLower(),
-                        "EMAIL IS INVALID!"));
+                        string.Empty,
+                        "DataCollections Email is invalid"));
                 }
                 else
                 {
@@ -100,7 +102,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     fileSchool.Name,
                     "Principal Email",
                     fileSchool.PrincipalEmail.ToLower(),
-                    collectionEmailRequest.Value.Email.ToLower()));
+                    collectionEmailRequest.Value.Email.ToLower(),
+                    "MasterFile value (current) does not match DataCollections value (new)"));
                 }
             }
 
@@ -114,7 +117,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                     fileSchool.Name,
                     "Principal Email",
                     fileSchool.PrincipalEmail.ToLower(),
-                    "EMAIL IS INVALID!"));
+                    string.Empty,
+                    "MasterFile Email is invalid"));
             }
         }
 
@@ -161,7 +165,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent 1 Email",
                         fileStudent.Parent1Email.ToLower(),
-                        "EMAIL IS INVALID!"));
+                        string.Empty,
+                        "MasterFile Email is invalid"));
                 }
 
                 Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToLower() == fileStudent.Parent1Email.ToLower());
@@ -174,7 +179,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent 1 Email",
                         fileStudent.Parent1Email.ToLower(),
-                        string.Empty));
+                        string.Empty,
+                        "MasterFile value does not exist in Constellation"));
                 }
                 else
                 {
@@ -194,7 +200,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent 2 Email",
                         fileStudent.Parent1Email.ToLower(),
-                        "EMAIL IS INVALID!"));
+                        string.Empty,
+                        "MasterFile Email is invalid"));
                 }
 
                 Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToLower() == fileStudent.Parent2Email.ToLower());
@@ -207,7 +214,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent 2 Email",
                         fileStudent.Parent2Email.ToLower(),
-                        string.Empty));
+                        string.Empty,
+                        "MasterFile value does not exist in Constellation"));
                 }
                 else
                 {
@@ -225,7 +233,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent Email",
                         string.Empty,
-                        parent.EmailAddress.ToLower()));
+                        parent.EmailAddress.ToLower(),
+                        "Constellation value does not exist in MasterFile"));
                 }
                 else
                 {
@@ -235,7 +244,8 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Other Parent Email",
                         string.Empty,
-                        parent.EmailAddress.ToLower()));
+                        parent.EmailAddress.ToLower(),
+                        "Constellation value does not exist in MasterFile"));
                 }
             }
         }

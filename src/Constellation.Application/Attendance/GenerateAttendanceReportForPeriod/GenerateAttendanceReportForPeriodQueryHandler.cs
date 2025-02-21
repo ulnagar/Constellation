@@ -60,7 +60,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
         List<DateOnly> reportDates = await _attendanceRepository.GetPeriodEndDates(endDate.Year, cancellationToken);
         int historyPosition = reportDates.IndexOf(endDate);
-        DateOnly historyBoundary = reportDates[historyPosition - 4];
+        DateOnly historyBoundary = reportDates.Count > 5 ? reportDates[historyPosition - 4] : reportDates.Min();
         
         foreach (AttendanceValue value in values)
         {

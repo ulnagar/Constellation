@@ -43,6 +43,7 @@ internal class AttendanceRepository : IAttendanceRepository
     {
         List<DateOnly> listOfStartDates = await _context
             .Set<AttendanceValue>()
+            .Where(entry => entry.StartDate.Year == _dateTime.CurrentYear)
             .Select(entry => entry.StartDate)
             .Distinct()
             .OrderByDescending(entry => entry)

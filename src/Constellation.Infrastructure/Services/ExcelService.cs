@@ -869,7 +869,11 @@ public class ExcelService : IExcelService
         List<MasterFileStudent> studentList = new();
 
         using ExcelPackage package = new(stream);
-        ExcelWorksheet worksheet = package.Workbook.Worksheets.First(sheet => sheet.Name == "Students");
+        ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault(sheet => sheet.Name == "Students_2025");
+
+        if (worksheet is null)
+            return Task.FromResult(studentList);
+
         int rows = worksheet.Dimension.Rows;
 
         for (int i = 2; i <= rows; i++)
