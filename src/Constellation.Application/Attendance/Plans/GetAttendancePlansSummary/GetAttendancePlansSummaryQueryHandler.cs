@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models.Attendance;
+using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Repositories;
 using Core.Shared;
 using Serilog;
@@ -33,7 +34,10 @@ internal sealed class GetAttendancePlansSummaryQueryHandler
 
         foreach (AttendancePlan plan in plans)
         {
-            var overallPercentage = (plan.Periods.Sum(period => period.MinutesPresent)) / (plan.Periods.DistinctBy(period => period.CourseId).Sum(period => period.TargetMinutesPerCycle));
+            if (plan.Status.Equals(AttendancePlanStatus.Archived))
+                continue;
+
+            double overallPercentage = (plan.Periods.Sum(period => period.MinutesPresent)) / (plan.Periods.DistinctBy(period => period.CourseId).Sum(period => period.TargetMinutesPerCycle));
 
             if (overallPercentage is Double.NaN)
                 overallPercentage = Double.PositiveInfinity;

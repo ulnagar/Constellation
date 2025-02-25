@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models.Attendance;
+using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Repositories;
 using Core.Shared;
 using GetAttendancePlansSummary;
@@ -33,6 +34,9 @@ internal sealed class GetAttendancePlansSummaryForSchoolQueryHandler
 
         foreach (AttendancePlan plan in plans)
         {
+            if (plan.Status.Equals(AttendancePlanStatus.Archived))
+                continue;
+
             response.Add(new(
                 plan.Id,
                 plan.Student,

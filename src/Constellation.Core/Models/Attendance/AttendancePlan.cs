@@ -167,10 +167,11 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     {
         if (Status.Equals(AttendancePlanStatus.Accepted) || 
             Status.Equals(AttendancePlanStatus.Rejected) ||
-            Status.Equals(AttendancePlanStatus.Superseded))
+            Status.Equals(AttendancePlanStatus.Superseded) ||
+            Status.Equals(AttendancePlanStatus.Archived))
             return Result.Failure(AttendancePlanErrors.InvalidCurrentStatus(Status));
 
-        if (newStatus.Equals(AttendancePlanStatus.Pending))
+        if (newStatus.Equals(AttendancePlanStatus.Pending) || newStatus.Equals(AttendancePlanStatus.Archived))
             return Result.Failure(AttendancePlanErrors.InvalidNewStatus(newStatus));
 
         Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, $"Updated Status from {Status} to {newStatus}");
@@ -181,6 +182,20 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         _notes.Add(note.Value);
 
         Status = newStatus;
+
+        return Result.Success();
+    }
+
+    public Result ArchivePlan()
+    {
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, $"Plan archived");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        Status = AttendancePlanStatus.Archived;
 
         return Result.Success();
     }
