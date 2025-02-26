@@ -3,6 +3,7 @@
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
+using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Shared;
 using HtmlAgilityPack;
 using Serilog;
@@ -35,6 +36,7 @@ public interface ISentralGateway
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week);
     Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date);
     Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default);
+    Task<IndigenousStatus> GetStudentIndigenousStatus(string sentralStudentId);
 
 
     // API methods

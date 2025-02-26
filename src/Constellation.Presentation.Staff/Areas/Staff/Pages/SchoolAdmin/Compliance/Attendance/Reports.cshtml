@@ -1,7 +1,7 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance.ReportModel
 
-<h2>Generate Attendance Report</h2>
+<h2>Attendance Reports</h2>
 
 <div class="page-menu">
 
@@ -9,20 +9,63 @@
 
 <hr />
 
-<form method="post">
-    <div class="form-group row">
-        <label asp-for="SelectedPeriod" class="col-md-2">Attendance Period</label>
-        <div class="col-md-5">
-            <select asp-for="SelectedPeriod" asp-items="new SelectList(Model.PeriodNames)" class="form-control combo custom-select">
-                <option selected="selected" value=""> -- Please Select -- </option>
-            </select>
-            <span asp-validation-for="SelectedPeriod" class="text-danger"></span>
-        </div>
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Attendance Report</h4>
+        Attendance report with graphs for selected period
     </div>
+    <div class="col-md-12">
+        <form method="post" asp-page-handler="AttendanceReport">
+            <div class="form-group row">
+                <label class="col-md-2">Attendance Period</label>
+                <div class="col-md-5">
+                    <select name="SelectedPeriod" asp-items="new SelectList(Model.PeriodNames)" class="form-control combo custom-select">
+                        <option selected="selected" value=""> -- Please Select -- </option>
+                    </select>
+                </div>
+            </div>
     
-    <div class="form-group">
-        <div class="col-md-3">
-            <input type="submit" value="Download" class="btn btn-primary btn-block btn-lg" />
-        </div>
+            <div class="form-group">
+                <div class="col-md-3">
+                    <input type="submit" value="Download" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+
+    <div class="col-md-12 mt-2">
+        <h4>Custom Attendance Report</h4>
+        Data export for selected values from selected period
+    </div>
+    <div class="col-md-12">
+        <form method="post" asp-page-handler="CustomReport">
+            <div class="form-group row">
+                <label class="col-md-2">Attendance Period</label>
+                <div class="col-md-5">
+                    <select name="SelectedPeriod" asp-items="new SelectList(Model.PeriodNames)" class="form-control combo custom-select">
+                        <option selected="selected" value=""> -- Please Select -- </option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2">Attendance Value</label>
+                <div class="col-md-5">
+                    <select name="SelectedValue" class="form-control combo custom-select">
+                        <option selected="selected" value=""> -- Please Select -- </option>
+                        <option value="YTDDay">Year To Date (Day)</option>
+                        <option value="YTDMin">Year To Date (Minute)</option>
+                        <option value="WeekDay">Week (Day)</option>
+                        <option value="WeekMin">Week (Minute)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-3">
+                    <input type="submit" value="Download" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

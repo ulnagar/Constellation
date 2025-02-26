@@ -44,6 +44,7 @@ public class Student : AggregateRoot, IAuditableEntity
     public EmailAddress EmailAddress { get; private set; }
     public Gender Gender { get; private set; }
     public Gender PreferredGender { get; private set; }
+    public IndigenousStatus IndigenousStatus { get; private set; }
 
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -78,6 +79,7 @@ public class Student : AggregateRoot, IAuditableEntity
             null);
 
         entry.AwardTally = new(entry.Id);
+        entry.IndigenousStatus = IndigenousStatus.Unknown;
 
         entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), entry.Id));
 
@@ -102,19 +104,21 @@ public class Student : AggregateRoot, IAuditableEntity
             emailAddress,
             gender,
             null);
-
         Result enrolment = entry.AddSchoolEnrolment(school.Code, school.Name, grade, dateTime);
 
         if (enrolment.IsFailure)
             return Result.Failure<Student>(enrolment.Error);
 
         entry.AwardTally = new(entry.Id);
+        entry.IndigenousStatus = IndigenousStatus.Unknown;
 
         entry.RaiseDomainEvent(new StudentCreatedDomainEvent(new(), entry.Id));
 
         return entry;
     }
 
+    public void UpdateIndigenousStatus(IndigenousStatus status) => IndigenousStatus = status;
+    
     public Result AddSchoolEnrolment(
         string schoolCode,
         string schoolName,

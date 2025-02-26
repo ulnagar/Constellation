@@ -4,6 +4,7 @@ using Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using Application.Absences.GetAbsencesWithFilterForReport;
 using Application.Assets.ImportAssetsFromFile;
 using Application.Attendance.GenerateAttendanceReportForPeriod;
+using Application.Attendance.GenerateCustomReportForPeriod;
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Awards.ExportAwardNominations;
 using Application.Compliance.GetWellbeingReportFromSentral;
@@ -2090,6 +2091,48 @@ public class ExcelService : IExcelService
                 row++;
             }
         }
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateCustomAttendanceReport(
+        string periodLabel,
+        List<ExportRecord> records,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Data");
+
+        worksheet.Cells[1, 1].Value = "SRN";
+        worksheet.Cells[1, 2].Value = "First Name";
+        worksheet.Cells[1, 3].Value = "Last Name";
+        worksheet.Cells[1, 4].Value = "Grade";
+        worksheet.Cells[1, 5].Value = "School";
+        worksheet.Cells[1, 6].Value = "ATSI";
+        worksheet.Cells[1, 7].Value = "Attendance Percentage";
+
+        int row = 2;
+
+        foreach (ExportRecord record in records.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name.SortOrder))
+        {
+            worksheet.Cells[row, 1].Value = record.StudentReferenceNumber.Number;
+            worksheet.Cells[row, 2].Value = record.Name.PreferredName;
+            worksheet.Cells[row, 3].Value = record.Name.LastName;
+            worksheet.Cells[row, 4].Value = record.Grade.AsName();
+            worksheet.Cells[row, 5].Value = record.SchoolName;
+            worksheet.Cells[row, 6].Value = record.IndigenousStatus.Name;
+            worksheet.Cells[row, 7].Value = record.Value;
+
+            row++;
+        }
+
+        worksheet.Cells[1, 1, 1, worksheet.Dimension.Columns].AutoFilter = true;
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.View.FreezePanes(2, 1);
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);

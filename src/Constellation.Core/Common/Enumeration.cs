@@ -33,6 +33,10 @@ public abstract class IntEnumeration<TEnum> : IEquatable<IntEnumeration<TEnum>>
             .Values
             .SingleOrDefault(e => e.Name == name);
 
+    public static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
+        .Select(entry => entry.Value)
+        .AsEnumerable();
+
     public bool Equals(IntEnumeration<TEnum>? other)
     {
         if (other is null)

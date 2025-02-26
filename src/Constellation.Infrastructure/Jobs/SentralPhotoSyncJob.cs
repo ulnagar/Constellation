@@ -9,6 +9,7 @@ using Core.Models.Attachments.Repository;
 using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Students;
+using Core.Models.Students.Enums;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;
@@ -62,6 +63,21 @@ internal sealed class SentralPhotoSyncJob : ISentralPhotoSyncJob
                 
                 continue;
             }
+            
+            SystemLink sentralId = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
+
+            if (sentralId is null)
+                continue;
+
+            IndigenousStatus status = await _gateway.GetStudentIndigenousStatus(sentralId.Value);
+
+            if (student.IndigenousStatus != status && status != IndigenousStatus.Unknown)
+            {
+                student.UpdateIndigenousStatus(status);
+
+                await _unitOfWork.CompleteAsync(token);
+            }
+
 
             byte[] photo = await _gateway.GetSentralStudentPhoto(student.StudentReferenceNumber.Number);
 

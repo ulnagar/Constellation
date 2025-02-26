@@ -10,6 +10,7 @@ using Constellation.Infrastructure.Extensions;
 using Constellation.Infrastructure.ExternalServices.Sentral.Models;
 using Core.Abstractions.Clock;
 using Core.Models.Families;
+using Core.Models.Students.Enums;
 using Core.Shared;
 using ExcelDataReader;
 using HtmlAgilityPack;
@@ -676,6 +677,38 @@ public class Gateway : ISentralGateway
         byte[] response = await GetByteArrayByGet($"{_settings.ServerUrl}/_common/lib/photo?type=student&id={studentId}&w=250&h=250", default);
 
         return response;
+    }
+
+    public async Task<IndigenousStatus> GetStudentIndigenousStatus(string sentralStudentId)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("GetStudentIndigenousStatus: sentralStudentId={sentralStudentId}", sentralStudentId);
+
+            return IndigenousStatus.Unknown;
+        }
+
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/overview", CancellationToken.None);
+
+        if (page is null)
+            return IndigenousStatus.Unknown;
+
+        //HtmlNode atsiField = page.DocumentNode.SelectSingleNode("/html/body/div[8]/div/div[4]/div[2]/div/div/div[1]/div[2]/div/table/tr/td[1]/table/tr[7]/td");
+        HtmlNode atsiField = page.DocumentNode.SelectSingleNode("//*[@id=\"expander-content-1\"]/table/tr/td[1]/table/tr[7]/td");
+
+        if (atsiField is null)
+            return IndigenousStatus.Unknown;
+
+        string atsiValue = atsiField.InnerText.Trim();
+
+        return atsiValue switch
+        {
+            "Aboriginal but not Torres Strait Islander Origin" => IndigenousStatus.AboriginalButNotTorresStraitIslander,
+            "Torres Strait Islander but Not Aboriginal Origin" => IndigenousStatus.TorresStraitIslanderButNotAboriginal,
+            "Both Torres Strait and Aboriginal Origin" => IndigenousStatus.BothAboriginalAndTorresStraitIslander,
+            "" => IndigenousStatus.NeitherAboriginalNorTorresStraitIslander,
+            _ => IndigenousStatus.Unknown
+        };
     }
 
     public async Task<string> GetSentralStudentIdFromSRN(string srn, string grade)

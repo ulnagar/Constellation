@@ -114,5 +114,11 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
             .HasMany<Absence>()
             .WithOne()
             .HasForeignKey(absence => absence.StudentId);
+
+        builder
+            .Property(student => student.IndigenousStatus)
+            .HasConversion(
+                status => status.Value,
+                value => IndigenousStatus.FromValue(value));
     }
 }

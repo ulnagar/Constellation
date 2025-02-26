@@ -7,6 +7,7 @@ using Attendance.GenerateAttendanceReportForPeriod;
 using Attendance.GetAttendanceDataFromSentral;
 using Awards.ExportAwardNominations;
 using Compliance.GetWellbeingReportFromSentral;
+using Constellation.Application.Attendance.GenerateCustomReportForPeriod;
 using Constellation.Application.Contacts.Models;
 using Constellation.Application.DTOs.Canvas;
 using Constellation.Application.Training.GenerateOverallReport;
@@ -64,4 +65,5 @@ public interface IExcelService
     Task<MemoryStream> CreateAssetExportFile(List<Asset> assets, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCanvasRubricResultExport(RubricEntry rubric, List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, List<Student> students, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCanvasAssignmentCommentExport(List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, Dictionary<string, List<Student>> students, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateCustomAttendanceReport(string periodLabel, List<ExportRecord> records, CancellationToken cancellationToken = default);
 }

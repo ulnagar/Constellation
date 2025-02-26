@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance;
 
+using Application.Attendance.GenerateCustomReportForPeriod;
 using Application.Attendance.GetAttendancePeriodLabels;
 using Application.Common.PresentationModels;
 using Application.Helpers;
@@ -37,9 +38,6 @@ public class ReportModel : BasePageModel
 
     public List<string> PeriodNames { get; set; } = new();
 
-    [BindProperty]
-    public string SelectedPeriod { get; set; }
-
     public async Task OnGet()
     {
         _logger.Information("Requested to retrieve Attendance Percentage reports by user {User}", _currentUserService.UserName);
@@ -60,17 +58,17 @@ public class ReportModel : BasePageModel
         PeriodNames = request.Value.ToList();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPostAttendanceReport(string selectedPeriod)
     {
-        _logger.Information("Requested to export Attendance Percentage Report for period {Period} by user {User}", SelectedPeriod, _currentUserService.UserName);
+        _logger.Information("Requested to export Attendance Percentage Report for period {Period} by user {User}", selectedPeriod, _currentUserService.UserName);
 
-        Result<MemoryStream> request = await _mediator.Send(new GenerateAttendanceReportForPeriodQuery(SelectedPeriod));
+        Result<MemoryStream> request = await _mediator.Send(new GenerateAttendanceReportForPeriodQuery(selectedPeriod));
 
         if (request.IsFailure)
         {
             _logger
                 .ForContext(nameof(Error), request.Error, true)
-                .Warning("Failed to export Attendance Percentage Report for period {Period} by user {User}", SelectedPeriod, _currentUserService.UserName);
+                .Warning("Failed to export Attendance Percentage Report for period {Period} by user {User}", selectedPeriod, _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(request.Error);
 
@@ -78,7 +76,31 @@ public class ReportModel : BasePageModel
         }
 
         byte[] fileData = request.Value.ToArray();
-        string fileName = $"Attendance Report {SelectedPeriod.Replace(",", "")}.xlsx";
+        string fileName = $"Attendance Report {selectedPeriod.Replace(",", "")}.xlsx";
+        string fileType = FileContentTypes.ExcelModernFile;
+
+        return File(fileData, fileType, fileName);
+    }
+
+    public async Task<IActionResult> OnPostCustomReport(string selectedPeriod, string selectedValue)
+    {
+        _logger.Information("Requested to export custom Attendance Percentage Report for period {Period} by user {User}", selectedPeriod, _currentUserService.UserName);
+
+        Result<MemoryStream> request = await _mediator.Send(new GenerateCustomReportForPeriodQuery(selectedPeriod, selectedValue));
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to export custom Attendance Percentage Report for period {Period} by user {User}", selectedPeriod, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(request.Error);
+
+            return Page();
+        }
+
+        byte[] fileData = request.Value.ToArray();
+        string fileName = $"Attendance Export {selectedPeriod.Replace(",", "")}.xlsx";
         string fileType = FileContentTypes.ExcelModernFile;
 
         return File(fileData, fileType, fileName);
