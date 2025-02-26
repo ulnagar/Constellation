@@ -78,14 +78,16 @@ internal sealed class SentralPhotoSyncJob : ISentralPhotoSyncJob
                 await _unitOfWork.CompleteAsync(token);
             }
 
+            byte[] photo = await _gateway.GetSentralStudentPhotoFromApi(sentralId.Value, token);
 
-            byte[] photo = await _gateway.GetSentralStudentPhoto(student.StudentReferenceNumber.Number);
+            if (photo.Length == 0)
+                continue;
 
             Attachment attachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.StudentPhoto, student.Id.ToString(), token);
 
             try
             {
-                _logger.Information("{id}: Found new photo for {student} ({grade})", jobId, student.Name.DisplayName, student.CurrentEnrolment?.Grade.AsName());
+                _logger.Information("{id}: Found photo for {student} ({grade})", jobId, student.Name.DisplayName, student.CurrentEnrolment?.Grade.AsName());
 
                 bool newAttachment = false;
 

@@ -75,7 +75,7 @@ public class Gateway : ISentralGateway
         Links
     }
 
-    private async Task<Dictionary<JsonSection, List<JsonElement>>> GetApiResponse(Uri path, CancellationToken cancellationToken = default)
+    private async Task<Dictionary<JsonSection, List<JsonElement>>> GetApiJsonResponse(Uri path, CancellationToken cancellationToken = default)
     {
         Dictionary<JsonSection, List<JsonElement>> completeResponse = new();
         completeResponse.Add(JsonSection.Data, new());
@@ -151,11 +151,23 @@ public class Gateway : ISentralGateway
         return completeResponse;
     }
 
+    private async Task<byte[]> GetApiImageResponse(Uri path, CancellationToken cancellationToken = default)
+    {
+        HttpResponseMessage response = await _apiClient.GetAsync(path, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return [];
+        }
+
+        return await response.Content.ReadAsByteArrayAsync(cancellationToken);
+    }
+
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default)
     {
         Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student?includeInactive=0");
 
-        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiResponse(path, cancellationToken);
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
         List<FamilyDetailsDto> familyDetails = new();
 
@@ -184,7 +196,7 @@ public class Gateway : ISentralGateway
     {
         Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
 
-        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiResponse(path, cancellationToken);
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
         List<CoreStudent> students = new();
         List<CoreStudentRelationship> people = new();
@@ -250,7 +262,7 @@ public class Gateway : ISentralGateway
 
         path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-family/{familyId}");
 
-        Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetApiResponse(path, cancellationToken);
+        Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetApiJsonResponse(path, cancellationToken);
 
         foreach (JsonElement entry in familyResponse.Where(entry => entry.Key == JsonSection.Data).SelectMany(entry => entry.Value))
         {
@@ -303,6 +315,15 @@ public class Gateway : ISentralGateway
         }
 
         return familyDetails;
+    }
+
+    public async Task<byte[]> GetSentralStudentPhotoFromApi(string sentralStudentId, CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"https://admin.aurora.dec.nsw.gov.au/restapi/v1/core/core-student/{sentralStudentId}/photo");
+
+        byte[] imageResponse = await GetApiImageResponse(path, cancellationToken);
+
+        return imageResponse;
     }
 
     #endregion
