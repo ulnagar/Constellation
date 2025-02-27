@@ -1,7 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
 using Application.Models.Auth;
+using Constellation.Application.Attendance.Plans.CopyAttendancePlanDetails;
 using Constellation.Application.Attendance.Plans.GetAttendancePlanForSubmit;
+using Constellation.Application.Attendance.Plans.GetRecentlyCompletedPlans;
 using Constellation.Application.Attendance.Plans.SubmitAttendancePlan;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Attendance.Identifiers;
@@ -49,6 +51,7 @@ public class EditModel : BasePageModel
 
     public SelectList Weeks { get; set; }
     public SelectList Days { get; set; }
+    public SelectList StudentPlans { get; set; }
 
     public async Task OnGet() => await PreparePage();
 
@@ -71,10 +74,59 @@ public class EditModel : BasePageModel
 
         Plan = plan.Value;
 
+        Result<List<CompletedPlansResponse>> completedPlans = await _mediator.Send(new GetRecentlyCompletedPlansQuery(plan.Value.SchoolCode, plan.Value.Grade));
+
+        if (completedPlans.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), plan.Error, true)
+                .Warning("Failed to retrieve related Attendance Plans by user {User}", Id, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                plan.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Index", values: new { area = "Staff" }));
+
+            return Page();
+        }
+
+        List<CompletedPlansResponse> completedPlansList = completedPlans.Value
+            .OrderBy(entry => entry.DisplayName)
+            .ToList();
+
         Weeks = new(PeriodWeek.GetOptions, nameof(PeriodWeek.Value), nameof(PeriodWeek.Name));
         Days = new(PeriodDay.GetOptions, nameof(PeriodDay.Value), nameof(PeriodWeek.Name));
+        StudentPlans = new(completedPlansList, nameof(CompletedPlansResponse.PlanId), nameof(CompletedPlansResponse.DisplayName));
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCopyPlan([FromBody] AttendancePlanId sourcePlanId)
+    {
+        CopyAttendancePlanDetailsCommand command = new(Id, sourcePlanId);
+
+        _logger
+            .ForContext(nameof(CopyAttendancePlanDetailsCommand), command, true)
+            .Information("Requested to copy Attendance Plan details by user {User}", _currentUserService.UserName);
+
+        Result operation = await _mediator.Send(new CopyAttendancePlanDetailsCommand(Id, sourcePlanId));
+
+        if (operation.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CopyAttendancePlanDetailsCommand), command, true)
+                .ForContext(nameof(Error), operation.Error, true)
+                .Warning("Failed to copy Attendance Plan details by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                operation.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Details", values: new { area = "Staff", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPost(FormData formData)

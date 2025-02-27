@@ -68,3 +68,12 @@
 tr.current {
     font-weight: bold;
 }
+
+.form-label {
+    font-weight: bold;
+}
+
+.form-control:invalid {
+    border-color: red;
+    border-width: 5px;
+}
