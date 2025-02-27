@@ -182,7 +182,14 @@
                             <option value=""> ---- </option>
                             @foreach (var item in Model.Weeks)
                             {
-                                <option value="@item.Value">@item.Text</option>
+                                if (Model.Plan.SciencePrac?.Week.Value.ToString() == item.Value)
+                                {
+                                    <option value="@item.Value" selected="selected">@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
                             }
                         </select>
                     </div>
@@ -195,7 +202,14 @@
                             <option value=""> ---- </option>
                             @foreach (var item in Model.Days)
                             {
-                                <option value="@item.Value">@item.Text</option>
+                                if (Model.Plan.SciencePrac?.Day.Value.ToString() == item.Value)
+                                {
+                                    <option value="@item.Value" selected="selected">@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
                             }
                         </select>
                     </div>
@@ -204,7 +218,7 @@
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Period</label></div>
                     <div class="col font-weight-bold">
-                        <input name="ScienceLessonPeriod" class="form-control" required />
+                        <input name="ScienceLessonPeriod" value="@Model.Plan.SciencePrac?.Period" class="form-control" required />
                     </div>
                 </div>
             </div>
@@ -239,10 +253,36 @@
                             </tr>
                         </thead>
                         <tbody id="missed-lessons-table">
+                            @{
+                                var missedPeriodIndex = 0;
+
+                                foreach (var entry in Model.Plan.MissedPeriods)
+                                {
+                                    <tr name="MissedLessons[@missedPeriodIndex]">
+                                        <td>@entry.Subject</td>
+                                        <td>@entry.TotalMinutesPerCycle</td>
+                                        <td>@entry.MinutesMissedPerCycle</td>
+                                        <td><button type="button" class="btn btn-danger" onclick="removeMissedLesson(@missedPeriodIndex)">Remove</button></td>
+                                    </tr>
+
+                                    missedPeriodIndex++;
+                                }
+                            }
                         </tbody>
                     </table>
 
-                    <div id="missed-lessons-list"></div>
+                    <div id="missed-lessons-list">
+                        @{
+                            var missedLessonFieldIndex = 0;
+
+                            foreach (var entry in Model.Plan.MissedPeriods)
+                            {
+                                <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject" />
+                                <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle" />
+                                <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle" />
+                            }
+                        }
+                    </div>
                 </div>
             </div>
         </div>
