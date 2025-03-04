@@ -10,9 +10,11 @@
 @{
     var viewMode = Model.Mode == DetailsModel.PageMode.View;
     var allowEdit = Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing;
+    var missedLessonFieldIndex = 0;
+    var freePeriodFieldIndex = 0;
 }
 
-<h2>Attendance Plan</h2>
+<h2>Attendance Plan - @Model.Plan.Status.Name</h2>
 
 <div class="page-menu">
     @if (allowEdit && viewMode)
@@ -123,12 +125,12 @@
 
                                             <div class="mt-2">
                                                 <span class="d-block">Entry Time</span>
-                                                <span>@period.EntryTime.ToString("h:mm tt")</span>
+                                                <span>@(period.EntryTime == TimeOnly.MinValue ? "-" : period.EntryTime.ToString("h:mm tt"))</span>
                                             </div>
 
                                             <div class="mt-2">
                                                 <span class="d-block">Exit Time</span>
-                                                <span>@period.ExitTime.ToString("h:mm tt")</span>
+                                                <span>@(period.ExitTime == TimeOnly.MinValue ? "-" : period.ExitTime.ToString("h:mm tt"))</span>
                                             </div>
                                         }
                                     </div>
@@ -416,7 +418,14 @@
                                 <option value=""> ---- </option>
                                 @foreach (var item in Model.Weeks)
                                 {
-                                    <option value="@item.Value">@item.Text</option>
+                                    if (Model.Plan.SciencePrac?.Week.Value.ToString() == item.Value)
+                                    {
+                                        <option value="@item.Value" selected="selected">@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -429,7 +438,14 @@
                                 <option value=""> ---- </option>
                                 @foreach (var item in Model.Days)
                                 {
-                                    <option value="@item.Value">@item.Text</option>
+                                    if (Model.Plan.SciencePrac?.Day.Value.ToString() == item.Value)
+                                    {
+                                        <option value="@item.Value" selected="selected">@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
                                 }
                             </select>
                         </div>
@@ -438,7 +454,7 @@
                     <div class="mb-3 row mt-3">
                         <div class="col-3"><label class="form-label">Period</label></div>
                         <div class="col font-weight-bold">
-                            <input name="ScienceLessonPeriod" class="form-control" required />
+                            <input name="ScienceLessonPeriod" value="@Model.Plan.SciencePrac?.Period" class="form-control" required />
                         </div>
                     </div>
                 </div>
@@ -473,10 +489,36 @@
                                 </tr>
                             </thead>
                             <tbody id="missed-lessons-table">
+                                @{
+                                    var missedPeriodIndex = 0;
+
+                                    foreach (var entry in Model.Plan.MissedPeriods)
+                                    {
+                                        <tr name="MissedLessons[@missedPeriodIndex]">
+                                            <td>@entry.Subject</td>
+                                            <td>@entry.TotalMinutesPerCycle</td>
+                                            <td>@entry.MinutesMissedPerCycle</td>
+                                            <td><button type="button" class="btn btn-danger" onclick="removeMissedLesson(@missedPeriodIndex)">Remove</button></td>
+                                        </tr>
+
+                                        missedPeriodIndex++;
+                                    }
+                                }
                             </tbody>
                         </table>
 
-                        <div id="missed-lessons-list"></div>
+                        <div id="missed-lessons-list">
+                            @{
+                                foreach (var entry in Model.Plan.MissedPeriods)
+                                {
+                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject" />
+                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle" />
+                                    <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle" />
+
+                                    missedLessonFieldIndex++;
+                                }
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -510,10 +552,39 @@
                                 </tr>
                             </thead>
                             <tbody id="free-periods-table">
+                                @{
+                                    var freePeriodIndex = 0;
+
+                                    foreach (var entry in Model.Plan.FreePeriods)
+                                    {
+                                        <tr name="FreePeriods[@freePeriodIndex]">
+                                            <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
+                                            <td>@entry.Minutes</td>
+                                            <td>@entry.Activity</td>
+                                            <td><button type="button" class="btn btn-danger" onclick="removePeriod(@freePeriodIndex)">Remove</button></td>
+                                        </tr>
+
+                                        freePeriodIndex++;
+                                    }
+                                }
                             </tbody>
                         </table>
 
-                        <div id="free-periods-list"></div>
+                        <div id="free-periods-list">
+                            @{
+
+                                foreach (var entry in Model.Plan.FreePeriods)
+                                {
+                                    <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Week" value="@entry.Week.Value" />
+                                    <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Day" value="@entry.Day.Value" />
+                                    <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Period" value="@entry.Period" />
+                                    <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Minutes" value="@entry.Minutes" />
+                                    <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Activity" value="@entry.Activity" />
+
+                                    freePeriodFieldIndex++;
+                                }
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
@@ -522,8 +593,11 @@
         <hr class="my-3" />
 
         <div class="row">
-            <div class="col-4 mb-3 mt-3 d-grid">
+            <div class="col-4 mb-3 mt-3">
+                <button type="button" class="btn btn-warning btn-lg py-3 me-3" onclick="submitForm('draft')">Save Draft</button>
                 <button type="submit" class="btn btn-success btn-lg py-3" onclick="confirmSubmit()">Submit Plan</button>
+                <button type="submit" class="d-none" formnovalidate="formnovalidate" asp-page-handler="Save" id="saveDraftButton"></button>
+                <button type="submit" class="d-none" asp-page-handler="Submit" id="submitButton"></button>
             </div>
         </div>
     </form>
@@ -681,7 +755,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="submit" type="button" class="btn btn-primary me-3">Yes, Submit!</button>
+                    <button type="button" class="btn btn-primary me-3" onclick="submitForm('final')">Yes, Submit!</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -692,15 +766,14 @@
 @section scripts
 {
     <script>
-        let missedLessonIndex = 0;
-        let freePeriodIndex = 0;
+        let missedLessonIndex = @missedLessonFieldIndex;
+        let freePeriodIndex = @freePeriodFieldIndex;
 
         function confirmSubmit()
         {
-            event.preventDefault();
-
             if (document.getElementById('pageForm').checkValidity())
             {
+                event.preventDefault();
                 $('#confirm-submit-modal').modal('show');
             }
         }
@@ -824,19 +897,8 @@
             $('#missed-lessons-list > input[name*="MissedLessons[' + index + ']"]').remove();
         }
 
-        $('#pageForm').on('submit', function(e){
-            var blockSubmit = @viewMode.ToString().ToLower();
-           
-            if (blockSubmit == true)
-            {
-                e.preventDefault();
-                return false;
-            }
-
-            return true;
-        });
-
-        $('#submit').on('click', function (e) {
+        function submitForm(mode)
+        {
             var i = 0;
             $('#free-periods-list input').each(function () {
                 var names = $(this).attr("name").split('.');
@@ -888,7 +950,14 @@
                 }
             }
 
-             $('#pageForm').submit();
-        })
+            if (mode == 'draft')
+            {
+                 $('#saveDraftButton').trigger('click');
+            }
+            else if (mode == 'final')
+            {
+                 $('#submitButton').trigger('click');
+            }
+        }
     </script>
 }

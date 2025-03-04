@@ -68,7 +68,23 @@ public class DetailsModel : BasePageModel
         await PreparePage();
     }
 
-    public async Task<IActionResult> OnPost(FormData formData)
+    public async Task<IActionResult> OnPostSave(FormData formData)
+    {
+        Result saveDraftAttempt = await SaveDraft(formData);
+
+        if (saveDraftAttempt.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                saveDraftAttempt.Error,
+                _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage("/Absences/Plans/Details", new { area = "Schools", Id });
+    }
+
+    public async Task<IActionResult> OnPostSubmit(FormData formData)
     {
         if (!ModelState.IsValid)
         {
@@ -83,53 +99,12 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        List<SaveDraftAttendancePlanCommand.PlanPeriod> periodList = new();
-        foreach (FormPeriod period in formData.Periods)
-        {
-            periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
-        }
+        Result saveDraftAttempt = await SaveDraft(formData);
 
-        SaveDraftAttendancePlanCommand.ScienceLesson? scienceLesson = (formData.ScienceLessonWeek is not null && formData.ScienceLessonDay is not null)
-                ? new SaveDraftAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
-                : null;
-
-        List<SaveDraftAttendancePlanCommand.FreePeriod> freePeriods = new();
-        foreach (FormFreePeriods period in formData.FreePeriods)
-        {
-            freePeriods.Add(new(
-                period.Week,
-                period.Day,
-                period.Period,
-                period.Minutes,
-                period.Activity));
-        }
-
-        List<SaveDraftAttendancePlanCommand.MissedLesson> missedLessons = new();
-        foreach (FormMissedLesson missedLesson in formData.MissedLessons)
-        {
-            missedLessons.Add(new(
-                missedLesson.Subject,
-                missedLesson.TotalMinutesPerCycle,
-                missedLesson.MinutesMissedPerCycle));
-        }
-
-        SaveDraftAttendancePlanCommand command = new(
-            Id,
-            periodList,
-            scienceLesson,
-            missedLessons, 
-            freePeriods);
-
-        _logger
-            .ForContext(nameof(SubmitAttendancePlanCommand), command, true)
-            .Information("Requested to submit attendance plan by user {user}", _currentUserService.UserName);
-
-        Result attempt = await _mediator.Send(command);
-
-        if (attempt.IsFailure)
+        if (saveDraftAttempt.IsFailure)
         {
             ModalContent = new ErrorDisplay(
-                attempt.Error,
+                saveDraftAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
             return Page();
@@ -180,7 +155,7 @@ public class DetailsModel : BasePageModel
 
     private async Task PreparePage()
     {
-        var request = new GetAttendancePlanForSubmitQuery(
+        GetAttendancePlanForSubmitQuery request = new(
             Id,
             Mode switch
             {
@@ -244,6 +219,54 @@ public class DetailsModel : BasePageModel
         }
 
         return response;
+    }
+
+    private async Task<Result> SaveDraft(FormData formData)
+    {
+        List<SaveDraftAttendancePlanCommand.PlanPeriod> periodList = new();
+        foreach (FormPeriod period in formData.Periods)
+        {
+            periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
+        }
+
+        SaveDraftAttendancePlanCommand.ScienceLesson? scienceLesson = (formData.ScienceLessonWeek is not null && formData.ScienceLessonDay is not null)
+            ? new SaveDraftAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
+            : null;
+
+        List<SaveDraftAttendancePlanCommand.FreePeriod> freePeriods = new();
+        foreach (FormFreePeriods period in formData.FreePeriods)
+        {
+            freePeriods.Add(new(
+                period.Week,
+                period.Day,
+                period.Period,
+                period.Minutes,
+                period.Activity));
+        }
+
+        List<SaveDraftAttendancePlanCommand.MissedLesson> missedLessons = new();
+        foreach (FormMissedLesson missedLesson in formData.MissedLessons)
+        {
+            missedLessons.Add(new(
+                missedLesson.Subject,
+                missedLesson.TotalMinutesPerCycle,
+                missedLesson.MinutesMissedPerCycle));
+        }
+
+        SaveDraftAttendancePlanCommand command = new(
+            Id,
+            periodList,
+            scienceLesson,
+            missedLessons,
+            freePeriods);
+
+        _logger
+            .ForContext(nameof(SubmitAttendancePlanCommand), command, true)
+            .Information("Requested to submit attendance plan by user {user}", _currentUserService.UserName);
+
+        Result attempt = await _mediator.Send(command);
+
+        return attempt;
     }
 
     public sealed class FormData

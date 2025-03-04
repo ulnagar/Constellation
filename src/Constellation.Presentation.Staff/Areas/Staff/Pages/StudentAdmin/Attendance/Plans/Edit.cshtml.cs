@@ -161,7 +161,7 @@ public class EditModel : BasePageModel
             return Page();
         }
 
-        var saveDraftAttempt = await SaveDraft(formData);
+        Result saveDraftAttempt = await SaveDraft(formData);
 
         if (saveDraftAttempt.IsFailure)
         {
