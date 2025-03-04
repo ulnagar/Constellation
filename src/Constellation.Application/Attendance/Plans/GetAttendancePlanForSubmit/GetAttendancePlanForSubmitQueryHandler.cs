@@ -56,7 +56,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
             return Result.Failure<AttendancePlanEntry>(AttendancePlanErrors.NotFound(request.PlanId));
         }
 
-        if (plan.Status == AttendancePlanStatus.Processing)
+        if (plan.Status == AttendancePlanStatus.Processing && request.Mode == GetAttendancePlanForSubmitQuery.ModeOptions.Edit)
         {
             plan.EditPlan($"Plan opened for editing by {_currentUserService.UserName}");
 

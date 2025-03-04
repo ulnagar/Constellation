@@ -5,15 +5,22 @@
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
+@using Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans
 
 @{
-    var isDisplayOnly = !Model.Plan.Status.Equals(AttendancePlanStatus.Pending);
+    var viewMode = Model.Mode == DetailsModel.PageMode.View;
+    var allowEdit = Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing;
 }
 
 <h2>Attendance Plan</h2>
 
 <div class="page-menu">
-    @if (!isDisplayOnly && Model.StudentPlans.Any())
+    @if (allowEdit && viewMode)
+    {
+        <a asp-page-handler="Edit" class="btn btn-warning">Edit</a>
+    }
+
+    @if (!viewMode && Model.StudentPlans.Any())
     {
         <button type="button" class="btn btn-success" onclick="showModal('copy-student')">Copy From Another Plan</button>
     }
@@ -35,7 +42,8 @@
     <div class="col-9">@Model.Plan.Grade.AsName()</div>
 </div>
 
-<form id="pageForm" method="post">
+@if (viewMode)
+{
     <div>
         <div class="mb-3 row mt-3">
             <div class="col">
@@ -74,7 +82,7 @@
 
                                         <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
                                             <span class="w-100">
-                                                @period.PeriodName<br/>
+                                                @period.PeriodName<br />
                                                 @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
                                             </span>
                                         </div>
@@ -107,55 +115,7 @@
                                     var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
 
                                     <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
-                                        @if (!string.IsNullOrWhiteSpace(period.OfferingName) && !isDisplayOnly)
-                                        {
-                                            var options = Model.CalculateOptions(period.StartTime, period.EndTime);
-
-                                            <div>
-                                                <span>@period.OfferingName</span>
-                                                <input type="hidden" name="Periods[@fieldIndex].PlanPeriodId" id="Periods[@fieldIndex].PlanPeriodId" value="@period.PlanPeriodId"/>
-                                            </div>
-
-                                            <div class="mt-2">
-                                                <span>Entry Time</span>
-                                                <select name="Periods[@fieldIndex].EntryTime" id="Periods[@fieldIndex].EntryTime" class="form-control" required>
-                                                    <option value=""> ---- </option>
-                                                    @foreach (var minute in options)
-                                                    {
-                                                        if (period.EntryTime == minute)
-                                                        {
-                                                            <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="@minute">@minute.ToString("h:mm tt")</option>
-                                                        }
-                                                    }
-                                                </select>
-                                            </div>
-
-                                            options.Reverse();
-                                            <div class="mt-2">
-                                                <span>Exit Time</span>
-                                                <select name="Periods[@fieldIndex].ExitTime" id="Periods[@fieldIndex].ExitTime" class="form-control" required>
-                                                    <option value=""> ---- </option>
-                                                    @foreach (var minute in options)
-                                                    {
-                                                        if (period.ExitTime == minute)
-                                                        {
-                                                            <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
-                                                        }
-                                                        else
-                                                        {
-                                                            <option value="@minute">@minute.ToString("h:mm tt")</option>
-                                                        }
-                                                    }
-                                                </select>
-                                            </div>
-
-                                            fieldIndex++;
-                                        }
-                                        else if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                        @if (!string.IsNullOrWhiteSpace(period.OfferingName))
                                         {
                                             <div>
                                                 <span>@period.OfferingName</span>
@@ -182,7 +142,7 @@
             </div>
         }
     </div>
-    
+
     @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
     {
         <hr class="my-3" />
@@ -196,19 +156,9 @@
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Week</label></div>
                     <div class="col font-weight-bold">
-                        @if (isDisplayOnly && Model.Plan.SciencePrac is not null)
+                        @if (Model.Plan.SciencePrac is not null)
                         {
                             <span>@Model.Plan.SciencePrac.Week.Name</span>
-                        }
-                        else
-                        {
-                            <select name="ScienceLessonWeek" class="form-control" required>
-                                <option value=""> ---- </option>
-                                @foreach (var item in Model.Weeks)
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                            </select>
                         }
                     </div>
                 </div>
@@ -216,19 +166,9 @@
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Day</label></div>
                     <div class="col font-weight-bold">
-                        @if (isDisplayOnly && Model.Plan.SciencePrac is not null)
+                        @if (Model.Plan.SciencePrac is not null)
                         {
                             <span>@Model.Plan.SciencePrac.Day.Name</span>
-                        }
-                        else
-                        {
-                            <select name="ScienceLessonDay" class="form-control" required>
-                                <option value=""> ---- </option>
-                                @foreach (var item in Model.Days)
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                            </select>
                         }
                     </div>
                 </div>
@@ -236,13 +176,9 @@
                 <div class="mb-3 row mt-3">
                     <div class="col-3"><label class="form-label">Period</label></div>
                     <div class="col font-weight-bold">
-                        @if (isDisplayOnly && Model.Plan.SciencePrac is not null)
+                        @if (Model.Plan.SciencePrac is not null)
                         {
                             <span>@Model.Plan.SciencePrac.Period</span>
-                        }
-                        else
-                        {
-                            <input name="ScienceLessonPeriod" class="form-control" required/>
                         }
                     </div>
                 </div>
@@ -250,125 +186,348 @@
         </div>
 
         <hr class="my-3" />
-        
+
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
                     <div class="col"><h3>Missed Home School Lessons</h3></div>
                 </div>
-                
+
                 <div class="mb-3 row mt-3">
                     <div class="col">If the student is not able to attend 100% of home school lessons, enter the details of the missed lessons here.</div>
                 </div>
-                
-                @if (!isDisplayOnly)
-                {
-                    <div class="mb-3 row mt-3">
-                        <div class="col">
-                            <button type="button" class="btn btn-warning" onclick="showModal('missed')">Add Missed Lesson</button>
-                        </div>
-                    </div>
-                }
-                
+
                 <div class="mb-3 row mt-3">
                     <table class="table">
                         <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Total Timetabled Minutes</th>
-                            <th>Missed Minutes</th>
-                            <th></th>
-                        </tr>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Total Timetabled Minutes</th>
+                                <th>Missed Minutes</th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody id="missed-lessons-table">
-                            @if (isDisplayOnly)
+                            @foreach (var entry in Model.Plan.MissedPeriods)
                             {
-                                foreach (var entry in Model.Plan.MissedPeriods)
-                                {
-                                    <tr>
-                                        <td>@entry.Subject</td>
-                                        <td>@entry.TotalMinutesPerCycle</td>
-                                        <td>@entry.MinutesMissedPerCycle</td>
-                                        <td>@entry.PercentMissed.ToString("P")</td>
-                                    </tr>
-                                }
+                                <tr>
+                                    <td>@entry.Subject</td>
+                                    <td>@entry.TotalMinutesPerCycle</td>
+                                    <td>@entry.MinutesMissedPerCycle</td>
+                                    <td>@entry.PercentMissed.ToString("P")</td>
+                                </tr>
                             }
                         </tbody>
                     </table>
-
-                    <div id="missed-lessons-list"></div>
                 </div>
             </div>
         </div>
 
         <hr class="my-3" />
-        
+
         <div class="row">
             <div class="col-8">
                 <div class="mb-3 row mt-3">
                     <div class="col"><h3>Free Periods</h3></div>
                 </div>
-                
+
                 <div class="mb-3 row mt-3">
                     <div class="col">If the student has any period where there is no timetabled Aurora College lesson AND no timetabled home school lesson, enter the details of the periods here.</div>
                 </div>
-                
-                @if (!isDisplayOnly)
-                {
+
+                <div class="mb-3 row mt-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Length</th>
+                                <th>Activity</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="free-periods-table">
+                            @foreach (var entry in Model.Plan.FreePeriods)
+                            {
+                                <tr>
+                                    <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
+                                    <td>@entry.Minutes</td>
+                                    <td>@entry.Activity</td>
+                                    <td></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <hr class="my-3" />
+}
+
+@if (!viewMode)
+{
+    <form id="pageForm" method="post">
+        <div>
+            <div class="mb-3 row mt-3">
+                <div class="col">
+                    <h3>Class Alignment</h3>
+                </div>
+            </div>
+
+            <div class="mb-3 row mt-3">
+                <div class="col">
+                    For each period where the student has an Aurora College lesson, select the time when the student will enter the Aurora College class, and the time the student will leave the Aurora College class. If the student is unable to attend the lesson in this period, select the same value for the entry and exit times.
+                </div>
+            </div>
+
+            @{
+                var fieldIndex = 0;
+                var weeks = Model.Plan.Periods.Where(p => p.PeriodType != PeriodType.Offline).OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+
+                <div>
+                    @foreach (var week in weeks)
+                    {
+                        var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+                        var firstDay = true;
+
+                        <div class="Timetable-Week">
+                            @foreach (var day in days)
+                            {
+                                var periods = day.OrderBy(p => p.StartTime).ToList();
+
+                                if (firstDay)
+                                {
+                                    <div class="Timetable-Day">
+                                        <div class="Timetable-Day-Title"></div>
+                                        @foreach (var period in periods)
+                                        {
+                                            var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                            <div class="Timetable-Day-Period @period.PeriodType.Name align-middle @(noCollapse ? "" : "collapsed")">
+                                                <span class="w-100">
+                                                    @period.PeriodName<br />
+                                                    @period.StartTime.ToString("h:mm tt") - @period.EndTime.ToString("h:mm tt")
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                <div class="Timetable-Day">
+                                    <div class="Timetable-Day-Title">
+                                        @week.Key.Name - @day.Key.Name
+                                    </div>
+                                    @foreach (var period in periods)
+                                    {
+                                        var style = "";
+
+                                        if (string.IsNullOrWhiteSpace(period.OfferingName))
+                                        {
+                                            style += " Inactive";
+                                        }
+                                        else
+                                        {
+                                            style += " Active";
+                                        }
+
+                                        if (period.PeriodType == PeriodType.Break)
+                                        {
+                                            style += " Break";
+                                        }
+
+                                        var noCollapse = week.Any(p => p.StartTime == period.StartTime && !string.IsNullOrWhiteSpace(p.OfferingName));
+
+                                        <div class="Timetable-Day-Period @style @(noCollapse ? "" : "collapsed")">
+                                            @if (!string.IsNullOrWhiteSpace(period.OfferingName))
+                                            {
+                                                var options = Model.CalculateOptions(period.StartTime, period.EndTime);
+
+                                                <div>
+                                                    <span>@period.OfferingName</span>
+                                                    <input type="hidden" name="Periods[@fieldIndex].PlanPeriodId" id="Periods[@fieldIndex].PlanPeriodId" value="@period.PlanPeriodId" />
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <span>Entry Time</span>
+                                                    <select name="Periods[@fieldIndex].EntryTime" id="Periods[@fieldIndex].EntryTime" class="form-control" required>
+                                                        <option value=""> ---- </option>
+                                                        @foreach (var minute in options)
+                                                        {
+                                                            if (period.EntryTime == minute)
+                                                            {
+                                                                <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                                options.Reverse();
+                                                <div class="mt-2">
+                                                    <span>Exit Time</span>
+                                                    <select name="Periods[@fieldIndex].ExitTime" id="Periods[@fieldIndex].ExitTime" class="form-control" required>
+                                                        <option value=""> ---- </option>
+                                                        @foreach (var minute in options)
+                                                        {
+                                                            if (period.ExitTime == minute)
+                                                            {
+                                                                <option value="@minute" selected="selected">@minute.ToString("h:mm tt")</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@minute">@minute.ToString("h:mm tt")</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                                fieldIndex++;
+                                            }
+                                        </div>
+                                    }
+                                </div>
+
+                                firstDay = false;
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (Model.Plan.Grade != Grade.Y05 && Model.Plan.Grade != Grade.Y06)
+        {
+            <hr class="my-3" />
+
+            <div class="row">
+                <div class="col-8">
+                    <div class="mb-3 row mt-3">
+                        <div class="col"><h3>Science Practical Lesson</h3></div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col-3"><label class="form-label">Week</label></div>
+                        <div class="col font-weight-bold">
+                            <select name="ScienceLessonWeek" class="form-control" required>
+                                <option value=""> ---- </option>
+                                @foreach (var item in Model.Weeks)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col-3"><label class="form-label">Day</label></div>
+                        <div class="col font-weight-bold">
+                            <select name="ScienceLessonDay" class="form-control" required>
+                                <option value=""> ---- </option>
+                                @foreach (var item in Model.Days)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col-3"><label class="form-label">Period</label></div>
+                        <div class="col font-weight-bold">
+                            <input name="ScienceLessonPeriod" class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-3" />
+
+            <div class="row">
+                <div class="col-8">
+                    <div class="mb-3 row mt-3">
+                        <div class="col"><h3>Missed Home School Lessons</h3></div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col">If the student is not able to attend 100% of home school lessons, enter the details of the missed lessons here.</div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-warning" onclick="showModal('missed')">Add Missed Lesson</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Total Timetabled Minutes</th>
+                                    <th>Missed Minutes</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="missed-lessons-table">
+                            </tbody>
+                        </table>
+
+                        <div id="missed-lessons-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-3" />
+
+            <div class="row">
+                <div class="col-8">
+                    <div class="mb-3 row mt-3">
+                        <div class="col"><h3>Free Periods</h3></div>
+                    </div>
+
+                    <div class="mb-3 row mt-3">
+                        <div class="col">If the student has any period where there is no timetabled Aurora College lesson AND no timetabled home school lesson, enter the details of the periods here.</div>
+                    </div>
+
                     <div class="mb-3 row mt-3">
                         <div class="col">
                             <button type="button" class="btn btn-warning" onclick="showModal('free')">Add Free Period</button>
                         </div>
                     </div>
-                }
-                
-                <div class="mb-3 row mt-3">
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Length</th>
-                            <th>Activity</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody id="free-periods-table">
-                            @if (isDisplayOnly)
-                            {
-                                foreach (var entry in Model.Plan.FreePeriods)
-                                {
-                                    <tr>
-                                        <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
-                                        <td>@entry.Minutes</td>
-                                        <td>@entry.Activity</td>
-                                        <td></td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
 
-                    <div id="free-periods-list"></div>
+                    <div class="mb-3 row mt-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Length</th>
+                                    <th>Activity</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="free-periods-table">
+                            </tbody>
+                        </table>
+
+                        <div id="free-periods-list"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-    
-    <hr class="my-3" />
-    
-    @if (!isDisplayOnly)
-    {
+        }
+
+        <hr class="my-3" />
+
         <div class="row">
             <div class="col-4 mb-3 mt-3 d-grid">
                 <button type="submit" class="btn btn-success btn-lg py-3" onclick="confirmSubmit()">Submit Plan</button>
             </div>
         </div>
+    </form>
 
-    }
-</form>
-
-@if (!isDisplayOnly)
-{
     <form id="copy-student-modal-form" asp-page-handler="CopyPlan">
         <div class="modal fade" tabindex="-1" id="copy-student-modal">
             <div class="modal-dialog" style="max-width: 600px;">
@@ -517,7 +676,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="form-group col">
-                            <span class="control-label">Are you sure you want to submit this attendance plan. Please note that plans cannot be edited once they are submitted.</span>
+                            <span class="control-label">Are you sure you want to submit this attendance plan? Please note that plans cannot be edited once they are submitted.</span>
                         </div>
                     </div>
                 </div>
@@ -666,7 +825,7 @@
         }
 
         $('#pageForm').on('submit', function(e){
-            var blockSubmit = @isDisplayOnly.ToString().ToLower();
+            var blockSubmit = @viewMode.ToString().ToLower();
            
             if (blockSubmit == true)
             {

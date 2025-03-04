@@ -57,7 +57,16 @@ public class DetailsModel : BasePageModel
     public SelectList Days { get; set; }
     public SelectList StudentPlans { get; set; }
 
+    public PageMode Mode { get; set; } = PageMode.View;
+
     public async Task OnGet() => await PreparePage();
+
+    public async Task OnGetEdit()
+    {
+        Mode = PageMode.Edit;
+
+        await PreparePage();
+    }
 
     public async Task<IActionResult> OnPost(FormData formData)
     {
@@ -171,7 +180,16 @@ public class DetailsModel : BasePageModel
 
     private async Task PreparePage()
     {
-        Result<AttendancePlanEntry> plan = await _mediator.Send(new GetAttendancePlanForSubmitQuery(Id));
+        var request = new GetAttendancePlanForSubmitQuery(
+            Id,
+            Mode switch
+            {
+                PageMode.View => GetAttendancePlanForSubmitQuery.ModeOptions.View,
+                PageMode.Edit => GetAttendancePlanForSubmitQuery.ModeOptions.Edit,
+                _ => GetAttendancePlanForSubmitQuery.ModeOptions.View
+            });
+
+        Result<AttendancePlanEntry> plan = await _mediator.Send(request);
 
         if (plan.IsFailure)
         {
@@ -265,5 +283,11 @@ public class DetailsModel : BasePageModel
         public string Period { get; set; } = string.Empty;
         public double Minutes { get; set; }
         public string Activity { get; set; } = string.Empty;
+    }
+
+    public enum PageMode
+    {
+        View,
+        Edit
     }
 }
