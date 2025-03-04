@@ -280,6 +280,8 @@
                                 <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].Subject" value="@entry.Subject" />
                                 <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].TotalMinutesPerCycle" value="@entry.TotalMinutesPerCycle" />
                                 <input type="hidden" name="MissedLessons[@missedLessonFieldIndex].MinutesMissedPerCycle" value="@entry.MinutesMissedPerCycle" />
+
+                                missedLessonFieldIndex++;
                             }
                         }
                     </div>
@@ -316,10 +318,40 @@
                             </tr>
                         </thead>
                         <tbody id="free-periods-table">
+                            @{
+                                var freePeriodIndex = 0;
+
+                                foreach (var entry in Model.Plan.FreePeriods)
+                                {
+                                    <tr name="FreePeriods[@freePeriodIndex]">
+                                        <td>@entry.Week.Name @entry.Day.Name @entry.Period</td>
+                                        <td>@entry.Minutes</td>
+                                        <td>@entry.Activity</td>
+                                        <td><button type="button" class="btn btn-danger" onclick="removePeriod(@freePeriodIndex)">Remove</button></td>
+                                    </tr>
+
+                                    freePeriodIndex++;
+                                }
+                            }
                         </tbody>
                     </table>
 
-                    <div id="free-periods-list"></div>
+                    <div id="free-periods-list">
+                        @{
+                            var freePeriodFieldIndex = 0;
+
+                            foreach (var entry in Model.Plan.FreePeriods)
+                            {
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Week" value="@entry.Week.Value" />
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Day" value="@entry.Day.Value" />
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Period" value="@entry.Period" />
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Minutes" value="@entry.Minutes" />
+                                <input type="hidden" name="FreePeriods[@freePeriodFieldIndex].Activity" value="@entry.Activity" />
+
+                                freePeriodFieldIndex++;
+                            }
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -329,7 +361,10 @@
 
     <div class="row">
         <div class="col-4 mb-3 mt-3 d-grid">
+            <button type="button" class="btn btn-warning btn-lg py-3 mr-3" onclick="submitForm('draft')">Save Draft</button>
             <button type="submit" class="btn btn-success btn-lg py-3" onclick="confirmSubmit()">Submit Plan</button>
+            <button type="submit" class="d-none" formnovalidate="formnovalidate" asp-page-handler="Save" id="saveDraftButton"></button>
+            <button type="submit" class="d-none" asp-page-handler="Submit" id="submitButton"></button>
         </div>
     </div>
 
@@ -413,7 +448,7 @@
 </div>
 
 <div class="modal fade" tabindex="-1" id="free-period-modal">
-    <form id="free-period-modal-form">
+    <form id="free-period-modal-form" onsubmit="submitFreePeriodForm()">
         <div class="modal-dialog" style="max-width: 600px;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -481,12 +516,12 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="form-group col">
-                        <span class="control-label">Are you sure you want to submit this attendance plan. Please note that plans cannot be edited once they are submitted.</span>
+                        <span class="control-label">Are you sure you want to submit this attendance plan? Please note that plans cannot be edited once they are submitted.</span>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="submit" type="button" class="btn btn-primary me-3">Yes, Submit!</button>
+                <button type="button" class="btn btn-primary me-3" onclick="submitForm('final')">Yes, Submit!</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
             </div>
         </div>
@@ -501,10 +536,9 @@
 
         function confirmSubmit()
         {
-            event.preventDefault();
-
             if (document.getElementById('pageForm').checkValidity())
             {
+                event.preventDefault();
                 $('#confirm-submit-modal').modal('show');
             }
         }
@@ -628,7 +662,8 @@
             $('#missed-lessons-list > input[name*="MissedLessons[' + index + ']"]').remove();
         }
 
-        $('#submit').on('click', function (e) {
+        function submitForm(mode)
+        {
             var i = 0;
             $('#free-periods-list input').each(function () {
                 var names = $(this).attr("name").split('.');
@@ -680,7 +715,14 @@
                 }
             }
 
-             $('#pageForm').submit();
-        })
+            if (mode == 'draft')
+            {
+                 $('#saveDraftButton').trigger('click');
+            } 
+            else if (mode == 'final')
+            {
+                 $('#submitButton').trigger('click');
+            }
+        }
     </script>
 }

@@ -18,6 +18,8 @@ using Subjects;
 using Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using Timetables;
 using Timetables.Enums;
@@ -114,7 +116,6 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         SubmittedBy = currentUserService.UserName;
         SubmittedAt = dateTime.Now;
 
-        Status = AttendancePlanStatus.Processing;
 
         return Result.Success();
     }
@@ -149,20 +150,27 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         return Result.Success();
     }
 
-    public void AddMissedLesson(
-        string subject,
-        double totalMinutes,
-        double missedMinutes) =>
-        _missedLessons.Add(new(subject, totalMinutes, missedMinutes));
+    public void AddMissedLessons(List<(string Subject, double TotalMinutes, double MissedMinutes)> missedLessons)
+    {
+        _missedLessons.Clear();
 
-    public void AddFreePeriod(
-        PeriodWeek week,
-        PeriodDay day,
-        string period,
-        double minutes,
-        string activity) =>
-        _freePeriods.Add(new(week, day, period, minutes, activity));
+        foreach ((string Subject, double TotalMinutes, double MissedMinutes) missedLesson in missedLessons)
+        {
+            _missedLessons.Add(new(missedLesson.Subject, missedLesson.TotalMinutes, missedLesson.MissedMinutes));
+        }
+    }
 
+    public void AddFreePeriods(List<(PeriodWeek Week, PeriodDay Day, string Period, double Minutes, string Activity)> freePeriods)
+    {
+        _freePeriods.Clear();
+
+        foreach ((PeriodWeek Week, PeriodDay Day, string Period, double Minutes, string Activity) freePeriod in freePeriods)
+        {
+            _freePeriods.Add(new(freePeriod.Week, freePeriod.Day, freePeriod.Period, freePeriod.Minutes, freePeriod.Activity));
+        }
+
+    }
+    
     private Result UpdateStatus(AttendancePlanStatus newStatus)
     {
         if (Status.Equals(AttendancePlanStatus.Accepted) || 
@@ -171,7 +179,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
             Status.Equals(AttendancePlanStatus.Archived))
             return Result.Failure(AttendancePlanErrors.InvalidCurrentStatus(Status));
 
-        if (newStatus.Equals(AttendancePlanStatus.Pending) || newStatus.Equals(AttendancePlanStatus.Archived))
+        if (newStatus.Equals(AttendancePlanStatus.Archived))
             return Result.Failure(AttendancePlanErrors.InvalidNewStatus(newStatus));
 
         Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, $"Updated Status from {Status} to {newStatus}");
@@ -200,12 +208,36 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         return Result.Success();
     }
 
+    public Result SubmitPlan(string comment)
+    {
+        Result statusUpdate = UpdateStatus(AttendancePlanStatus.Processing);
+
+        if (statusUpdate.IsFailure)
+            return statusUpdate;
+
+        if (string.IsNullOrWhiteSpace(comment))
+            return Result.Success();
+
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, comment);
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        return Result.Success();
+    }
+
+
     public Result ApprovePlan(string comment)
     {
         Result statusUpdate = UpdateStatus(AttendancePlanStatus.Accepted);
 
         if (statusUpdate.IsFailure)
             return statusUpdate;
+
+        if (string.IsNullOrWhiteSpace(comment))
+            return Result.Failure(AttendancePlanErrors.CommentRequired);
 
         Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, comment);
 
@@ -234,6 +266,23 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         _notes.Add(note.Value);
 
         RaiseDomainEvent(new AttendancePlanRejectedDomainEvent(new(), Id));
+
+        return Result.Success();
+    }
+
+    public Result EditPlan(string comment)
+    {
+        Result statusUpdate = UpdateStatus(AttendancePlanStatus.Pending);
+
+        if (statusUpdate.IsFailure)
+            return statusUpdate;
+
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, comment);
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
 
         return Result.Success();
     }

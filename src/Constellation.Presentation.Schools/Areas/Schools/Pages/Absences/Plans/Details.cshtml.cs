@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans;
 using Application.Attendance.Plans.CopyAttendancePlanDetails;
 using Application.Attendance.Plans.GetAttendancePlanForSubmit;
 using Application.Attendance.Plans.GetRecentlyCompletedPlans;
+using Application.Attendance.Plans.SaveDraftAttendancePlan;
 using Application.Attendance.Plans.SubmitAttendancePlan;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
@@ -73,17 +74,17 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        List<SubmitAttendancePlanCommand.PlanPeriod> periodList = new();
+        List<SaveDraftAttendancePlanCommand.PlanPeriod> periodList = new();
         foreach (FormPeriod period in formData.Periods)
         {
             periodList.Add(new(period.PlanPeriodId, period.EntryTime, period.ExitTime));
         }
 
-        SubmitAttendancePlanCommand.ScienceLesson? scienceLesson = (formData.ScienceLessonWeek is not null && formData.ScienceLessonDay is not null)
-                ? new SubmitAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
+        SaveDraftAttendancePlanCommand.ScienceLesson? scienceLesson = (formData.ScienceLessonWeek is not null && formData.ScienceLessonDay is not null)
+                ? new SaveDraftAttendancePlanCommand.ScienceLesson(formData.ScienceLessonWeek, formData.ScienceLessonDay, formData.ScienceLessonPeriod)
                 : null;
 
-        List<SubmitAttendancePlanCommand.FreePeriod> freePeriods = new();
+        List<SaveDraftAttendancePlanCommand.FreePeriod> freePeriods = new();
         foreach (FormFreePeriods period in formData.FreePeriods)
         {
             freePeriods.Add(new(
@@ -94,7 +95,7 @@ public class DetailsModel : BasePageModel
                 period.Activity));
         }
 
-        List<SubmitAttendancePlanCommand.MissedLesson> missedLessons = new();
+        List<SaveDraftAttendancePlanCommand.MissedLesson> missedLessons = new();
         foreach (FormMissedLesson missedLesson in formData.MissedLessons)
         {
             missedLessons.Add(new(
@@ -103,7 +104,7 @@ public class DetailsModel : BasePageModel
                 missedLesson.MinutesMissedPerCycle));
         }
 
-        SubmitAttendancePlanCommand command = new(
+        SaveDraftAttendancePlanCommand command = new(
             Id,
             periodList,
             scienceLesson,
@@ -120,6 +121,17 @@ public class DetailsModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(
                 attempt.Error,
+                _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            return Page();
+        }
+
+        Result submitAttempt = await _mediator.Send(new SubmitAttendancePlanCommand(Id));
+
+        if (submitAttempt.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                submitAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
             return Page();

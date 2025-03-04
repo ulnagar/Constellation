@@ -29,10 +29,13 @@
 
         <button type="button" data-toggle="modal" data-target="#add-note-modal" class="btn btn-warning">Add Note</button>
 
-        @if (Model.Plan.Status == AttendancePlanStatus.Pending)
+        // Edit pending or processing plan
+        @if (Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing)
         {
             <a asp-page="/StudentAdmin/Attendance/Plans/Edit" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
         }
+
+        // TODO: R1.17.1: Edit Approved plan via versioning
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>

@@ -42,4 +42,8 @@ public static class AttendancePlanErrors
     public static readonly Error EntryTimeAfterExitTime = new(
         "AttendancePlans.UpdatePeriods.EntryTimeAfterExitTime",
         "The supplied entry time is after the supplied exit time");
+
+    public static readonly Error CommentRequired = new(
+        "AttendancePlans.UpdateStatus.CommentRequired",
+        "A comment is required to update the plan status");
 }
