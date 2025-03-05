@@ -280,7 +280,9 @@
 
         <div id="sessions" class="tab-pane">
             <h3>Current Sessions</h3>
-
+            
+            <a asp-page="/Partner/Students/Timetable" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">View Timetable</a>
+            
             <table class="table-striped table-hover data-table">
                 <thead>
                 <tr>

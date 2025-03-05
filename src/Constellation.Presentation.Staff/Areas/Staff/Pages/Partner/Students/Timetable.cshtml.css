@@ -1,0 +1,77 @@
+.Student-Timetable-Week {
+    margin-top: 1rem;
+    /*border: 1px solid red;*/
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Student-Timetable-Day {
+    /*border: 1px solid green;*/
+    /*margin: 2px;*/
+    display: flex;
+    padding: 0.5rem 0;
+    flex-direction: column;
+    align-items: stretch;
+    align-content: stretch;
+}
+
+.Student-Timetable-Day-Title {
+    height: 2rem;
+    text-align: center;
+    font-weight: bolder;
+    margin: 2px 1px;
+}
+
+.Student-Timetable-Day-Period {
+    border: 1px solid green;
+    height: 4rem;
+    margin: 2px;
+    padding: 0.5rem;
+    text-align: center;
+    width: 10vw;
+    background-color: azure;
+}
+
+    .Student-Timetable-Day-Period.ClassDetails {
+        height: 7rem;
+    }
+
+    .Student-Timetable-Day-Period.SingleCustom {
+        height: 8rem;
+    }
+
+    .Student-Timetable-Day-Period.DoubleCustom {
+        height: 11rem;
+    }
+
+    .Student-Timetable-Day-Period.Inactive {
+        /*background-color: cornflowerblue;*/
+    }
+
+    .Student-Timetable-Day-Period.Active {
+        background-color: darkseagreen;
+        font-weight: bold;
+    }
+
+    .Student-Timetable-Day-Period.Break {
+        background-color: lightyellow;
+    }
+
+    .Student-Timetable-Day-Period.Offline {
+        background-color: lightgray;
+    }
+
+.custom-time {
+    display: block;
+    color: red;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.class-details {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
