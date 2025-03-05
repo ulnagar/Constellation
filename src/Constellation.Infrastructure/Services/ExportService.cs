@@ -45,6 +45,6 @@ public class ExportService : IExportService
         var headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReportHeader.cshtml", viewModel);
         var htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Attendance/AttendanceReport.cshtml", viewModel);
 
-        return _pdfService.StringToPdfStream(htmlString, headerString);
+        return _pdfService.StringToPdfStream(htmlString, headerString, 100);
     }
 }

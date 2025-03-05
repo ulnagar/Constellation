@@ -46,6 +46,17 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
             .Where(plan => plan.StudentId == studentId)
             .ToListAsync(cancellationToken);
 
+    public async Task<AttendancePlan?> GetCurrentApprovedForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AttendancePlan>()
+            .Where(plan =>
+                plan.StudentId == studentId &&
+                plan.Status == AttendancePlanStatus.Accepted)
+            .OrderByDescending(plan => plan.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<AttendancePlan>> GetPendingForSchool(
         string schoolCode,
         CancellationToken cancellationToken = default) =>

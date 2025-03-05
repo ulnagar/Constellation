@@ -41,6 +41,23 @@ else
         </span>
     </div>
 
+    <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative">
+        @if (!Model.TimetableData.HasAttendancePlan)
+        {
+            <div class="alert alert-dark mt-3" role="alert">
+                This timetable is provisional and does not yet incorporate information from @Model.TimetableData.StudentSchool relating to conflicts due to bell times and local timetables.<br />
+                If you have any concerns regarding the entry or exit times for a lesson, please contact Aurora College on 1300 287 629 or at auroracoll-h.school@@det.nsw.edu.au
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mt-3" role="alert">
+                This timetable includes agreed entry and/or exit times for each period as negotiated with @Model.TimetableData.StudentSchool. Where these differ from the Aurora College bell times, they are listed in red on the period.<br />
+                If you have any concerns regarding the entry or exit times for a lesson, please contact Aurora College on 1300 287 629 or at auroracoll-h.school@@det.nsw.edu.au
+            </div>
+        }
+    </div>
+
     <div class="d-lg-none">
         <div class="d-grid gap-2 d-block mb-2">
             <a class="btn btn-primary" asp-page-handler="Download" asp-route-studentId="@Model.StudentId" onclick="showLoader(2500)">Download Full Timetable</a>
@@ -160,6 +177,14 @@ else
 
                 <div class="p-2 ms-1 me-1 border border-2 rounded-3 @style">
                     <span class="h5">@period.Name (@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime())</span>
+                    @if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
+                    {
+                        <span class="d-block red-text">&nbsp; Class Entry Time: @period.EntryTime.ToString("h:mm tt")</span>
+                    }
+                    @if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
+                    {
+                        <span class="d-block red-text">&nbsp; Class Exit Time: @period.ExitTime.ToString("h:mm tt")</span>
+                    }
                     <span class="d-block">&nbsp; @period.ClassName</span>
                     <span class="d-block">&nbsp; @period.ClassTeacher</span>
                 </div>
@@ -198,7 +223,14 @@ else
                                         style += " period-break";
                                     }
 
-                                    <div class="Timetable-Day-Period @style">
+                                    var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+
+                                    var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
+                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                    collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
+
+                                    <div class="Timetable-Day-Period @style @collapseState">
                                         @period.Name<br />
                                         @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
                                     </div>
@@ -228,9 +260,26 @@ else
                                     style += " period-break";
                                 }
 
-                                <div class="Timetable-Day-Period @style">
+                                var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+
+                                var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
+                                collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
+
+                                <div class="Timetable-Day-Period @style @collapseState">
                                     <span class="d-block">&nbsp; @period.ClassName</span>
                                     <span class="d-block">&nbsp; @period.ClassTeacher</span>
+                                    @if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
+                                    {
+                                        <span class="d-block red-text mt-2">&nbsp; Class Entry Time:</span>
+                                        <span class="d-block red-text">&nbsp; @period.EntryTime.ToString("h:mm tt")</span>
+                                    }
+                                    @if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
+                                    {
+                                        <span class="d-block red-text mt-2">&nbsp; Class Exit Time:</span>
+                                        <span class="d-block red-text">&nbsp; @period.ExitTime.ToString("h:mm tt")</span>
+                                    }
                                 </div>
                             }
                         </div>

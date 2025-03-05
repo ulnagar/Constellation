@@ -103,9 +103,9 @@ internal sealed class EmailAttachmentService : IEmailAttachmentService
         }
 
         var timetableHeaderString = await _razorService.RenderViewToStringAsync("/Views/Documents/Timetable/ClassTimetableHeader.cshtml", timetableData);
-        var timetableBodyString = await _razorService.RenderViewToStringAsync("/Views/Documents/Timetable/Timetable.cshtml", timetableData);
+        var timetableBodyString = await _razorService.RenderViewToStringAsync("/Views/Documents/Timetable/ClassTimetable.cshtml", timetableData);
 
-        var timetableAttachment = _pdfService.StringToPdfAttachment(timetableBodyString, timetableHeaderString, $"{offering.Name} Timetable.pdf");
+        var timetableAttachment = _pdfService.StringToPdfAttachment(timetableBodyString, timetableHeaderString, 110, $"{offering.Name} Timetable.pdf");
 
         return timetableAttachment;
     }

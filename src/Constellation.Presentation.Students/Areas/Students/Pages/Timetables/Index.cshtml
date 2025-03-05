@@ -19,6 +19,21 @@
 <br />
 @Model.StudentTimetableData.StudentSchool
 
+@if (!Model.StudentTimetableData.HasAttendancePlan)
+{
+    <div class="alert alert-dark mt-3" role="alert">
+        This timetable is provisional and does not yet incorporate information from @Model.StudentTimetableData.StudentSchool relating to conflicts due to bell times and local timetables.<br />
+        If you have any concerns regarding the entry or exit times for a lesson, please contact Aurora College on 1300 287 629 or at auroracoll-h.school@@det.nsw.edu.au
+    </div>
+}
+else
+{
+    <div class="alert alert-info mt-3" role="alert">
+        This timetable includes agreed entry and/or exit times for each period as negotiated with @Model.StudentTimetableData.StudentSchool. Where these differ from the Aurora College bell times, they are listed in red on the period.<br />
+        If you have any concerns regarding the entry or exit times for a lesson, please contact Aurora College on 1300 287 629 or at auroracoll-h.school@@det.nsw.edu.au
+    </div>
+}
+
 <div>
     @{
         IEnumerable<IGrouping<Timetable, TimetableDataDto.TimetableData>> timetables = new List<IGrouping<Timetable, TimetableDataDto.TimetableData>>();
@@ -48,7 +63,14 @@
                                     <div class="Timetable-Day-Title">&nbsp;</div>
                                     @foreach (var period in periods)
                                     {
-                                        <div class="Timetable-Day-Period @period.Type.Name">
+                                        var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+
+                                        var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
+                                        collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                        collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                        collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
+
+                                        <div class="Timetable-Day-Period @period.Type.Name @collapseState">
                                             @period.Name<br />
                                             @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
                                         </div>
@@ -78,13 +100,37 @@
                                         style += " Break";
                                     }
 
-                                    <div class="Timetable-Day-Period @style">
+                                    var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+
+                                    var collapseState = (matchingPeriods.Any(p => !string.IsNullOrWhiteSpace(p.ClassName)) ? "ClassDetails" : "");
+                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                    collapseState = (matchingPeriods.Any(p => p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "SingleCustom" : collapseState);
+                                    collapseState = (matchingPeriods.Any(p => p.EntryTime != TimeOnly.FromTimeSpan(p.StartTime) && p.EntryTime != TimeOnly.MinValue && p.ExitTime != TimeOnly.FromTimeSpan(p.EndTime) && p.ExitTime != TimeOnly.MinValue) ? "DoubleCustom" : collapseState);
+
+                                    <div class="Timetable-Day-Period @style @collapseState">
+                                        @if (period.EntryTime != TimeOnly.FromTimeSpan(period.StartTime) && period.EntryTime != TimeOnly.MinValue)
+                                        {
+                                            <div class="custom-time">
+                                                Class Entry Time:<br />
+                                                @period.EntryTime.ToString("h:mm tt")
+                                            </div>
+                                        }
+
                                         @if (!string.IsNullOrWhiteSpace(period.ClassName))
                                         {
+                                            <div class="class-details">
                                             @period.ClassName
-
-                                            <br />
+                                            <br/>
                                             @period.ClassTeacher
+                                            </div>
+                                        }
+                                        
+                                        @if (period.ExitTime != TimeOnly.FromTimeSpan(period.EndTime) && period.ExitTime != TimeOnly.MinValue)
+                                        {
+                                            <div class="custom-time">
+                                                Class Exit Time:<br />
+                                                @period.ExitTime.ToString("h:mm tt")
+                                            </div>
                                         }
                                     </div>
                                 }

@@ -1,48 +1,115 @@
-﻿@page "{studentId}"
+﻿@model StudentTimetableDataDto
+
 @using Constellation.Application.DTOs
+@using Constellation.Application.Extensions
 @using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Core.Models.Timetables.ValueObjects
-@model Constellation.Presentation.Schools.Areas.Schools.Pages.Timetables.ViewModel
+
 @{
+    Layout = null;
 }
 
-<h2>Student Timetables</h2>
+<!DOCTYPE html>
 
-<div class="d-flex flex-row mt-3 mb-3 page-menu">
-    <a asp-page-handler="Download" class="btn btn-primary" onclick="showLoader(3000)">Download</a>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+    <style>
+        .Timetable-Week {
+            /*margin-top: 1rem;*/
+            /*margin-left: 5%;*/
+            /*border: 1px solid red;*/
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            align-content: stretch;
+        }
 
-    <a asp-page="/Timetables/Index" asp-area="Schools" class="btn btn-danger btn-pull-right">Go Back</a>
-</div>
+        .Timetable-Day {
+            /*border: 1px solid green;*/
+            /*margin: 2px;*/
+            display: flex;
+            padding: 5px 0;
+            flex-direction: column;
+            align-items: stretch;
+            align-content: stretch;
+            width: 175px;
+        }
 
-<hr />
+        .Timetable-Day-Title {
+            height: 20px;
+            text-align: center;
+            font-weight: bolder;
+            margin: 2px 1px;
+        }
 
-@Model.StudentTimetableData.StudentName
-<br />
-@Model.StudentTimetableData.StudentGrade
-<br />
-@Model.StudentTimetableData.StudentSchool
+        .Timetable-Day-Period {
+            border: 1px solid green;
+            height: 4rem;
+            margin: 2px;
+            padding: 0.5rem;
+            text-align: center;
+            /*width: 10vw;*/
+            background-color: azure;
+        }
 
-@if (!Model.StudentTimetableData.HasAttendancePlan)
-{
-    <div class="alert alert-dark mt-3" role="alert">
-        This timetable is provisional and does not yet incorporate information from @Model.StudentTimetableData.StudentSchool relating to conflicts due to bell times and local timetables.<br />
-        If you have any concerns regarding the entry or exit times for a lesson, please contact Aurora College on 1300 287 629 or at auroracoll-h.school@@det.nsw.edu.au
-    </div>
-}
-else
-{
-    <div class="alert alert-info mt-3" role="alert">
-        This timetable includes agreed entry and/or exit times for each period as negotiated with @Model.StudentTimetableData.StudentSchool. Where these differ from the Aurora College bell times, they are listed in red on the period.<br />
-        If you have any concerns regarding the entry or exit times for a lesson, please contact Aurora College on 1300 287 629 or at auroracoll-h.school@@det.nsw.edu.au
-    </div>
-}
+        .Timetable-Day-Period.ClassDetails {
+            height: 5rem;
+        }
 
-<div>
+        .Timetable-Day-Period.SingleCustom {
+            height: 7rem;
+        }
+
+        .Timetable-Day-Period.DoubleCustom {
+            height: 9rem;
+        }
+
+        .Timetable-Day-Period.Inactive {
+            /*background-color: cornflowerblue;*/
+        }
+
+        .Timetable-Day-Period.Active {
+            background-color: darkseagreen;
+            font-weight: bold;
+        }
+
+        .Timetable-Day-Period.Break {
+            background-color: lightyellow;
+        }
+
+        .Timetable-Day-Period.Offline {
+            background-color: lightgray;
+        }
+
+        .custom-time {
+            display: block;
+            color: red;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .class-details {
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .Page {
+            margin-left: 3%;
+            margin-right: 3%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="Page">
     @{
         IEnumerable<IGrouping<Timetable, TimetableDataDto.TimetableData>> timetables = new List<IGrouping<Timetable, TimetableDataDto.TimetableData>>();
-        if (Model.StudentTimetableData.Timetables != null)
+        if (Model.Timetables != null)
         {
-            timetables = Model.StudentTimetableData.Timetables.OrderBy(data => data.Timetable).GroupBy(data => data.Timetable);
+            timetables = Model.Timetables.OrderBy(data => data.Timetable).GroupBy(data => data.Timetable);
         }
 
         @foreach (var block in timetables)
@@ -54,6 +121,11 @@ else
                 {
                     var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
                     var firstDay = true;
+
+                    if (week.Key.Value > 1)
+                    {
+                        <div style="page-break-after: always; border: none;"></div>
+                    }
 
                     <div class="Timetable-Week">
                         @foreach (var day in days)
@@ -80,7 +152,7 @@ else
                                     }
                                 </div>
                             }
-                            
+
                             <div class="Timetable-Day">
                                 <div class="Timetable-Day-Title">
                                     @week.Key.Name - @day.Key.Name
@@ -146,4 +218,7 @@ else
             </div>
         }
     }
-</div>
+    </div>
+
+</body>
+</html>

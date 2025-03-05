@@ -7,7 +7,7 @@ namespace Constellation.Application.Interfaces.Services
     {
         Attachment PageToPdfAttachment(string url, string filename);
         Attachment StringToPdfAttachment(string input, string filename);
-        Attachment StringToPdfAttachment(string input, string header, string filename);
-        MemoryStream StringToPdfStream(string input, string header);
+        Attachment StringToPdfAttachment(string input, string header, int headerHeight, string filename);
+        MemoryStream StringToPdfStream(string input, string header, int headerHeight);
     }
 }

@@ -8,6 +8,8 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Extensions;
+using Core.Models.Attendance;
+using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Errors;
@@ -20,6 +22,7 @@ using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using DTOs;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,6 +35,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly IAttendancePlanRepository _planRepository;
     private readonly ILogger _logger;
 
     public GetStudentTimetableDataQueryHandler(
@@ -39,12 +43,14 @@ internal sealed class GetStudentTimetableDataQueryHandler
         IOfferingRepository offeringRepository,
         IPeriodRepository periodRepository,
         IStaffRepository staffRepository,
+        IAttendancePlanRepository planRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _periodRepository = periodRepository;
         _staffRepository = staffRepository;
+        _planRepository = planRepository;
         _logger = logger.ForContext<GetStudentTimetableDataQuery>();
     }
 
@@ -64,6 +70,8 @@ internal sealed class GetStudentTimetableDataQueryHandler
             return Result.Failure<StudentTimetableDataDto>(StudentErrors.NotFound(request.StudentId));
         }
 
+        AttendancePlan? plan = await _planRepository.GetCurrentApprovedForStudent(student.Id, cancellationToken);
+
         SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
@@ -80,6 +88,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
         response.StudentName = student.Name.DisplayName;
         response.StudentGrade = enrolment.Grade.AsName();
         response.StudentSchool = enrolment.SchoolName;
+        response.HasAttendancePlan = plan is not null;
 
         List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
@@ -124,13 +133,17 @@ internal sealed class GetStudentTimetableDataQueryHandler
             if (period.Type == PeriodType.Offline)
                 continue;
 
+            AttendancePlanPeriod? planPeriod = plan?.Periods.FirstOrDefault(planPeriod => planPeriod.PeriodId == period.Id);
+
             TimetableDataDto.TimetableData entry = new()
             {
                 Timetable = period.Timetable,
                 Week = period.Week,
                 Day = period.Day,
                 StartTime = period.StartTime,
+                EntryTime = planPeriod?.EntryTime ?? TimeOnly.MinValue,
                 EndTime = period.EndTime,
+                ExitTime = planPeriod?.ExitTime ?? TimeOnly.MinValue,
                 Name = period.Name,
                 PeriodCode = period.PeriodCode,
                 Type = period.Type

@@ -23,7 +23,7 @@
 
 .Timetable-Day-Period {
     border: 1px solid green;
-    height: 7rem;
+    height: 4rem;
     margin: 2px;
     padding: 0.5rem;
     text-align: center;
@@ -31,6 +31,18 @@
     min-width: 12vw;
     background-color: azure;
 }
+
+    .Timetable-Day-Period.ClassDetails {
+        height: 7rem;
+    }
+
+    .Timetable-Day-Period.SingleCustom {
+        height: 8rem;
+    }
+
+    .Timetable-Day-Period.DoubleCustom {
+        height: 11rem;
+    }
 
     .Timetable-Day-Period.Active {
         background-color: darkseagreen;
@@ -44,3 +56,16 @@
     .Timetable-Day-Period.Offline {
         background-color: lightgray;
     }
+
+.custom-time {
+    display: block;
+    color: red;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.class-details {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

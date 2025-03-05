@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Timetables.GetStudentTimetableExport;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Attendance.Repositories;
 using Core.Extensions;
 using Core.Models;
 using Core.Models.Offerings;
@@ -22,6 +24,7 @@ using DTOs;
 using Interfaces.Repositories;
 using Interfaces.Services;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,6 +40,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IPeriodRepository _periodRepository;
+    private readonly IAttendancePlanRepository _planRepository;
     private readonly IRazorViewToStringRenderer _renderService;
     private readonly IPDFService _pdfService;
     private readonly ILogger _logger;
@@ -47,6 +51,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
         IPeriodRepository periodRepository,
+        IAttendancePlanRepository planRepository,
         IRazorViewToStringRenderer renderService, 
         IPDFService pdfService,
         ILogger logger)
@@ -56,6 +61,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
         _staffRepository = staffRepository;
         _offeringRepository = offeringRepository;
         _periodRepository = periodRepository;
+        _planRepository = planRepository;
         _renderService = renderService;
         _pdfService = pdfService;
         _logger = logger;
@@ -77,6 +83,8 @@ internal sealed class GetStudentTimetableExportQueryHandler
             return Result.Failure<FileDto>(StudentErrors.NotFound(request.StudentId));
         }
 
+        AttendancePlan? plan = await _planRepository.GetCurrentApprovedForStudent(student.Id, cancellationToken);
+
         SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
@@ -93,6 +101,7 @@ internal sealed class GetStudentTimetableExportQueryHandler
         response.StudentName = student.Name.DisplayName;
         response.StudentGrade = enrolment.Grade.AsName();
         response.StudentSchool = enrolment.SchoolName;
+        response.HasAttendancePlan = plan is not null;
 
         List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
@@ -137,13 +146,17 @@ internal sealed class GetStudentTimetableExportQueryHandler
             if (period.Type == PeriodType.Offline)
                 continue;
 
+            AttendancePlanPeriod? planPeriod = plan?.Periods.FirstOrDefault(planPeriod => planPeriod.PeriodId == period.Id);
+
             TimetableDataDto.TimetableData entry = new()
             {
                 Timetable = period.Timetable,
                 Week = period.Week,
                 Day = period.Day,
                 StartTime = period.StartTime,
+                EntryTime = planPeriod?.EntryTime ?? TimeOnly.MinValue,
                 EndTime = period.EndTime,
+                ExitTime = planPeriod?.ExitTime ?? TimeOnly.MinValue,
                 Name = period.Name,
                 PeriodCode = period.PeriodCode,
                 Type = period.Type
@@ -186,9 +199,9 @@ internal sealed class GetStudentTimetableExportQueryHandler
         string fileName = $"{response.StudentName} Timetable.pdf";
 
         string headerString = await _renderService.RenderViewToStringAsync("/Views/Documents/Timetable/StudentTimetableHeader.cshtml", response);
-        string htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Timetable/Timetable.cshtml", response);
+        string htmlString = await _renderService.RenderViewToStringAsync("/Views/Documents/Timetable/StudentTimetable.cshtml", response);
 
-        MemoryStream pdfStream = _pdfService.StringToPdfStream(htmlString, headerString);
+        MemoryStream pdfStream = _pdfService.StringToPdfStream(htmlString, headerString, 130);
 
         FileDto result = new()
         {

@@ -17,7 +17,9 @@ public abstract class TimetableDataDto
         public PeriodDay Day { get; set; }
         public char PeriodCode { get; set; }
         public TimeSpan StartTime { get; set; }
+        public TimeOnly EntryTime { get; set; } = TimeOnly.MinValue;
         public TimeSpan EndTime { get; set; }
+        public TimeOnly ExitTime { get; set; } = TimeOnly.MinValue;
         public string Name { get; set; }
         public PeriodType Type { get; set; }
         public string ClassName { get; set; }
@@ -31,6 +33,7 @@ public class StudentTimetableDataDto : TimetableDataDto
     public string StudentName { get; set; }
     public string StudentSchool { get; set; }
     public string StudentGrade { get; set; }
+    public bool HasAttendancePlan { get; set; } = false;
 }
 
 public class ClassTimetableDataDto : TimetableDataDto
