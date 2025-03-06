@@ -6,6 +6,7 @@ using Application.Attendance.Plans.GetAttendancePlanDetails;
 using Application.Attendance.Plans.RejectAttendancePlan;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
+using Constellation.Application.Attendance.Plans.CreateAttendancePlanVersion;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
 using Core.Shared;
@@ -50,6 +51,24 @@ public class DetailsModel : BasePageModel
     public AttendancePlanDetailsResponse Plan { get; set; }
 
     public async Task OnGet() => await PreparePage();
+
+    public async Task<IActionResult> OnGetVersion()
+    {
+        Result<AttendancePlanId> versionAttempt = await _mediator.Send(new CreateAttendancePlanVersionCommand(Id));
+
+        if (versionAttempt.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                versionAttempt.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Index", values: new { area = "Staff" }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage("/StudentAdmin/Attendance/Plans/Edit", new { area = "Staff", Id = versionAttempt.Value });
+    }
 
     private async Task<IActionResult> PreparePage()
     {

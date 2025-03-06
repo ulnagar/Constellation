@@ -228,7 +228,6 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         return Result.Success();
     }
 
-
     public Result ApprovePlan(string comment)
     {
         Result statusUpdate = UpdateStatus(AttendancePlanStatus.Accepted);
@@ -247,6 +246,27 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         _notes.Add(note.Value);
 
         RaiseDomainEvent(new AttendancePlanAcceptedDomainEvent(new(), Id));
+
+        return Result.Success();
+    }
+
+    public Result SupersededBy(AttendancePlanId newPlanId)
+    {
+        Result<AttendancePlanNote> note = AttendancePlanNote.Create(Id, $"Updated Status from {Status} to {AttendancePlanStatus.Superseded}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
+
+        Status = AttendancePlanStatus.Superseded;
+
+        note = AttendancePlanNote.Create(Id, $"Plan superseded by {newPlanId}");
+
+        if (note.IsFailure)
+            return Result.Failure(note.Error);
+
+        _notes.Add(note.Value);
 
         return Result.Success();
     }

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
+using Application.Assets.ImportAssetsFromFile;
 using Application.Attendance.Plans.GetAttendancePlansSummary;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -37,11 +38,14 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Plans;
     [ViewData] public string PageTitle => "Attendance Plans";
 
+    [BindProperty(SupportsGet = true)]
+    public AttendancePlanStatusFilter Filter { get; set; } = AttendancePlanStatusFilter.All;
+
     public List<AttendancePlanSummaryResponse> Plans { get; set; } = new();
 
     public async Task OnGet()
     {
-        Result<List<AttendancePlanSummaryResponse>> plans = await _mediator.Send(new GetAttendancePlansSummaryQuery());
+        Result<List<AttendancePlanSummaryResponse>> plans = await _mediator.Send(new GetAttendancePlansSummaryQuery(Filter));
 
         if (plans.IsFailure)
         {

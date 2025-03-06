@@ -35,7 +35,11 @@
             <a asp-page="/StudentAdmin/Attendance/Plans/Edit" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
         }
 
-        // TODO: R1.17.1: Edit Approved plan via versioning
+        // Edit/Version and accepted plan
+        @if (Model.Plan.Status == AttendancePlanStatus.Accepted)
+        {
+            <a asp-page-handler="Version" class="btn btn-warning">Edit</a>
+        }
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>

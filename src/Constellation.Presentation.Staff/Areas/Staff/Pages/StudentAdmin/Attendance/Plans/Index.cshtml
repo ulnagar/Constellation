@@ -1,4 +1,5 @@
 ﻿@page
+@using Constellation.Application.Attendance.Plans.GetAttendancePlansSummary
 @using Constellation.Core.Extensions
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans.IndexModel
 
@@ -11,6 +12,36 @@
 <h2>Attendance Plans</h2>
 
 <div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var currentStyle = allStyle;
+        var inProgressStyle = allStyle;
+        var expiredStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case AttendancePlanStatusFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case AttendancePlanStatusFilter.Current:
+                currentStyle = "btn-primary";
+                break;
+            case AttendancePlanStatusFilter.InProgress:
+                inProgressStyle = "btn-primary";
+                break;
+            case AttendancePlanStatusFilter.Expired:
+                expiredStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@AttendancePlanStatusFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@AttendancePlanStatusFilter.Current" class="btn @currentStyle">Current</a>
+        <a asp-route-filter="@AttendancePlanStatusFilter.InProgress" class="btn @inProgressStyle">In Progress</a>
+        <a asp-route-filter="@AttendancePlanStatusFilter.Expired" class="btn @expiredStyle">Expired</a>
+    </div>
+
     @if (canManageTest.Succeeded)
     {
         <a asp-page="/StudentAdmin/Attendance/Plans/Generate" asp-area="Staff" class="btn btn-success">Generate Plans</a>
@@ -19,30 +50,46 @@
 
 <hr />
 
-<table class="table-striped data-table">
+<table class="table-striped table-hover">
     <thead>
-        <tr>
-            <th>Student</th>
-            <th>Grade</th>
-            <th>School</th>
-            <th>Status</th>
-            <th>Overall Percentage</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Student</th>
+        <th>Grade</th>
+        <th>School</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Overall Percentage</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Model.Plans)
-        {
-            <tr>
-                <td data-order="@entry.Student.SortOrder">@entry.Student.DisplayName</td>
-                <td>@entry.Grade.AsName()</td>
-                <td>@entry.School</td>
-                <td data-order="@entry.Status.Order">@entry.Status.Name</td>
-                <td data-order="@entry.OverallPercentage">@entry.OverallPercentage.ToString("P2")</td>
-                <td>
-                    <a asp-page="/StudentAdmin/Attendance/Plans/Details" asp-area="Staff" asp-route-id="@entry.PlanId" class="btn btn-secondary btn-sm btn-show-hover">More Info...</a>
-                </td>
-            </tr>
-        }
+    @foreach (var entry in Model.Plans)
+    {
+        <tr>
+            <td data-order="@entry.Student.SortOrder">@entry.Student.DisplayName</td>
+            <td>@entry.Grade.AsName()</td>
+            <td>@entry.School</td>
+            <td data-order="@entry.CreatedAt.ToString("yyyy-MM-dd hh:mm")">@entry.CreatedAt.ToString("dd/MM/yyyy")</td>
+            <td data-order="@entry.Status.Order">@entry.Status.Name</td>
+            <td data-order="@entry.OverallPercentage">@entry.OverallPercentage.ToString("P2")</td>
+            <td>
+                <a asp-page="/StudentAdmin/Attendance/Plans/Details" asp-area="Staff" asp-route-id="@entry.PlanId" class="btn btn-secondary btn-sm btn-show-hover">More Info...</a>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+@section scripts {
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({ 
+                "order": [
+                    [1, 'asc'],
+                    [0, 'asc'],
+                    [3, 'desc']
+                ] 
+            });
+        })
+    </script>
+}

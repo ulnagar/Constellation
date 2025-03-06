@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans;
 
 using Application.Attendance.Plans.CopyAttendancePlanDetails;
+using Application.Attendance.Plans.CreateAttendancePlanVersion;
 using Application.Attendance.Plans.GetAttendancePlanForSubmit;
 using Application.Attendance.Plans.GetRecentlyCompletedPlans;
 using Application.Attendance.Plans.SaveDraftAttendancePlan;
@@ -68,6 +69,24 @@ public class DetailsModel : BasePageModel
         await PreparePage();
     }
 
+    public async Task<IActionResult> OnGetVersion()
+    {
+        Result<AttendancePlanId> versionAttempt = await _mediator.Send(new CreateAttendancePlanVersionCommand(Id));
+
+        if (versionAttempt.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                versionAttempt.Error,
+                _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage("/Absences/Plans/Details", "Edit", new { area = "Schools", Id = versionAttempt.Value});
+    }
+
     public async Task<IActionResult> OnPostSave(FormData formData)
     {
         Result saveDraftAttempt = await SaveDraft(formData);
@@ -77,6 +96,8 @@ public class DetailsModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 saveDraftAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            await PreparePage();
 
             return Page();
         }
@@ -107,6 +128,8 @@ public class DetailsModel : BasePageModel
                 saveDraftAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
+            await PreparePage();
+
             return Page();
         }
 
@@ -117,6 +140,8 @@ public class DetailsModel : BasePageModel
             ModalContent = new ErrorDisplay(
                 submitAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
+
+            await PreparePage();
 
             return Page();
         }

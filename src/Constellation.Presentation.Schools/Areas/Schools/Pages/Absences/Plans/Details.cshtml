@@ -10,6 +10,7 @@
 @{
     var viewMode = Model.Mode == DetailsModel.PageMode.View;
     var allowEdit = Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing;
+    var allowVersioning = Model.Plan.Status == AttendancePlanStatus.Accepted;
     var missedLessonFieldIndex = 0;
     var freePeriodFieldIndex = 0;
 }
@@ -20,6 +21,11 @@
     @if (allowEdit && viewMode)
     {
         <a asp-page-handler="Edit" class="btn btn-warning">Edit</a>
+    }
+    
+    @if (allowVersioning && viewMode)
+    {
+        <a asp-page-handler="Version" class="btn btn-warning">Edit</a>
     }
 
     @if (!viewMode && Model.StudentPlans.Any())

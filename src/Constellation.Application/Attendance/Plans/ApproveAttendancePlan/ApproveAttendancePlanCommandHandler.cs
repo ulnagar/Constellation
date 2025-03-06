@@ -4,7 +4,6 @@ using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Errors;
-using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Repositories;
 using Core.Shared;
 using Serilog;

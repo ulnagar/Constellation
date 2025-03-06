@@ -2,9 +2,11 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Attendance.Enums;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects.Repositories;
 using Constellation.Core.Models.Timetables.Repositories;
+using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings;
@@ -17,6 +19,7 @@ using Core.Models.Timetables.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -30,6 +33,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IPeriodRepository _periodRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -39,6 +43,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
         IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
         IPeriodRepository periodRepository,
+        IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -47,6 +52,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
         _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
         _periodRepository = periodRepository;
+        _dateTime = dateTime;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<GenerateAttendancePlansCommand>();
@@ -90,6 +96,17 @@ internal sealed class GenerateAttendancePlansCommandHandler
 
         foreach (Student student in students)
         {
+            // Check for existing Pending or Processing plan for the student
+            List<AttendancePlan> studentPlans = await _planRepository.GetForStudent(student.Id, cancellationToken);
+            List<AttendancePlan> inProgressPlans = studentPlans
+            .Where(entry =>
+                    entry.CreatedAt.Year == _dateTime.CurrentYear &&
+                    (entry.Status == AttendancePlanStatus.Pending || entry.Status == AttendancePlanStatus.Processing))
+                .ToList();
+
+            if (inProgressPlans.Count > 0)
+                continue;
+
             AttendancePlan attendancePlan = AttendancePlan.Create(student);
 
             List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);

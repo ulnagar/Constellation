@@ -37,6 +37,9 @@ internal sealed class GetAttendancePlansSummaryQueryHandler
             if (plan.Status.Equals(AttendancePlanStatus.Archived))
                 continue;
 
+            if (!MatchesStatusFilter(plan.Status, request.Filter))
+                continue;
+
             double overallPercentage = (plan.Periods.Sum(period => period.MinutesPresent)) / (plan.Periods.DistinctBy(period => period.CourseId).Sum(period => period.TargetMinutesPerCycle));
 
             if (overallPercentage is Double.NaN)
@@ -53,5 +56,19 @@ internal sealed class GetAttendancePlansSummaryQueryHandler
         }
 
         return response;
+    }
+
+    private static bool MatchesStatusFilter(AttendancePlanStatus status, AttendancePlanStatusFilter filter)
+    {
+        return filter switch
+        {
+            AttendancePlanStatusFilter.All => true,
+            AttendancePlanStatusFilter.Current => status.Equals(AttendancePlanStatus.Accepted),
+            AttendancePlanStatusFilter.InProgress => status.Equals(AttendancePlanStatus.Pending) ||
+                                                     status.Equals(AttendancePlanStatus.Processing),
+            AttendancePlanStatusFilter.Expired => status.Equals(AttendancePlanStatus.Rejected) ||
+                                                  status.Equals(AttendancePlanStatus.Superseded),
+            _ => true
+        };
     }
 }

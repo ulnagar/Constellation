@@ -46,4 +46,16 @@ public static class AttendancePlanErrors
     public static readonly Error CommentRequired = new(
         "AttendancePlans.UpdateStatus.CommentRequired",
         "A comment is required to update the plan status");
+
+    public static readonly Error StatusNotAccepted = new(
+        "AttendancePlans.StatusNotAccepted",
+        "The Attendance Plan must be Accepted to process this action");
+
+    public static readonly Error NoPeriodsFound = new(
+        "AttendancePlans.NoPeriodsFound",
+        "No suitable periods found when attempting to generate the Attendance Plan");
+
+    public static readonly Error ExistingInProgressPlanFound = new(
+        "AttendancePlans.ExistingInProgressPlanFound",
+        "An existing Attendance Plan with a status of either Pending or Processing exists for this student");
 }
