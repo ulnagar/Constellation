@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.PartialViews.AssignRoleModal;
 using Shared.PartialViews.DeleteRoleModal;
@@ -31,17 +30,20 @@ public class ReportsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthorizationService _authorizationService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public ReportsModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        IAuthorizationService authorizationService,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _authorizationService = authorizationService;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportsModel>()
@@ -57,8 +59,10 @@ public class ReportsModel : BasePageModel
     {
         _logger
             .Information("Requested to retrieve School Contact Reports by user {User}", _currentUserService.UserName);
+        
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
 
-        Result<List<SchoolWithContactsResponse>> schools = await _mediator.Send(new GetContactsBySchoolQuery());
+        Result<List<SchoolWithContactsResponse>> schools = await _mediator.Send(new GetContactsBySchoolQuery(execMemberTest.Succeeded));
 
         if (schools.IsFailure)
         {
@@ -81,7 +85,9 @@ public class ReportsModel : BasePageModel
         _logger
             .Information("Requested to export School Contact Reports by user {User}", _currentUserService.UserName);
 
-        Result<FileDto> file = await _mediator.Send(new ExportContactsBySchoolQuery());
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
+        Result<FileDto> file = await _mediator.Send(new ExportContactsBySchoolQuery(execMemberTest.Succeeded));
 
         if (file.IsFailure)
         {
@@ -91,7 +97,7 @@ public class ReportsModel : BasePageModel
                 .ForContext(nameof(Error), file.Error, true)
                 .Warning("Failed to export School Contact Reports by user {User}", _currentUserService.UserName);
 
-            Result<List<SchoolWithContactsResponse>> schools = await _mediator.Send(new GetContactsBySchoolQuery());
+            Result<List<SchoolWithContactsResponse>> schools = await _mediator.Send(new GetContactsBySchoolQuery(execMemberTest.Succeeded));
             Schools = schools.Value.OrderBy(entry => entry.SchoolName).ToList();
             
             return Page();
@@ -106,7 +112,9 @@ public class ReportsModel : BasePageModel
     {
         AssignRoleModalViewModel viewModel = new();
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
+        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.ExportContactsBySchool;
 
 using Abstractions.Messaging;
+using Constellation.Application.Helpers;
 using Constellation.Application.Schools.Enums;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Repositories;
@@ -18,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ThirdPartyConsent.GetRequiredApplicationsForStudent;
 
 internal sealed class ExportContactsBySchoolQueryHandler
     : IQueryHandler<ExportContactsBySchoolQuery, FileDto>
@@ -101,6 +103,9 @@ internal sealed class ExportContactsBySchoolQueryHandler
 
                 foreach (SchoolContactRole role in roles)
                 {
+                    if (!request.IncludeRestrictedContacts && role.IsContactRoleRestricted())
+                        continue;
+
                     entries.Add(new(
                         contact.Id,
                         role.Id,

@@ -10,6 +10,7 @@ public static class AuthPolicies
     public const string CanViewTrainingModuleContentDetails = "CanViewTrainingModuleContentDetails";
     public const string CanRunTrainingModuleReports = "CanRunTrainingModuleReports";
     public const string IsStaffMember = "IsStaffMember";
+    public const string IsExecutive = "IsExecutive";
     public const string CanEditFaculties = "CanEditFaculties";
     public const string CanViewFacultyDetails = "CanEditFacultyDetails";
     public const string CanViewGroupTutorials = "CanViewGroupTutorials";

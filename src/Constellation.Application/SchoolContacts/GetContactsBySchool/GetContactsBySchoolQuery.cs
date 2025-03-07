@@ -3,5 +3,6 @@
 using Abstractions.Messaging;
 using System.Collections.Generic;
 
-public sealed record GetContactsBySchoolQuery()
+public sealed record GetContactsBySchoolQuery(
+    bool IncludeRestrictedContacts = false)
     : IQuery<List<SchoolWithContactsResponse>>;

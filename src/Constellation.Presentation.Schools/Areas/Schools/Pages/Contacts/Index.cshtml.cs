@@ -69,7 +69,7 @@ public class IndexModel : BasePageModel
 
         _logger.Information("Requested to retrieve contact list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
 
-        Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
+        Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode, true));
 
         if (contactsRequest.IsFailure)
         {
@@ -88,7 +88,7 @@ public class IndexModel : BasePageModel
     {
         SchoolContactRoleId roleId = SchoolContactRoleId.FromValue(assignmentId);
 
-        Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
+        Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode, true));
 
         ContactResponse? contact = contactsRequest.Value.FirstOrDefault(entry => entry.AssignmentId == roleId);
 

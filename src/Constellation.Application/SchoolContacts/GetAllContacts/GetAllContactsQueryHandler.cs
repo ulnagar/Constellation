@@ -9,6 +9,7 @@ using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
+using Helpers;
 using Interfaces.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -95,6 +96,10 @@ internal sealed class GetAllContactsQueryHandler
 
             foreach (SchoolContactRole assignment in activeAssignments)
             {
+                // If the request should not include restricted roles, ignore restricted roles.
+                if (!request.IncludeRestrictedRoles && assignment.IsContactRoleRestricted())
+                    continue;
+
                 School school = schools.FirstOrDefault(entry => entry.Code == assignment.SchoolCode);
 
                 bool directNumber = false;

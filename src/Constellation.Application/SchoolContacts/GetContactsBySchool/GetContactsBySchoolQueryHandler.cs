@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactsBySchool;
 
 using Abstractions.Messaging;
+using Constellation.Application.SchoolContacts.Helpers;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
@@ -93,6 +94,9 @@ internal sealed class GetContactsBySchoolQueryHandler
 
                 foreach (SchoolContactRole role in roles)
                 {
+                    if (!request.IncludeRestrictedContacts && role.IsContactRoleRestricted())
+                        continue;
+
                     entries.Add(new(
                         contact.Id,
                         role.Id,

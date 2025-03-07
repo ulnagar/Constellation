@@ -1,0 +1,32 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu.DashboardModel
+
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+    <div class="sidebar-sticky pt-3">
+        <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+            <span class="w-100">Quick Links</span>
+        </h4>
+        <ul class="nav flex-column mx-2">
+            <li class="nav-item">
+                <a class="nav-link" asp-page="/SchoolAdmin/Training/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="Staff">
+                    Mandatory Training 
+                    @if (Model.ExpiringTraining > 0)
+                    {
+                        <span class="badge badge-danger ml-1">@Model.ExpiringTraining</span><span class="sr-only">training certificates expiring soon</span>
+                    }
+                </a>
+            </li>
+        </ul>
+
+        @foreach (var entry in Model.Classes.OrderBy(entry => entry.Key))
+        {
+            <ul class="nav flex-column mx-2">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Staff" asp-page="/Subject/Offerings/Details" asp-route-id="@entry.Value">
+                        @entry.Key
+                    </a>
+                </li>
+            </ul>
+        }
+
+    </div>
+</nav>

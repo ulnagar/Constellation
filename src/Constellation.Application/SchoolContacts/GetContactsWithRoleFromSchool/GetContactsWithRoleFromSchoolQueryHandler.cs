@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool;
 
 using Abstractions.Messaging;
+using Constellation.Application.SchoolContacts.Helpers;
 using Constellation.Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
@@ -34,6 +35,9 @@ internal sealed class GetContactsWithRoleFromSchoolQueryHandler
             foreach (SchoolContactRole role in contact.Assignments)
             {
                 if (role.IsDeleted)
+                    continue;
+
+                if (!request.IncludeRestrictedContacts && role.IsContactRoleRestricted())
                     continue;
 
                 response.Add(new(

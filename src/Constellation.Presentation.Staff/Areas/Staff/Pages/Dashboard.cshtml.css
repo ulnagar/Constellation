@@ -1,12 +1,16 @@
 ﻿.quick-links {
     width: 27%;
-    margin-right: 3%;
-    float: left;
+    margin-left: 1.5%;
+    padding-left: 1.5%;
+    float: right;
+    border-left: 2px solid orange;
+    height: 100%;
+    overflow: hidden;
 }
 
 .main-content {
     width: 70%;
-    float: right;
+    float: left;
 }
 
 .page-heading {

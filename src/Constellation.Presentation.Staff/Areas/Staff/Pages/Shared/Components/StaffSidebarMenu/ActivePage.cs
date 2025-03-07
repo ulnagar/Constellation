@@ -5,6 +5,8 @@
 
 internal static class ActivePage
 {
+    public const string Staff_Dashboard = "Dashboard..";
+
     public const string Equipment_Assets_Assets = "Equipment.Assets.Assets";
     public const string Equipment_Assets_Allocations = "Equipment.Assets.Allocations";
     public const string Equipment_Assets_Locations = "Equipment.Assets.Locations";

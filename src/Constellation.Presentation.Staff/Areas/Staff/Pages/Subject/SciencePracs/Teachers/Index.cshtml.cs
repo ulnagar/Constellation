@@ -96,7 +96,7 @@ public class IndexModel : BasePageModel
     {
         AssignRoleModalViewModel viewModel = new();
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(false));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");

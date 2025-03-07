@@ -2,10 +2,10 @@
 
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.DashboardModel
 
-<div class="container">
+<div class="main-content">
     <div class="page-heading">
         <h2 class="text-center m-2">Welcome, @Model.UserName</h2>
-    
+
         @if (!string.IsNullOrWhiteSpace(Model.Message))
         {
             <div class="alert alert-success">
@@ -14,51 +14,35 @@
         }
     </div>
 
-    <div class="quick-links">
-        <h3>Quick Links</h3>
-    
-        <a class="btn btn-success btn-block" asp-page="/SchoolAdmin/Training/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="Staff">Mandatory Training <span class="badge badge-light">@Model.ExpiringTraining</span><span class="sr-only">training certificates expiring soon</span></a>
-    
-        @foreach (var stocktake in Model.ActiveStocktakeEvents)
-        {
-            <a class="btn btn-warning btn-block" asp-area="Staff" asp-page="/Equipment/Stocktake/Dashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
-        }
-
-        @foreach (var entry in @Model.Classes.OrderBy(entry => entry.Key))
-        {
-            <a class="btn btn-secondary btn-block" asp-area="Staff" asp-page="/Subject/Offerings/Details" asp-route-id="@entry.Value">@entry.Key</a>
-        }
-    </div>
-
-    <div class="main-content">
-        @* 
-        <div class="alert alert-info alert-dismissible fade show feature-alert d-none" data-version="1.16.2">
-            <h4 class="alert-heading">New Features!</h4>
-            <p>Changes to grouping of features in Constellation have been applied. The SchoolAdmin area has been split into SchoolAdmin and StudentAdmin. Features specific to students are in the StudentAdmin area, while features around school processes are in the SchoolAdmin area.</p>
-            <p>E.g. Student Awards are in the StudentAdmin area, while Award Nominations are in the SchoolAdmin area.</p>
-            <p>If you have any questions, please contact the Technology Support Team at <a href="mailto:support@aurora.nsw.edu.au" class="alert-link">support@aurora.nsw.edu.au</a></p>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div> 
-        *@
-
-        @if (Model.ActiveStocktakeEvents.Count > 0)
-        {
-            <div class="alert alert-info text-left mt-3" role="alert">
-                <h4 class="alert-heading">Stocktake</h4>
-                <p>Please take the time to register your Aurora College equipment in the current stocktake.</p>
-                @foreach (var stocktake in Model.ActiveStocktakeEvents)
-                {
-                    <a class="alert-link" asp-area="Staff" asp-page="/Equipment/Stocktake/Dashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
-                }
-            </div>
-        }
-
-        <div class="row row-cols-1 row-cols-md-3" id="sortable-cards">
-            <vc:show-dashboard-widgets user="@Model.User"/>
+    @if (Model.ActiveStocktakeEvents.Count > 0)
+    {
+        <div class="alert alert-info text-left mt-3" role="alert">
+            <h4 class="alert-heading">Stocktake</h4>
+            <p>Please take the time to register your Aurora College equipment in the current stocktake.</p>
+            @foreach (var stocktake in Model.ActiveStocktakeEvents)
+            {
+                <a class="alert-link" asp-area="Staff" asp-page="/Equipment/Stocktake/Dashboard" asp-route-id="@stocktake.Id">@stocktake.Name</a>
+            }
         </div>
+    }
+
+    <div class="row row-cols-1 row-cols-md-3" id="sortable-cards">
+        <vc:show-dashboard-widgets user="@Model.User"/>
     </div>
+</div>
+
+<div class="quick-links">
+    <h3 class="text-center m-2 mb-3">Recent Updates</h3>
+    
+    @foreach (var update in Model.Changes.OrderByDescending(entry => entry.Datestamp))
+    {
+        <div class="card bg-light mb-3">
+            <div class="card-header h6">@update.Title</div>
+            <div class="card-body">
+                <p>@update.Body</p>
+            </div>
+        </div>
+    }
 </div>
 
 @section Scripts
@@ -78,18 +62,7 @@
                     }
                 }
             });
-
-            var featureAlert = $('.feature-alert');
-            var version = featureAlert.data('version');
-
-            if (localStorage.getItem('feature-alert-' + version) === null) 
-            {
-                featureAlert.removeClass('d-none');
-
-                featureAlert.on('closed.bs.alert', function () {
-                    localStorage.setItem('feature-alert-' + version, 'closed');
-                });
-            }
         });
     </script>
 }
+

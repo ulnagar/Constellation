@@ -112,6 +112,9 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.CanManageReports, policy =>
             policy.RequireClaim(AuthClaimType.Permission, AuthPermissions.StudentAdmin.Reports.Manage));
 
+        options.AddPolicy(AuthPolicies.IsExecutive, policy =>
+            policy.RequireRole(AuthRoles.ExecStaffMember, AuthRoles.Admin));
+
         return options;
     }
 }

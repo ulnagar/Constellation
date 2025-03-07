@@ -26,17 +26,20 @@ public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthorizationService _authorizationService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public CreateModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        IAuthorizationService authorizationService,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _authorizationService = authorizationService;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<CreateModel>()
@@ -79,7 +82,9 @@ public class CreateModel : BasePageModel
 
     public async Task OnGet()
     {
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
+        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         if (rolesRequest.IsFailure)
         {
             ModalContent = new ErrorDisplay(
@@ -112,9 +117,11 @@ public class CreateModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        
         if (!ModelState.IsValid)
         {
-            Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+            Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
             if (rolesRequest.IsFailure)
             {
                 ModalContent = new ErrorDisplay(
@@ -178,7 +185,7 @@ public class CreateModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create School Contact by user {User}", _currentUserService.UserName);
 
-                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
                 if (rolesRequest.IsFailure)
                 {
                     ModalContent = new ErrorDisplay(
@@ -237,7 +244,7 @@ public class CreateModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
 
-                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
                 if (rolesRequest.IsFailure)
                 {
                     ModalContent = new ErrorDisplay(

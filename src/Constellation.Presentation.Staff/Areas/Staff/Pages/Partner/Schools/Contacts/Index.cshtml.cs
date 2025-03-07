@@ -30,17 +30,20 @@ public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IAuthorizationService _authorizationService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
+        IAuthorizationService authorizationService,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
+        _authorizationService = authorizationService;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
@@ -59,7 +62,11 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve list of school contacts by user {User}", _currentUserService.UserName);
 
-        Result<List<SchoolContactResponse>> contacts = await _mediator.Send(new GetAllContactsQuery(Filter));
+        Result<List<SchoolContactResponse>> contacts;
+
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
+        contacts = await _mediator.Send(new GetAllContactsQuery(Filter, execMemberTest.Succeeded));
 
         if (contacts.IsFailure)
         {
@@ -71,7 +78,7 @@ public class IndexModel : BasePageModel
 
             return;
         }
-
+        
         Contacts = Filter switch
         {
             GetAllContactsQuery.SchoolContactFilter.All => contacts.Value.OrderBy(entry => entry.SchoolName).ToList(),
@@ -131,7 +138,9 @@ public class IndexModel : BasePageModel
     {
         AssignRoleModalViewModel viewModel = new();
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery());
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
+        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
