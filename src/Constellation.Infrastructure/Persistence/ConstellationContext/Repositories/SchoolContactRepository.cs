@@ -88,8 +88,9 @@ public class SchoolContactRepository : ISchoolContactRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
-            .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
-            .Where(contact => contact.Assignments.Any(role => !role.IsDeleted && role.SchoolCode == schoolCode))
+            .Where(contact => contact.Assignments.Any(role => 
+                !role.IsDeleted && 
+                role.SchoolCode == schoolCode))
             .ToListAsync(cancellationToken);
 
     public async Task<List<SchoolContact>> GetByGrade(

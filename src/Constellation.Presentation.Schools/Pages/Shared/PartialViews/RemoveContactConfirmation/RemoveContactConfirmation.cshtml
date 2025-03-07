@@ -1,4 +1,10 @@
+@using Constellation.Core.Shared
+@using Constellation.Core.ValueObjects
 @model Constellation.Presentation.Schools.Pages.Shared.PartialViews.RemoveContactConfirmation.RemoveContactConfirmationViewModel
+
+@{
+    Result<EmailAddress> contactEmail = EmailAddress.Create(Model.Contact.EmailAddress);
+}
 
 <form asp-page-handler="RemoveContact">
     <div class="modal-header">
@@ -19,7 +25,7 @@
 
                 <div class="mb-3 row mt-3">
                     <label class="col-5">Email Address</label>
-                    <div class="col font-weight-bold"><vc:email-address email="@Model.Contact.EmailAddress" /></div>
+                    <div class="col font-weight-bold"><vc:email-address email="@contactEmail.IsSuccess ? contactEmail.Value : EmailAddress.None" /></div>
                 </div>
 
                 <div class="mb-3 row mt-3">

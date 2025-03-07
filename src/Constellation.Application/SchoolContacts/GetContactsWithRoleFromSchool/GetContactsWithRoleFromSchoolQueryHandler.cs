@@ -33,6 +33,9 @@ internal sealed class GetContactsWithRoleFromSchoolQueryHandler
         {
             foreach (SchoolContactRole role in contact.Assignments)
             {
+                if (role.IsDeleted)
+                    continue;
+
                 response.Add(new(
                     contact.Id,
                     role.Id,

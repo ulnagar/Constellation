@@ -55,7 +55,8 @@
         <div class="mb-3 row">
             <label asp-for="SchoolCode" class="form-label col-md-2">School</label>
             <div class="col-md-3">
-                <input class="form-control" readonly="readonly" value="@Model.SchoolName" />
+                <input type="hidden" asp-for="SchoolCode" value="@Model.SchoolCode" />
+                <input class="form-control" readonly="readonly" value="@Model.SchoolName"/>
             </div>
         </div>
 

@@ -8,6 +8,7 @@ using Constellation.Application.Schools.GetSchoolContactDetails;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -49,7 +50,9 @@ public class IndexModel : BasePageModel
 
     public string Message { get; set; } = string.Empty;
 
-    public async Task OnGet()
+    public async Task OnGet() => await PreparePage();
+
+    private async Task PreparePage()
     {
         _logger.Information("Requested to retrieve school data by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
 
@@ -65,9 +68,9 @@ public class IndexModel : BasePageModel
         SchoolDetails = schoolDetailsRequest.Value;
 
         _logger.Information("Requested to retrieve contact list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
-        
+
         Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
-        
+
         if (contactsRequest.IsFailure)
         {
             ModalContent = new ErrorDisplay(contactsRequest.Error);
@@ -125,20 +128,7 @@ public class IndexModel : BasePageModel
             "Ok",
             "btn-success");
 
-        _logger.Information("Requested to retrieve school data by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
-        
-        Result<SchoolContactDetailsResponse> schoolDetailsRequest = await _mediator.Send(new GetSchoolContactDetailsQuery(CurrentSchoolCode));
-
-        SchoolDetails = schoolDetailsRequest.Value;
-
-        _logger.Information("Requested to retrieve contact list by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
-        
-        Result<List<ContactResponse>> contactsRequest = await _mediator.Send(new GetContactsWithRoleFromSchoolQuery(CurrentSchoolCode));
-
-        Contacts = contactsRequest.Value
-            .OrderBy(contact => contact.PositionSort())
-            .ThenBy(contact => contact.LastName)
-            .ToList();
+        await PreparePage();
 
         return Page();
     }
