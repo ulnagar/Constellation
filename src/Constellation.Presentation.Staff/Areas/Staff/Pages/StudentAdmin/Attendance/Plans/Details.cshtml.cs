@@ -129,7 +129,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostRejectPlan(RejectAttendancePlanModalSelection viewModel)
     {
-        RejectAttendancePlanCommand command = new(Id, viewModel.Comment);
+        RejectAttendancePlanCommand command = new(Id, viewModel.Comment, viewModel.SendEmailUpdate);
 
         _logger
             .ForContext(nameof(RejectAttendancePlanCommand), command, true)

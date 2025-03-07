@@ -271,7 +271,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         return Result.Success();
     }
 
-    public Result RejectPlan(string comment)
+    public Result RejectPlan(string comment, bool notifySchool)
     {
         Result statusUpdate = UpdateStatus(AttendancePlanStatus.Rejected);
 
@@ -285,7 +285,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
 
         _notes.Add(note.Value);
 
-        RaiseDomainEvent(new AttendancePlanRejectedDomainEvent(new(), Id));
+        RaiseDomainEvent(new AttendancePlanRejectedDomainEvent(new(), Id, comment, notifySchool));
 
         return Result.Success();
     }

@@ -5,5 +5,6 @@ using Constellation.Core.Models.Attendance.Identifiers;
 
 public sealed record RejectAttendancePlanCommand(
     AttendancePlanId PlanId,
-    string Comment)
+    string Comment,
+    bool SendEmail)
     : ICommand;

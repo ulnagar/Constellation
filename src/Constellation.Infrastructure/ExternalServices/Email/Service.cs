@@ -120,7 +120,34 @@ public sealed class Service : IEmailService
             toRecipients: recipients, 
             fromRecipient: EmailRecipient.AuroraCollege, 
             subject: viewModel.Title, 
-            body: body, 
+            body: body,
+        cancellationToken: cancellationToken);
+    }
+
+    public async Task SendAttendancePlanRejectedNotificationToSchool(
+        List<EmailRecipient> recipients,
+        AttendancePlan plan,
+        string comment,
+        CancellationToken cancellationToken = default)
+    {
+        AttendancePlanRejectedNotificationEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Attendance Plan Rejected",
+            Student = plan.Student.DisplayName,
+            Grade = plan.Grade.AsName(),
+            Comment = comment
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(AttendancePlanRejectedNotificationEmailViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send(
+            toRecipients: recipients,
+            fromRecipient: EmailRecipient.AuroraCollege,
+            subject: viewModel.Title,
+            body: body,
             cancellationToken: cancellationToken);
     }
 

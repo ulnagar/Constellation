@@ -18,7 +18,6 @@ using Core.Models.SchoolContacts;
 using Core.Models.Subjects;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
-using Org.BouncyCastle.Cms;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -114,4 +113,5 @@ public interface IEmailService
 
     // Attendance Plan Emails
     Task SendAttendancePlanToAdmin(List<EmailRecipient> recipients, AttendancePlan plan, CancellationToken cancellationToken = default);
+    Task SendAttendancePlanRejectedNotificationToSchool(List<EmailRecipient> recipients, AttendancePlan plan, string comment, CancellationToken cancellationToken = default);
 }

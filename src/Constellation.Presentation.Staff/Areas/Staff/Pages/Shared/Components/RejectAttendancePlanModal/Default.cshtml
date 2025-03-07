@@ -19,6 +19,15 @@
                             <textarea asp-for="Comment" class="form-control"></textarea>
                         </div>
                     </div>
+                    <div class="form-group row">
+                        <label asp-for="SendEmailUpdate" class="col-md-3">Send Email</label>
+                        <div class="col-md-9">
+                            <input asp-for="SendEmailUpdate" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <span class="text-danger">Selecting this option will send a notification to all registered ACCs at the school that includes the Comment text above. Please ensure that no sensitive content is included in the Comment box.</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger">Reject</button>

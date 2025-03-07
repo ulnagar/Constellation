@@ -42,7 +42,7 @@ internal sealed class RejectAttendancePlanCommandHandler
             return Result.Failure(AttendancePlanErrors.NotFound(request.PlanId));
         }
 
-        Result update = plan.RejectPlan(request.Comment);
+        Result update = plan.RejectPlan(request.Comment, request.SendEmail);
 
         if (update.IsFailure)
         {

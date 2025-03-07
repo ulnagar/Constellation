@@ -44,6 +44,10 @@ public static class SchoolContactRoleErrors
         "SchoolContactRole.NotFoundForSchool",
         $"Could not find a School Contact Role for School with Id {id}");
 
+    public static readonly Func<string, string, Error> NotFoundForSchoolAndRole = (school, role) => new(
+        "SchoolContactRole.NotFoundForSchoolAndRole",
+        $"Could not find a {role} registered for school {school}");
+
     public static class Validation
     {
         public static readonly Error RoleEmpty = new(

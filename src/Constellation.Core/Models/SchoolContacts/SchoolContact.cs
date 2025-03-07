@@ -194,13 +194,10 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public Result<Name> GetName()
-    {
-        Result<Name> name = Name.Create(FirstName, string.Empty, LastName);
+    public Result<Name> GetName() => 
+        Name.Create(FirstName, string.Empty, LastName);
 
-        if (name.IsFailure)
-            return Result.Failure<Name>(name.Error);
+    public Result<EmailRecipient> GetEmailRecipient() => 
+        EmailRecipient.Create(DisplayName, EmailAddress);
 
-        return name.Value;
-    }
 }

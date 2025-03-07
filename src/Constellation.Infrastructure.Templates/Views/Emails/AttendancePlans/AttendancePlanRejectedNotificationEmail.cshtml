@@ -1,0 +1,17 @@
+@using Constellation.Infrastructure.Templates.Views.Emails.AttendancePlans
+@model AttendancePlanRejectedNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The submitted Attendance Plan for student @Model.Student (@Model.Grade) has been rejected with the following comment:</p>
+
+<p>@Model.Comment</p>
+
+<p>A new plan will be generated for this student shortly. If you need assistance, please contact the school by responding to this email.</p>

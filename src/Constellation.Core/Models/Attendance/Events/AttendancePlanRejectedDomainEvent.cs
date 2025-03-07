@@ -6,5 +6,7 @@ using Identifiers;
 
 public sealed record AttendancePlanRejectedDomainEvent(
     DomainEventId Id,
-    AttendancePlanId PlanId)
+    AttendancePlanId PlanId,
+    string Comment,
+    bool NotifySchool)
     : DomainEvent(Id);

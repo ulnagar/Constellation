@@ -22,10 +22,8 @@ using Core.Models.Timetables.Enums;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
