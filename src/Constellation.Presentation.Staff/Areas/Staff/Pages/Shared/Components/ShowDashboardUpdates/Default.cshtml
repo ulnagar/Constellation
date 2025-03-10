@@ -1,0 +1,13 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardUpdates.ShowDashboardUpdatesViewComponentModel
+
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardUpdates
+
+@foreach (ShowDashboardUpdatesViewComponentModel.RecentChange update in Model.Changes.OrderByDescending(entry => entry.Datestamp))
+{
+    <div class="card bg-light mb-3">
+        <div class="card-header h6">@update.Title</div>
+        <div class="card-body">
+            <p>@update.Body</p>
+        </div>
+    </div>
+}
