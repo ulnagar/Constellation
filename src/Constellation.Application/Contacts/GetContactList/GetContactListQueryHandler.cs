@@ -21,6 +21,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
 using Models;
+using SchoolContacts.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -142,6 +143,13 @@ internal sealed class GetContactListQueryHandler
 
                 foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
                 {
+                    if (role.IsDeleted)
+                        continue;
+
+                    // If the request should not include restricted roles, ignore restricted roles.
+                    if (!request.IncludeRestrictedRoles && role.IsContactRoleRestricted())
+                        continue;
+
                     ContactCategory category = role.Role switch
                     {
                         SchoolContactRole.Principal => ContactCategory.PartnerSchoolPrincipal,

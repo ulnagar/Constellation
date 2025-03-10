@@ -29,17 +29,20 @@ public class IndexModel : BasePageModel
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IAuthorizationService _authorizationService;
     private readonly ILogger _logger;
 
     public IndexModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
+        IAuthorizationService authorizationService,
         ILogger logger)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
+        _authorizationService = authorizationService;
         _logger = logger
             .ForContext<IndexModel>()
             .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
@@ -79,11 +82,14 @@ public class IndexModel : BasePageModel
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
         ExportContactListCommand command = new(
             offeringIds,
             Filter.Grades,
             Filter.Schools,
-            filterCategories);
+            filterCategories,
+            execMemberTest.Succeeded);
 
         _logger
             .ForContext(nameof(ExportContactListCommand), command, true)
@@ -177,12 +183,15 @@ public class IndexModel : BasePageModel
             Filter.Grades.Any() ||
             Filter.Schools.Any())
         {
+            AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+
             Result<List<ContactResponse>> contactRequest = await _mediator.Send(
                 new GetContactListQuery(
                     offeringIds,
                     Filter.Grades,
                     Filter.Schools,
-                    filterCategories),
+                    filterCategories,
+                    execMemberTest.Succeeded),
                 cancellationToken);
 
             if (contactRequest.IsFailure)

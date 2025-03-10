@@ -24,6 +24,7 @@ using Helpers;
 using Interfaces.Repositories;
 using Interfaces.Services;
 using Models;
+using SchoolContacts.Helpers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -150,6 +151,10 @@ internal sealed class ExportContactListCommandHandler
 
                 foreach (SchoolContactRole role in contact.Assignments)
                 {
+                    // If the request should not include restricted roles, ignore restricted roles.
+                    if (!request.IncludeRestrictedRoles && role.IsContactRoleRestricted())
+                        continue;
+
                     ContactCategory category = role.Role switch
                     {
                         SchoolContactRole.Principal => ContactCategory.PartnerSchoolPrincipal,
