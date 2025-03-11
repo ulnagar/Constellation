@@ -6,6 +6,7 @@ using Application.Models.Auth;
 using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,7 +39,7 @@ public class ExplainModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ExplainModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;

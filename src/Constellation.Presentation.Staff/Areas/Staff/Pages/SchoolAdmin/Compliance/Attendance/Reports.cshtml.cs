@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -30,7 +31,7 @@ public class ReportModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportModel>()
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.SchoolAdmin_Compliance_AttendanceReports;

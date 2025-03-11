@@ -18,6 +18,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -41,7 +42,7 @@ public class CreateModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<CreateModel>()
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.ShortTerm_Covers_Index;

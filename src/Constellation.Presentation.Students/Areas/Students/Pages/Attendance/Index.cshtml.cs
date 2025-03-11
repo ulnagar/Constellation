@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(StudentLogDefaults.Application, StudentLogDefaults.StudentPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;

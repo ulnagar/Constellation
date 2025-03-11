@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -33,7 +34,7 @@ public class ConfigurationModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ConfigurationModel>()
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Configuration;

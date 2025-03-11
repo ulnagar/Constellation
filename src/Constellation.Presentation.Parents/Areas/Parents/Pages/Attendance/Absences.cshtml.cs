@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]
@@ -31,7 +32,7 @@ public class AbsencesModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<AbsencesModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;

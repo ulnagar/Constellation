@@ -13,6 +13,7 @@ using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.Stude
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -31,7 +32,7 @@ public class ReportsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportsModel>()
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Reports;

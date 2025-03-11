@@ -1,35 +1,37 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Help;
 
 using Application.Models.Auth;
-using MediatR;
+using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Shared.Helpers.Logging;
+using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
 {
-    private readonly ISender _mediator;
-    private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
 
     public IndexModel(
-        ISender mediator,
-        LinkGenerator linkGenerator,
-        IHttpContextAccessor httpContextAccessor, 
-        IServiceScopeFactory serviceFactory) 
+        IHttpContextAccessor httpContextAccessor,
+        IServiceScopeFactory serviceFactory,
+        ICurrentUserService currentUserService,
+        ILogger logger)
         : base(httpContextAccessor, serviceFactory)
     {
-        _mediator = mediator;
-        _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Help;
 
-    public async Task OnGet()
+    public void OnGet()
     {
+        _logger.Information("Requested to retrieve help index page by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
     }
-
-    
 }

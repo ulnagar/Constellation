@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanManageAbsences)]
@@ -39,7 +40,7 @@ public class EditModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<EditModel>()
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.StudentAdmin_Attendance_Plans;

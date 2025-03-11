@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
 
@@ -39,7 +40,7 @@ public class RequirementModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal)
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal)
             .ForContext<RequirementModel>();
     }
 

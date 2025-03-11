@@ -8,6 +8,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Reports.Identifiers;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
@@ -38,7 +39,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(StudentLogDefaults.Application, StudentLogDefaults.StudentPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Reports;

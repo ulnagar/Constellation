@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.SciencePracs.GetLessonRollsForSchoolsPortal;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
@@ -36,7 +37,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;

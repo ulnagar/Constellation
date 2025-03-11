@@ -8,6 +8,7 @@ using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +40,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;

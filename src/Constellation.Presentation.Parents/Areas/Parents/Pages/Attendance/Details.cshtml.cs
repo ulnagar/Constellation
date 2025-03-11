@@ -6,6 +6,7 @@ using Constellation.Application.Absences.GetAbsenceDetailsForParent;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using MediatR;
@@ -35,7 +36,7 @@ public class DetailsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DetailsModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;

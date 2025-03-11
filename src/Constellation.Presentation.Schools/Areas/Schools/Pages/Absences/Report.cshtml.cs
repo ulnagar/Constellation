@@ -7,6 +7,7 @@ using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.DTOs;
 using Constellation.Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
@@ -46,7 +47,7 @@ public class ReportModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
 
         StartDate = dateTime.Today;
     }

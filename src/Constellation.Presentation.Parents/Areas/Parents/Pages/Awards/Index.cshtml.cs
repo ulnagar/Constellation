@@ -8,6 +8,7 @@ using Constellation.Application.Students.GetStudentsByParentEmail;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Students.Identifiers;
@@ -38,7 +39,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Awards;

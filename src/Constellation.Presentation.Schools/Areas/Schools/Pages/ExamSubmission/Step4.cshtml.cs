@@ -12,6 +12,7 @@ using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Models.Assignments.Identifiers;
@@ -47,7 +48,7 @@ public class Step4Model : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<Step4Model>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;

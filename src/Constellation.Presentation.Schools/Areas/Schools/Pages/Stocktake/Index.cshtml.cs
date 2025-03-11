@@ -7,6 +7,7 @@ using Application.Stocktake.GetCurrentStocktakeEvents;
 using Application.Stocktake.GetStocktakeSightingsForSchool;
 using Constellation.Application.Stocktake.Models;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using MediatR;
@@ -44,7 +45,7 @@ public class IndexModel : BasePageModel
         _dateTime = dateTime;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;

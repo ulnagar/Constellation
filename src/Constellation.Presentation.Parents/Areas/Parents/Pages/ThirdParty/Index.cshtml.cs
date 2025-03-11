@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.ThirdPartyConsent.GetApplicationsWithoutRequiredConsent;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Contacts;
 using Core.Shared;
 using MediatR;
@@ -32,7 +33,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ThirdParty;

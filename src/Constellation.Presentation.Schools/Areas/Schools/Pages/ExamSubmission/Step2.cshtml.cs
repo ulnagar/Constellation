@@ -5,6 +5,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Courses.GetCoursesForStudent;
 using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
@@ -40,7 +41,7 @@ public class Step2Model : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<Step2Model>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;

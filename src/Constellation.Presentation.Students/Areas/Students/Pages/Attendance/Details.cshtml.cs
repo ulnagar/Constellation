@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStudent)]
@@ -35,7 +36,7 @@ public class DetailsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DetailsModel>()
-            .ForContext(StudentLogDefaults.Application, StudentLogDefaults.StudentPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;

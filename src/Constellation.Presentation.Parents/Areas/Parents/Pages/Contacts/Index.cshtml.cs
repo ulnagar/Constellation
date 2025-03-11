@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Contacts.GetContactListForParentPortal;
 using Constellation.Application.Students.GetStudentsByParentEmail;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
@@ -34,7 +35,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Contacts;

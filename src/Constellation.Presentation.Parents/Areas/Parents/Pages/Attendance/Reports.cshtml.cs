@@ -9,6 +9,7 @@ using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Parents.GetParentWithStudentIds;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Students.Identifiers;
@@ -43,7 +44,7 @@ public class ReportsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ReportsModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Attendance;

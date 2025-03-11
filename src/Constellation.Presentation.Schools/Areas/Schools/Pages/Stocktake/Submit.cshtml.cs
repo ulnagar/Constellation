@@ -10,6 +10,7 @@ using Constellation.Application.StaffMembers.Models;
 using Constellation.Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -41,7 +42,7 @@ public class SubmitModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<SubmitModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;

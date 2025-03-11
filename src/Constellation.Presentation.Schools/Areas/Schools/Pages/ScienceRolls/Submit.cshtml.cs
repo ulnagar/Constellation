@@ -6,6 +6,7 @@ using Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
 using Application.SciencePracs.SubmitRoll;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Shared;
@@ -40,7 +41,7 @@ public class SubmitModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<SubmitModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ScienceRolls;

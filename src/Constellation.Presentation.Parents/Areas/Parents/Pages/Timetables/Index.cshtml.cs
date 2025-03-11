@@ -7,6 +7,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Enums;
@@ -37,7 +38,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;

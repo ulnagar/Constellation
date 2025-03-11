@@ -7,6 +7,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using MediatR;
@@ -39,7 +40,7 @@ public class ViewModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<ViewModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Timetables;

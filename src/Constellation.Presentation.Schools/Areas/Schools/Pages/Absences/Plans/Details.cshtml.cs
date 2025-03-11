@@ -8,6 +8,7 @@ using Application.Attendance.Plans.SaveDraftAttendancePlan;
 using Application.Attendance.Plans.SubmitAttendancePlan;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
 using Core.Models.Timetables.Enums;
@@ -44,7 +45,7 @@ public class DetailsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DetailsModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;

@@ -6,6 +6,7 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.Students.GetStudentById;
 using Application.Students.Models;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
@@ -40,7 +41,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(StudentLogDefaults.Application, StudentLogDefaults.StudentPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Awards;

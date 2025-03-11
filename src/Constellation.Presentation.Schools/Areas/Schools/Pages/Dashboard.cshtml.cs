@@ -5,6 +5,7 @@ using Application.Common.PresentationModels;
 using Application.Students.GetCurrentStudentsFromSchool;
 using Application.Students.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
@@ -38,7 +39,7 @@ public class DashboardModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<DashboardModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;

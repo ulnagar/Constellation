@@ -5,6 +5,7 @@ using Application.Offerings.GetCurrentOfferingsForStudent;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
@@ -29,7 +30,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext(StudentLogDefaults.Application, StudentLogDefaults.StudentPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StudentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;

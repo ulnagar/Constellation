@@ -7,6 +7,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Students.GetStudentsByParentEmail;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.ThirdPartyConsent.Enums;
 using Core.Models.ThirdPartyConsent.Identifiers;
@@ -35,8 +36,8 @@ public class ApplicationsModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext("APPLICATION", "Parent Portal")
-            .ForContext<ApplicationsModel>();
+            .ForContext<ApplicationsModel>()
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.ThirdParty;

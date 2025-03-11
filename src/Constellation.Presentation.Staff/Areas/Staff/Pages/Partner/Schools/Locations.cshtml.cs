@@ -9,6 +9,7 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
 public class LocationsModel : BasePageModel
@@ -26,7 +27,7 @@ public class LocationsModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<LocationsModel>()
-            .ForContext(StaffLogDefaults.Application, StaffLogDefaults.StaffPortal);
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Schools_Schools;

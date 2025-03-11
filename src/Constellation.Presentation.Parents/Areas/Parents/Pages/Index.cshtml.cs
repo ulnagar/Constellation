@@ -6,6 +6,7 @@ using Application.ThirdPartyConsent.DoesStudentHaveRequiredApplicationWithoutCon
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Students.GetStudentsByParentEmail;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +34,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Parent Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.ParentPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;

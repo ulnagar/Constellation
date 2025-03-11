@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +37,7 @@ public class Step1Model : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<Step1Model>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Exams;

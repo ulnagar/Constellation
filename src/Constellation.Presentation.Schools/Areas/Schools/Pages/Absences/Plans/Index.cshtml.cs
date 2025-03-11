@@ -3,6 +3,7 @@
 using Application.Attendance.Plans.GetAttendancePlansSummary;
 using Application.Attendance.Plans.GetAttendancePlansSummaryForSchool;
 using Constellation.Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
@@ -35,7 +36,7 @@ public class IndexModel : BasePageModel
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<IndexModel>()
-            .ForContext("APPLICATION", "Schools Portal");
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Absences;
