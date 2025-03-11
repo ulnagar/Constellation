@@ -122,7 +122,11 @@
         // If page is restored from bfcache, remove spinner immediately
         window.addEventListener('pageshow', (event) => {
             if (event.persisted) {
-                $('.spinner-overlay').addClass('d-none');
+                console.log("pageshow start");
+                setTimeout(function () {
+                    $('.spinner-overlay').addClass('d-none');
+                    console.log("pageshow timeout");
+                }, 1000);
             }
         });
     </script>
