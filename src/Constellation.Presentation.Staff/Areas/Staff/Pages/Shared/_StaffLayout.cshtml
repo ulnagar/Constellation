@@ -110,18 +110,20 @@
     @await RenderSectionAsync("Scripts", required: false)
     
     <script>
-        // $(document).ready(function () {
-        //     setTimeout(function () {
-        //         $('.spinner-overlay').addClass('d-none');
-        //         // console.log("Normal timeout");
-        //     }, 1000);
-        // });
+        $(document).ready(function () {
+            console.loge("DOM is ready");
+            // setTimeout(function () {
+            //     $('.spinner-overlay').addClass('d-none');
+            //     // console.log("Normal timeout");
+            // }, 1000);
+        });
     
         // Remove spinner after page has completed loaded:
         $(window).on('load', function(){
+            console.log("Window on Load start");
             setTimeout(function () {
                 $('.spinner-overlay').addClass('d-none');
-                // console.log("Normal timeout");
+                console.log("Window on Load timeout");
             }, 1000);
         })
     </script>
