@@ -110,15 +110,7 @@
     @await RenderSectionAsync("Scripts", required: false)
     
     <script>
-        $(document).ready(function () {
-            console.loge("DOM is ready");
-            // setTimeout(function () {
-            //     $('.spinner-overlay').addClass('d-none');
-            //     // console.log("Normal timeout");
-            // }, 1000);
-        });
-    
-        // Remove spinner after page has completed loaded:
+        // Remove spinner 1sec after page has finished loading
         $(window).on('load', function(){
             console.log("Window on Load start");
             setTimeout(function () {
@@ -126,6 +118,13 @@
                 console.log("Window on Load timeout");
             }, 1000);
         })
+
+        // If page is restored from bfcache, remove spinner immediately
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                $('.spinner-overlay').addClass('d-none');
+            }
+        });
     </script>
 </body>
 </html>
