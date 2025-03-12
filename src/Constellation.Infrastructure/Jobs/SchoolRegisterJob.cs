@@ -9,6 +9,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Models;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 
 internal sealed class SchoolRegisterJob : ISchoolRegisterJob
@@ -205,7 +206,7 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 csvSchool.PrincipalLastName,
                 csvSchool.PrincipalEmail,
                 string.Empty,
-                SchoolContactRole.Principal,
+                Position.Principal, 
                 csvSchool.SchoolCode,
                 $"{_dateTime.Today.ToString("dd/MM/yy")} - Principal created from CESE Data Source",
                 false),

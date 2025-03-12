@@ -10,6 +10,7 @@ using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.SchoolContacts.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +70,7 @@ public class UpsertModel : BasePageModel
     public string SchoolCode { get; set; }
 
     [BindProperty]
-    public string Role { get; set; }
+    public Position Role { get; set; }
 
     public SelectList SchoolList { get; set; }
     

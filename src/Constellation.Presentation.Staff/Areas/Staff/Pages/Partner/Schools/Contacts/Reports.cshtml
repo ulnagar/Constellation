@@ -1,4 +1,5 @@
 ﻿@page
+@using Constellation.Core.Models.SchoolContacts.Enums
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts.ReportsModel
 
 @inject IAuthorizationService authService
@@ -9,7 +10,7 @@
 <h2>School Contacts by School</h2>
 
 <div class="page-menu">
-    <a asp-page-handler="Export" class="btn btn-warning">Export List</a>
+    <a asp-page-handler="Export" class="btn btn-warning show-loader-5">Export List</a>
 
     @if (authorised.Succeeded)
     {
@@ -70,7 +71,7 @@
                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                                     <a asp-page="/Partner/Schools/Contacts/Update" asp-area="Staff" asp-route-id="@contact.ContactId" class="dropdown-item">Edit Contact</a>
                                     <button class="dropdown-item create-assignment-button" data-contact-id="@contact.ContactId.Value" data-name="@contact.Contact.DisplayName">Add Role</button>
-                                    @if (!string.IsNullOrEmpty(contact.Role))
+                                    @if (contact.Role != Position.Empty)
                                     {
                                         <button data-contact-id="@contact.ContactId.Value" data-role-id="@contact.AssignmentId.Value" data-name="@contact.Contact.DisplayName" data-role="@contact.Role" data-school="@school.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                     }

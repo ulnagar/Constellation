@@ -12,6 +12,7 @@ using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.SchoolContacts.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -74,7 +75,7 @@ public class CreateModel : BasePageModel
     [BindProperty]
     public string? SchoolCode { get; set; }
     [BindProperty]
-    public string? Role { get; set; }
+    public Position Role { get; set; } = Position.Empty;
     [BindProperty]
     public string? Note { get; set; }
 
@@ -85,7 +86,7 @@ public class CreateModel : BasePageModel
     {
         AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
+        Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         if (rolesRequest.IsFailure)
         {
             ModalContent = new ErrorDisplay(
@@ -122,7 +123,7 @@ public class CreateModel : BasePageModel
         
         if (!ModelState.IsValid)
         {
-            Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
+            Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
             if (rolesRequest.IsFailure)
             {
                 ModalContent = new ErrorDisplay(
@@ -160,7 +161,6 @@ public class CreateModel : BasePageModel
         PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber) ? PhoneNumber : PhoneNumber.Trim();
         EmailAddress = EmailAddress.Trim();
         
-        Role = string.IsNullOrWhiteSpace(Role) ? string.Empty : Role.Trim();
         Note = string.IsNullOrWhiteSpace(Note) ? Note : Note.Trim();
         
         if (string.IsNullOrWhiteSpace(SchoolCode))
@@ -186,7 +186,7 @@ public class CreateModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create School Contact by user {User}", _currentUserService.UserName);
 
-                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
+                Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
                 if (rolesRequest.IsFailure)
                 {
                     ModalContent = new ErrorDisplay(
@@ -245,7 +245,7 @@ public class CreateModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create new School Contact by user {User}", _currentUserService.UserName);
 
-                Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
+                Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
                 if (rolesRequest.IsFailure)
                 {
                     ModalContent = new ErrorDisplay(
@@ -258,7 +258,7 @@ public class CreateModel : BasePageModel
 
                     return Page();
                 }
-                RolesList = new SelectList(rolesRequest.Value);
+                RolesList = new(rolesRequest.Value);
 
                 Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
                 if (schoolsRequest.IsFailure)

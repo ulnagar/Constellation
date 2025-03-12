@@ -3,22 +3,23 @@
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
 using Application.Interfaces.Configuration;
-using Constellation.Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
+using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.SciencePracs;
 using Core.Models.Subjects;
+using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Services;
-using Core.Abstractions.Clock;
-using Core.Models.SchoolContacts.Repositories;
-using Core.Models.Subjects.Repositories;
 using Microsoft.Extensions.Options;
+using Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -144,9 +145,8 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
 
             List<EmailRecipient> sptRecipients = new();
             List<EmailRecipient> accRecipients = new();
-            List<EmailRecipient> principalRecipients = new();
 
-            foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.SciencePrac && !role.IsDeleted)))
+            foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.SciencePracticalTeacher && !role.IsDeleted)))
             {
                 Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
 
@@ -157,7 +157,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             if (!sptRecipients.Any())
                 sptRecipients.Add(schoolResult.Value);
 
-            foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.Coordinator && !role.IsDeleted)))
+            foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.Coordinator && !role.IsDeleted)))
             {
                 Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
 
@@ -168,17 +168,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
             if (!accRecipients.Any())
                 accRecipients.Add(schoolResult.Value);
 
-            foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted)))
-            {
-                Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
-
-                if (result.IsSuccess && principalRecipients.All(entry => entry.Email != result.Value.Email))
-                    principalRecipients.Add(result.Value);
-            }
-
-            if (!principalRecipients.Any())
-                principalRecipients.Add(schoolResult.Value);
-            
+           
             // Break these down into the outstanding time
             // Eg 1. first email after due date (SPT & ACC)
             // 2. second email a week after first (SPT, ACC) (rpt)
@@ -201,9 +191,6 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 _logger.Log(LogSeverity.Information, $" (ACC) {contact.Name} - {contact.Email}");
 
             _logger.Log(LogSeverity.Information, $" (SCH) {schoolResult.Value.Name} - {schoolResult.Value.Email}");
-
-            foreach (EmailRecipient contact in principalRecipients)
-                _logger.Log(LogSeverity.Information, $" (PRN) {contact.Name} - {contact.Email}");
 
             _logger.Log(LogSeverity.Information, string.Empty);
 
@@ -308,7 +295,6 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                     Recipients = sptRecipients
                         .Concat(accRecipients)
                         .Concat(new List<EmailRecipient> { schoolResult.Value })
-                        .Concat(principalRecipients)
                         .Distinct()
                         .ToList()
                 };

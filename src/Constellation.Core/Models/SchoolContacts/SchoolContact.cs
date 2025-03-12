@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.SchoolContacts;
 
+using Enums;
 using Errors;
 using Events;
 using Identifiers;
@@ -113,14 +114,11 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
     }
 
     public Result AddRole(
-        string role,
+        Position role,
         string schoolCode,
         string schoolName,
         string note)
     {
-        if (string.IsNullOrWhiteSpace(role))
-            return Result.Failure(SchoolContactRoleErrors.Validation.RoleEmpty);
-
         if (string.IsNullOrWhiteSpace(schoolCode) || string.IsNullOrWhiteSpace(schoolName))
             return Result.Failure(SchoolContactRoleErrors.Validation.SchoolCodeEmpty);
         

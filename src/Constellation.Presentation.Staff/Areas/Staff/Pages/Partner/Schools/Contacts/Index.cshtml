@@ -3,6 +3,7 @@
 
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Constellation.Application.SchoolContacts.GetAllContacts
+@using Constellation.Core.Models.SchoolContacts.Enums
 @using Constellation.Core.ValueObjects
 
 @inject IAuthorizationService authService
@@ -86,7 +87,7 @@
                 }
             </td>
             <td>
-                @Html.DisplayFor(model => item.Role)
+                @item.Role
                 @if (!string.IsNullOrWhiteSpace(item.Note))
                 {
                     <br/>
@@ -101,7 +102,7 @@
                         <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                             <a asp-page="/Partner/Schools/Contacts/Update" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Edit Contact</a>
                             <button class="dropdown-item create-assignment-button" data-contact-id="@item.Id.Value" data-name="@item.Name">Add Role</button>
-                            @if (!string.IsNullOrEmpty(item.Role))
+                            @if (item.Role != Position.Empty)
                             {
                                 <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
                                 <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name" data-role="@item.Role" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>

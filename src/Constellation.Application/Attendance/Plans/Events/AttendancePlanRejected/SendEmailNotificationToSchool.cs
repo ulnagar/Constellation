@@ -6,6 +6,7 @@ using Constellation.Core.Models.Attendance.Errors;
 using Constellation.Core.Models.Attendance.Repositories;
 using Core.Models.Attendance.Events;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
@@ -56,7 +57,7 @@ internal sealed class SendEmailNotificationToSchool
             return;
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(plan.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
+        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(plan.SchoolCode, Position.Coordinator, cancellationToken);
 
         List<EmailRecipient> recipients = contacts
             .Select(contact => contact.GetEmailRecipient())
@@ -68,7 +69,7 @@ internal sealed class SendEmailNotificationToSchool
         {
             _logger
                 .ForContext(nameof(AttendancePlanRejectedDomainEvent), notification, true)
-                .ForContext(nameof(Error), SchoolContactRoleErrors.NotFoundForSchoolAndRole(plan.School, SchoolContactRole.Coordinator), true)
+                .ForContext(nameof(Error), SchoolContactRoleErrors.NotFoundForSchoolAndRole(plan.School, Position.Coordinator), true)
                 .Warning("Failed to send Attendance Plan Rejected notification");
 
             return;

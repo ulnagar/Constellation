@@ -2,6 +2,7 @@
 
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.ValueObjects;
 using System.Collections.Generic;
@@ -43,6 +44,6 @@ public sealed record StaffDetailsResponse(
         string Name,
         string EmailAddress,
         string PhoneNumber,
-        string Role,
+        Position Role,
         string School);
 }

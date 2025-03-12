@@ -2,6 +2,7 @@
 
 using Core.Enums;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students;
@@ -70,7 +71,7 @@ public class SchoolContactRepository : ISchoolContactRepository
             .Where(contact =>
                 contact.Assignments.Any(role =>
                     !role.IsDeleted &&
-                    role.Role == SchoolContactRole.Principal &&
+                    role.Role == Position.Principal &&
                     role.SchoolCode == schoolCode))
             .ToListAsync(cancellationToken);
 
@@ -121,36 +122,28 @@ public class SchoolContactRepository : ISchoolContactRepository
 
     public async Task<List<SchoolContact>> GetBySchoolAndRole(
         string schoolCode,
-        string selectedRole,
+        Position selectedRole,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
             .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
-            .Where(contact => 
-                contact.Assignments.Any(role => 
-                    !role.IsDeleted && 
-                    role.SchoolCode == schoolCode && 
+            .Where(contact =>
+                contact.Assignments.Any(role =>
+                    !role.IsDeleted &&
+                    role.SchoolCode == schoolCode &&
                     role.Role == selectedRole))
             .ToListAsync(cancellationToken);
 
     public async Task<List<SchoolContact>> GetAllByRole(
-        string selectedRole,
+        Position selectedRole,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
             .Include(contact => contact.Assignments.Where(role => !role.IsDeleted))
-            .Where(contact => 
+            .Where(contact =>
                 contact.Assignments.Any(role =>
                     !role.IsDeleted &&
                     role.Role == selectedRole))
-            .ToListAsync(cancellationToken);
-
-    public async Task<List<string>> GetAvailableRoleList(
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<SchoolContactRole>()
-            .Select(role => role.Role)
-            .Distinct()
             .ToListAsync(cancellationToken);
 
     public async Task<List<SchoolContact>> GetAllActive(

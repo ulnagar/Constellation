@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactsBySchool;
 
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.ValueObjects;
 using Schools.Enums;
@@ -17,6 +18,6 @@ public sealed record SchoolWithContactsResponse(
         Name Contact,
         EmailAddress EmailAddress,
         PhoneNumber PhoneNumber,
-        string Role,
+        Position Role,
         string Note);
 }

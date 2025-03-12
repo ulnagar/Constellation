@@ -103,6 +103,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddMvc(options =>
     {
         options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
+        options.ModelBinderProviders.Insert(0, new PositionEnumBinderProvider());
     })
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 

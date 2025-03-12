@@ -15,6 +15,7 @@ using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.SchoolContacts.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -78,14 +79,14 @@ public class IndexModel : BasePageModel
         SchoolContactId contactId,
         SchoolContactRoleId roleId,
         string name,
-        string role,
+        Position role,
         string school)
     {
         DeleteRoleModalViewModel viewModel = new(
             contactId,
             roleId,
             name,
-            role,
+            role.Name,
             school);
 
         return Partial("DeleteRoleModal", viewModel);
@@ -97,12 +98,12 @@ public class IndexModel : BasePageModel
     {
         AssignRoleModalViewModel viewModel = new();
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(false));
+        Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(false));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
-        viewModel.Roles = new SelectList(rolesRequest.Value, SchoolContactRole.SciencePrac);
-        viewModel.RoleName = SchoolContactRole.SciencePrac;
+        viewModel.Roles = new SelectList(rolesRequest.Value, Position.SciencePracticalTeacher);
+        viewModel.RoleName = Position.SciencePracticalTeacher;
         viewModel.ContactId = contactId;
         viewModel.ContactName = name;
 
@@ -139,7 +140,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreateAssignment(
         string schoolCode,
-        string roleName,
+        Position roleName,
         string note,
         SchoolContactId contactId)
     {

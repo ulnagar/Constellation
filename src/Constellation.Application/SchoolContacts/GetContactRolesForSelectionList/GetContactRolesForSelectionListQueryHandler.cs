@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactRolesForSelectionList;
 
 using Abstractions.Messaging;
-using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +9,18 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetContactRolesForSelectionListQueryHandler
-    : IQueryHandler<GetContactRolesForSelectionListQuery, List<string>>
+    : IQueryHandler<GetContactRolesForSelectionListQuery, List<Position>>
 {
-    public async Task<Result<List<string>>> Handle(GetContactRolesForSelectionListQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<Position>>> Handle(GetContactRolesForSelectionListQuery request, CancellationToken cancellationToken)
     {
-        List<string> contactTypes = new();
+        IEnumerable<Position> options = Position.GetOptions;
+        
+        options = (request.IncludeRestrictedContacts) 
+            ? options 
+            : options.Where(position => !position.IsRestricted);
 
-        if (request.IncludeRestrictedContacts)
-            contactTypes.Add(SchoolContactRole.Principal);
-
-        contactTypes.Add(SchoolContactRole.Coordinator);
-        contactTypes.Add(SchoolContactRole.SciencePrac);
-
-        return contactTypes.OrderBy(entry => entry).ToList();
+        return options
+            .OrderBy(position => position.SortOrder)
+            .ToList();
     }
 }

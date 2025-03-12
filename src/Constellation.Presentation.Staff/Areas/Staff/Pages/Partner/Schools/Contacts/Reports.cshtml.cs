@@ -11,6 +11,7 @@ using Constellation.Application.SchoolContacts.RemoveContactRole;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
 using Constellation.Application.Users.RepairSchoolContactUser;
+using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
@@ -115,7 +116,7 @@ public class ReportsModel : BasePageModel
 
         AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
+        Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
@@ -128,7 +129,7 @@ public class ReportsModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreateAssignment(
         string schoolCode,
-        string roleName,
+        Position roleName,
         string note,
         SchoolContactId contactId)
     {

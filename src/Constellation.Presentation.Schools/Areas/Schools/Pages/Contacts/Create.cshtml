@@ -1,5 +1,4 @@
 ﻿@page
-@using Constellation.Core.Models.SchoolContacts
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Contacts.CreateModel
 @{
 }
@@ -27,7 +26,7 @@
         <div class="mb-3 row">
             <label asp-for="PhoneNumber" class="form-label col-md-2">Phone Number</label>
             <div class="col-md-3">
-                <input asp-for="PhoneNumber" class="form-control" />
+                <input asp-for="PhoneNumber" class="form-control" placeholder="Optional" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
         </div>
@@ -43,11 +42,8 @@
         <div class="mb-3 row">
             <label asp-for="Position" class="form-label col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="Position" class="form-control">
+                <select asp-for="Position" asp-items="Model.ValidPositions" class="form-control">
                     <option value="">-- Select --</option>
-                    <option value="@SchoolContactRole.Principal">@SchoolContactRole.Principal</option>
-                    <option value="@SchoolContactRole.Coordinator">@SchoolContactRole.Coordinator</option>
-                    <option value="@SchoolContactRole.SciencePrac">@SchoolContactRole.SciencePrac</option>
                 </select>
             </div>
         </div>

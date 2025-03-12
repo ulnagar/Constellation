@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers.IndexModel
 
 @using Constellation.Core.Models.SchoolContacts;
+@using Constellation.Core.Models.SchoolContacts.Enums
 @using Constellation.Core.ValueObjects
 
 @inject IAuthorizationService authService
@@ -73,7 +74,7 @@
                                 <a asp-page="/Subject/SciencePracs/Teachers/Upsert" asp-area="Staff" asp-route-id="@item.Id.Value" class="dropdown-item">Edit Contact</a>
                                 <button data-contact-id="@item.Id" data-name="@item.Name.DisplayName" class="dropdown-item create-assignment-button">Add Role</button>
                                 <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-note="@item.Note" class="dropdown-item update-note-button">Update Note</button>
-                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name.DisplayName" data-role="@SchoolContactRole.SciencePrac" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
+                                <button data-contact-id="@item.Id" data-role-id="@item.AssignmentId" data-name="@item.Name.DisplayName" data-role="@Position.SciencePracticalTeacher.Value" data-school="@item.SchoolName" class="dropdown-item delete-role-button">Remove Role</button>
                                 <div class="dropdown-divider"></div>
                                 <a asp-page-handler="Audit" asp-area="Staff" asp-route-id="@item.Id" class="dropdown-item">Audit Account</a>
                             </div>

@@ -1,20 +1,24 @@
 ﻿namespace Constellation.Core.Models.SchoolContacts;
 
+using Enums;
 using Identifiers;
 using Primitives;
 using System;
 
 public sealed class SchoolContactRole : IAuditableEntity
 {
-    public const string SciencePrac = "Science Practical Teacher";
-    public const string Coordinator = "Aurora College Coordinator";
-    public const string Principal = "Principal";
+    //public const string SciencePrac = "Science Practical Teacher";
+    //public const string Coordinator = "Aurora College Coordinator";
+    //public const string Principal = "Principal";
+    //public const string Timetabler = "Timetable Officer";
+    //public const string NESACoordinator = "NESA Coordinator";
+    //public const string TechnologyOfficer = "Technology Support Officer";
 
     private SchoolContactRole() { } // Required for EF Core
 
     internal SchoolContactRole(
         SchoolContactId contactId,
-        string role,
+        Position role,
         string schoolCode, 
         string schoolName,
         string note)
@@ -29,7 +33,7 @@ public sealed class SchoolContactRole : IAuditableEntity
 
     public SchoolContactRoleId Id { get; private set; }
     public SchoolContactId SchoolContactId { get; private set; }
-    public string Role { get; private set; }
+    public Position Role { get; private set; }
     public string SchoolCode { get; private set; }
     public string SchoolName { get; private set; }
     public string Note { get; private set; }

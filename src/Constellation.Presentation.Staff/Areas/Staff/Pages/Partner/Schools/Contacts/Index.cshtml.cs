@@ -11,6 +11,7 @@ using Application.Users.RepairSchoolContactUser;
 using Constellation.Application.SchoolContacts.Models;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
+using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Identifiers;
@@ -141,7 +142,7 @@ public class IndexModel : BasePageModel
 
         AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
 
-        Result<List<string>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
+        Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 
         viewModel.Schools = new SelectList(schoolsRequest.Value.OrderBy(entry => entry.Name), "Code", "Name");
@@ -154,7 +155,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreateAssignment(
         string schoolCode,
-        string roleName,
+        Position roleName,
         string note,
         SchoolContactId contactId)
     {

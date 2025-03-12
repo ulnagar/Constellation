@@ -9,6 +9,7 @@ using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Core.Errors;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
@@ -120,7 +121,7 @@ internal sealed class SendLessonNotificationCommandHandler
             description = $"{course.Grade} {course.Name} {lesson.Name}";
 
         lessonItems.Add(
-            new LessonEmail.LessonItem(
+            new(
                 lesson.Id,
                 roll.Id,
                 description,
@@ -132,30 +133,21 @@ internal sealed class SendLessonNotificationCommandHandler
 
         List<EmailRecipient> sptRecipients = new();
         List<EmailRecipient> accRecipients = new();
-        List<EmailRecipient> principalRecipients = new();
 
-        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.SciencePrac && !role.IsDeleted)))
+        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.SciencePracticalTeacher && !role.IsDeleted)))
         {
-            Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+            Result<EmailRecipient> result = contact.GetEmailRecipient();
 
             if (result.IsSuccess && sptRecipients.All(entry => entry.Email != result.Value.Email))
                 sptRecipients.Add(result.Value);
         }
 
-        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.Coordinator && !role.IsDeleted)))
+        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.Coordinator && !role.IsDeleted)))
         {
-            Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+            Result<EmailRecipient> result = contact.GetEmailRecipient();
 
             if (result.IsSuccess && accRecipients.All(entry => entry.Email != result.Value.Email))
                 accRecipients.Add(result.Value);
-        }
-
-        foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == SchoolContactRole.Principal && !role.IsDeleted)))
-        {
-            Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
-
-            if (result.IsSuccess && principalRecipients.All(entry => entry.Email != result.Value.Email))
-                principalRecipients.Add(result.Value);
         }
 
         Result<EmailRecipient> schoolResult = EmailRecipient.Create(school.Name, school.EmailAddress);
@@ -182,8 +174,7 @@ internal sealed class SendLessonNotificationCommandHandler
             Recipients = roll.NotificationCount switch
             {
                 0 or 1 => sptRecipients.Concat(accRecipients).Distinct().ToList(),
-                2 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Distinct().ToList(),
-                3 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Concat(principalRecipients).Distinct().ToList(),
+                2 or 3 => sptRecipients.Concat(accRecipients).Concat(new List<EmailRecipient> { schoolResult.Value }).Distinct().ToList(),
                 >= 4 => facultyContacts,
                 _ => sptRecipients.Concat(accRecipients).Distinct().ToList()
             }

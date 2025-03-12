@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Contacts.Models;
 
 using Constellation.Core.Enums;
-using Core.Models.Students.Identifiers;
+using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
 
 public sealed record ContactResponse(
-    StudentId StudentId,
+    StudentReferenceNumber StudentId,
     Name Student,
     Grade StudentGrade,
     string School,

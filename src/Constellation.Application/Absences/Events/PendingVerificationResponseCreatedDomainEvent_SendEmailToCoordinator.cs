@@ -16,6 +16,7 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
 using MediatR;
@@ -96,7 +97,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        List<SchoolContact> coordinators = await _contactRepository.GetBySchoolAndRole(enrolment.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
+        List<SchoolContact> coordinators = await _contactRepository.GetBySchoolAndRole(enrolment.SchoolCode, Position.Coordinator, cancellationToken);
 
         List<EmailRecipient> recipients = new();
 

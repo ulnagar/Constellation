@@ -12,6 +12,7 @@ using Constellation.Core.Models.Students.Repositories;
 using ConvertAbsenceToAbsenceEntry;
 using Core.Abstractions.Clock;
 using Core.Errors;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
 using Core.Shared;
@@ -84,7 +85,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
 
         if (digestWholeAbsences.Any() || digestPartialAbsences.Any())
         {
-            List<SchoolContact> coordinators = await _schoolContactRepository.GetBySchoolAndRole(enrolment.SchoolCode, SchoolContactRole.Coordinator, cancellationToken);
+            List<SchoolContact> coordinators = await _schoolContactRepository.GetBySchoolAndRole(enrolment.SchoolCode, Position.Coordinator, cancellationToken);
 
             List<EmailRecipient> recipients = new();
 

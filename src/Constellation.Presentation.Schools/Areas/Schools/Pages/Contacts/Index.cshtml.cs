@@ -9,7 +9,6 @@ using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
-using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -80,7 +79,7 @@ public class IndexModel : BasePageModel
         }
 
         Contacts = contactsRequest.Value
-            .OrderBy(contact => contact.PositionSort())
+            .OrderBy(contact => contact.Position.SortOrder)
             .ThenBy(contact => contact.LastName)
             .ToList();
     }

@@ -5,11 +5,13 @@ using Application.Models.Auth;
 using Application.SchoolContacts.CreateContactWithRole;
 using Application.Schools.GetSchoolById;
 using Core.Abstractions.Services;
+using Core.Models.SchoolContacts.Enums;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Logging;
@@ -56,12 +58,14 @@ public class CreateModel : BasePageModel
     public string EmailAddress { get; set; }
 
     [BindProperty]
-    public string Position { get; set; }
+    public Position Position { get; set; }
 
     [BindProperty]
     public string SchoolCode { get; set; }
 
     public string SchoolName { get; set; }
+
+    public SelectList ValidPositions { get; set; }
 
     public async Task OnGet()
     {
@@ -78,6 +82,14 @@ public class CreateModel : BasePageModel
 
         SchoolName = request.Value.Name;
         SchoolCode = request.Value.SchoolCode;
+
+        List<Position> positions = Position.GetOptions
+            .Where(position => position.SortOrder >= 2) // Exclude the DEL Role
+            .Where(position => position != Position.Empty)
+            .OrderBy(position => position.SortOrder)
+            .ToList();
+
+        ValidPositions = new(positions, nameof(Core.Models.SchoolContacts.Enums.Position.Value), nameof(Core.Models.SchoolContacts.Enums.Position.Name));
     }
 
     public async Task<IActionResult> OnPost()

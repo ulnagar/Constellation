@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.SchoolContacts.GetContactsWithRoleFromSchool;
 
-using Constellation.Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 
 public sealed record ContactResponse(
@@ -10,14 +10,4 @@ public sealed record ContactResponse(
     string LastName,
     string PhoneNumber,
     string EmailAddress,
-    string Position)
-{
-    public int PositionSort() =>
-        Position switch
-        {
-            SchoolContactRole.Principal => 1,
-            SchoolContactRole.Coordinator => 2,
-            SchoolContactRole.SciencePrac => 3,
-            _ => 10
-        };
-}
+    Position Position);

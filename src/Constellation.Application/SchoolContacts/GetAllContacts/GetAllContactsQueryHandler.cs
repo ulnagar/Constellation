@@ -5,6 +5,7 @@ using Constellation.Application.SchoolContacts.Models;
 using Core.Abstractions.Services;
 using Core.Models;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
@@ -85,7 +86,7 @@ internal sealed class GetAllContactsQueryHandler
                     email.IsSuccess ? email.Value : EmailAddress.None,
                     PhoneNumber.Empty, 
                     true,
-                    string.Empty,
+                    Position.Empty,
                     string.Empty,
                     false,
                     string.Empty,

@@ -4,8 +4,6 @@ using Core.Models.SchoolContacts;
 
 public static class SchoolContactRoleHelpers
 {
-    public static bool IsContactRoleRestricted(this SchoolContactRole assignment)
-    {
-        return assignment.Role != SchoolContactRole.Coordinator && assignment.Role != SchoolContactRole.SciencePrac;
-    }
+    public static bool IsContactRoleRestricted(this SchoolContactRole assignment) 
+        => assignment.Role.IsRestricted;
 }

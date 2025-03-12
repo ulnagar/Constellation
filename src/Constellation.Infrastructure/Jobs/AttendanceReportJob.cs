@@ -9,6 +9,7 @@ using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students;
 using Core.Shared;
@@ -174,7 +175,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
                 recipients.Add(result.Value);
         }
 
-        if (recipients.Any())
+        if (recipients.Count > 0)
         {
             MemoryStream stream = new(file.FileData);
 
@@ -209,23 +210,24 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
         DateOnly dateToReport, 
         CancellationToken cancellationToken)
     {
-        List<SchoolContact> coordinators = await _contactRepository.GetBySchoolAndRole(schoolCode, SchoolContactRole.Coordinator, cancellationToken);
+        List<SchoolContact> coordinators = await _contactRepository.GetBySchoolAndRole(schoolCode, Position.Coordinator, cancellationToken);
 
         List<EmailRecipient> recipients = new();
 
         foreach (SchoolContact coordinator in coordinators)
         {
-            Result<Name> nameResult = Name.Create(coordinator.FirstName, string.Empty, coordinator.LastName);
+            Result<Name> nameResult = coordinator.GetName();
+
             if (nameResult.IsFailure)
                 continue;
 
-            Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, coordinator.EmailAddress);
+            Result<EmailRecipient> result = coordinator.GetEmailRecipient();
 
             if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
                 recipients.Add(result.Value);
         }
 
-        if (recipients.Any())
+        if (recipients.Count > 0)
         {
             bool success = await _emailService.SendSchoolAttendanceReportEmail(
                dateToReport,

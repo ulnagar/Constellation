@@ -3,6 +3,7 @@
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.ValueObjects;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.SchoolContacts.Enums;
 using Students.GetCurrentStudentsWithCurrentOfferings;
 using System.Collections.Generic;
 
@@ -39,7 +40,7 @@ public sealed record SchoolDetailsResponse(
         SchoolContactId ContactId,
         SchoolContactRoleId RoleId,
         Name Name,
-        string Role,
+        Position Role,
         string Note,
         PhoneNumber PhoneNumber,
         EmailAddress EmailAddress);

@@ -1,20 +1,21 @@
 ﻿namespace Constellation.Application.SchoolContacts.Events.SchoolContactRoleCreated;
 
 using Abstractions.Messaging;
-using Interfaces.Services;
 using Constellation.Core.Models.SchoolContacts;
 using Core.Abstractions.Clock;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Events;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
+using Interfaces.Services;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
 
 internal sealed class SendWelcomeEmail 
     : IDomainEventHandler<SchoolContactRoleCreatedDomainEvent>
@@ -66,62 +67,58 @@ internal sealed class SendWelcomeEmail
         if (_dateTime.Now.Subtract(contact.CreatedAt).TotalDays < 5)
             return;
 
-        switch (role.Role)
+        if (role.Role == Position.Coordinator &&
+            contact.Assignments
+                .Count(assignment =>
+                    !assignment.IsDeleted &&
+                    assignment.Role == Position.Coordinator) == 1)
         {
-            case SchoolContactRole.Coordinator when 
-                contact.Assignments
-                    .Count(assignment =>
-                        !assignment.IsDeleted && 
-                        assignment.Role == SchoolContactRole.Coordinator) == 1:
-                {
-                    // This is a new ACC without another Coordinator role.
-                    List<EmailRecipient> recipients = new();
+            // This is a new ACC without another Coordinator role.
+            List<EmailRecipient> recipients = new();
 
-                    Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
 
-                    if (recipient.IsFailure)
-                    {
-                        _logger
-                            .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
-                            .ForContext(nameof(SchoolContact), contact, true)
-                            .ForContext(nameof(Error), recipient.Error, true)
-                            .Warning("Failed to send welcome email to new School Contact");
+            if (recipient.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
+                    .ForContext(nameof(SchoolContact), contact, true)
+                    .ForContext(nameof(Error), recipient.Error, true)
+                    .Warning("Failed to send welcome email to new School Contact");
 
-                        return;
-                    }
+                return;
+            }
 
-                    recipients.Add(recipient.Value);
+            recipients.Add(recipient.Value);
 
-                    await _emailService.SendWelcomeEmailToCoordinator(recipients, role.SchoolName, cancellationToken);
-                    break;
-                }
-            case SchoolContactRole.SciencePrac when
-                contact.Assignments
-                    .Count(assignment =>
-                        !assignment.IsDeleted &&
-                        assignment.Role == SchoolContactRole.SciencePrac) == 1:
-                {
-                    // This is a new SPT without another SPT role.
-                    List<EmailRecipient> recipients = new();
+            await _emailService.SendWelcomeEmailToCoordinator(recipients, role.SchoolName, cancellationToken);
+        }
 
-                    Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+        if (role.Role == Position.SciencePracticalTeacher &&
+            contact.Assignments
+                .Count(assignment =>
+                    !assignment.IsDeleted &&
+                    assignment.Role == Position.SciencePracticalTeacher) == 1)
+        {
+            // This is a new SPT without another SPT role.
+            List<EmailRecipient> recipients = new();
 
-                    if (recipient.IsFailure)
-                    {
-                        _logger
-                            .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
-                            .ForContext(nameof(SchoolContact), contact, true)
-                            .ForContext(nameof(Error), recipient.Error, true)
-                            .Warning("Failed to send welcome email to new School Contact");
+            Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
 
-                        return;
-                    }
+            if (recipient.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
+                    .ForContext(nameof(SchoolContact), contact, true)
+                    .ForContext(nameof(Error), recipient.Error, true)
+                    .Warning("Failed to send welcome email to new School Contact");
 
-                    recipients.Add(recipient.Value);
+                return;
+            }
 
-                    await _emailService.SendWelcomeEmailToSciencePracTeacher(recipients, role.SchoolName, cancellationToken);
-                    break;
-                }
+            recipients.Add(recipient.Value);
+
+            await _emailService.SendWelcomeEmailToSciencePracTeacher(recipients, role.SchoolName, cancellationToken);
         }
     }
 }

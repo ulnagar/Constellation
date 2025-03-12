@@ -1,4 +1,5 @@
-﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AssignRoleModal.AssignRoleModalViewModel
+﻿@using Constellation.Core.Models.SchoolContacts.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AssignRoleModal.AssignRoleModalViewModel
 
 <form asp-page-handler="CreateAssignment" method="post">
     <div class="modal-header">
@@ -25,7 +26,7 @@
         <div class="form-group row">
             <label asp-for="RoleName" class="col-md-3">Role</label>
             <div class="col-md-9">
-                @if (string.IsNullOrWhiteSpace(Model.RoleName))
+                @if (Model.RoleName == Position.Empty)
                 {
                     <select asp-for="RoleName" asp-items="@Model.Roles" class="combo-with-tag" style="width:100%">
                         <option value="">-- Select or Enter --</option>

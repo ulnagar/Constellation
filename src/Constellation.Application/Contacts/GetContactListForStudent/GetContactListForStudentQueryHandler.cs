@@ -18,6 +18,7 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.Faculties.ValueObjects;
 using Core.Models.Families;
 using Core.Models.Offerings;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Core.ValueObjects;
@@ -88,8 +89,8 @@ internal sealed class GetContactListForStudentQueryHandler
         List<Course> courses = await _courseRepository
             .GetAll(cancellationToken);
 
-        result.Add(new ContactResponse(
-            student.Id,
+        result.Add(new(
+            student.StudentReferenceNumber,
             student.Name,
             enrolment.Grade,
             enrolment.SchoolName,
@@ -105,8 +106,8 @@ internal sealed class GetContactListForStudentQueryHandler
 
         if (schoolEmail.IsSuccess)
         {
-            result.Add(new ContactResponse(
-                student.Id,
+            result.Add(new(
+                student.StudentReferenceNumber,
                 student.Name,
                 enrolment.Grade,
                 enrolment.SchoolName,
@@ -134,16 +135,16 @@ internal sealed class GetContactListForStudentQueryHandler
 
             foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
             {
-                ContactCategory category = role.Role switch
+                ContactCategory category = role switch
                 {
-                    SchoolContactRole.Principal => ContactCategory.PartnerSchoolPrincipal,
-                    SchoolContactRole.Coordinator => ContactCategory.PartnerSchoolACC,
-                    SchoolContactRole.SciencePrac => ContactCategory.PartnerSchoolSPT,
+                    _ when role.Role == Position.Principal => ContactCategory.PartnerSchoolPrincipal,
+                    _ when role.Role == Position.Coordinator => ContactCategory.PartnerSchoolACC,
+                    _ when role.Role == Position.SciencePracticalTeacher => ContactCategory.PartnerSchoolSPT,
                     _ => ContactCategory.PartnerSchoolOtherStaff
                 };
 
-                result.Add(new ContactResponse(
-                    student.Id,
+                result.Add(new(
+                    student.StudentReferenceNumber,
                     student.Name,
                     enrolment.Grade,
                     enrolment.SchoolName,
@@ -168,8 +169,8 @@ internal sealed class GetContactListForStudentQueryHandler
 
             if (isResidential)
             {
-                result.Add(new ContactResponse(
-                    student.Id,
+                result.Add(new(
+                    student.StudentReferenceNumber,
                     student.Name,
                     enrolment.Grade,
                     enrolment.SchoolName,
@@ -200,8 +201,8 @@ internal sealed class GetContactListForStudentQueryHandler
                         _ => ContactCategory.ResidentialFamily
                     };
 
-                    result.Add(new ContactResponse(
-                        student.Id,
+                    result.Add(new(
+                        student.StudentReferenceNumber,
                         student.Name,
                         enrolment.Grade,
                         enrolment.SchoolName,
@@ -214,8 +215,8 @@ internal sealed class GetContactListForStudentQueryHandler
             }
             else
             {
-                result.Add(new ContactResponse(
-                    student.Id,
+                result.Add(new(
+                    student.StudentReferenceNumber,
                     student.Name,
                     enrolment.Grade,
                     enrolment.SchoolName,
@@ -239,8 +240,8 @@ internal sealed class GetContactListForStudentQueryHandler
 
                     Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
 
-                    result.Add(new ContactResponse(
-                        student.Id,
+                    result.Add(new(
+                        student.StudentReferenceNumber,
                         student.Name,
                         enrolment.Grade,
                         enrolment.SchoolName,
@@ -277,8 +278,8 @@ internal sealed class GetContactListForStudentQueryHandler
                 if (teacherEmail.IsFailure)
                     continue;
 
-                result.Add(new ContactResponse(
-                    student.Id,
+                result.Add(new(
+                    student.StudentReferenceNumber,
                     student.Name,
                     enrolment.Grade,
                     enrolment.SchoolName,
@@ -318,13 +319,13 @@ internal sealed class GetContactListForStudentQueryHandler
                 bool existingEntry = result.Any(entry =>
                     entry.Category.Equals(ContactCategory.AuroraHeadTeacher) &&
                 entry.Contact == teacherName &&
-                    entry.StudentId == student.Id);
+                    entry.StudentId == student.StudentReferenceNumber);
 
                 if (existingEntry)
                     continue;
 
-                result.Add(new ContactResponse(
-                    student.Id,
+                result.Add(new(
+                    student.StudentReferenceNumber,
                     student.Name,
                     enrolment.Grade,
                     enrolment.SchoolName,

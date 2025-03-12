@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
 using Core.Models;
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 using Core.ValueObjects;
 using Models;
@@ -35,7 +36,7 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
     {
         List<SchoolContactResponse> response = new();
 
-        List<SchoolContact> contacts = await _contactRepository.GetAllByRole(SchoolContactRole.SciencePrac, cancellationToken);
+        List<SchoolContact> contacts = await _contactRepository.GetAllByRole(Position.SciencePracticalTeacher, cancellationToken);
 
         List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
 
@@ -44,7 +45,7 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
             List<SchoolContactRole> activeAssignments = contact.Assignments
                 .Where(assignment => 
                     !assignment.IsDeleted &&
-                    assignment.Role == SchoolContactRole.SciencePrac)
+                    assignment.Role == Position.SciencePracticalTeacher)
                 .ToList();
 
             Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);

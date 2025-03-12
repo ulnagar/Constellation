@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.SchoolContacts.Models;
 
+using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.ValueObjects;
 
@@ -10,7 +11,7 @@ public sealed record SchoolContactResponse(
     EmailAddress EmailAddress,
     PhoneNumber PhoneNumber,
     bool IsDirectNumber,
-    string Role,
+    Position Role,
     string SchoolName,
     bool IsActivePartnerSchool,
     string Note,
