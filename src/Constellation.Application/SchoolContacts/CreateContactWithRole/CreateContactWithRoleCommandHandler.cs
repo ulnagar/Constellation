@@ -85,8 +85,8 @@ internal sealed class CreateContactWithRoleCommandHandler
 
         if (existingContact.Assignments.Any(role =>
                 !role.IsDeleted &&
-                role.SchoolCode != request.SchoolCode &&
-                role.Role != request.Position))
+                role.SchoolCode == request.SchoolCode &&
+                role.Role == request.Position))
             return Result.Success();
 
         existingContact.AddRole(
