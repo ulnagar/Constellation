@@ -13,7 +13,8 @@ internal sealed class GetContactRolesForSelectionListQueryHandler
 {
     public async Task<Result<List<Position>>> Handle(GetContactRolesForSelectionListQuery request, CancellationToken cancellationToken)
     {
-        IEnumerable<Position> options = Position.GetOptions;
+        IEnumerable<Position> options = Position.GetOptions
+            .Where(position => position != Position.Empty);
         
         options = (request.IncludeRestrictedContacts) 
             ? options 
