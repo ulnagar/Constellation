@@ -3,9 +3,13 @@ namespace Constellation.Infrastructure.Jobs;
 
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -21,6 +25,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IFacultyRepository _facultyRepository;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly TrackItContext _tiContext;
     private readonly ILogger _logger;
     private static int _newCustomerSequence;
@@ -36,6 +41,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository,
         IFacultyRepository facultyRepository,
+        ISchoolContactRepository contactRepository,
         TrackItContext tiContext, 
         ILogger logger)
     {
@@ -43,6 +49,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         _staffRepository = staffRepository;
         _schoolRepository = schoolRepository;
         _facultyRepository = facultyRepository;
+        _contactRepository = contactRepository;
         _tiContext = tiContext;
         _logger = logger.ForContext<ITrackItSyncJob>();
     }
@@ -54,6 +61,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         List<Student> acosStudents = await _studentRepository.GetAll(cancellationToken);
         List<School> acosSchools = await _schoolRepository.GetAllActive(cancellationToken);
         List<Staff> acosStaff = await _staffRepository.GetAll(cancellationToken);
+        List<SchoolContact> acosContacts = await _contactRepository.GetAllByRole(Position.TimetableOfficer, cancellationToken);
         _faculties = await _facultyRepository.GetAll(cancellationToken);
 
         List<Customer> tiCustomers = await _tiContext.Customers.ToListAsync(cancellationToken);
@@ -109,6 +117,19 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
                         continue;
 
                     if (staffMember.DateDeleted != null && staffMember.DateDeleted.Value.AddDays(7) > DateTime.Today)
+                        continue;
+                }
+
+                SchoolContact? contact = acosContacts.FirstOrDefault(contact => contact.EmailAddress.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
+
+                if (contact is not null)
+                {
+                    bool validRoles = contact.Assignments
+                        .Any(role =>
+                            role.Role == Position.TimetableOfficer && 
+                            !role.IsDeleted);
+
+                    if (!contact.IsDeleted && validRoles)
                         continue;
                 }
                 
@@ -186,6 +207,40 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             else
             {
                 Customer customer = CreateCustomerFromStaff(acosStaffMember);
+                _tiContext.Customers.Add(customer);
+            }
+        }
+
+        SetNextCustomerSequence();
+        await _tiContext.SaveChangesAsync(cancellationToken);
+
+        foreach (SchoolContact acosContact in acosContacts.Where(contact => !contact.IsDeleted))
+        {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            bool validRoles = acosContact.Assignments
+                .Any(role =>
+                    role.Role == Position.TimetableOfficer &&
+                    !role.IsDeleted);
+
+            if (!validRoles)
+                continue;
+
+            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}", jobId, acosContact.DisplayName, acosContact.EmailAddress);
+
+            string contactEmailId = ConvertEmailToEmailId(acosContact.EmailAddress);
+            string contactPortalId = ConvertEmailToPortalId(acosContact.EmailAddress);
+
+            Customer? tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == contactPortalId || c.Emailid == contactEmailId);
+
+            if (tiCustomer is not null)
+            {
+                CheckExistingCustomerDetail(tiCustomer, acosContact);
+            }
+            else
+            {
+                Customer customer = CreateCustomerFromContact(acosContact);
                 _tiContext.Customers.Add(customer);
             }
         }
@@ -284,6 +339,61 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     private static string ConvertEmailToEmailId(string email) =>
         $"SMTP:{{{email.ToLower(CultureInfo.InvariantCulture)}}}{email.ToLower(CultureInfo.InvariantCulture)}";
 
+    private static string ConvertEmailToPortalId(string email) =>
+        email[..(email.IndexOf('@') - 1)].ToLower(CultureInfo.InvariantCulture);
+
+    private void CheckExistingCustomerDetail(Customer customer, SchoolContact contact)
+    {
+        // Is this customer linked to an Aurora College staff member as well?
+        Department? checkDepartment = _tiDepartments.FirstOrDefault(c => c.Sequence == customer.Dept);
+
+        if (checkDepartment?.Name.Contains("Faculty", StringComparison.OrdinalIgnoreCase) ?? false)
+            return;
+
+        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress);
+
+        if (string.IsNullOrWhiteSpace(contactPortalId))
+            return;
+
+        string? schoolCode = contact.Assignments
+            .FirstOrDefault(role => 
+                !role.IsDeleted && 
+                role.Role == Position.TimetableOfficer)
+            ?.SchoolCode;
+
+        if (!customer.Client.Equals(contactPortalId.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
+            customer.Client = contactPortalId.ToUpper(CultureInfo.InvariantCulture);
+
+        customer.Emailid = ConvertEmailToEmailId(contact.EmailAddress);
+
+        if (customer.Fname != contact.FirstName)
+        {
+            customer.Fname = contact.FirstName;
+
+            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: FirstName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.FirstName);
+        }
+
+        if (customer.Name != contact.LastName)
+        {
+            customer.Name = contact.LastName;
+
+            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: LastName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.LastName);
+        }
+
+        Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Partner School");
+        customer.Dept = department?.Sequence;
+
+        if (!string.IsNullOrWhiteSpace(schoolCode))
+        {
+            Location? location = _tiLocations.FirstOrDefault(c => c.Note == schoolCode);
+            customer.Location = location?.Sequence;
+        }
+        
+        customer.Inactive = 0;
+
+        customer.Updated();
+    }
+
     private void CheckExistingCustomerDetail(Customer customer, Student student)
     {
         if (!customer.Client.Equals(student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
@@ -356,6 +466,42 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         customer.Updated();
     }
 
+    private Customer CreateCustomerFromContact(SchoolContact contact)
+    {
+        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress);
+        
+        Customer customer = new()
+        {
+            Client = contactPortalId?.ToUpper(CultureInfo.InvariantCulture),
+            Emailid = ConvertEmailToEmailId(contact.EmailAddress),
+            Group = 2,
+            Inactive = 0,
+            Fname = contact.FirstName,
+            Name = contact.LastName
+        };
+
+        _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: Created new record", JobId, contact.DisplayName, contact.EmailAddress);
+
+        Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Partner School");
+        customer.Dept = department?.Sequence;
+
+        string? schoolCode = contact.Assignments
+            .FirstOrDefault(role =>
+                !role.IsDeleted &&
+                role.Role == Position.TimetableOfficer)
+            ?.SchoolCode;
+
+        if (!string.IsNullOrWhiteSpace(schoolCode))
+        {
+            Location? location = _tiLocations.FirstOrDefault(c => c.Note == schoolCode);
+            customer.Location = location?.Sequence;
+        }
+        
+        customer.Sequence = GetNextCustomerSequence();
+
+        return customer;
+    }
+
     private Customer CreateCustomerFromStudent(Student student)
     {
         Customer customer = new()
@@ -393,7 +539,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             Name = staff.LastName
         };
 
-        _logger.Information("{id}: Staff: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
+        _logger.Information("{id}: Teacher: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
 
         FacultyMembership? membership = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
 
