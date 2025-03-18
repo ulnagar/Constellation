@@ -185,7 +185,8 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                UserEmail = operation.Staff.EmailAddress
+                UserEmail = operation.Staff.EmailAddress,
+                AdditionalInformation = "All"
             };
 
             teamOperation.Action = operation.Action switch
@@ -222,7 +223,8 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                UserEmail = casual.EmailAddress
+                UserEmail = casual.EmailAddress,
+                AdditionalInformation = "All"
             };
 
             teamOperation.Action = operation.Action switch
