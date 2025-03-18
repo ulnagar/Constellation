@@ -116,7 +116,7 @@
 
             @if (authorised.Succeeded)
             {
-                <a asp-page-handler="SendNotification" asp-route-studentId="@Model.Absence.StudentId" class="btn btn-info">Resent Email</a>
+                <a asp-page-handler="SendNotification" asp-route-studentId="@Model.Absence.StudentId" class="btn btn show-spinner-5">Resent Email</a>
             }
 
             <table class="table-striped data-table">
@@ -141,7 +141,7 @@
                                 }
                                 else
                                 {
-                                    <a asp-page="ViewEmail" asp-area="Staff" asp-route-absenceId="@Model.Absence.AbsenceId" asp-route-notificationId="@item.NotificationId" target="_blank" class="btn btn-secondary">Click to view</a>
+                                    <a asp-page="ViewEmail" asp-area="Staff" asp-route-absenceId="@Model.Absence.AbsenceId" asp-route-notificationId="@item.NotificationId" target="_blank" class="btn btn-secondary show-spinner-5">Click to view</a>
                                 }
                             </td>
                             <td>@item.SentAt.ToShortDateString()</td>
