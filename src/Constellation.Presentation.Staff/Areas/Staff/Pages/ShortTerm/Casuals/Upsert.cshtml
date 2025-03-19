@@ -21,7 +21,7 @@
         @Html.HiddenFor(model => model.Id)
 
         <div class="form-group row">
-            <label asp-for="FirstName" class="col-md-2"></label>
+            <label asp-for="FirstName" class="col-md-2">First Name</label>
             <div class="col-md-3">
                 <input asp-for="FirstName" class="form-control" />
                 <span asp-validation-for="FirstName" class="text-danger"></span>
@@ -29,7 +29,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="LastName" class="col-md-2"></label>
+            <label asp-for="LastName" class="col-md-2">Last Name</label>
             <div class="col-md-3">
                 <input asp-for="LastName" class="form-control" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
@@ -37,7 +37,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="EmailAddress" class="col-md-2"></label>
+            <label asp-for="EmailAddress" class="col-md-2">Email Address</label>
             <div class="col-md-3">
                 @if (editing)
                 {
@@ -53,7 +53,7 @@
         </div>
 
         <div class="form-group row">
-            <label asp-for="SchoolCode" class="col-md-2"></label>
+            <label asp-for="SchoolCode" class="col-md-2">School</label>
             <div class="col-md-3">
                 <select asp-for="SchoolCode" asp-items="@(new SelectList(Model.Schools, "Code", "Name", Model.SchoolCode))" class="form-control combo">
                     <option value="">-- Select --</option>

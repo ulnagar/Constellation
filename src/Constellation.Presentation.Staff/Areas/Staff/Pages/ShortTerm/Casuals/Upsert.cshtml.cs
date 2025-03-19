@@ -128,7 +128,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Casuals/Index", new { area = "ShortTerm" });
+        return RedirectToPage("/ShortTerm/Casuals/Index", new { area = "Staff" });
     }
 
     public async Task<IActionResult> OnPostUpdate(CancellationToken cancellationToken)
@@ -168,7 +168,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        return RedirectToPage("/Casuals/Index", new { area = "ShortTerm" });
+        return RedirectToPage("/ShortTerm/Casuals/Index", new { area = "Staff" });
     }
 
     private async Task PreparePage(CancellationToken cancellationToken = default)
