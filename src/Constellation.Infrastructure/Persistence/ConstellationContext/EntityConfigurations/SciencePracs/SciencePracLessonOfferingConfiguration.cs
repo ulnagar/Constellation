@@ -12,7 +12,7 @@ public class SciencePracLessonOfferingConfiguration : IEntityTypeConfiguration<S
 {
     public void Configure(EntityTypeBuilder<SciencePracLessonOffering> builder)
     {
-        builder.ToTable("SciencePracs_Lessons_Offerings");
+        builder.ToTable("LessonOfferings", "SciencePracs");
 
         builder
             .HasKey(entity => new { entity.LessonId, entity.OfferingId });

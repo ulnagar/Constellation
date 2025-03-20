@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
+using Core.Models.SciencePracs.Errors;
 using Serilog;
 using System;
 using System.Threading;
@@ -36,14 +37,14 @@ internal sealed class UpdateLessonCommandHandler
         {
             _logger.Warning("Could not find a Science Prac Lesson with the Id {id}", request.LessonId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         if (request.DueDate < DateOnly.FromDateTime(DateTime.Today))
         {
             _logger.Warning("Cannot set due date for Science Prac Lesson in the past");
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.PastDueDate(request.DueDate));
+            return Result.Failure(SciencePracLessonErrors.PastDueDate(request.DueDate));
         }
 
         Result updateRequest = lesson.Update(request.Name, request.DueDate);

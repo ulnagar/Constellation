@@ -4,6 +4,7 @@ namespace Constellation.Core.Models.SciencePracs;
 
 using Constellation.Core.Models.Offerings.Identifiers;
 using DomainEvents;
+using Enums;
 using Errors;
 using Identifiers;
 using Primitives;
@@ -23,6 +24,7 @@ public sealed class SciencePracLesson : AggregateRoot
     private SciencePracLesson(
         string name,
         DateOnly dueDate,
+        Grade grade,
         List<OfferingId> offerings,
         bool doNotGenerateRolls)
     {
@@ -41,6 +43,7 @@ public sealed class SciencePracLesson : AggregateRoot
     public SciencePracLessonId Id { get; private set; }
     public string Name { get; private set; }
     public DateOnly DueDate { get; private set; }
+    public Grade Grade { get; private set; }
     public IReadOnlyList<SciencePracLessonOffering> Offerings => _offerings;
     public IReadOnlyList<SciencePracRoll> Rolls => _rolls;
     public bool DoNotGenerateRolls { get; private set; }
@@ -48,17 +51,19 @@ public sealed class SciencePracLesson : AggregateRoot
     public static Result<SciencePracLesson> Create(
         string name,
         DateOnly dueDate,
+        Grade grade,
         List<OfferingId> offerings,
         bool doNotGenerateRolls)
     {
         if (dueDate < DateOnly.FromDateTime(DateTime.Today))
         {
-            return Result.Failure<SciencePracLesson>(DomainErrors.SciencePracs.Lesson.PastDueDate(dueDate));
+            return Result.Failure<SciencePracLesson>(SciencePracLessonErrors.PastDueDate(dueDate));
         }
 
         return new SciencePracLesson(
             name,
             dueDate,
+            grade,
             offerings,
             doNotGenerateRolls);
     }
@@ -75,7 +80,7 @@ public sealed class SciencePracLesson : AggregateRoot
 
         if (roll is null)
         {
-            return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(rollId));
+            return Result.Failure(SciencePracRollErrors.NotFound(rollId));
         }
 
         Result attempt = roll.MarkRoll(
@@ -104,22 +109,24 @@ public sealed class SciencePracLesson : AggregateRoot
     public Result AddRoll(SciencePracRoll roll)
     {
         if (_rolls.Any(entry => entry.SchoolCode == roll.SchoolCode))
-            return Result.Failure(DomainErrors.SciencePracs.Roll.AlreadyExistsForSchool);
+            return Result.Failure(SciencePracRollErrors.AlreadyExistsForSchool);
 
         _rolls.Add(roll);
 
         return Result.Success();
     }
 
+    public void UpdateGrade(Grade grade) => Grade = grade;
+
     public Result Update(
         string name,
         DateOnly dueDate)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.EmptyName);
+            return Result.Failure(SciencePracLessonErrors.EmptyName);
 
         if (dueDate < DateOnly.FromDateTime(DateTime.Today))
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.PastDueDate(dueDate));
+            return Result.Failure(SciencePracLessonErrors.PastDueDate(dueDate));
 
         Name = name;
         DueDate = dueDate;

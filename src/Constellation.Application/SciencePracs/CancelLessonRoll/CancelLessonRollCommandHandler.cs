@@ -8,6 +8,7 @@ using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Models.SciencePracs.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -44,7 +45,7 @@ internal sealed class CancelLessonRollCommandHandler
         {
             _logger.Warning("Could not find Science Prac Lesson with Id {id}", request.LessonId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
@@ -53,14 +54,14 @@ internal sealed class CancelLessonRollCommandHandler
         {
             _logger.Warning("Could not find Science Prac Roll with Id {id}", request.RollId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
+            return Result.Failure(SciencePracRollErrors.NotFound(request.RollId));
         }
 
         if (roll.Status != Core.Enums.LessonStatus.Active)
         {
             _logger.Warning("Cannot cancel a roll that has already been submitted");
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.CannotCancelCompletedRoll);
+            return Result.Failure(SciencePracRollErrors.CannotCancelCompletedRoll);
         }
 
         Result cancelRequest = roll.CancelRoll($"{request.Comment} Roll cancelled by {_currentUserService.UserName} at {_dateTime.Now}");

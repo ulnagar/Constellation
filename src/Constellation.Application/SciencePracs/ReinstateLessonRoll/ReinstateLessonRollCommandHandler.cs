@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
+using Core.Models.SciencePracs.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -36,7 +37,7 @@ internal sealed class ReinstateLessonRollCommandHandler
         {
             _logger.Warning("Could not find Science Prac Lesson with Id {id}", request.LessonId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
@@ -45,14 +46,14 @@ internal sealed class ReinstateLessonRollCommandHandler
         {
             _logger.Warning("Could not find Science Prac Roll with Id {id}", request.RollId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
+            return Result.Failure(SciencePracRollErrors.NotFound(request.RollId));
         }
 
         if (roll.Status != Core.Enums.LessonStatus.Cancelled)
         {
             _logger.Warning("Cannot reinstate a roll that has not already been submitted");
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.CannotReinstateRoll);
+            return Result.Failure(SciencePracRollErrors.CannotReinstateRoll);
         }
 
         Result reinstateRequest = roll.ReinstateRoll();

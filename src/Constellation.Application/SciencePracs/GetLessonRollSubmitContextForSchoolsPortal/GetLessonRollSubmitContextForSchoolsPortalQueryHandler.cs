@@ -8,6 +8,7 @@ using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
+using Core.Models.SciencePracs.Errors;
 using Core.Shared;
 using Serilog;
 using System;
@@ -43,7 +44,7 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
         {
             _logger.Warning("Could not find Science Prac Lesson with the Id {id}", request.LessonId);
 
-            return Result.Failure<ScienceLessonRollForSubmit>(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure<ScienceLessonRollForSubmit>(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         SciencePracRoll roll = lesson.Rolls.FirstOrDefault(roll => roll.Id == request.RollId);
@@ -52,7 +53,7 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
         {
             _logger.Warning("Could not find Science Prac Roll with the Id {id}", request.RollId);
 
-            return Result.Failure<ScienceLessonRollForSubmit>(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
+            return Result.Failure<ScienceLessonRollForSubmit>(SciencePracRollErrors.NotFound(request.RollId));
         }
 
         ScienceLessonRollForSubmit response = new()

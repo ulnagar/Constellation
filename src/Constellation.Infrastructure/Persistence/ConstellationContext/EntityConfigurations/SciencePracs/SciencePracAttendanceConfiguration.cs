@@ -10,7 +10,7 @@ public class SciencePracAttendanceConfiguration : IEntityTypeConfiguration<Scien
 {
     public void Configure(EntityTypeBuilder<SciencePracAttendance> builder)
     {
-        builder.ToTable("SciencePracs_Attendance");
+        builder.ToTable("Attendance", "SciencePracs");
 
         builder
             .HasKey(roll => roll.Id);

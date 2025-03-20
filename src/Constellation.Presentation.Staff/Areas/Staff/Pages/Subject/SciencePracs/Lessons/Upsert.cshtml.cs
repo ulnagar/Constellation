@@ -12,6 +12,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.SciencePracs.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -88,11 +89,11 @@ public class UpsertModel : BasePageModel
             if (lessonResponse.Value.Rolls.Any(roll => roll.Status == Core.Enums.LessonStatus.Completed))
             {
                 _logger
-                    .ForContext(nameof(Error), DomainErrors.SciencePracs.Lesson.CannotEdit, true)
+                    .ForContext(nameof(Error), SciencePracLessonErrors.CannotEdit, true)
                     .Warning("Failed to retrieve Lesson with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
                 ModalContent = new ErrorDisplay(
-                    DomainErrors.SciencePracs.Lesson.CannotEdit,
+                    SciencePracLessonErrors.CannotEdit,
                     _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", Id }));
             }
 

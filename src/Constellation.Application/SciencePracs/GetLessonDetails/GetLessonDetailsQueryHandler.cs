@@ -3,13 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.SciencePracs.Errors;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Serilog;
@@ -50,7 +50,7 @@ internal sealed class GetLessonDetailsQueryHandler
         {
             _logger.Warning("Could not find Science Prac Lesson with Id {id}", request.LessonId);
 
-            return Result.Failure<LessonDetailsResponse>(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure<LessonDetailsResponse>(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         List<string> offerings = new();

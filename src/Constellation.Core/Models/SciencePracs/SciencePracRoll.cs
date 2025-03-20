@@ -45,7 +45,7 @@ public sealed class SciencePracRoll
         List<StudentId> absentStudents)
     {
         if (presentStudents.Count == 0 && string.IsNullOrWhiteSpace(comment))
-            return Result.Failure(DomainErrors.SciencePracs.Roll.CommentRequiredNonePresent);
+            return Result.Failure(SciencePracRollErrors.CommentRequiredNonePresent);
 
         foreach (StudentId studentId in presentStudents)
         {
@@ -68,7 +68,7 @@ public sealed class SciencePracRoll
         }
 
         if (_attendance.Count(entry => entry.Present) == 0 && string.IsNullOrWhiteSpace(comment))
-            return Result.Failure(DomainErrors.SciencePracs.Roll.CommentRequiredNonePresent);
+            return Result.Failure(SciencePracRollErrors.CommentRequiredNonePresent);
 
         SubmittedBy = submittedBy;
         LessonDate = lessonDate;
@@ -82,7 +82,7 @@ public sealed class SciencePracRoll
     public Result CancelRoll(string comment)
     {
         if (Status == LessonStatus.Completed)
-            return Result.Failure(DomainErrors.SciencePracs.Roll.CannotCancelCompletedRoll);
+            return Result.Failure(SciencePracRollErrors.CannotCancelCompletedRoll);
 
         Status = LessonStatus.Cancelled;
         SubmittedDate = DateTime.Now;
@@ -94,7 +94,7 @@ public sealed class SciencePracRoll
     public Result ReinstateRoll()
     {
         if (Status != LessonStatus.Cancelled)
-            return Result.Failure(DomainErrors.SciencePracs.Roll.MustBeCancelled);
+            return Result.Failure(SciencePracRollErrors.MustBeCancelled);
 
         Status = LessonStatus.Active;
         SubmittedDate = null;

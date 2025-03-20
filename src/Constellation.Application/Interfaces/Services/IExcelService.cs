@@ -20,8 +20,10 @@ using DTOs;
 using DTOs.CSV;
 using ExternalDataConsistency;
 using GroupTutorials.GenerateTutorialAttendanceReport;
+using Org.BouncyCastle.Tls;
 using SchoolContacts.GetContactsBySchool;
 using SciencePracs.GenerateOverdueReport;
+using SciencePracs.GenerateYTDStatusReport;
 using Students.ImportStudentsFromFile;
 using System;
 using System.Collections.Generic;
@@ -57,6 +59,7 @@ public interface IExcelService
     Task<MemoryStream> CreateWellbeingExportFile(List<SentralIncidentDetails> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateStudentAttendanceReport(string periodLabel, List<AttendanceRecord> records, List<AbsenceRecord> absenceRecords, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSciencePracOverdueReport(List<OverdueRollResponse> records, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateSciencePracYTDReport(List<RollStatusResponse> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateTrainingModuleOverallReportFile(List<ModuleDetails> moduleDetails, List<StaffStatus> staffStatuses, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateWorkFlowReport(List<CaseReportItem> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSchoolContactExport(List<SchoolWithContactsResponse> records, CancellationToken cancellationToken = default);

@@ -11,6 +11,7 @@ using Constellation.Core.Models.Subjects.Errors;
 using Core.Errors;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.SciencePracs.Errors;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -83,7 +84,7 @@ internal sealed class SendLessonNotificationCommandHandler
         {
             _logger.Warning("Could not find a Science Prac Lesson with Id {id}", request.LessonId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
@@ -92,7 +93,7 @@ internal sealed class SendLessonNotificationCommandHandler
         {
             _logger.Warning("Could not find Science Prac Roll with Id {id}", request.RollId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
+            return Result.Failure(SciencePracRollErrors.NotFound(request.RollId));
         }
 
         School school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);

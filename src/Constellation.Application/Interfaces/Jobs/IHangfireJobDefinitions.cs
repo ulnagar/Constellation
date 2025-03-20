@@ -26,6 +26,8 @@ public interface IGroupTutorialExpiryScanJob : IHangfireJob { }
 
 public interface ILessonNotificationsJob : IHangfireJob { }
 
+public interface ILessonUpdateJob : IHangfireJob { }
+
 public interface IMandatoryTrainingScanJob : IHangfireJob { }
 
 public interface ICanvasAccessAuditJob : IHangfireJob { }

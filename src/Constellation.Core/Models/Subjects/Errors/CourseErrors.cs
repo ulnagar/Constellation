@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Subjects.Errors;
 
 using Identifiers;
+using Offerings.Identifiers;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,10 @@ public static class CourseErrors
     public static readonly Func<CourseId, Error> NotFound = id => new(
         "Subjects.Course.NotFound",
         $"Could not find a course with the id {id}");
+
+    public static readonly Func<OfferingId, Error> NotFoundByOfferingId = id => new(
+        "Subjects.Course.NotFoundByOfferingId",
+        $"Could not fina a course linked with offering with id {id}");
 
     public static readonly Error NoneFound = new(
         "Subjects.Course.NoneFound",

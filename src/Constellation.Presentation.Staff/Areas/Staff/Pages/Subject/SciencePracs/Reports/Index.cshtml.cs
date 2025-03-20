@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Reports;
 
+using Application.SciencePracs.GenerateYTDStatusReport;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
@@ -48,6 +49,26 @@ public class IndexModel : BasePageModel
             _logger
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to download Overdue Lesson report by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(reportRequest.Error);
+
+            return Page();
+        }
+
+        return File(reportRequest.Value.FileData, reportRequest.Value.FileType, reportRequest.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnGetDownloadYTDReport()
+    {
+        _logger.Information("Requested to download YTD Lesson Roll Status report by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> reportRequest = await _mediator.Send(new GenerateYTDStatusReportCommand());
+
+        if (reportRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), reportRequest.Error, true)
+                .Warning("Failed to download YTD Lesson Roll Status report by user {User}", _currentUserService.UserName);
 
             ModalContent = new ErrorDisplay(reportRequest.Error);
 

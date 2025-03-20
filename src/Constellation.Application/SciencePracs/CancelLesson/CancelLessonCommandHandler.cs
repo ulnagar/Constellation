@@ -6,6 +6,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Shared;
+using Core.Models.SciencePracs.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -36,7 +37,7 @@ internal sealed class CancelLessonCommandHandler
         {
             _logger.Warning("Could not find Science Prac Lesson with Id {id}", request.LessonId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         if (lesson.Rolls.Any(roll => roll.Status == Core.Enums.LessonStatus.Completed))
@@ -45,7 +46,7 @@ internal sealed class CancelLessonCommandHandler
                 .ForContext(nameof(CancelLessonCommand), request, true)
                 .Warning("Cannot cancel lesson with completed rolls");
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.RollCompleted);
+            return Result.Failure(SciencePracLessonErrors.RollCompleted);
         }
 
         _lessonRepository.Delete(lesson);

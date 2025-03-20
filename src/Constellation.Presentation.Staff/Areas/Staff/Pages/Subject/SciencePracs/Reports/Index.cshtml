@@ -16,7 +16,15 @@
         An Excel file that lists all Lesson Rolls that are currently overdue.
     </div>
     <div class="col-md-2">
-        <a asp-page-handler="DownloadReport" class="btn btn-block btn-warning show-spinner-5">Run Report</a>
+        <a asp-page-handler="DownloadReport" class="btn btn-block btn-warning show-loader-5">Run Report</a>
+    </div>
+    
+    <div class="col-md-12">
+        <h4>YTD Roll Status</h4>
+        An Excel file that lists Schools with a breakdown of how many Lesson Rolls that are currently overdue.
+    </div>
+    <div class="col-md-2">
+        <a asp-page-handler="DownloadYTDReport" class="btn btn-block btn-warning show-loader-5">Run Report</a>
     </div>
 
     <div class="col-md-12 mt-2">

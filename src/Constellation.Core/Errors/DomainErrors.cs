@@ -299,58 +299,7 @@ public static class DomainErrors
         }
     }
 
-    public static class SciencePracs
-    {
-        public static class Lesson
-        {
-            public static readonly Func<DateOnly, Error> PastDueDate = date => new(
-                "SciencePracs.Lesson.PastDueDate",
-                $"Cannot create a Lesson due in the past ({date})");
 
-            public static readonly Error EmptyName = new(
-                "SciencePracs.Lesson.EmptyName",
-                "Cannot create a Lesson with a blank name");
-
-            public static readonly Func<SciencePracLessonId, Error> NotFound = id => new(
-                "SciencePracs.Lesson.NotFound",
-                $"Could not find a lesson with the Id {id}");
-
-            public static readonly Error RollCompleted = new(
-                "SciencePracs.Lesson.RollCompleted",
-                "Cannot cancel a lesson that has completed rolls");
-
-            public static readonly Error CannotEdit = new(
-                "SciencePracs.Lesson.CannotEdit",
-                "Cannot edit a lesson after a roll has been submitted");
-        }
-
-        public static class Roll
-        {
-            public static readonly Error AlreadyExistsForSchool = new(
-                "SciencePracs.Roll.AlreadyExistsForSchool",
-                "A Roll already exists in this Lesson for this school");
-
-            public static readonly Error CommentRequiredNonePresent = new(
-                "SciencePracs.Rolls.CommentRequiredNonePresent",
-                "Cannot mark a roll with no students present without providing a comment");
-
-            public static readonly Error CannotCancelCompletedRoll = new(
-                "SciencePracs.Rolls.CannotCancelCompletedRolls",
-                "Cannot mark roll cancelled if it has already been submitted as marked");
-
-            public static readonly Error CannotReinstateRoll = new(
-                "SciencePracs.Rolls.CannotReinstateRoll",
-                "Cannot reinstate a roll that has not been cancelled");
-
-            public static readonly Func<SciencePracRollId, Error> NotFound = id => new(
-                "SciencePracs.Rolls.NotFound",
-                $"Could not find a roll with the Id {id}");
-
-            public static readonly Error MustBeCancelled = new(
-                "SciencePracs.Rolls.MustBeCancelled",
-                "Cannot reinstate roll that has not been cancelled");
-        }
-    }
 
     public static class Permissions
     {

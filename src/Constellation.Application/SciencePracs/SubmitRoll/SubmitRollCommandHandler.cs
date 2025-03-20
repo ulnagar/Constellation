@@ -5,6 +5,7 @@ using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.SciencePracs.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -41,7 +42,7 @@ internal sealed class SubmitRollCommandHandler
         {
             _logger.Warning("Could not find Science Prac Lesson with Id {id}", request.LessonId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
@@ -50,7 +51,7 @@ internal sealed class SubmitRollCommandHandler
         {
             _logger.Warning("Could not find Science Prac Roll with Id {id}", request.RollId);
 
-            return Result.Failure(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
+            return Result.Failure(SciencePracRollErrors.NotFound(request.RollId));
         }
 
         Result submitRequest = lesson.MarkRoll(

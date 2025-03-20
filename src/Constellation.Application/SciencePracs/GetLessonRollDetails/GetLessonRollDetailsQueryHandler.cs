@@ -10,6 +10,7 @@ using Core.Errors;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.SciencePracs.Errors;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
@@ -51,7 +52,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
         {
             _logger.Warning("Could not find a Science Prac Lesson with the Id {id}", request.LessonId);
 
-            return Result.Failure<LessonRollDetailsResponse>(DomainErrors.SciencePracs.Lesson.NotFound(request.LessonId));
+            return Result.Failure<LessonRollDetailsResponse>(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
         SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
@@ -60,7 +61,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
         {
             _logger.Warning("Could not find a Science Prac Roll with the Id {id}", request.RollId);
 
-            return Result.Failure<LessonRollDetailsResponse>(DomainErrors.SciencePracs.Roll.NotFound(request.RollId));
+            return Result.Failure<LessonRollDetailsResponse>(SciencePracRollErrors.NotFound(request.RollId));
         }
 
         List<LessonRollDetailsResponse.AttendanceRecord> attendanceRecords = new();

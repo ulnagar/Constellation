@@ -21,6 +21,7 @@ using Application.SciencePracs.GenerateOverdueReport;
 using Application.Training.Models;
 using Application.WorkFlows.ExportOpenCaseReport;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.SciencePracs.GenerateYTDStatusReport;
 using Constellation.Application.Students.ImportStudentsFromFile;
 using Constellation.Application.Training.GenerateOverallReport;
 using Constellation.Core.Models.Assets;
@@ -1648,6 +1649,83 @@ public class ExcelService : IExcelService
             opt.PrintHeaders = true;
         });
         worksheet.Cells[1, 4, worksheet.Dimension.Rows, 4].Style.Numberformat.Format = "dd/MM/yyyy";
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateSciencePracYTDReport(
+        List<RollStatusResponse> records,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Year To Date");
+        worksheet.Cells[1, 1].Value = "School";
+        worksheet.Cells[1, 2].Value = "Year 07";
+        worksheet.Cells[1, 3].Value = "Year 08";
+        worksheet.Cells[1, 4].Value = "Year 09";
+        worksheet.Cells[1, 5].Value = "Year 10";
+        worksheet.Cells[1, 6].Value = "Year 11";
+        worksheet.Cells[1, 7].Value = "Year 12";
+
+        int row = 1;
+        foreach (RollStatusResponse record in records)
+        {
+            row++;
+
+            worksheet.Cells[row, 1].Value = record.SchoolName;
+
+            if (record.GradeData.Any(entry => entry.Grade == Grade.Y07))
+            {
+                RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y07);
+
+                worksheet.Cells[row, 2].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+            }
+
+            if (record.GradeData.Any(entry => entry.Grade == Grade.Y08))
+            {
+                RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y08);
+
+                worksheet.Cells[row, 3].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+            }
+
+            if (record.GradeData.Any(entry => entry.Grade == Grade.Y09))
+            {
+                RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y09);
+
+                worksheet.Cells[row, 4].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+            }
+
+            if (record.GradeData.Any(entry => entry.Grade == Grade.Y10))
+            {
+                RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y10);
+
+                worksheet.Cells[row, 5].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+            }
+
+            if (record.GradeData.Any(entry => entry.Grade == Grade.Y11))
+            {
+                RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y11);
+
+                worksheet.Cells[row, 6].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+            }
+
+            if (record.GradeData.Any(entry => entry.Grade == Grade.Y12))
+            {
+                RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y12);
+
+                worksheet.Cells[row, 7].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+            }
+        }
 
         worksheet.View.FreezePanes(2, 1);
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
