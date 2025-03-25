@@ -61,6 +61,9 @@ internal sealed class GenerateYTDStatusReportCommandHandler
 
             foreach (Grade grade in Enum.GetValues<Grade>())
             {
+                if (grade is Grade.Y05 or Grade.Y06)
+                    continue;
+
                 List<SciencePracRoll> rolls = lessons
                     .Where(lesson => lesson.Grade == grade)
                     .SelectMany(lesson => lesson.Rolls)
@@ -76,6 +79,11 @@ internal sealed class GenerateYTDStatusReportCommandHandler
                     totalRolls,
                     students.Any(student => student.CurrentEnrolment?.Grade == grade)));
             }
+
+            responses.Add(new(
+                school.Code,
+                school.Name,
+                gradeData));
         }
 
         MemoryStream reportStream = await _excelService.CreateSciencePracYTDReport(responses, cancellationToken);

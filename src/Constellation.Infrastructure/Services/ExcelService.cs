@@ -1669,16 +1669,44 @@ public class ExcelService : IExcelService
         ExcelPackage excel = new();
 
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Year To Date");
-        worksheet.Cells[1, 1].Value = "School";
+        worksheet.Cells[2, 1].Value = "School";
+        
         worksheet.Cells[1, 2].Value = "Year 07";
-        worksheet.Cells[1, 3].Value = "Year 08";
-        worksheet.Cells[1, 4].Value = "Year 09";
-        worksheet.Cells[1, 5].Value = "Year 10";
-        worksheet.Cells[1, 6].Value = "Year 11";
-        worksheet.Cells[1, 7].Value = "Year 12";
+        worksheet.Cells[1, 2, 1, 4].Merge = true;
+        
+        worksheet.Cells[1, 5].Value = "Year 08";
+        worksheet.Cells[1, 5, 1, 7].Merge = true;
+        
+        worksheet.Cells[1, 8].Value = "Year 09";
+        worksheet.Cells[1, 8, 1, 10].Merge = true;
 
-        int row = 1;
-        foreach (RollStatusResponse record in records)
+        worksheet.Cells[1, 11].Value = "Year 10";
+        worksheet.Cells[1, 11, 1, 13].Merge = true;
+
+        worksheet.Cells[1, 14].Value = "Year 11";
+        worksheet.Cells[1, 14, 1, 16].Merge = true;
+
+        worksheet.Cells[1, 17].Value = "Year 12";
+        worksheet.Cells[1, 17, 1, 19].Merge = true;
+        
+        for (int i = 2; i < 20; i++)
+        {
+            worksheet.Cells[2, i].Value = "Submitted";
+            worksheet.Cells[2, i + 1].Value = "Total";
+            worksheet.Cells[2, i + 2].Value = "Active Students?";
+
+            i = i + 2;
+        }
+
+        int row = 2;
+
+        List<RollStatusResponse> activeRecords = records.Where(
+                record => record.GradeData.Any(entry =>
+                    entry.CurrentStudents == true ||
+                    entry.TotalRolls > 0))
+            .ToList();
+
+        foreach (RollStatusResponse record in activeRecords)
         {
             row++;
 
@@ -1688,48 +1716,60 @@ public class ExcelService : IExcelService
             {
                 RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y07);
 
-                worksheet.Cells[row, 2].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+                worksheet.Cells[row, 2].Value = entry.SubmittedRolls;
+                worksheet.Cells[row, 3].Value = entry.TotalRolls;
+                worksheet.Cells[row, 4].Value = entry.CurrentStudents;
             }
 
             if (record.GradeData.Any(entry => entry.Grade == Grade.Y08))
             {
                 RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y08);
 
-                worksheet.Cells[row, 3].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+                worksheet.Cells[row, 5].Value = entry.SubmittedRolls;
+                worksheet.Cells[row, 6].Value = entry.TotalRolls;
+                worksheet.Cells[row, 7].Value = entry.CurrentStudents;
             }
 
             if (record.GradeData.Any(entry => entry.Grade == Grade.Y09))
             {
                 RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y09);
 
-                worksheet.Cells[row, 4].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+                worksheet.Cells[row, 8].Value = entry.SubmittedRolls;
+                worksheet.Cells[row, 9].Value = entry.TotalRolls;
+                worksheet.Cells[row, 10].Value = entry.CurrentStudents;
             }
 
             if (record.GradeData.Any(entry => entry.Grade == Grade.Y10))
             {
                 RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y10);
 
-                worksheet.Cells[row, 5].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+                worksheet.Cells[row, 11].Value = entry.SubmittedRolls;
+                worksheet.Cells[row, 12].Value = entry.TotalRolls;
+                worksheet.Cells[row, 13].Value = entry.CurrentStudents;
             }
 
             if (record.GradeData.Any(entry => entry.Grade == Grade.Y11))
             {
                 RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y11);
 
-                worksheet.Cells[row, 6].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+                worksheet.Cells[row, 14].Value = entry.SubmittedRolls;
+                worksheet.Cells[row, 15].Value = entry.TotalRolls;
+                worksheet.Cells[row, 16].Value = entry.CurrentStudents;
             }
 
             if (record.GradeData.Any(entry => entry.Grade == Grade.Y12))
             {
                 RollStatusResponse.RollStatusGradeData entry = record.GradeData.First(entry => entry.Grade == Grade.Y12);
 
-                worksheet.Cells[row, 7].Value = $"{entry.SubmittedRolls} / {entry.TotalRolls}{(entry.CurrentStudents ? " *" : "")}";
+                worksheet.Cells[row, 17].Value = entry.SubmittedRolls;
+                worksheet.Cells[row, 18].Value = entry.TotalRolls;
+                worksheet.Cells[row, 19].Value = entry.CurrentStudents;
             }
         }
 
-        worksheet.View.FreezePanes(2, 1);
+        worksheet.View.FreezePanes(3, 1);
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
-        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
+        worksheet.Cells[2, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
