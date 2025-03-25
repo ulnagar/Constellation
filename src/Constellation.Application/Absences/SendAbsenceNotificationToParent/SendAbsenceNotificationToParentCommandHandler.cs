@@ -169,7 +169,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                         if (recipients.Any())
                         {
                             EmailDtos.SentEmail message =
-                                await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients,
+                                await _emailService.SendParentWholeAbsenceAlert(family.FamilyTitle, group.ToList(), student, recipients,
                                     cancellationToken);
 
                             foreach (AbsenceEntry entry in group)
@@ -215,7 +215,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 else if (recipients.Any())
                 {
                     EmailDtos.SentEmail message =
-                        await _emailService.SendParentWholeAbsenceAlert(group.ToList(), student, recipients,
+                        await _emailService.SendParentWholeAbsenceAlert(family.FamilyTitle, group.ToList(), student, recipients,
                             cancellationToken);
 
                     foreach (AbsenceEntry entry in group)

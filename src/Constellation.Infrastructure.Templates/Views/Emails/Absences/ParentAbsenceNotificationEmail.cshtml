@@ -10,10 +10,12 @@
     ViewData["SenderTitle"] = Model.SenderTitle;
 }
 
-<p>Regular attendance at school is essential if students are to achieve their educational best, social and psychological potential, and increase their career and life options.</p>
-<p>The school is required to record explanations for any absences as a way of ensuring that students are absent from school only when they are sick or have another acceptable reason for missing school.</p>
-<p>If you are able to explain any absences within seven days of their occurence we will adjust our records.</p>
-<p>@Model.StudentFirstName was absent from school on the following dates and no explanation has been received.</p>
+<p>Dear @Model.ParentName,</p>
+
+<p>Regular attendance at school is important for students to reach their potential. The school is required to record the reason for any absences as a way of ensuring that students are absent from school only when they are sick or have another good reason for missing school.</p>
+
+<p>Your child, @Model.StudentFirstName, was absent from the following lessons, and no explanation has been received.</p>
+
 <dl>
     @foreach (var entry in Model.Absences)
     {
@@ -21,5 +23,7 @@
         <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
     }
 </dl>
-<p>Please provide an explanation of these absences using our Parent Portal as soon as possible: <a href="@ParentAbsenceNotificationEmailViewModel.Link" target="_blank">@ParentAbsenceNotificationEmailViewModel.Link</a></p>
-<p>If you have any questions or concerns about this absence, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>
+
+<p>Please assist us by using our Parent Portal as soon as possible: <a href="@ParentAbsenceNotificationEmailViewModel.Link" target="_blank">@ParentAbsenceNotificationEmailViewModel.Link</a></p>
+
+<p>Alternatively, you may wish to contact the school on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a> to discuss your child's attendance.</p>

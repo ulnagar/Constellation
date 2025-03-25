@@ -294,6 +294,7 @@ public sealed class Service : IEmailService
     }
 
     public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(
+        string familyName,
         List<AbsenceEntry> absences, 
         Student student,
         List<EmailRecipient> emailAddresses,
@@ -305,6 +306,7 @@ public sealed class Service : IEmailService
             SenderName = _configuration.Absences.AbsenceCoordinatorName,
             SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
             Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
+            ParentName = familyName,
             StudentFirstName = student.Name.PreferredName,
             Absences = absences
         };

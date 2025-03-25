@@ -14,17 +14,23 @@
 
 @if (Model.WholeAbsences.Any())
 {
-    <p>@Model.StudentFirstName was absent from class on the following dates and no satisfactory explanation has been received.</p>
+    <p>Dear @Model.ParentName,</p>
+
+    <p>Regular attendance at school is important for students to reach their potential. The school is required to record the reason for any absences as a way of ensuring that students are absent from school only when they are sick or have another good reason for missing school.</p>
+
+    <p>Your child, @Model.StudentFirstName, was absent from the following lessons, and no explanation has been received.</p>
+
     <dl>
-        @foreach (var entry in Model.WholeAbsences.OrderBy(entry => entry.Date).ThenBy(entry => entry.PeriodName))
+        @foreach (var entry in Model.WholeAbsences)
         {
             <dt>@entry.Date.ToLongDateString()</dt>
-            <dd>Absent: @entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
+            <dd>@entry.PeriodName (@entry.PeriodTimeframe) - @entry.OfferingName</dd>
         }
     </dl>
-    <p>The <i>Education Act 1990</i> requires parents/carers to ensure their child attends school each day that instruction is provided, unless they are prevented from doing so by sickness or another acceptable reason. Parents/carers must also provide an explanation for any absence within seven days of the absence.</p>
-    <p>Failure to do so will result in an unjustified absence being recorded.</p>
-    <p>Please provide an explanation as soon as possible for the @(Model.WholeAbsences.Count > 1 ? "absences" : "absence") listed using our Parent Portal: <a href="@ParentAbsenceDigestEmailViewModel.Link" target="_blank">@ParentAbsenceDigestEmailViewModel.Link</a></p>
+
+    <p>Please assist us by using our Parent Portal as soon as possible: <a href="@ParentAbsenceDigestEmailViewModel.Link" target="_blank">@ParentAbsenceDigestEmailViewModel.Link</a></p>
+
+    <p>Alternatively, you may wish to contact the school on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a> to discuss your child's attendance.</p>
     <hr />
 }
 
@@ -43,8 +49,6 @@
     </dl>
     <p>@Model.StudentFirstName is required to provide an explanation for the @(Model.PartialAbsences.Count > 1 ? "absences" : "absence") which will then be verified by the home school.</p>
     <p>To date, no explanation of these partial absences has been received.</p>
-    <p>Please encourage @Model.StudentFirstName to enter an explanation for this absence using the link sent to them via email.</p>
+    <p>Please encourage @Model.StudentFirstName to enter an explanation for this absence using the Student Portal.</p>
     <hr />
 }
-
-<p>If you have any questions or concerns about these absences, please contact our office on 1300 287 629 or at <a href="mailto:auroracoll-h.school@det.nsw.edu.au">auroracoll-h.school@det.nsw.edu.au</a></p>
