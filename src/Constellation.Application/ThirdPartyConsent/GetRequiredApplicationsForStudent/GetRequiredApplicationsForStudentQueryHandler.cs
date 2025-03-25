@@ -101,7 +101,7 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
                 continue;
             }
 
-            if (!application.ConsentRequired)
+            if (!application.ConsentRequired || application.IsDeleted)
                 continue;
 
             Consent consent = application.Consents
