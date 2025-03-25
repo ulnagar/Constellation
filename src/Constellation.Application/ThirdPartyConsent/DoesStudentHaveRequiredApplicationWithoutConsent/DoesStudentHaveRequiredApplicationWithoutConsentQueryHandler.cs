@@ -99,7 +99,7 @@ internal sealed class DoesStudentHaveRequiredApplicationWithoutConsentQueryHandl
                 continue;
             }
 
-            if (!application.ConsentRequired)
+            if (!application.ConsentRequired || application.IsDeleted)
                 continue;
 
             Consent consent = application.Consents

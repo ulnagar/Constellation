@@ -91,7 +91,9 @@ internal sealed class ConsentRepository : IConsentRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<ConsentRequirement>()
-            .Where(requirement => requirement.ApplicationId == applicationId)
+            .Where(requirement => 
+                requirement.ApplicationId == applicationId && 
+                !requirement.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<ConsentRequirement> GetRequirementById(
@@ -114,7 +116,9 @@ internal sealed class ConsentRepository : IConsentRepository
         await _context
             .Set<ConsentRequirement>()
             .OfType<CourseConsentRequirement>()
-            .Where(requirement => requirement.CourseId == courseId)
+            .Where(requirement => 
+                requirement.CourseId == courseId && 
+                !requirement.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<List<GradeConsentRequirement>> GetRequirementsForGrade(
@@ -123,7 +127,9 @@ internal sealed class ConsentRepository : IConsentRepository
         await _context
             .Set<ConsentRequirement>()
             .OfType<GradeConsentRequirement>()
-            .Where(requirement => requirement.Grade == grade)
+            .Where(requirement => 
+                requirement.Grade == grade &&
+                !requirement.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<List<StudentConsentRequirement>> GetRequirementsForStudent(
@@ -132,7 +138,9 @@ internal sealed class ConsentRepository : IConsentRepository
         await _context
             .Set<ConsentRequirement>()
             .OfType<StudentConsentRequirement>()
-            .Where(requirement => requirement.StudentId == studentId)
+            .Where(requirement => 
+                requirement.StudentId == studentId &&
+                !requirement.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<Transaction> GetTransactionById(
