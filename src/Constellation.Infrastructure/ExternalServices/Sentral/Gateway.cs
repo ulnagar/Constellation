@@ -539,6 +539,29 @@ public class Gateway : ISentralGateway
         return null;
     }
 
+    public async Task IssueAward()
+    {
+        if (_logOnly)
+        {
+            _logger.Information("IssueAward");
+
+            return;
+        }
+
+        List<KeyValuePair<string, string>> payload =
+            [
+                new("action", "addAwards"),
+                new("students[]", "2102"), // Sentral Student Id
+                new("students[]", "2830"),
+                new("students[]", "2829"),
+                new("students[]", "2820"),
+                new("awards[]", "3"), // Stellar = 3, Galaxy = 6, Universal = 7
+                new("date", "2025-03-25")
+            ];
+
+        HtmlDocument report = await GetPageByPost($"{_settings.ServerUrl}/wellbeing/awards/new", payload, CancellationToken.None);
+    }
+
     public async Task<string> GetSentralStudentIdAsync(string studentName)
     {
         if (_logOnly)

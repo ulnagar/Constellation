@@ -38,6 +38,8 @@ public interface ISentralGateway
     Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default);
     Task<IndigenousStatus> GetStudentIndigenousStatus(string sentralStudentId);
 
+    Task IssueAward();
+
 
     // API methods
     Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default);
