@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
+using Awards.Enums;
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
@@ -38,7 +39,7 @@ public interface ISentralGateway
     Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default);
     Task<IndigenousStatus> GetStudentIndigenousStatus(string sentralStudentId);
 
-    Task IssueAward();
+    Task IssueAward(List<string> studentSentralIds, IssueAwardType awardType);
 
 
     // API methods

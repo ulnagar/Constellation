@@ -2,6 +2,7 @@
 
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Attendance.GetValidAttendanceReportDates;
+using Application.Awards.Enums;
 using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
@@ -539,27 +540,41 @@ public class Gateway : ISentralGateway
         return null;
     }
 
-    public async Task IssueAward()
+    public async Task IssueAward(
+        List<string> studentSentralIds,
+        IssueAwardType awardType)
     {
         if (_logOnly)
         {
-            _logger.Information("IssueAward");
+            _logger
+                .ForContext(nameof(studentSentralIds), studentSentralIds, true)
+                .ForContext(nameof(awardType), awardType, true)
+                .Information("IssueAward");
 
             return;
         }
 
+        // Stellar = 3, Galaxy = 6, Universal = 7
+        string award = awardType switch
+        {
+            IssueAwardType.Stellar => "3",
+            IssueAwardType.Galaxy => "6",
+            IssueAwardType.Universal => "7",
+            _ => null
+        };
+
         List<KeyValuePair<string, string>> payload =
             [
                 new("action", "addAwards"),
-                new("students[]", "2102"), // Sentral Student Id
-                new("students[]", "2830"),
-                new("students[]", "2829"),
-                new("students[]", "2820"),
-                new("awards[]", "3"), // Stellar = 3, Galaxy = 6, Universal = 7
-                new("date", "2025-03-25")
+                new("awards[]", award)
             ];
 
-        HtmlDocument report = await GetPageByPost($"{_settings.ServerUrl}/wellbeing/awards/new", payload, CancellationToken.None);
+        foreach (string student in studentSentralIds)
+            payload.Add(new("students[]", student));
+
+        payload.Add(new("date", _dateTime.Today.ToString("yyyy-MM-dd")));
+
+        await GetPageByPost($"{_settings.ServerUrl}/wellbeing/awards/new", payload, CancellationToken.None);
     }
 
     public async Task<string> GetSentralStudentIdAsync(string studentName)
