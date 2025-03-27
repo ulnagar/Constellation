@@ -3,6 +3,7 @@
 using Application.Canvas.GetCourseMembershipByCourseCode;
 using Application.DTOs.Canvas;
 using Application.Features.API.Operations.Commands;
+using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;

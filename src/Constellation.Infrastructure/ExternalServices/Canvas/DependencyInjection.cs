@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
+using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Infrastructure.ExternalServices.Canvas;
 using Microsoft.Extensions.Configuration;

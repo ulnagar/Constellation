@@ -1,4 +1,6 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.Canvas;
+﻿namespace Constellation.Application.Interfaces.Configuration;
+
+using System.Collections.Generic;
 
 public sealed class CanvasGatewayConfiguration
 {
@@ -9,6 +11,8 @@ public sealed class CanvasGatewayConfiguration
 
     public bool UseGroups { get; set; }
     public bool UseSections { get; set; }
+
+    public List<string> CourseAdmins { get; set; } = [];
 
     public bool IsConfigured()
     {

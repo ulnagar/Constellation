@@ -12,6 +12,8 @@ using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;
+using Interfaces.Configuration;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,15 +25,18 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly CanvasGatewayConfiguration _configuration;
 
     public GetCourseMembershipByCourseCodeQueryHandler(
         IOfferingRepository offeringRepository,
         IStudentRepository studentRepository,
-        IStaffRepository staffRepository)
+        IStaffRepository staffRepository,
+        IOptions<CanvasGatewayConfiguration> configuration)
     {
         _offeringRepository = offeringRepository;
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
+        _configuration = configuration.Value;
     }
 
     public async Task<Result<List<CanvasCourseMembership>>> Handle(GetCourseMembershipByCourseCodeQuery request, CancellationToken cancellationToken)
@@ -93,6 +98,25 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
             }
         }
 
+        // Add defined CourseAdmins
+        foreach (string staffId in _configuration.CourseAdmins)
+        {
+            Staff admin = await _staffRepository.GetById(staffId, cancellationToken);
+
+            if (admin is null)
+            {
+                // TODO: Log Error
+
+                continue;
+            }
+
+            response.Add(new(
+                request.CourseCode,
+                admin.StaffId,
+                CanvasSectionCode.Empty, 
+                CanvasPermissionLevel.Teacher));
+        }
+        
         return response;
     }
 }

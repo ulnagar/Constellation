@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.ExternalServices.Canvas;
 
 using Application.DTOs;
 using Application.DTOs.Canvas;
+using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Canvas.Models;
