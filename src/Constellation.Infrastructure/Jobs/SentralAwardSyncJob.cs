@@ -102,23 +102,18 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             _logger
                 .Information("Found {count} total awards for student {name} ({grade})", reportAwards.Count, student.Name.DisplayName, enrolment.Grade.AsName());
 
-            Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(systemLink.Value, _dateTime.CurrentYear.ToString()), cancellationToken);
-
-            if (awardIncidentsRequest.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(Error), awardIncidentsRequest.Error, true)
-                    .Warning("Failed to process Awards");
-
-                continue;
-            }
-
-            _logger
-                .Information("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, student.Name.DisplayName, enrolment.Grade.AsName());
+            List<AwardIncidentResponse> awardIncidents = [];
+            
+            //_logger
+            //    .Information("Found {count} award incidents for student {name} ({grade})", awardIncidentsRequest.Value.Count, student.Name.DisplayName, enrolment.Grade.AsName());
 
             foreach (AwardDetailResponse item in reportAwards)
             {
-                if (!existingAwards.Any(award => award.Type == item.Type && award.AwardedOn.AddSeconds(-award.AwardedOn.Second) == item.AwardCreated))
+                StudentAward matchingAward = existingAwards.FirstOrDefault(award =>
+                    award.Type == item.Type &&
+                    new DateTime(award.AwardedOn.Year, award.AwardedOn.Month, award.AwardedOn.Day, award.AwardedOn.Hour, award.AwardedOn.Minute, 0) == item.AwardCreated);
+
+                if (matchingAward is null)
                 {
                     _logger
                         .Information("Found new {type} on {date}", item.Type, item.AwardCreated.ToShortDateString());
@@ -134,7 +129,23 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
                         case StudentAward.Astra:
                             student.AwardTally.AddAstra();
 
-                            AwardIncidentResponse matchingIncident = awardIncidentsRequest.Value
+                            if (awardIncidents.Count == 0)
+                            {
+                                Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(systemLink.Value, _dateTime.CurrentYear.ToString()), cancellationToken);
+                                
+                                if (awardIncidentsRequest.IsFailure)
+                                {
+                                    _logger
+                                        .ForContext(nameof(Error), awardIncidentsRequest.Error, true)
+                                        .Warning("Failed to process Awards");
+
+                                    break;
+                                }
+
+                                awardIncidents = awardIncidentsRequest.Value;
+                            }
+                            
+                            AwardIncidentResponse matchingIncident = awardIncidents
                                 .FirstOrDefault(incident =>
                                     incident.AwardedAt == entry.AwardedOn);
 
@@ -164,6 +175,9 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 
             await _unitOfWork.CompleteAsync(cancellationToken);
         }
+
+        _logger
+            .Information("Stopping Sentral Awards Scan.");
     }
 
     private void ProcessAward(AwardIncidentResponse award, StudentAward matchingAward, Student student, List<Staff> teachers)

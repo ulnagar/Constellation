@@ -2,6 +2,7 @@
 
 using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Attendance.GetValidAttendanceReportDates;
+using Application.Awards.Enums;
 using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
@@ -12,6 +13,7 @@ using Core.Abstractions.Clock;
 using Core.Models.Families;
 using Core.Models.Students.Enums;
 using Core.Shared;
+using Errors;
 using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
@@ -430,7 +432,7 @@ public class Gateway : ISentralGateway
         return null;
     }
 
-    private async Task<HtmlDocument> GetPageByPost(string uri, List<KeyValuePair<string, string>> payload, CancellationToken cancellationToken)
+    private async Task<HtmlDocument> GetPageByPost(Uri uri, List<KeyValuePair<string, string>> payload, CancellationToken cancellationToken)
     {
         for (int i = 1; i < 6; i++)
         {
@@ -438,7 +440,8 @@ public class Gateway : ISentralGateway
             {
                 await Login(cancellationToken);
 
-                HttpResponseMessage response = await _client.PostAsync(uri, new FormUrlEncodedContent(payload), cancellationToken);
+                using FormUrlEncodedContent formContent = new(payload);
+                HttpResponseMessage response = await _client.PostAsync(uri, formContent, cancellationToken);
                 string content = await response.Content.ReadAsStringAsync(cancellationToken);
                 
                 HtmlDocument page = new();
@@ -537,6 +540,52 @@ public class Gateway : ISentralGateway
         }
 
         return null;
+    }
+
+    public async Task<Result<DateTime>> IssueAward(
+        List<string> studentSentralIds,
+        IssueAwardType awardType)
+    {
+        if (_logOnly)
+        {
+            _logger
+                .ForContext(nameof(studentSentralIds), studentSentralIds, true)
+                .ForContext(nameof(awardType), awardType, true)
+                .Information("IssueAward");
+
+            return _dateTime.Now;
+        }
+
+        if (studentSentralIds is null || studentSentralIds.Count == 0)
+            return Result.Failure<DateTime>(SentralGatewayErrors.NoStudentIdsProvided);
+
+        // Stellar = 3, Galaxy = 6, Universal = 7
+        string award = awardType switch
+        {
+            IssueAwardType.Stellar => "3",
+            IssueAwardType.Galaxy => "6",
+            IssueAwardType.Universal => "7",
+            _ => null
+        };
+
+        List<KeyValuePair<string, string>> payload =
+            [
+                new("action", "addAwards"),
+                new("awards[]", award)
+            ];
+
+        foreach (string student in studentSentralIds)
+            payload.Add(new("students[]", student));
+
+        payload.Add(new("date", _dateTime.Today.ToString("yyyy-MM-dd")));
+
+        HtmlDocument result = await GetPageByPost(new($"{_settings.ServerUrl}/wellbeing/awards/new"), payload, CancellationToken.None);
+        DateTime current = _dateTime.Now;
+
+        if (result is null)
+            return Result.Failure<DateTime>(SentralGatewayErrors.IncorrectResponseFromServer);
+
+        return current;
     }
 
     public async Task<string> GetSentralStudentIdAsync(string studentName)
@@ -1751,7 +1800,7 @@ public class Gateway : ISentralGateway
             new KeyValuePair<string, string>("action", "exportStudentAwards")
         };
 
-        HtmlDocument report = await GetPageByPost($"{_settings.ServerUrl}/wellbeing/awards/export", payload, cancellationToken);
+        HtmlDocument report = await GetPageByPost(new($"{_settings.ServerUrl}/wellbeing/awards/export"), payload, cancellationToken);
 
         return report;
     }
@@ -1931,7 +1980,7 @@ public class Gateway : ISentralGateway
             new("action", "export")
         };
 
-        response.YearToDateDayCalculationDocument = await GetPageByPost($"{_settings.ServerUrl}/attendance/reports/percentage", payload, default);
+        response.YearToDateDayCalculationDocument = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload, default);
 
         Stream perMinuteYearToDateCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export", default);
         response.YearToDateMinuteCalculationDocument = perMinuteYearToDateCalculationFile.IsExcelFile() ? perMinuteYearToDateCalculationFile : null;
@@ -1986,7 +2035,7 @@ public class Gateway : ISentralGateway
             new("action", "export")
         };
 
-        response.WeekDayCalculationDocument = await GetPageByPost($"{_settings.ServerUrl}/attendance/reports/percentage", payload, default);
+        response.WeekDayCalculationDocument = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload, default);
 
         Stream perMinuteWeekCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=week&term={term}&week={week}&year={year}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export", default);
         response.WeekMinuteCalculationDocument = perMinuteWeekCalculationFile.IsExcelFile() ? perMinuteWeekCalculationFile : null;
