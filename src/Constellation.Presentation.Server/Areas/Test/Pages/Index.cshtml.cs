@@ -1,51 +1,63 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Interfaces.Gateways;
-using Application.Interfaces.Repositories;
+using Application.Awards.Enums;
 using BaseModels;
-using Core.Abstractions.Clock;
+using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Models.Attendance.Repositories;
-using Core.Models.Offerings.Repositories;
-using Core.Models.Students.Repositories;
-using Core.Models.Subjects.Repositories;
-using Core.Models.Timetables.Repositories;
+using Core.Models.Students.Identifiers;
+using Core.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
+using System.Threading;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly ISentralGateway _gateway;
-    private readonly IStudentRepository _studentRepository;
-    private readonly ICourseRepository _courseRepository;
-    private readonly IOfferingRepository _offeringRepository;
-    private readonly IPeriodRepository _periodRepository;
-    private readonly IAttendancePlanRepository _attendancePlanRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
-        ISentralGateway gateway,
-        IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
-        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _mediator = mediator;
-        _gateway = gateway;
-
-        _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
-        _dateTime = dateTime;
+
         _logger = logger;
     }
 
+    [BindProperty]
+    public List<StudentId> StudentIds { get; set; } = new();
+    [BindProperty]
+    public IssueAwardType AwardType { get; set; }
+
+    public Dictionary<StudentId, string> StudentsList { get; set; } = new();
+
     public async Task OnGet()
     {
-        await _gateway.IssueAward();
+        Result<Dictionary<StudentId, string>> studentsRequest = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
+
+        if (studentsRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), studentsRequest.Error, true)
+                .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(studentsRequest.Error);
+
+            return;
+        }
+
+        StudentsList = studentsRequest.Value;
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+
+        return RedirectToPage();
     }
 }

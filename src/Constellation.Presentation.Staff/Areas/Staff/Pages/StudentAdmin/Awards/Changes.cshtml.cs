@@ -1,12 +1,14 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Awards;
 
 using Application.Awards.Enums;
+using Application.Awards.IssueAwardInSentral;
 using Application.Common.PresentationModels;
 using Application.Students.AuditAwardTallyValues;
 using Constellation.Application.Awards.GetStudentAwardStatistics;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -103,6 +105,32 @@ public class ChangesModel : BasePageModel
             return Page();
         }
 
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPost(
+        [FromForm] List<StudentId> studentIds,
+        [FromForm] IssueAwardType awardType)
+    {
+        IssueAwardInSentralCommand command = new(studentIds, awardType);
+
+        _logger
+            .ForContext(nameof(IssueAwardInSentralCommand), command, true)
+            .Information("Requested to issue awards by user {User}", _currentUserService.UserName);
+        
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to issue awards by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(result.Error);
+
+            return Page();
+        }
+        
         return RedirectToPage();
     }
 }

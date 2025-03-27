@@ -33,6 +33,51 @@
     </div>
     
     <a asp-page-handler="AuditValues" class="btn btn-danger">Audit Calculations</a>
+    
+    @if (Model.AwardStatistics.Any(entry => entry.CalculatedStellars > entry.AwardedStellars))
+    {
+        <button class="btn btn-danger" onclick="submitStellarForm()">Issue Stellar Awards</button>
+    }
+
+    @if (Model.AwardStatistics.Any(entry => entry.CalculatedGalaxies > entry.AwardedGalaxies))
+    {
+        <button class="btn btn-danger" onclick="submitGalaxyForm()">Issue Galaxy Awards</button>
+    }
+
+    @if (Model.AwardStatistics.Any(entry => entry.CalculatedUniversals > entry.AwardedUniversals))
+    {
+        <button class="btn btn-danger" onclick="submitUniversalForm()">Issue Universal Awards</button>
+    }
+    
+    <form method="post" id="stellar-form">
+        <div class="hidden">
+            @foreach (var entry in Model.AwardStatistics.Where(entry => entry.CalculatedStellars > entry.AwardedStellars))
+            {
+                <input type="hidden" name="StudentIds" value="@entry.StudentId" />
+            }
+            <input type="hidden" name="AwardType" value="@IssueAwardType.Stellar" />
+        </div>
+    </form>
+    
+    <form method="post" id="galaxy-form">
+        <div class="hidden">
+            @foreach (var entry in Model.AwardStatistics.Where(entry => entry.CalculatedGalaxies > entry.AwardedGalaxies))
+            {
+                <input type="hidden" name="StudentIds" value="@entry.StudentId" />
+            }
+            <input type="hidden" name="AwardType" value="@IssueAwardType.Galaxy" />
+        </div>
+    </form>
+    
+    <form method="post" id="universal-form">
+        <div class="hidden">
+            @foreach (var entry in Model.AwardStatistics.Where(entry => entry.CalculatedUniversals > entry.AwardedUniversals))
+            {
+                <input type="hidden" name="StudentIds" value="@entry.StudentId" />
+            }
+            <input type="hidden" name="AwardType" value="@IssueAwardType.Universal" />
+        </div>
+    </form>
 </div>
 
 <hr />
@@ -63,11 +108,11 @@
                 <td></td>
                 @if (entry.CalculatedStellars > entry.AwardedStellars)
                 {
-                    <td class="Over">@entry.CalculatedStellars</td>
+                    <td class="Over">@entry.CalculatedStellars (+@(entry.CalculatedStellars - @entry.AwardedStellars))</td>
                 }
                 else if (entry.CalculatedStellars < entry.AwardedStellars)
                 {
-                    <td class="Under">@entry.CalculatedStellars</td>
+                    <td class="Under">@entry.CalculatedStellars (-@(entry.CalculatedStellars - @entry.AwardedStellars))</td>
                 }
                 else
                 {
@@ -76,11 +121,11 @@
 
                 @if (entry.CalculatedGalaxies > entry.AwardedGalaxies)
                 {
-                    <td class="Over">@entry.CalculatedGalaxies</td>
+                    <td class="Over">@entry.CalculatedGalaxies (+@(entry.CalculatedGalaxies - @entry.AwardedGalaxies))</td>
                 }
                 else if (entry.CalculatedGalaxies < entry.AwardedGalaxies)
                 {
-                    <td class="Under">@entry.CalculatedGalaxies</td>
+                    <td class="Under">@entry.CalculatedGalaxies (-@(entry.CalculatedGalaxies - @entry.AwardedGalaxies))</td>
                 }
                 else
                 {
@@ -89,11 +134,11 @@
 
                 @if (entry.CalculatedUniversals > entry.AwardedUniversals)
                 {
-                    <td class="Over">@entry.CalculatedUniversals</td>
+                    <td class="Over">@entry.CalculatedUniversals (+@(entry.CalculatedUniversals - @entry.AwardedUniversals))</td>
                 }
                 else if (entry.CalculatedUniversals < entry.AwardedUniversals)
                 {
-                    <td class="Under">@entry.CalculatedUniversals</td>
+                    <td class="Under">@entry.CalculatedUniversals (-@(entry.CalculatedUniversals - @entry.AwardedUniversals))</td>
                 }
                 else
                 {
@@ -103,4 +148,21 @@
         </tbody>
     </table>
     <br />
+}
+
+@section scripts
+{
+    <script>
+        function submitStellarForm() {
+            $("#stellar-form").submit();
+        }
+
+        function submitGalaxyForm() {
+            $("#galaxy-form").submit();
+        }
+
+        function submitUniversalForm() {
+            $("#universal-form").submit();
+        }
+    </script>
 }

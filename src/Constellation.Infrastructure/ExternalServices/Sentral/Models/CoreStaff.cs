@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral.Models;
 
+using Constellation.Infrastructure.ExternalServices.Sentral.Errors;
 using Core.Shared;
 using Extensions;
 using System.Text.Json;

@@ -39,7 +39,7 @@ public interface ISentralGateway
     Task<(Stream BasicFile, Stream DetailFile)> GetNAwardReport(CancellationToken cancellationToken = default);
     Task<IndigenousStatus> GetStudentIndigenousStatus(string sentralStudentId);
 
-    Task IssueAward(List<string> studentSentralIds, IssueAwardType awardType);
+    Task<Result<DateTime>> IssueAward(List<string> studentSentralIds, IssueAwardType awardType);
 
 
     // API methods
