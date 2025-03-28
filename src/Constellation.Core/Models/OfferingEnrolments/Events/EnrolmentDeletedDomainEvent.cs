@@ -8,7 +8,7 @@ using Identifiers;
 
 public sealed record EnrolmentDeletedDomainEvent(
     DomainEventId Id,
-    EnrolmentId EnrolmentId,
+    OfferingEnrolmentId OfferingEnrolmentId,
     StudentId StudentId,
     OfferingId OfferingId)
     : DomainEvent(Id);

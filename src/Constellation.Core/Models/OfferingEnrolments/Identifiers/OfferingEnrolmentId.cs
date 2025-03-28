@@ -3,13 +3,13 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record EnrolmentId(Guid Value)
+public record struct OfferingEnrolmentId(Guid Value)
     : IStronglyTypedId
 {
-    public static EnrolmentId FromValue(Guid Value) =>
-        new(Value);
+    public static OfferingEnrolmentId FromValue(Guid value) =>
+        new(value);
 
-    public EnrolmentId()
+    public OfferingEnrolmentId()
         : this(Guid.NewGuid()) { }
 
     public override string ToString() =>

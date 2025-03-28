@@ -4,5 +4,5 @@ using Constellation.Core.Models.OfferingEnrolments.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 
 public sealed record EnrolmentResponse(
-    EnrolmentId EnrolmentId,
+    OfferingEnrolmentId OfferingEnrolmentId,
     StudentId StudentId);

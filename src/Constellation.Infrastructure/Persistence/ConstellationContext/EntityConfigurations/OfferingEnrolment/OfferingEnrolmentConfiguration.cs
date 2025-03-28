@@ -1,10 +1,10 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Enrolment;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.OfferingEnrolment;
 
+using Constellation.Core.Models.OfferingEnrolments;
+using Constellation.Core.Models.OfferingEnrolments.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
-using Core.Models.OfferingEnrolments;
-using Core.Models.OfferingEnrolments.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,7 +12,7 @@ public class OfferingEnrolmentConfiguration : IEntityTypeConfiguration<OfferingE
 {
     public void Configure(EntityTypeBuilder<OfferingEnrolment> builder)
     {
-        builder.ToTable("Enrolments");
+        builder.ToTable("OfferingEnrolments");
 
         builder
             .HasKey(enrolment => enrolment.Id);
@@ -21,7 +21,7 @@ public class OfferingEnrolmentConfiguration : IEntityTypeConfiguration<OfferingE
             .Property(enrolment => enrolment.Id)
             .HasConversion(
                 id => id.Value,
-                value => EnrolmentId.FromValue(value));
+                value => OfferingEnrolmentId.FromValue(value));
 
         builder
             .HasOne<Student>()

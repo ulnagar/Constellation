@@ -67,7 +67,7 @@ namespace Constellation.Application.DTOs
 
         public class MonitorCourseEnrolment
         {
-            public EnrolmentId Id { get; set; }
+            public OfferingEnrolmentId Id { get; set; }
             public string StudentId { get; set; }
             public string StudentDisplayName { get; set; }
             public string StudentLastName { get; set; }

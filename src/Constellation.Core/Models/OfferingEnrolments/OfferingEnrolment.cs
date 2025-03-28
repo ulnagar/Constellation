@@ -22,7 +22,7 @@ public class OfferingEnrolment : AggregateRoot, IAuditableEntity
         OfferingId = offeringId;
     }
 
-    public EnrolmentId Id { get; private set; }
+    public OfferingEnrolmentId Id { get; private set; }
     public StudentId StudentId { get; private set; }
     public OfferingId OfferingId { get; private set; }
     public bool IsDeleted { get; private set; }
