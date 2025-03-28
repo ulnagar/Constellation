@@ -2,14 +2,14 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Models.Subjects.Repositories;
 using Core.Extensions;
 using Core.Models;
-using Core.Models.Enrolments;
 using Core.Models.Families;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -26,7 +26,7 @@ internal sealed class CreateInterviewsImportQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
@@ -34,14 +34,14 @@ internal sealed class CreateInterviewsImportQueryHandler
     public CreateInterviewsImportQueryHandler(
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ICourseRepository courseRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository)
     {
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _courseRepository = courseRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
@@ -69,11 +69,11 @@ internal sealed class CreateInterviewsImportQueryHandler
                             member.IsResidentialFamily))
                 .ToList();
 
-            List<Enrolment> validEnrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+            List<OfferingEnrolment> validEnrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Family family in families)
             {
-                foreach (Enrolment enrolment in validEnrolments)
+                foreach (OfferingEnrolment enrolment in validEnrolments)
                 {
                     Offering offering = offerings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
 

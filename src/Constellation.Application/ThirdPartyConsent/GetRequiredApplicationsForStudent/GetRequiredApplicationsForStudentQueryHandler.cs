@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.GetRequiredApplicationsForStudent;
 
 using Abstractions.Messaging;
-using Core.Models.Enrolments;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -25,20 +25,20 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
 {
     private readonly IConsentRepository _consentRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ILogger _logger;
 
     public GetRequiredApplicationsForStudentQueryHandler(
         IConsentRepository consentRepository,
         IStudentRepository studentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ICourseRepository courseRepository,
         ILogger logger)
     {
         _consentRepository = consentRepository;
         _studentRepository = studentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _courseRepository = courseRepository;
         _logger = logger
             .ForContext<GetRequiredApplicationsForStudentQuery>();
@@ -65,7 +65,7 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
 
         requirements.AddRange(studentRequirements);
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
         List<OfferingId> offeringIds = enrolments.Select(enrolment => enrolment.OfferingId).ToList();
 

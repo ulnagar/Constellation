@@ -2,7 +2,6 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
@@ -13,7 +12,8 @@ using Constellation.Core.Models.WorkFlow.Errors;
 using Constellation.Core.Models.WorkFlow.Repositories;
 using Core.Errors;
 using Core.Models;
-using Core.Models.Enrolments;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.WorkFlow.Events;
 using Core.Shared;
@@ -33,7 +33,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
     private readonly ICurrentUserService _currentUserService;
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
@@ -43,7 +43,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         ICurrentUserService currentUserService,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IOptions<AppConfiguration> configuration,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -52,7 +52,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         _currentUserService = currentUserService;
         _staffRepository = staffRepository;
         _offeringRepository = offeringRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _unitOfWork = unitOfWork;
         _configuration = configuration.Value;
         _logger = logger.ForContext<CaseCreatedDomainEvent>();
@@ -97,9 +97,9 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
             return;
         }
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(caseDetail.StudentId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(caseDetail.StudentId, cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments)
         {
             Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 

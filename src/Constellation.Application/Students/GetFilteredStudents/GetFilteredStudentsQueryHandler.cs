@@ -2,7 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Core.Enums;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -18,16 +18,16 @@ internal sealed class GetFilteredStudentsQueryHandler
     : IQueryHandler<GetFilteredStudentsQuery, List<FilteredStudentResponse>>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ILogger _logger;
 
     public GetFilteredStudentsQueryHandler(
         IStudentRepository studentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _logger = logger;
     }
 
@@ -44,7 +44,7 @@ internal sealed class GetFilteredStudentsQueryHandler
 
         foreach (Student student in students)
         {
-            int enrolmentCount = await _enrolmentRepository.GetCurrentCountByStudentId(student.Id, cancellationToken);
+            int enrolmentCount = await _offeringEnrolmentRepository.GetCurrentCountByStudentId(student.Id, cancellationToken);
 
             SchoolEnrolment? enrolment = student.CurrentEnrolment;
             

@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.CreateTransaction;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
@@ -11,7 +10,8 @@ using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Enums;
 using Core.IntegrationEvents;
-using Core.Models.Enrolments;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.ThirdPartyConsent;
@@ -35,7 +35,7 @@ internal sealed class CreateTransactionCommandHandler
 {
     private readonly IConsentRepository _consentRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
@@ -45,7 +45,7 @@ internal sealed class CreateTransactionCommandHandler
     public CreateTransactionCommandHandler(
         IConsentRepository consentRepository,
         IStudentRepository studentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ICourseRepository courseRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService,
@@ -54,7 +54,7 @@ internal sealed class CreateTransactionCommandHandler
     {
         _consentRepository = consentRepository;
         _studentRepository = studentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _courseRepository = courseRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
@@ -84,7 +84,7 @@ internal sealed class CreateTransactionCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
         List<OfferingId> offeringIds = enrolments.Select(enrolment => enrolment.OfferingId).ToList();
 

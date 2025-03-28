@@ -5,8 +5,8 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Errors;
 using Core.Models;
-using Core.Models.Enrolments;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Timetables;
@@ -21,20 +21,20 @@ using System.Threading.Tasks;
 internal sealed class GetSessionDetailsForStudentQueryHandler
     : IQueryHandler<GetSessionDetailsForStudentQuery, List<StudentSessionDetailsResponse>>
 {
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly ILogger _logger;
 
     public GetSessionDetailsForStudentQueryHandler(
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         IPeriodRepository periodRepository,
         ILogger logger)
     {
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
         _periodRepository = periodRepository;
@@ -45,7 +45,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
     {
         List<StudentSessionDetailsResponse> sessionList = new();
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
         if (enrolments is null || !enrolments.Any())
         {
@@ -54,7 +54,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
             return Result.Failure<List<StudentSessionDetailsResponse>>(DomainErrors.Enrolments.Enrolment.NotFoundForStudent(request.StudentId));
         }
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments)
         {
             Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 

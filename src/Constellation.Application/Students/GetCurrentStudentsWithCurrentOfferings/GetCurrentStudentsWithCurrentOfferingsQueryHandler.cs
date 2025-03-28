@@ -3,8 +3,8 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models.Enrolments;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
@@ -20,18 +20,18 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
     : IQueryHandler<GetCurrentStudentsWithCurrentOfferingsQuery, List<StudentWithOfferingsResponse>>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetCurrentStudentsWithCurrentOfferingsQueryHandler(
         IStudentRepository studentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _offeringRepository = offeringRepository;
         _logger = logger;
     }
@@ -48,9 +48,9 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
         {
             List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+            List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
-            foreach (Enrolment enrolment in enrolments)
+            foreach (OfferingEnrolment enrolment in enrolments)
             {
                 Offering offering = offerings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
 

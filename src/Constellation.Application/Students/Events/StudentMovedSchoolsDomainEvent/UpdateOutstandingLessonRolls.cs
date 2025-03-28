@@ -8,8 +8,8 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models.Enrolments;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Events;
 using Core.Shared;
@@ -25,20 +25,20 @@ internal sealed class UpdateOutstandingLessonRolls
 : IDomainEventHandler<StudentMovedSchoolsDomainEvent>
 {
     private readonly IStudentRepository _studentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ILessonRepository _lessonRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public UpdateOutstandingLessonRolls(
         IStudentRepository studentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ILessonRepository lessonRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _studentRepository = studentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _lessonRepository = lessonRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<StudentMovedSchoolsDomainEvent>();
@@ -62,7 +62,7 @@ internal sealed class UpdateOutstandingLessonRolls
             return;
         }
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
         List<OfferingId> offeringIds = enrolments
             .Select(enrolments => enrolments.OfferingId)

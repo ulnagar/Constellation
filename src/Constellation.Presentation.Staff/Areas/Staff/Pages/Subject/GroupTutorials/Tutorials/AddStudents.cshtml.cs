@@ -4,8 +4,6 @@ using Application.GroupTutorials.AddMultipleStudentsToTutorial;
 using Application.GroupTutorials.GetCurrentStudentsInGroupTutorial;
 using Application.GroupTutorials.GetTutorialById;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Enrolments.EnrolMultipleStudentsInOffering;
-using Constellation.Application.Enrolments.GetCurrentEnrolmentsForOffering;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingSummary;
 using Constellation.Application.Offerings.Models;

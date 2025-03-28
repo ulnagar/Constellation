@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Enrolments.EnrolStudent;
-using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
+using Application.OfferingEnrolments.EnrolStudent;
+using Application.OfferingEnrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
 using Constellation.Application.Students.GetStudentById;

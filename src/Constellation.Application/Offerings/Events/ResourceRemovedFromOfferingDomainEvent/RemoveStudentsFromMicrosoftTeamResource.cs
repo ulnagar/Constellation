@@ -5,14 +5,14 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -22,7 +22,7 @@ internal sealed class RemoveStudentsFromMicrosoftTeamResource
     : IDomainEventHandler<ResourceRemovedFromOfferingDomainEvent>
 {
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
@@ -30,14 +30,14 @@ internal sealed class RemoveStudentsFromMicrosoftTeamResource
 
     public RemoveStudentsFromMicrosoftTeamResource(
         IOfferingRepository offeringRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IMSTeamOperationsRepository operationsRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _operationsRepository = operationsRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
@@ -63,9 +63,9 @@ internal sealed class RemoveStudentsFromMicrosoftTeamResource
 
         MicrosoftTeamResource resource = notification.Resource as MicrosoftTeamResource;
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments)
         {
             StudentOfferingMSTeamOperation operation = new()
             {

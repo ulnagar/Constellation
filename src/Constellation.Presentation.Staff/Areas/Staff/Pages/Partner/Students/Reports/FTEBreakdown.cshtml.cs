@@ -2,7 +2,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Re
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Constellation.Application.Enrolments.GetFTETotalByGrade;
+using Application.OfferingEnrolments.GetFTETotalByGrade;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Extensions;

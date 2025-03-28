@@ -1,14 +1,14 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
-using Application.Enrolments.UnenrolStudent;
-using Application.Enrolments.UnenrolStudentFromAllOfferings;
+using Application.OfferingEnrolments.GetStudentEnrolmentsWithDetails;
+using Application.OfferingEnrolments.UnenrolStudent;
+using Application.OfferingEnrolments.UnenrolStudentFromAllOfferings;
 using Application.Students.GetSchoolEnrolmentHistoryForStudent;
 using Application.Students.RemoveSchoolEnrolment;
 using Application.Students.TransferStudent;
 using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
 using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
-using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
 using Constellation.Application.Models.Auth;

@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Students.GetStudentsFromCourseAsDictionary;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects.Errors;
 using Core.Extensions;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -21,16 +21,16 @@ internal sealed class GetStudentsFromCourseAsDictionaryQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
 
     public GetStudentsFromCourseAsDictionaryQueryHandler(
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
-        IEnrolmentRepository enrolmentRepository)
+        IOfferingEnrolmentRepository offeringEnrolmentRepository)
     {
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
     }
 
     public async Task<Result<Dictionary<StudentId, string>>> Handle(GetStudentsFromCourseAsDictionaryQuery request, CancellationToken cancellationToken)
@@ -42,11 +42,11 @@ internal sealed class GetStudentsFromCourseAsDictionaryQueryHandler
         if (offerings is null)
             return Result.Failure<Dictionary<StudentId, string>>(CourseErrors.NoOfferings(request.CourseId));
 
-        List<Enrolment> enrolments = new();
+        List<OfferingEnrolment> enrolments = new();
 
         foreach (Offering offering in offerings)
         {
-            List<Enrolment> valid = await _enrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
+            List<OfferingEnrolment> valid = await _offeringEnrolmentRepository.GetCurrentByOfferingId(offering.Id, cancellationToken);
 
             if (valid is null)
                 continue;

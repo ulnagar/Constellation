@@ -2,10 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
-using Core.Models.Enrolments;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings.Identifiers;
-using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Identifiers;
@@ -25,18 +24,18 @@ internal sealed class GetConsentsWithFilterQueryHandler
 : IQueryHandler<GetConsentsWithFilterQuery, List<ConsentSummaryResponse>>
 {
     private readonly IConsentRepository _consentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ILogger _logger;
 
     public GetConsentsWithFilterQueryHandler(
         IConsentRepository consentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IStudentRepository studentRepository,
         ILogger logger)
     {
         _consentRepository = consentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _studentRepository = studentRepository;
         _logger = logger
             .ForContext<GetConsentsWithFilterQuery>();
@@ -50,7 +49,7 @@ internal sealed class GetConsentsWithFilterQueryHandler
 
         foreach (OfferingId offeringId in request.OfferingIds)
         {
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(offeringId, cancellationToken);
+            List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByOfferingId(offeringId, cancellationToken);
 
             studentIds.AddRange(enrolments.Select(enrolment => enrolment.StudentId));
         }

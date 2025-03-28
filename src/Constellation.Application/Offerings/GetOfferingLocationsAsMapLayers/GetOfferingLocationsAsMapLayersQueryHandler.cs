@@ -1,24 +1,21 @@
 ﻿namespace Constellation.Application.Offerings.GetOfferingLocationsAsMapLayers;
 
 using Abstractions.Messaging;
-using Constellation.Application.Helpers;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using DTOs;
 using Interfaces.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +23,7 @@ using System.Threading.Tasks;
 internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
     : IQueryHandler<GetOfferingLocationsAsMapLayersQuery, List<MapLayer>>
 {
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
@@ -34,14 +31,14 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
     private readonly ILogger _logger;
 
     public GetOfferingLocationsAsMapLayersQueryHandler(
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         ISchoolRepository schoolRepository,
         ILogger logger)
     {
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
@@ -54,9 +51,9 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
         List<string> studentSchoolCodes = new();
         List<string> staffSchoolCodes = new();
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(request.OfferingId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByOfferingId(request.OfferingId, cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments)
         {
             Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
 

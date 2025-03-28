@@ -2,12 +2,12 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.DomainEvents;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Students.Identifiers;
 using Interfaces.Repositories;
 using Serilog;
@@ -20,20 +20,20 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
     : IDomainEventHandler<SciencePracLessonCreatedDomainEvent>
 {
     private readonly ILessonRepository _lessonRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public SciencePracLessonCreatedDomainEvent_CreateRolls(
         ILessonRepository lessonRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IStudentRepository studentRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _studentRepository = studentRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<SciencePracLessonCreatedDomainEvent_CreateRolls>();
@@ -53,9 +53,9 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
 
         foreach (SciencePracLessonOffering record in lesson.Offerings)
         {
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByOfferingId(record.OfferingId, cancellationToken);
+            List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByOfferingId(record.OfferingId, cancellationToken);
 
-            foreach (Enrolment enrolment in enrolments)
+            foreach (OfferingEnrolment enrolment in enrolments)
                 studentIds.Add(enrolment.StudentId);
         }
 

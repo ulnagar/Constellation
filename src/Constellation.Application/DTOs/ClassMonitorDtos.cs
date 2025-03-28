@@ -1,10 +1,10 @@
-﻿using Constellation.Core.Models.Enrolments.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
+﻿using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 using System.Collections.Generic;
 
 namespace Constellation.Application.DTOs
 {
+    using Core.Models.OfferingEnrolments.Identifiers;
     using Core.Models.Timetables.Enums;
     using Core.Models.Timetables.Identifiers;
     using Core.Models.Timetables.ValueObjects;

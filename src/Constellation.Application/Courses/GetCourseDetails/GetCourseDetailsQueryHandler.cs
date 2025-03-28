@@ -9,10 +9,10 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
-using Core.Models.Enrolments.Repositories;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
 using Serilog;
@@ -28,7 +28,7 @@ internal sealed class GetCourseDetailsQueryHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
@@ -37,7 +37,7 @@ internal sealed class GetCourseDetailsQueryHandler
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IDateTimeProvider dateTime,
         ILogger logger)
     {
@@ -45,7 +45,7 @@ internal sealed class GetCourseDetailsQueryHandler
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _dateTime = dateTime;
         _logger = logger.ForContext<GetCourseDetailsQueryHandler>();
     }
@@ -114,7 +114,7 @@ internal sealed class GetCourseDetailsQueryHandler
                 offering.StartDate > _dateTime.Today));
         }
 
-        int enrolments = await _enrolmentRepository.GetCurrentCountByCourseId(course.Id, cancellationToken);
+        int enrolments = await _offeringEnrolmentRepository.GetCurrentCountByCourseId(course.Id, cancellationToken);
 
         return new CourseDetailsResponse(
             course.Id,

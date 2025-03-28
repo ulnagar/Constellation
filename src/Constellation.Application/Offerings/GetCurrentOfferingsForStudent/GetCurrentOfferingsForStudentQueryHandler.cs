@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Models;
-using Core.Models.Enrolments;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
@@ -22,20 +22,20 @@ internal sealed class GetCurrentOfferingsForStudentQueryHandler
 : IQueryHandler<GetCurrentOfferingsForStudentQuery, List<OfferingDetailResponse>>
 {
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ILogger _logger;
 
     public GetCurrentOfferingsForStudentQueryHandler(
         IOfferingRepository offeringRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IStaffRepository staffRepository,
         ICourseRepository courseRepository,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _staffRepository = staffRepository;
         _courseRepository = courseRepository;
         _logger = logger
@@ -46,11 +46,11 @@ internal sealed class GetCurrentOfferingsForStudentQueryHandler
     {
         List<OfferingDetailResponse> response = new();
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
         List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments)
         {
             Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 

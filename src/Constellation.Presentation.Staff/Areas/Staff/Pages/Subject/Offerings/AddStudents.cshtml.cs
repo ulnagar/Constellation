@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
+using Application.OfferingEnrolments.EnrolMultipleStudentsInOffering;
+using Application.OfferingEnrolments.GetCurrentEnrolmentsForOffering;
 using Application.Students.GetCurrentStudentsFromGrade;
 using Application.Students.Models;
-using Constellation.Application.Enrolments.EnrolMultipleStudentsInOffering;
-using Constellation.Application.Enrolments.GetCurrentEnrolmentsForOffering;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Offerings.GetOfferingSummary;
 using Constellation.Application.Offerings.Models;

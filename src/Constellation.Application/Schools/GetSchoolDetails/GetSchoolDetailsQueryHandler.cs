@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Schools.GetSchoolDetails;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Students.Identifiers;
 using Core.Errors;
 using Core.Models;
-using Core.Models.Enrolments;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
@@ -36,7 +36,7 @@ internal sealed class GetSchoolDetailsQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ILogger _logger;
 
     public GetSchoolDetailsQueryHandler(
@@ -46,7 +46,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         ISchoolContactRepository contactRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ILogger logger)
     {
         _schoolRepository = schoolRepository;
@@ -55,7 +55,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _contactRepository = contactRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _logger = logger.ForContext<GetSchoolDetailsQuery>();
     }
 
@@ -81,9 +81,9 @@ internal sealed class GetSchoolDetailsQueryHandler
         {
             List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
 
-            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
+            List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
-            foreach (Enrolment enrolment in enrolments)
+            foreach (OfferingEnrolment enrolment in enrolments)
             {
                 Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 

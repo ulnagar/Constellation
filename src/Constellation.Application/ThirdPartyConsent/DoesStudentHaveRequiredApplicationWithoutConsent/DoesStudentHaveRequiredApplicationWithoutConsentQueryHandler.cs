@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.ThirdPartyConsent.DoesStudentHaveRequiredApplicationWithoutConsent;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
@@ -11,7 +10,8 @@ using Constellation.Core.Models.Subjects.Repositories;
 using Constellation.Core.Models.ThirdPartyConsent;
 using Constellation.Core.Models.ThirdPartyConsent.Errors;
 using Constellation.Core.Models.ThirdPartyConsent.Repositories;
-using Core.Models.Enrolments;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -25,20 +25,20 @@ internal sealed class DoesStudentHaveRequiredApplicationWithoutConsentQueryHandl
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IConsentRepository _consentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ILogger _logger;
 
     public DoesStudentHaveRequiredApplicationWithoutConsentQueryHandler(
         IStudentRepository studentRepository,
         IConsentRepository consentRepository,
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         ICourseRepository courseRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _consentRepository = consentRepository;
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _courseRepository = courseRepository;
         _logger = logger
             .ForContext<DoesStudentHaveRequiredApplicationWithoutConsentQuery>();
@@ -63,7 +63,7 @@ internal sealed class DoesStudentHaveRequiredApplicationWithoutConsentQueryHandl
 
         requirements.AddRange(studentRequirements);
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
         List<OfferingId> offeringIds = enrolments.Select(enrolment => enrolment.OfferingId).ToList();
 

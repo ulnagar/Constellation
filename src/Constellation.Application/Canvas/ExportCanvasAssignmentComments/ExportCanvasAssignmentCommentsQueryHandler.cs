@@ -11,7 +11,6 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Students.Identifiers;
 using Core.Shared;

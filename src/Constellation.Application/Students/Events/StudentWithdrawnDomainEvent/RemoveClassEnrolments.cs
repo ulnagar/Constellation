@@ -2,10 +2,10 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
-using Core.Models.Enrolments.Repositories;
+using Core.Models.OfferingEnrolments;
+using Core.Models.OfferingEnrolments.Repositories;
 using Core.Models.Students.Events;
 using Serilog;
 using System.Collections.Generic;
@@ -15,18 +15,18 @@ using System.Threading.Tasks;
 internal sealed class RemoveClassEnrolments 
     : IDomainEventHandler<StudentWithdrawnDomainEvent>
 {
-    private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IOfferingEnrolmentRepository _offeringEnrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public RemoveClassEnrolments(
-        IEnrolmentRepository enrolmentRepository,
+        IOfferingEnrolmentRepository offeringEnrolmentRepository,
         IOfferingRepository offeringRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _enrolmentRepository = enrolmentRepository;
+        _offeringEnrolmentRepository = offeringEnrolmentRepository;
         _offeringRepository = offeringRepository;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<StudentWithdrawnDomainEvent>();
@@ -36,9 +36,9 @@ internal sealed class RemoveClassEnrolments
     {
         _logger.Information("Attempting to unenroll student {studentId} from classes due to withdrawal", notification.StudentId);
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(notification.StudentId, cancellationToken);
+        List<OfferingEnrolment> enrolments = await _offeringEnrolmentRepository.GetCurrentByStudentId(notification.StudentId, cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments)
         {
             Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 

@@ -1,15 +1,14 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Canvas.Models;
-using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
+using Core.Models.OfferingEnrolments;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables;
@@ -145,7 +144,7 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
         List<OfferingId> offeringIds = await _context
-            .Set<Enrolment>()
+            .Set<OfferingEnrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
                 // enrolment was created before the absence date
                 enrolment.CreatedAt < absenceDate &&
@@ -188,7 +187,7 @@ public class OfferingRepository : IOfferingRepository
         CancellationToken cancellationToken = default)
     {
         List<OfferingId> offeringIds = await _context
-            .Set<Enrolment>()
+            .Set<OfferingEnrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
                 !enrolment.IsDeleted)
             .Select(enrolment => enrolment.OfferingId)
