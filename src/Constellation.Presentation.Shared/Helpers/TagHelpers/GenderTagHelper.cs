@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Shared.Helpers.TagHelpers;
 
-using Core.Models.Students.Enums;
+using Core.Enums;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 public class GenderTagHelper : TagHelper
@@ -13,13 +13,14 @@ public class GenderTagHelper : TagHelper
         {
             not null when Gender.Equals(Gender.Female) => "glyph-color-pink",
             not null when Gender.Equals(Gender.Male) => "glyph-color-blue",
-            not null when Gender.Equals(Gender.NonBinary) => "glyph-color-gray",
-            _ => "glyph-color-yellow"
+            not null when Gender.Equals(Gender.NonBinary) => "glyph-color-yellow",
+            _ => "glyph-color-gray"
         };
 
         output.TagName = "span";
         output.TagMode = TagMode.StartTagAndEndTag;
         output.Attributes.SetAttribute("class", $"glyphicon glyphicon-user {colour}");
         output.Attributes.SetAttribute("style", "padding-right: 5px;");
+        output.Attributes.SetAttribute("title", Gender.Name);
     }
 }

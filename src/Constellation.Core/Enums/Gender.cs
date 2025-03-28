@@ -1,10 +1,12 @@
-﻿namespace Constellation.Core.Models.Students.Enums;
+﻿namespace Constellation.Core.Enums;
 
-using Constellation.Core.Common;
+using Common;
 using System.Collections.Generic;
 
 public sealed class Gender : StringEnumeration<Gender>
 {
+    public static readonly Gender Unknown = new("Unknown");
+
     public static readonly Gender Male = new("Male");
     public static readonly Gender Female = new("Female");
     public static readonly Gender NonBinary = new("Non-Binary");

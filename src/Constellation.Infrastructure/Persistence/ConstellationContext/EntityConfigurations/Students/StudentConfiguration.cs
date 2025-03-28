@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Students;
 using Converters;
+using Core.Enums;
 using Core.Models.Absences;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
