@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Parents.Areas.Parents.Pages.ThirdParty;
 using Application.Common.PresentationModels;
 using Application.ThirdPartyConsent.GetApplicationsWithoutRequiredConsent;
 using Constellation.Application.Models.Auth;
+using Constellation.Application.Parents.IsResidentialParent;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Contacts;
@@ -39,6 +40,7 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.ThirdParty;
 
     public List<ApprovedApplicationResponse> Applications { get; set; } = new();
+    public bool IsResidentialParent { get; set; }
 
     public async Task OnGet()
     {
@@ -61,5 +63,22 @@ public class IndexModel : BasePageModel
         }
 
         Applications = applications.Value.OrderBy(app => app.Name).ToList();
+
+        Result<bool> isResidentialParent = await _mediator.Send(new IsResidentialParentQuery(_currentUserService.EmailAddress));
+
+        if (isResidentialParent.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), isResidentialParent.Error, true)
+                .Warning("Failed to retrieve approved Applications by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                isResidentialParent.Error,
+                _linkGenerator.GetPathByPage("/Index", values: new { area = "Parents" }));
+
+            return;
+        }
+
+        IsResidentialParent = isResidentialParent.Value;
     }
 }

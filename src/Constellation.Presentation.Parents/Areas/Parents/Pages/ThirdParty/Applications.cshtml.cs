@@ -5,6 +5,7 @@ using Application.ThirdPartyConsent.CreateTransaction;
 using Application.ThirdPartyConsent.GetRequiredApplicationsForStudent;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Students.GetStudentsByParentEmail;
+using Constellation.Core.Models.Families.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
@@ -86,7 +87,7 @@ public class ApplicationsModel : BasePageModel
         return RedirectToPage("/ThirdParty/Index", new { area = "Parents"});
     }
 
-    public async Task PreparePage()
+    public async Task<IActionResult> PreparePage()
     {
         _logger.Information("Requested to retrieve student list by user {user}", _currentUserService.UserName);
 
@@ -96,7 +97,7 @@ public class ApplicationsModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(studentsRequest.Error);
 
-            return;
+            return Page();
         }
 
         Students = studentsRequest.Value
@@ -105,6 +106,12 @@ public class ApplicationsModel : BasePageModel
             .ThenBy(student => student.LastName)
             .ThenBy(student => student.FirstName)
             .ToList();
+
+        if (Students.Count == 0)
+        {
+            // Parent is non-residential and should not have access to this page
+            return RedirectToPage("/Index", new { area = "Parents" });
+        }
 
         if (Students.Count == 1)
             StudentId = Students.First().StudentId;
@@ -119,7 +126,7 @@ public class ApplicationsModel : BasePageModel
 
             if (applications.IsFailure)
             {
-                return;
+                return Page();
             }
 
             Applications = applications.Value;
