@@ -1,7 +1,6 @@
-﻿using Constellation.Core.Models.Canvas.Models;
+﻿namespace Constellation.Core.Models.Operations;
 
-namespace Constellation.Core.Models.Operations;
-
+using Constellation.Core.Models.Canvas.Models;
 using Enums;
 using System;
 
@@ -18,7 +17,7 @@ public abstract class CanvasOperation
     public void Delete() => IsDeleted = true;
 }
 
-public class CreateUserCanvasOperation : CanvasOperation
+public sealed class CreateUserCanvasOperation : CanvasOperation
 {
     private CreateUserCanvasOperation() { }
 
@@ -42,7 +41,7 @@ public class CreateUserCanvasOperation : CanvasOperation
     public string EmailAddress { get; private set; } = string.Empty;
 }
 
-public class ModifyEnrolmentCanvasOperation : CanvasOperation
+public sealed class ModifyEnrolmentCanvasOperation : CanvasOperation
 {
     private ModifyEnrolmentCanvasOperation() {}
 
@@ -72,7 +71,7 @@ public class ModifyEnrolmentCanvasOperation : CanvasOperation
     public CanvasAction Action { get; private set; } = CanvasAction.Add;
 }
 
-public class UpdateUserEmailCanvasOperation : CanvasOperation
+public sealed class UpdateUserEmailCanvasOperation : CanvasOperation
 {
     private UpdateUserEmailCanvasOperation() {}
 
@@ -87,7 +86,7 @@ public class UpdateUserEmailCanvasOperation : CanvasOperation
     public string PortalUsername { get; private set; }
 }
 
-public class DeleteUserCanvasOperation : CanvasOperation
+public sealed class DeleteUserCanvasOperation : CanvasOperation
 {
     private  DeleteUserCanvasOperation() { }
 
