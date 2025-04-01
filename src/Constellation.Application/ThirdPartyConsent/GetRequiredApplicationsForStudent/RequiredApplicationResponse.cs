@@ -23,4 +23,4 @@ public sealed record RequiredApplicationResponse(
     DateTime? ProvidedAt,
     ConsentMethod? Method,
     string MethodNotes,
-    Dictionary<ConsentRequirementId, string> Requirements);
+    List<string> Requirements);

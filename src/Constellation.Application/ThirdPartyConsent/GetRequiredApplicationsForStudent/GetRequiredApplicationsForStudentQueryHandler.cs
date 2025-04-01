@@ -124,7 +124,7 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
                 consent?.ProvidedAt,
                 consent?.Method,
                 consent?.MethodNotes ?? string.Empty,
-                applicationId.ToDictionary(k => k.Id, k =>
+                applicationId.Select(k =>
                 {
                     string type = k switch
                     {
@@ -135,7 +135,7 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
                     };
 
                     return $"{type}: {k.Description}";
-                })));
+                }).ToList()));
         }
 
         return responses;
