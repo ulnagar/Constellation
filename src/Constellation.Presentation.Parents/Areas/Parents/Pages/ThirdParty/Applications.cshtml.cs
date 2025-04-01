@@ -131,5 +131,7 @@ public class ApplicationsModel : BasePageModel
 
             Applications = applications.Value;
         }
+
+        return Page();
     }
 }

@@ -25,7 +25,7 @@ public class ParentNavViewComponent : ViewComponent
         _mediator = mediator;
     }
 
-    public async Task<IViewComponentResult> Invoke(string activePage)
+    public async Task<IViewComponentResult> InvokeAsync(string activePage)
     {
         ParentNavViewModel viewModel = new()
         {
