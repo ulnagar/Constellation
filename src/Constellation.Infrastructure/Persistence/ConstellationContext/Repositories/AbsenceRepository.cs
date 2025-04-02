@@ -219,4 +219,18 @@ public class AbsenceRepository : IAbsenceRepository
                 absence.Date <= endOfYear)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Absence>> GetStudentWholeAbsencesForDateRange(
+        StudentId studentId,
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .Where(absence =>
+                absence.StudentId == studentId &&
+                absence.Date >= startDate &&
+                absence.Date <= endDate)
+            .ToListAsync(cancellationToken);
+    
 }

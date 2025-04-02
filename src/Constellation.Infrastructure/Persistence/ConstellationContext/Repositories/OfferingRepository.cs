@@ -1,7 +1,6 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Canvas.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
@@ -290,9 +289,16 @@ public class OfferingRepository : IOfferingRepository
                 EF.Functions.Like(offering.Name, searchTerm) &&
                 offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today)
-            .ToListAsync(cancellationToken);
-
+        .ToListAsync(cancellationToken);
         return offerings;
     }
-   
+
+    public async Task<List<Offering>> GetListFromIds(
+        List<OfferingId> offeringIds,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering => offeringIds.Contains(offering.Id))
+            .ToListAsync(cancellationToken);
+
 }

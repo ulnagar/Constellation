@@ -45,4 +45,5 @@ public interface IOfferingRepository
     Task<List<Offering>> GetWithLinkedCanvasResource(CanvasCourseCode courseCode, CancellationToken cancellationToken = default);
 
     Task<List<Offering>> GetOfferingsFromSameGroup(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetListFromIds(List<OfferingId> offeringIds, CancellationToken cancellationToken = default);
 }

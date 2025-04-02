@@ -112,6 +112,25 @@ public class EnrolmentRepository : IEnrolmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Enrolment>> GetHistoricalForStudent(
+        StudentId studentId,
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken = default)
+    {
+        DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        DateTime endDateTime = endDate.ToDateTime(TimeOnly.MinValue);
+
+        return await _context
+            .Set<Enrolment>()
+            .Where(enrolment => 
+                enrolment.StudentId == studentId &&
+                enrolment.CreatedAt < endDateTime &&
+                (enrolment.DeletedAt == DateTime.MinValue || enrolment.DeletedAt > startDateTime))
+            .ToListAsync(cancellationToken);
+    }
+
+
     public void Insert(Enrolment enrolment) =>
         _context.Set<Enrolment>().Add(enrolment);
 }
