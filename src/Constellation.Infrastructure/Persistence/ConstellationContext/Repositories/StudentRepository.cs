@@ -394,6 +394,24 @@ public class StudentRepository : IStudentRepository
         return matchedStudents.First().Id;
     }
 
+    public async Task<List<Student>> GetEnrolledForDates(
+        DateOnly startDate, 
+        DateOnly endDate,
+        CancellationToken cancellationToken = default)
+    {
+        DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        DateTime endDateTime = endDate.ToDateTime(TimeOnly.MinValue);
+
+        List<Student> students = await _context
+            .Set<Student>()
+            .Where(student => 
+                student.CreatedAt < endDateTime && 
+                student.DeletedAt > startDateTime)
+            .ToListAsync(cancellationToken);
+
+        return students;
+    }
+
     public void Insert(Student student) => _context.Set<Student>().Add(student);
 
     public async Task<List<Student>> ForInterviewsExportAsync(

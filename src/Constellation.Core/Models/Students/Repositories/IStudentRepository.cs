@@ -5,6 +5,7 @@ using Constellation.Core.ValueObjects;
 using Identifiers;
 using Offerings.Identifiers;
 using Subjects.Identifiers;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,7 +51,7 @@ public interface IStudentRepository
     Task<int> GetCountCurrentStudentsFromSchool(string schoolCode, CancellationToken cancellationToken = default);
     Task<StudentId> GetStudentIdFromNameFragments(string[] names, CancellationToken cancellationToken = default);
     Task<Dictionary<string, List<Student>>> GetCurrentEnrolmentsForCourseWithOfferingName(CourseId courseId, CancellationToken cancellationToken = default);
-
+    Task<List<Student>> GetEnrolledForDates(DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
     Task<List<Student>> ForInterviewsExportAsync(List<int> filterGrades, List<OfferingId> filterClasses, CancellationToken cancellationToken = default);
 
     void Insert(Student student);
