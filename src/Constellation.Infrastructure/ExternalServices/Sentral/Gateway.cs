@@ -1071,6 +1071,62 @@ public class Gateway : ISentralGateway
         return detectedAbsences;
     }
 
+    public async Task<Result<List<DateOnly>>> GetEnrolledDatesForStudent(string sentralId, string year, DateOnly startDate, DateOnly endDate)
+    {
+        if (_logOnly)
+        {
+            _logger
+                .ForContext(nameof(sentralId), sentralId)
+                .ForContext(nameof(year), year)
+                .ForContext(nameof(startDate), startDate)
+                .ForContext(nameof(endDate), endDate)
+                .Information("GetEnrolledDatesForStudent");
+
+            return new List<DateOnly>();
+        }
+
+        HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralId}&year={year}", default);
+
+        if (page == null)
+        {
+            return Result.Failure<List<DateOnly>>(SentralGatewayErrors.IncorrectResponseFromServer);
+        }
+
+        var pxpRolls = page.DocumentNode.SelectNodes(@"//*[contains(@class, 'pxp-roll')]");
+
+        List<DateOnly> enrolledDates = new();
+
+        foreach (var term in pxpRolls)
+        {
+            var cells = term.Descendants("td");
+
+            foreach (var cell in cells)
+            {
+                if (!cell.HasClass("tips"))
+                    continue;
+
+                List<string> classes = cell.GetClasses().ToList();
+
+                if (classes.Contains("mixed") || classes.Contains("present") || classes.Contains("absent"))
+                {
+                    var cellTitle = cell.GetAttributeValue<string>("title", "");
+
+                    if (string.IsNullOrWhiteSpace(cellTitle))
+                        continue;
+
+                    var pos = cellTitle.IndexOf("::");
+
+                    if (pos == -1)
+                        continue;
+
+                    var stringDate = cellTitle[..pos];
+                }
+            }
+        }
+
+        return enrolledDates;
+    }
+
     public async Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year)
     {
         if (_logOnly)

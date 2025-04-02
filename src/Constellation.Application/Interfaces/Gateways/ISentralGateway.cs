@@ -40,6 +40,7 @@ public interface ISentralGateway
     Task<IndigenousStatus> GetStudentIndigenousStatus(string sentralStudentId);
 
     Task<Result<DateTime>> IssueAward(List<string> studentSentralIds, IssueAwardType awardType);
+    Task<Result<List<DateOnly>>> GetEnrolledDatesForStudent(string sentralId, string year, DateOnly startDate, DateOnly endDate);
 
 
     // API methods

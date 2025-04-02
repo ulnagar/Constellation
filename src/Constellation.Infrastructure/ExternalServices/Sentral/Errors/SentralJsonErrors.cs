@@ -12,14 +12,3 @@ public static class SentralJsonErrors
         "Sentral.JsonConversion.TooManyResponses",
         $"Received too many objects");
 }
-
-public static class SentralGatewayErrors
-{
-    public static readonly Error NoStudentIdsProvided = new(
-        "Sentral.NoStudentIdsProvided",
-        "This action requires selected Student Ids to complete");
-
-    public static readonly Error IncorrectResponseFromServer = new(
-        "Sentral.IncorrectResponseFromServer",
-        "The Sentral Server responded with an unexpected result");
-}
