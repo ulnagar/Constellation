@@ -1092,15 +1092,15 @@ public class Gateway : ISentralGateway
             return Result.Failure<List<DateOnly>>(SentralGatewayErrors.IncorrectResponseFromServer);
         }
 
-        var pxpRolls = page.DocumentNode.SelectNodes(@"//*[contains(@class, 'pxp-roll')]");
+        HtmlNodeCollection pxpRolls = page.DocumentNode.SelectNodes(@"//*[contains(@class, 'pxp-roll')]");
 
         List<DateOnly> enrolledDates = new();
 
-        foreach (var term in pxpRolls)
+        foreach (HtmlNode term in pxpRolls)
         {
-            var cells = term.Descendants("td");
+            IEnumerable<HtmlNode> cells = term.Descendants("td");
 
-            foreach (var cell in cells)
+            foreach (HtmlNode cell in cells)
             {
                 if (!cell.HasClass("tips"))
                     continue;
@@ -1109,22 +1109,25 @@ public class Gateway : ISentralGateway
 
                 if (classes.Contains("mixed") || classes.Contains("present") || classes.Contains("absent"))
                 {
-                    var cellTitle = cell.GetAttributeValue<string>("title", "");
+                    string cellTitle = cell.GetAttributeValue<string>("title", "");
 
                     if (string.IsNullOrWhiteSpace(cellTitle))
                         continue;
 
-                    var pos = cellTitle.IndexOf("::");
+                    int pos = cellTitle.IndexOf("::");
 
                     if (pos == -1)
                         continue;
 
-                    var stringDate = cellTitle[..pos];
+                    string stringDate = cellTitle[..pos];
 
-                    var success = DateOnly.TryParse(stringDate, out DateOnly date);
+                    bool success = DateOnly.TryParse(stringDate, out DateOnly date);
 
                     if (success)
                     {
+                        if (date < startDate || date > endDate)
+                            continue;
+
                         enrolledDates.Add(date);
                     }
                 }
