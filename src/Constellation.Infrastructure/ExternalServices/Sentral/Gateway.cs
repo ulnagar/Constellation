@@ -1120,6 +1120,13 @@ public class Gateway : ISentralGateway
                         continue;
 
                     var stringDate = cellTitle[..pos];
+
+                    var success = DateOnly.TryParse(stringDate, out DateOnly date);
+
+                    if (success)
+                    {
+                        enrolledDates.Add(date);
+                    }
                 }
             }
         }
