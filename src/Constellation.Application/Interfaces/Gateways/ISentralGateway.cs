@@ -41,7 +41,7 @@ public interface ISentralGateway
 
     Task<Result<DateTime>> IssueAward(List<string> studentSentralIds, IssueAwardType awardType);
     Task<Result<List<DateOnly>>> GetEnrolledDatesForStudent(string sentralId, string year, DateOnly startDate, DateOnly endDate);
-
+    Task<Result<List<SentralPeriodAbsenceDto>>> GetAbsenceDataAsync(string sentralStudentId, string year, CancellationToken cancellationToken = default);
 
     // API methods
     Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default);

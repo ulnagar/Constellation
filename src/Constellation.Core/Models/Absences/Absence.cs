@@ -206,6 +206,9 @@ public class Absence : AggregateRoot
         AbsenceLength += other.AbsenceLength;
     }
 
+    public void UpdateAbsenceReason(AbsenceReason newReason) =>
+        AbsenceReason = newReason;
+
     public void UpdateLastSeen()
     {
         LastSeen = DateTime.Now;

@@ -937,6 +937,130 @@ public class Gateway : ISentralGateway
         return absences;
     }
 
+    public async Task<Result<List<SentralPeriodAbsenceDto>>> GetAbsenceDataAsync(
+        string sentralStudentId, 
+        string year, 
+        CancellationToken cancellationToken = default)
+    {
+        if (_logOnly)
+        {
+            _logger
+                .ForContext(nameof(sentralStudentId), sentralStudentId)
+                .ForContext(nameof(year), year)
+                .Information("GetAbsenceDataAsync");
+
+            return new List<SentralPeriodAbsenceDto>();
+        }
+        
+        List<SentralPeriodAbsenceDto> absences = new();
+        
+        for (int term = 1; term < 5; term++)
+        {
+            HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}?term={term}&year={year}", cancellationToken);
+
+            if (page == null)
+                return Result.Failure<List<SentralPeriodAbsenceDto>>(SentralGatewayErrors.IncorrectResponseFromServer);
+
+            HtmlNode absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.AbsenceTable);
+            
+            if (absenceTable != null)
+            {
+                IEnumerable<HtmlNode> rows = absenceTable.Descendants("tr");
+                DateOnly previousDate = new();
+
+                foreach (HtmlNode row in rows)
+                {
+                    HtmlNode dateCell = row.ChildNodes.FindFirst("td");
+                    string stringDate = dateCell.InnerText.Trim();
+                    DateOnly date;
+
+                    if (stringDate == "No period absences have been recorded for this student.")
+                        continue;
+
+                    if (string.IsNullOrWhiteSpace(stringDate) || stringDate == "&nbsp;")
+                    {
+                        if (previousDate == DateOnly.MinValue)
+                        {
+                            continue;
+                        }
+
+                        //stringDate = previousDate.ToString("dd-MM-yyyy");
+                        date = previousDate;
+                    }
+                    else
+                    {
+                        date = DateOnly.Parse(stringDate);
+                        previousDate = date;
+                    }
+
+                    SentralPeriodAbsenceDto periodAbsence = new()
+                    {
+                        Date = date
+                    };
+
+                    int cellNumber = 0;
+                    // Process Row!
+                    foreach (HtmlNode cell in row.Descendants("td"))
+                    {
+                        cellNumber++;
+
+                        switch (cellNumber)
+                        {
+                            case 1:
+                            case 6:
+                            case 7:
+                                break;
+                            case 2:
+                                string[] periodsText = cell.InnerText.Trim().Split(' ');
+                                periodAbsence.Period = periodsText[0].Trim();
+                                periodAbsence.ClassName = periodsText[2].Trim();
+                                break;
+                            case 3:
+                                string absenceTypeText = cell.InnerText.Trim();
+                                switch (absenceTypeText[..4])
+                                {
+                                    case "Abse":
+                                        periodAbsence.Type = SentralPeriodAbsenceDto.Whole;
+                                        break;
+                                    default:
+                                        if (!absenceTypeText.Contains('('))
+                                        {
+                                            // What the hell happened here? This shouldn't happen!
+                                        }
+                                        else
+                                        {
+                                            // Partial absence, but for how long?
+                                            periodAbsence.Type = SentralPeriodAbsenceDto.Partial;
+                                            string stringMinutes = absenceTypeText.Split('(')[1].Split(')')[0];
+                                            periodAbsence.MinutesAbsent = int.Parse(stringMinutes);
+                                            periodAbsence.PartialType = absenceTypeText.Split('(')[0].Trim();
+                                        }
+                                        break;
+                                }
+                                break;
+                            case 4:
+                                periodAbsence.Reason = cell.InnerText.Trim();
+                                break;
+                            case 5:
+                                if (string.IsNullOrWhiteSpace(periodAbsence.Reason))
+                                    periodAbsence.Reason = cell.InnerText.Trim();
+                                break;
+                            case 8:
+                                // Last cell, so do we have a valid PeriodAbsence object?
+                                if (periodAbsence.IsValid())
+                                {
+                                    absences.Add(periodAbsence);
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return absences;
+    }
+
     public async Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId)
     {
         List<SentralPeriodAbsenceDto> term1 = await GetPartialAbsenceDataForTerm(sentralStudentId, 1);

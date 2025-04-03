@@ -1662,6 +1662,49 @@ public class ExcelService : IExcelService
         return memoryStream;
     }
 
+    public async Task<MemoryStream> CreateSefAttendanceDataExport(
+        List<SefAttendanceData> attendanceData,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("SEF Attendance Data");
+        worksheet.Cells[1, 1].Value = "Student";
+        worksheet.Cells[1, 2].Value = "Days Enrolled";
+        worksheet.Cells[1, 3].Value = "Days Absent (Total)";
+        worksheet.Cells[1, 4].Value = "Days Present (Total)";
+        worksheet.Cells[1, 5].Value = "Percentage in Attendance (Total)";
+        worksheet.Cells[1, 6].Value = "Days Absent (Justified)";
+        worksheet.Cells[1, 7].Value = "Days Present (Justified)";
+        worksheet.Cells[1, 8].Value = "Percentage in Attendance (Justified)";
+
+        var row = 2;
+        foreach (var entry in attendanceData)
+        {
+            worksheet.Cells[row, 1].Value = entry.Student.DisplayName;
+            worksheet.Cells[row, 2].Value = entry.EnrolledDays;
+            worksheet.Cells[row, 3].Value = entry.AbsentDays;
+            worksheet.Cells[row, 4].Value = entry.EnrolledDays - entry.AbsentDays;
+            worksheet.Cells[row, 5].Value = (entry.EnrolledDays - entry.AbsentDays) / entry.EnrolledDays;
+            worksheet.Cells[row, 6].Value = entry.AbsentDays - entry.JustifiedDays;
+            worksheet.Cells[row, 7].Value = entry.EnrolledDays - (entry.AbsentDays - entry.JustifiedDays);
+            worksheet.Cells[row, 8].Value = (entry.EnrolledDays - (entry.AbsentDays - entry.JustifiedDays)) / entry.EnrolledDays;
+
+            row++;
+        }
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
+        worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
     public async Task<MemoryStream> CreateSciencePracYTDReport(
         List<RollStatusResponse> records,
         CancellationToken cancellationToken = default)

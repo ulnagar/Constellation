@@ -69,4 +69,5 @@ public interface IExcelService
     Task<MemoryStream> CreateCanvasRubricResultExport(RubricEntry rubric, List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, List<Student> students, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCanvasAssignmentCommentExport(List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, Dictionary<string, List<Student>> students, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCustomAttendanceReport(string periodLabel, List<ExportRecord> records, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateSefAttendanceDataExport(List<SefAttendanceData> attendanceData, CancellationToken cancellationToken = default);
 }

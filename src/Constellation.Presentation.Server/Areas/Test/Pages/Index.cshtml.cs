@@ -1,6 +1,11 @@
+using Constellation.Core.Models.Students.Identifiers;
+
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.DTOs;
+using Application.Interfaces.Services;
 using BaseModels;
+using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Students;
@@ -19,7 +24,10 @@ using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Repositories;
 using Core.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
+using System.ComponentModel;
+using System.IO;
 
 public class IndexModel : BasePageModel
 {
@@ -31,6 +39,7 @@ public class IndexModel : BasePageModel
     private readonly IOfferingRepository _offeringRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly ISentralGateway _gateway;
+    private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
     public IndexModel(
@@ -42,6 +51,7 @@ public class IndexModel : BasePageModel
         IOfferingRepository offeringRepository,
         IPeriodRepository periodRepository,
         ISentralGateway gateway,
+        IExcelService excelService,
         ILogger logger)
     {
         _mediator = mediator;
@@ -52,10 +62,11 @@ public class IndexModel : BasePageModel
         _offeringRepository = offeringRepository;
         _periodRepository = periodRepository;
         _gateway = gateway;
+        _excelService = excelService;
         _logger = logger;
     }
 
-    public async Task OnGet()
+    public async Task<IActionResult> OnGet()
     {
         DateOnly startDate = new(2023, 01, 01);
         DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
@@ -64,7 +75,7 @@ public class IndexModel : BasePageModel
 
         List<Student> students = await _studentRepository.GetEnrolledForDates(startDate, endDate, default);
 
-        List<Data> records = [];
+        List<SefAttendanceData> records = [];
 
         foreach (Student student in students)
         {
@@ -81,7 +92,12 @@ public class IndexModel : BasePageModel
                 continue;
 
             int enrolledDays = enrolledDates.Value.Count();
+
+            if (enrolledDays == 0)
+                continue;
+
             List<DateOnly> absentDates = [];
+            List<DateOnly> justifiedAbsentDates = [];
 
             // Get active student enrolments for the period
             List<Enrolment> enrolments = await _enrolmentRepository.GetHistoricalForStudent(student.Id, startDate, endDate, default);
@@ -151,6 +167,14 @@ public class IndexModel : BasePageModel
                 }
             }
 
+            // Get Sentral Attendance absences for the student
+            Result<List<SentralPeriodAbsenceDto>> sentralAbsences = await _gateway.GetAbsenceDataAsync(sentralId, startDate.Year.ToString(), default);
+            if (sentralAbsences.IsFailure)
+            {
+                //TODO: R1.17.1: Log and handle this situation properly
+                continue;
+            }
+
             // Get whole absences for the student for the period
             List<Absence> wholeAbsences = await _absenceRepository.GetStudentWholeAbsencesForDateRange(student.Id, startDate, endDate, default);
 
@@ -167,6 +191,26 @@ public class IndexModel : BasePageModel
 
                 // Calculate whether the absences were School Business/Shared Enrollment
                 // If it is, add to separate list to duplicate percentage for absences only
+                foreach (var absence in group)
+                {
+                    var matchingSentralAbsence = sentralAbsences.Value.FirstOrDefault(entry => entry.Date == absence.Date);
+
+                    if (matchingSentralAbsence is null)
+                    {
+                        //TODO: R1.17.1: Should this be ignored, or should the absence be discarded?
+                        continue;
+                    }
+
+                    if (absence.AbsenceReason != matchingSentralAbsence.Reason)
+                    {
+                        absence.UpdateAbsenceReason((AbsenceReason)TypeDescriptor.GetConverter(typeof(AbsenceReason)).ConvertFromString(matchingSentralAbsence.Reason));
+                    }
+                }
+
+                if (group.All(absence => absence.AbsenceReason == AbsenceReason.SchoolBusiness || absence.AbsenceReason == AbsenceReason.SharedEnrolment))
+                {
+                    justifiedAbsentDates.Add(group.Key);
+                }
 
                 absentDates.Add(group.Key);
             }
@@ -174,6 +218,7 @@ public class IndexModel : BasePageModel
             // Take absent whole days from enrolledDays as presentDays
             int absentDays = absentDates.Count;
             int presentDays = enrolledDays - absentDays;
+            int justifiedDays = justifiedAbsentDates.Count;
 
             // Calculate percentage with presentDays / enrolledDays
             decimal percentage = (decimal)presentDays / (decimal)enrolledDays;
@@ -183,6 +228,7 @@ public class IndexModel : BasePageModel
                 student.Name,
                 enrolledDays,
                 absentDays,
+                justifiedDays,
                 presentDays, 
                 percentage, 
                 absentDates));
@@ -190,15 +236,8 @@ public class IndexModel : BasePageModel
             // Don't need to determine if a date is week a or week b as the timetable should be symmetrical for number of periods. Need to check that this holds true for Stage 6, as there may have been a P5 class on at random times.
         }
 
-        return;
-    }
+        var report = await _excelService.CreateSefAttendanceDataExport(records, default);
 
-    public record Data(
-        StudentId StudentId,
-        Name Student,
-        int EnrolledDays,
-        int AbsentDays,
-        int PresentDays,
-        decimal Percentage,
-        List<DateOnly> AbsentDates);
+        return File(report, FileContentTypes.ExcelModernFile, "Sef Attendance Data.xlsx");
+    }
 }
