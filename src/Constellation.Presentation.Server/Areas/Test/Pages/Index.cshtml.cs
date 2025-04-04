@@ -8,6 +8,7 @@ using BaseModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
@@ -77,7 +78,7 @@ public class IndexModel : BasePageModel
 
         List<SefAttendanceData> records = [];
 
-        foreach (Student student in students)
+        foreach (Student student in students.Take(10))
         {
             string sentralId = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral)?.Value;
 
@@ -96,8 +97,8 @@ public class IndexModel : BasePageModel
             if (enrolledDays == 0)
                 continue;
 
-            List<DateOnly> absentDates = [];
-            List<DateOnly> justifiedAbsentDates = [];
+            Dictionary<DateOnly, string> absentDates = new();
+            Dictionary<DateOnly, string> justifiedAbsentDates = new();
 
             // Get active student enrolments for the period
             List<Enrolment> enrolments = await _enrolmentRepository.GetHistoricalForStudent(student.Id, startDate, endDate, default);
@@ -168,12 +169,16 @@ public class IndexModel : BasePageModel
             }
 
             // Get Sentral Attendance absences for the student
-            Result<List<SentralPeriodAbsenceDto>> sentralAbsences = await _gateway.GetAbsenceDataAsync(sentralId, startDate.Year.ToString(), default);
-            if (sentralAbsences.IsFailure)
+            Result<List<SentralPeriodAbsenceDto>> sentralAbsencesRequest = await _gateway.GetAbsenceDataAsync(sentralId, startDate.Year.ToString(), default);
+            if (sentralAbsencesRequest.IsFailure)
             {
                 //TODO: R1.17.1: Log and handle this situation properly
                 continue;
             }
+
+            List<SentralPeriodAbsenceDto> sentralAbsences = sentralAbsencesRequest.Value
+                .Where(entry => enrolledDates.Value.Contains(entry.Date))
+                .ToList();
 
             // Get whole absences for the student for the period
             List<Absence> wholeAbsences = await _absenceRepository.GetStudentWholeAbsencesForDateRange(student.Id, startDate, endDate, default);
@@ -193,7 +198,7 @@ public class IndexModel : BasePageModel
                 // If it is, add to separate list to duplicate percentage for absences only
                 foreach (var absence in group)
                 {
-                    var matchingSentralAbsence = sentralAbsences.Value.FirstOrDefault(entry => entry.Date == absence.Date);
+                    var matchingSentralAbsence = sentralAbsences.FirstOrDefault(entry => entry.Date == absence.Date);
 
                     if (matchingSentralAbsence is null)
                     {
@@ -209,10 +214,10 @@ public class IndexModel : BasePageModel
 
                 if (group.All(absence => absence.AbsenceReason == AbsenceReason.SchoolBusiness || absence.AbsenceReason == AbsenceReason.SharedEnrolment))
                 {
-                    justifiedAbsentDates.Add(group.Key);
+                    justifiedAbsentDates.Add(group.Key, string.Join(",", group.Select(entry => entry.AbsenceReason.Name)));
                 }
 
-                absentDates.Add(group.Key);
+                absentDates.Add(group.Key, string.Join(",", group.Select(entry => entry.AbsenceReason.Name)));
             }
 
             // Take absent whole days from enrolledDays as presentDays
@@ -223,15 +228,34 @@ public class IndexModel : BasePageModel
             // Calculate percentage with presentDays / enrolledDays
             decimal percentage = (decimal)presentDays / (decimal)enrolledDays;
 
+            Grade grade = offerings.First().Name.Value[..2] switch
+            {
+                "05" => Grade.Y05,
+                "06" => Grade.Y06,
+                "07" => Grade.Y07,
+                "08" => Grade.Y08,
+                "09" => Grade.Y09,
+                "10" => Grade.Y10,
+                "11" => Grade.Y11,
+                "12" => Grade.Y12,
+                _ => Grade.SpecialProgram
+            };
+
             records.Add(new(
                 student.Id,
                 student.Name,
-                enrolledDays,
-                absentDays,
-                justifiedDays,
-                presentDays, 
-                percentage, 
-                absentDates));
+                grade,
+                offerings.Select(entry => entry.Name.Value).ToList(),
+                enrolledDates.Value.Count,
+                absentDates.Count,
+                enrolledDates.Value.Count - absentDates.Count,
+                (decimal)(enrolledDates.Value.Count - absentDates.Count) / (decimal)enrolledDates.Value.Count,
+                justifiedAbsentDates.Count,
+                absentDates.Count - justifiedAbsentDates.Count,
+                enrolledDates.Value.Count - (absentDates.Count - justifiedAbsentDates.Count), 
+                (decimal)(enrolledDates.Value.Count - (absentDates.Count - justifiedAbsentDates.Count)) / (decimal)enrolledDates.Value.Count,
+                absentDates.Select(entry => $"{entry.Key.ToString("dd/MM/yyyy")} - {entry.Value}").ToList(),
+                justifiedAbsentDates.Select(entry => $"{entry.Key.ToString("dd/MM/yyyy")} - {entry.Value}").ToList()));
 
             // Don't need to determine if a date is week a or week b as the timetable should be symmetrical for number of periods. Need to check that this holds true for Stage 6, as there may have been a P5 class on at random times.
         }
