@@ -92,7 +92,7 @@ public class IndexModel : BasePageModel
             if (enrolledDates.IsFailure)
                 continue;
 
-            int enrolledDays = enrolledDates.Value.Count();
+            int enrolledDays = enrolledDates.Value.Count;
 
             if (enrolledDays == 0)
                 continue;

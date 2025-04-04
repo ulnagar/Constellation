@@ -1670,25 +1670,31 @@ public class ExcelService : IExcelService
 
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("SEF Attendance Data");
         worksheet.Cells[1, 1].Value = "Student";
-        worksheet.Cells[1, 2].Value = "Days Enrolled";
-        worksheet.Cells[1, 3].Value = "Days Absent (Total)";
-        worksheet.Cells[1, 4].Value = "Days Present (Total)";
-        worksheet.Cells[1, 5].Value = "Percentage in Attendance (Total)";
-        worksheet.Cells[1, 6].Value = "Days Absent (Justified)";
-        worksheet.Cells[1, 7].Value = "Days Present (Justified)";
-        worksheet.Cells[1, 8].Value = "Percentage in Attendance (Justified)";
+        worksheet.Cells[1, 2].Value = "Grade";
+        worksheet.Cells[1, 3].Value = "Classes";
+        worksheet.Cells[1, 4].Value = "Days Enrolled";
+        worksheet.Cells[1, 5].Value = "Days Absent (Total)";
+        worksheet.Cells[1, 6].Value = "Days Present (Total)";
+        worksheet.Cells[1, 7].Value = "Percentage in Attendance (Total)";
+        worksheet.Cells[1, 8].Value = "Justified Days Absent";
+        worksheet.Cells[1, 9].Value = "Days Absent (Unjustified)";
+        worksheet.Cells[1, 10].Value = "Days Present (Unjustified)";
+        worksheet.Cells[1, 11].Value = "Percentage in Attendance (Unjustified)";
 
         var row = 2;
         foreach (var entry in attendanceData)
         {
             worksheet.Cells[row, 1].Value = entry.Student.DisplayName;
-            worksheet.Cells[row, 2].Value = entry.EnrolledDays;
-            worksheet.Cells[row, 3].Value = entry.AbsentDays;
-            worksheet.Cells[row, 4].Value = entry.EnrolledDays - entry.AbsentDays;
-            worksheet.Cells[row, 5].Value = (entry.EnrolledDays - entry.AbsentDays) / entry.EnrolledDays;
-            worksheet.Cells[row, 6].Value = entry.AbsentDays - entry.JustifiedDays;
-            worksheet.Cells[row, 7].Value = entry.EnrolledDays - (entry.AbsentDays - entry.JustifiedDays);
-            worksheet.Cells[row, 8].Value = (entry.EnrolledDays - (entry.AbsentDays - entry.JustifiedDays)) / entry.EnrolledDays;
+            worksheet.Cells[row, 2].Value = entry.Grade.AsName();
+            worksheet.Cells[row, 3].Value = string.Join(Environment.NewLine, entry.EnrolledClasses);
+            worksheet.Cells[row, 4].Value = entry.EnrolledDays;
+            worksheet.Cells[row, 5].Value = entry.TotalAbsentDays;
+            worksheet.Cells[row, 6].Value = entry.TotalPresentDays;
+            worksheet.Cells[row, 7].Value = entry.TotalPercentage;
+            worksheet.Cells[row, 8].Value = entry.JustifiedAbsentDays;
+            worksheet.Cells[row, 9].Value = entry.UnjustifiedAbsentDays;
+            worksheet.Cells[row, 10].Value = entry.UnjustifiedPresentDays;
+            worksheet.Cells[row, 11].Value = entry.UnjustifiedPercentage;
 
             row++;
         }
