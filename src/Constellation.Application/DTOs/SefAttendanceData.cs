@@ -6,7 +6,7 @@ using Core.ValueObjects;
 using System.Collections.Generic;
 
 public sealed record SefAttendanceData(
-    StudentId StudentId,
+    string StudentId,
     Name Student,
     Grade Grade,
     List<string> EnrolledClasses,

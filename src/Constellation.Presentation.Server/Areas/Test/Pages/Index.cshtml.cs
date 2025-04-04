@@ -249,7 +249,7 @@ public class IndexModel : BasePageModel
             };
 
             records.Add(new(
-                student.Id,
+                sentralId,
                 student.Name,
                 grade,
                 offerings.Select(entry => entry.Name.Value).ToList(),

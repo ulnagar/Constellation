@@ -1680,6 +1680,7 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 9].Value = "Days Absent (Unjustified)";
         worksheet.Cells[1, 10].Value = "Days Present (Unjustified)";
         worksheet.Cells[1, 11].Value = "Percentage in Attendance (Unjustified)";
+        worksheet.Cells[1, 12].Value = "SentralId";
 
         var row = 2;
         foreach (var entry in attendanceData)
@@ -1695,6 +1696,7 @@ public class ExcelService : IExcelService
             worksheet.Cells[row, 9].Value = entry.UnjustifiedAbsentDays;
             worksheet.Cells[row, 10].Value = entry.UnjustifiedPresentDays;
             worksheet.Cells[row, 11].Value = entry.UnjustifiedPercentage;
+            worksheet.Cells[row, 12].Value = entry.StudentId;
 
             row++;
         }
