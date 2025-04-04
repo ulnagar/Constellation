@@ -114,6 +114,9 @@ public class IndexModel : BasePageModel
                 .Where(offering => offering.Name.Value[2] != 'T')
                 .ToList();
 
+            if (offerings.Count == 0)
+                continue;
+
             // Get sessions from offerings
             List<Session> sessions = offerings
                 .SelectMany(offering => offering.Sessions)
@@ -221,7 +224,7 @@ public class IndexModel : BasePageModel
                     justifiedAbsentDates.Add(group.Key, string.Join(",", group.Select(entry => entry.AbsenceReason.Name)));
                 }
 
-                absentDates.Add(group.Key, string.Join(",", group.Select(entry => entry.AbsenceReason.Name)));
+                absentDates.Add(group.Key, string.Join(",", group.Select(entry => entry.AbsenceReason?.Name)));
             }
 
             // Take absent whole days from enrolledDays as presentDays
