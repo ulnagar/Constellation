@@ -28,6 +28,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 
 public class IndexModel : BasePageModel
@@ -69,6 +70,9 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
+        var timer = new Stopwatch();
+        timer.Start();
+
         DateOnly startDate = new(2023, 01, 01);
         DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
         DateOnly endDate = new(2023, 7, 1);
@@ -78,7 +82,7 @@ public class IndexModel : BasePageModel
 
         List<SefAttendanceData> records = [];
 
-        foreach (Student student in students.Take(10))
+        foreach (Student student in students)
         {
             string sentralId = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral)?.Value;
 
@@ -261,6 +265,9 @@ public class IndexModel : BasePageModel
         }
 
         var report = await _excelService.CreateSefAttendanceDataExport(records, default);
+
+        timer.Stop();
+        _logger.Information("Operation took {time}", timer.Elapsed.ToString(@"m\:ss\.fff"));
 
         return File(report, FileContentTypes.ExcelModernFile, "Sef Attendance Data.xlsx");
     }

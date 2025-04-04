@@ -1699,6 +1699,10 @@ public class ExcelService : IExcelService
             row++;
         }
 
+        worksheet.Cells[2, 7, worksheet.Dimension.Rows, 7].Style.Numberformat.Format = "0.00%";
+        worksheet.Cells[2, 11, worksheet.Dimension.Rows, 11].Style.Numberformat.Format = "0.00%";
+        worksheet.Cells[2, 3, worksheet.Dimension.Rows, 3].Style.WrapText = true;
+
         worksheet.View.FreezePanes(2, 1);
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
