@@ -73,9 +73,9 @@ public class IndexModel : BasePageModel
         var timer = new Stopwatch();
         timer.Start();
 
-        DateOnly startDate = new(2023, 01, 01);
+        DateOnly startDate = new(2022, 01, 01);
         DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
-        DateOnly endDate = new(2023, 7, 1);
+        DateOnly endDate = new(2022, 7, 7);
         DateTime endDateTime = endDate.ToDateTime(TimeOnly.MinValue);
 
         List<Student> students = await _studentRepository.GetEnrolledForDates(startDate, endDate, default);
