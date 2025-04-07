@@ -406,7 +406,7 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .Where(student => 
                 student.CreatedAt < endDateTime && 
-                student.DeletedAt > startDateTime)
+                (student.DeletedAt == DateTime.MinValue || student.DeletedAt > startDateTime))
             .ToListAsync(cancellationToken);
 
         return students;

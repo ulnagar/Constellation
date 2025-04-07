@@ -227,7 +227,9 @@ public class AbsenceRepository : IAbsenceRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Absence>()
+            .AsNoTracking()
             .Where(absence =>
+                absence.Type == AbsenceType.Whole &&
                 absence.StudentId == studentId &&
                 absence.Date >= startDate &&
                 absence.Date <= endDate)

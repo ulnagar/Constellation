@@ -1669,39 +1669,41 @@ public class ExcelService : IExcelService
         ExcelPackage excel = new();
 
         ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("SEF Attendance Data");
-        worksheet.Cells[1, 1].Value = "Student";
-        worksheet.Cells[1, 2].Value = "Grade";
-        worksheet.Cells[1, 3].Value = "Classes";
-        worksheet.Cells[1, 4].Value = "Days Enrolled";
-        worksheet.Cells[1, 5].Value = "Days Absent (Total)";
-        worksheet.Cells[1, 6].Value = "Days Present (Total)";
-        worksheet.Cells[1, 7].Value = "Percentage in Attendance (Total)";
-        worksheet.Cells[1, 8].Value = "Justified Days Absent";
-        worksheet.Cells[1, 9].Value = "Days Absent (Unjustified)";
-        worksheet.Cells[1, 10].Value = "Days Present (Unjustified)";
-        worksheet.Cells[1, 11].Value = "Percentage in Attendance (Unjustified)";
+        worksheet.Cells[1, 1].Value = "Student Id";
+        worksheet.Cells[1, 2].Value = "Student";
+        worksheet.Cells[1, 3].Value = "Grade";
+        worksheet.Cells[1, 4].Value = "Classes";
+        worksheet.Cells[1, 5].Value = "Days Enrolled";
+        worksheet.Cells[1, 6].Value = "Days Absent (Total)";
+        worksheet.Cells[1, 7].Value = "Days Present (Total)";
+        worksheet.Cells[1, 8].Value = "Percentage in Attendance (Total)";
+        worksheet.Cells[1, 9].Value = "Justified Days Absent";
+        worksheet.Cells[1, 10].Value = "Days Absent (Unjustified)";
+        worksheet.Cells[1, 11].Value = "Days Present (Unjustified)";
+        worksheet.Cells[1, 12].Value = "Percentage in Attendance (Unjustified)";
 
         var row = 2;
         foreach (var entry in attendanceData)
         {
-            worksheet.Cells[row, 1].Value = entry.Student.DisplayName;
-            worksheet.Cells[row, 2].Value = entry.Grade.AsName();
-            worksheet.Cells[row, 3].Value = string.Join(Environment.NewLine, entry.EnrolledClasses);
-            worksheet.Cells[row, 4].Value = entry.EnrolledDays;
-            worksheet.Cells[row, 5].Value = entry.TotalAbsentDays;
-            worksheet.Cells[row, 6].Value = entry.TotalPresentDays;
-            worksheet.Cells[row, 7].Value = entry.TotalPercentage;
-            worksheet.Cells[row, 8].Value = entry.JustifiedAbsentDays;
-            worksheet.Cells[row, 9].Value = entry.UnjustifiedAbsentDays;
-            worksheet.Cells[row, 10].Value = entry.UnjustifiedPresentDays;
-            worksheet.Cells[row, 11].Value = entry.UnjustifiedPercentage;
+            worksheet.Cells[row, 1].Value = entry.StudentReferenceNumber.ToString();
+            worksheet.Cells[row, 2].Value = entry.Student.DisplayName;
+            worksheet.Cells[row, 3].Value = entry.Grade.AsName();
+            worksheet.Cells[row, 4].Value = string.Join(Environment.NewLine, entry.EnrolledClasses);
+            worksheet.Cells[row, 5].Value = entry.EnrolledDays;
+            worksheet.Cells[row, 6].Value = entry.TotalAbsentDays;
+            worksheet.Cells[row, 7].Value = entry.TotalPresentDays;
+            worksheet.Cells[row, 8].Value = entry.TotalPercentage;
+            worksheet.Cells[row, 9].Value = entry.JustifiedAbsentDays;
+            worksheet.Cells[row, 10].Value = entry.UnjustifiedAbsentDays;
+            worksheet.Cells[row, 11].Value = entry.UnjustifiedPresentDays;
+            worksheet.Cells[row, 12].Value = entry.UnjustifiedPercentage;
 
             row++;
         }
 
-        worksheet.Cells[2, 7, worksheet.Dimension.Rows, 7].Style.Numberformat.Format = "0.00%";
-        worksheet.Cells[2, 11, worksheet.Dimension.Rows, 11].Style.Numberformat.Format = "0.00%";
-        worksheet.Cells[2, 3, worksheet.Dimension.Rows, 3].Style.WrapText = true;
+        worksheet.Cells[2, 8, worksheet.Dimension.Rows, 8].Style.Numberformat.Format = "0.00%";
+        worksheet.Cells[2, 12, worksheet.Dimension.Rows, 12].Style.Numberformat.Format = "0.00%";
+        worksheet.Cells[2, 4, worksheet.Dimension.Rows, 4].Style.WrapText = true;
 
         worksheet.View.FreezePanes(2, 1);
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
