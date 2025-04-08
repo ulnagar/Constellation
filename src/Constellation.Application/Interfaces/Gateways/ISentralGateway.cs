@@ -5,6 +5,7 @@ using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
 using Constellation.Application.Attendance.GetValidAttendanceReportDates;
 using Constellation.Application.DTOs;
 using Constellation.Core.Models.Students.Enums;
+using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.Shared;
 using HtmlAgilityPack;
 using Serilog;
@@ -42,6 +43,7 @@ public interface ISentralGateway
     Task<Result<DateTime>> IssueAward(List<string> studentSentralIds, IssueAwardType awardType);
     Task<Result<List<DateOnly>>> GetEnrolledDatesForStudent(string sentralId, string year, DateOnly startDate, DateOnly endDate);
     Task<Result<List<SentralPeriodAbsenceDto>>> GetAbsenceDataAsync(string sentralStudentId, string year, CancellationToken cancellationToken = default);
+    Task<Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>>> GetAttendanceModuleAbsenceDataForSchool(CancellationToken cancellationToken = default);
 
     // API methods
     Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default);

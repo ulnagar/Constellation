@@ -7,6 +7,9 @@ using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Infrastructure.Extensions;
 using Constellation.Infrastructure.ExternalServices.Sentral.Models;
 using Core.Abstractions.Clock;
@@ -461,6 +464,33 @@ public class Gateway : ISentralGateway
         }
 
         return null;
+    }
+
+    private async Task<Stream> GetStreamByPost(Uri uri, List<KeyValuePair<string, string>> payload, CancellationToken cancellationToken)
+    {
+        for (int i = 1; i < 6; i++)
+        {
+            try
+            {
+                await Login(cancellationToken);
+
+                using FormUrlEncodedContent formContent = new(payload);
+                HttpResponseMessage response = await _client.PostAsync(uri, formContent, cancellationToken);
+                
+                return await response.Content.ReadAsStreamAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning($"Failed to retrieve information from Sentral Server with error: {ex.Message}");
+                if (ex.InnerException != null)
+                    _logger.Warning($"Inner Exception: {ex.InnerException.Message}");
+
+                // Wait and retry
+                await Task.Delay(5000, cancellationToken);
+            }
+        }
+
+        return Stream.Null;
     }
 
     private async Task<Stream> GetStreamByGet(string uri, CancellationToken cancellationToken)
@@ -1059,6 +1089,137 @@ public class Gateway : ISentralGateway
         }
 
         return absences;
+    }
+
+    public async Task<Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>>> GetAttendanceModuleAbsenceDataForSchool(
+        CancellationToken cancellationToken = default)
+    {
+        Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> data = new();
+
+        if (_logOnly)
+        {
+            _logger.Information("GetAttendanceModuleAbsenceDataForSchool");
+
+            return data;
+        }
+
+        Uri filePath = new Uri($"{_settings.ServerUrl}/attendance/reports/absences");
+
+        List<KeyValuePair<string, string>> formData = new()
+        {
+            new KeyValuePair<string, string>("length", "year"),
+            new KeyValuePair<string, string>("year", _dateTime.CurrentYear.ToString()),
+            new KeyValuePair<string, string>("absence_display", "code"),
+            new KeyValuePair<string, string>("absence_types", "all"),
+            new KeyValuePair<string, string>("reasons[]", "1"),
+            new KeyValuePair<string, string>("reasons[]", "2"),
+            new KeyValuePair<string, string>("reasons[]", "3"),
+            new KeyValuePair<string, string>("reasons[]", "4"),
+            new KeyValuePair<string, string>("reasons[]", "5"),
+            new KeyValuePair<string, string>("reasons[]", "6"),
+            new KeyValuePair<string, string>("reasons[]", "7"),
+            new KeyValuePair<string, string>("reasons[]", "8"),
+            new KeyValuePair<string, string>("reasons[]", "9"),
+            new KeyValuePair<string, string>("reasons[]", "10"),
+            new KeyValuePair<string, string>("group_absences", "date"),
+            new KeyValuePair<string, string>("group", "years"),
+            new KeyValuePair<string, string>("years[]", "5"),
+            new KeyValuePair<string, string>("years[]", "6"),
+            new KeyValuePair<string, string>("years[]", "7"),
+            new KeyValuePair<string, string>("years[]", "8"),
+            new KeyValuePair<string, string>("years[]", "9"),
+            new KeyValuePair<string, string>("years[]", "10"),
+            new KeyValuePair<string, string>("years[]", "11"),
+            new KeyValuePair<string, string>("years[]", "12"),
+            new KeyValuePair<string, string>("action", "export")
+        };
+
+        Stream completePage = await GetStreamByPost(filePath, formData, cancellationToken);
+
+        if (completePage is null)
+            return data;
+
+        using IExcelDataReader completeReader = ExcelReaderFactory.CreateReader(completePage);
+        DataSet completeWorksheet = completeReader.AsDataSet();
+
+        foreach (DataRow row in completeWorksheet.Tables[0].Rows)
+        {
+            if (row.ItemArray.First()?.ToString() == "STUDENT ID") // This is a header row
+                continue;
+
+            string srn = row[0].ToString().FormatField();
+            Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
+            if (studentReferenceNumber.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(StudentReferenceNumber), srn)
+                    .ForContext(nameof(Error), studentReferenceNumber.Error, true)
+                    .Information("Error parsing SRN to StudentReferenceNumber object");
+            }
+
+            SentralPeriodAbsenceDto absence = new();
+            string stringDate = row[2].ToString().FormatField();
+            DateOnly rowDate = DateOnly.ParseExact(stringDate, "yyyy-MM-dd");
+            absence.Date = rowDate;
+            absence.Reason = row[9].ToString().FormatField();
+
+            absence.Timeframe = row[10].ToString().FormatField();
+            if (string.IsNullOrWhiteSpace(absence.Timeframe))
+            {
+                absence.WholeDay = true;
+            }
+            else
+            {
+                bool startTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[0], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly startTime);
+                if (startTimeSuccess)
+                    absence.StartTime = startTime;
+                else
+                    _logger
+                        .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
+                        .ForContext("AbsenceDate", absence.Date)
+                        .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber)
+                        .Information("Error parsing absence start time to TimeOnly object");
+
+                bool endTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly endTime);
+                if (endTimeSuccess)
+                    absence.EndTime = endTime;
+                else
+                    _logger
+                        .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
+                        .ForContext("AbsenceDate", absence.Date)
+                        .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber)
+                        .Information("Error parsing absence end time to TimeOnly object");
+            }
+
+            string comment = row[11].ToString().FormatField();
+            if (!string.IsNullOrWhiteSpace(comment))
+            {
+                string explainer = row[12].ToString().FormatField();
+                if (string.IsNullOrWhiteSpace(explainer))
+                {
+                    absence.ExternalExplanation = comment;
+                }
+                else
+                {
+                    string explainerSource = row[13].ToString().FormatField();
+                    absence.ExternalExplanation = comment;
+                    absence.ExternalExplanationSource = string.IsNullOrWhiteSpace(explainerSource) 
+                        ? explainer 
+                        : $"{explainer} via {explainerSource}";
+                }
+            }
+
+            if (data.TryGetValue(studentReferenceNumber.Value, out List<SentralPeriodAbsenceDto> record))
+            {
+                record.Add(absence);
+            }
+            else
+            {
+                data.Add(studentReferenceNumber.Value, [ absence ]);
+            }
+        }
+
+        return data;
     }
 
     public async Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId)

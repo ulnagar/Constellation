@@ -3,3 +3,21 @@
 
 <h2>Test Page</h2>
 
+<table class="table-border">
+    @foreach (var date in Model.AbsenceDates)
+    {
+        <td>@date.ToString("yyyy-MM-dd")</td>
+        <td>
+            @foreach (var absence in Model.PageAbsences.Where(entry => entry.Date == date))
+            {
+                <span>@absence.Type - @absence.Timeframe - @absence.Reason</span>
+            }
+        </td>
+        <td>
+            @foreach (var absence in Model.ExportAbsences.Where(entry => entry.Date == date))
+            {
+                <span>@absence.Type - @absence.Timeframe - @absence.Reason</span>
+            }
+        </td>
+    }
+</table>
