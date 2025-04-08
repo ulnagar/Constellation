@@ -12,6 +12,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.ValueObjects;
 using Core.Extensions;
 using Core.Models.Students.Enums;
 using Core.Models.Timetables;
@@ -34,6 +35,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
     private Student _student;
     private List<DateOnly> _excludedDates = new(); 
+    private Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> _periodAbsenceCache;
     private readonly AppConfiguration _configuration;
     private Guid JobId { get; set; }
 
@@ -65,6 +67,11 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         _logger.Information("{id}: Scanning student {student} ({grade})", JobId, student.Name.DisplayName, student.CurrentEnrolment?.Grade.AsName());
 
         List<Absence> returnAbsences = new();
+
+        if (_periodAbsenceCache is null || _periodAbsenceCache.Count == 0)
+        {
+            _periodAbsenceCache = await _sentralGateway.GetAttendanceModuleAbsenceDataForSchool(cancellationToken);
+        }
 
         List<DateOnly> activePartialScanDates = new();
         List<DateOnly> activeWholeScanDates = new();
@@ -144,7 +151,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             _excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
 
         List<SentralPeriodAbsenceDto> pxpAbsences = await _sentralGateway.GetAbsenceDataAsync(sentralId.Value);
-        List<SentralPeriodAbsenceDto> attendanceAbsences = await _sentralGateway.GetPartialAbsenceDataAsync(sentralId.Value);
+        List<SentralPeriodAbsenceDto> attendanceAbsences = _periodAbsenceCache[student.StudentReferenceNumber];
 
         // If the webattend absence is not a whole day absence, calculate the absence length
         foreach (SentralPeriodAbsenceDto attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))
@@ -927,7 +934,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         {
             // Update the start time and end time appropriately
 
-            if (attendanceAbsence.Timeframe == "Whole Day")
+            if (attendanceAbsence.WholeDay || attendanceAbsence.Timeframe == "Whole Day")
             {
                 // This Attendance entry explains the partial. Should create an explained entry.
                 startTime = absencesToProcess.First().StartTime;

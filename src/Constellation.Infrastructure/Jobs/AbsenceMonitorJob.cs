@@ -45,7 +45,7 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
     {
         _logger.Information("{id}: Starting Absence Monitor Scan.", jobId);
 
-        foreach (Grade grade in Enum.GetValues(typeof(Grade)))
+        foreach (Grade grade in Enum.GetValues<Grade>())
         {
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -73,7 +73,7 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                 // This must be done early, otherwise the digests will not reflect these changes
                 await _unitOfWork.CompleteAsync(cancellationToken);
 
-                if (absences.Any())
+                if (absences.Count != 0)
                 {
                     if (cancellationToken.IsCancellationRequested)
                         return;
@@ -98,12 +98,13 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                         .Select(absence => absence.Id)
                         .ToList();
 
-                    if (partialAbsenceIds.Count != 0)
-                        await _mediator.Send(new SendAbsenceNotificationToStudentCommand(
-                            jobId,
-                            student.Id,
-                            partialAbsenceIds),
-                            cancellationToken);
+                    // TODO: Debug only. Remove commenting before publish!
+                    //if (partialAbsenceIds.Count != 0)
+                    //    await _mediator.Send(new SendAbsenceNotificationToStudentCommand(
+                    //        jobId,
+                    //        student.Id,
+                    //        partialAbsenceIds),
+                    //        cancellationToken);
 
                     List<AbsenceId> wholeAbsenceIds = absences
                         .Where(absence => 
@@ -112,22 +113,24 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                         .Select(absence => absence.Id)
                         .ToList();
 
-                    if (wholeAbsenceIds.Count != 0)
-                        await _mediator.Send(new SendAbsenceNotificationToParentCommand(
-                            jobId,
-                            student.Id,
-                            wholeAbsenceIds),
-                            cancellationToken);
+                    // TODO: Debug only. Remove commenting before publish!
+                    //if (wholeAbsenceIds.Count != 0)
+                    //    await _mediator.Send(new SendAbsenceNotificationToParentCommand(
+                    //        jobId,
+                    //        student.Id,
+                    //        wholeAbsenceIds),
+                    //        cancellationToken);
                 }
-                
+
                 if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
                 {
                     if (cancellationToken.IsCancellationRequested)
                         return;
-                    
-                    await _mediator.Send(new SendAbsenceDigestToStudentCommand(jobId, student.Id), cancellationToken);
-                    await _mediator.Send(new SendAbsenceDigestToParentCommand(jobId, student.Id), cancellationToken);
-                    await _mediator.Send(new SendAbsenceDigestToCoordinatorCommand(jobId, student.Id), cancellationToken);
+
+                    // TODO: Debug only. Remove commenting before publish!
+                    //await _mediator.Send(new SendAbsenceDigestToStudentCommand(jobId, student.Id), cancellationToken);
+                    //await _mediator.Send(new SendAbsenceDigestToParentCommand(jobId, student.Id), cancellationToken);
+                    //await _mediator.Send(new SendAbsenceDigestToCoordinatorCommand(jobId, student.Id), cancellationToken);
                 }
 
                 // If there was any whole absence found for yesterday, send the missed work email to student and parents
@@ -143,15 +146,16 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                         absence.AbsenceReason == AbsenceReason.Suspended)
                         continue;
 
+                    // TODO: Debug only. Remove commenting before publish!
                     // Send missed work generic email
-                    await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
-                        jobId, 
-                        student.Id,
-                        absence.OfferingId,
-                        absence.Date),
-                        cancellationToken);
+                    //await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
+                    //    jobId, 
+                    //    student.Id,
+                    //    absence.OfferingId,
+                    //    absence.Date),
+                    //    cancellationToken);
                 }
-                
+
                 await _unitOfWork.CompleteAsync(cancellationToken);
             }
         }
