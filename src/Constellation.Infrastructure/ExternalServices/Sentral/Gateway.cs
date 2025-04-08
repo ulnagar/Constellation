@@ -1144,10 +1144,11 @@ public class Gateway : ISentralGateway
 
         foreach (DataRow row in completeWorksheet.Tables[0].Rows)
         {
-            if (row[0].ToString() == "Student ID") // This is a header row
+            string srn = row[0].ToString().FormatField();
+            
+            if (srn == "Student ID") // This is a header row
                 continue;
 
-            string srn = row[0].ToString().FormatField();
             Result<StudentReferenceNumber> studentReferenceNumber = StudentReferenceNumber.Create(srn);
             if (studentReferenceNumber.IsFailure)
             {
