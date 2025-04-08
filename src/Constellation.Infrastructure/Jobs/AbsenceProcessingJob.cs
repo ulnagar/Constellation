@@ -147,7 +147,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             sentralId = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
         }
 
-        if (!_excludedDates.Any())
+        if (_excludedDates.Count == 0)
             _excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
 
         List<SentralPeriodAbsenceDto> pxpAbsences = await _sentralGateway.GetAbsenceDataAsync(sentralId.Value);
