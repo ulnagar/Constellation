@@ -1144,7 +1144,7 @@ public class Gateway : ISentralGateway
 
         foreach (DataRow row in completeWorksheet.Tables[0].Rows)
         {
-            if (row.ItemArray.First()?.ToString() == "STUDENT ID") // This is a header row
+            if (row[0].ToString() == "Student ID") // This is a header row
                 continue;
 
             string srn = row[0].ToString().FormatField();

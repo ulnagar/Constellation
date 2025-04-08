@@ -16,6 +16,7 @@ using static Constellation.Core.Errors.DomainErrors.LinkedSystems;
 using System.Collections.Generic;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Enums;
+using System.Diagnostics;
 
 public class IndexModel : BasePageModel
 {
@@ -46,12 +47,19 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        var srn = StudentReferenceNumber.FromValue("451140922");
+        var srn = StudentReferenceNumber.FromValue("450978264");
         var student = await _studentRepository.GetBySRN(srn);
         var sentralId = student.SystemLinks.FirstOrDefault(entry => entry.System == SystemType.Sentral)?.Value;
 
+        var pageTimer = new Stopwatch();
+        pageTimer.Start();
         var pageReadAbsences = await _gateway.GetPartialAbsenceDataAsync(sentralId);
+        pageTimer.Stop();
+
+        var exportTimer = new Stopwatch();
+        exportTimer.Start();
         var exportAbsences = await _gateway.GetAttendanceModuleAbsenceDataForSchool();
+        exportTimer.Stop();
 
         PageAbsences = pageReadAbsences;
         ExportAbsences = exportAbsences[srn];
