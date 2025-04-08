@@ -47,6 +47,9 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
         foreach (Grade grade in Enum.GetValues<Grade>())
         {
+            if (grade != Grade.Y07)
+                continue;
+
             if (cancellationToken.IsCancellationRequested)
                 return;
 

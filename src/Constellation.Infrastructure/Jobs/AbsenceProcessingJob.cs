@@ -547,27 +547,30 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             {
                 // How do we tell these apart?
                 // Can we match the period for the WebAttend absences to the PxP absence entry?
-                
-                Timetable timetable = Timetable.FromPrefix(absence.Period.TakeWhile(c => !Char.IsLetter(c)).FirstOrDefault());
+                char timetablePrefix = absence.Period.TakeWhile(Char.IsLetter).FirstOrDefault();
+                Timetable timetable = Timetable.FromPrefix(timetablePrefix);
 
                 List<Period> periods = await _periodRepository.GetAllFromTimetable([timetable], cancellationToken);
 
-                IEnumerable<SentralPeriodAbsenceDto> bestGuessWebAttendAbsences = webAttendAbsences
+                List<SentralPeriodAbsenceDto> bestGuessWebAttendAbsences = webAttendAbsences
                     .Where(aa =>
                         aa.Date == absence.Date &&
                         aa.Reason == absence.Reason &&
-                        aa.MinutesAbsent == absence.MinutesAbsent);
+                        aa.MinutesAbsent == absence.MinutesAbsent)
+                    .ToList();
 
                 foreach (SentralPeriodAbsenceDto webAttendAbsence in bestGuessWebAttendAbsences)
                     CalculateWebAttendAbsencePeriod(webAttendAbsence, periods);
 
                 int lastAttemptWebAttendAbsencesCount = bestGuessWebAttendAbsences
                     .Count(aa =>
+                        aa.Period is not null &&
                         aa.Period.Contains(absence.Period) &&
                         aa.PartialType == absence.PartialType);
 
                 if (lastAttemptWebAttendAbsencesCount == 1)
                     return bestGuessWebAttendAbsences.FirstOrDefault(aa =>
+                        aa.Period is not null &&
                         aa.Period.Contains(absence.Period) &&
                         aa.PartialType == absence.PartialType);
             }
