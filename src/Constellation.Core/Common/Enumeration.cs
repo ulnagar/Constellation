@@ -95,6 +95,7 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
 
     public static IEnumerable<TEnum> GetEnumerable = CreateEnumerations()
         .Select(entry => entry.Value)
+        .Where(entry => !string.IsNullOrWhiteSpace(entry.Value))
         .AsEnumerable();
 
     public string Value { get; protected init; }

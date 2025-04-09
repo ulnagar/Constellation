@@ -58,7 +58,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 
         _logger.Information("Auditing Canvas Enrolments");
 
-        List<CourseListEntry> coursesInCanvas = await _gateway.GetAllCourses(_dateTime.CurrentYear.ToString(), cancellationToken);
+        List<CourseListEntry> coursesInCanvas = await _gateway.GetAllCourses(_dateTime.CurrentYearAsString, cancellationToken);
 
         foreach (CourseListEntry canvasCourse in coursesInCanvas.OrderBy(entry => entry.CourseCode))
         {

@@ -6,13 +6,13 @@ using Application.Attendance.GetRecentAttendanceValues;
 using Application.Common.PresentationModels;
 using Constellation.Application.Attendance.GetAttendancePeriodLabels;
 using Constellation.Application.Models.Auth;
+using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Attendance;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -90,8 +90,8 @@ public class IndexModel : BasePageModel
 
         _logger.Information("Requested to update Attendance Percentage for period {Period} by user {User}", SelectedPeriod, _currentUserService.UserName);
 
-        string term = string.Empty;
-        string week = string.Empty;
+        SchoolTerm term = SchoolTerm.Empty;
+        SchoolWeek week = SchoolWeek.Empty;
         string year = string.Empty;
 
         string[] blocks = SelectedPeriod.Split(',');
@@ -100,9 +100,9 @@ public class IndexModel : BasePageModel
             string[] microBlocks = block.Split(' ');
 
             if (microBlocks.Contains("Term"))
-                term = microBlocks[1];
+                term = SchoolTerm.FromName(microBlocks[1]) ?? SchoolTerm.Empty;
             else if (microBlocks.Contains("Week"))
-                week = microBlocks[1];
+                week = SchoolWeek.FromName(microBlocks[1]) ?? SchoolWeek.Empty;
             else
                 year = microBlocks[0];
         }

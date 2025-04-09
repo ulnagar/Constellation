@@ -10,6 +10,7 @@ internal class DateTimeProvider : IDateTimeProvider
     public DateOnly LastDayOfYear { get; } = new DateOnly(2024, 12, 31);
     public DateOnly FirstDayOfYear { get; } = new DateOnly(2024, 01, 01);
     public int CurrentYear { get; } = 2024;
+    public string CurrentYearAsString { get; } = "2024";
     public DateOnly GetFirstDayOfYear(int year) => new(year, 01, 01);
 
     public DateOnly GetLastDayOfYear(int year) => new(year, 12, 31);

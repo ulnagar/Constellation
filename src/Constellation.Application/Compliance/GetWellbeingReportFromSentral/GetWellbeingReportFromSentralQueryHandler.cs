@@ -35,7 +35,7 @@ internal sealed class GetWellbeingReportFromSentralQueryHandler
 
         if (files.BasicReport.Length > 0 && files.DetailReport.Length > 0)
         {
-            List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYear.ToString());
+            List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYearAsString);
 
             List<SentralIncidentDetails> data = await _excelService.ConvertSentralIncidentReport(files.BasicReport, files.DetailReport, excludedDates, cancellationToken);
 

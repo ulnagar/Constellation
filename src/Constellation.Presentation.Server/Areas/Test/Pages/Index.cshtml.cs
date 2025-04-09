@@ -4,6 +4,8 @@ using Application.Attendance.GenerateHistoricalDailyAttendanceReport;
 using BaseModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Helpers;
+using Constellation.Core.Enums;
+using Constellation.Core.ValueObjects;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
@@ -39,7 +41,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetHistoricalReport()
     {
-        GenerateHistoricalDailyAttendanceReportCommand command = new(new DateOnly(2024, 1, 1), new DateOnly(2024, 7, 7));
+        GenerateHistoricalDailyAttendanceReportCommand command = new("2024", new SchoolTermWeek(SchoolTerm.Term1, SchoolWeek.Week1), new SchoolTermWeek(SchoolTerm.Term2, SchoolWeek.Week10));
 
         Result<MemoryStream> report = await _mediator.Send(command);
 

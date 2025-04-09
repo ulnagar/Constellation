@@ -151,7 +151,10 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             _excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString());
 
         List<SentralPeriodAbsenceDto> pxpAbsences = await _sentralGateway.GetAbsenceDataAsync(sentralId.Value);
-        List<SentralPeriodAbsenceDto> attendanceAbsences = _periodAbsenceCache[student.StudentReferenceNumber];
+        bool success = _periodAbsenceCache.TryGetValue(student.StudentReferenceNumber, out List<SentralPeriodAbsenceDto> attendanceAbsences);
+
+        if (!success)
+            attendanceAbsences = [];
 
         // If the webattend absence is not a whole day absence, calculate the absence length
         foreach (SentralPeriodAbsenceDto attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))

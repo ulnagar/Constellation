@@ -1,0 +1,61 @@
+@using Constellation.Core.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.HistoricalAttendanceReport.HistoricalAttendanceReportSelection
+
+<div class="modal fade" tabindex="-1" id="historicAttendanceReportModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page-handler="HistoricAttendanceReport" id="historicAttendanceReportForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Historical Attendance Report</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span>This report will be emailed to you once it has been completed. It may take over an hour to complete.</span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Year</span>
+                            <select asp-for="Year" asp-items="@(new SelectList(Model.Years))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-6">
+                            <span class="control-label">Start</span>
+                        </div>
+                        <div class="form-group col-6">
+                            <select asp-for="StartTerm" asp-items="@(new SelectList(Model.SchoolTerms, nameof(SchoolTerm.Value), nameof(SchoolTerm.Name)))" class="combo">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <select asp-for="StartWeek" asp-items="@(new SelectList(Model.SchoolWeeks, nameof(SchoolWeek.Value), nameof(SchoolWeek.Name)))" class="combo">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-6">
+                            <span class="control-label">End</span>
+                        </div>
+                        <div class="form-group col-6">
+                            <select asp-for="EndTerm" asp-items="@(new SelectList(Model.SchoolTerms, nameof(SchoolTerm.Value), nameof(SchoolTerm.Name)))" class="combo">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <select asp-for="EndWeek" asp-items="@(new SelectList(Model.SchoolWeeks, nameof(SchoolWeek.Value), nameof(SchoolWeek.Name)))" class="combo">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" id="historicAttendanceReportSubmitButton" value="Run Report" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

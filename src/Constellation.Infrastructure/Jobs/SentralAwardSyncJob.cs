@@ -131,7 +131,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
 
                             if (awardIncidents.Count == 0)
                             {
-                                Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(systemLink.Value, _dateTime.CurrentYear.ToString()), cancellationToken);
+                                Result<List<AwardIncidentResponse>> awardIncidentsRequest = await _mediator.Send(new GetAwardIncidentsFromSentralQuery(systemLink.Value, _dateTime.CurrentYearAsString), cancellationToken);
                                 
                                 if (awardIncidentsRequest.IsFailure)
                                 {

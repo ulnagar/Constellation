@@ -7,6 +7,7 @@ using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
+using Constellation.Core.Enums;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.ValueObjects;
@@ -1108,7 +1109,7 @@ public class Gateway : ISentralGateway
         List<KeyValuePair<string, string>> formData = new()
         {
             new KeyValuePair<string, string>("length", "year"),
-            new KeyValuePair<string, string>("year", _dateTime.CurrentYear.ToString()),
+            new KeyValuePair<string, string>("year", _dateTime.CurrentYearAsString),
             new KeyValuePair<string, string>("absence_display", "code"),
             new KeyValuePair<string, string>("absence_types", "all"),
             new KeyValuePair<string, string>("reasons[]", "1"),
@@ -1470,14 +1471,14 @@ public class Gateway : ISentralGateway
         return nonSchoolDays.OrderBy(a => a).ToList();
     }
 
-    public async Task<Result<(string Week, string Term)>> GetWeekForDate(DateOnly date)
+    public async Task<Result<(SchoolWeek Week, SchoolTerm Term)>> GetWeekForDate(DateOnly date)
     {
         if (_logOnly)
         {
             _logger
                 .Information("GetWeekForDate: date={date}", date);
 
-            return ("1", "1");
+            return (SchoolWeek.Week1, SchoolTerm.Term1);
         }
 
         string year = date.Year.ToString();
@@ -1485,7 +1486,7 @@ public class Gateway : ISentralGateway
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 
         if (page == null)
-            return Result.Failure<(string, string)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
+            return Result.Failure<(SchoolWeek, SchoolTerm)>(new("SentralGateway.GetPage.Failure", "Could not retrieve page from Sentral Server"));
 
         HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.TermCalendarTable);
 
@@ -1493,8 +1494,8 @@ public class Gateway : ISentralGateway
         {
             IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
 
-            string term = "1";
-            string week = "1";
+            SchoolTerm term = SchoolTerm.Term1;
+            SchoolWeek week = SchoolWeek.Week1;
 
             foreach (HtmlNode row in rows)
             {
@@ -1510,7 +1511,7 @@ public class Gateway : ISentralGateway
                         continue;
                     }
 
-                    term = termName.InnerText.Split(' ')[1];
+                    term = SchoolTerm.FromName(termName.InnerText);
                     continue;
                 }
 
@@ -1519,7 +1520,7 @@ public class Gateway : ISentralGateway
                 if (string.IsNullOrWhiteSpace(weekName.InnerText))
                     continue;
 
-                week = weekName.InnerText;
+                week = SchoolWeek.FromValue(weekName.InnerText);
 
                 foreach (HtmlNode cell in row.Descendants("td"))
                 {
@@ -1534,10 +1535,10 @@ public class Gateway : ISentralGateway
             }
         }
 
-        return Result.Failure<(string, string)>(new("SentralGateway.GetWeekForDate.NotFound", "Could not identify Term and Week from date"));
+        return Result.Failure<(SchoolWeek, SchoolTerm)>(new("SentralGateway.GetWeekForDate.NotFound", "Could not identify Term and Week from date"));
     }
 
-    public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, string term, string week)
+    public async Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, SchoolTerm term, SchoolWeek week)
     {
         if (_logOnly)
         {
@@ -1577,7 +1578,7 @@ public class Gateway : ISentralGateway
                         continue;
                     }
 
-                    if (termName.InnerText == $"Term {term}")
+                    if (termName.InnerText == term.Name)
                     {
                         correctTerm = true;
                         continue;
@@ -1593,7 +1594,7 @@ public class Gateway : ISentralGateway
                 {
                     HtmlNode weekName = row.Descendants("th").FirstOrDefault();
 
-                    if (weekName?.InnerText == week)
+                    if (weekName?.InnerText == week.Value)
                     {
                         HtmlNode monday = row.Descendants("td").First();
 
@@ -2271,7 +2272,7 @@ public class Gateway : ISentralGateway
         return (baseFile, detailFile);
     }
 
-    public async Task<SystemAttendanceData> GetAttendancePercentages(string term, string week, string year, DateOnly startDate, DateOnly endDate)
+    public async Task<SystemAttendanceData> GetAttendancePercentages(SchoolTerm term, SchoolWeek week, string year, DateOnly startDate, DateOnly endDate)
     {
         SystemAttendanceData response = new();
 
@@ -2342,9 +2343,9 @@ public class Gateway : ISentralGateway
             // length=week
             new("length", "week"),
             // term=3
-            new ("term", term),
+            new ("term", term.Value),
             // week=1
-            new ("week", week),
+            new ("week", week.Value),
             // year=2023
             new("year", year),
             // limit_sign=equal

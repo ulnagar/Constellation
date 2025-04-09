@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Attendance.GetAttendanceDataForYearFromSentral;
 
 using Abstractions.Messaging;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Repositories;
 using Constellation.Core.Models.Students;
@@ -46,19 +47,19 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
     {
         bool stopProcessing = false;
 
-        string year = _dateTime.CurrentYear.ToString();
+        string year = _dateTime.CurrentYearAsString;
 
-        for (int term = 1; term < 5; term++)
+        foreach (SchoolTerm term in SchoolTerm.GetOptions)
         {
             if (stopProcessing)
                 continue;
 
-            for (int week = 1; week < 12; week++)
+            foreach (SchoolWeek week in SchoolWeek.GetOptions)
             {
                 if (stopProcessing)
                     continue;
 
-                Result<(DateOnly StartDate, DateOnly EndDate)> dates = await _gateway.GetDatesForWeek(year, term.ToString(), week.ToString());
+                Result<(DateOnly StartDate, DateOnly EndDate)> dates = await _gateway.GetDatesForWeek(year, term, week);
                 if (dates.IsFailure)
                     continue;
 
@@ -68,7 +69,7 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
                     continue;
                 }
 
-                SystemAttendanceData data = await _gateway.GetAttendancePercentages(term.ToString(), week.ToString(), year, dates.Value.StartDate, dates.Value.EndDate);
+                SystemAttendanceData data = await _gateway.GetAttendancePercentages(term, week, year, dates.Value.StartDate, dates.Value.EndDate);
                 if (data is null)
                     continue;
 

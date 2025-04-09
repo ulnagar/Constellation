@@ -2,6 +2,7 @@
 
 using Constellation.Core.Abstractions.Clock;
 using System;
+using System.Globalization;
 
 public class DateTimeProvider : IDateTimeProvider
 {
@@ -14,6 +15,7 @@ public class DateTimeProvider : IDateTimeProvider
     public DateOnly FirstDayOfYear => new DateOnly(CurrentYear, 1, 1);
 
     public int CurrentYear => Today.Year;
+    public string CurrentYearAsString => Today.ToString("yyyy", CultureInfo.InvariantCulture);
 
     public DateOnly GetFirstDayOfYear(int year) => new DateOnly(year, 1, 1);
 

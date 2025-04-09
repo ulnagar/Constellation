@@ -138,7 +138,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
             }
         }
 
-        List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYear.ToString());
+        List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYearAsString);
         List<DateOnly> datesBetween = detail.CreatedDate.Range(_dateTime.Today);
         datesBetween = datesBetween
             .Where(entry => !excludedDates.Contains(entry))

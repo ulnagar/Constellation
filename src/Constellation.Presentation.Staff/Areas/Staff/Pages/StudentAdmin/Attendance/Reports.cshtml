@@ -42,6 +42,16 @@
     </div>
 </div>
 
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h4>Historical Attendance Report</h4>
+        An Excel export of each student, along with the total number of days enrolled, present, and the attendance percentage for the period
+    </div>
+    <div class="col-md-2">
+        <button type="button" data-toggle="modal" data-target="#historicAttendanceReportModal" class="btn btn-block btn-warning historic-report-button">Run Report</button>
+    </div>
+</div>
+
 <vc:student-attendance-report />
 
 @section scripts {
@@ -50,6 +60,12 @@
             e.preventDefault();
             $('#attendanceReportModal').modal('hide');
             $('#attendanceReportForm').submit();
+        });
+
+        $('#historicAttendanceReportSubmitButton').click(function (e) {
+            e.preventDefault();
+            $('#historicAttendanceReportModal').modal('hide');
+            $('#historicAttendanceReportForm').submit();
         });
     </script>
 }

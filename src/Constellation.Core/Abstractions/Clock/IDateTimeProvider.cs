@@ -11,6 +11,7 @@ public interface IDateTimeProvider
     DateOnly FirstDayOfYear { get; }
 
     int CurrentYear { get; }
+    string CurrentYearAsString { get; }
 
     DateOnly GetFirstDayOfYear(int year);
     DateOnly GetLastDayOfYear(int year);

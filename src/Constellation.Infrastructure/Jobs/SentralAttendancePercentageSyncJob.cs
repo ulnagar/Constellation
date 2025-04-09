@@ -5,6 +5,7 @@ using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
@@ -45,7 +46,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
         // Figure out which period should be scanned
-        Result<(string week, string term)> periodRequest = await _sentralGateway.GetWeekForDate(_dateTime.Yesterday);
+        Result<(SchoolWeek week, SchoolTerm term)> periodRequest = await _sentralGateway.GetWeekForDate(_dateTime.Yesterday);
         if (periodRequest.IsFailure)
         {
             _logger
@@ -55,10 +56,10 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
             return;
         }
 
-        string term = periodRequest.Value.term;
-        string week = periodRequest.Value.week;
+        SchoolTerm term = periodRequest.Value.term;
+        SchoolWeek week = periodRequest.Value.week;
 
-        Result<(DateOnly StartDate, DateOnly EndDate)> dateRequest = await _sentralGateway.GetDatesForWeek(_dateTime.CurrentYear.ToString(), term, week);
+        Result<(DateOnly StartDate, DateOnly EndDate)> dateRequest = await _sentralGateway.GetDatesForWeek(_dateTime.CurrentYearAsString, term, week);
         if (periodRequest.IsFailure)
         {
             _logger
@@ -86,7 +87,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
         }
 
         // Grab the file from Sentral
-        SystemAttendanceData request = await _sentralGateway.GetAttendancePercentages(term, week, _dateTime.CurrentYear.ToString(), startDate, endDate);
+        SystemAttendanceData request = await _sentralGateway.GetAttendancePercentages(term, week, _dateTime.CurrentYearAsString, startDate, endDate);
 
         if (request is null)
         {

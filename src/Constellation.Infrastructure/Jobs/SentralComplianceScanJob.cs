@@ -45,7 +45,7 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
     {
         // Get all currently open N-Award and LoC from Sentral
         (Stream BasicFile, Stream DetailFile) files = await _sentralGateway.GetNAwardReport(cancellationToken);
-        List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYear.ToString());
+        List<DateOnly> excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(_dateTime.CurrentYearAsString);
         List<SentralIncidentDetails> incidents = await _excelService.ConvertSentralIncidentReport(files.BasicFile, files.DetailFile, excludedDates, cancellationToken);
 
         // Do not run on dates that are in the excluded list to prevent from processing the same values over and over (e.g. during school holidays)

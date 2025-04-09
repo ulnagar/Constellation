@@ -9,6 +9,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
+using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.HistoricalAttendanceReport;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StudentAttendanceReport;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -90,4 +91,8 @@ public class ReportsModel : BasePageModel
         return File(fileRequest.Value.FileData, fileRequest.Value.FileType, fileRequest.Value.FileName);
     }
 
+    public async Task<IActionResult> OnPostHistoricAttendanceReport(HistoricalAttendanceReportSelection viewModel)
+    {
+        return RedirectToPage();
+    }
 }

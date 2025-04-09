@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
@@ -38,6 +39,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
     private readonly IPeriodRepository _periodRepository;
     private readonly ISentralGateway _gateway;
     private readonly IExcelService _excelService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GenerateHistoricalDailyAttendanceReportCommandHandler(
@@ -48,6 +50,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
         IPeriodRepository periodRepository,
         ISentralGateway gateway,
         IExcelService excelService,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _studentRepository = studentRepository;
@@ -57,6 +60,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
         _periodRepository = periodRepository;
         _gateway = gateway;
         _excelService = excelService;
+        _dateTime = dateTime;
         _logger = logger
             .ForContext<GenerateHistoricalDailyAttendanceReportCommand>();
     }
@@ -64,10 +68,15 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
     public async Task<Result<MemoryStream>> Handle(GenerateHistoricalDailyAttendanceReportCommand request, CancellationToken cancellationToken)
     {
         //TODO: R1.17.1: Calculate start and end dates based on Year/Term selection and the Sentral Calendar
-        DateTime startDateTime = request.StartDate.ToDateTime(TimeOnly.MinValue);
-        DateTime endDateTime = request.EndDate.ToDateTime(TimeOnly.MinValue);
+        Result<(DateOnly StartDate, DateOnly EndDate)> startDates = await _gateway.GetDatesForWeek(request.Year, request.Start.Term, request.Start.Week);
+        Result<(DateOnly StartDate, DateOnly EndDate)> endDates = await _gateway.GetDatesForWeek(request.Year, request.End.Term, request.End.Week);
 
-        List<Student> students = await _studentRepository.GetEnrolledForDates(request.StartDate, request.EndDate, cancellationToken);
+        DateOnly startDate = startDates.Value.StartDate;
+        DateOnly endDate = endDates.Value.EndDate;
+        DateTime startDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+        DateTime endDateTime = startDate.ToDateTime(TimeOnly.MinValue);
+
+        List<Student> students = await _studentRepository.GetEnrolledForDates(startDate, endDate, cancellationToken);
 
         _logger.Information("Found {students} students to process", students.Count);
 
@@ -85,7 +94,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
                 continue;
             }
 
-            Result<List<DateOnly>> enrolledDates = await _gateway.GetEnrolledDatesForStudent(sentralId, request.StartDate.Year.ToString(), request.StartDate, request.EndDate);
+            Result<List<DateOnly>> enrolledDates = await _gateway.GetEnrolledDatesForStudent(sentralId, request.Year, startDate, endDate);
 
             if (enrolledDates.IsFailure)
             {
@@ -107,7 +116,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
             Dictionary<DateOnly, string> justifiedAbsentDates = new();
 
             // Get active student enrolments for the period
-            List<Enrolment> enrolments = await _enrolmentRepository.GetHistoricalForStudent(student.Id, request.StartDate, request.EndDate, cancellationToken);
+            List<Enrolment> enrolments = await _enrolmentRepository.GetHistoricalForStudent(student.Id, startDate, endDate, cancellationToken);
 
             // Get offerings from enrolments
             List<Offering> offerings = await _offeringRepository.GetListFromIds(enrolments.Select(enrolment => enrolment.OfferingId).ToList(), cancellationToken);
@@ -181,7 +190,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
             }
 
             // Get whole absences for the student for the period
-            List<Absence> wholeAbsences = await _absenceRepository.GetStudentWholeAbsencesForDateRange(student.Id, request.StartDate, request.EndDate, cancellationToken);
+            List<Absence> wholeAbsences = await _absenceRepository.GetStudentWholeAbsencesForDateRange(student.Id, startDate, endDate, cancellationToken);
 
             _logger.Information("{student} had {absences} whole absences during period", student.Name.DisplayName, wholeAbsences.Count);
             List<SentralPeriodAbsenceDto> sentralAbsences = [];
@@ -189,7 +198,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
             // Only get Sentral Attendance absences for the student if there are any absences to confirm
             if (wholeAbsences.Count > 0)
             {
-                Result<List<SentralPeriodAbsenceDto>> sentralAbsencesRequest = await _gateway.GetAbsenceDataAsync(sentralId, request.StartDate.Year.ToString(), cancellationToken);
+                Result<List<SentralPeriodAbsenceDto>> sentralAbsencesRequest = await _gateway.GetAbsenceDataAsync(sentralId, request.Year, cancellationToken);
                 if (sentralAbsencesRequest.IsFailure)
                 {
                     _logger
