@@ -1,11 +1,13 @@
-﻿namespace Constellation.Infrastructure.Jobs;
+﻿#pragma warning disable CA2326
+namespace Constellation.Infrastructure.Jobs;
 
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Core.Primitives;
-using Constellation.Infrastructure.Persistence.ConstellationContext;
-using Constellation.Infrastructure.Persistence.ConstellationContext.Outbox;
+using Core.Primitives;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Persistence.ConstellationContext;
+using Persistence.ConstellationContext.Outbox;
 using Polly;
 using Polly.Retry;
 using Serilog;
@@ -28,7 +30,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
     public async Task StartJob(Guid jobId, CancellationToken token)
     {
-        var messages = await _context
+        List<OutboxMessage> messages = await _context
             .Set<OutboxMessage>()
             .Where(m => m.ProcessedOn == null && m.OccurredOn <= DateTime.Now)
             .OrderBy(m => m.OccurredOn)
@@ -37,7 +39,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
         foreach (OutboxMessage message in messages)
         {
-            var eventItem = JsonConvert
+            IEvent eventItem = JsonConvert
                 .DeserializeObject<IEvent>(
                     message.Content,
                     new JsonSerializerSettings
@@ -48,8 +50,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
             if (eventItem is null)
             {
-                // TODO: Handle properly
-                _logger.Warning("Failed to deserialize job: {@message}", message);
+                _logger.Error("Failed to deserialize job: {@message}", message);
 
                 continue;
             }
@@ -66,8 +67,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
             if (result.FinalException is not null)
             {
-                // TODO: Log error or report somewhere
-                _logger.Warning("Failed to process job {@job} with error {@error}", eventItem, result.FinalException);
+                _logger.Error("Failed to process job {@job} with error {@error}", eventItem, result.FinalException);
 
                 message.Error = result.FinalException.ToString();
             }

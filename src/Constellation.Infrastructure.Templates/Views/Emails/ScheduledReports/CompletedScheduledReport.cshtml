@@ -1,0 +1,14 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.ScheduledReports.CompletedScheduledReportViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.Recipient</p>
+
+<p>The report that you requested has been completed and is attached here.</p>

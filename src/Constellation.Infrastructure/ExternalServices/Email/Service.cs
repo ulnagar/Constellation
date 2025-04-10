@@ -27,6 +27,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Org.BouncyCastle.Cms;
 using System;
 using System.Net.Mail;
 using System.Threading;
@@ -40,6 +41,7 @@ using Templates.Views.Emails.Covers;
 using Templates.Views.Emails.Lessons;
 using Templates.Views.Emails.Reports;
 using Templates.Views.Emails.RollMarking;
+using Templates.Views.Emails.ScheduledReports;
 using Templates.Views.Emails.ThirdParty;
 using Templates.Views.Emails.WorkFlow;
 using Action = Core.Models.WorkFlow.Action;
@@ -67,6 +69,25 @@ public sealed class Service : IEmailService
         _razorService = razorService;
         _logger = logger.ForContext<IEmailService>();
         _configuration = configuration.Value;
+    }
+
+    public async Task ForwardCompletedScheduledReport(
+        EmailRecipient recipient,
+        Attachment attachment,
+        CancellationToken cancellationToken = default)
+    {
+        CompletedScheduledReportViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Scheduled Report",
+            Recipient = recipient.Name
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(CompletedScheduledReportViewModel.ViewLocation, viewModel);
+
+        await _emailSender.Send([recipient], EmailRecipient.NoReply, viewModel.Title, body, [ attachment ], cancellationToken);
     }
 
     public async Task SendAttendancePlanToAdmin(
@@ -150,8 +171,7 @@ public sealed class Service : IEmailService
             body: body,
             cancellationToken: cancellationToken);
     }
-
-
+    
     public async Task SendAcademicReportToNonResidentialParent(
         List<EmailRecipient> recipients, 
         Name studentName, 
@@ -180,7 +200,7 @@ public sealed class Service : IEmailService
 
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Reports/AcademicReportEmail.cshtml", viewModel);
 
-            await _emailSender.Send(recipients, null, viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, attachments, cancellationToken);
         }
     }
 
@@ -678,12 +698,21 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new();
+        List<EmailRecipient> toRecipients = new();
         foreach (string entry in notificationEmail.Recipients)
-            if (toRecipients.All(recipient => recipient.Value != entry))
-                toRecipients.Add(entry, entry);
+        {
+            if (toRecipients.Any(recipient => recipient.Email == entry))
+            {
+                continue;
+            }
 
-        await _emailSender.Send(toRecipients, null, $"Absence Explanation Received - {viewModel.StudentName}", body);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(entry, entry);
+
+            if (recipient.IsSuccess)
+                toRecipients.Add(recipient.Value);
+        }
+
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, $"Absence Explanation Received - {viewModel.StudentName}", body);
     }
 
     public async Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
@@ -713,12 +742,21 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel.ViewLocation, viewModel);
 
-        Dictionary<string, string> toRecipients = new();
+        List<EmailRecipient> toRecipients = new();
         foreach (string entry in notificationEmail.Recipients)
-            if (toRecipients.All(recipient => recipient.Value != entry))
-                toRecipients.Add(entry, entry);
+        {
+            if (toRecipients.Any(recipient => recipient.Email == entry))
+            {
+                continue;
+            }
 
-        await _emailSender.Send(toRecipients, null, $"Non-Residential Parent Absence Explanation Received - {viewModel.StudentName}", body);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(entry, entry);
+
+            if (recipient.IsSuccess)
+                toRecipients.Add(recipient.Value);
+        }
+
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, $"Non-Residential Parent Absence Explanation Received - {viewModel.StudentName}", body);
     }
 
     public async Task SendNewCoverEmail(
@@ -780,41 +818,6 @@ public sealed class Service : IEmailService
 
     }
 
-    public async Task SendNewCoverEmail(EmailDtos.CoverEmail resource)
-    {
-        NewCoverEmailViewModel viewModel = new()
-        {
-            ToName = resource.CoveringTeacherName,
-            Title = "Class Cover Information",
-            SenderName = _configuration.Covers.ContactName ?? string.Empty,
-            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
-            StartDate = resource.StartDate,
-            EndDate = resource.EndDate,
-            HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
-            Preheader = "",
-            ClassWithLink = resource.ClassesIncluded
-        };
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
-
-        Dictionary<string, string> toRecipients = new()
-        {
-            { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
-        };
-
-        Dictionary<string, string> ccRecipients = new();
-
-        foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
-            if (toRecipients.All(recipient => recipient.Value != entry.Value))
-                toRecipients.Add(entry.Key, entry.Value);
-
-        foreach (KeyValuePair<string, string> entry in resource.SecondaryRecipients)
-            if (ccRecipients.All(recipient => recipient.Value != entry.Value))
-                ccRecipients.Add(entry.Key, entry.Value);
-
-        await _emailSender.Send(toRecipients, ccRecipients, EmailRecipient.AuroraCollege.Email, $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
-    }
-
     public async Task SendUpdatedCoverEmail(
         ClassCover cover,
         Offering offering,
@@ -873,41 +876,6 @@ public sealed class Service : IEmailService
         }
     }
 
-    public async Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource)
-    {
-        UpdatedCoverEmailViewModel viewModel = new()
-        {
-            ToName = resource.CoveringTeacherName,
-            Title = "[UPDATED] Class Cover Information",
-            SenderName = _configuration.Covers.ContactName ?? string.Empty,
-            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
-            StartDate = resource.StartDate,
-            EndDate = resource.EndDate,
-            HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
-            Preheader = "",
-            ClassWithLink = resource.ClassesIncluded
-        };
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
-
-        Dictionary<string, string> toRecipients = new()
-        {
-            { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
-        };
-
-        Dictionary<string, string> ccRecipients = new();
-
-        foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
-            if (toRecipients.All(recipient => recipient.Value != entry.Value))
-                toRecipients.Add(entry.Key, entry.Value);
-
-        foreach (KeyValuePair<string, string> entry in resource.SecondaryRecipients)
-            if (ccRecipients.All(recipient => recipient.Value != entry.Value))
-                ccRecipients.Add(entry.Key, entry.Value);
-
-        await _emailSender.Send(toRecipients, ccRecipients, EmailRecipient.AuroraCollege.Email, $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
-    }
-
     public async Task SendCancelledCoverEmail(
         ClassCover cover,
         Offering offering,
@@ -960,41 +928,6 @@ public sealed class Service : IEmailService
 
             await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
         }
-    }
-
-    public async Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource)
-    {
-        CancelledCoverEmailViewModel viewModel = new()
-        {
-            ToName = resource.CoveringTeacherName,
-            Title = "[CANCELLED] Class Cover Information",
-            SenderName = _configuration.Covers.ContactName ?? string.Empty,
-            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
-            StartDate = resource.StartDate,
-            EndDate = resource.EndDate,
-            HasAdobeAccount = resource.CoveringTeacherAdobeAccount,
-            Preheader = "",
-            ClassWithLink = resource.ClassesIncluded
-        };
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
-
-        Dictionary<string, string> toRecipients = new()
-        {
-            { resource.CoveringTeacherName, resource.CoveringTeacherEmail }
-        };
-
-        Dictionary<string, string> ccRecipients = new();
-
-        foreach (KeyValuePair<string, string> entry in resource.ClassroomTeachers)
-            if (toRecipients.All(recipient => recipient.Value != entry.Value))
-                toRecipients.Add(entry.Key, entry.Value);
-
-        foreach (KeyValuePair<string, string> entry in resource.SecondaryRecipients)
-            if (ccRecipients.All(recipient => recipient.Value != entry.Value))
-                ccRecipients.Add(entry.Key, entry.Value);
-
-        await _emailSender.Send(toRecipients, ccRecipients, EmailRecipient.AuroraCollege.Email, $"Class Cover Information - {resource.StartDate.ToShortDateString()}", body, resource.Attachments);
     }
 
     public async Task SendLessonMissedEmail(LessonMissedNotificationEmail notification)
@@ -1125,10 +1058,9 @@ public sealed class Service : IEmailService
             Subject = courseName
         };
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { student.Name.DisplayName, student.EmailAddress.Email }
-        };
+        List<EmailRecipient> toRecipients = new();
+        Result<EmailRecipient> recipient = EmailRecipient.Create(student.Name.DisplayName, student.EmailAddress.Email);
+        toRecipients.Add(recipient.Value);
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
 
@@ -1152,7 +1084,10 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, EmailRecipient.NoReply, $"[Aurora College] Service Log Output - {notification.Source}", body);
     }
 
-    public async Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients)
+    public async Task SendDailyRollMarkingReport(
+        List<RollMarkingEmailDto> entries, 
+        DateOnly reportDate, 
+        Dictionary<string, string> recipients)
     {
         DailyReportEmailViewModel viewModel = new()
         {
@@ -1165,10 +1100,27 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, null, viewModel.Title, body);
+        List<EmailRecipient> toRecipients = new();
+
+        foreach (KeyValuePair<string, string> entry in recipients)
+        {
+            if (toRecipients.Any(recipient => recipient.Email == entry.Value))
+            {
+                continue;
+            }
+
+            Result<EmailRecipient> recipient = EmailRecipient.Create(entry.Key, entry.Value);
+
+            if (recipient.IsSuccess)
+                toRecipients.Add(recipient.Value);
+        }
+
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, viewModel.Title, body);
     }
 
-    public async Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients)
+    public async Task SendNoRollMarkingReport(
+        DateOnly reportDate, 
+        Dictionary<string, string> recipients)
     {
         DailyReportEmailViewModel viewModel = new()
         {
@@ -1180,7 +1132,22 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/NoReportEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, null, viewModel.Title, body);
+        List<EmailRecipient> toRecipients = new();
+
+        foreach (KeyValuePair<string, string> entry in recipients)
+        {
+            if (toRecipients.Any(recipient => recipient.Email == entry.Value))
+            {
+                continue;
+            }
+
+            Result<EmailRecipient> recipient = EmailRecipient.Create(entry.Key, entry.Value);
+
+            if (recipient.IsSuccess)
+                toRecipients.Add(recipient.Value);
+        }
+
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, viewModel.Title, body);
     }
 
     public async Task SendMagicLinkLoginEmail(MagicLinkEmail notification)
@@ -1200,23 +1167,28 @@ public sealed class Service : IEmailService
         await _emailSender.Send(notification.Recipients, EmailRecipient.NoReply, viewModel.Title, body);
     }
 
-    public async Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default)
+    public async Task SendMasterFileConsistencyReportEmail(
+        MemoryStream report, 
+        string emailAddress, 
+        CancellationToken cancellationToken = default)
     {
         string viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "", emailAddress }
-        };
+        List<EmailRecipient> toRecipients = new();
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(emailAddress, emailAddress);
+
+        if (recipient.IsSuccess)
+            toRecipients.Add(recipient.Value);
 
         List<Attachment> attachments = new()
         {
             new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
-        await _emailSender.Send(toRecipients, null, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
     }
 
     public async Task SendAwardCertificateParentEmail(

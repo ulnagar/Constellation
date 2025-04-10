@@ -1,13 +1,11 @@
 ﻿namespace Constellation.Application.Attendance.GenerateHistoricalDailyAttendanceReport;
 
 using Abstractions.Messaging;
-using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
-using System;
-using System.IO;
+using DTOs;
 
-public sealed record GenerateHistoricalDailyAttendanceReportCommand(
+public sealed record GenerateHistoricalDailyAttendanceReportQuery(
     string Year,
     SchoolTermWeek Start,
     SchoolTermWeek End)
-    : ICommand<MemoryStream>;
+    : IQuery<FileDto>;

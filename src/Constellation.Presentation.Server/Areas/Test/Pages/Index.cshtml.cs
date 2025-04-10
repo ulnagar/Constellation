@@ -41,15 +41,15 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnGetHistoricalReport()
     {
-        GenerateHistoricalDailyAttendanceReportCommand command = new("2024", new SchoolTermWeek(SchoolTerm.Term1, SchoolWeek.Week1), new SchoolTermWeek(SchoolTerm.Term2, SchoolWeek.Week10));
+        GenerateHistoricalDailyAttendanceReportQuery command = new("2024", new SchoolTermWeek(SchoolTerm.Term1, SchoolWeek.Week1), new SchoolTermWeek(SchoolTerm.Term2, SchoolWeek.Week10));
 
-        Result<MemoryStream> report = await _mediator.Send(command);
+        Result<FileDto> report = await _mediator.Send(command);
 
         if (report.IsFailure)
         {
             return Page();
         }
 
-        return File(report.Value, FileContentTypes.ExcelModernFile, "Sef Attendance Data.xlsx");
+        return File(report.Value.FileData, report.Value.FileType, report.Value.FileName);
     }
 }

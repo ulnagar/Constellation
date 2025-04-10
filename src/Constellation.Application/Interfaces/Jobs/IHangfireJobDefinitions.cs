@@ -34,6 +34,8 @@ public interface ICanvasAccessAuditJob : IHangfireJob { }
 
 public interface IProcessOutboxMessagesJob : IHangfireJob { }
 
+public interface IProcessScheduledReportsJob : IHangfireJob { }
+
 public interface IRollMarkingReportJob : IHangfireJob { }
 
 public interface ISchoolRegisterJob : IHangfireJob { }

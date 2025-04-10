@@ -1,5 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
+using Application.Attendance.GenerateHistoricalDailyAttendanceReport;
+using Application.ScheduledReports.CreateScheduledReport;
 using Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Common.PresentationModels;
@@ -11,6 +13,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.HistoricalAttendanceReport;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StudentAttendanceReport;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +96,35 @@ public class ReportsModel : BasePageModel
 
     public async Task<IActionResult> OnPostHistoricAttendanceReport(HistoricalAttendanceReportSelection viewModel)
     {
+        GenerateHistoricalDailyAttendanceReportQuery report = new(
+            viewModel.Year,
+            new(viewModel.StartTerm, viewModel.StartWeek),
+            new(viewModel.EndTerm, viewModel.EndWeek));
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(_currentUserService.UserName, _currentUserService.EmailAddress);
+
+        if (recipient.IsFailure)
+        {
+            // Log error
+
+            // Modal Error
+
+            return Page();
+        }
+
+        CreateScheduledReportCommand<GenerateHistoricalDailyAttendanceReportQuery> command = new(report, recipient.Value);
+
+        Result response = await _mediator.Send(command);
+
+        if (response.IsFailure)
+        {
+            // Log error
+
+            // Modal error
+
+            return Page();
+        }
+
         return RedirectToPage();
     }
 }

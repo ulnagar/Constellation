@@ -7,6 +7,7 @@ using Core.Abstractions.Clock;
 using Core.Models.SchoolContacts.Events;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Services;
 using Serilog;
@@ -75,11 +76,7 @@ internal sealed class SendNotificationToSchoolAdminOfSelfRegisteredContact
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "Aurora College IT Support", "support@aurora.nsw.edu.au" },
-            { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
-        };
+        List<EmailRecipient> toRecipients = [EmailRecipient.AuroraCollege, EmailRecipient.InfoTechTeam];
 
         await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "New School Contact registered", body, cancellationToken);
     }

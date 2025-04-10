@@ -7,6 +7,7 @@ using Constellation.Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using MimeKit;
 using Serilog;
 using System.Collections.Generic;
@@ -57,11 +58,7 @@ internal sealed class RequestContactRemovalCommandHandler
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        Dictionary<string, string> toRecipients = new()
-        {
-            { "Aurora College IT Support", "support@aurora.nsw.edu.au" },
-            { "Aurora College", "auroracoll-h.school@det.nsw.edu.au" }
-        };
+        List<EmailRecipient> toRecipients = [EmailRecipient.AuroraCollege, EmailRecipient.InfoTechTeam];
 
         MimeMessage response = await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "School Contact change requested", body, cancellationToken);
 

@@ -2,12 +2,15 @@
 
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.ValueObjects;
+using Extensions;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MimeKit.Text;
 using System.Net.Mail;
 using System.Net.Mime;
+using ContentType = System.Net.Mime.ContentType;
+using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 public class Gateway : IEmailGateway
 {
@@ -187,6 +190,26 @@ public class Gateway : IEmailGateway
             ccRecipients,
             bccRecipients,
             fromAddress,
+            subject,
+            body,
+            attachments,
+            null,
+            cancellationToken);
+    }
+
+    public Task<MimeMessage> Send(
+        List<EmailRecipient> toRecipients,
+        EmailRecipient fromRecipient,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            null,
+            null,
+            fromRecipient,
             subject,
             body,
             attachments,
@@ -446,32 +469,32 @@ public class Gateway : IEmailGateway
         string calendarInfo,
         CancellationToken cancellationToken = default)
     {
-        var id = Guid.NewGuid();
+        Guid id = Guid.NewGuid();
 
         _logger.Information("Sending email {id}", id);
 
-        var message = new MailMessage();
+        MailMessage message = new();
 
         if (fromAddress == null)
             message.From = new MailAddress("auroracoll-h.school@det.nsw.edu.au", "Aurora College");
         else
             message.From = new MailAddress(fromAddress, "Aurora College");
 
-        foreach (var recipient in toAddresses)
+        foreach (KeyValuePair<string, string> recipient in toAddresses)
         {
             _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Key, recipient.Value);
             message.To.Add(new MailAddress(recipient.Value, recipient.Key));
         }
 
         if (ccAddresses != null)
-            foreach (var recipient in ccAddresses)
+            foreach (KeyValuePair<string, string> recipient in ccAddresses)
             {
                 _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Key, recipient.Value);
                 message.CC.Add(new MailAddress(recipient.Value, recipient.Key));
             }
 
         if (bccAddresses != null)
-            foreach (var recipient in bccAddresses)
+            foreach (KeyValuePair<string, string> recipient in bccAddresses)
             {
                 _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Key, recipient.Value);
                 message.Bcc.Add(new MailAddress(recipient.Value, recipient.Key));
@@ -481,21 +504,22 @@ public class Gateway : IEmailGateway
         message.Subject = subject;
 
         // Body
-        var html = AlternateView.CreateAlternateViewFromString(body, null, MediaTypeNames.Text.Html);
+        AlternateView html = AlternateView.CreateAlternateViewFromString(body, null, MediaTypeNames.Text.Html);
         message.AlternateViews.Add(html);
 
         // Calendar Invite
-        var contentType = new System.Net.Mime.ContentType("text/calendar");
+        ContentType contentType = new("text/calendar");
 
-        var method = "";
-        foreach (var line in calendarInfo.Split(Environment.NewLine))
+        string method = "";
+        foreach (string line in calendarInfo.Split(Environment.NewLine))
         {
-            if (line.StartsWith("METHOD"))
+            if (line.StartsWith("METHOD", StringComparison.InvariantCultureIgnoreCase))
             {
-                var details = line.Split(':');
+                string[] details = line.Split(':');
                 method = details[1];
             }
         }
+
         contentType.Parameters.Add("method", method);
         contentType.Parameters.Add("name", "Meeting.ics");
         AlternateView ical = AlternateView.CreateAlternateViewFromString(calendarInfo, contentType);
@@ -505,7 +529,7 @@ public class Gateway : IEmailGateway
         // Attachments
         if (attachments != null)
         {
-            foreach (var attachment in attachments)
+            foreach (Attachment attachment in attachments)
             {
                 message.Attachments.Add(attachment);
             }
@@ -535,59 +559,58 @@ public class Gateway : IEmailGateway
         string calendarInfo,
         CancellationToken cancellationToken = default)
     {
-        var id = Guid.NewGuid();
+        Guid id = Guid.NewGuid();
 
         _logger.Information("Sending email {id}", id);
 
-        var message = new MimeMessage();
+        MimeMessage message = new();
 
-        if (string.IsNullOrWhiteSpace(fromAddress))
-            message.From.Add(new MailboxAddress("Aurora College", "auroracoll-h.school@det.nsw.edu.au"));
-        else
-            message.From.Add(new MailboxAddress("Aurora College", fromAddress));
+        message.From.Add(string.IsNullOrWhiteSpace(fromAddress)
+            ? new MailboxAddress("Aurora College", "auroracoll-h.school@det.nsw.edu.au")
+            : new MailboxAddress("Aurora College", fromAddress));
 
-        foreach (var recipient in toRecipients)
+        foreach (EmailRecipient recipient in toRecipients)
         {
             _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
-            message.To.Add(new MailboxAddress(recipient.Name, recipient.Email));
+            message.To.Add(recipient.ToMailboxAddress());
         }
 
         if (ccRecipients != null)
-            foreach (var recipient in ccRecipients)
+            foreach (EmailRecipient recipient in ccRecipients)
             {
                 _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Name, recipient.Email);
-                message.Cc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+                message.Cc.Add(recipient.ToMailboxAddress());
             }
 
         if (bccRecipients != null)
-            foreach (var recipient in bccRecipients)
+            foreach (EmailRecipient recipient in bccRecipients)
             {
                 _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Name, recipient.Email);
-                message.Bcc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+                message.Bcc.Add(recipient.ToMailboxAddress());
             }
 
         _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
 
-        var textPartBody = new TextPart(TextFormat.Html)
+        TextPart textPartBody = new(TextFormat.Html)
         {
             Text = body
         };
 
         if (attachments != null || calendarInfo != null)
         {
-            var multipart = new Multipart("mixed")
+            Multipart multipart = new("mixed")
             {
                 textPartBody
             };
 
             if (attachments != null)
             {
-                foreach (var item in attachments)
+                foreach (Attachment item in attachments)
                 {
-                    var attachment = new MimePart
+                    MimePart attachment = new()
                     {
-                        Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
+                        Content = new MimeContent(item.ContentStream),
                         ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
                         FileName = item.Name
@@ -601,7 +624,7 @@ public class Gateway : IEmailGateway
 
             if (calendarInfo != null)
             {
-                var ical = new TextPart("calendar")
+                TextPart ical = new("calendar")
                 {
                     ContentTransferEncoding = ContentEncoding.Base64,
                     Text = calendarInfo
@@ -648,56 +671,56 @@ public class Gateway : IEmailGateway
     string calendarInfo,
     CancellationToken cancellationToken = default)
     {
-        var id = Guid.NewGuid();
+        Guid id = Guid.NewGuid();
 
         _logger.Information("Sending email {id}", id);
 
-        var message = new MimeMessage();
+        MimeMessage message = new();
 
-        message.From.Add(new MailboxAddress(fromAddress.Name, fromAddress.Email));
+        message.From.Add(fromAddress.ToMailboxAddress());
         
-        foreach (var recipient in toRecipients)
+        foreach (EmailRecipient recipient in toRecipients)
         {
             _logger.Information("{id}: Adding {name} ({email}) to TO field.", id, recipient.Name, recipient.Email);
-            message.To.Add(new MailboxAddress(recipient.Name, recipient.Email));
+            message.To.Add(recipient.ToMailboxAddress());
         }
 
         if (ccRecipients != null)
-            foreach (var recipient in ccRecipients)
+            foreach (EmailRecipient recipient in ccRecipients)
             {
                 _logger.Information("{id}: Adding {name} ({email}) to CC field.", id, recipient.Name, recipient.Email);
-                message.Cc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+                message.Cc.Add(recipient.ToMailboxAddress());
             }
 
         if (bccRecipients != null)
-            foreach (var recipient in bccRecipients)
+            foreach (EmailRecipient recipient in bccRecipients)
             {
                 _logger.Information("{id}: Adding {name} ({email}) to BCC field.", id, recipient.Name, recipient.Email);
-                message.Bcc.Add(new MailboxAddress(recipient.Name, recipient.Email));
+                message.Bcc.Add(recipient.ToMailboxAddress());
             }
 
         _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
 
-        var textPartBody = new TextPart(TextFormat.Html)
+        TextPart textPartBody = new(TextFormat.Html)
         {
             Text = body
         };
 
         if (attachments != null || calendarInfo != null)
         {
-            var multipart = new Multipart("mixed")
+            Multipart multipart = new("mixed")
             {
                 textPartBody
             };
 
             if (attachments != null)
             {
-                foreach (var item in attachments)
+                foreach (Attachment item in attachments)
                 {
-                    var attachment = new MimePart
+                    MimePart attachment = new()
                     {
-                        Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
+                        Content = new MimeContent(item.ContentStream),
                         ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
                         FileName = item.Name
@@ -711,7 +734,7 @@ public class Gateway : IEmailGateway
 
             if (calendarInfo != null)
             {
-                var ical = new TextPart("calendar")
+                TextPart ical = new("calendar")
                 {
                     ContentTransferEncoding = ContentEncoding.Base64,
                     Text = calendarInfo
@@ -810,7 +833,7 @@ public class Gateway : IEmailGateway
                 {
                     var attachment = new MimePart
                     {
-                        Content = new MimeContent(item.ContentStream, ContentEncoding.Default),
+                        Content = new MimeContent(item.ContentStream),
                         ContentDisposition = new MimeKit.ContentDisposition(MimeKit.ContentDisposition.Attachment),
                         ContentTransferEncoding = ContentEncoding.Base64,
                         FileName = item.Name
@@ -862,7 +885,7 @@ public class Gateway : IEmailGateway
 
     private async Task Send(MailMessage message, CancellationToken cancellationToken = default)
     {
-        var mailKitMessage = (MimeMessage)message;
+        MimeMessage mailKitMessage = (MimeMessage)message;
 
         await PushToServer(mailKitMessage, cancellationToken);
     }
@@ -872,7 +895,7 @@ public class Gateway : IEmailGateway
         if (_logOnly)
             return;
 
-        using var client = new MailKit.Net.Smtp.SmtpClient();
+        using SmtpClient client = new();
         client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
         await client.ConnectAsync(

@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.Absences.ConvertResponseToAbsenceExplanation;
-using Constellation.Application.DTOs;
-using Constellation.Application.DTOs.EmailRequests;
+using Absences.ConvertAbsenceToAbsenceEntry;
+using Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Attendance;
@@ -12,12 +10,14 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
-using Constellation.Core.ValueObjects;
 using Core.Models.Assignments;
 using Core.Models.SchoolContacts;
 using Core.Models.Subjects;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
+using Core.ValueObjects;
+using DTOs;
+using DTOs.EmailRequests;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,8 +60,8 @@ public interface IEmailService
 
 
     // Attendance Emails
-    Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
-    Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
 
     // RollMarking Emails
@@ -70,12 +70,10 @@ public interface IEmailService
 
 
     // Cover Emails
-    Task SendCancelledCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
-    Task SendCancelledCoverEmail(EmailDtos.CoverEmail resource);
-    Task SendNewCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
-    Task SendNewCoverEmail(EmailDtos.CoverEmail resource);
-    Task SendUpdatedCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<System.Net.Mail.Attachment> attachments, CancellationToken cancellationToken = default);
-    Task SendUpdatedCoverEmail(EmailDtos.CoverEmail resource);
+    Task SendCancelledCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendNewCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task SendUpdatedCoverEmail(ClassCover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
+
 
     // Service Emails
     Task SendParentContactChangeReportEmail(MemoryStream report, CancellationToken cancellationToken = default);
@@ -114,4 +112,7 @@ public interface IEmailService
     // Attendance Plan Emails
     Task SendAttendancePlanToAdmin(List<EmailRecipient> recipients, AttendancePlan plan, CancellationToken cancellationToken = default);
     Task SendAttendancePlanRejectedNotificationToSchool(List<EmailRecipient> recipients, AttendancePlan plan, string comment, CancellationToken cancellationToken = default);
+
+    // Scheduled Reports Emails
+    Task ForwardCompletedScheduledReport(EmailRecipient recipient, Attachment attachment, CancellationToken cancellationToken = default);
 }

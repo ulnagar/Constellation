@@ -18,6 +18,7 @@ using Constellation.Core.Models.Timetables.Repositories;
 using Core.Models.Enrolments;
 using Core.Models.Students.Enums;
 using Core.Shared;
+using Helpers;
 using Interfaces.Gateways;
 using Serilog;
 using System;
@@ -29,8 +30,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
-: ICommandHandler<GenerateHistoricalDailyAttendanceReportCommand, MemoryStream>
+internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
+: IQueryHandler<GenerateHistoricalDailyAttendanceReportQuery, FileDto>
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
@@ -42,7 +43,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
-    public GenerateHistoricalDailyAttendanceReportCommandHandler(
+    public GenerateHistoricalDailyAttendanceReportQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IEnrolmentRepository enrolmentRepository,
@@ -62,12 +63,11 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
         _excelService = excelService;
         _dateTime = dateTime;
         _logger = logger
-            .ForContext<GenerateHistoricalDailyAttendanceReportCommand>();
+            .ForContext<GenerateHistoricalDailyAttendanceReportQuery>();
     }
 
-    public async Task<Result<MemoryStream>> Handle(GenerateHistoricalDailyAttendanceReportCommand request, CancellationToken cancellationToken)
+    public async Task<Result<FileDto>> Handle(GenerateHistoricalDailyAttendanceReportQuery request, CancellationToken cancellationToken)
     {
-        //TODO: R1.17.1: Calculate start and end dates based on Year/Term selection and the Sentral Calendar
         Result<(DateOnly StartDate, DateOnly EndDate)> startDates = await _gateway.GetDatesForWeek(request.Year, request.Start.Term, request.Start.Week);
         Result<(DateOnly StartDate, DateOnly EndDate)> endDates = await _gateway.GetDatesForWeek(request.Year, request.End.Term, request.End.Week);
 
@@ -288,6 +288,13 @@ internal sealed class GenerateHistoricalDailyAttendanceReportCommandHandler
         _logger.Information("Building export file");
         MemoryStream report = await _excelService.CreateSefAttendanceDataExport(records, cancellationToken);
 
-        return report;
+        FileDto file = new()
+        {
+            FileData = report.ToArray(), 
+            FileName = "Historical Attendance Report.xlsx", 
+            FileType = FileContentTypes.ExcelModernFile
+        };
+
+        return file;
     }
 }

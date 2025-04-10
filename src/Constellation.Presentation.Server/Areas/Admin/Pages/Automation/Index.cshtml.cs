@@ -42,6 +42,7 @@ public class IndexModel : BasePageModel
         JobDefinitions.Add(new(typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 5 * * 1-6"));
         JobDefinitions.Add(new(typeof(IMandatoryTrainingScanJob), nameof(IMandatoryTrainingScanJob), "0 12 * * 1"));
         JobDefinitions.Add(new(typeof(IProcessOutboxMessagesJob), nameof(IProcessOutboxMessagesJob), "* 2-22 * * *"));
+        JobDefinitions.Add(new(typeof(IProcessScheduledReportsJob), nameof(IProcessScheduledReportsJob), "* 7-22 * *"));
         JobDefinitions.Add(new(typeof(IGroupTutorialExpiryScanJob), nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5"));
         JobDefinitions.Add(new(typeof(IAssignmentSubmissionJob), nameof(IAssignmentSubmissionJob), "30 12 * * *"));
         JobDefinitions.Add(new(typeof(IAttachmentManagementJob), nameof(IAttachmentManagementJob), "0 4 * * *"));
