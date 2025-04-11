@@ -6,5 +6,5 @@ using MimeKit;
 public static class EmailRecipientExtensions
 {
     public static MailboxAddress ToMailboxAddress(this EmailRecipient recipient) =>
-        new(recipient.Email, recipient.Name);
+        new(recipient.Name, recipient.Email);
 }
