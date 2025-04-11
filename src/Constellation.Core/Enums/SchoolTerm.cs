@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Enums;
 
 using Constellation.Core.Common;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 public sealed class SchoolTerm : StringEnumeration<SchoolTerm>
@@ -14,10 +15,11 @@ public sealed class SchoolTerm : StringEnumeration<SchoolTerm>
 
     public int SortOrder { get; init; }
 
-    private SchoolTerm(string value, int order)
+    [JsonConstructor]
+    private SchoolTerm(string value, int sortOrder)
         : base(value, value)
     {
-        SortOrder = order;
+        SortOrder = sortOrder;
     }
 
     public static IEnumerable<SchoolTerm> GetOptions => GetEnumerable;

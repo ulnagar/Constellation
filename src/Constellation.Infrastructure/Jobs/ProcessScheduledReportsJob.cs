@@ -49,44 +49,55 @@ internal sealed class ProcessScheduledReportsJob : IProcessScheduledReportsJob
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        IQuery<FileDto> reportDefinition = message.GetQuery<IQuery<FileDto>>();
-
-        if (reportDefinition is null)
+        try
         {
-            _logger.Error("Failed to deserialize scheduled report: {@message}", message);
+            IQuery<FileDto> reportDefinition = message.GetQuery<IQuery<FileDto>>();
 
-            message.UpdateStatus(Result.Failure(new ("Serialization.Deserialize.Failed", "Failed to deserialize scheduled report")));
+            if (reportDefinition is null)
+            {
+                _logger.Error("Failed to deserialize scheduled report: {@message}", message);
+
+                message.UpdateStatus(Result.Failure(new("Serialization.Deserialize.Failed", "Failed to deserialize scheduled report")));
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return;
+            }
+
+            Result<FileDto> file = await _publisher.Send(reportDefinition, cancellationToken);
+
+            if (file.IsFailure)
+            {
+                _logger
+                    .ForContext("Query", reportDefinition, true)
+                    .ForContext(nameof(Error), file.Error, true)
+                    .Error("Failed to process scheduled report with error");
+
+                message.UpdateStatus(file);
+
+                await _context.SaveChangesAsync(cancellationToken);
+
+                return;
+            }
+
+            // Email report
+            MemoryStream stream = new(file.Value.FileData);
+            Attachment attachment = new(stream, file.Value.FileName, file.Value.FileType);
+
+            await _emailService.ForwardCompletedScheduledReport(message.ForwardTo, attachment, cancellationToken);
+
+            attachment.Dispose();
+            
+            message.UpdateStatus(Result.Success());
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            _logger.Error("Failed to run scheduled report: {@message}", e.Message);
+
+            message.UpdateStatus(Result.Failure(new(e.GetType().ToString(), e.Message)));
 
             await _context.SaveChangesAsync(cancellationToken);
-
-            return;
         }
-
-        Result<FileDto> file = await _publisher.Send(reportDefinition, cancellationToken);
-
-        if (file.IsFailure)
-        {
-            _logger
-                .ForContext("Query", reportDefinition, true)
-                .ForContext(nameof(Error), file.Error, true)
-                .Error("Failed to process scheduled report with error");
-
-            message.UpdateStatus(file);
-
-            await _context.SaveChangesAsync(cancellationToken);
-
-            return;
-        }
-
-        // Email report
-        MemoryStream stream = new(file.Value.FileData);
-        Attachment attachment = new(stream, file.Value.FileName, file.Value.FileType);
-
-        await _emailService.ForwardCompletedScheduledReport(message.ForwardTo, attachment, cancellationToken);
-
-        attachment.Dispose();
-
-        message.UpdateStatus(Result.Success());
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }
