@@ -1,9 +1,11 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GenerateHistoricalDailyAttendanceReport;
+using Application.Interfaces.Gateways;
 using BaseModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Helpers;
+using Constellation.Application.Interfaces.Gateways.PowershellGateway;
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Services;
@@ -12,20 +14,24 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Collections.Generic;
+using System.Security;
 
 public class IndexModel : BasePageModel
 {
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IPowershellGateway _gateway;
     private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
         ICurrentUserService currentUserService,
+        IPowershellGateway gateway,
         ILogger logger)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;
+        _gateway = gateway;
         _logger = logger;
     }
 
@@ -36,7 +42,8 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-
+        //_gateway.Connect("", new SecureString());
+        _gateway.GetTeams("");
     }
 
     public async Task<IActionResult> OnGetHistoricalReport()

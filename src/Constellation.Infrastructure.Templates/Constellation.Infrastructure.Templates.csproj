@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <Configurations>Debug;Release</Configurations>
+    <AssemblyVersion>1.0.4.25104</AssemblyVersion>
   </PropertyGroup>
 
 	<ItemGroup>

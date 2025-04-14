@@ -116,7 +116,7 @@ public static class ServicesRegistration
         services.AddScoped(typeof(IJobDispatcherService<>), typeof(JobDispatcherService<>));
 
         // Add External Service gateways
-
+        
         services.AddCanvasExternalService(configuration);
         services.AddDoEDataServicesGateway(configuration);
         services.AddEmailExternalService(configuration);
@@ -125,6 +125,7 @@ public static class ServicesRegistration
         services.AddSentralExternalService(configuration);
         services.AddSMSExternalService(configuration, environment);
         services.AddTeamsExternalService(configuration);
+        services.AddPowershellExternalService(configuration);
 
         // Add Email Template Engine
 
