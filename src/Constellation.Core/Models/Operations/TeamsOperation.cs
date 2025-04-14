@@ -34,5 +34,11 @@ public abstract record CoverTeamsOperation : TeamsOperation
 public sealed record CasualCoverTeamsOperation : CoverTeamsOperation
 {
     public CasualId CasualId { get; init; }
-    public string CasualName { get; init; }
+    public string Name { get; init; }
+}
+
+public sealed record TeacherCoverTeamsOperation : CoverTeamsOperation
+{
+    public string StaffId { get; init; }
+    public string Name { get; init; }
 }
