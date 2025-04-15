@@ -1,9 +1,9 @@
 ﻿#pragma warning disable CA1002
 namespace Constellation.Infrastructure.ExternalServices.Powershell;
 
-using Application.Exceptions;
 using Application.Interfaces.Gateways.PowershellGateway.Models;
 using Constellation.Application.Interfaces.Gateways.PowershellGateway;
+using Microsoft.Extensions.Options;
 using Microsoft.PowerShell;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
@@ -14,146 +14,95 @@ using System.Security;
 
 public class Gateway : IPowershellGateway
 {
+    private readonly PowershellGatewayConfiguration _settings;
     private readonly Runspace _runspace;
-
-    private string Username { get; init; }
-    private SecureString Password { get; init; }
-
-    public Gateway()
+    
+    public Gateway(
+        IOptions<PowershellGatewayConfiguration> settings)
     {
+        _settings = settings.Value;
+
         InitialSessionState initial = InitialSessionState.CreateDefault();
         initial.ExecutionPolicy = ExecutionPolicy.Unrestricted;
-
-        //if (OperatingSystem.IsWindows())
-        //{
-        //    bool imported = false;
-        //    string? paths = Environment.GetEnvironmentVariable("PSModulePath");
-        //    if (paths is not null)
-        //    {
-        //        List<string> locations = paths.Split(';').ToList();
-        //        foreach (string location in locations)
-        //        {
-        //            string path = $@"{location}\MicrosoftTeams\6.9.0";
-
-        //            if (Directory.Exists(Environment.ExpandEnvironmentVariables(path)))
-        //            {
-        //                initial.ImportPSModulesFromPath(Environment.ExpandEnvironmentVariables(path));
-        //                imported = true;
-        //            }
-        //        }
-        //    }
-
-        //    if (imported is false)
-        //    {
-        //        throw new ModuleNotFoundException("Could not locate the MicrosoftTeams powershell module in any of the PSModulePath environment paths.");
-        //    }
-        //}
 
         _runspace = RunspaceFactory.CreateRunspace(initial);
         _runspace.Open();
 
-        PowerShell ps = PowerShell.Create(_runspace);
+        using PowerShell ps = PowerShell.Create(_runspace);
         ps.AddCommand("Import-Module")
             .AddParameter("Name", "MicrosoftTeams")
             .Invoke();
-
-        ps.Dispose();
-
-        Username = "";
-        Password = new NetworkCredential("", "").SecurePassword;
     }
 
     public void Connect(string username, SecureString password)
     {
-        PowerShell ps = PowerShell.Create(_runspace);
+        using PowerShell ps = PowerShell.Create(_runspace);
 
-        IEnumerable<PSModuleInfo> modules = ps
-            .AddCommand("Get-Module")
-            .Invoke<PSModuleInfo>();
+        SecureString securePassword = new NetworkCredential("", _settings.Password).SecurePassword;
 
-        PSCredential credential = new(Username, Password);
+        PSCredential credential = new(_settings.Username, securePassword);
 
         ps.Streams.Error.DataAdded += ErrorEventHandler;
 
         //ps.Runspace = _runspace;
         ps.AddStatement()
             .AddCommand("Connect-MicrosoftTeams")
-            .AddParameter("Credential", credential);
-
-        ps.Invoke();
-
-        ps.Dispose();
+            .AddParameter("Credential", credential)
+            .Invoke();
     }
 
     public List<Team> GetTeams(string userEmail)
     {
-        PowerShell ps = PowerShell.Create(_runspace);
-
+        using PowerShell ps = PowerShell.Create(_runspace);
+        
         ps.Streams.Error.DataAdded += ErrorEventHandler;
-
-        ps.AddStatement()
+        
+        Collection<PSObject> results = ps
             .AddCommand("Get-Team")
-            .AddParameter("User", userEmail)
-            .AddParameter("Archived", false);
-
-        Collection<PSObject> results = ps.Invoke();
-
-        ps.Dispose();
-
+                .AddParameter("GroupId", "f6422f7a-e908-40bc-b623-027c3f312073")
+                //.AddParameter("User", _settings.Username)
+                //.AddParameter("Archived", false)
+            .Invoke<PSObject>();
+        
         return ConvertObjects<Team>(results);
     }
 
     public List<TeamMember> GetTeamMembers(string groupId)
     {
-        PowerShell ps = PowerShell.Create();
+        using PowerShell ps = PowerShell.Create(_runspace);
 
         ps.Streams.Error.DataAdded += ErrorEventHandler;
 
-        ps.Runspace = _runspace;
-        ps.AddStatement()
-            .AddCommand("Get-TeamUser")
-            .AddParameter("GroupId", groupId);
+        Collection<PSObject> results = ps.AddCommand("Get-TeamUser")
+            .AddParameter("GroupId", groupId)
+            .Invoke<PSObject>();
 
-        Collection<PSObject> results = ps.Invoke();
-        
-        ps.Dispose();
-        
         return ConvertObjects<TeamMember>(results);
     }
 
     public List<TeamChannel> GetChannels(string groupId)
     {
-        PowerShell ps = PowerShell.Create();
+        using PowerShell ps = PowerShell.Create(_runspace);
 
         ps.Streams.Error.DataAdded += ErrorEventHandler;
 
-        ps.Runspace = _runspace;
-        ps.AddStatement()
-            .AddCommand("Get-TeamAllChannel")
-            .AddParameter("GroupId", groupId);
-
-        Collection<PSObject> results = ps.Invoke();
-
-        ps.Dispose();
-
+        Collection<PSObject> results = ps.AddCommand("Get-TeamAllChannel")
+            .AddParameter("GroupId", groupId)
+            .Invoke();
+        
         return ConvertObjects<TeamChannel>(results);
     }
 
     public List<TeamMember> GetChannelMembers(string groupId, string channelName)
     {
-        PowerShell ps = PowerShell.Create();
+        using PowerShell ps = PowerShell.Create(_runspace);
 
         ps.Streams.Error.DataAdded += ErrorEventHandler;
 
-        ps.Runspace = _runspace;
-        ps.AddStatement()
-            .AddCommand("Get-TeamChannelUser")
+        Collection<PSObject> results = ps.AddCommand("Get-TeamChannelUser")
             .AddParameter("GroupId", groupId)
-            .AddParameter("DisplayName", channelName);
-
-        Collection<PSObject> results = ps.Invoke();
-
-        ps.Dispose();
+            .AddParameter("DisplayName", channelName)
+            .Invoke<PSObject>();
 
         return ConvertObjects<TeamMember>(results);
     }

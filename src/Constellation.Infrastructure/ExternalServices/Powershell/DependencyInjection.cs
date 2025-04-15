@@ -8,6 +8,9 @@ public static class PowershellServicesRegistration
 {
     public static IServiceCollection AddPowershellExternalService(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOptions<PowershellGatewayConfiguration>();
+        services.Configure<PowershellGatewayConfiguration>(configuration.GetSection(PowershellGatewayConfiguration.Section));
+
         services.AddScoped<IPowershellGateway, Gateway>();
 
         return services;

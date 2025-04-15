@@ -1,13 +1,23 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways.PowershellGateway.Models;
 
+using Newtonsoft.Json;
 using System;
 
 public sealed class TeamMember : IEquatable<TeamMember>
 {
+    [JsonProperty("GroupId")]
     public Guid GroupId { get; internal set; }
+
+    [JsonProperty("UserId")]
     public Guid UserId { get; internal set; }
+
+    [JsonProperty("User")]
     public string User { get; internal set; } = string.Empty;
+
+    [JsonProperty("Name")]
     public string Name { get; internal set; } = string.Empty;
+
+    [JsonProperty("Role")]
     public TeamMemberRole Role { get; internal set; }
 
     public bool Equals(TeamMember? other)

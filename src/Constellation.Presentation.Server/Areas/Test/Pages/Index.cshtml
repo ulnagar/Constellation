@@ -3,7 +3,12 @@
 
 <h2>Test Page</h2>
 
-<table class="table table-bordered table-striped">
+@foreach (var line in Model.Outputs)
+{
+    <span>@line</span><br />
+}
+
+@* <table class="table table-bordered table-striped">
     @foreach (var date in Model.AbsenceDates)
     {
         <tr>
@@ -22,4 +27,4 @@
             </td>
         </tr>
     }
-</table>
+</table> *@
