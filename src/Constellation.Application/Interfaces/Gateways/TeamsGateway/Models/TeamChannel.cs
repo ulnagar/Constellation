@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Interfaces.Gateways.PowershellGateway.Models;
+﻿namespace Constellation.Application.Interfaces.Gateways.TeamsGateway.Models;
 
 using Newtonsoft.Json;
 using System;

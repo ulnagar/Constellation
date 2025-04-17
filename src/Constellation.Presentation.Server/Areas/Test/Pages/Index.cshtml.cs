@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
 using Application.Attendance.GenerateHistoricalDailyAttendanceReport;
-using Application.Interfaces.Gateways.PowershellGateway.Models;
+using Application.Interfaces.Gateways.TeamsGateway;
+using Application.Interfaces.Gateways.TeamsGateway.Models;
 using Application.Teams.GetTeamMembershipById;
 using BaseModels;
 using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Gateways.PowershellGateway;
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Repositories;
@@ -22,14 +22,14 @@ public class IndexModel : BasePageModel
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ITeamRepository _teamRepository;
-    private readonly IPowershellGateway _gateway;
+    private readonly ITeamsGateway _gateway;
     private readonly ILogger _logger;
 
     public IndexModel(
         IMediator mediator,
         ICurrentUserService currentUserService,
         ITeamRepository teamRepository,
-        IPowershellGateway gateway,
+        ITeamsGateway gateway,
         ILogger logger)
     {
         _mediator = mediator;

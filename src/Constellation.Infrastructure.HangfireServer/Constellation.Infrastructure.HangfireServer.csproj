@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
-	<AssemblyVersion>1.0.25105.5</AssemblyVersion>
+	<AssemblyVersion>1.0.25107.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

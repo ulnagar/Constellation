@@ -1,10 +1,10 @@
-﻿namespace Constellation.Application.Interfaces.Gateways.PowershellGateway;
+﻿namespace Constellation.Application.Interfaces.Gateways.TeamsGateway;
 
 using Models;
 using System.Collections.Generic;
 using System.Security;
 
-public interface IPowershellGateway
+public interface ITeamsGateway
 {
     void Connect(string username, SecureString password);
 

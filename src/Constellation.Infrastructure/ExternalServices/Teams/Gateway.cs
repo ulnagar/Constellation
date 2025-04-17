@@ -1,8 +1,9 @@
 ﻿#pragma warning disable CA1002
-namespace Constellation.Infrastructure.ExternalServices.Powershell;
+namespace Constellation.Infrastructure.ExternalServices.Teams;
 
-using Application.Interfaces.Gateways.PowershellGateway.Models;
-using Constellation.Application.Interfaces.Gateways.PowershellGateway;
+using Application.Interfaces.Configuration;
+using Constellation.Application.Interfaces.Gateways.TeamsGateway;
+using Constellation.Application.Interfaces.Gateways.TeamsGateway.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.PowerShell;
 using Newtonsoft.Json;
@@ -12,13 +13,13 @@ using System.Management.Automation.Runspaces;
 using System.Net;
 using System.Security;
 
-public class Gateway : IPowershellGateway
+public class Gateway : ITeamsGateway
 {
-    private readonly PowershellGatewayConfiguration _settings;
+    private readonly TeamsGatewayConfiguration _settings;
     private readonly Runspace _runspace;
     
     public Gateway(
-        IOptions<PowershellGatewayConfiguration> settings)
+        IOptions<TeamsGatewayConfiguration> settings)
     {
         _settings = settings.Value;
 

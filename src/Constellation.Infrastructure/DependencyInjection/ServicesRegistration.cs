@@ -125,7 +125,6 @@ public static class ServicesRegistration
         services.AddSentralExternalService(configuration);
         services.AddSMSExternalService(configuration, environment);
         services.AddTeamsExternalService(configuration);
-        services.AddPowershellExternalService(configuration);
 
         // Add Email Template Engine
 
