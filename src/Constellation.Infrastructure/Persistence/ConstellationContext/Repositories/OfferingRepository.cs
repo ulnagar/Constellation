@@ -81,6 +81,7 @@ public class OfferingRepository : IOfferingRepository
             .Set<Offering>()
             .Where(offering =>
                 offering.Teachers.Any(teacher =>
+                    teacher.Type == AssignmentType.ClassroomTeacher &&
                     teacher.StaffId == StaffId &&
                     !teacher.IsDeleted) &&
                 offering.StartDate <= _dateTime.Today &&

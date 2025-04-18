@@ -128,6 +128,23 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
                 cover.OfferingId == offeringId)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<ClassCover>> GetCurrentForStaff(
+        string staffId,
+        CancellationToken cancellationToken = default)
+    {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        return await _context
+            .Set<ClassCover>()
+            .Where(cover =>
+                !cover.IsDeleted &&
+                cover.StartDate <= today &&
+                cover.EndDate >= today &&
+                cover.TeacherType == CoverTeacherType.Staff &&
+                cover.TeacherId == staffId)
+            .ToListAsync(cancellationToken);
+    }
+
     public void Insert(ClassCover cover) =>
         _context.Set<ClassCover>().Add(cover);
 }

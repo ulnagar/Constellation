@@ -109,6 +109,17 @@ public class PeriodRepository : IPeriodRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<Period>> GetByWeekAndDay(
+        PeriodWeek week,
+        PeriodDay day,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Period>()
+            .Where(period =>
+                period.Week == week &&
+                period.Day == day)
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Period>> GetAll(CancellationToken cancellationToken = default) =>
         await _context
             .Set<Period>()

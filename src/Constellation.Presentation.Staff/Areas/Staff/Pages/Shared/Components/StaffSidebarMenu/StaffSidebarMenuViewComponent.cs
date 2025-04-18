@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu;
 
+using Application.Extensions;
+using Application.Timetables.GetStaffDailyTimetableData;
 using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
@@ -8,6 +10,8 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
+using Core.Models.Timetables.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,15 +19,18 @@ public class StaffSidebarMenuViewComponent : ViewComponent
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IStaffRepository _staffRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ISender _mediator;
 
     public StaffSidebarMenuViewComponent(
         ICurrentUserService currentUserService,
         IStaffRepository staffRepository,
+        IDateTimeProvider dateTime,
         ISender mediator)
     {
         _currentUserService = currentUserService;
         _staffRepository = staffRepository;
+        _dateTime = dateTime;
         _mediator = mediator;
     }
 
@@ -74,6 +81,20 @@ public class StaffSidebarMenuViewComponent : ViewComponent
         if (trainingExpiringSoonRequest.IsSuccess)
             model.ExpiringTraining = trainingExpiringSoonRequest.Value;
 
+        Result<List<StaffDailyTimetableResponse>> timetable = await _mediator.Send(new GetStaffDailyTimetableDataQuery(model.StaffId));
+
+        if (timetable.IsFailure)
+            return model;
+
+        DateOnly today = _dateTime.Today;
+        int dayNumber = today.GetDayNumber();
+        PeriodWeek week = PeriodWeek.FromDayNumber(dayNumber);
+        PeriodDay day = PeriodDay.FromDayNumber(dayNumber);
+
+        model.Day = day;
+        model.Week = week;
+        model.Periods = timetable.Value;
+        
         return model;
     }
 }
