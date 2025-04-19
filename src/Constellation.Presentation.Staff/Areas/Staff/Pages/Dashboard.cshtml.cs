@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
+using System.Reflection;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
@@ -45,6 +46,8 @@ public class DashboardModel : BasePageModel
 
     public string UserName { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
+
+    public string VersionLabel { get; set; } = string.Empty;
     
     public IReadOnlyList<StocktakeEventResponse> ActiveStocktakeEvents { get; set; } =
         new List<StocktakeEventResponse>();
@@ -69,7 +72,9 @@ public class DashboardModel : BasePageModel
 
         Result<List<StocktakeEventResponse>>? stocktakeEvents = await _mediator.Send(new GetCurrentStocktakeEventsQuery(), cancellationToken);
         ActiveStocktakeEvents = stocktakeEvents.IsSuccess ? stocktakeEvents.Value : new List<StocktakeEventResponse>();
-        
+
+        VersionLabel = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
         return Page();
     }
 

@@ -7,6 +7,7 @@ using System.Linq;
 
 public class PeriodDay : IntEnumeration<PeriodDay>, IComparable<PeriodDay>
 {
+    public static readonly PeriodDay Unknown = new(0, "Unknown");
     public static readonly PeriodDay Monday = new(1, "Monday");
     public static readonly PeriodDay Tuesday = new(2, "Tuesday");
     public static readonly PeriodDay Wednesday = new(3, "Wednesday");
@@ -29,11 +30,14 @@ public class PeriodDay : IntEnumeration<PeriodDay>, IComparable<PeriodDay>
             2 or 7 => Tuesday,
             3 or 8 => Wednesday,
             4 or 9 => Thursday,
-            5 or 10 => Friday
+            5 or 10 => Friday,
+            _ => Unknown
         };
 
     public static IEnumerable<PeriodDay> GetOptions 
-        => Enumerations.Select(entry => entry.Value);
+        => Enumerations
+            .Select(entry => entry.Value)
+            .Where(entry => entry.Value > 0);
 
     public int CompareTo(PeriodDay other) =>
         Value.CompareTo(other.Value);

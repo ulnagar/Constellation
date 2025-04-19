@@ -32,9 +32,16 @@
 </div>
 
 <div class="quick-links">
-    <h3 class="text-center m-2 mb-3">Recent Updates</h3>
+    <h3 class="text-center m-2 mb-1">Recent Updates</h3>
     
+    <div class="text-center mb-3">
+        <div class="text-muted">Version: @Model.VersionLabel</div>
+        <a asp-page="/ChangeLog" asp-area="" class="btn btn-sm btn-warning">Changelog</a>
+    </div>
+
     <vc:show-dashboard-updates></vc:show-dashboard-updates>
+    
+    <span class="transparent_gradient"></span>
 </div>
 
 @section Scripts

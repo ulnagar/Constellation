@@ -6,7 +6,7 @@
     var module = segments[1];
 }
 
-<nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+<nav id="accordion" class="d-md-block bg-light sidebar">
     <div class="sidebar-sticky pt-3">
         <div class="card">
             <div class="card-header" id="attendanceHeading">
@@ -17,7 +17,7 @@
 
             <div id="attendance" class="collapse @(module == "Attendance" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_Absences ? "active" : "")" asp-page="/StudentAdmin/Attendance/Absences/Index" asp-area="Staff">
                                 Absences
@@ -52,7 +52,7 @@
 
             <div id="awards" class="collapse @(module == "Awards" ? "show" : "")" aria-labelledby="awardsHeading" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.StudentAdmin_Awards_List ? "active" : "")" asp-page="/StudentAdmin/Awards/Index" asp-area="Staff">
                                 List
@@ -87,7 +87,7 @@
 
             <div id="consent" class="collapse @(module == "Consent" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.StudentAdmin_Consent_Applications ? "active" : "")" asp-page="/StudentAdmin/Consent/Applications/Index" asp-area="Staff">
                                 Applications
@@ -112,7 +112,7 @@
 
             <div id="reports" class="collapse @(module == "Reports" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.StudentAdmin_Reports_Academic ? "active" : "")" asp-page="/StudentAdmin/Reports/Academic/Index" asp-area="Staff">
                                 Academic Reports

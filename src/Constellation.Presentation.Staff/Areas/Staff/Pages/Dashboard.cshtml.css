@@ -1,16 +1,30 @@
 ﻿.quick-links {
-    width: 27%;
+    position: sticky;
+    top: 0;
+    width: 20%;
     margin-left: 1.5%;
     padding-left: 1.5%;
     float: right;
     border-left: 2px solid orange;
-    height: 100%;
+    height: calc(100vh - 62px - 2rem);
     overflow: hidden;
 }
 
+.transparent_gradient {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8vw;
+    background: linear-gradient(180deg, transparent 0, white 100%);
+}
+
 .main-content {
-    width: 70%;
+    width: 78%;
     float: left;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 
 .page-heading {

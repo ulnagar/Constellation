@@ -73,9 +73,11 @@
     <div id="main-container" class="container-fluid">
         @if (activePageAvailable)
         {
-            <div class="row sidebar-layout">
-                <vc:staff-sidebar-menu active-page="@activePage!.ToString()"></vc:staff-sidebar-menu>
-                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 pt-md-3">
+            <div class="sidebar-layout d-flex">
+                <div class="sidebar-container">
+                    <vc:staff-sidebar-menu active-page="@activePage!.ToString()" />
+                </div>
+                <main role="main" class="ml-sm-auto px-md-4 pt-md-3">
                     @RenderBody()
                 </main>
             </div>
@@ -98,10 +100,10 @@
             </script>
         }
     </div>
-
+@* 
     <footer class="footer fixed-bottom">
         <vc:page-footer/>
-    </footer>
+    </footer> *@
 
     <script src="~/js/staff.js" asp-append-version="true"></script>
     <script src="~/js/maps.js" asp-append-version="true"></script>

@@ -6,7 +6,7 @@
     var module = segments[1];
 }
 
-<nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+<nav id="accordion" class="d-md-block bg-light sidebar">
     <div class="sidebar-sticky pt-3">
         <div class="card">
             <div class="card-header" id="awardsHeading">
@@ -17,7 +17,7 @@
 
             <div id="awards" class="collapse @(module == "Awards" ? "show" : "")" aria-labelledby="awardsHeading" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Awards_Nominations ? "active" : "")" asp-page="/SchoolAdmin/Awards/Nominations/Index" asp-area="Staff">
                                 Nominations
@@ -37,7 +37,7 @@
             
             <div id="compliance" class="collapse @(module == "Compliance" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Compliance_Attendance ? "active" : "")" asp-page="/SchoolAdmin/Compliance/Attendance/Index" asp-area="Staff">
                                 Attendance Records
@@ -72,7 +72,7 @@
 
             <div id="training" class="collapse @(module == "Training" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_Training_Staff ? "active" : "")" asp-page="/SchoolAdmin/Training/Staff/Index" asp-area="Staff" asp-route-staffId="@Model.StaffId">
                                 My Records
@@ -107,7 +107,7 @@
 
             <div id="workflows" class="collapse @(module == "WorkFlows" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model.ActivePage == ActivePage.SchoolAdmin_WorkFlows_Cases ? "active" : "")" asp-page="/SchoolAdmin/Workflows/Index" asp-area="Staff">
                                 Cases

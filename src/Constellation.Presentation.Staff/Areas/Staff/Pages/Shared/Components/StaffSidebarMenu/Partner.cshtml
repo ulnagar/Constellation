@@ -6,7 +6,7 @@
     var module = segments[1];
 }
 
-<nav id="accordion" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+<nav id="accordion" class="d-md-block bg-light sidebar">
     <div class="sidebar-sticky pt-3">
         <div class="card">
             <div class="card-header" id="contactsHeading">
@@ -17,7 +17,7 @@
 
             <div id="contacts" class="collapse @(module == "Contacts" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Partner_Contacts_List ? "active" : "")" asp-page="/Partner/Contacts/Index" asp-area="Staff">
                                 List
@@ -37,7 +37,7 @@
 
             <div id="schools" class="collapse @(module == "Schools" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Partner_Schools_Schools ? "active" : "")" asp-page="/Partner/Schools/Index" asp-area="Staff">
                                 Schools
@@ -67,7 +67,7 @@
 
             <div id="staff" class="collapse @(module == "Staff" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Partner_Staff_Staff ? "active" : "")" asp-page="/Partner/Staff/Index" asp-area="Staff">
                                 Staff
@@ -92,7 +92,7 @@
 
             <div id="students" class="collapse @(module == "Students" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
-                    <ul class="nav flex-column mx-2">
+                    <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Partner_Students_Students ? "active" : "")" asp-page="/Partner/Students/Index" asp-area="Staff">
                                 Students
