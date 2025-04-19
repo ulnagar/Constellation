@@ -4,9 +4,7 @@
 @model Constellation.Presentation.Server.Pages.ChangeLogModel
 
 @{
-    var file = Assembly.GetExecutingAssembly().Location;
-    var lastWriteTime = System.IO.File.GetLastWriteTime(file);
-    var version = $"{lastWriteTime:yyMM.d}";
+    var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 }
 
 <style>
@@ -28,7 +26,7 @@
 
 <h1>Constellation Changelog</h1>
 
-<h3>Current version: Release V1.17.1 (Build @version)</h3>
+<h3>Current version: @version</h3>
 
 <div class="changelog">
     <ul>
