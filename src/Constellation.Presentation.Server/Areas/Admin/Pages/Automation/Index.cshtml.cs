@@ -47,6 +47,7 @@ public class IndexModel : BasePageModel
         JobDefinitions.Add(new(typeof(IAssignmentSubmissionJob), nameof(IAssignmentSubmissionJob), "30 12 * * *"));
         JobDefinitions.Add(new(typeof(IAttachmentManagementJob), nameof(IAttachmentManagementJob), "0 4 * * *"));
         JobDefinitions.Add(new(typeof(ISentralComplianceScanJob), nameof(ISentralComplianceScanJob), "0 4 * * *"));
+        JobDefinitions.Add(new(typeof(ITeamsAccessAuditJob), nameof(ITeamsAccessAuditJob), "* 2-22 * * *"));
     }
 
     public sealed record JobDefinition(

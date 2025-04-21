@@ -52,6 +52,8 @@ public interface ISentralPhotoSyncJob : IHangfireJob { }
 
 public interface ISentralReportSyncJob : IHangfireJob { }
 
+public interface ITeamsAccessAuditJob : IHangfireJob { }
+
 public interface ITrackItSyncJob : IHangfireJob { }
 
 public interface IUserManagerJob : IHangfireJob { }

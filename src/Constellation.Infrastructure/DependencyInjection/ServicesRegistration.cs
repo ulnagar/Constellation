@@ -109,6 +109,7 @@ public static class ServicesRegistration
         services.AddScoped<ISentralFamilyDetailsSyncJob, SentralFamilyDetailsSyncJob>();
         services.AddScoped<ISentralPhotoSyncJob, SentralPhotoSyncJob>();
         services.AddScoped<ISentralReportSyncJob, SentralReportSyncJob>();
+        services.AddScoped<ITeamsAccessAuditJob, TeamsAccessAuditJob>();
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
         services.AddScoped<IUserManagerJob, UserManagerJob>();
         services.AddScoped<ISentralComplianceScanJob, SentralComplianceScanJob>();
