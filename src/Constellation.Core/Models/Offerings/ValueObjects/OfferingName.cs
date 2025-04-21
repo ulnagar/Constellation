@@ -8,6 +8,8 @@ using System.Collections.Generic;
 
 public sealed class OfferingName : ValueObject, IComparable
 {
+    public static OfferingName None => new("");
+
     private OfferingName(string value)
     {
         Value = value;

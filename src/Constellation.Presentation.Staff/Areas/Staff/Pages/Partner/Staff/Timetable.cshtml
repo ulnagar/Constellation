@@ -1,0 +1,287 @@
+@page "{id}/Timetables"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.TimetableModel
+
+@using Constellation.Application.Timetables.GetStaffIntegratedTimetableData
+@using Constellation.Core.Models.Offerings.ValueObjects
+@using Constellation.Core.Models.Timetables.Enums
+@using Constellation.Core.Models.Timetables.Identifiers
+@using Constellation.Core.Models.Timetables.ValueObjects
+
+@{
+    var timetableNames = Model.TimetableData
+        .Select(data => data.Timetable)
+        .OrderBy(timetable => timetable.Name)
+        .Distinct()
+        .ToDictionary(k => k.Code, k => k.Name);
+}
+
+<h2>Timetable - @Model.StaffName</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills">
+        <li class="nav-item active">
+            <a class="nav-link" href="#integrated" data-toggle="tab" role="tab">Integrated</a>
+        </li>
+
+        @foreach (var timetable in timetableNames)
+        {
+            <li class="nav-item">
+                <a class="nav-link" href="#@timetable.Key" data-toggle="tab" role="tab">@timetable.Value</a>
+            </li>
+        }
+    </ul>
+
+    <div class="tab-content">
+        <div id="integrated" class="tab-pane active">
+            <h3>Integrated Timetable</h3>
+
+            @{
+                var allWeeks = Model.TimetableData.OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+            }
+
+            <div>
+                @foreach (var week in allWeeks)
+                {
+                    var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+
+                    <div class="Student-Timetable-Week">
+                        @foreach (var day in days)
+                        {
+                            var periods = day.Where(period => period.Duration > 0).OrderBy(p => p.StartTime).ToList();
+
+                            <div class="Student-Timetable-Day">
+                                <div class="Student-Timetable-Day-Title">
+                                    @week.Key.Name - @day.Key.Name
+                                </div>
+
+                                @{
+                                    TimeSpan dayStart = periods.First().StartTime;
+                                    TimeSpan dayEnd = periods.Last().EndTime;
+
+                                    List<StaffIntegratedTimetableResponse> classPeriods = periods
+                                        .Where(period => period.OfferingName != OfferingName.None)
+                                        .OrderBy(period => period.StartTime)
+                                        .ToList();
+
+                                    List<StaffIntegratedTimetableResponse> customPeriods = [];
+
+                                    if (classPeriods.Count == 0)
+                                    {
+                                        // no classes this day, create whole day OOB
+
+                                        customPeriods.Add(new(
+                                            PeriodId.Empty,
+                                            Timetable.Senior,
+                                            week.Key,
+                                            periods.First().DayNumber,
+                                            day.Key,
+                                            string.Empty,
+                                            string.Empty,
+                                            PeriodType.Offline,
+                                            dayStart,
+                                            dayEnd,
+                                            (int)dayEnd.Subtract(dayStart).TotalMinutes,
+                                            OfferingName.None));
+                                    }
+                                    else
+                                    {
+                                        for (int i = 0; i < classPeriods.Count; i++)
+                                        {
+                                            customPeriods.Add(classPeriods[i]);
+
+                                            if (i == 0 && classPeriods[i].StartTime != dayStart)
+                                            {
+                                                // First class does not start at the beginning of the day, so create the start-of-day OOB
+                                                customPeriods.Add(new(
+                                                    PeriodId.Empty,
+                                                    Timetable.Senior,
+                                                    week.Key,
+                                                    periods.First().DayNumber,
+                                                    day.Key,
+                                                    string.Empty,
+                                                    string.Empty,
+                                                    PeriodType.Offline,
+                                                    dayStart,
+                                                    classPeriods.First().StartTime,
+                                                    (int)classPeriods.First().StartTime.Subtract(dayStart).TotalMinutes,
+                                                    OfferingName.None));
+                                            }
+
+                                            // If this is the last class of the day, create an OOB record for the rest of the day
+                                            if (i == (classPeriods.Count - 1))
+                                            {
+                                                if (classPeriods[i].EndTime == dayEnd)
+                                                    continue;
+
+                                                customPeriods.Add(new(
+                                                    PeriodId.Empty,
+                                                    Timetable.Senior,
+                                                    week.Key,
+                                                    periods.First().DayNumber,
+                                                    day.Key,
+                                                    string.Empty,
+                                                    string.Empty,
+                                                    PeriodType.Offline,
+                                                    classPeriods[i].EndTime,
+                                                    dayEnd,
+                                                    (int)dayEnd.Subtract(classPeriods[i].EndTime).TotalMinutes,
+                                                    OfferingName.None));
+                                            }
+                                            else if (classPeriods.Any(period => period.PeriodId != classPeriods[i].PeriodId && period.StartTime == classPeriods[i].EndTime))
+                                            {
+                                                // if another class directly abutts this one, continue
+                                            }
+                                            else
+                                            {
+                                                // if not, create an oob entry between this period and the next
+                                                var next = classPeriods.Where(period => period.StartTime > classPeriods[i].EndTime).OrderBy(period => period.StartTime).First();
+
+                                                customPeriods.Add(new(
+                                                    PeriodId.Empty,
+                                                    Timetable.Senior,
+                                                    week.Key,
+                                                    periods.First().DayNumber,
+                                                    day.Key,
+                                                    string.Empty,
+                                                    string.Empty,
+                                                    PeriodType.Offline,
+                                                    classPeriods[i].EndTime,
+                                                    next.StartTime,
+                                                    (int)next.StartTime.Subtract(classPeriods[i].EndTime).TotalMinutes,
+                                                    OfferingName.None));
+                                            }
+                                        }
+                                    }
+                                }
+
+                                @foreach (var period in customPeriods.OrderBy(period => period.StartTime))
+                                {
+                                    var style = "";
+
+                                    if (period.OfferingName == OfferingName.None)
+                                    {
+                                        style += " Inactive";
+                                    }
+                                    else
+                                    {
+                                        style += " Active";
+                                    }
+
+                                    if (period.Type == PeriodType.Break)
+                                    {
+                                        style += " Break";
+                                    }
+
+                                    <div class="Student-Timetable-Day-Period integrated @style" style="height: @(period.Duration * 1.75)px;">
+
+                                        <div class="class-details" title="@period.OfferingName &#013; @period.PeriodCode - @period.PeriodName &#013; @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                            @if (period.OfferingName != OfferingName.None)
+                                            {
+                                                @period.OfferingName
+                                                <br/>
+                                                <span>@period.PeriodCode - @period.PeriodName</span>
+                                                <br />
+                                            }
+                                            @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        @{
+            IEnumerable<IGrouping<Timetable, StaffIntegratedTimetableResponse>> timetables = [];
+            if (Model.TimetableData != null)
+            {
+                timetables = Model.TimetableData.OrderBy(data => data.Timetable).GroupBy(data => data.Timetable);
+            }
+
+            @foreach (var block in timetables)
+            {
+                <div id="@block.Key.Code" class="tab-pane">
+                    <h3>@block.Key</h3>
+                    
+                    @{
+                        var weeks = block.OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+                    }
+
+                    <div>
+                        @foreach (var week in weeks)
+                        {
+                            var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+                            var firstDay = true;
+
+                            <div class="Student-Timetable-Week">
+                                @foreach (var day in days)
+                                {
+                                    var periods = day.OrderBy(p => p.StartTime).ToList();
+
+                                    if (firstDay)
+                                    {
+                                        <div class="Student-Timetable-Day">
+                                            <div class="Student-Timetable-Day-Title"></div>
+                                            @foreach (var period in periods)
+                                            {
+                                                var matchingPeriods = week.Where(p => p.StartTime == period.StartTime).ToList();
+
+                                                <div class="Student-Timetable-Day-Period @period.Type.Name">
+                                                    @period.PeriodName<br/>
+                                                    @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+
+                                    <div class="Student-Timetable-Day">
+                                        <div class="Student-Timetable-Day-Title">
+                                            @week.Key.Name - @day.Key.Name
+                                        </div>
+                                        @foreach (var period in periods)
+                                        {
+                                            var style = "";
+
+                                            if (period.OfferingName == OfferingName.None)
+                                            {
+                                                style += " Inactive";
+                                            }
+                                            else
+                                            {
+                                                style += " Active";
+                                            }
+
+                                            if (period.Type == PeriodType.Break)
+                                            {
+                                                style += " Break";
+                                            }
+
+                                            <div class="Student-Timetable-Day-Period @style">
+                                                @if (period.OfferingName != OfferingName.None)
+                                                {
+                                                    <div class="class-details">
+                                                        @period.OfferingName
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+
+                                    firstDay = false;
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
