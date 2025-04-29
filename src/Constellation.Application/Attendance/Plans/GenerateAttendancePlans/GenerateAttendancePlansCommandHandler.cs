@@ -15,6 +15,7 @@ using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Timetables;
+using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -131,6 +132,10 @@ internal sealed class GenerateAttendancePlansCommandHandler
                     .ToList();
 
                 List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
+
+                periods = periods
+                    .Where(period => !period.Type.Equals(PeriodType.Offline))
+                    .ToList();
 
                 attendancePlan.AddPeriods(periods, offering, course);
             }

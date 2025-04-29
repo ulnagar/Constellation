@@ -1,28 +1,40 @@
 ﻿#pragma warning disable CA1002
+#nullable enable
 namespace Constellation.Infrastructure.ExternalServices.Teams;
 
 using Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways.TeamsGateway;
 using Constellation.Application.Interfaces.Gateways.TeamsGateway.Models;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.PowerShell;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Net;
-using System.Security;
 
 public class Gateway : ITeamsGateway
 {
+    private readonly ILogger _logger;
     private readonly TeamsGatewayConfiguration _settings;
     private readonly Runspace _runspace;
     
     public Gateway(
-        IOptions<TeamsGatewayConfiguration> settings)
+        IOptions<TeamsGatewayConfiguration> settings,
+        ILogger logger)
     {
+        _logger = logger.ForContext<ITeamsGateway>();
         _settings = settings.Value;
 
+        if (!_settings.IsConfigured())
+        {
+            _logger
+                .ForContext(nameof(TeamsGatewayConfiguration), _settings, true)
+                .Error("Failed to retrieve Teams Gateway configuration!");
+
+            throw new InvalidConfigurationException();
+        }
+        
         InitialSessionState initial = InitialSessionState.CreateDefault();
         initial.ExecutionPolicy = ExecutionPolicy.Unrestricted;
 
@@ -35,17 +47,33 @@ public class Gateway : ITeamsGateway
             .Invoke();
     }
 
-    public void Connect(string username, SecureString password)
+    private PSCredential? GetCredentials()
     {
         using PowerShell ps = PowerShell.Create(_runspace);
 
-        SecureString securePassword = new NetworkCredential("", _settings.Password).SecurePassword;
+        ps.Streams.Error.DataAdded += ErrorEventHandler;
+        
+        string script = $"New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList {_settings.Username}, (Get-Content {_settings.PasswordFile} | ConvertTo-SecureString -Key (Get-Content {_settings.KeyFile}))";
 
-        PSCredential credential = new(_settings.Username, securePassword);
+        List<PSCredential> credentials = ps.AddStatement()
+            .AddScript(script)
+            .Invoke<PSCredential>()
+            .ToList();
+
+        return credentials.FirstOrDefault();
+    }
+
+    public void Connect()
+    {
+        using PowerShell ps = PowerShell.Create(_runspace);
+
+        PSCredential? credential = GetCredentials();
+
+        if (credential is null)
+            throw new InvalidConfigurationException();
 
         ps.Streams.Error.DataAdded += ErrorEventHandler;
 
-        //ps.Runspace = _runspace;
         ps.AddStatement()
             .AddCommand("Connect-MicrosoftTeams")
             .AddParameter("Credential", credential)
@@ -321,10 +349,11 @@ public class Gateway : ITeamsGateway
         return returnData;
     }
 
-    private static void ErrorEventHandler(object? sender, DataAddedEventArgs? e)
+    private void ErrorEventHandler(object? sender, DataAddedEventArgs? e)
     {
         if (sender is not null && e is not null)
-            Console.WriteLine(((PSDataCollection<ErrorRecord>)sender)[e.Index].ToString());
+            _logger
+                .Warning(((PSDataCollection<ErrorRecord>)sender)[e.Index].ToString());
     }
 
 }

@@ -42,10 +42,16 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
         _logger
             .Information("Start Teams Access Audit Job");
 
-        _gateway.Connect("", new SecureString());
+        _gateway.Connect();
 
         List<Team> serverTeams = await _teamRepository.GetAll();
-        serverTeams = serverTeams.Where(team => !team.IsArchived).ToList();
+        serverTeams = serverTeams
+            .Where(team => 
+                !team.IsArchived &&
+                (team.Description.Split(';').Contains("CLASS") || 
+                team.Description.Split(';').Contains("GTUT")))
+            .OrderBy(team => team.Name)
+            .ToList();
 
         foreach (var team in serverTeams)
         {
@@ -138,14 +144,14 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
             _logger
                 .Information("Found user that needs to be added: {EmailAddress}", expectedUser.EmailAddress);
 
-            _gateway.AddTeamMember(teamId.ToString(), expectedUser.EmailAddress);
+            //_gateway.AddTeamMember(teamId.ToString(), expectedUser.EmailAddress);
 
             if (expectedUser.PermissionLevel == "Owner")
             {
                 _logger
                     .Information("User must be Owner: {EmailAddress}", expectedUser.EmailAddress);
 
-                _gateway.AddTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
+                //_gateway.AddTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
             }
             
             return;
@@ -157,13 +163,13 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
                 _logger
                     .Information("User must be Owner: {EmailAddress}", expectedUser.EmailAddress);
 
-                _gateway.AddTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
+                //_gateway.AddTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
                 break;
             case TeamMemberRole.Owner when expectedUser.PermissionLevel == "Member":
                 _logger
                     .Information("User must NOT be an Owner: {EmailAddress}", expectedUser.EmailAddress);
 
-                _gateway.DemoteTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
+                //_gateway.DemoteTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
                 break;
         }
     }
@@ -181,10 +187,10 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
 
             if (foundUser.Role == TeamMemberRole.Owner)
             {
-                _gateway.DemoteTeamOwner(teamId.ToString(), foundUser.User);
+                //_gateway.DemoteTeamOwner(teamId.ToString(), foundUser.User);
             }
 
-            _gateway.RemoveTeamMember(teamId.ToString(), foundUser.User);
+            //_gateway.RemoveTeamMember(teamId.ToString(), foundUser.User);
 
             return;
         }
@@ -195,13 +201,13 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
                 _logger
                     .Information("User must be an Owner: {EmailAddress}", foundUser.User);
 
-                _gateway.AddTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
+                //_gateway.AddTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
                 break;
             case "Owner" when foundUser.Role == TeamMemberRole.Member:
                 _logger
                     .Information("User must NOT be an Owner: {EmailAddress}", foundUser.User);
 
-                _gateway.DemoteTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
+                //_gateway.DemoteTeamOwner(teamId.ToString(), expectedUser.EmailAddress);
                 break;
         }
     }
@@ -217,8 +223,8 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
             _logger
                 .Information("Found user that needs to be added to channel as Owner: {ChannelName} - {EmailAddress}", channelName, expectedOwner.EmailAddress);
 
-            _gateway.AddChannelMember(teamId.ToString(), channelName, expectedOwner.EmailAddress);
-            _gateway.AddChannelOwner(teamId.ToString(), channelName, expectedOwner.EmailAddress);
+            //_gateway.AddChannelMember(teamId.ToString(), channelName, expectedOwner.EmailAddress);
+            //_gateway.AddChannelOwner(teamId.ToString(), channelName, expectedOwner.EmailAddress);
 
             return;
         }
@@ -228,7 +234,7 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
             _logger
                 .Information("User must be an Owner of Channel: {ChannelName} - {EmailAddress}", channelName, expectedOwner.EmailAddress);
 
-            _gateway.AddChannelOwner(teamId.ToString(), channelName, expectedOwner.EmailAddress);
+            //_gateway.AddChannelOwner(teamId.ToString(), channelName, expectedOwner.EmailAddress);
         }
     }
 
@@ -243,8 +249,8 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
             _logger
                 .Information("Found user that needs to be removed from channel: {ChannelName} - {EmailAddress}", channelName, foundUser.User);
 
-            _gateway.DemoteChannelOwner(teamId.ToString(), channelName, foundUser.User);
-            _gateway.RemoveChannelMember(teamId.ToString(), channelName, foundUser.User);
+            //_gateway.DemoteChannelOwner(teamId.ToString(), channelName, foundUser.User);
+            //_gateway.RemoveChannelMember(teamId.ToString(), channelName, foundUser.User);
 
             return;
         }
@@ -254,7 +260,7 @@ internal sealed class TeamsAccessAuditJob : ITeamsAccessAuditJob
             _logger
                 .Information("User must be an Owner of Channel: {ChannelName} - {EmailAddress}", channelName, foundUser.User);
 
-            _gateway.AddChannelOwner(teamId.ToString(), channelName, foundUser.User);
+            //_gateway.AddChannelOwner(teamId.ToString(), channelName, foundUser.User);
         }
     }
 
