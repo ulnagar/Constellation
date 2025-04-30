@@ -2,17 +2,11 @@
 
 using Models;
 using System.Collections.Generic;
-using System.Security;
 
 public interface ITeamsGateway
 {
-    void Connect(string username, SecureString password);
-
-    /// <summary>
-    /// Gets all Teams that are not marked Archived for the specific user.
-    /// </summary>
-    /// <param name="userEmail">Email address of the user who logged into the Teams system.</param>
-    List<Team> GetTeams(string userEmail);
+    void Connect();
+    List<Team> GetTeams();
     List<TeamMember> GetTeamMembers(string groupId);
     List<TeamChannel> GetChannels(string groupId);
     List<TeamMember> GetChannelMembers(string groupId, string channelName);

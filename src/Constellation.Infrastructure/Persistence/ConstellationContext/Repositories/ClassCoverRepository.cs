@@ -6,7 +6,6 @@ using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +30,20 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
                 !cover.IsDeleted)
             .ToListAsync(cancellationToken);
     }
-        
+
+    public async Task<List<ClassCover>> GetAllCurrent(
+        CancellationToken cancellationToken = default)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        return await _context
+            .Set<ClassCover>()
+            .Where(cover =>
+                cover.EndDate >= today &&
+                cover.StartDate <= today &&
+                !cover.IsDeleted)
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<ClassCover>> GetAllUpcoming(
         CancellationToken cancellationToken = default)

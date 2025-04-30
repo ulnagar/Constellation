@@ -1,4 +1,5 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+﻿#nullable enable
+namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
@@ -40,6 +41,24 @@ internal sealed class FacultyRepository : IFacultyRepository
             .Where(faculty => faculty.Members.Any(member => !member.IsDeleted && member.StaffId == staffId))
             .ToListAsync(cancellationToken);
 
+    public async Task<Faculty> GetByCourseId(
+        CourseId courseId,
+        CancellationToken cancellationToken = default)
+    {
+        FacultyId? facultyId = await _dbContext
+            .Set<Course>()
+            .Where(course => course.Id == courseId)
+            .Select(course => course.FacultyId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return (facultyId is null)
+            ? null
+            : await _dbContext
+                .Set<Faculty>()
+                .Where(faculty => faculty.Id == facultyId)
+                .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Faculty?> GetByOfferingId(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
@@ -56,12 +75,9 @@ internal sealed class FacultyRepository : IFacultyRepository
             .Select(course => course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (facultyId is null)
-        {
-            return null;
-        }
-
-        return await _dbContext
+        return (facultyId is null)
+            ? null
+            : await _dbContext
             .Set<Faculty>()
             .Where(faculty => faculty.Id == facultyId)
             .FirstOrDefaultAsync(cancellationToken);
