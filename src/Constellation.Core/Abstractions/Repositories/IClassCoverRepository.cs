@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 public interface IClassCoverRepository
 {
     Task<List<ClassCover>> GetAllCurrentAndUpcoming(CancellationToken cancellationToken = default);
+    Task<List<ClassCover>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<List<ClassCover>> GetAllUpcoming(CancellationToken cancellationToken = default);
     Task<List<ClassCover>> GetAllForCurrentCalendarYear(CancellationToken cancellationToken = default);
     Task<ClassCover> GetById(ClassCoverId CoverId, CancellationToken cancellationToken = default);

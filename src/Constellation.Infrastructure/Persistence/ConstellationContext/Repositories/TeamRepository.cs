@@ -20,6 +20,13 @@ internal sealed class TeamRepository : ITeamRepository
             .Set<Team>()
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Team>> GetAllCurrent(
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Team>()
+            .Where(team => !team.IsArchived)
+            .ToListAsync(cancellationToken);
+
     public async Task<Team?> GetById(
         Guid teamId, 
         CancellationToken cancellationToken = default) =>

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 public interface ITeamRepository
 {
     Task<List<Team>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<Team>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<Team?> GetById(Guid teamId, CancellationToken cancellationToken = default);
     Task<List<Team>> GetByName(string name, CancellationToken cancellationToken = default);
     Task<Guid?> GetIdByOffering(string offeringName, string offeringYear, CancellationToken cancellationToken = default);
