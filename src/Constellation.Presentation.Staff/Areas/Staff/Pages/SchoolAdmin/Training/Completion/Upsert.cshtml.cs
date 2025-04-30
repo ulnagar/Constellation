@@ -2,8 +2,10 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Trainin
 
 using Application.Common.PresentationModels;
 using Application.DTOs;
-using Application.Features.Common.Queries;
 using Application.Models.Auth;
+using Application.StaffMembers.GetStaffMemberNameById;
+using Application.StaffMembers.GetStaffMembersAsDictionary;
+using Application.Training.GetTrainingModulesAsDictionary;
 using Constellation.Application.Training.CreateTrainingCompletion;
 using Constellation.Application.Training.GetCompletionRecordEditContext;
 using Constellation.Application.Training.GetTrainingModuleEditContext;
@@ -11,6 +13,7 @@ using Constellation.Application.Training.GetUploadedTrainingCertificationMetadat
 using Constellation.Application.Training.UpdateTrainingCompletion;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.SelectTrainingModuleForReportModal;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Attachments.ValueObjects;
@@ -19,7 +22,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
@@ -184,8 +186,43 @@ public class UpsertModel : BasePageModel
     {
         string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        StaffOptions = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
-        ModuleOptions = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
+        if (staffId is null)
+        {
+            _logger
+                .Warning("Could not determine current users Staff Id");
+
+            return;
+        }
+
+        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        if (staffListRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), staffListRequest.Error, true)
+                .Warning("Failed to initialise Training Completion upload page by user {User}", _currentUserService.UserName);
+
+            return;
+        }
+
+        StaffOptions = staffListRequest.Value;
+
+        Dictionary<Guid, string> moduleList = new();
+
+        Result<Dictionary<Guid, string>> moduleListRequest = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
+
+        if (moduleListRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), moduleListRequest.Error, true)
+                .Warning("Failed to initialise Training Completion upload page by user {User}", _currentUserService.UserName);
+        }
+        else
+        {
+            moduleList = moduleListRequest.Value;
+        }
+
+        ModuleOptions = moduleList;
 
         // Insert only mode allowing staff to create new records for themselves only
         if (Mode == CompletionPageMode.SoloStaff)
@@ -213,7 +250,12 @@ public class UpsertModel : BasePageModel
     {
         if (FormFile is not null)
         {
-            string staffMember = await _mediator.Send(new GetStaffMemberNameByIdQuery { StaffId = SelectedStaffId });
+            Result<string> staffMember = await _mediator.Send(new GetStaffMemberNameByIdQuery(SelectedStaffId));
+
+            if (staffMember.IsFailure)
+            {
+                return null;
+            }
 
             Result<ModuleEditContextDto> moduleRequest = await _mediator.Send(new GetTrainingModuleEditContextQuery(ModuleId));
             
@@ -226,7 +268,7 @@ public class UpsertModel : BasePageModel
 
             FileDto file = new()
             {
-                FileName = $"{staffMember} - {CompletedDate:yyyy-MM-dd} - {trainingModule.Name}.pdf",
+                FileName = $"{staffMember.Value} - {CompletedDate:yyyy-MM-dd} - {trainingModule.Name}.pdf",
                 FileType = FormFile.ContentType
             };
 

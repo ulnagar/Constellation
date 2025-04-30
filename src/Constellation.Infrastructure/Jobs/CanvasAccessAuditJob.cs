@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.Canvas.GetCourseMembershipByCourseCode;
+using Application.Canvas.ProcessCanvasOperation;
 using Application.DTOs.Canvas;
-using Application.Features.API.Operations.Commands;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Repositories;
@@ -11,7 +11,6 @@ using Core.Abstractions.Clock;
 using Core.Models.Canvas.Models;
 using Core.Models.Operations;
 using Core.Shared;
-using ExternalServices.Canvas;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System;

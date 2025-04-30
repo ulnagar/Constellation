@@ -2,8 +2,8 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake
 
 using Application.Common.PresentationModels;
 using Application.DTOs;
-using Application.Features.API.Schools.Queries;
 using Application.Models.Auth;
+using Application.Schools.GetCurrentPartnerSchoolCodes;
 using Application.Schools.GetSchoolsFromList;
 using Application.StaffMembers.GetStaffById;
 using Application.StaffMembers.GetStaffForSelectionList;
@@ -18,7 +18,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -170,9 +169,18 @@ public class SubmitModel : BasePageModel
             .OrderBy(teacher => teacher.LastName)
             .ToList();
 
-        ICollection<string> schoolCodes = await _mediator.Send(new GetSchoolCodeOfAllPartnerSchoolsQuery());
+        Result<List<string>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());
 
-        Result<List<SchoolDto>> schools = await _mediator.Send(new GetSchoolsFromListQuery(schoolCodes.ToList()));
+        if (schoolCodes.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                schoolCodes.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        Result<List<SchoolDto>> schools = await _mediator.Send(new GetSchoolsFromListQuery(schoolCodes.Value));
 
         if (schools.IsFailure)
         {

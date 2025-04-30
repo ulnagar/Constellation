@@ -1,7 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows;
 
 using Application.Common.PresentationModels;
-using Application.Features.Common.Queries;
 using Application.Models.Auth;
 using Application.Offerings.GetOfferingsForSelectionList;
 using Application.WorkFlows.AddActionNote;
@@ -15,6 +14,7 @@ using Application.WorkFlows.CancelAction;
 using Application.WorkFlows.GetCaseById;
 using Application.WorkFlows.ReassignAction;
 using Application.WorkFlows.UpdateCaseStatus;
+using Constellation.Application.StaffMembers.GetStaffMembersAsDictionary;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.WorkFlow;
@@ -26,7 +26,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
@@ -207,12 +206,25 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxReassignAction(Guid actionId)
     {
-        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Dictionary<string, string> staffList = new();
+
+        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        if (staffListRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), staffListRequest.Error, true)
+                .Warning("Failed to retrieve list of staff by user {User}", _currentUserService.UserName);
+        }
+        else
+        {
+            staffList = staffListRequest.Value;
+        }
 
         ReassignActionToStaffMemberModalViewModel viewModel = new()
         {
             ActionId = ActionId.FromValue(actionId),
-            StaffMembers = staffResult
+            StaffMembers = staffList
         };
 
         return Partial("ReassignActionToStaffMemberModal", viewModel);
@@ -253,8 +265,21 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxNewAction(string actionType)
     {
-        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Dictionary<string, string> staffResult = new();
 
+        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        if (staffListRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), staffListRequest.Error, true)
+                .Warning("Failed to retrieve list of staff by user {User}", _currentUserService.UserName);
+        }
+        else
+        {
+            staffResult = staffListRequest.Value;
+        }
+        
         switch (actionType)
         {
             case nameof(SendEmailAction):

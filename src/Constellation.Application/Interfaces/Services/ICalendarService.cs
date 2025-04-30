@@ -1,19 +1,18 @@
-﻿using System;
+﻿namespace Constellation.Application.Interfaces.Services;
 
-namespace Constellation.Application.Interfaces.Services
+using System;
+
+public interface ICalendarService
 {
-    public interface ICalendarService
-    {
-        string CreateInvite(string uid, string attendeeName, string attendeeEmail, string summary, string location, string description, DateTime start, DateTime end, int repeats = 0);
-        string CancelInvite(string uid, string attendeeName, string attendeeEmail, string summary, string location, string description, DateTime start, DateTime end, int repeats = 0);
+    string CreateInvite(string uid, string attendeeName, string attendeeEmail, string summary, string location, string description, DateTime start, DateTime end, int repeats = 0);
+    string CancelInvite(string uid, string attendeeName, string attendeeEmail, string summary, string location, string description, DateTime start, DateTime end, int repeats = 0);
         
-        string CreateEvent(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
-        string ModifyEvent(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
-        string CancelEvent(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
+    string CreateEvent(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
+    string ModifyEvent(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
+    string CancelEvent(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
 
-        string StartCalendarFile();
-        string AddEventWithAlarm(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
-        string CancelEvent(string uid);
-        string EndCalendarFile();
-    }
+    string StartCalendarFile();
+    string AddEventWithAlarm(string uid, string summary, string location, string description, DateTime start, DateTime end, int repeats);
+    string CancelEvent(string uid);
+    string EndCalendarFile();
 }

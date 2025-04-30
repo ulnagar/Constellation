@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddStaffMemberToTrainingModule;
 
-using Constellation.Application.Features.Common.Queries;
+using Constellation.Application.StaffMembers.GetStaffMembersAsDictionary;
 using Constellation.Application.Training.GetModuleDetails;
 using Constellation.Application.Training.Models;
 using Constellation.Core.Models.Training.Identifiers;
@@ -25,8 +25,15 @@ public class AddStaffMemberToTrainingModuleViewComponent : ViewComponent
 
         if (module.IsFailure)
             return Content(string.Empty);
+        
+        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
-        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        if (staffListRequest.IsFailure)
+        {
+            return Content(string.Empty);
+        }
+
+        Dictionary<string, string> staffResult = staffListRequest.Value;
 
         foreach (ModuleDetailsDto.Assignee assignee in module.Value.Assignees)
             staffResult.Remove(assignee.StaffId);

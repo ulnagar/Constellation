@@ -1,9 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿namespace Constellation.Application.Interfaces.Services;
 
-namespace Constellation.Application.Interfaces.Services
+using System.Threading.Tasks;
+
+public interface IRazorViewToStringRenderer
 {
-    public interface IRazorViewToStringRenderer
-    {
-        Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model);
-    }
+    Task<string> RenderViewToStringAsync<TModel>(string viewName, TModel model);
 }

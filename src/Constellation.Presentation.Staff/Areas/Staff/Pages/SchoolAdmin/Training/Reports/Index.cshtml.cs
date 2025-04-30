@@ -2,12 +2,13 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Trainin
 
 using Application.Common.PresentationModels;
 using Application.DTOs;
-using Application.Features.Common.Queries;
 using Application.Models.Auth;
 using Application.Training.GenerateModuleReport;
 using Application.Training.GenerateOverallReport;
 using Application.Training.GenerateStaffReport;
 using Areas;
+using Constellation.Application.StaffMembers.GetStaffMembersAsDictionary;
+using Constellation.Application.Training.GetTrainingModulesAsDictionary;
 using Constellation.Application.Training.Models;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
@@ -15,7 +16,6 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.SelectStaffMemberForReportModal;
@@ -47,12 +47,25 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxModuleModal(bool detailsRequested)
     {
-        Dictionary<Guid, string> modules = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
-        
+        Dictionary<Guid, string> moduleList = new();
+
+        Result<Dictionary<Guid, string>> moduleListRequest = await _mediator.Send(new GetTrainingModulesAsDictionaryQuery());
+
+        if (moduleListRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), moduleListRequest.Error, true)
+                .Warning("Failed to initialise Training Completion upload page by user {User}", _currentUserService.UserName);
+        }
+        else
+        {
+            moduleList = moduleListRequest.Value;
+        }
+
         SelectTrainingModuleForReportModalViewModel viewModel = new()
         {
             DetailedReportRequested = detailsRequested,
-            Modules = modules
+            Modules = moduleList
         };
 
         return Partial("SelectTrainingModuleForReportModal", viewModel);
@@ -138,8 +151,21 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxStaffModal(string reportType)
     {
-        Dictionary<string, string> staffResult = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Dictionary<string, string> staffList = new();
 
+        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+
+        if (staffListRequest.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), staffListRequest.Error, true)
+                .Warning("Failed to retrieve list of staff by user {User}", _currentUserService.UserName);
+        }
+        else
+        {
+            staffList = staffListRequest.Value;
+        }
+        
         SelectStaffMemberForReportModalViewModel.ReportType type = reportType == "summary" ? SelectStaffMemberForReportModalViewModel.ReportType.Summary
             : reportType == "detail" ? SelectStaffMemberForReportModalViewModel.ReportType.Detail
             : SelectStaffMemberForReportModalViewModel.ReportType.Module;
@@ -147,7 +173,7 @@ public class IndexModel : BasePageModel
         SelectStaffMemberForReportModalViewModel viewModel = new()
         {
             Type = type,
-            StaffMembers = staffResult
+            StaffMembers = staffList
         };
 
         return Partial("SelectStaffMemberForReportModal", viewModel);

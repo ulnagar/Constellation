@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Constellation.Presentation.Server.Areas.API.Controllers
 {
+    using Application.Schools.GetCurrentPartnerSchoolCodes;
+    using Core.Shared;
+
     [Route("api/v1/Schools")]
     [ApiController]
     public class SchoolsController : ControllerBase
@@ -20,7 +23,12 @@ namespace Constellation.Presentation.Server.Areas.API.Controllers
         [Route("List")]
         public async Task<IEnumerable<string>> Get()
         {
-            return await _mediator.Send(new GetSchoolCodeOfAllPartnerSchoolsQuery());
+            Result<List<string>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());
+
+            if (schoolCodes.IsFailure)
+                return new List<string>();
+
+            return schoolCodes.Value;
         }
 
         // GET api/Schools/8912/Graph?day=0

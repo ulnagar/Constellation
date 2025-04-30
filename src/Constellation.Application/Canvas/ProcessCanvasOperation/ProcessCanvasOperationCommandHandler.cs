@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Features.API.Operations.Commands;
+﻿namespace Constellation.Application.Canvas.ProcessCanvasOperation;
 
 using Abstractions.Messaging;
 using Core.Errors;
