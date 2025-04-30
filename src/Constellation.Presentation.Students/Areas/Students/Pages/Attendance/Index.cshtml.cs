@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages.Attendance;
 
-using Application.Absences.GetAbsencesForStudent;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesForStudent;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

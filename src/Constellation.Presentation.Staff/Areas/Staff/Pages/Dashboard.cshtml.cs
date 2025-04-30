@@ -2,19 +2,17 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages;
 
 using Application.Affirmations;
-using Application.Stocktake.GetCurrentStocktakeEvents;
+using Application.Domains.AssetManagement.Stocktake.Queries.GetCurrentStocktakeEvents;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffByEmail;
 using Constellation.Application.StaffMembers.Models;
-using Constellation.Application.Stocktake.Models;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Models.Offerings.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Reflection;

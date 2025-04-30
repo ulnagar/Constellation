@@ -4,8 +4,8 @@ using Application.Common.PresentationModels;
 using Application.DTOs;
 using Application.Models.Auth;
 using Application.Students.GetStudentsByParentEmail;
-using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
-using Constellation.Application.Attendance.GetValidAttendanceReportDates;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Parents.GetParentWithStudentIds;
 using Constellation.Core.Shared;
@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]

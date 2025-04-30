@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Absences;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
+using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System.Collections.Generic;
 

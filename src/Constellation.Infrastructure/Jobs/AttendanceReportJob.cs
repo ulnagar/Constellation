@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Attendance.GenerateAttendanceReportForStudent;
+using Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using Application.DTOs;
 using Application.Extensions;
 using Constellation.Application.Interfaces.Jobs;

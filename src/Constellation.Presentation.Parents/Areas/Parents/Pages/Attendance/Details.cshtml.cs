@@ -1,10 +1,9 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance;
 
-using Application.Absences.ProvideParentWholeAbsenceExplanation;
+using Application.Domains.Attendance.Absences.Commands.ProvideParentWholeAbsenceExplanation;
 using Application.Models.Auth;
-using Constellation.Application.Absences.GetAbsenceDetailsForParent;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Core.Models.Absences;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDetailsForParent;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]

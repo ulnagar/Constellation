@@ -1,17 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance;
 
-using Application.Attendance.GenerateCustomReportForPeriod;
-using Application.Attendance.GetAttendancePeriodLabels;
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
+using Application.Domains.Attendance.Reports.Queries.GenerateCustomReportForPeriod;
+using Application.Domains.Attendance.Reports.Queries.GetAttendancePeriodLabels;
 using Application.Helpers;
 using Application.Models.Auth;
-using Constellation.Application.Attendance.GenerateAttendanceReportForPeriod;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

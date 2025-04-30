@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance;
 
-using Application.Attendance.GetAttendanceDataForYearFromSentral;
-using Application.Attendance.GetAttendanceDataFromSentral;
-using Application.Attendance.GetRecentAttendanceValues;
 using Application.Common.PresentationModels;
-using Constellation.Application.Attendance.GetAttendancePeriodLabels;
+using Application.Domains.Attendance.Reports.Queries.GetAttendanceDataForYearFromSentral;
+using Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
+using Application.Domains.Attendance.Reports.Queries.GetAttendancePeriodLabels;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetRecentAttendanceValues;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;

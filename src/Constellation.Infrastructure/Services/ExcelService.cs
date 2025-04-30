@@ -1,11 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Application.Absences.ExportUnexplainedPartialAbsencesReport;
-using Application.Absences.GetAbsencesWithFilterForReport;
 using Application.Assets.ImportAssetsFromFile;
-using Application.Attendance.GenerateAttendanceReportForPeriod;
-using Application.Attendance.GenerateCustomReportForPeriod;
-using Application.Attendance.GetAttendanceDataFromSentral;
 using Application.Awards.ExportAwardNominations;
 using Application.Compliance.GetWellbeingReportFromSentral;
 using Application.Contacts.Models;
@@ -20,6 +15,11 @@ using Application.SchoolContacts.GetContactsBySchool;
 using Application.SciencePracs.GenerateOverdueReport;
 using Application.Training.Models;
 using Application.WorkFlows.ExportOpenCaseReport;
+using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateCustomReportForPeriod;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.SciencePracs.GenerateYTDStatusReport;
 using Constellation.Application.Students.ImportStudentsFromFile;

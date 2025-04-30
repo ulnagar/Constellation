@@ -2,7 +2,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences;
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Constellation.Application.Absences.GetOutstandingAbsencesForSchool;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetOutstandingAbsencesForSchool;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

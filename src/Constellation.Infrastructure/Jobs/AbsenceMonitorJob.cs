@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Absences.SendAbsenceDigestToCoordinator;
-using Application.Absences.SendAbsenceDigestToParent;
-using Application.Absences.SendAbsenceDigestToStudent;
-using Application.Absences.SendAbsenceNotificationToParent;
-using Application.Absences.SendAbsenceNotificationToStudent;
-using Application.Absences.SendMissedWorkEmailToStudent;
+using Application.Domains.Attendance.Absences.Commands.SendAbsenceDigestToCoordinator;
+using Application.Domains.Attendance.Absences.Commands.SendAbsenceDigestToParent;
+using Application.Domains.Attendance.Absences.Commands.SendAbsenceDigestToStudent;
+using Application.Domains.Attendance.Absences.Commands.SendAbsenceNotificationToParent;
+using Application.Domains.Attendance.Absences.Commands.SendAbsenceNotificationToStudent;
+using Application.Domains.Attendance.Absences.Commands.SendMissedWorkEmailToStudent;
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Core.Models.Students.Repositories;

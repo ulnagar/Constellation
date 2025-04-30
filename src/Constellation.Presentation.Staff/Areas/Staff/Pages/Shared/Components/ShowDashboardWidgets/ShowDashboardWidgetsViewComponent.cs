@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets;
 
-using Application.Attendance.Plans.CountAttendancePlansWithStatus;
+using Application.Domains.Attendance.Plans.Queries.CountAttendancePlansWithStatus;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Students.CountStudentsWithAbsenceScanDisabled;
 using Constellation.Application.Students.CountStudentsWithAwardOverages;

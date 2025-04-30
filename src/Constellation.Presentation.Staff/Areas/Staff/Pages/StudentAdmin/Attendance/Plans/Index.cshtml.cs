@@ -1,15 +1,13 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
-using Application.Assets.ImportAssetsFromFile;
-using Application.Attendance.Plans.GetAttendancePlansSummary;
 using Application.Models.Auth;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummary;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;

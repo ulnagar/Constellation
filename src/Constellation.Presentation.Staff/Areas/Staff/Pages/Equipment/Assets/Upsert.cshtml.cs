@@ -3,7 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 using Application.Assets.CreateFullAsset;
 using Application.Assets.UpdateAsset;
 using Application.Common.PresentationModels;
-using Constellation.Application.Assets.GetAssetByAssetNumber;
+using Application.Domains.AssetManagement.Assets.Queries.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.Enums;
 using Constellation.Core.Models.Assets.ValueObjects;

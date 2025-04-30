@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Templates.Views.Documents.Attendance;
 
-using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using System;
 using System.Collections.Generic;
 

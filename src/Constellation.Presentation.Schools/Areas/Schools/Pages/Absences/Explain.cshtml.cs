@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences;
 
-using Application.Absences.CreateAbsenceResponseFromSchool;
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Absences.Commands.CreateAbsenceResponseFromSchool;
 using Application.Models.Auth;
-using Constellation.Application.Absences.GetAbsenceDetailsForSchool;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDetailsForSchool;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]

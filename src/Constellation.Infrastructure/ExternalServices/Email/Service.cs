@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email;
 
-using Application.Absences.ConvertAbsenceToAbsenceEntry;
-using Application.Absences.ConvertResponseToAbsenceExplanation;
+using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
+using Application.Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
 using Application.Helpers;
@@ -27,7 +27,6 @@ using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using Org.BouncyCastle.Cms;
 using System;
 using System.Net.Mail;
 using System.Threading;

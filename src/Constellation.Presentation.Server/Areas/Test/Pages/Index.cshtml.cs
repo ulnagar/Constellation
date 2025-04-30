@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
-using Application.Attendance.GenerateHistoricalDailyAttendanceReport;
 using BaseModels;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateHistoricalDailyAttendanceReport;
 using Constellation.Application.DTOs;
 using Constellation.Core.Enums;
 using Constellation.Core.ValueObjects;

@@ -4,7 +4,7 @@ using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Constellation.Application.Attendance.GetAttendanceDataFromSentral;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Students;

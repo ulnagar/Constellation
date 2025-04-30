@@ -1,7 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Absences.ConvertAbsenceToAbsenceEntry;
-using Absences.ConvertResponseToAbsenceExplanation;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Models.Attendance;
@@ -16,6 +14,8 @@ using Core.Models.Subjects;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
 using Core.ValueObjects;
+using Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
+using Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
 using DTOs;
 using DTOs.EmailRequests;
 using System;

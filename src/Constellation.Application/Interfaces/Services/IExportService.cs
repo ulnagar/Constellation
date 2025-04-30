@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using Constellation.Core.Models.Students;
 using System;
 using System.Collections.Generic;

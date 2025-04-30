@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
-using Application.Attendance.Plans.GenerateAttendancePlans;
 using Application.Helpers;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Attendance.Plans.Commands.GenerateAttendancePlans;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Schools.GetSchoolsForSelectionList;
 using Constellation.Application.Schools.Models;
@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

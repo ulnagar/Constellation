@@ -1,15 +1,13 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral;
 
-using Application.Attendance.GetAttendanceDataFromSentral;
-using Application.Attendance.GetValidAttendanceReportDates;
 using Application.Awards.Enums;
 using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
-using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Infrastructure.Extensions;
 using Constellation.Infrastructure.ExternalServices.Sentral.Models;

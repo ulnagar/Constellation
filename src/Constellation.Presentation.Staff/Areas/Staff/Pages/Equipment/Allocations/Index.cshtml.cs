@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Allocations;
 
-using Application.Assets.GetAllocationList;
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Queries.GetAllocationList;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
@@ -11,7 +11,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;

@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans;
 
-using Application.Attendance.Plans.CopyAttendancePlanDetails;
-using Application.Attendance.Plans.CreateAttendancePlanVersion;
-using Application.Attendance.Plans.GetAttendancePlanForSubmit;
-using Application.Attendance.Plans.GetRecentlyCompletedPlans;
-using Application.Attendance.Plans.SaveDraftAttendancePlan;
-using Application.Attendance.Plans.SubmitAttendancePlan;
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Plans.Commands.CreateAttendancePlanVersion;
 using Application.Models.Auth;
+using Constellation.Application.Domains.Attendance.Plans.Commands.CopyAttendancePlanDetails;
+using Constellation.Application.Domains.Attendance.Plans.Commands.SaveDraftAttendancePlan;
+using Constellation.Application.Domains.Attendance.Plans.Commands.SubmitAttendancePlan;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlanForSubmit;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetRecentlyCompletedPlans;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;

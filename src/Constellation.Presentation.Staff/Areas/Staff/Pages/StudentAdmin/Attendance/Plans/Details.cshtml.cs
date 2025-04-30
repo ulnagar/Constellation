@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
-using Application.Attendance.Plans.AddAttendancePlanNote;
-using Application.Attendance.Plans.ApproveAttendancePlan;
-using Application.Attendance.Plans.GetAttendancePlanDetails;
-using Application.Attendance.Plans.RejectAttendancePlan;
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Plans.Commands.CreateAttendancePlanVersion;
 using Application.Models.Auth;
-using Constellation.Application.Attendance.Plans.CreateAttendancePlanVersion;
+using Constellation.Application.Domains.Attendance.Plans.Commands.AddAttendancePlanNote;
+using Constellation.Application.Domains.Attendance.Plans.Commands.ApproveAttendancePlan;
+using Constellation.Application.Domains.Attendance.Plans.Commands.RejectAttendancePlan;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlanDetails;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
 using Core.Shared;
@@ -14,7 +14,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.AddAttendancePlanNote;

@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Queries.GetDevicesAllocatedToStudent;
 using Application.Enrolments.UnenrolStudent;
 using Application.Enrolments.UnenrolStudentFromAllOfferings;
 using Application.Students.GetSchoolEnrolmentHistoryForStudent;
 using Application.Students.RemoveSchoolEnrolment;
 using Application.Students.TransferStudent;
-using Constellation.Application.Absences.GetAbsenceSummaryForStudent;
-using Constellation.Application.Assets.GetDevicesAllocatedToStudent;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceSummaryForStudent;
 using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Families.GetFamilyContactsForStudent;
 using Constellation.Application.Families.Models;
@@ -31,7 +31,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.ReinstateStudent;

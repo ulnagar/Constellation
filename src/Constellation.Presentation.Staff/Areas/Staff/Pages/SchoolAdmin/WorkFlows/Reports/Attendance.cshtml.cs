@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Reports;
 
-using Application.Attendance.GetAttendanceTrendValues;
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Application.WorkFlows.CreateAttendanceCase;
 using Application.WorkFlows.UpdateAttendanceCaseDetails;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceTrendValues;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Students.Identifiers;
@@ -13,7 +13,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

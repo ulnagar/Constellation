@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance;
 
-using Application.Attendance.GetAttendanceValuesForStudent;
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Reports.Queries.GetAttendanceValuesForStudent;
 using Application.Models.Auth;
 using Constellation.Application.Students.GetStudentById;
 using Constellation.Application.Students.Models;
@@ -14,7 +14,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

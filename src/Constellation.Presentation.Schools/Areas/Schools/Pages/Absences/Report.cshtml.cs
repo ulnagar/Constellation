@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using Application.Models.Auth;
 using Application.Students.Models;
-using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.DTOs;
 using Constellation.Application.Students.GetCurrentStudentsFromSchool;
 using Constellation.Core.Shared;

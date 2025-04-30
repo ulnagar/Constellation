@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
+using Application.Assets.GetAllActiveAssets;
+using Application.Assets.GetAllDisposedAssets;
+using Application.Assets.SightAsset;
 using Application.Common.PresentationModels;
-using Constellation.Application.Assets.Enums;
-using Constellation.Application.Assets.ExportAssetsToExcel;
-using Constellation.Application.Assets.GetAllActiveAssets;
-using Constellation.Application.Assets.GetAllAssets;
-using Constellation.Application.Assets.GetAllDisposedAssets;
-using Constellation.Application.Assets.Models;
-using Constellation.Application.Assets.SightAsset;
+using Application.Domains.AssetManagement.Assets.Queries.ExportAssetsToExcel;
+using Application.Domains.AssetManagement.Assets.Queries.GetAllAssets;
+using Constellation.Application.Domains.AssetManagement.Assets.Enums;
+using Constellation.Application.Domains.AssetManagement.Assets.Models;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
@@ -20,7 +20,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.AddAssetSighting;

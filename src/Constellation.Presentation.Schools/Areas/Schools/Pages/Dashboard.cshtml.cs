@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages;
 
-using Application.Attendance.Plans.CountPendingPlansForSchool;
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Plans.Queries.CountPendingPlansForSchool;
 using Application.Students.GetCurrentStudentsFromSchool;
 using Application.Students.Models;
 using Constellation.Application.Models.Auth;

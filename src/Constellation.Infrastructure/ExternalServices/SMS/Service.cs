@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
-using Application.Absences.ConvertAbsenceToAbsenceEntry;
+using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;

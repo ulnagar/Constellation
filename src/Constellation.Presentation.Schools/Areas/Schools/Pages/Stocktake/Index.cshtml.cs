@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Queries.GetCurrentStocktakeEvents;
+using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForSchool;
 using Application.Models.Auth;
-using Application.Stocktake.CancelSighting;
-using Application.Stocktake.GetCurrentStocktakeEvents;
-using Application.Stocktake.GetStocktakeSightingsForSchool;
-using Constellation.Application.Stocktake.Models;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;

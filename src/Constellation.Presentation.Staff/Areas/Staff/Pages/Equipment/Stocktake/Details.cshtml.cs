@@ -2,14 +2,13 @@
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Application.Stocktake.GetStocktakeEventDetails;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;

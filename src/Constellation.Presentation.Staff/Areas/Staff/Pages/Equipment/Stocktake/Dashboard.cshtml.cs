@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEvent;
+using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 using Application.Models.Auth;
-using Application.Stocktake.GetStocktakeEvent;
-using Application.Stocktake.GetStocktakeSightingsForStaffMember;
-using Application.Stocktake.Models;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
@@ -12,7 +12,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

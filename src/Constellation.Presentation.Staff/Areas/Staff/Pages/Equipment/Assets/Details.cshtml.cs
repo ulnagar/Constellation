@@ -8,7 +8,7 @@ using Application.Assets.SightAsset;
 using Application.Assets.TransferAsset;
 using Application.Assets.UpdateAssetStatus;
 using Application.Common.PresentationModels;
-using Constellation.Application.Assets.GetAssetByAssetNumber;
+using Application.Domains.AssetManagement.Assets.Queries.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.StaffMembers.GetStaffForSelectionList;
 using Constellation.Application.StaffMembers.Models;

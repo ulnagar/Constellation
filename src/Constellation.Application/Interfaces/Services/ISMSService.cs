@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Constellation.Application.Absences.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.DTOs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
+using Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

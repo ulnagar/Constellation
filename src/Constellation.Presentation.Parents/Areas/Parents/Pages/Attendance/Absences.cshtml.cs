@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance;
 
-using Application.Absences.GetAbsencesForFamily;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesForFamily;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;

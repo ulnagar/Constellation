@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans;
 
-using Application.Attendance.Plans.GetAttendancePlansSummary;
-using Application.Attendance.Plans.GetAttendancePlansSummaryForSchool;
+using Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummaryForSchool;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummary;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

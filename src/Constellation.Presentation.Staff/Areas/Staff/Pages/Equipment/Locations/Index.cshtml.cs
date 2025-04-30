@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Locations;
 
-using Application.Assets.GetLocationList;
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Queries.GetLocationList;
 using Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

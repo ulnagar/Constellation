@@ -1,16 +1,15 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
-using Application.Attendance.GenerateHistoricalDailyAttendanceReport;
+using Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Application.ScheduledReports.CreateScheduledReport;
-using Constellation.Application.Absences.ExportUnexplainedPartialAbsencesReport;
-using Constellation.Application.Attendance.GenerateAttendanceReportForStudent;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateHistoricalDailyAttendanceReport;
 using Constellation.Application.DTOs;
 using Constellation.Application.Extensions;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Staff.Areas.Staff.Models;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.HistoricalAttendanceReport;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StudentAttendanceReport;
 using Core.ValueObjects;

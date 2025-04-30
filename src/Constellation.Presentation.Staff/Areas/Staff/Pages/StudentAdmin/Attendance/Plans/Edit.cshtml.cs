@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
-using Application.Attendance.Plans.SaveDraftAttendancePlan;
 using Application.Models.Auth;
-using Constellation.Application.Attendance.Plans.CopyAttendancePlanDetails;
-using Constellation.Application.Attendance.Plans.GetAttendancePlanForSubmit;
-using Constellation.Application.Attendance.Plans.GetRecentlyCompletedPlans;
-using Constellation.Application.Attendance.Plans.SubmitAttendancePlan;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Attendance.Plans.Commands.CopyAttendancePlanDetails;
+using Constellation.Application.Domains.Attendance.Plans.Commands.SaveDraftAttendancePlan;
+using Constellation.Application.Domains.Attendance.Plans.Commands.SubmitAttendancePlan;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlanForSubmit;
+using Constellation.Application.Domains.Attendance.Plans.Queries.GetRecentlyCompletedPlans;
 using Constellation.Core.Models.Attendance.Identifiers;
 using Constellation.Core.Models.Timetables.Enums;
 using Constellation.Core.Shared;
@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

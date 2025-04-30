@@ -1,17 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral;
 
-using Application.Attendance.GetAttendanceDataFromSentral;
-using Application.Attendance.GetValidAttendanceReportDates;
-using Application.DTOs;
 using Application.Interfaces.Configuration;
-using Application.Interfaces.Gateways;
-using Core.Models.Families;
-using Core.Shared;
-using Extensions;
-using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
-using Models;
-using System.Text.Json;
 
 public sealed class ApiGateway
 {

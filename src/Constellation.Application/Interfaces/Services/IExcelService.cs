@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Absences.ExportUnexplainedPartialAbsencesReport;
-using Absences.GetAbsencesWithFilterForReport;
 using Assets.ImportAssetsFromFile;
-using Attendance.GenerateAttendanceReportForPeriod;
-using Attendance.GetAttendanceDataFromSentral;
 using Awards.ExportAwardNominations;
 using Compliance.GetWellbeingReportFromSentral;
-using Constellation.Application.Attendance.GenerateCustomReportForPeriod;
 using Constellation.Application.Contacts.Models;
+using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
+using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateCustomReportForPeriod;
+using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Constellation.Application.DTOs.Canvas;
 using Constellation.Application.Training.GenerateOverallReport;
 using Constellation.Core.Models.Students;
@@ -20,7 +20,6 @@ using DTOs;
 using DTOs.CSV;
 using ExternalDataConsistency;
 using GroupTutorials.GenerateTutorialAttendanceReport;
-using Org.BouncyCastle.Tls;
 using SchoolContacts.GetContactsBySchool;
 using SciencePracs.GenerateOverdueReport;
 using SciencePracs.GenerateYTDStatusReport;

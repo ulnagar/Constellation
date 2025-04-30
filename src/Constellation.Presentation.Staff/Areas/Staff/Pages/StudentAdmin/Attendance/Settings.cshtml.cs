@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
-using Constellation.Application.Absences.SetAbsenceConfigurationForStudent;
+using Application.Domains.Attendance.Absences.Commands.SetAbsenceConfigurationForStudent;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
@@ -13,7 +13,6 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Staff.Areas.Staff.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
