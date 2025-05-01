@@ -1,5 +1,4 @@
-﻿@using System.IO;
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,6 +27,7 @@
                         <li><a asp-page="/Dashboard" asp-area="Staff" class="nav-link">Staff</a></li>
                         <li><a asp-page="/Dashboard" asp-area="Schools" class="nav-link">Schools</a></li>
                         <li><a asp-page="/Index" asp-area="Parents" class="nav-link">Parents</a></li>
+                        <li><a asp-page="/Index" asp-area="Students" class="nav-link">Students</a></li>
                     </ul>
                 </div>
             </div>
@@ -39,10 +39,6 @@
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer fixed-bottom">
-        <vc:page-footer />
-    </footer>
 
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/bootstrap4/js/bootstrap.bundle.min.js"></script>

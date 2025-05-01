@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Pages;
 
+using Core.Abstractions.Services;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,26 +11,29 @@ using System.Diagnostics;
 [IgnoreAntiforgeryToken]
 public class ErrorModel : PageModel
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
     public string RequestId { get; set; }
     public ProblemDetails ProblemDetails { get; set; }
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
     public ErrorModel(
+        ICurrentUserService currentUserService,
         ILogger logger)
     {
+        _currentUserService = currentUserService;
         _logger = logger.ForContext<ErrorModel>();
     }
 
     public void OnGet()
     {
-        var exceptionDetails = HttpContext.Features.Get<IExceptionHandlerFeature>();
-        var ex = exceptionDetails?.Error;
+        IExceptionHandlerFeature exceptionDetails = HttpContext.Features.Get<IExceptionHandlerFeature>();
+        Exception ex = exceptionDetails?.Error;
 
         if (ex != null)
         {
-            var title = "An error occured: " + ex.Message;
-            var details = ex.ToString();
+            string title = "An error occured: " + ex.Message;
+            string details = ex.ToString();
 
             ProblemDetails = new ProblemDetails
             {
@@ -42,5 +46,11 @@ public class ErrorModel : PageModel
             if (RequestId != null)
                 ProblemDetails.Extensions["traceId"] = RequestId;
         }
+
+        _logger
+            .ForContext(nameof(_currentUserService.UserName), _currentUserService.UserName)
+            .ForContext(nameof(_currentUserService.EmailAddress), _currentUserService.EmailAddress)
+            .ForContext(nameof(ProblemDetails), ProblemDetails, true)
+            .Error("User experienced hard error");
     }
 }

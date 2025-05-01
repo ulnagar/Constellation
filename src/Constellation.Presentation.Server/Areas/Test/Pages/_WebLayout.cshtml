@@ -38,10 +38,21 @@
 </head>
 <body>
     <vc:staff-nav-bar />
-
-    <div id="main-container" class="container">
-        <div class="pb-3">
-            @RenderBody()
+    
+    <div id="main-container" class="container-fluid">
+        <div class="sidebar-layout d-flex">
+            <div class="sidebar-container">
+                <nav id="sidebarMenu" class="d-md-block bg-light sidebar collapse">
+                    <div class="sidebar-sticky pt-3">
+                        <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                            <span class="w-100"></span>
+                        </h4>
+                    </div>
+                </nav>
+            </div>
+            <main role="main" class="ml-sm-auto px-md-4 pt-md-3">
+                @RenderBody()
+            </main>
         </div>
 
         @if (Model.ModalContent is not null)
@@ -55,10 +66,6 @@
             </script>
         }
     </div>
-
-    <footer class="footer fixed-bottom">
-        <vc:page-footer />
-    </footer>
     
     <script src="~/js/staff.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
