@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.FamilyAddStudent;
 
-using Constellation.Application.Families.GetFamilyById;
-using Constellation.Application.Families.Models;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Application.Domains.Families.Queries.GetFamilyById;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
+using Constellation.Application.Domains.Families.Models;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Models.Students.Identifiers;

@@ -1,10 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Schools.Commands.UpsertSchool;
+using Application.Domains.Schools.Queries.GetSchoolForEdit;
 using Application.Models.Auth;
-using Application.Schools.GetSchoolById;
-using Application.Schools.GetSchoolForEdit;
-using Application.Schools.UpsertSchool;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;

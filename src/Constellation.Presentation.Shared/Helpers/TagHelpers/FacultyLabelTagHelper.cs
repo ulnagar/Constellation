@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Shared.Helpers.TagHelpers;
 
-using Constellation.Application.Faculties.GetFacultiesSummary;
+using Constellation.Application.Domains.Faculties.Queries.GetFacultiesSummary;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 public class FacultyLabelTagHelper : TagHelper

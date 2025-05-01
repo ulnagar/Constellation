@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Users.AuditAllUsers;
+using Application.Domains.Auth.Commands.AuditAllUsers;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Shared;
 

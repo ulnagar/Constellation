@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialTeacherAssignment;
 
-using Constellation.Application.StaffMembers.GetStaffMembersAsDictionary;
+using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

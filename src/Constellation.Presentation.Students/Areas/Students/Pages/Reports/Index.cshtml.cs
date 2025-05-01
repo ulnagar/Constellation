@@ -1,9 +1,8 @@
 namespace Constellation.Presentation.Students.Areas.Students.Pages.Reports;
 
-using Application.Attachments.GetAttachmentFile;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
+using Application.Domains.StudentReports.Queries.GetCombinedReportListForStudent;
 using Application.Models.Auth;
-using Application.Reports.GetCombinedReportListForStudent;
-using Application.Students.GetStudentsByParentEmail;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Models.Reports.Identifiers;
 using Constellation.Core.Models.Students.Errors;

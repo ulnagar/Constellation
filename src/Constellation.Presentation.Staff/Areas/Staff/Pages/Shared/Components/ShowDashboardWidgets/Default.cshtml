@@ -1,5 +1,6 @@
-﻿@using Constellation.Application.Awards.Enums
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets.ShowDashboardWidgetsViewComponentModel
+
+@using Constellation.Application.Domains.MeritAwards.Awards.Enums
 
 <div class="col mb-4 sortable" data-id="card-workflow-actions">
     <div class="card h-100 @(Model.ActiveWorkFlowActions > 0 ? "text-white bg-danger" : "text-white bg-success")">

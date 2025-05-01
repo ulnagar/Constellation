@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.ScheduledReports;
 
-using Application.ScheduledReports;
-using Application.ScheduledReports.Identifiers;
+using Application.Domains.ScheduledReports;
+using Application.Domains.ScheduledReports.Identifiers;
+using Application.Domains.ScheduledReports.Models;
 using Converters;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;

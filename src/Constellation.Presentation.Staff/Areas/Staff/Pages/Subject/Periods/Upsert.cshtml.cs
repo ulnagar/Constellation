@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Timetables.Periods.Commands.UpsertPeriod;
+using Application.Domains.Timetables.Periods.Queries.GetPeriodById;
 using Application.Models.Auth;
-using Application.Periods.GetPeriodById;
-using Application.Periods.UpsertPeriod;
 using Core.Abstractions.Services;
 using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;

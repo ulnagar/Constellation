@@ -1,14 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Responses;
 
 using Application.Common.PresentationModels;
-using Application.Families.GetFamilyContactsForStudent;
-using Application.Families.Models;
+using Application.Domains.Families.Queries.GetFamilyContactsForStudent;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Models.Auth;
-using Application.Students.GetCurrentStudentsAsDictionary;
-using Application.ThirdPartyConsent.CreateTransaction;
-using Constellation.Application.ThirdPartyConsent.GetRequiredApplicationsForStudent;
+using Constellation.Application.Domains.Families.Models;
+using Constellation.Application.Domains.ThirdPartyConsent.Commands.CreateTransaction;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetRequiredApplicationsForStudent;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Families.Errors;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
@@ -19,7 +18,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;

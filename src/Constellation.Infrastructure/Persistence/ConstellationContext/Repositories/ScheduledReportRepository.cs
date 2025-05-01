@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Application.ScheduledReports;
-using Application.ScheduledReports.Repositories;
+using Application.Domains.ScheduledReports;
+using Application.Domains.ScheduledReports.Models;
+using Application.Domains.ScheduledReports.Repositories;
 
 internal sealed class ScheduledReportRepository : IScheduledReportRepository
 {

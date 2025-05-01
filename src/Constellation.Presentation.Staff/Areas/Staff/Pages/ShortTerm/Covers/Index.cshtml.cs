@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.ClassCovers.CancelCover;
-using Constellation.Application.ClassCovers.GetAllCoversForCalendarYear;
-using Constellation.Application.ClassCovers.GetAllCurrentAndFutureCovers;
-using Constellation.Application.ClassCovers.GetFutureCovers;
-using Constellation.Application.ClassCovers.Models;
+using Application.Domains.ClassCovers.Commands.CancelCover;
+using Application.Domains.ClassCovers.Models;
+using Application.Domains.ClassCovers.Queries.GetAllCoversForCalendarYear;
+using Application.Domains.ClassCovers.Queries.GetAllCurrentAndFutureCovers;
+using Application.Domains.ClassCovers.Queries.GetFutureCovers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Core.Abstractions.Services;

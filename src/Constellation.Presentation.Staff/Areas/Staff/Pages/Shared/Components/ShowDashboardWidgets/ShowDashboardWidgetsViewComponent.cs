@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets;
 
 using Application.Domains.Attendance.Plans.Queries.CountAttendancePlansWithStatus;
+using Application.Domains.Students.Queries.CountStudentsWithAbsenceScanDisabled;
+using Application.Domains.Students.Queries.CountStudentsWithAwardOverages;
+using Application.Domains.Students.Queries.CountStudentsWithoutSentralId;
+using Application.Domains.Students.Queries.CountStudentsWithPendingAwards;
+using Application.Domains.Training.Queries.CountStaffWithoutModule;
+using Application.Domains.WorkFlows.Queries.CountActiveActionsForUser;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Students.CountStudentsWithAbsenceScanDisabled;
-using Constellation.Application.Students.CountStudentsWithAwardOverages;
-using Constellation.Application.Students.CountStudentsWithoutSentralId;
-using Constellation.Application.Students.CountStudentsWithPendingAwards;
-using Constellation.Application.Training.CountStaffWithoutModule;
-using Constellation.Application.WorkFlows.CountActiveActionsForUser;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

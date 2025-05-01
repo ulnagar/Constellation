@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.BulkCancelSciencePracRolls;
 
-using Application.Schools.Models;
+using Application.Domains.Schools.Models;
 using Core.Enums;
 using System.Collections.Generic;
 

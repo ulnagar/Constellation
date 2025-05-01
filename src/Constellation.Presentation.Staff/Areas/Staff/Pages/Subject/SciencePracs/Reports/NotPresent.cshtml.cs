@@ -1,9 +1,8 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Reports;
 
+using Application.Domains.SciencePracs.Queries.GetRollsWithoutPresentStudents;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SciencePracs.GetRollsWithoutPresentStudents;
-using Constellation.Application.SciencePracs.Models;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas.Staff.Models;

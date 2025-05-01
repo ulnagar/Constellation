@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages;
 
 using Application.Models.Auth;
-using Application.Offerings.GetCurrentOfferingsForStudent;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForStudent;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Logging;

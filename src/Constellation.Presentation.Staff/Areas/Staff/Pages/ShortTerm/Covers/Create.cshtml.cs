@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
-using Application.StaffMembers.Models;
-using Constellation.Application.Casuals.GetCasualsForSelectionList;
-using Constellation.Application.ClassCovers.BulkCreateCovers;
+using Application.Domains.Casuals.Queries.GetCasualsForSelectionList;
+using Application.Domains.ClassCovers.Commands.BulkCreateCovers;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
+using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.GetOfferingsForSelectionList;
-using Constellation.Application.StaffMembers.GetStaffForSelectionList;
-using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Staff.Areas.Staff.Models;

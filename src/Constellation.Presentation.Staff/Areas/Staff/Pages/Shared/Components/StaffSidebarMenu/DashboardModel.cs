@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu;
 
-using Application.Timetables.GetStaffDailyTimetableData;
+using Application.Domains.Timetables.Timetables.Queries.GetStaffDailyTimetableData;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Models.Timetables.Enums;
 using System.Collections.Generic;

@@ -6,7 +6,6 @@ using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models.Students.Enums;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -14,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ThirdPartyConsent.GetRequiredApplicationsForStudent;
 
 internal sealed class GenerateCustomReportForPeriodQueryHandler
 : IQueryHandler<GenerateCustomReportForPeriodQuery, MemoryStream>

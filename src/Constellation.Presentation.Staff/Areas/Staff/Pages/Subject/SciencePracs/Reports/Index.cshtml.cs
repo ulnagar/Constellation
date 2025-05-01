@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Reports;
 
-using Application.SciencePracs.GenerateYTDStatusReport;
+using Application.Domains.SciencePracs.Queries.GenerateOverdueReport;
+using Application.Domains.SciencePracs.Queries.GenerateYTDStatusReport;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SciencePracs.GenerateOverdueReport;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;

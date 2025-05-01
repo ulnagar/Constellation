@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Controllers;
 
+using Application.Domains.LinkedSystems.Teams.Models;
 using Application.DTOs;
 using Application.Interfaces.Repositories;
-using Constellation.Application.Teams.Models;
 using Constellation.Core.Models.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.Enums;

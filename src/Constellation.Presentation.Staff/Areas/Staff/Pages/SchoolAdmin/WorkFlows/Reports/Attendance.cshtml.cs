@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.WorkFlows.Commands.CreateAttendanceCase;
+using Application.Domains.WorkFlows.Commands.UpdateAttendanceCaseDetails;
 using Application.Models.Auth;
-using Application.WorkFlows.CreateAttendanceCase;
-using Application.WorkFlows.UpdateAttendanceCaseDetails;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceTrendValues;
 using Core.Abstractions.Services;
 using Core.Errors;

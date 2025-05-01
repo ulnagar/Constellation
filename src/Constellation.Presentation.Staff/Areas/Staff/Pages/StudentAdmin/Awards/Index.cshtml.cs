@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Awards;
 
-using Application.Attachments.GetAttachmentFile;
 using Application.Common.PresentationModels;
-using Constellation.Application.Awards.GetAllAwards;
-using Constellation.Application.Awards.GetRecentAwards;
-using Constellation.Application.Awards.Models;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
+using Application.Domains.MeritAwards.Awards.Queries.GetAllAwards;
+using Application.Domains.MeritAwards.Awards.Queries.GetRecentAwards;
+using Constellation.Application.Domains.MeritAwards.Awards.Models;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
@@ -18,9 +18,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]

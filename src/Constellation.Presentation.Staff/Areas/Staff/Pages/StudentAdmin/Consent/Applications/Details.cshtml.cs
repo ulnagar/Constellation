@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Applications;
 
 using Application.Common.PresentationModels;
+using Application.Domains.ThirdPartyConsent.Commands.RevokeRequirement;
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.DisableApplication;
-using Application.ThirdPartyConsent.GetApplicationDetails;
-using Application.ThirdPartyConsent.ReenableApplication;
-using Application.ThirdPartyConsent.RevokeRequirement;
+using Constellation.Application.Domains.ThirdPartyConsent.Commands.DisableApplication;
+using Constellation.Application.Domains.ThirdPartyConsent.Commands.ReenableApplication;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplicationDetails;
 using Core.Abstractions.Services;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
@@ -13,9 +13,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using ApplicationId = Core.Models.ThirdPartyConsent.Identifiers.ApplicationId;
 

@@ -1,16 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Actions;
 
 using Application.Common.PresentationModels;
+using Application.Domains.WorkFlows.Commands.UpdateConfirmSentralEntryAction;
+using Application.Domains.WorkFlows.Commands.UpdateCreateSentralEntryAction;
+using Application.Domains.WorkFlows.Commands.UpdateParentInterviewAction;
+using Application.Domains.WorkFlows.Commands.UpdatePhoneParentAction;
+using Application.Domains.WorkFlows.Commands.UpdateSendEmailAction;
+using Application.Domains.WorkFlows.Commands.UpdateSentralIncidentStatusAction;
+using Application.Domains.WorkFlows.Commands.UpdateUploadTrainingCertificateAction;
+using Application.Domains.WorkFlows.Queries.GetCaseById;
 using Application.Models.Auth;
-using Application.WorkFlows.UpdateConfirmSentralEntryAction;
-using Application.WorkFlows.UpdateCreateSentralEntryAction;
-using Application.WorkFlows.UpdateParentInterviewAction;
-using Application.WorkFlows.UpdatePhoneParentAction;
-using Application.WorkFlows.UpdateSendEmailAction;
-using Application.WorkFlows.UpdateSentralIncidentStatusAction;
-using Application.WorkFlows.UpdateUploadTrainingCertificateAction;
 using Constellation.Application.DTOs;
-using Constellation.Application.WorkFlows.GetCaseById;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;

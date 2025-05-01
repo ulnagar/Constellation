@@ -2,9 +2,9 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Complia
 
 using Application.Common.PresentationModels;
 using Application.Domains.Attendance.Reports.Queries.GetAttendanceValuesForStudent;
+using Application.Domains.Students.Queries.GetStudentById;
 using Application.Models.Auth;
-using Constellation.Application.Students.GetStudentById;
-using Constellation.Application.Students.Models;
+using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Shared;

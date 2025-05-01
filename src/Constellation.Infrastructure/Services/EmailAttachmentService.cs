@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Constellation.Application.Abstractions;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.StaffMembers.GetStaffById;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Students;

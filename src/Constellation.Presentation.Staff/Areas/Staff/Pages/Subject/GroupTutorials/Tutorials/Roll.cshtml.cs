@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials;
 
-using Application.GroupTutorials.AddStudentToTutorialRoll;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.GroupTutorials.GetTutorialRollWithDetailsById;
-using Constellation.Application.GroupTutorials.RemoveStudentFromTutorialRoll;
-using Constellation.Application.GroupTutorials.SubmitRoll;
+using Constellation.Application.Domains.GroupTutorials.Commands.AddStudentToTutorialRoll;
+using Constellation.Application.Domains.GroupTutorials.Commands.RemoveStudentFromTutorialRoll;
+using Constellation.Application.Domains.GroupTutorials.Commands.SubmitRoll;
+using Constellation.Application.Domains.GroupTutorials.Queries.GetTutorialRollWithDetailsById;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
@@ -15,7 +15,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.TutorialRollAddStudent;

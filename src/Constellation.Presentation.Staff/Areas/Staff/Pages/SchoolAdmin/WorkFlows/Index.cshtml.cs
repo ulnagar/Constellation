@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows;
 
 using Application.Common.PresentationModels;
+using Application.Domains.WorkFlows.Queries.GetCaseSummaryList;
 using Application.Models.Auth;
-using Application.WorkFlows.GetCaseSummaryList;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow.Enums;

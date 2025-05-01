@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Timetables;
 
+using Application.Domains.Timetables.Timetables.Queries.GetStudentTimetableData;
+using Application.Domains.Timetables.Timetables.Queries.GetStudentTimetableExport;
 using Application.Models.Auth;
-using Application.Students.GetStudentsByParentEmail;
-using Application.Timetables.GetStudentTimetableExport;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Application.DTOs;
-using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

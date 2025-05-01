@@ -1,12 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.Extensions;
+using Application.Domains.StudentReports.Commands.CreateNewStudentReport;
+using Application.Domains.StudentReports.Commands.ReplaceStudentReport;
+using Application.Domains.StudentReports.Queries.GetAcademicReportsForStudent;
+using Application.Domains.Students.Queries.GetCurrentStudentsWithSentralId;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Reports.CreateNewStudentReport;
-using Constellation.Application.Reports.GetAcademicReportsForStudent;
-using Constellation.Application.Reports.ReplaceStudentReport;
-using Constellation.Application.Students.GetCurrentStudentsWithSentralId;
 using Core.Extensions;
 using MediatR;
 using System;

@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Families.CreateFamily;
+using Constellation.Application.Domains.Families.Commands.CreateFamily;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Staff.Areas;
@@ -12,7 +12,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;

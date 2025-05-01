@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Contacts.Queries.GetContactListForParentPortal;
 using Application.Models.Auth;
-using Constellation.Application.Contacts.GetContactListForParentPortal;
-using Constellation.Application.Students.GetStudentsByParentEmail;
+using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]

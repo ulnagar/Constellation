@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ReinstateStudent;
 
-using Application.Schools.GetSchoolsForSelectionList;
-using Application.Schools.Models;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;

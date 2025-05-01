@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Models.Auth;
-using Application.Schools.GetSchoolsForSelectionList;
-using Application.Schools.Models;
-using Application.Students.CreateStudent;
-using Application.Students.GetStudentById;
-using Application.Students.Models;
-using Application.Students.UpdateStudent;
+using Constellation.Application.Domains.Students.Commands.CreateStudent;
+using Constellation.Application.Domains.Students.Commands.UpdateStudent;
+using Constellation.Application.Domains.Students.Models;
+using Constellation.Application.Domains.Students.Queries.GetStudentById;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Enums;
@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

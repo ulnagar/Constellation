@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.Nominate;
 
-using Application.Awards.CreateAwardNomination;
-using Application.Awards.GetNominationPeriod;
 using Application.Common.PresentationModels;
-using Application.Courses.GetActiveCoursesList;
-using Application.Courses.Models;
 using Application.Models.Auth;
-using Application.Offerings.GetFilteredOfferingsForSelectionList;
-using Constellation.Application.Students.GetFilteredStudentsForSelectionList;
+using Constellation.Application.Domains.Courses.Models;
+using Constellation.Application.Domains.Courses.Queries.GetActiveCoursesList;
+using Constellation.Application.Domains.MeritAwards.Nominations.Commands.CreateAwardNomination;
+using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
+using Constellation.Application.Domains.Offerings.Queries.GetFilteredOfferingsForSelectionList;
+using Constellation.Application.Domains.Students.Queries.GetFilteredStudentsForSelectionList;
 using Constellation.Core.Enums;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;
@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;

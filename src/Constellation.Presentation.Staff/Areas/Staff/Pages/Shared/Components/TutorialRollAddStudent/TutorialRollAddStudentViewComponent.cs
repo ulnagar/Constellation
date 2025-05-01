@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialRollAddStudent;
 
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;

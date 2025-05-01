@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Faculties.GetFacultiesAsDictionary;
+using Application.Domains.Faculties.Queries.GetFacultiesAsDictionary;
+using Application.Domains.StaffMembers.Queries.GetStaffList;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.StaffMembers.GetStaffList;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
@@ -11,7 +11,6 @@ using Core.Models.Faculties.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

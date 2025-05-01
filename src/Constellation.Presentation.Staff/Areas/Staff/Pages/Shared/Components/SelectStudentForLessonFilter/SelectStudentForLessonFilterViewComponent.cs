@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.SelectStudentForLessonFilter;
 
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Shared;
 using Core.Models.Students.Identifiers;
 using MediatR;

@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Timetables.Periods.Queries.GetPeriodsForVisualSelection;
 using Application.Models.Auth;
-using Application.Periods.GetPeriodsForVisualSelection;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
+using Application.Domains.Training.Queries.GetModuleStatusByStaffMember;
 using Application.Models.Auth;
-using Application.StaffMembers.GetStaffById;
-using Constellation.Application.Training.GetModuleStatusByStaffMember;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

@@ -2,13 +2,12 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Re
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Application.Students.GetCurrentStudentsWithCurrentOfferings;
+using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsWithCurrentOfferings;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

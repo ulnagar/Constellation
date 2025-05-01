@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
+using Application.Domains.Schools.Queries.GetSchoolById;
 using Application.Models.Auth;
-using Application.SchoolContacts.CreateContactWithRole;
-using Application.Schools.GetSchoolById;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Enums;
 using Core.Shared;

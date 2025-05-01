@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Awards;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
 using Application.Models.Auth;
-using Constellation.Application.Attachments.GetAttachmentFile;
-using Constellation.Application.Awards.GetSummaryForStudent;
-using Constellation.Application.Students.GetStudentsByParentEmail;
+using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetSummaryForStudent;
+using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsParent)]

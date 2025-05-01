@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Presentation.Schools.Areas;
 
+using Application.Domains.Schools.Queries.GetSchoolsForContact;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
-using Constellation.Application.Schools.GetSchoolsForContact;
 using Constellation.Core.Shared;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;

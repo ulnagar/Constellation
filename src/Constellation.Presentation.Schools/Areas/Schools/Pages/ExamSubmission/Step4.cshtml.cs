@@ -1,19 +1,18 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ExamSubmission;
 
-using Application.Assignments.UploadAssignmentSubmission;
+using Application.Domains.Assignments.Commands.UploadAssignmentSubmission;
+using Application.Domains.Assignments.Queries.GetAssignmentsByCourse;
 using Application.DTOs;
 using Application.Helpers;
 using Application.Models.Auth;
-using Constellation.Application.Assignments.GetAssignmentsByCourse;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Courses.GetCoursesForStudent;
-using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+using Constellation.Application.Domains.Courses.Queries.GetCoursesForStudent;
+using Constellation.Application.Domains.Students.Queries.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
-using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Models.Assignments.Identifiers;
 using MediatR;

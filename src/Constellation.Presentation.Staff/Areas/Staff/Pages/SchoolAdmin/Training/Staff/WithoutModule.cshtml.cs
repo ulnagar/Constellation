@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Staff;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Training.Queries.GetListOfStaffMembersWithoutModule;
 using Application.Models.Auth;
-using Application.Training.GetListOfStaffMembersWithoutModule;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

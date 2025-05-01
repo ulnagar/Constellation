@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Wellbeing;
 
 using Application.Common.PresentationModels;
-using Application.Compliance.ExportWellbeingReport;
-using Application.Compliance.GetWellbeingReportFromSentral;
+using Application.Domains.Compliance.Wellbeing.Queries.ExportWellbeingReport;
+using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Application.DTOs;
 using Application.Models.Auth;
 using Core.Abstractions.Services;

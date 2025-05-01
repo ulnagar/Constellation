@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
 using Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
-using Application.ScheduledReports.CreateScheduledReport;
+using Application.Domains.ScheduledReports.Commands.CreateScheduledReport;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateHistoricalDailyAttendanceReport;

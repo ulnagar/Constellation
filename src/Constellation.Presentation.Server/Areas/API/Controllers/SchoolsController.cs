@@ -1,11 +1,11 @@
 ﻿using Constellation.Application.DTOs;
-using Constellation.Application.Features.API.Schools.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Constellation.Presentation.Server.Areas.API.Controllers
 {
-    using Application.Schools.GetCurrentPartnerSchoolCodes;
+    using Application.Domains.ExternalSystems.NetworkStatistics.Queries.GetGraphDataForSchool;
+    using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolCodes;
     using Core.Shared;
 
     [Route("api/v1/Schools")]

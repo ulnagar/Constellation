@@ -1,15 +1,14 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Responses;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Models.Auth;
-using Application.Schools.Models;
-using Application.StaffMembers.Models;
-using Application.ThirdPartyConsent.GetConsentsWithFilter;
-using Constellation.Application.Offerings.GetOfferingsForSelectionList;
-using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
-using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
-using Constellation.Application.ThirdPartyConsent.Models;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetConsentsWithFilter;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Abstractions.Services;

@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu;
 
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffByEmail;
+using Application.Domains.Timetables.Timetables.Queries.GetStaffDailyTimetableData;
+using Application.Domains.Training.Queries.GetCountOfExpiringCertificatesForStaffMember;
 using Application.Extensions;
-using Application.Timetables.GetStaffDailyTimetableData;
-using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
-using Constellation.Application.StaffMembers.GetStaffByEmail;
-using Constellation.Application.StaffMembers.Models;
-using Constellation.Application.Training.GetCountOfExpiringCertificatesForStaffMember;
+using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;

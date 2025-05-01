@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties;
 
 using Application.Common.PresentationModels;
-using Application.StaffMembers.GetStaffMembersAsDictionary;
-using Constellation.Application.Faculties.GetFaculty;
+using Application.Domains.StaffMembers.Commands.AddStaffToFaculty;
+using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
+using Constellation.Application.Domains.Faculties.Queries.GetFaculty;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.StaffMembers.AddStaffToFaculty;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;

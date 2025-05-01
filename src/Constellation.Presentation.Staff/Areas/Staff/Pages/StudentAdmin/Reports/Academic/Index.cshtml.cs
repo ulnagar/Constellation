@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.Academic;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
+using Application.Domains.StudentReports.Queries.GetAllAcademicReports;
 using Application.Models.Auth;
-using Application.Reports.GetAllAcademicReports;
-using Constellation.Application.Attachments.GetAttachmentFile;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Core.Abstractions.Services;

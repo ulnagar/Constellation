@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.GetConsentStatusByApplication;
-using Constellation.Application.Offerings.GetOfferingsForSelectionList;
-using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
-using Constellation.Application.StaffMembers.Models;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetConsentStatusByApplication;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

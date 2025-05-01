@@ -1,13 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
+using Application.Domains.Students.Commands.ImportStudentsFromFile;
 using Application.DTOs;
-using Application.Students.ImportStudentsFromFile;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
-using Constellation.Presentation.Staff.Areas.Staff.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

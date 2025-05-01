@@ -2,8 +2,8 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ExamSubmission;
 
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Courses.GetCoursesForStudent;
-using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+using Constellation.Application.Domains.Courses.Queries.GetCoursesForStudent;
+using Constellation.Application.Domains.Students.Queries.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]

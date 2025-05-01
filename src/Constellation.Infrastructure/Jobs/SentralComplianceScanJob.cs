@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Compliance.GetWellbeingReportFromSentral;
+using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
+using Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
+using Application.Domains.WorkFlows.Commands.CreateComplianceCase;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Services;
-using Application.WorkFlows.AddCaseDetailUpdateAction;
-using Application.WorkFlows.CreateComplianceCase;
 using Core.Abstractions.Clock;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;

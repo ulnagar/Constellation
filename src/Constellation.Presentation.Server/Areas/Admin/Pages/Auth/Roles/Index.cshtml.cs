@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles;
 
-using Constellation.Application.AdminDashboards.AddUserToRole;
-using Constellation.Application.AdminDashboards.RemoveUserFromRole;
+using Application.Domains.Auth.Commands.AddUserToRole;
+using Application.Domains.Auth.Commands.RemoveUserFromRole;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;

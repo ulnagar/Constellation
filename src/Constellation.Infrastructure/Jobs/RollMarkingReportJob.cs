@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Faculties.GetFacultyManagers;
-using Constellation.Application.ClassCovers.GetCoversSummaryByDateAndOffering;
+using Application.Domains.ClassCovers.Queries.GetCoversSummaryByDateAndOffering;
+using Application.Domains.Faculties.Queries.GetFacultyManagers;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;

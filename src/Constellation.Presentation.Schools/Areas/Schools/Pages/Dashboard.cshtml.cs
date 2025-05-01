@@ -2,8 +2,8 @@
 
 using Application.Common.PresentationModels;
 using Application.Domains.Attendance.Plans.Queries.CountPendingPlansForSchool;
-using Application.Students.GetCurrentStudentsFromSchool;
-using Application.Students.Models;
+using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
+using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

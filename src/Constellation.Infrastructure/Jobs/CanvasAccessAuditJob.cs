@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Canvas.GetCourseMembershipByCourseCode;
-using Application.Canvas.ProcessCanvasOperation;
+using Application.Domains.LinkedSystems.Canvas.Commands.ProcessCanvasOperation;
+using Application.Domains.LinkedSystems.Canvas.Queries.GetCourseMembershipByCourseCode;
 using Application.DTOs.Canvas;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;

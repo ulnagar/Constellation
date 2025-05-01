@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AllocateAsset;
 
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
-using Constellation.Application.StaffMembers.GetStaffForSelectionList;
-using Constellation.Application.StaffMembers.Models;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Shared;
 using Core.Models.Students.Identifiers;
 using MediatR;

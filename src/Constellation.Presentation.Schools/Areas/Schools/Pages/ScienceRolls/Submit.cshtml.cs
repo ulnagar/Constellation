@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SciencePracs.Commands.SubmitRoll;
+using Application.Domains.SciencePracs.Queries.GetLessonRollSubmitContextForSchoolsPortal;
 using Application.Models.Auth;
-using Application.SciencePracs.GetLessonRollSubmitContextForSchoolsPortal;
-using Application.SciencePracs.SubmitRoll;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Logging;

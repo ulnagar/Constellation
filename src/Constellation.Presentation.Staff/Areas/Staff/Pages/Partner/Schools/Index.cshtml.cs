@@ -1,16 +1,14 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
 using Application.Common.PresentationModels;
-using Application.GroupTutorials.GenerateTutorialAttendanceReport;
+using Application.Domains.Schools.Queries.GetSchoolsSummaryList;
 using Application.Models.Auth;
-using Application.Schools.GetSchoolsSummaryList;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Tests.Unit.Features.Partners.Schools.Commands;
 
-using Constellation.Application.Schools.UpsertSchool;
+using Domains.Schools.Commands.UpsertSchool;
 
 public class UpsertSchoolCommandValidatorTests
 {

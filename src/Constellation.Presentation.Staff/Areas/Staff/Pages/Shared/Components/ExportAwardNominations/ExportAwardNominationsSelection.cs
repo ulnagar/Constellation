@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ExportAwardNominations;
 
-using Application.Awards.ExportAwardNominations;
+using Constellation.Application.Domains.MeritAwards.Nominations.Queries.ExportAwardNominations;
 
 public sealed class ExportAwardNominationsSelection
 {

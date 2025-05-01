@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
+using Application.Domains.Schools.Commands.UpsertSchool;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Repositories;
-using Application.SchoolContacts.CreateContactWithRole;
-using Application.Schools.UpsertSchool;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Models;

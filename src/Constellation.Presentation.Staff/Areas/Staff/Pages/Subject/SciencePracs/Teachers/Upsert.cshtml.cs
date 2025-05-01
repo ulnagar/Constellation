@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Teachers;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
+using Application.Domains.SchoolContacts.Commands.UpdateContact;
+using Application.Domains.SchoolContacts.Queries.GetContactSummary;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SchoolContacts.CreateContactWithRole;
-using Constellation.Application.SchoolContacts.GetContactSummary;
-using Constellation.Application.SchoolContacts.UpdateContact;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

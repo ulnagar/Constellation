@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Assignments.GetAllAssignmentSubmissionFiles;
-using Constellation.Application.Assignments.GetAssignmentById;
-using Constellation.Application.Assignments.GetAssignmentSubmissionFile;
-using Constellation.Application.Assignments.ResendAssignmentSubmissionToCanvas;
-using Constellation.Application.Assignments.UploadAssignmentSubmission;
+using Application.Domains.Assignments.Commands.ResendAssignmentSubmissionToCanvas;
+using Application.Domains.Assignments.Commands.UploadAssignmentSubmission;
+using Application.Domains.Assignments.Queries.GetAllAssignmentSubmissionFiles;
+using Application.Domains.Assignments.Queries.GetAssignmentById;
+using Application.Domains.Assignments.Queries.GetAssignmentSubmissionFile;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;

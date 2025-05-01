@@ -2,13 +2,12 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consen
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.GetApplications;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplications;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance;
 
 using Application.Domains.Attendance.Absences.Commands.SetAbsenceConfigurationForStudent;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;

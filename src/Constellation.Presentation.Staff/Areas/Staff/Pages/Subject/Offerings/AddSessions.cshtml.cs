@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Offerings.Queries.GetOfferingSummary;
+using Application.Domains.Timetables.Periods.Queries.GetPeriodsForVisualSelection;
+using Constellation.Application.Domains.Offerings.Commands.AddMultipleSessionsToOffering;
+using Constellation.Application.Domains.Offerings.Models;
+using Constellation.Application.Domains.Offerings.Queries.GetSessionListForOffering;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.AddMultipleSessionsToOffering;
-using Constellation.Application.Offerings.GetOfferingSummary;
-using Constellation.Application.Offerings.GetSessionListForOffering;
-using Constellation.Application.Offerings.Models;
-using Constellation.Application.Periods.GetPeriodsForVisualSelection;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
@@ -16,7 +16,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

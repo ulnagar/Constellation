@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Devices;
 
 using Application.Common.PresentationModels;
-using Application.Devices.GetDeviceDetails;
+using Application.Domains.AssetManagement.Archive.Queries.GetDeviceDetails;
 using Application.Models.Auth;
 using Constellation.Core.Models.Assets;
 using Core.Abstractions.Services;

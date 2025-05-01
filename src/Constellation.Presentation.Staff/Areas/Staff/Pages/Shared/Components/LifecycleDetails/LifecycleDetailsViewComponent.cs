@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.LifecycleDetails;
 
-using Application.Students.GetLifecycleDetailsForStudent;
+using Constellation.Application.Domains.Students.Queries.GetLifecycleDetailsForStudent;
 using Microsoft.AspNetCore.Mvc;
 
 public sealed class LifecycleDetailsViewComponent : ViewComponent

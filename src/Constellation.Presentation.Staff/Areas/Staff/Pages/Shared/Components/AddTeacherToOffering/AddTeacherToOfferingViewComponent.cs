@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddTeacherToOffering;
 
-using Constellation.Application.Offerings.GetOfferingDetails;
-using Constellation.Application.StaffMembers.GetStaffForSelectionList;
-using Constellation.Application.StaffMembers.Models;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;

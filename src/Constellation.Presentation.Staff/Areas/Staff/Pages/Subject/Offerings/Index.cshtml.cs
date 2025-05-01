@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
+using Constellation.Application.Domains.Offerings.Models;
+using Constellation.Application.Domains.Offerings.Queries.GetAllOfferingSummaries;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.GetAllOfferingSummaries;
-using Constellation.Application.Offerings.Models;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;

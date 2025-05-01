@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.WorkFlows.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.WorkFlows.Queries.ExportOpenCaseReport;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.WorkFlows.ExportOpenCaseReport;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;

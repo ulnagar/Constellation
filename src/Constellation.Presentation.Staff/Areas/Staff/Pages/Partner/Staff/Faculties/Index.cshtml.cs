@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Faculties.GetFacultiesSummary;
+using Constellation.Application.Domains.Faculties.Queries.GetFacultiesSummary;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
@@ -9,7 +9,6 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

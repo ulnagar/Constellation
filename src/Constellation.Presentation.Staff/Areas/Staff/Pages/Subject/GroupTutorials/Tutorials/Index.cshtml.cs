@@ -1,14 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.GroupTutorials.GetAllTutorials;
+using Constellation.Application.Domains.GroupTutorials.Queries.GetAllTutorials;
 using Constellation.Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

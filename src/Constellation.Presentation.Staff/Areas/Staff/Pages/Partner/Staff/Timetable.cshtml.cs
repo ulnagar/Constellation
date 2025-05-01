@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
-using Application.StaffMembers.GetStaffById;
-using Application.Timetables.GetStaffIntegratedTimetableData;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
+using Application.Domains.Timetables.Timetables.Queries.GetStaffIntegratedTimetableData;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;

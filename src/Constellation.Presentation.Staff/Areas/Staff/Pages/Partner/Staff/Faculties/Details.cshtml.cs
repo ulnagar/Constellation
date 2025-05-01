@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.Faculties;
 
-using Constellation.Application.Faculties.GetFacultyDetails;
+using Application.Domains.StaffMembers.Commands.RemoveStaffFromFaculty;
+using Constellation.Application.Domains.Faculties.Queries.GetFacultyDetails;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.StaffMembers.RemoveStaffFromFaculty;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
@@ -10,7 +10,6 @@ using Core.Models.Faculties.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

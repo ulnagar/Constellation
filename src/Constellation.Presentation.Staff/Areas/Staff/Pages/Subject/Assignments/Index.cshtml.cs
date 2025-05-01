@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Assignments.GetCurrentAssignmentsListing;
+using Application.Domains.Assignments.Queries.GetCurrentAssignmentsListing;
 using Constellation.Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Shared;

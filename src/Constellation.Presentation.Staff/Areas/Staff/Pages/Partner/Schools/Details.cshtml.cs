@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
 using Application.Common.PresentationModels;
+using Application.Domains.ExternalSystems.NetworkStatistics.Queries.GetGraphDataForSchool;
+using Application.Domains.Schools.Queries.GetSchoolDetails;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.Schools.GetSchoolDetails;
-using Constellation.Application.Features.API.Schools.Queries;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;

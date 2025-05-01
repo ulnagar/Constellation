@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TransferAsset;
 
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Shared;
 using MediatR;

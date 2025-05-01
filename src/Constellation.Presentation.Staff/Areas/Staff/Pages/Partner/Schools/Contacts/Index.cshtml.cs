@@ -1,16 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Auth.Commands.RepairSchoolContactUser;
+using Application.Domains.SchoolContacts.Commands.CreateContactRoleAssignment;
+using Application.Domains.SchoolContacts.Commands.RemoveContactRole;
+using Application.Domains.SchoolContacts.Commands.UpdateRoleNote;
+using Application.Domains.SchoolContacts.Models;
+using Application.Domains.SchoolContacts.Queries.GetAllContacts;
+using Application.Domains.SchoolContacts.Queries.GetContactRolesForSelectionList;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Models.Auth;
-using Application.SchoolContacts.CreateContactRoleAssignment;
-using Application.SchoolContacts.GetAllContacts;
-using Application.SchoolContacts.GetContactRolesForSelectionList;
-using Application.SchoolContacts.RemoveContactRole;
-using Application.SchoolContacts.UpdateRoleNote;
-using Application.Users.RepairSchoolContactUser;
-using Constellation.Application.SchoolContacts.Models;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

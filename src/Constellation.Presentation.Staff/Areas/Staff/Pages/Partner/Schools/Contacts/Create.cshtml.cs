@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SchoolContacts.Commands.CreateContact;
+using Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
+using Application.Domains.SchoolContacts.Queries.GetContactRolesForSelectionList;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SchoolContacts.CreateContact;
-using Constellation.Application.SchoolContacts.CreateContactWithRole;
-using Constellation.Application.SchoolContacts.GetContactRolesForSelectionList;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;

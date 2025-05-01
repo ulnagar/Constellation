@@ -1,12 +1,12 @@
 ﻿#nullable enable
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages;
 
-using Application.Affirmations;
+using Application.Domains.Affirmations.Queries;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetCurrentStocktakeEvents;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffByEmail;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.StaffMembers.GetStaffByEmail;
-using Constellation.Application.StaffMembers.Models;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;

@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
 	<ImplicitUsings>enable</ImplicitUsings>
-	<AssemblyVersion>1.17.25120.23</AssemblyVersion>
+	<AssemblyVersion>1.17.25121.13</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

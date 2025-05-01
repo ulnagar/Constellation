@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Shared.Components.ParentNav;
 
+using Application.Domains.Families.Queries.IsResidentialParent;
 using Application.Interfaces.Configuration;
-using Constellation.Application.Parents.IsResidentialParent;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using MediatR;

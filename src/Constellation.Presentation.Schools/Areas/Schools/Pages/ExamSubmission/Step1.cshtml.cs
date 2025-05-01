@@ -2,7 +2,7 @@ namespace Constellation.Presentation.Schools.Areas.Schools.Pages.ExamSubmission;
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+using Constellation.Application.Domains.Students.Queries.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

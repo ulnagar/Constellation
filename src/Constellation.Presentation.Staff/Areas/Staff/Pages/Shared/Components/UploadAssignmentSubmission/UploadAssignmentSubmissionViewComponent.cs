@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.UploadAssignmentSubmission;
 
-using Constellation.Application.Students.GetStudentsFromCourseAsDictionary;
+using Application.Domains.Students.Queries.GetStudentsFromCourseAsDictionary;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Shared;

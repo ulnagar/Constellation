@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SchoolContacts.Commands.UpdateContact;
+using Application.Domains.SchoolContacts.Queries.GetContactSummary;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SchoolContacts.GetContactSummary;
-using Constellation.Application.SchoolContacts.UpdateContact;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;

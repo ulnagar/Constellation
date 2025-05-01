@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.LinkedSystems.Teams.Queries.GetCurrentTeamsWithMembership;
 using Application.Interfaces.Jobs;
-using Application.Teams.GetCurrentTeamsWithMembership;
 using Constellation.Application.Interfaces.Gateways.TeamsGateway;
 using Constellation.Application.Interfaces.Gateways.TeamsGateway.Models;
 using Constellation.Core.Shared;

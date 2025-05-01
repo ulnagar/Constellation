@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consent.Applications;
 
-using Application.Courses.GetActiveCoursesList;
-using Application.Courses.Models;
+using Application.Domains.Courses.Queries.GetActiveCoursesList;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
+using Application.Domains.ThirdPartyConsent.Commands.CreateRequirement;
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.CreateRequirement;
-using Application.ThirdPartyConsent.GetApplicationById;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Constellation.Application.Domains.Courses.Models;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplicationById;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Enums;
@@ -17,7 +17,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;

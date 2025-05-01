@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Attendance;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Families.Queries.GetParentWithStudentIds;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.Students.GetStudentsByParentEmail;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
+using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Application.Models.Identity;
-using Constellation.Application.Parents.GetParentWithStudentIds;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

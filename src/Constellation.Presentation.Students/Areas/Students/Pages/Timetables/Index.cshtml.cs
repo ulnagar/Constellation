@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Students.Areas.Students.Pages.Timetables;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Timetables.Timetables.Queries.GetStudentTimetableData;
+using Application.Domains.Timetables.Timetables.Queries.GetStudentTimetableExport;
 using Application.Models.Auth;
-using Application.Timetables.GetStudentTimetableExport;
 using Constellation.Application.DTOs;
-using Constellation.Application.Timetables.GetStudentTimetableData;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;

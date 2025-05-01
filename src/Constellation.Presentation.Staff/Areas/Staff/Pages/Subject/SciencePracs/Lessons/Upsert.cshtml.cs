@@ -1,13 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Courses.GetCoursesForSelectionList;
-using Constellation.Application.Courses.Models;
+using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
+using Application.Domains.SciencePracs.Commands.CreateLesson;
+using Application.Domains.SciencePracs.Commands.UpdateLesson;
+using Application.Domains.SciencePracs.Queries.GetLessonDetails;
+using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SciencePracs.CreateLesson;
-using Constellation.Application.SciencePracs.GetLessonDetails;
-using Constellation.Application.SciencePracs.UpdateLesson;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
@@ -18,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

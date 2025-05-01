@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.Components.SchoolSelector;
 
+using Application.Domains.Schools.Queries.GetSchoolsForContact;
 using Application.Models.Auth;
 using Application.Models.Identity;
-using Application.Schools.GetSchoolsForContact;
 using Areas;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Shared;

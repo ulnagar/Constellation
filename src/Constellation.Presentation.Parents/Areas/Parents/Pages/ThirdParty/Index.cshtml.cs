@@ -1,12 +1,11 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.ThirdParty;
 
 using Application.Common.PresentationModels;
-using Application.ThirdPartyConsent.GetApplicationsWithoutRequiredConsent;
+using Application.Domains.Families.Queries.IsResidentialParent;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplicationsWithoutRequiredConsent;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Parents.IsResidentialParent;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Presentation.Shared.Helpers.Logging;
-using Contacts;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
 using Application.Common.PresentationModels;
-using Application.Training.GetCompletionRecordDetails;
-using Application.Training.MarkTrainingCompletionRecordDeleted;
-using Application.Training.Models;
+using Application.Domains.Training.Commands.MarkTrainingCompletionRecordDeleted;
+using Application.Domains.Training.Models;
+using Application.Domains.Training.Queries.GetCompletionRecordDetails;
+using Application.Domains.Training.Queries.GetUploadedTrainingCertificateFileById;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.GetUploadedTrainingCertificateFileById;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;

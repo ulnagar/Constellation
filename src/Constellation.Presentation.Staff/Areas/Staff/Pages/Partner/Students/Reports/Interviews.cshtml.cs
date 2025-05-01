@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.ExternalSystems.Bookings.Queries.CreateInterviewsImport;
 using Application.DTOs;
 using Application.Helpers;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
-using Application.Offerings.GetOfferingsForSelectionList;
-using Application.Reports.CreateInterviewsImport;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Abstractions.Services;
 using Core.Shared;
@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

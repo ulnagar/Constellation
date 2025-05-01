@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddSessionToOffering;
 
-using Constellation.Application.Offerings.GetOfferingDetails;
-using Constellation.Application.Periods.GetAllPeriods;
+using Application.Domains.Timetables.Periods.Queries.GetAllPeriods;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;

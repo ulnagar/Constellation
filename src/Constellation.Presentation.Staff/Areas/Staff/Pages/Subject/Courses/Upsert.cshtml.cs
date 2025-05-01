@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Courses.CreateCourse;
-using Constellation.Application.Courses.GetCourseSummary;
-using Constellation.Application.Courses.Models;
-using Constellation.Application.Courses.UpdateCourse;
-using Constellation.Application.Faculties.GetFacultiesForSelectionList;
+using Application.Domains.Courses.Queries.GetCourseSummary;
+using Constellation.Application.Domains.Courses.Commands.CreateCourse;
+using Constellation.Application.Domains.Courses.Commands.UpdateCourse;
+using Constellation.Application.Domains.Courses.Models;
+using Constellation.Application.Domains.Faculties.Queries.GetFacultiesForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Faculties.Identifiers;
@@ -16,7 +16,6 @@ using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

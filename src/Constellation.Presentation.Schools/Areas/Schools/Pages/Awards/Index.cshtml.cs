@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Awards;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
 using Application.Models.Auth;
-using Constellation.Application.Attachments.GetAttachmentFile;
-using Constellation.Application.Awards.GetSummaryForStudent;
-using Constellation.Application.Students.GetStudentsFromSchoolForSelectionList;
+using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetSummaryForStudent;
+using Constellation.Application.Domains.Students.Queries.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Identifiers;
@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]

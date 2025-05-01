@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Enrolments.EnrolStudent;
-using Constellation.Application.Enrolments.GetStudentEnrolmentsWithDetails;
+using Application.Domains.Students.Queries.GetStudentById;
+using Constellation.Application.Domains.Enrolments.Commands.EnrolStudent;
+using Constellation.Application.Domains.Enrolments.Queries.GetStudentEnrolmentsWithDetails;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForBulkEnrol;
+using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.GetOfferingsForBulkEnrol;
-using Constellation.Application.Students.GetStudentById;
-using Constellation.Application.Students.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
@@ -16,9 +16,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanEditStudents)]

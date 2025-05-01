@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ActionUpdateForm;
 
-using Constellation.Application.Families.Models;
+using Constellation.Application.Domains.Families.Models;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 
 public sealed class ParentInterviewActionViewModel

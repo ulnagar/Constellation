@@ -1,17 +1,17 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Contacts.Models;
+using Application.Domains.Contacts.Queries.ExportContactList;
+using Application.Domains.Contacts.Queries.GetContactList;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.Offerings.GetOfferingsForSelectionList;
-using Application.StaffMembers.GetStaffLinkedToOffering;
-using Application.StaffMembers.Models;
 using Areas;
-using Constellation.Application.Contacts.ExportContactList;
-using Constellation.Application.Contacts.GetContactList;
-using Constellation.Application.Contacts.Models;
-using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
-using Constellation.Application.Schools.Models;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Enums;

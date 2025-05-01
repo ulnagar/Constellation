@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Models.Auth;
-using Application.Students.SetStudentPhoto;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Constellation.Application.Domains.Students.Commands.SetStudentPhoto;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

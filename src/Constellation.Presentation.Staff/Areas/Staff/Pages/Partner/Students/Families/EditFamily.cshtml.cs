@@ -3,8 +3,8 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Fa
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Areas;
-using Constellation.Application.Families.GetFamilyEditContext;
-using Constellation.Application.Families.UpdateFamily;
+using Constellation.Application.Domains.Families.Commands.UpdateFamily;
+using Constellation.Application.Domains.Families.Queries.GetFamilyEditContext;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using Core.Shared;
@@ -12,9 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 

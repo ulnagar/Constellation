@@ -1,16 +1,15 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.Students.Commands.SendFamilyContactChangesReport;
 using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Repositories;
-using Application.Students.SendFamilyContactChangesReport;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Repositories;
 using Core.Extensions;
 using Core.Models.Families;
 using Core.Models.Identifiers;
 using Core.Models.Students;
-using Core.Models.Students.Enums;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
 using Core.Shared;

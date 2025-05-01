@@ -1,8 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Awards.CreateNominationPeriod;
-using Constellation.Application.Awards.GetNominationPeriod;
+using Constellation.Application.Domains.MeritAwards.Nominations.Commands.CreateNominationPeriod;
+using Constellation.Application.Domains.MeritAwards.Nominations.Commands.UpdateNominationPeriod;
+using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;

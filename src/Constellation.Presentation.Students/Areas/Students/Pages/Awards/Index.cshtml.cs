@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages.Awards;
 
-using Application.Attachments.GetAttachmentFile;
-using Application.Awards.GetSummaryForStudent;
 using Application.Common.PresentationModels;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
+using Application.Domains.Students.Queries.GetStudentById;
 using Application.Models.Auth;
-using Application.Students.GetStudentById;
-using Application.Students.Models;
+using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetSummaryForStudent;
+using Constellation.Application.Domains.Students.Models;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;

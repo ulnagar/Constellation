@@ -1,16 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolCodes;
+using Application.Domains.Schools.Queries.GetSchoolsFromList;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
+using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
+using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.Schools.GetCurrentPartnerSchoolCodes;
-using Application.Schools.GetSchoolsFromList;
-using Application.StaffMembers.GetStaffById;
-using Application.StaffMembers.GetStaffForSelectionList;
-using Application.Students.GetCurrentStudentsFromSchool;
-using Application.Students.Models;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
-using Constellation.Application.StaffMembers.Models;
+using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

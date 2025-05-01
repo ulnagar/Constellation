@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SciencePracs.Commands.CancelLessonRoll;
+using Application.Domains.SciencePracs.Commands.ReinstateLessonRoll;
+using Application.Domains.SciencePracs.Commands.SendLessonNotification;
+using Application.Domains.SciencePracs.Queries.GetLessonRollDetails;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SciencePracs.CancelLessonRoll;
-using Constellation.Application.SciencePracs.GetLessonRollDetails;
-using Constellation.Application.SciencePracs.ReinstateLessonRoll;
-using Constellation.Application.SciencePracs.SendLessonNotification;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.MasterFile;
 
+using Application.Domains.ExternalSystems.Masterfile.Commands;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.ExternalDataConsistency;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;

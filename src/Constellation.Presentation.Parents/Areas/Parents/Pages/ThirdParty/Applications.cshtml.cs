@@ -1,11 +1,10 @@
 namespace Constellation.Presentation.Parents.Areas.Parents.Pages.ThirdParty;
 
 using Application.Models.Auth;
-using Application.ThirdPartyConsent.CreateTransaction;
-using Application.ThirdPartyConsent.GetRequiredApplicationsForStudent;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Students.GetStudentsByParentEmail;
-using Constellation.Core.Models.Families.Errors;
+using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
+using Constellation.Application.Domains.ThirdPartyConsent.Commands.CreateTransaction;
+using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetRequiredApplicationsForStudent;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;

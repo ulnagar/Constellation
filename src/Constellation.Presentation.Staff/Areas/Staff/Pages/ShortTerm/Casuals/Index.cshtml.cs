@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Casuals;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Casuals.DeleteCasual;
-using Constellation.Application.Casuals.GetActiveCasuals;
-using Constellation.Application.Casuals.GetAllCasuals;
-using Constellation.Application.Casuals.GetInactiveCasuals;
-using Constellation.Application.Casuals.Models;
-using Constellation.Application.Casuals.RestoreCasual;
+using Application.Domains.Casuals.Commands.DeleteCasual;
+using Application.Domains.Casuals.Commands.RestoreCasual;
+using Application.Domains.Casuals.Models;
+using Application.Domains.Casuals.Queries.GetActiveCasuals;
+using Application.Domains.Casuals.Queries.GetAllCasuals;
+using Application.Domains.Casuals.Queries.GetInactiveCasuals;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Core.Abstractions.Services;

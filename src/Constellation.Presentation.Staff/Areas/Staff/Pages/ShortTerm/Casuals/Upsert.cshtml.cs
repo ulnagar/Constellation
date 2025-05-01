@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Casuals;
 
-using Constellation.Application.Casuals.CreateCasual;
-using Constellation.Application.Casuals.GetCasualById;
-using Constellation.Application.Casuals.UpdateCasual;
+using Application.Domains.Casuals.Commands.CreateCasual;
+using Application.Domains.Casuals.Commands.UpdateCasual;
+using Application.Domains.Casuals.Queries.GetCasualById;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
 using Constellation.Core.Models.Identifiers;
 using Core.Abstractions.Services;
 using Core.Shared;

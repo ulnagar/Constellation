@@ -1,16 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Absences;
 
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Absences.Queries.ExportAbsencesReport;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.GetOfferingsForSelectionList;
-using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
-using Constellation.Application.Schools.Models;
-using Constellation.Application.StaffMembers.GetStaffLinkedToOffering;
-using Constellation.Application.StaffMembers.Models;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;

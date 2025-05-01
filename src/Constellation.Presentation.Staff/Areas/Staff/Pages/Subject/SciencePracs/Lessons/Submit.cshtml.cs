@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SciencePracs.Commands.SubmitRoll;
+using Application.Domains.SciencePracs.Queries.GetLessonRollDetails;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.SciencePracs.GetLessonRollDetails;
-using Constellation.Application.SciencePracs.SubmitRoll;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

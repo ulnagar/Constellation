@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Awards;
 
-using Constellation.Application.Awards.GetAwardCountsByTypeByGrade;
+using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetAwardCountsByTypeByGrade;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
@@ -8,7 +8,6 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

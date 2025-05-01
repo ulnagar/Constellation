@@ -2,7 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials.IndexModel
 
 @inject IAuthorizationService AuthorizationService
-@using Constellation.Application.GroupTutorials.GetAllTutorials
+@using Constellation.Application.Domains.GroupTutorials.Queries.GetAllTutorials
 
 @{
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);

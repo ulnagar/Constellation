@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Courses.GetCourseDetails;
+using Constellation.Application.Domains.Courses.Queries.GetCourseDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
@@ -11,7 +11,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

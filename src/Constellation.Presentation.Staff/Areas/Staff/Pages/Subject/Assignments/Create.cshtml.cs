@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments;
 
-using Application.Assignments.GetUploadAssignmentsFromCourse;
 using Application.Common.PresentationModels;
-using Constellation.Application.Assignments.CreateAssignment;
-using Constellation.Application.Assignments.Models;
-using Constellation.Application.Courses.GetCoursesForSelectionList;
-using Constellation.Application.Courses.GetCourseSummary;
-using Constellation.Application.Courses.Models;
+using Application.Domains.Assignments.Commands.CreateAssignment;
+using Application.Domains.Assignments.Models;
+using Application.Domains.Assignments.Queries.GetUploadAssignmentsFromCourse;
+using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
+using Application.Domains.Courses.Queries.GetCourseSummary;
+using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Extensions;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;

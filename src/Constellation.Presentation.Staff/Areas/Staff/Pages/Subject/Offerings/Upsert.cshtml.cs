@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Courses.GetCoursesForSelectionList;
-using Constellation.Application.Courses.Models;
+using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
+using Application.Domains.Offerings.Queries.GetOfferingSummary;
+using Constellation.Application.Domains.Courses.Models;
+using Constellation.Application.Domains.Offerings.Commands.CreateOffering;
+using Constellation.Application.Domains.Offerings.Commands.UpdateOffering;
+using Constellation.Application.Domains.Offerings.Models;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.CreateOffering;
-using Constellation.Application.Offerings.GetOfferingSummary;
-using Constellation.Application.Offerings.Models;
-using Constellation.Application.Offerings.UpdateOffering;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;

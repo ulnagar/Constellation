@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Modules;
 
 using Application.Common.PresentationModels;
-using Application.Training.AddStaffMemberToTrainingModule;
-using Application.Training.GetModuleDetails;
-using Application.Training.Models;
-using Application.Training.RemoveStaffMemberToTrainingModule;
+using Application.Domains.Training.Commands.AddStaffMemberToTrainingModule;
+using Application.Domains.Training.Commands.ReinstateTrainingModule;
+using Application.Domains.Training.Commands.RemoveStaffMemberToTrainingModule;
+using Application.Domains.Training.Commands.RetireTrainingModule;
+using Application.Domains.Training.Models;
+using Application.Domains.Training.Queries.GetModuleDetails;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Training.ReinstateTrainingModule;
-using Constellation.Application.Training.RetireTrainingModule;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;

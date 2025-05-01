@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attachments.Queries.GetAttachmentFile;
+using Application.Domains.StudentReports.Queries.GetStudentReportsForSchool;
 using Application.Models.Auth;
-using Application.Reports.GetStudentReportsForSchool;
-using Constellation.Application.Attachments.GetAttachmentFile;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Reports.Identifiers;

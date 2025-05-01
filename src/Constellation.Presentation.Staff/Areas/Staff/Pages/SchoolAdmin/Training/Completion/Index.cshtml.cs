@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
 using Application.Common.PresentationModels;
-using Application.Training.GetListOfCompletionRecords;
-using Application.Training.Models;
+using Application.Domains.Training.Models;
+using Application.Domains.Training.Queries.GetListOfCompletionRecords;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Shared;

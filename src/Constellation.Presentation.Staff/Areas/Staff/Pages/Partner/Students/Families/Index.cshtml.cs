@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Families;
 
 using Application.Common.PresentationModels;
-using Application.Families.GetFamilyById;
+using Application.Domains.Families.Queries.GetFamilyById;
+using Application.Domains.Families.Queries.GetFamilyContacts;
 using Application.Models.Auth;
 using Areas;
-using Constellation.Application.Families.DeleteFamilyById;
-using Constellation.Application.Families.DeleteParentById;
-using Constellation.Application.Families.GetFamilyContactsForStudent;
-using Constellation.Application.Families.Models;
+using Constellation.Application.Domains.Families.Commands.DeleteFamilyById;
+using Constellation.Application.Domains.Families.Commands.DeleteParentById;
+using Constellation.Application.Domains.Families.Models;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
@@ -16,9 +16,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 using Shared.PartialViews.DeleteFamilySelectionModal;

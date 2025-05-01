@@ -1,16 +1,16 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
 using Application.Common.PresentationModels;
+using Application.Domains.StaffMembers.Queries.GetStaffMemberNameById;
+using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
+using Application.Domains.Training.Commands.CreateTrainingCompletion;
+using Application.Domains.Training.Commands.UpdateTrainingCompletion;
+using Application.Domains.Training.Queries.GetCompletionRecordEditContext;
+using Application.Domains.Training.Queries.GetTrainingModuleEditContext;
+using Application.Domains.Training.Queries.GetTrainingModulesAsDictionary;
+using Application.Domains.Training.Queries.GetUploadedTrainingCertificationMetadata;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.StaffMembers.GetStaffMemberNameById;
-using Application.StaffMembers.GetStaffMembersAsDictionary;
-using Application.Training.GetTrainingModulesAsDictionary;
-using Constellation.Application.Training.CreateTrainingCompletion;
-using Constellation.Application.Training.GetCompletionRecordEditContext;
-using Constellation.Application.Training.GetTrainingModuleEditContext;
-using Constellation.Application.Training.GetUploadedTrainingCertificationMetadata;
-using Constellation.Application.Training.UpdateTrainingCompletion;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.SelectTrainingModuleForReportModal;

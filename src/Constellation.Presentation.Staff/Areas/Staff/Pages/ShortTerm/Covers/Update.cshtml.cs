@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
-using Constellation.Application.ClassCovers.GetCoverWithDetails;
-using Constellation.Application.ClassCovers.UpdateCover;
+using Application.Domains.ClassCovers.Commands.UpdateCover;
+using Application.Domains.ClassCovers.Queries.GetCoverWithDetails;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;

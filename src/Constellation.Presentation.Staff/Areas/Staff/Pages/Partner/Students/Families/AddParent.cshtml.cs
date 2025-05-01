@@ -4,7 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Helpers;
 using Application.Models.Auth;
 using Areas;
-using Constellation.Application.Families.CreateParent;
+using Constellation.Application.Domains.Families.Commands.CreateParent;
 using Core.Abstractions.Services;
 using Core.Models.Families;
 using Core.Models.Identifiers;

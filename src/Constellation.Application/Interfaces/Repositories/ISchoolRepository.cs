@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Repositories;
 
 using Constellation.Core.Models;
-using Schools.Enums;
+using Domains.Schools.Enums;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

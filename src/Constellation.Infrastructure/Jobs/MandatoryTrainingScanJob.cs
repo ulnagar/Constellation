@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
+using Application.Domains.WorkFlows.Commands.CreateTrainingCase;
 using Application.Interfaces.Configuration;
-using Application.WorkFlows.AddCaseDetailUpdateAction;
-using Application.WorkFlows.CreateTrainingCase;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Enums;

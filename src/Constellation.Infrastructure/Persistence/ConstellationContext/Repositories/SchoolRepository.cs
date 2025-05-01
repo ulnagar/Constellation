@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Application.Schools.Enums;
+using Application.Domains.Schools.Enums;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Core.Abstractions.Clock;

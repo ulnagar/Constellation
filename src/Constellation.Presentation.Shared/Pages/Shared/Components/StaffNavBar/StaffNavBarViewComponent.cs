@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.StaffNavBar;
 
 using Application.Models.Auth;
-using Constellation.Application.Offerings.GetCurrentOfferingsForTeacher;
+using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

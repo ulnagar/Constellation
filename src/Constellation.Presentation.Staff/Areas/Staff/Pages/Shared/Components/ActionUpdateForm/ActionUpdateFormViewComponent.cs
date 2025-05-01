@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ActionUpdateForm;
 
-using Application.Contacts.GetContactListForStudent;
-using Application.Families.GetFamilyContactsForStudent;
-using Application.StaffMembers.GetStaffByEmail;
-using Constellation.Application.Contacts.Models;
-using Constellation.Application.Families.Models;
-using Constellation.Application.StaffMembers.Models;
+using Application.Domains.Contacts.Models;
+using Application.Domains.Contacts.Queries.GetContactListForStudent;
+using Application.Domains.Families.Queries.GetFamilyContactsForStudent;
+using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffByEmail;
+using Constellation.Application.Domains.Families.Models;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Enums;
 using Constellation.Core.Models.WorkFlow.Identifiers;

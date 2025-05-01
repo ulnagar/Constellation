@@ -1,17 +1,15 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports;
 
 using Application.Common.PresentationModels;
-using Application.GroupTutorials.GenerateTutorialAttendanceReport;
+using Application.Domains.Students.Commands.UpdateStudentSentralId;
+using Application.Domains.Students.Queries.GetCurrentStudentsWithoutSentralId;
 using Application.Models.Auth;
-using Application.Students.GetCurrentStudentsWithoutSentralId;
-using Application.Students.Models;
-using Application.Students.UpdateStudentSentralId;
+using Constellation.Application.Domains.Students.Models;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

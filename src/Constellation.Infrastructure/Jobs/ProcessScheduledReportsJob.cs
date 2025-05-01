@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.Abstractions.Messaging;
+using Application.Domains.ScheduledReports;
+using Application.Domains.ScheduledReports.Models;
 using Application.DTOs;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Services;
-using Application.ScheduledReports;
 using Core.Abstractions.Clock;
 using Core.Shared;
 using Microsoft.EntityFrameworkCore;

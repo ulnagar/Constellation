@@ -1,15 +1,15 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Reports;
 
 using Application.Common.PresentationModels;
+using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
+using Application.Domains.Training.Models;
+using Application.Domains.Training.Queries.GenerateModuleReport;
+using Application.Domains.Training.Queries.GenerateOverallReport;
+using Application.Domains.Training.Queries.GenerateStaffReport;
+using Application.Domains.Training.Queries.GetTrainingModulesAsDictionary;
 using Application.DTOs;
 using Application.Models.Auth;
-using Application.Training.GenerateModuleReport;
-using Application.Training.GenerateOverallReport;
-using Application.Training.GenerateStaffReport;
 using Areas;
-using Constellation.Application.StaffMembers.GetStaffMembersAsDictionary;
-using Constellation.Application.Training.GetTrainingModulesAsDictionary;
-using Constellation.Application.Training.Models;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

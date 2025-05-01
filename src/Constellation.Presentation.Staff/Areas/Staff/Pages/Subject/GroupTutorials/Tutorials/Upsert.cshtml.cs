@@ -1,9 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.GroupTutorials.Tutorials;
 
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.GroupTutorials.CreateGroupTutorial;
-using Constellation.Application.GroupTutorials.EditGroupTutorial;
-using Constellation.Application.GroupTutorials.GetTutorialById;
+using Constellation.Application.Domains.GroupTutorials.Commands.CreateGroupTutorial;
+using Constellation.Application.Domains.GroupTutorials.Commands.EditGroupTutorial;
+using Constellation.Application.Domains.GroupTutorials.Queries.GetTutorialById;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;

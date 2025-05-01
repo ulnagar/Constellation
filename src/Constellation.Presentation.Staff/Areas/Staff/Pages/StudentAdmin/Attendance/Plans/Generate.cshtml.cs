@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.Plans;
 
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Helpers;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Plans.Commands.GenerateAttendancePlans;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;

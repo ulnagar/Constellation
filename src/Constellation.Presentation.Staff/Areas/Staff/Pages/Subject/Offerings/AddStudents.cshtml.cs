@@ -1,14 +1,14 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 
 using Application.Common.PresentationModels;
-using Application.Students.GetCurrentStudentsFromGrade;
-using Application.Students.Models;
-using Constellation.Application.Enrolments.EnrolMultipleStudentsInOffering;
-using Constellation.Application.Enrolments.GetCurrentEnrolmentsForOffering;
+using Application.Domains.Offerings.Queries.GetOfferingSummary;
+using Application.Domains.Students.Queries.GetCurrentStudentsFromGrade;
+using Constellation.Application.Domains.Enrolments.Commands.EnrolMultipleStudentsInOffering;
+using Constellation.Application.Domains.Enrolments.Queries.GetCurrentEnrolmentsForOffering;
+using Constellation.Application.Domains.Offerings.Models;
+using Constellation.Application.Domains.Students.Models;
+using Constellation.Application.Domains.Students.Queries.GetStudentsFromOfferingGrade;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Offerings.GetOfferingSummary;
-using Constellation.Application.Offerings.Models;
-using Constellation.Application.Students.GetStudentsFromOfferingGrade;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
@@ -19,7 +19,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

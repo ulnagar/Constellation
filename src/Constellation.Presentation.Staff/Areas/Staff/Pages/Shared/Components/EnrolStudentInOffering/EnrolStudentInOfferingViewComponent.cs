@@ -1,13 +1,12 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.EnrolStudentInOffering;
 
-using Constellation.Application.Offerings.GetOfferingDetails;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
+using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Shared.Helpers.ModelBinders;
 
 public class EnrolStudentInOfferingViewComponent : ViewComponent
 {

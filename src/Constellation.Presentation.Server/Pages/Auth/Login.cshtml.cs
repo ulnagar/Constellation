@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Auth;
 
-using Application.Auth.GetParentUserFromMobileNumber;
+using Application.Domains.Auth.Queries.GetParentUserFromMobileNumber;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Application.Models.Identity;

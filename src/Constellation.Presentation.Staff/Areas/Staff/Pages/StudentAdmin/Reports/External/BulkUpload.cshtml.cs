@@ -1,17 +1,17 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Reports.External;
 
-using Application.Attachments.BulkPublishTemporaryFiles;
-using Application.Attachments.DeleteTemporaryFile;
-using Application.Attachments.EmailExternalReports;
-using Application.Attachments.GetTemporaryFileById;
-using Application.Attachments.PublishTemporaryFile;
+using Application.Domains.Attachments.Commands.BulkPublishTemporaryFiles;
+using Application.Domains.Attachments.Commands.DeleteTemporaryFile;
+using Application.Domains.Attachments.Commands.EmailExternalReports;
+using Application.Domains.Attachments.Commands.ProcessPATReportZipFile;
+using Application.Domains.Attachments.Commands.PublishTemporaryFile;
+using Application.Domains.Attachments.Models;
+using Application.Domains.Attachments.Queries.GetTemporaryFileById;
+using Application.Domains.Attachments.Queries.GetTemporaryFiles;
+using Application.Domains.StudentReports.Commands.UpdateTempReportDetails;
+using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Models.Auth;
-using Application.Reports.UpdateTempReportDetails;
-using Constellation.Application.Attachments.GetTemporaryFiles;
-using Constellation.Application.Attachments.Models;
-using Constellation.Application.Attachments.ProcessPATReportZipFile;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Students.GetCurrentStudentsAsDictionary;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
@@ -22,7 +22,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.EmailExternalReports;
@@ -31,7 +30,6 @@ using Shared.PartialViews.ConfirmTempReportPublishModal;
 using Shared.PartialViews.UpdateTempReportDetails;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 [Authorize(Policy = AuthPolicies.CanManageReports)]
 public class BulkUploadModel : BasePageModel

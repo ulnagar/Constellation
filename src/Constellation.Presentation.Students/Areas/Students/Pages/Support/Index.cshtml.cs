@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages.Support;
 
+using Application.Domains.Contacts.Queries.GetContactListForParentPortal;
+using Application.Domains.ExternalSystems.HelpDesk.Commands.SubmitSupportTicket;
+using Application.Domains.Students.Queries.GetStudentById;
 using Application.Models.Auth;
-using Application.Students.GetStudentById;
-using Application.Students.Models;
-using Application.SupportTicket.SubmitSupportTicket;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Contacts.GetContactListForParentPortal;
+using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;

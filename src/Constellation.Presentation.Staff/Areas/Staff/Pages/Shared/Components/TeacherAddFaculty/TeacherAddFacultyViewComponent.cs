@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TeacherAddFaculty;
 
-using Constellation.Application.Faculties.GetFacultiesAsDictionary;
+using Application.Domains.Faculties.Queries.GetFacultiesAsDictionary;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Faculties.ValueObjects;

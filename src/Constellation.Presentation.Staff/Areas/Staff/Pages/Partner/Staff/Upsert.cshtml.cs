@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
+using Application.Domains.StaffMembers.Commands.CreateStaffMember;
+using Application.Domains.StaffMembers.Commands.UpdateStaffMember;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Models.Auth;
-using Application.StaffMembers.CreateStaffMember;
-using Application.StaffMembers.GetStaffById;
-using Application.StaffMembers.UpdateStaffMember;
-using Constellation.Application.Schools.GetSchoolsForSelectionList;
-using Constellation.Application.Schools.Models;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;

@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Training.Completion;
 
 using Application.Common.PresentationModels;
-using Application.Training.ProcessTrainingImportFile;
+using Application.Domains.Training.Commands.ProcessTrainingImportFile;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

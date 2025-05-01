@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Tests.Unit.Reports.Events;
 
 using Constellation.Application.Interfaces.Services;
-using Constellation.Application.Reports.Events;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Reports;
@@ -15,6 +14,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
+using Domains.StudentReports.Events;
 using Moq;
 
 public class EmailToNonResidentialParentsTests

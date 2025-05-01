@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddStaffMemberToTrainingModule;
 
-using Constellation.Application.StaffMembers.GetStaffMembersAsDictionary;
-using Constellation.Application.Training.GetModuleDetails;
-using Constellation.Application.Training.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
+using Application.Domains.Training.Models;
+using Application.Domains.Training.Queries.GetModuleDetails;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;

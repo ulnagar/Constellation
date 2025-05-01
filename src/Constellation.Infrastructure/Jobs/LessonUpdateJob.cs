@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.SciencePracs.Commands.UpdateLessonGrade;
 using Application.Interfaces.Jobs;
-using Application.SciencePracs.UpdateLessonGrade;
 using Constellation.Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models.SciencePracs;

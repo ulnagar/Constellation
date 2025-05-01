@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Constellation.Application.Awards.GetAwardDetailsFromSentral;
-using Constellation.Application.Awards.GetAwardIncidentsFromSentral;
+using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetAwardDetailsFromSentral;
+using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetAwardIncidentsFromSentral;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;

@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Controllers;
 
-using Constellation.Application.Teams.ArchiveTeam;
-using Constellation.Application.Teams.CreateTeam;
-using Constellation.Application.Teams.DeleteTeam;
-using Constellation.Application.Teams.GetAllTeams;
-using Constellation.Application.Teams.GetTeamById;
-using Constellation.Application.Teams.GetTeamMembershipById;
-using Constellation.Application.Teams.Models;
+using Application.Domains.LinkedSystems.Teams.Commands.ArchiveTeam;
+using Application.Domains.LinkedSystems.Teams.Commands.CreateTeam;
+using Application.Domains.LinkedSystems.Teams.Commands.DeleteTeam;
+using Application.Domains.LinkedSystems.Teams.Models;
+using Application.Domains.LinkedSystems.Teams.Queries.GetAllTeams;
+using Application.Domains.LinkedSystems.Teams.Queries.GetTeamById;
+using Application.Domains.LinkedSystems.Teams.Queries.GetTeamMembershipById;
 using Constellation.Presentation.Server.Areas.API.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

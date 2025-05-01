@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.SchoolContacts.Commands.RequestContactRemoval;
+using Application.Domains.SchoolContacts.Queries.GetContactsWithRoleFromSchool;
+using Application.Domains.Schools.Queries.GetSchoolContactDetails;
 using Application.Models.Auth;
-using Application.SchoolContacts.GetContactsWithRoleFromSchool;
-using Constellation.Application.SchoolContacts.RequestContactRemoval;
-using Constellation.Application.Schools.GetSchoolContactDetails;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;

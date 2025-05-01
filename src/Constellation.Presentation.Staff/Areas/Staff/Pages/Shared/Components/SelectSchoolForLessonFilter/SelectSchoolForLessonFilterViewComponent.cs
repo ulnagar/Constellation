@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.SelectSchoolForLessonFilter;
 
-using Constellation.Application.Schools.GetCurrentPartnerSchoolsWithStudentsList;
-using Constellation.Application.Schools.Models;
+using Application.Domains.Schools.Models;
+using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

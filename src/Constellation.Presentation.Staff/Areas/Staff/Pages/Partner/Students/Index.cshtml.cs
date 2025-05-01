@@ -2,15 +2,13 @@
 
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
-using Application.Students.GetFilteredStudents;
+using Constellation.Application.Domains.Students.Queries.GetFilteredStudents;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
