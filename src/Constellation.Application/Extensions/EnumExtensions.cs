@@ -1,10 +1,10 @@
-﻿namespace Constellation.Application.Helpers;
+﻿namespace Constellation.Application.Extensions;
 
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-public static class EnumDisplayName
+public static class EnumExtensions
 {
     public static string GetDisplayName(this Enum value)
     {

@@ -3,8 +3,8 @@
 using Core.Models.Attachments.DTOs;
 using Core.Models.Canvas.Models;
 using Core.Shared;
+using Domains.LinkedSystems.Canvas.Models;
 using DTOs;
-using DTOs.Canvas;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

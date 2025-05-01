@@ -1,6 +1,6 @@
-﻿namespace Constellation.Application.DTOs.CSV;
+﻿namespace Constellation.Application.Domains.ExternalSystems.Masterfile.Models;
 
-using Constellation.Core.Enums;
+using Core.Enums;
 
 public sealed record MasterFileStudent(
     int Index,

@@ -33,6 +33,12 @@ public abstract class MSTeamOperation
     {
         IsDeleted = true;
     }
+
+    public bool IsOutstanding()
+    {
+        // Has it been marked Deleted or Completed?
+        return DateScheduled <= DateTime.Today && !(IsDeleted || IsCompleted);
+    }
 }
 
 public abstract class OfferingMSTeamOperation : MSTeamOperation

@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attend
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
+using Application.Extensions;
 using Application.Helpers;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Plans.Commands.GenerateAttendancePlans;

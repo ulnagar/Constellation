@@ -4,6 +4,7 @@ using Application.Domains.Attendance.Absences.Commands.SetAbsenceConfigurationFo
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
+using Application.Extensions;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;

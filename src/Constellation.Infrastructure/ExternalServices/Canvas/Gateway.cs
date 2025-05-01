@@ -1,8 +1,8 @@
 ﻿#nullable enable
 namespace Constellation.Infrastructure.ExternalServices.Canvas;
 
+using Application.Domains.LinkedSystems.Canvas.Models;
 using Application.DTOs;
-using Application.DTOs.Canvas;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Core.Models.Attachments.DTOs;

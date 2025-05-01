@@ -8,5 +8,5 @@ internal class UsagePoint
     public DateTime Time { get; set; }
 
     [JsonProperty("value")]
-    public decimal Value { get; set; }
+    public decimal? Value { get; set; }
 }

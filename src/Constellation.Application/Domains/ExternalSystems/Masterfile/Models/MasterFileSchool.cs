@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.DTOs.CSV;
+﻿namespace Constellation.Application.Domains.ExternalSystems.Masterfile.Models;
 
 public sealed record MasterFileSchool(
     int Index,

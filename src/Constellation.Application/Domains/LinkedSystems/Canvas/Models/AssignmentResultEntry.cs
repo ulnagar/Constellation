@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.DTOs.Canvas;
+﻿namespace Constellation.Application.Domains.LinkedSystems.Canvas.Models;
 
 using Core.Models.Canvas.Models;
 using System;

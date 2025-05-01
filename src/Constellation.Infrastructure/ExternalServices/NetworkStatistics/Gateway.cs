@@ -79,7 +79,7 @@ internal sealed class Gateway : INetworkStatisticsGateway
         foreach (var site in results)
         {
             var budSite = site.ToObject<Site>();
-            budSite.BandwidthDisplay = BandwidthDisplayHelper.DecimalToFormattedString(Convert.ToDecimal(budSite.Bandwidth));
+            budSite.BandwidthDisplay = Convert.ToDecimal(budSite.Bandwidth).ToFormattedString();
             sites.Add(budSite);
         }
 
@@ -239,16 +239,16 @@ internal sealed class Gateway : INetworkStatisticsGateway
                 var usage = new NetworkStatisticsSiteDto.PointOfTimeUsage
                 {
                     Time = point.Time,
-                    WANInbound = point.Value,
-                    WANInboundDisplay = BandwidthDisplayHelper.DecimalToRoundedString(point.Value)
+                    WANInbound = point.Value ?? 0,
+                    WANInboundDisplay = point.Value.ToRoundedString()
                 };
 
                 var outPoint = WANOutboundUsage.FirstOrDefault(o => o.Time == usage.Time);
                 if (outPoint == null)
                     continue;
 
-                usage.WANOutbound = outPoint.Value;
-                usage.WANOutboundDisplay = BandwidthDisplayHelper.DecimalToRoundedString(outPoint.Value);
+                usage.WANOutbound = outPoint.Value ?? 0;
+                usage.WANOutboundDisplay = outPoint.Value.ToRoundedString();
 
                 if (page.INTInbound != null)
                 {
@@ -256,15 +256,15 @@ internal sealed class Gateway : INetworkStatisticsGateway
                     if (INTinPoint == null)
                         continue;
 
-                    usage.INTInbound = INTinPoint.Value;
-                    usage.INTInboundDisplay = BandwidthDisplayHelper.DecimalToRoundedString(INTinPoint.Value);
+                    usage.INTInbound = INTinPoint.Value ?? 0;
+                    usage.INTInboundDisplay = INTinPoint.Value.ToRoundedString();
 
                     var INToutPoint = WANOutboundUsage.FirstOrDefault(o => o.Time == usage.Time);
                     if (INToutPoint == null)
                         continue;
 
-                    usage.INTOutbound = INToutPoint.Value;
-                    usage.INTOutboundDisplay = BandwidthDisplayHelper.DecimalToRoundedString(INToutPoint.Value);
+                    usage.INTOutbound = INToutPoint.Value ?? 0;
+                    usage.INTOutboundDisplay = INToutPoint.Value.ToRoundedString();
                 }
 
                 site.WANData.Add(usage);
