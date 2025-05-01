@@ -11,8 +11,8 @@ internal sealed class GetAffirmationQueryHandler
 {
     // https://learn.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-visual-studio?tabs=netcore-cli
 
-    private readonly string[] _phrase1 = new string[]
-    {
+    private readonly string[] _phrase1 =
+    [
         "Champ,",
         "Fact:",
         "Everybody says",
@@ -31,10 +31,10 @@ internal sealed class GetAffirmationQueryHandler
         "In my opinion,",
         "Hear ye, hear ye:",
         "Okay, listen up:"
-    };
+    ];
 
-    private readonly string[] _phrase2 = new string[]
-    {
+    private readonly string[] _phrase2 =
+    [
         "the mere idea of you",
         "your soul",
         "your hair today",
@@ -53,10 +53,10 @@ internal sealed class GetAffirmationQueryHandler
         "the way you roll",
         "whatever your secret is",
         "all of y'all"
-    };
+    ];
 
-    private readonly string[] _phrase3 = new string[]
-    {
+    private readonly string[] _phrase3 =
+    [
         "has serious game,",
         "rains magic,",
         "deserves the Nobel Prize,",
@@ -75,10 +75,10 @@ internal sealed class GetAffirmationQueryHandler
         "should be taught in school,",
         "makes my world go 'round,",
         "is 100% legit,"
-    };
+    ];
 
-    private readonly string[] _phrase4 = new string[]
-    {
+    private readonly string[] _phrase4 =
+    [
         "24/7.",
         "can I get an amen?",
         "and that's a fact.",
@@ -97,10 +97,10 @@ internal sealed class GetAffirmationQueryHandler
         "say it again!",
         "according to CNN.",
         "so get used to it."
-    };
+    ];
 
-    private readonly string[] _completeAffirmations = new string[]
-    {
+    private readonly string[] _completeAffirmations =
+    [
         "I am strong, smart, and capable. I am good enough and worthy.", "Today I will strive to do my best.",
         "Every day I am learning to become a better me.", "I am excited for the possibilities that today holds.",
         "I am fulfilling my purpose in this world.",
@@ -167,10 +167,10 @@ internal sealed class GetAffirmationQueryHandler
         "I am confident to speak up and share my ideas and talent.",
         "I will step out of my comfort zone and view every day as a learning opportunity.",
         "I am deserving of recognition and advancement, and I confidently seize opportunities for growth."
-    };
+    ];
 
-    private readonly string[] _quoteAffirmations = new string[]
-    {
+    private readonly string[] _quoteAffirmations =
+    [
         @"""I am in the right place at the right time, doing the right thing"" - Louise Hay",
         @"""Conscious breathing is my anchor"" - Thích Nhất Hạnh",
         @"""You are loved just for being who you are, just for existing"" - Ram Dass",
@@ -210,10 +210,10 @@ internal sealed class GetAffirmationQueryHandler
         @"""Hold up your head! You were note made for failure, you were made for victory"" - Anne Gilchrist",
         @"""If you have good thoughts they will shine out of your face like sunbeams and you will always look lovely"" - Roald Dahl",
         @"""There is nothing either good or bad, but thinking makes it so"" - William Shakespeare"
-    };
+    ];
 
-    private readonly string[] _workAffirmations = new string[]
-    {
+    private readonly string[] _workAffirmations =
+    [
         "I am capable and confident in my abilities.",
         "Every challenge is a chance to grow.",
         "My work is valuable and impactful.",
@@ -337,10 +337,10 @@ internal sealed class GetAffirmationQueryHandler
         "Each day, we build stronger bonds and better solutions.",
         "We collaborate with kindness and professionalism.",
         "Our diversity is our strength, fueling our creativity and success."
-    };
+    ];
 
-    private readonly string[] _teamflectAffirmations = new string[]
-    {
+    private readonly string[] _teamflectAffirmations =
+    [
         "I am destined for success in my career.",
         "Every day, I am moving closer to achieving my professional goals.",
         "Success flows effortlessly into my work life.",
@@ -441,7 +441,132 @@ internal sealed class GetAffirmationQueryHandler
         "Gratitude enhances my work environment, creating a positive atmosphere.",
         "I express gratitude for the ability to contribute meaningfully to my team.",
         "My heart is filled with gratitude for the fulfilling and rewarding aspects of my work."
-    };
+    ];
+
+    // Taken from https://blog.gratefulness.me/teacher-affirmations/
+    private readonly string[] _teacherAffirmations =
+    [
+        "I am a confident and capable teacher", 
+        "My confidence inspires my students to excel",
+        "I trust in my teaching abilities", 
+        "I believe in my power to make a difference",
+        "I radiate confidence in the classroom", 
+        "Confidence is my strength as an educator",
+        "I am confident in my teaching journey", 
+        "I stand tall and teach with confidence",
+        "My confidence empowers me and my students", 
+        "I have the confidence to overcome challenges",
+        "I am a confident guide for my students", 
+        "Confidence is my secret to effective teaching",
+        "I am a beacon of confidence for all to see", 
+        "My confidence fuels my teaching passion",
+        "I embrace my teaching role with confidence", 
+        "My confidence creates a positive classroom",
+        "I am confident in my ability to adapt", 
+        "Confidence propels my teaching forward",
+        "I am a confident and impactful teacher", 
+        "I am proud of my job as a teacher",
+        "I am a patient and understanding teacher", 
+        "Patience is my strength in the classroom",
+        "I approach each student with patience and empathy",
+        "I remain calm and composed, even in challenging moments",
+        "I give my students the time they need to learn and grow",
+        "Patience allows me to connect deeply with my students",
+        "I embrace the pace of each individual student's journey", 
+        "I am a patient guide on the path of education",
+        "Patience is a key ingredient in my teaching success",
+        "I understand that learning takes time, and I give it freely",
+        "I am patient with myself as I continue to grow as an educator",
+        "I create a peaceful and patient atmosphere in my classroom",
+        "My patience nurtures a love for learning in my students",
+        "I stay patient and positive in the face of challenges",
+        "I trust the process and am patient with the outcomes",
+        "I find joy in the journey of teaching, even when it requires patience",
+        "I practice patience daily, both with my students and myself",
+        "Patience helps me build strong relationships with my students",
+        "I am a patient teacher, and my students benefit from it",
+        "I appreciate the value of patience in the classroom",
+        "I am a lifelong learner, constantly growing in knowledge",
+        "Creativity flows freely through my teaching and inspires my students",
+        "I encourage a culture of curiosity and innovation in my classroom",
+        "I embrace new ideas and approaches to enhance my teaching",
+        "Every day, I discover new opportunities for learning and growth",
+        "I foster a love for learning that extends beyond the classroom",
+        "Creativity is the key to unlocking the full potential of my students",
+        "I am open to exploring new teaching methods and techniques",
+        "I nurture creativity in my students, allowing their talents to shine",
+        "Learning is a lifelong journey, and I am committed to it",
+        "I am a source of inspiration, sparking creativity in my students",
+        "I welcome challenges as opportunities to expand my knowledge",
+        "My teaching is a canvas for creativity and innovation",
+        "I believe in the power of creativity to transform education",
+        "I inspire a hunger for knowledge in my students that lasts a lifetime",
+        "I adapt and evolve my teaching style to meet the needs of my students",
+        "Learning is an adventure",
+        "I encourage my students to think critically and express themselves creatively",
+        "Creativity is the heartbeat of my classroom",
+        "I am a dedicated learner",
+        "I prioritize balance and self-care in my life",
+        "Taking care of myself is essential to being an effective teacher",
+        "I make time for rest and rejuvenation",
+        "Balance in my life allows me to give my best to my students",
+        "I am mindful of my own needs and well-being",
+        "Self-care is necessary for my teaching journey",
+        "I create space for both work and relaxation in my daily routine",
+        "I listen to my body and mind",
+        "Balance fuels my energy and passion for teaching",
+        "I deserve the time to rest and unwind",
+        "Taking breaks is a sign of strength",
+        "I set healthy boundaries to maintain balance in my life",
+        "Self-care is my secret to long-term success as a teacher",
+        "I know that balance is key to preventing burnout",
+        "I make time for hobbies and activities that bring me joy",
+        "Balance allows me to show up fully present for my students",
+        "I practice self-compassion and kindness toward myself",
+        "My well-being is a priority",
+        "I am in control of my time",
+        "I deserve to have off time",
+        "I am grateful for the privilege of being a teacher",
+        "Each day, I am thankful for the opportunity to educate and inspire",
+        "I appreciate the unique gifts and talents of each of my students",
+        "Gratitude fills my heart as I witness my students' growth",
+        "I am thankful for the support and collaboration of my colleagues",
+        "Gratitude is the foundation of my teaching journey",
+        "I cherish the moments of connection and learning in my classroom",
+        "My heart is full of gratitude for the impact I make on young lives",
+        "I am thankful for the lessons my students teach me every day",
+        "I find joy in expressing gratitude to my students and their families",
+        "Gratitude is my daily attitude in and out of the classroom",
+        "I am grateful for the resources and tools that enhance my teaching",
+        "I recognize and value the hard work of my fellow educators",
+        "Gratitude fuels my motivation and dedication to teaching",
+        "I appreciate the growth and resilience that teaching brings",
+        "Gratitude opens my heart to the beauty of education",
+        "I am thankful for the endless opportunities to make a difference",
+        "I express gratitude for the support of parents and caregivers",
+        "Gratitude keeps me grounded in the purpose of my work",
+        "I am grateful for the transformative power of education",
+        "I am on the path to success as an educator",
+        "I wake up each day excited to inspire and educate",
+        "My passion for teaching drives my motivation to excel",
+        "Success is the result of my hard work and dedication",
+        "I set clear goals and work diligently toward them",
+        "I am constantly improving my teaching skills and strategies",
+        "I am capable of achieving greatness as a teacher",
+        "I believe in my ability to make a meaningful impact",
+        "My students' success is a reflection of my dedication",
+        "I am a source of inspiration and motivation for my students",
+        "Challenges are opportunities for growth and success",
+        "I am resilient in the face of adversity and setbacks",
+        "I am confident in my ability to overcome any obstacles",
+        "I celebrate my achievements and milestones along the way",
+        "I am motivated to create a positive and engaging classroom environment",
+        "I am determined to make a lasting difference in my students' lives",
+        "I find joy in the journey toward success as a teacher",
+        "I have the mindset of a successful and motivated educator",
+        "My commitment to teaching fuels my motivation every day",
+        "I am a successful teacher, and my impact is far-reaching"
+    ];
 
 #pragma warning disable CA5394
     public async Task<Result<string>> Handle(GetAffirmationQuery request, CancellationToken cancellationToken)
@@ -455,10 +580,11 @@ internal sealed class GetAffirmationQueryHandler
 
         return typeSelector switch
         {
-            < 0.13 => _workAffirmations[random.Next(_workAffirmations.Length)],
-            >= 0.13 and < 0.38 => _completeAffirmations[random.Next(_completeAffirmations.Length)],
-            >= 0.38 and < 0.63  => _quoteAffirmations[random.Next(_quoteAffirmations.Length)],
-            >= 0.63 or _ => _teamflectAffirmations[random.Next(_teamflectAffirmations.Length)]
+            < 0.15 => _workAffirmations[random.Next(_workAffirmations.Length)],
+            >= 0.15 and < 0.30 => _completeAffirmations[random.Next(_completeAffirmations.Length)],
+            >= 0.30 and < 0.55  => _quoteAffirmations[random.Next(_quoteAffirmations.Length)],
+            >= 0.55 and < 0.70 => _teamflectAffirmations[random.Next(_teamflectAffirmations.Length)],
+            >= 0.70 or _ => _teacherAffirmations[random.Next(_teacherAffirmations.Length)]
         };
     }
 
