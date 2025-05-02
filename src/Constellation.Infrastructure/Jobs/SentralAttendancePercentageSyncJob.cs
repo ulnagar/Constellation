@@ -121,7 +121,7 @@ internal sealed class SentralAttendancePercentageSyncJob : ISentralAttendancePer
                 enrolment.Grade,
                 startDate,
                 endDate,
-                $"Term {term}, Week {week}, {_dateTime.CurrentYear}",
+                $"{term}, {week}, {_dateTime.CurrentYear}",
                 entry.MinuteYTD,
                 entry.MinuteWeek,
                 entry.DayYTD,
