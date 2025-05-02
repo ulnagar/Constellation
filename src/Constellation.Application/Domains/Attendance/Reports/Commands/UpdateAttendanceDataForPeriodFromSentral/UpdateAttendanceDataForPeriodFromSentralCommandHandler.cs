@@ -56,7 +56,7 @@ internal sealed class UpdateAttendanceDataForPeriodFromSentralCommandHandler
                 .ForContext(nameof(Error), dateResponse.Error, true)
                 .Warning("Failed to retrieve attendance data from Sentral");
 
-            return Result.Failure(new Error("TBC", "TBC - UpdateAttendanceDataForPeriodFromSentralCommand:50"));
+            return Result.Failure(dateResponse.Error);
         }
 
         SystemAttendanceData data = await _sentralGateway.GetAttendancePercentages(request.Term, request.Week, request.Year, dateResponse.Value.StartDate, dateResponse.Value.EndDate);

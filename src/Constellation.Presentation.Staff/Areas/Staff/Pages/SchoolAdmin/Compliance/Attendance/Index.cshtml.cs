@@ -97,14 +97,14 @@ public class IndexModel : BasePageModel
         string[] blocks = SelectedPeriod.Split(',');
         foreach (string block in blocks)
         {
-            string[] microBlocks = block.Split(' ');
+            string preparedBlock = block.Trim();
 
-            if (microBlocks.Contains("Term"))
-                term = SchoolTerm.FromName(microBlocks[1]) ?? SchoolTerm.Empty;
-            else if (microBlocks.Contains("Week"))
-                week = SchoolWeek.FromName(microBlocks[1]) ?? SchoolWeek.Empty;
+            if (preparedBlock.Contains("Term", StringComparison.InvariantCultureIgnoreCase))
+                term = SchoolTerm.FromName(preparedBlock) ?? SchoolTerm.Empty;
+            else if (preparedBlock.Contains("Week", StringComparison.InvariantCultureIgnoreCase))
+                week = SchoolWeek.FromName(preparedBlock) ?? SchoolWeek.Empty;
             else
-                year = microBlocks[0];
+                year = preparedBlock;
         }
 
         Result result = await _mediator.Send(new UpdateAttendanceDataForPeriodFromSentralCommand(year, term, week));
