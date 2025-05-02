@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Students;

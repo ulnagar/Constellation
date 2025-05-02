@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Sentral;
 
+using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Domains.MeritAwards.Awards.Enums;
 using Constellation.Core.Enums;

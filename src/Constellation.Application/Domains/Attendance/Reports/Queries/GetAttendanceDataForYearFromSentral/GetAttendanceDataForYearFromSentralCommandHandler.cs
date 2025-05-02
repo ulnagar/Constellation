@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataForYearFromSentral;
 
 using Abstractions.Messaging;
+using Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Attendance.Repositories;
@@ -8,7 +9,6 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Clock;
 using Core.Shared;
-using GetAttendanceDataFromSentral;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using Interfaces.Services;

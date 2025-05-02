@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Application.Domains.Attendance.Reports.Queries.GetAttendanceDataForYearFromSentral;
-using Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Application.Domains.Attendance.Reports.Queries.GetAttendancePeriodLabels;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetRecentAttendanceValues;
 using Constellation.Application.Models.Auth;
@@ -107,7 +107,7 @@ public class IndexModel : BasePageModel
                 year = microBlocks[0];
         }
 
-        Result<List<AttendanceValue>> result = await _mediator.Send(new GetAttendanceDataFromSentralQuery(year, term, week));
+        Result result = await _mediator.Send(new UpdateAttendanceDataForPeriodFromSentralCommand(year, term, week));
 
         if (result.IsFailure)
         {

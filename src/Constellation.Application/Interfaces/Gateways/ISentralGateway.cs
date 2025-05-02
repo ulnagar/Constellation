@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
-using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Domains.MeritAwards.Awards.Enums;
 using Constellation.Application.DTOs;
@@ -8,6 +7,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Enums;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.Shared;
+using Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using HtmlAgilityPack;
 using Serilog;
 using System;

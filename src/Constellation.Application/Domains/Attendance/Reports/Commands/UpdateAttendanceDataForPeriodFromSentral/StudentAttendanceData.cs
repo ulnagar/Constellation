@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceDataFromSentral;
+﻿namespace Constellation.Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 
 using Core.Enums;
 using Core.Models.Students.ValueObjects;

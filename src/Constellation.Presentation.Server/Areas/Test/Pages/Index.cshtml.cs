@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using BaseModels;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateHistoricalDailyAttendanceReport;
 using Constellation.Application.DTOs;
@@ -34,7 +35,9 @@ public class IndexModel : BasePageModel
     public List<DateOnly> AbsenceDates { get; set; } = new();
 
     public async Task OnGet()
-    { }
+    {
+        await _mediator.Send(new UpdateAttendanceDataForPeriodFromSentralCommand("2025", SchoolTerm.Term1, SchoolWeek.Week11));
+    }
 
     public async Task<IActionResult> OnGetHistoricalReport()
     {
