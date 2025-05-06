@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Folder Include="Models\Assignments\Services\" />
+    <Folder Include="Models\Edval\" />
     <Folder Include="Models\ThirdPartyConsent\Events\" />
     <Folder Include="Models\Timetables\Events\" />
     <Folder Include="Models\Training\Events\" />
