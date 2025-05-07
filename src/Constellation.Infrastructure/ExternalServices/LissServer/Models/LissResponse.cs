@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.LissServer.Models;
 
+using Application.Interfaces.Gateways.LissServerGateway.Models;
 using System.Text.Json.Serialization;
-
-public interface ILissResponse { }
 
 public sealed class LissResponse : ILissResponse
 {

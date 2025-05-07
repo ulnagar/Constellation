@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.LissServer.Models;
 
+using Core.Models.Edval;
 using System.Text.Json.Serialization;
 
 public sealed class LissPublishTimetable
@@ -13,4 +14,18 @@ public sealed class LissPublishTimetable
 
     [JsonPropertyName("TtStructure")]
     public string Timetable { get; set; }
+
+    public EdvalTimetable ToTimetable()
+    {
+        return new()
+        {
+            DayNumber = DayNumber,
+            Period = Period,
+            ClassCode = ClassCode,
+            TeacherId = TeacherId,
+            RoomId = RoomId,
+            RoomCode = RoomCode,
+            Timetable = Timetable
+        };
+    }
 }

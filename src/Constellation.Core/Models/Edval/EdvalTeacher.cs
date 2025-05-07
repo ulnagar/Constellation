@@ -1,9 +1,8 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.LissServer.Models;
+﻿namespace Constellation.Core.Models.Edval;
 
-using Core.Models.Edval;
 using System.Text.Json.Serialization;
 
-public sealed class LissPublishTeachers
+public sealed class EdvalTeacher
 {
     public string TeacherId { get; set; }
     public string TeacherCode { get; set; }
@@ -27,25 +26,4 @@ public sealed class LissPublishTeachers
 
     [JsonPropertyName("Guid")]
     public string UniqueId { get; set; }
-
-    public EdvalTeacher ToTeacher()
-    {
-        return new()
-        {
-            TeacherId = TeacherId,
-            TeacherCode = TeacherCode,
-            Title = Title,
-            FirstName = FirstName,
-            LastName = LastName,
-            PreferredName = PreferredName,
-            DisplayName = DisplayName,
-            Faculty = Faculty,
-            StaffType = StaffType,
-            Gender = Gender,
-            DaysAvailable = DaysAvailable,
-            EmailAddress = EmailAddress,
-            PhoneNumber = PhoneNumber,
-            UniqueId = UniqueId
-        };
-    }
 }

@@ -126,6 +126,7 @@ public static class ServicesRegistration
         services.AddSentralExternalService(configuration);
         services.AddSMSExternalService(configuration, environment);
         services.AddTeamsExternalService(configuration);
+        services.AddLissServer(configuration, environment);
 
         // Add Email Template Engine
 

@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Controllers;
 
 using Application.Interfaces.Configuration;
+using Application.Interfaces.Gateways.LissServerGateway;
+using Application.Interfaces.Gateways.LissServerGateway.Models;
 using Constellation.Infrastructure.ExternalServices.LissServer;
 using Constellation.Infrastructure.ExternalServices.LissServer.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -14,19 +16,19 @@ using System.Text.Json;
 public sealed class LissController : ControllerBase
 {
     private readonly LissServerGatewayConfiguration _configuration;
-    private readonly ILissServerService _lissServerService;
+    private readonly ILissServerGateway _lissServerGateway;
     private readonly ILogger _logger;
 
     public LissController(
         IOptions<LissServerGatewayConfiguration> configuration,
-        ILissServerService lissServerService,
+        ILissServerGateway lissServerGateway,
         ILogger logger)
     {
         if (!configuration.Value.IsConfigured())
             throw new InvalidConfigurationException("LissServerGatewayConfiguration is invalid!");
 
         _configuration = configuration.Value;
-        _lissServerService = lissServerService;
+        _lissServerGateway = lissServerGateway;
         _logger = logger.ForContext<LissController>();
     }
 
@@ -63,19 +65,19 @@ public sealed class LissController : ControllerBase
         LissCallMethod method = LissCallMethod.FromValue(callDetails.Method);
 
         if (method == LissCallMethod.PublishStudents)
-            return await _lissServerService.PublishStudents(callDetails.Params);
+            return await _lissServerGateway.PublishStudents(callDetails.Params);
 
         if (method == LissCallMethod.PublishTimetable)
-            return await _lissServerService.PublishTimetable(callDetails.Params);
+            return await _lissServerGateway.PublishTimetable(callDetails.Params);
 
         if (method == LissCallMethod.PublishTeachers)
-            return await _lissServerService.PublishTeachers(callDetails.Params);
+            return await _lissServerGateway.PublishTeachers(callDetails.Params);
 
         if (method == LissCallMethod.PublishClassMemberships)
-            return await _lissServerService.PublishClassMemberships(callDetails.Params);
+            return await _lissServerGateway.PublishClassMemberships(callDetails.Params);
 
         if (method == LissCallMethod.PublishClasses)
-            return await _lissServerService.PublishClasses(callDetails.Params);
+            return await _lissServerGateway.PublishClasses(callDetails.Params);
 
         return new LissResponse();
     }

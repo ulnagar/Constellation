@@ -1,6 +1,7 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Interfaces.Configuration;
+using Constellation.Application.Interfaces.Gateways.LissServerGateway;
 using Constellation.Infrastructure.ExternalServices.LissServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -12,7 +13,7 @@ public static class LissServerServicesRegistration
         services.AddOptions<LissServerGatewayConfiguration>();
         services.Configure<LissServerGatewayConfiguration>(configuration.GetSection(LissServerGatewayConfiguration.Section));
 
-        services.AddScoped<ILissServerService, LissServerService>();
+        services.AddScoped<ILissServerGateway, LissServerGateway>();
         
         return services;
     }

@@ -1,10 +1,9 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.LissServer.Models;
+﻿namespace Constellation.Core.Models.Edval;
 
-using Core.Models.Edval;
 using System;
 using System.Text.Json.Serialization;
 
-public sealed class LissPublishStudents
+public sealed class EdvalStudent
 {
     [JsonPropertyName("StudentId")]
     public string StudentId { get; set; }
@@ -47,25 +46,4 @@ public sealed class LissPublishStudents
 
     [JsonPropertyName("EndDate")]
     public DateTime EndDate { get; set; }
-
-    public EdvalStudent ToStudent()
-    {
-        return new()
-        {
-            StudentId = StudentId,
-            FirstName = FirstName,
-            LastName = LastName,
-            PreferredName = PreferredName,
-            Grade = Grade,
-            RollGroup = RollGroup,
-            House = House,
-            Gender = Gender,
-            StudentReference = StudentReference,
-            EmailAddress = EmailAddress,
-            PhoneNumber = PhoneNumber,
-            UniqueId = UniqueId,
-            StartDate = StartDate,
-            EndDate = EndDate
-        };
-    }
 }
