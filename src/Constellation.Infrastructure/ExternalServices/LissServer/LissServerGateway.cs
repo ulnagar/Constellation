@@ -5,6 +5,7 @@ using Application.Interfaces.Gateways.LissServerGateway;
 using Application.Interfaces.Gateways.LissServerGateway.Models;
 using Application.Interfaces.Repositories;
 using Core.Models.Edval;
+using Core.Models.Edval.Events;
 using Models;
 using System.Text.Json;
 
@@ -39,9 +40,11 @@ internal sealed class LissServerGateway : ILissServerGateway
 
         foreach (LissPublishStudents student in students)
             _edvalRepository.Insert(student.ToStudent());
-
+        
+        _edvalRepository.AddIntegrationEvent(new EdvalStudentsUpdatedIntegrationEvent(new()));
+        
         await _unitOfWork.CompleteAsync(cancellationToken);
-
+        
         return new LissResponseBlank();
     }
 
@@ -71,6 +74,8 @@ internal sealed class LissServerGateway : ILissServerGateway
             }
         }
 
+        _edvalRepository.AddIntegrationEvent(new EdvalTimetablesUpdatedIntegrationEvent(new()));
+        
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return new LissResponseBlank();
@@ -95,6 +100,8 @@ internal sealed class LissServerGateway : ILissServerGateway
         foreach (LissPublishTeachers teacher in teachers)
             _edvalRepository.Insert(teacher.ToTeacher());
 
+        _edvalRepository.AddIntegrationEvent(new EdvalTeachersUpdatedIntegrationEvent(new()));
+        
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return new LissResponseBlank();
@@ -118,6 +125,8 @@ internal sealed class LissServerGateway : ILissServerGateway
 
         foreach (var membership in classMemberships)
             _edvalRepository.Insert(membership.ToClassMembership());
+
+        _edvalRepository.AddIntegrationEvent(new EdvalClassMembershipsUpdatedIntegrationEvent(new()));
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
@@ -143,6 +152,8 @@ internal sealed class LissServerGateway : ILissServerGateway
         foreach (LissPublishClasses entry in classes)
             _edvalRepository.Insert(entry.ToClass());
 
+        _edvalRepository.AddIntegrationEvent(new EdvalClassesUpdatedIntegrationEvent(new()));
+        
         await _unitOfWork.CompleteAsync(cancellationToken);
 
         return new LissResponseBlank();
