@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Core.Models.Edval;
 
-using System.Text.Json.Serialization;
+using System;
 
 public sealed class EdvalClassMembership
 {
-    [JsonPropertyName("ClassCode")]
-    public string OfferingName { get; set; }
+    public string ClassCode { get; set; }
     public string EdvalClassCode { get; set; }
     public string StudentId { get; set; }
+
+    public string OfferingName => ClassCode.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase).PadLeft(7, '0');
 }

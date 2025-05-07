@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 public interface IEnrolmentRepository
 {
+    Task<List<Enrolment>> GetCurrent(CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<int> GetCurrentCountByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
