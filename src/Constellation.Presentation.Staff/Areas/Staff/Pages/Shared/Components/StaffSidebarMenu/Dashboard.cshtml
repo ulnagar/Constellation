@@ -35,7 +35,7 @@
         
         <div id="timetable" class="collapse show">
             <div class="text-center">
-                <a asp-page="/Partner/Staff/Timetable" asp-area="Staff" asp-route-id="@Model.StaffId" class="btn btn-sm btn-warning my-2">View Complete Timetable</a>
+                <a asp-page="/Subject/Periods/Timetables/Staff" asp-area="Staff" asp-route-id="@Model.StaffId" class="btn btn-sm btn-warning my-2">View Complete Timetable</a>
             </div>
             
             @if (Model.Day != PeriodDay.Unknown && Model.Week != PeriodWeek.Unknown)

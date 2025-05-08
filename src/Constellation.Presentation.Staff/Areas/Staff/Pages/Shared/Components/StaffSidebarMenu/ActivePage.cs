@@ -63,4 +63,6 @@ internal static class ActivePage
     public const string Subject_GroupTutorials_Tutorials = "Subject.GroupTutorials.Tutorials";
 
     public const string Subject_Periods_Periods = "Subject.Periods.Periods";
+    public const string Subject_Periods_Timetables = "Subject.Periods.Timetables";
+    public const string Subject_Periods_Edval = "Subject.Periods.Edval";
 }

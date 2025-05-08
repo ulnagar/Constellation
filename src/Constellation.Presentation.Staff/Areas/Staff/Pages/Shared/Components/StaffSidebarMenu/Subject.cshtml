@@ -71,7 +71,7 @@
         <div class="card">
             <div class="card-header" id="periodsHeading">
                 <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#periods" role="button">
-                    Periods
+                    Timetables
                 </h4>
             </div>
 
@@ -80,7 +80,19 @@
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Subject_Periods_Periods ? "active" : "")" asp-page="/Subject/Periods/Index" asp-area="Staff">
-                                List
+                                Periods
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Periods_Timetables ? "active" : "")" asp-page="/Subject/Periods/Timetables/Index" asp-area="Staff">
+                                Teacher Timetables
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Periods_Edval ? "active" : "")" asp-page="/Subject/Periods/Edval/Index" asp-area="Staff">
+                                Edval Data
                             </a>
                         </li>
                     </ul>

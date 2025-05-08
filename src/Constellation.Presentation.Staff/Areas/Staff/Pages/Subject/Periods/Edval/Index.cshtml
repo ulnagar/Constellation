@@ -1,0 +1,68 @@
+@page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Edval.IndexModel
+
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Edval
+
+<h2>Edval Data Differences</h2>
+
+<div class="page-menu">
+    @{
+        var allStyle = "btn-outline-secondary";
+        var classStyle = allStyle;
+        var membershipStyle = allStyle;
+        var teacherStyle = allStyle;
+        var studentStyle = allStyle;
+        var timetableStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.EdvalFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case IndexModel.EdvalFilter.Class:
+                classStyle = "btn-primary";
+                break;
+            case IndexModel.EdvalFilter.ClassMembership:
+                membershipStyle = "btn-primary";
+                break;
+            case IndexModel.EdvalFilter.Student:
+                studentStyle = "btn-primary";
+                break;
+            case IndexModel.EdvalFilter.Teacher:
+                teacherStyle = "btn-primary";
+                break;
+            case IndexModel.EdvalFilter.Timetable:
+                timetableStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@IndexModel.EdvalFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@IndexModel.EdvalFilter.Class" class="btn @classStyle">Class</a>
+        <a asp-route-filter="@IndexModel.EdvalFilter.ClassMembership" class="btn @membershipStyle">Class Membership</a>
+        <a asp-route-filter="@IndexModel.EdvalFilter.Student" class="btn @studentStyle">Student</a>
+        <a asp-route-filter="@IndexModel.EdvalFilter.Teacher" class="btn @teacherStyle">Teacher</a>
+        <a asp-route-filter="@IndexModel.EdvalFilter.Timetable" class="btn @timetableStyle">Timetable</a>
+    </div>
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+    <tr>
+        <th>Type</th>
+        <th>Difference</th>
+    </tr>
+    </thead>
+    @foreach (var item in Model.Differences)
+    {
+        <tr>
+            <td>@item.Type</td>
+            <td>@item.Description</td>
+        </tr>
+    }
+</table>

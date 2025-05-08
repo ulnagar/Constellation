@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets;
 
 using Application.Domains.Attendance.Plans.Queries.CountAttendancePlansWithStatus;
+using Application.Domains.Edval.Queries.CountEdvalDifferences;
 using Application.Domains.Students.Queries.CountStudentsWithAbsenceScanDisabled;
 using Application.Domains.Students.Queries.CountStudentsWithAwardOverages;
 using Application.Domains.Students.Queries.CountStudentsWithoutSentralId;
@@ -70,6 +71,13 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
             {
                 viewModel.PendingAttendancePlans = attendancePlanRequest.Value.Pending;
                 viewModel.ProcessingAttendancePlans = attendancePlanRequest.Value.Processing;
+            }
+
+            Result<int> edvalDifferencesRequest = await _mediator.Send(new CountEdvalDifferencesQuery(), cancellationToken);
+
+            if (edvalDifferencesRequest.IsSuccess)
+            {
+                viewModel.EdvalDifferences = edvalDifferencesRequest.Value;
             }
         }
 

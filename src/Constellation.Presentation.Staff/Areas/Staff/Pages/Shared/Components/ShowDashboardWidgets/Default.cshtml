@@ -86,6 +86,17 @@
             </div>
         </div>
     </div>
+
+    <div class="col mb-4 sortable" data-id="card-absences-edval-differences">
+        <div class="card h-100 @(Model.EdvalDifferences > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Edval Differences</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.EdvalDifferences</h3>
+                <p class="card-text">differences between Edval data and Constellation</p>
+                <a asp-page="/Subject/Periods/Edval/Index" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
 }
 
 @if (Model.ShowAwardsWidgets)

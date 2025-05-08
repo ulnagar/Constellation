@@ -72,8 +72,8 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
                 continue;
             }
 
-            if (!student.Name.FirstName.Equals(edvalStudent.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                !student.Name.PreferredName.Equals(edvalStudent.FirstName, StringComparison.OrdinalIgnoreCase))
+            if (!student.Name.FirstName.Trim().Equals(edvalStudent.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                !student.Name.PreferredName.Trim().Equals(edvalStudent.FirstName, StringComparison.OrdinalIgnoreCase))
             {
                 _edvalRepository.Insert(new Difference()
                 {
@@ -84,7 +84,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
                 continue;
             }
 
-            if (!student.Name.LastName.Equals(edvalStudent.LastName, StringComparison.OrdinalIgnoreCase))
+            if (!student.Name.LastName.Trim().Equals(edvalStudent.LastName, StringComparison.OrdinalIgnoreCase))
             {
                 _edvalRepository.Insert(new Difference()
                 {

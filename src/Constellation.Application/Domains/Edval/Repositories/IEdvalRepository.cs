@@ -9,7 +9,7 @@ using Training.Queries.GetListOfCertificatesForStaffMemberWithNotCompletedModule
 
 public interface IEdvalRepository
 {
-
+    Task<int> CountDifferences(CancellationToken cancellationToken = default);
     Task<List<Difference>> GetDifferences(CancellationToken cancellationToken = default);
     Task<List<EdvalClass>> GetClasses(CancellationToken cancellationToken = default);
     Task<List<EdvalClassMembership>> GetClassMemberships(CancellationToken cancellationToken = default);

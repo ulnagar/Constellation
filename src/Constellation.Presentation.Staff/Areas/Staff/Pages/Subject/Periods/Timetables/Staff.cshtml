@@ -1,5 +1,6 @@
-@page "{id}/Timetables"
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.TimetableModel
+@page "{id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Timetables.StaffModel
+
 @using Constellation.Application.Domains.Timetables.Timetables.Queries.GetStaffIntegratedTimetableData
 @using Constellation.Core.Models.Offerings.ValueObjects
 @using Constellation.Core.Models.Timetables.Enums
@@ -25,7 +26,7 @@
 <div>
     <ul class="nav nav-pills">
         <li class="nav-item active">
-            <a class="nav-link" href="#integrated" data-toggle="tab" role="tab">Integrated</a>
+            <a class="nav-link active" href="#integrated" data-toggle="tab" role="tab">Integrated</a>
         </li>
 
         @foreach (var timetable in timetableNames)

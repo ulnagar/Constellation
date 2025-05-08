@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250507021036_AddEdvalDataCache")]
+    [Migration("20250508004843_AddEdvalDataCache")]
     partial class AddEdvalDataCache
     {
         /// <inheritdoc />
@@ -1340,6 +1340,26 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("DeviceNotes");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("Key", 0);
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Differences", "Edval");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Edval.EdvalClass", b =>
                 {
                     b.Property<string>("EdvalClassCode")
@@ -1364,9 +1384,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("EdvalClassCode")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("OfferingName")
-                        .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "ClassCode");
+                    b.Property<string>("ClassCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId", "EdvalClassCode");
 

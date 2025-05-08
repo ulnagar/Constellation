@@ -35,11 +35,26 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     EdvalClassCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     StudentId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    OfferingName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ClassCode = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ClassMembership", x => new { x.StudentId, x.EdvalClassCode });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Differences",
+                schema: "Edval",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Differences", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -122,6 +137,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.DropTable(
                 name: "ClassMembership",
+                schema: "Edval");
+
+            migrationBuilder.DropTable(
+                name: "Differences",
                 schema: "Edval");
 
             migrationBuilder.DropTable(

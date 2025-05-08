@@ -75,6 +75,13 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                     .ForContext(nameof(EdvalClassMembership), membership, true)
                     .Warning("Unable to find matching student by StudentReferenceNumber");
 
+                // Additional class enrolment in Edval
+                _edvalRepository.Insert(new Difference()
+                {
+                    Type = EdvalDifferenceType.EdvalClassMembership,
+                    Description = $"{membership.StudentId} (invalid) is not enrolled in {membership.OfferingName} in Constellation"
+                });
+
                 continue;
             }
 

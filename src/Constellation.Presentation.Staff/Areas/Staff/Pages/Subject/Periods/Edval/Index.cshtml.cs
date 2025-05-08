@@ -1,0 +1,86 @@
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Edval;
+
+using Application.Common.PresentationModels;
+using Application.Domains.Edval.Queries.GetEdvalDifferences;
+using Application.Models.Auth;
+using Core.Abstractions.Services;
+using Core.Models.Edval;
+using Core.Models.Edval.Enums;
+using Core.Shared;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Serilog;
+
+[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+public class IndexModel : BasePageModel
+{
+    private readonly ISender _mediator;
+    private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
+
+
+    public IndexModel(
+        ISender mediator,
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger)
+    {
+        _mediator = mediator;
+        _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>();
+    }
+
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Edval;
+    [ViewData] public string PageTitle => "Edval Differences";
+
+    [BindProperty(SupportsGet = true)]
+    public EdvalFilter Filter { get; set; } = EdvalFilter.All;
+
+    public List<Difference> Differences { get; set; } = new();
+
+    public async Task OnGet()
+    {
+        _logger
+            .Information("Requested to retrieve list of Edval Differences for user {User}", _currentUserService.UserName);
+
+        Result<List<Difference>> differences = await _mediator.Send(new GetEdvalDifferencesQuery());
+
+        if (differences.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), differences.Error, true)
+                .Warning("Failed to retrieve list of Edval Differences for user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                differences.Error,
+                _linkGenerator.GetPathByPage("Dashboard", values: new { area = "Staff" }));
+
+            return;
+        }
+
+        Differences = Filter switch
+        {
+            EdvalFilter.Class => differences.Value.Where(difference => difference.Type.Equals(EdvalDifferenceType.EdvalClass)).ToList(),
+            EdvalFilter.ClassMembership => differences.Value.Where(difference => difference.Type.Equals(EdvalDifferenceType.EdvalClassMembership)).ToList(),
+            EdvalFilter.Student => differences.Value.Where(difference => difference.Type.Equals(EdvalDifferenceType.EdvalStudent)).ToList(),
+            EdvalFilter.Teacher => differences.Value.Where(difference => difference.Type.Equals(EdvalDifferenceType.EdvalTeacher)).ToList(),
+            EdvalFilter.Timetable => differences.Value.Where(difference => difference.Type.Equals(EdvalDifferenceType.EdvalTimetable)).ToList(),
+            _ => differences.Value
+        };
+    }
+
+    public enum EdvalFilter
+    {
+        All,
+        Class,
+        ClassMembership,
+        Student,
+        Teacher,
+        Timetable
+    }
+}

@@ -137,6 +137,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                     assignment.Type == AssignmentType.ClassroomTeacher &&
                     !assignment.IsDeleted)
                 .Select(assignment => assignment.StaffId)
+                .Distinct()
                 .ToList();
 
             List<Staff> classTeachers = staff

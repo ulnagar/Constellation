@@ -1,12 +1,12 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff;
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Timetables;
 
-using Application.Domains.StaffMembers.Queries.GetStaffById;
-using Application.Domains.Timetables.Timetables.Queries.GetStaffIntegratedTimetableData;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.StaffMembers.Queries.GetStaffById;
+using Constellation.Application.Domains.Timetables.Timetables.Queries.GetStaffIntegratedTimetableData;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
-using Core.ValueObjects;
+using Constellation.Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +14,14 @@ using Microsoft.AspNetCore.Routing;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
-public class TimetableModel : BasePageModel
+public class StaffModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
-    public TimetableModel(
+    public StaffModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
@@ -31,10 +31,10 @@ public class TimetableModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<TimetableModel>();
+            .ForContext<StaffModel>();
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Staff_Staff;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Periods_Timetables;
     [ViewData] public string PageTitle { get; set; } = "Staff Timetable";
 
     [BindProperty(SupportsGet = true)]
@@ -54,7 +54,7 @@ public class TimetableModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(
                 staffMember.Error,
-                _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
+                _linkGenerator.GetPathByPage("/Subject/Period/Timetables/Index", values: new { area = "Staff" }));
 
             _logger
                 .ForContext(nameof(Error), staffMember.Error, true)
@@ -71,7 +71,7 @@ public class TimetableModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(
                 timetableRequest.Error,
-                _linkGenerator.GetPathByPage("/Partner/Staff/Details", values: new { area = "Staff", Id }));
+                _linkGenerator.GetPathByPage("/Subject/Period/Timetables/Index", values: new { area = "Staff" }));
 
             _logger
                 .ForContext(nameof(Error), timetableRequest.Error, true)

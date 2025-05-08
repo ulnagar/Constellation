@@ -16,6 +16,12 @@ public sealed class EdvalRepository : IEdvalRepository
         _context = context;
     }
 
+    public async Task<int> CountDifferences(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Difference>()
+            .CountAsync(cancellationToken);
+
     public async Task<List<Difference>> GetDifferences(
         CancellationToken cancellationToken = default) =>
         await _context

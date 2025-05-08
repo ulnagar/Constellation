@@ -20,4 +20,6 @@ public sealed class ShowDashboardWidgetsViewComponentModel
 
     public int PendingAttendancePlans { get; set; }
     public int ProcessingAttendancePlans { get; set; }
+
+    public int EdvalDifferences { get; set; }
 }

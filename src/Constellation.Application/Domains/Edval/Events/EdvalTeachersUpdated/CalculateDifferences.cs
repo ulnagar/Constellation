@@ -44,8 +44,8 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
         foreach (EdvalTeacher teacher in edvalTeachers)
         {
             Staff staffMember = existingStaff.FirstOrDefault(member =>
-                member.FirstName.Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                member.LastName.Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
+                member.FirstName.Trim().Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                member.LastName.Trim().Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
 
             if (staffMember is null)
             {
@@ -70,9 +70,9 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
 
         foreach (Staff staffMember in existingStaff)
         {
-            if (!edvalTeachers.All(teacher => 
-                    teacher.FirstName.Equals(staffMember.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                    teacher.LastName.Equals(staffMember.LastName, StringComparison.OrdinalIgnoreCase)))
+            if (!edvalTeachers.Any(teacher => 
+                    teacher.FirstName.Equals(staffMember.FirstName.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    teacher.LastName.Equals(staffMember.LastName.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
                 _edvalRepository.Insert(new Difference()
                 {

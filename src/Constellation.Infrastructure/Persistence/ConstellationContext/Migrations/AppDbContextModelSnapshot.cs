@@ -1381,9 +1381,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("EdvalClassCode")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("OfferingName")
-                        .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "ClassCode");
+                    b.Property<string>("ClassCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId", "EdvalClassCode");
 
