@@ -1,6 +1,11 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods.Edval;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Edval.Commands.RefreshClassDifferences;
+using Application.Domains.Edval.Commands.RefreshDifferences;
+using Application.Domains.Edval.Commands.RefreshStudentDifferences;
+using Application.Domains.Edval.Commands.RefreshTeacherDifferences;
+using Application.Domains.Edval.Commands.RefreshTimetableDifferences;
 using Application.Domains.Edval.Queries.GetEdvalDifferences;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -20,7 +25,6 @@ public class IndexModel : BasePageModel
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
-
 
     public IndexModel(
         ISender mediator,
@@ -43,7 +47,38 @@ public class IndexModel : BasePageModel
 
     public List<Difference> Differences { get; set; } = new();
 
-    public async Task OnGet()
+    public async Task OnGet() => await PreparePage();
+
+    public async Task OnGetRefresh()
+    {
+        _logger
+            .Information("Requested to refresh Edval Differences for user {User}", _currentUserService.UserName);
+
+        Result result = Filter switch
+        {
+            EdvalFilter.Class => await _mediator.Send(new RefreshClassDifferencesCommand()),
+            EdvalFilter.ClassMembership => await _mediator.Send(new RefreshClassDifferencesCommand()),
+            EdvalFilter.Student => await _mediator.Send(new RefreshStudentDifferencesCommand()),
+            EdvalFilter.Teacher => await _mediator.Send(new RefreshTeacherDifferencesCommand()),
+            EdvalFilter.Timetable => await _mediator.Send(new RefreshTimetableDifferencesCommand()),
+            _ => await _mediator.Send(new RefreshDifferencesCommand())
+        };
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to refresh Edval Differences for user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                result.Error,
+                null);
+        }
+        
+        await PreparePage();
+    }
+
+    private async Task PreparePage()
     {
         _logger
             .Information("Requested to retrieve list of Edval Differences for user {User}", _currentUserService.UserName);

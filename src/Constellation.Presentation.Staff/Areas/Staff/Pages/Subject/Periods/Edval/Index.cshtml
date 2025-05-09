@@ -45,6 +45,8 @@
         <a asp-route-filter="@IndexModel.EdvalFilter.Teacher" class="btn @teacherStyle">Teacher</a>
         <a asp-route-filter="@IndexModel.EdvalFilter.Timetable" class="btn @timetableStyle">Timetable</a>
     </div>
+    
+    <a asp-page-handler="Refresh" asp-route-filter="@Model.Filter" class="btn btn-danger">Refresh Differences</a>
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>

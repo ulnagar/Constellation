@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Edval.Repositories;
 
+using Constellation.Core.Models.Edval.Enums;
 using Constellation.Core.Primitives;
 using Core.Models.Edval;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Training.Queries.GetListOfCertificatesForStaffMemberWithNotCompletedModules;
 
 public interface IEdvalRepository
 {
@@ -22,6 +22,7 @@ public interface IEdvalRepository
     Task ClearStudents(CancellationToken cancellationToken = default);
     Task ClearTeachers(CancellationToken cancellationToken = default);
     Task ClearTimetables(CancellationToken cancellationToken = default);
+    Task ClearDifferences(EdvalDifferenceType type, CancellationToken cancellationToken = default);
 
     void Insert(EdvalClass entity);
     void Insert(EdvalClassMembership entity);

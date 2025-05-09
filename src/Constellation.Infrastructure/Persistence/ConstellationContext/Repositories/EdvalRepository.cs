@@ -109,7 +109,7 @@ public sealed class EdvalRepository : IEdvalRepository
         await ClearDifferences(EdvalDifferenceType.EdvalTimetable, cancellationToken);
     }
 
-    private async Task ClearDifferences(EdvalDifferenceType type, CancellationToken cancellationToken = default) =>
+    public async Task ClearDifferences(EdvalDifferenceType type, CancellationToken cancellationToken = default) =>
         await _context
             .Set<Difference>()
             .Where(difference => difference.Type == type)
