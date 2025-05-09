@@ -137,7 +137,17 @@ internal sealed class GenerateAttendancePlansCommandHandler
                     .Where(period => !period.Type.Equals(PeriodType.Offline))
                     .ToList();
 
-                attendancePlan.AddPeriods(periods, offering, course);
+                Result addPeriodRequest = attendancePlan.AddPeriods(periods, offering, course);
+
+                if (addPeriodRequest.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(GenerateAttendancePlansCommand), request, true)
+                        .ForContext(nameof(Error), addPeriodRequest.Error, true)
+                        .Warning("Failed to generate Attendance Plan");
+
+                    return Result.Failure(addPeriodRequest.Error);
+                }
             }
 
             if (attendancePlan.Periods.Count > 0)

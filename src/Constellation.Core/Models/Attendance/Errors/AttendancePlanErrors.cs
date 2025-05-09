@@ -4,6 +4,7 @@ using Enums;
 using Identifiers;
 using Shared;
 using System;
+using Timetables.Identifiers;
 
 public static class AttendancePlanErrors
 {
@@ -22,6 +23,10 @@ public static class AttendancePlanErrors
     public static readonly Func<AttendancePlanPeriodId, Error> PeriodNotFound = periodId => new(
         "AttendancePlans.UpdatePeriods.PeriodNotFound",
         $"A Period with the Id {periodId} could not be found");
+
+    public static readonly Func<PeriodId, Error> PeriodAlreadyExists = periodId => new(
+        "AttendancePlans.AddPeriod.PeriodAlreadyExists",
+        $"A Period with the Id {periodId} already exists in the Plan");
 
     public static readonly Error EntryTimeBeforeStartTime = new(
         "AttendancePlans.UpdatePeriods.EntryTimeBeforeStartTime",

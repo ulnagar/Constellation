@@ -164,7 +164,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
             foreach (PeriodId periodId in periodIds)
             {
-                AttendancePlanPeriod matchingPeriod = plan.Periods.SingleOrDefault(period => period.PeriodId == periodId);
+                AttendancePlanPeriod matchingPeriod = plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
 
                 if (matchingPeriod is null)
                     continue;

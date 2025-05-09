@@ -81,7 +81,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
         return plan;
     }
 
-    public void AddPeriods(
+    public Result AddPeriods(
         List<Period> periods,
         Offering offering,
         Course course)
@@ -94,8 +94,13 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
                 offering,
                 course);
 
+            if (_periods.Any(existingPeriod => existingPeriod.PeriodId == planPeriod.PeriodId))
+                return Result.Failure(AttendancePlanErrors.PeriodAlreadyExists(period.Id));
+
             _periods.Add(planPeriod);
         }
+
+        return Result.Success();
     }
 
     public Result UpdatePeriods(

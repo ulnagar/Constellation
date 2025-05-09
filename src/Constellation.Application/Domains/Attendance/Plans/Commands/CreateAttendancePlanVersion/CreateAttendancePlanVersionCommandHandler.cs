@@ -141,7 +141,17 @@ internal sealed class CreateAttendancePlanVersionCommandHandler
 
             List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
 
-            newPlan.AddPeriods(periods, offering, course);
+            Result addPeriodRequest = newPlan.AddPeriods(periods, offering, course);
+
+            if (addPeriodRequest.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(CreateAttendancePlanVersionCommand), request, true)
+                    .ForContext(nameof(Error), addPeriodRequest.Error, true)
+                    .Warning("Failed to create version of Accepted Attendance Plan");
+
+                return Result.Failure<AttendancePlanId>(addPeriodRequest.Error);
+            }
         }
 
         // Verify the plan has some periods attached
