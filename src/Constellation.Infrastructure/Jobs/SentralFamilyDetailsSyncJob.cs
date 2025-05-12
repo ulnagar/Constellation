@@ -104,6 +104,10 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         _logger
             .Information("Found {count} families", families.Count);
 
+        // if there are no families in Sentral, end now
+        if (families.Count == 0)
+            return;
+
         List<Family> dbFamilies = await _familyRepository.GetAll(token);
 
         // Check objects against database
