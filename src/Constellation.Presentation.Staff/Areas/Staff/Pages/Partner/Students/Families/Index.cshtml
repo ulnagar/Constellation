@@ -82,7 +82,7 @@
                             }
                             else
                             {
-                                <a asp-page="/Partner/Students/Families/EditParent" asp-route-familyidentifier="@entry.FamilyId" asp-route-parentIdentifier="@entry.ParentId" class="dropdown-item">Edit</a>
+                                <a asp-page="/Partner/Students/Families/EditParent" asp-route-familyId="@entry.FamilyId" asp-route-parentId="@entry.ParentId" class="dropdown-item">Edit</a>
                                 <a href="#" data-family-id="@entry.FamilyId" data-parent-id="@entry.ParentId" class="dropdown-item delete-parent-menu">Delete</a>
                             }
                         }
