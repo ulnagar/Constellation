@@ -2163,7 +2163,8 @@ public class ExcelService : IExcelService
                         
                         RubricEntry.RubricCriterionRating rating = rubric.Criteria.SelectMany(entry => entry.Ratings).FirstOrDefault(entry => entry.RatingId == result.RatingId);
 
-                        worksheet.Cells[row, item.Value + 1].Value = rating.Name;
+                        if (rating is not null)
+                            worksheet.Cells[row, item.Value + 1].Value = rating.Name;
                     }
                 }
             }

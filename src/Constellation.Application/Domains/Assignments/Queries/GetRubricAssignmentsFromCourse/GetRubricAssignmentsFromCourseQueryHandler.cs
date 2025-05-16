@@ -42,19 +42,19 @@ internal sealed class GetRubricAssignmentsFromCourseQueryHandler
     {
         List<AssignmentFromCourseResponse> response = new();
 
-        List<Offering> offerings = await _offeringRepository.GetActiveByCourseId(request.CourseId, cancellationToken);
+        Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
 
-        if (offerings.Count == 0)
+        if (offering is null)
         {
             _logger
                 .ForContext(nameof(GetRubricAssignmentsFromCourseQuery), request, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFoundInCourse(request.CourseId), true)
-                .Warning("Failed to retrieve Assignments linked to Course");
+                .ForContext(nameof(Error), OfferingErrors.NotFound(request.OfferingId), true)
+                .Warning("Failed to retrieve Assignments linked to Offering");
 
-            return Result.Failure<List<AssignmentFromCourseResponse>>(OfferingErrors.NotFoundInCourse(request.CourseId));
+            return Result.Failure<List<AssignmentFromCourseResponse>>(OfferingErrors.NotFound(request.OfferingId));
         }
-        List<CanvasCourseCode> canvasCourseIds = offerings
-            .SelectMany(offering => offering.Resources)
+        List<CanvasCourseCode> canvasCourseIds = offering
+            .Resources
             .OfType<CanvasCourseResource>()
             .Select(resource => resource.CourseId)
             .Distinct()

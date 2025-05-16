@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Assignments.Queries.GetRubricAssignmentsFromCourse;
 
 using Abstractions.Messaging;
-using Core.Models.Subjects.Identifiers;
+using Core.Models.Offerings.Identifiers;
 using Models;
 using System.Collections.Generic;
 
 public sealed record GetRubricAssignmentsFromCourseQuery(
-    CourseId CourseId)
+    OfferingId OfferingId)
     : IQuery<List<AssignmentFromCourseResponse>>;

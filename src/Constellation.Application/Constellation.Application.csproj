@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
-    <AssemblyVersion>1.17.25134.0</AssemblyVersion>
+    <AssemblyVersion>1.17.25136.2</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

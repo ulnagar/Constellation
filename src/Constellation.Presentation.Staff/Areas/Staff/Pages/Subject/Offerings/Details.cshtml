@@ -411,8 +411,8 @@
                 <div class="row my-3">
                     <div class="col-8">@assignment.Name (@assignment.DueDate.ToShortDateString())</div>
                     <div class="col">
-                        <a asp-page-handler="DownloadRubricResults" asp-route-assignmentId="@assignment.CanvasAssignmentId" asp-route-assignmentName="@assignment.Name" asp-route-courseCode="@assignment.CourseCode" class="btn btn-secondary">Download Results</a>
-                        <a asp-page-handler="DownloadComments" asp-route-assignmentId="@assignment.CanvasAssignmentId" asp-route-assignmentName="@assignment.Name" asp-route-courseCode="@assignment.CourseCode" class="btn btn-secondary">Download Comments</a>
+                        <a asp-page-handler="DownloadRubricResults" asp-route-assignmentId="@assignment.CanvasAssignmentId" asp-route-assignmentName="@assignment.Name" asp-route-courseCode="@assignment.CourseCode" class="btn btn-secondary show-loader-10">Download Results</a>
+                        <a asp-page-handler="DownloadComments" asp-route-assignmentId="@assignment.CanvasAssignmentId" asp-route-assignmentName="@assignment.Name" asp-route-courseCode="@assignment.CourseCode" class="btn btn-secondary show-loader-10">Download Comments</a>
                     </div>
                 </div>
             }

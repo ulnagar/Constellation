@@ -21,7 +21,6 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings.Errors;
 using Core.Models.Students.Identifiers;
@@ -31,7 +30,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
@@ -98,7 +96,7 @@ public class DetailsModel : BasePageModel
 
         Offering = query.Value;
 
-        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetRubricAssignmentsFromCourseQuery(Offering.CourseId));
+        Result<List<AssignmentFromCourseResponse>> assignments = await _sender.Send(new GetRubricAssignmentsFromCourseQuery(Offering.Id));
 
         if (assignments.IsFailure)
         {
