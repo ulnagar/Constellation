@@ -97,7 +97,7 @@ internal sealed class GetAttendanceDataForYearFromSentralCommandHandler
                         enrolment.Grade,
                         dates.Value.StartDate,
                         dates.Value.EndDate,
-                        $"Term {term}, Week {week}, {year}",
+                        $"{term}, {week}, {year}",
                         entry.MinuteYTD,
                         entry.MinuteWeek,
                         entry.DayYTD,
