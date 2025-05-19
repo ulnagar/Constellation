@@ -58,10 +58,13 @@
                     <div class="mx-2 my-3">
                         <div class="w-100 font-weight-bold">@period.OfferingName @(period.IsCover ? "(Cover)" : "")</div>
                         <div class="w-100">@period.PeriodName : @period.StartTime - @period.EndTime</div>
-
-                        <div class="text-center">
-                            <a href="@period.TeamLink" class="btn btn-sm btn-success">Open Team</a>
-                        </div>
+                        
+                        @if (!string.IsNullOrWhiteSpace(period.TeamName) && !string.IsNullOrWhiteSpace(period.TeamLink))
+                        {
+                            <div class="text-center">
+                                <a href="@period.TeamLink" class="btn btn-sm btn-success">Open Team</a>
+                            </div>
+                        }
                     </div>
                 }
             </div>

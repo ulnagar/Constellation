@@ -86,8 +86,8 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
                     TimeOnly.FromTimeSpan(period.EndTime),
                     offering.Id,
                     offering.Name,
-                    teamResource.Name,
-                    teamResource.Url,
+                    teamResource?.Name ?? string.Empty,
+                    teamResource?.Url ?? string.Empty,
                     false));
             }
         }
