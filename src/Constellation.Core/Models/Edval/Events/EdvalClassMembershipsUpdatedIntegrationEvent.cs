@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Edval.Events;
 
 using Constellation.Core.IntegrationEvents;
-using Identifiers;
+using Models.Identifiers;
 
 public sealed record EdvalClassMembershipsUpdatedIntegrationEvent(
     IntegrationEventId Id)

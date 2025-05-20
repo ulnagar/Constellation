@@ -55,9 +55,14 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
 
         List<EdvalTeacher> teachers = await _edvalRepository.GetTeachers(cancellationToken);
         List<EdvalTimetable> timetables = await _edvalRepository.GetTimetables(cancellationToken);
+        List<EdvalIgnore> ignoredTimetables = await _edvalRepository.GetIgnoreRecords(EdvalDifferenceType.EdvalTimetable, cancellationToken);
 
         foreach (EdvalTimetable timetable in timetables)
         {
+            bool ignored = ignoredTimetables
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.EdvalDifference)
+                .Any(ignore => ignore.Identifier == timetable.Identifier);
+
             EdvalTeacher teacher = teachers.FirstOrDefault(teacher => teacher.TeacherId == timetable.TeacherId);
 
             if (teacher is null)
@@ -98,11 +103,12 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                     assignment.Type == AssignmentType.ClassroomTeacher &&
                     !assignment.IsDeleted))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalTimetable,
-                    Description = $"{staffMember.FirstName} {staffMember.LastName} is not a Classroom Teacher for {offering.Name} in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalTimetable,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    timetable.Identifier,
+                    $"{staffMember.FirstName} {staffMember.LastName} is not a Classroom Teacher for {offering.Name} in Constellation",
+                    ignored));
             }
 
             Period period = periods.SingleOrDefault(period =>
@@ -122,11 +128,12 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                     session.PeriodId == period.Id &&
                     !session.IsDeleted))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalTimetable,
-                    Description = $"{offering.Name} does not have a session at {period} in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalTimetable,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    timetable.Identifier,
+                    $"{offering.Name} does not have a session at {period} in Constellation",
+                    ignored));
             }
         }
 
@@ -146,6 +153,10 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
 
             foreach (Staff classTeacher in classTeachers)
             {
+                bool ignored = ignoredTimetables
+                    .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
+                    .Any(ignore => ignore.Identifier == $"{offering.Id}--{classTeacher.StaffId}");
+
                 EdvalTeacher edvalTeacher = teachers.FirstOrDefault(teacher =>
                     teacher.FirstName.Equals(classTeacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
                     teacher.LastName.Equals(classTeacher.LastName, StringComparison.OrdinalIgnoreCase));
@@ -163,11 +174,12 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                         timetable.OfferingName == offering.Name.Value &&
                         timetable.TeacherId == edvalTeacher.TeacherId))
                 {
-                    _edvalRepository.Insert(new Difference()
-                    {
-                        Type = EdvalDifferenceType.EdvalTimetable,
-                        Description = $"{classTeacher.FirstName} {classTeacher.LastName} is not a Classroom Teacher for {offering.Name} in Edval"
-                    });
+                    _edvalRepository.Insert(new Difference(
+                        EdvalDifferenceType.EdvalTimetable,
+                        EdvalDifferenceSystem.ConstellationDifference,
+                        $"{offering.Id}--{classTeacher.StaffId}",
+                        $"{classTeacher.FirstName} {classTeacher.LastName} is not a Classroom Teacher for {offering.Name} in Edval",
+                        ignored));
                 }
             }
 
@@ -182,16 +194,21 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
 
             foreach (Period period in classPeriods)
             {
+                bool ignored = ignoredTimetables
+                    .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
+                    .Any(ignore => ignore.Identifier == $"{offering.Id}--{period.Id}");
+
                 if (!timetables.Any(timetable =>
                         timetable.DayNumber == period.DayNumber &&
                         timetable.Period == period.SentralPeriodName() &&
                         timetable.OfferingName == offering.Name.Value))
                 {
-                    _edvalRepository.Insert(new Difference()
-                    {
-                        Type = EdvalDifferenceType.EdvalTimetable,
-                        Description = $"{offering.Name} does not have a session at {period} in Edval"
-                    });
+                    _edvalRepository.Insert(new Difference(
+                        EdvalDifferenceType.EdvalTimetable,
+                        EdvalDifferenceSystem.ConstellationDifference,
+                        $"{offering.Id}--{period.Id}",
+                        $"{offering.Name} does not have a session at {period} in Edval",
+                        ignored));
                 }
             }
         }

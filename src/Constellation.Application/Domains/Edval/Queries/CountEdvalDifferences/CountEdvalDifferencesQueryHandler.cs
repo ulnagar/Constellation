@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CountEdvalDifferencesQueryHandler
-: IQueryHandler<CountEdvalDifferencesQuery, int>
+: IQueryHandler<CountEdvalDifferencesQuery, (int Active, int Ignored)>
 {
     private readonly IEdvalRepository _edvalRepository;
     private readonly ILogger _logger;
@@ -22,8 +22,11 @@ internal sealed class CountEdvalDifferencesQueryHandler
             .ForContext<CountEdvalDifferencesQuery>();
     }
 
-    public async Task<Result<int>> Handle(CountEdvalDifferencesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<(int Active, int Ignored)>> Handle(CountEdvalDifferencesQuery request, CancellationToken cancellationToken)
     {
-        return await _edvalRepository.CountDifferences(cancellationToken);
+        int active =  await _edvalRepository.CountDifferences(cancellationToken);
+        int ignored = await _edvalRepository.CountIgnoredDifferences(cancellationToken);
+
+        return (active, ignored);
     }
 }

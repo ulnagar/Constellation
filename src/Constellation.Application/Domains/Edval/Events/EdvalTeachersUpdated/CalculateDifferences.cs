@@ -2,7 +2,6 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Edval.Enums;
-using Constellation.Core.Models.Students;
 using Core.Models;
 using Core.Models.Edval;
 using Core.Models.Edval.Events;
@@ -40,9 +39,14 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
         List<Staff> existingStaff = await _staffRepository.GetAllActive(cancellationToken);
 
         List<EdvalTeacher> edvalTeachers = await _edvalRepository.GetTeachers(cancellationToken);
+        List<EdvalIgnore> ignoredTeachers = await _edvalRepository.GetIgnoreRecords(EdvalDifferenceType.EdvalTeacher, cancellationToken);
 
         foreach (EdvalTeacher teacher in edvalTeachers)
         {
+            bool ignored = ignoredTeachers
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.EdvalDifference)
+                .Any(ignore => ignore.Identifier == teacher.UniqueId);
+
             Staff staffMember = existingStaff.FirstOrDefault(member =>
                 member.FirstName.Trim().Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
                 member.LastName.Trim().Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
@@ -50,35 +54,43 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
             if (staffMember is null)
             {
                 // Additional staff member in Edval
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalTeacher,
-                    Description = $"{teacher.FirstName} {teacher.LastName} is not present in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalTeacher,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    teacher.UniqueId,
+                    $"{teacher.FirstName} {teacher.LastName} is not present in Constellation",
+                    ignored));
+
                 continue;
             }
 
             if (!staffMember.EmailAddress.Equals(teacher.EmailAddress, StringComparison.OrdinalIgnoreCase))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalTeacher,
-                    Description = $"{staffMember.FirstName} {staffMember.LastName} has a different Email Address ({teacher.EmailAddress}) in Edval"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalTeacher,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    teacher.UniqueId,
+                    $"{staffMember.FirstName} {staffMember.LastName} has a different Email Address ({teacher.EmailAddress}) in Edval",
+                    ignored));
             }
         }
 
         foreach (Staff staffMember in existingStaff)
         {
+            bool ignored = ignoredTeachers
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
+                .Any(ignore => ignore.Identifier == staffMember.StaffId);
+
             if (!edvalTeachers.Any(teacher => 
                     teacher.FirstName.Equals(staffMember.FirstName.Trim(), StringComparison.OrdinalIgnoreCase) &&
                     teacher.LastName.Equals(staffMember.LastName.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalTeacher,
-                    Description = $"{staffMember.FirstName} {staffMember.LastName} is not present in Edval"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalTeacher,
+                    EdvalDifferenceSystem.ConstellationDifference,
+                    staffMember.StaffId,
+                    $"{staffMember.FirstName} {staffMember.LastName} is not present in Edval",
+                    ignored));
             }
         }
 

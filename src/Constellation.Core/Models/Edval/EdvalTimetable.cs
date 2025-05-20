@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Edval;
 
+using Constellation.Core.Models.Edval.Enums;
 using System;
 using System.Text.Json.Serialization;
 
@@ -14,7 +15,7 @@ public sealed class EdvalTimetable
 
     [JsonPropertyName("TtStructure")]
     public string Timetable { get; set; }
-
-
+    
     public string OfferingName => ClassCode.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase).PadLeft(7, '0');
+    public string Identifier => $"{Timetable}--{DayNumber}--{Period}--{ClassCode}--{TeacherId}";
 }

@@ -2,3 +2,8 @@
     text-align: center;
     font-size: 40pt;
 }
+
+.card {
+    min-width: 250px;
+    max-width: 250px;
+}

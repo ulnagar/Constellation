@@ -44,8 +44,14 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
 
         List<EdvalStudent> edvalStudents = await _edvalRepository.GetStudents(cancellationToken);
 
+        List<EdvalIgnore> ignoredStudents = await _edvalRepository.GetIgnoreRecords(EdvalDifferenceType.EdvalStudent, cancellationToken);
+
         foreach (EdvalStudent edvalStudent in edvalStudents)
         {
+            bool ignored = ignoredStudents
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.EdvalDifference)
+                .Any(ignore => ignore.Identifier == edvalStudent.StudentId);
+
             Result<StudentReferenceNumber> srn = StudentReferenceNumber.Create(edvalStudent.StudentId);
 
             if (srn.IsFailure)
@@ -63,11 +69,12 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
             if (student is null)
             {
                 // Additional student in Edval
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalStudent,
-                    Description = $"{edvalStudent.FirstName} {edvalStudent.LastName} is not enrolled in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalStudent,
+                    EdvalDifferenceSystem.EdvalDifference, 
+                    edvalStudent.StudentId,
+                    $"{edvalStudent.FirstName} {edvalStudent.LastName} is not enrolled in Constellation",
+                    ignored));
 
                 continue;
             }
@@ -75,35 +82,32 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
             if (!student.Name.FirstName.Trim().Equals(edvalStudent.FirstName, StringComparison.OrdinalIgnoreCase) &&
                 !student.Name.PreferredName.Trim().Equals(edvalStudent.FirstName, StringComparison.OrdinalIgnoreCase))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalStudent,
-                    Description = $"{student.Name} has a different First Name ({edvalStudent.FirstName}) in Edval"
-                });
-
-                continue;
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalStudent,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    edvalStudent.StudentId,
+                    $"{student.Name} has a different First Name ({edvalStudent.FirstName}) in Edval",
+                    ignored));
             }
 
             if (!student.Name.LastName.Trim().Equals(edvalStudent.LastName, StringComparison.OrdinalIgnoreCase))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalStudent,
-                    Description = $"{student.Name} has a different Last Name ({edvalStudent.LastName}) in Edval"
-                });
-
-                continue;
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalStudent,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    edvalStudent.StudentId,
+                    $"{student.Name} has a different Last Name ({edvalStudent.LastName}) in Edval", 
+                    ignored));
             }
 
             if (!student.EmailAddress.Email.Equals(edvalStudent.EmailAddress, StringComparison.OrdinalIgnoreCase))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalStudent,
-                    Description = $"{student.Name} has a different Email Address ({edvalStudent.EmailAddress}) in Edval"
-                });
-
-                continue;
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalStudent,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    edvalStudent.StudentId,
+                    $"{student.Name} has a different Email Address ({edvalStudent.EmailAddress}) in Edval",
+                    ignored));
             }
 
             string edvalGradeString = Regex.Match(edvalStudent.Grade, @"\d+").Value;
@@ -111,23 +115,29 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalStude
 
             if (student.CurrentEnrolment?.Grade != edvalGrade)
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalStudent,
-                    Description = $"{student.Name} has a different Grade ({edvalStudent.Grade}) in Edval"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalStudent,
+                    EdvalDifferenceSystem.EdvalDifference,
+                    edvalStudent.StudentId,
+                    $"{student.Name} has a different Grade ({edvalStudent.Grade}) in Edval",
+                    ignored));
             }
         }
 
         foreach (Student student in existingStudents)
         {
+            bool ignored = ignoredStudents
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
+                .Any(ignore => ignore.Identifier == student.Id.ToString());
+
             if (edvalStudents.All(edvalStudent => edvalStudent.StudentId != student.StudentReferenceNumber.Number))
             {
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalStudent,
-                    Description = $"{student.Name} is not enrolled in Edval"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalStudent,
+                    EdvalDifferenceSystem.ConstellationDifference,
+                    student.Id.ToString(),
+                    $"{student.Name} is not enrolled in Edval",
+                    ignored));
             }
         }
 

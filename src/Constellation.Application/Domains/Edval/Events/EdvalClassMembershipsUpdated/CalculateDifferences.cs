@@ -52,9 +52,14 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
         List<Enrolment> existingEnrolments = await _enrolmentRepository.GetCurrent(cancellationToken);
 
         List<EdvalClassMembership> edvalClassMemberships = await _edvalRepository.GetClassMemberships(cancellationToken);
+        List<EdvalIgnore> ignoredMemberships = await _edvalRepository.GetIgnoreRecords(EdvalDifferenceType.EdvalClassMembership, cancellationToken);
 
         foreach (EdvalClassMembership membership in edvalClassMemberships)
         {
+            bool ignored = ignoredMemberships
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.EdvalDifference)
+                .Any(ignore => ignore.Identifier == membership.Identifier);
+
             Result<StudentReferenceNumber> srn = StudentReferenceNumber.Create(membership.StudentId);
 
             if (srn.IsFailure)
@@ -74,13 +79,14 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                 _logger
                     .ForContext(nameof(EdvalClassMembership), membership, true)
                     .Warning("Unable to find matching student by StudentReferenceNumber");
-
+                
                 // Additional class enrolment in Edval
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalClassMembership,
-                    Description = $"{membership.StudentId} (invalid) is not enrolled in {membership.OfferingName} in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalClassMembership,
+                    EdvalDifferenceSystem.EdvalDifference, 
+                    membership.Identifier,
+                    $"{membership.StudentId} (invalid) is not enrolled in {membership.OfferingName} in Constellation",
+                    ignored));
 
                 continue;
             }
@@ -99,16 +105,21 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
             if (existingEnrolments.All(enrolment => enrolment.StudentId != student.Id && enrolment.OfferingId != offering.Id))
             {
                 // Additional class enrolment in Edval
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalClassMembership,
-                    Description = $"{student.Name} is not enrolled in {membership.OfferingName} in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalClassMembership,
+                    EdvalDifferenceSystem.EdvalDifference, 
+                    membership.Identifier,
+                    $"{student.Name} is not enrolled in {membership.OfferingName} in Constellation",
+                    ignored));
             }
         }
 
         foreach (Enrolment enrolment in existingEnrolments)
         {
+            bool ignored = ignoredMemberships
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
+                .Any(ignore => ignore.Identifier == enrolment.Id.ToString());
+
             Student student = existingStudents.FirstOrDefault(student => student.Id == enrolment.StudentId);
 
             if (student is null)
@@ -134,11 +145,12 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
             if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Number && entry.OfferingName != offering.Name.Value))
             {
                 // Additional class enrolment in Constellation
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalClassMembership,
-                    Description = $"{student.Name} is not enrolled in {offering.Name} in Edval"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalClassMembership,
+                    EdvalDifferenceSystem.ConstellationDifference, 
+                    enrolment.Id.ToString(),
+                    $"{student.Name} is not enrolled in {offering.Name} in Edval",
+                    ignored));
             }
         }
 

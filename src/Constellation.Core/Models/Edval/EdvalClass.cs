@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Edval;
 
+using Enums;
 using System;
 
 public sealed class EdvalClass
@@ -9,5 +10,4 @@ public sealed class EdvalClass
     public string Form { get; set; }
 
     public string OfferingName => ClassCode.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase).PadLeft(7, '0');
-
 }

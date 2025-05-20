@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Edval;
 
+using Constellation.Core.Models.Edval.Enums;
 using System;
 using System.Text.Json.Serialization;
 

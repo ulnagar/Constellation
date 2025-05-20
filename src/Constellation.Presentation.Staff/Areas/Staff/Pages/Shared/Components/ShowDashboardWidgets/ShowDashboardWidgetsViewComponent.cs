@@ -73,11 +73,11 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
                 viewModel.ProcessingAttendancePlans = attendancePlanRequest.Value.Processing;
             }
 
-            Result<int> edvalDifferencesRequest = await _mediator.Send(new CountEdvalDifferencesQuery(), cancellationToken);
+            Result<(int Active, int Ignored)> edvalDifferencesRequest = await _mediator.Send(new CountEdvalDifferencesQuery(), cancellationToken);
 
             if (edvalDifferencesRequest.IsSuccess)
             {
-                viewModel.EdvalDifferences = edvalDifferencesRequest.Value;
+                viewModel.EdvalDifferences = edvalDifferencesRequest.Value.Active;
             }
         }
 

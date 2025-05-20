@@ -4,6 +4,7 @@ using Application.Domains.Edval.Repositories;
 using Constellation.Core.Primitives;
 using Core.Models.Edval;
 using Core.Models.Edval.Enums;
+using Core.Models.Edval.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -20,7 +21,20 @@ public sealed class EdvalRepository : IEdvalRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Difference>()
-            .CountAsync(cancellationToken);
+            .CountAsync(difference => difference.Ignored == false, cancellationToken);
+
+    public async Task<int> CountIgnoredDifferences(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Difference>()
+            .CountAsync(difference => difference.Ignored == true, cancellationToken);
+
+    public async Task<Difference?> GetDifference(
+        DifferenceId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Difference>()
+            .FirstOrDefaultAsync(difference => difference.Id == id, cancellationToken);
 
     public async Task<List<Difference>> GetDifferences(
         CancellationToken cancellationToken = default) =>
@@ -57,6 +71,22 @@ public sealed class EdvalRepository : IEdvalRepository
         await _context
             .Set<EdvalTimetable>()
             .ToListAsync(cancellationToken);
+
+    public async Task<List<EdvalIgnore>> GetIgnoreRecords(
+        EdvalDifferenceType? type,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<EdvalIgnore> records = _context
+            .Set<EdvalIgnore>();
+
+        if (type is not null)
+        {
+            records = records
+                .Where(record => record.Type == type);
+        }
+
+        return await records.ToListAsync(cancellationToken);
+    }
 
     public async Task ClearClasses(
         CancellationToken cancellationToken = default)
@@ -121,6 +151,9 @@ public sealed class EdvalRepository : IEdvalRepository
     public void Insert(EdvalTeacher entity) => _context.Add(entity);
     public void Insert(EdvalTimetable entity) => _context.Add(entity);
     public void Insert(Difference entity) => _context.Add(entity);
+    public void Insert(EdvalIgnore entity) => _context.Add(entity);
+
+    public void Remove(EdvalIgnore entity) => _context.Remove(entity);
 
     public void AddIntegrationEvent(IIntegrationEvent integrationEvent) =>
         _context.AddIntegrationEvent(integrationEvent);

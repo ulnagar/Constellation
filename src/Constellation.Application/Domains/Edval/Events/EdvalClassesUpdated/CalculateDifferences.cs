@@ -40,30 +40,41 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
 
         List<EdvalClass> edvalClasses = await _edvalRepository.GetClasses(cancellationToken);
 
+        List<EdvalIgnore> ignoredClasses = await _edvalRepository.GetIgnoreRecords(EdvalDifferenceType.EdvalClass, cancellationToken);
+
         foreach (EdvalClass edvalClass in edvalClasses)
         {
+            bool ignored = ignoredClasses
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.EdvalDifference)
+                .Any(ignore => ignore.Identifier == edvalClass.EdvalClassCode);
+
             if (existingClasses.All(entry => entry.Name.Value != edvalClass.OfferingName))
             {
                 // Additional class in Edval
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalClass, 
-                    Description = $"{edvalClass.OfferingName} is not present in Constellation"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalClass,
+                    EdvalDifferenceSystem.EdvalDifference, 
+                    edvalClass.EdvalClassCode,
+                    $"{edvalClass.OfferingName} is not present in Constellation",
+                    ignored));
             }
         }
 
         foreach (Offering existingClass in existingClasses)
         {
+            bool ignored = ignoredClasses
+                .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
+                .Any(ignore => ignore.Identifier == existingClass.Id.ToString());
+
             if (edvalClasses.All(entry => entry.OfferingName != existingClass.Name.Value))
             {
                 // Additional class in Constellation
-
-                _edvalRepository.Insert(new Difference()
-                {
-                    Type = EdvalDifferenceType.EdvalClass,
-                    Description = $"{existingClass.Name} is not present in Edval"
-                });
+                _edvalRepository.Insert(new Difference(
+                    EdvalDifferenceType.EdvalClass,
+                    EdvalDifferenceSystem.ConstellationDifference,
+                    existingClass.Id.ToString(),
+                    $"{existingClass.Name} is not present in Edval",
+                    ignored));
             }
         }
 

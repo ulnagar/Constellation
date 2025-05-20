@@ -3,4 +3,4 @@
 using Abstractions.Messaging;
 
 public sealed record CountEdvalDifferencesQuery()
-    : IQuery<int>;
+    : IQuery<(int Active, int Ignored)>;

@@ -13,6 +13,7 @@
         var teacherStyle = allStyle;
         var studentStyle = allStyle;
         var timetableStyle = allStyle;
+        var ignoredStyle = allStyle;
 
         switch (Model.Filter)
         {
@@ -34,6 +35,9 @@
             case IndexModel.EdvalFilter.Timetable:
                 timetableStyle = "btn-primary";
                 break;
+            case IndexModel.EdvalFilter.Ignored:
+                ignoredStyle = "btn-primary";
+                break;
         }
     }
 
@@ -44,6 +48,7 @@
         <a asp-route-filter="@IndexModel.EdvalFilter.Student" class="btn @studentStyle">Student</a>
         <a asp-route-filter="@IndexModel.EdvalFilter.Teacher" class="btn @teacherStyle">Teacher</a>
         <a asp-route-filter="@IndexModel.EdvalFilter.Timetable" class="btn @timetableStyle">Timetable</a>
+        <a asp-route-filter="@IndexModel.EdvalFilter.Ignored" class="btn @ignoredStyle">Ignored</a>
     </div>
     
     <a asp-page-handler="Refresh" asp-route-filter="@Model.Filter" class="btn btn-danger">Refresh Differences</a>
@@ -58,6 +63,7 @@
     <tr>
         <th>Type</th>
         <th>Difference</th>
+        <th></th>
     </tr>
     </thead>
     @foreach (var item in Model.Differences)
@@ -65,6 +71,16 @@
         <tr>
             <td>@item.Type</td>
             <td>@item.Description</td>
+            <td>
+                @if (!item.Ignored)
+                {
+                    <a asp-page-handler="Ignore" asp-route-filter="@Model.Filter" asp-route-differenceId="@item.Id" class="btn btn-sm btn-warning btn-show-hover">Ignore</a>
+                }
+                else
+                {
+                    <a asp-page-handler="Regard" asp-route-filter="@Model.Filter" asp-route-differenceId="@item.Id" class="btn btn-sm btn-warning btn-show-hover">Remove</a>
+                }
+            </td>
         </tr>
     }
 </table>

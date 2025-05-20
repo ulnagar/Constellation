@@ -2,24 +2,17 @@
 
 using Core.Models.Edval;
 using Core.Models.Edval.Enums;
-using Core.Models.Edval.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal class DifferenceConfiguration : IEntityTypeConfiguration<Difference>
+internal class EdvalIgnoreConfiguration : IEntityTypeConfiguration<EdvalIgnore>
 {
-    public void Configure(EntityTypeBuilder<Difference> builder)
+    public void Configure(EntityTypeBuilder<EdvalIgnore> builder)
     {
-        builder.ToTable("Differences", "Edval");
+        builder.ToTable("Ignore", "Edval");
 
         builder
-            .HasKey(entity => entity.Id);
-
-        builder
-            .Property(entity => entity.Id)
-            .HasConversion(
-                id => id.Value,
-                value => DifferenceId.FromValue(value));
+            .HasKey(entity => new { entity.Type, entity.System, entity.Identifier });
 
         builder
             .Property(entity => entity.Type)
@@ -30,7 +23,7 @@ internal class DifferenceConfiguration : IEntityTypeConfiguration<Difference>
         builder
             .Property(entity => entity.System)
             .HasConversion(
-                type => type.Value,
+                system => system.Value,
                 value => EdvalDifferenceSystem.FromValue(value));
     }
 }
