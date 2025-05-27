@@ -11,8 +11,8 @@ public class Timetable : ValueObject, IComparable<Timetable>
     private static readonly Dictionary<string, Timetable> _enumerations = CreateEnumerations();
 
     public static Timetable Primary => new("PRI", "Primary", 'P');
-    public static Timetable Junior6 => new("JU6", "Junior 6", default);
-    public static Timetable Junior8 => new("JU8", "Junior 8", 'A');
+    public static Timetable Junior6 => new("JU6", "Secondary", 'J');
+    public static Timetable Junior8 => new("JU8", "Alternate", 'A');
     public static Timetable Senior => new("SEN", "Senior", 'S');
 
     private Timetable() { }
@@ -85,7 +85,7 @@ public class Timetable : ValueObject, IComparable<Timetable>
     }
 
     public int CompareTo(Timetable other) => 
-        this.Code.CompareTo(other.Code);
+        string.Compare(Code, other.Code, StringComparison.OrdinalIgnoreCase);
 
     public override bool Equals(object obj) =>
         ReferenceEquals(this, obj) || obj is Timetable other && Equals(other);
