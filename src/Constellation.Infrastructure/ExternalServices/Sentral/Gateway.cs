@@ -1954,63 +1954,42 @@ public class Gateway : ISentralGateway
             return new List<RollMarkReportDto>();
         }
 
-        string sentralDate = date.ToString("yyyy-MM-dd");
+        string sentralDate = date.ToString("yyyy-MM-dd", new DateTimeFormatInfo());
 
-        HtmlDocument primaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id=1&range=single_day&date={sentralDate}&export=1", default);
-        HtmlDocument secondaryPage = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id=2&range=single_day&date={sentralDate}&export=1", default);
+        List<RollMarkReportDto> response = [];
 
-        if (primaryPage == null || secondaryPage == null)
-            return new List<RollMarkReportDto>();
-
-        List<string> primaryList = new();
-        if (!primaryPage.DocumentNode.InnerHtml.StartsWith("<"))
-            primaryList = primaryPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-
-        List<string> secondaryList = new();
-        if (!secondaryPage.DocumentNode.InnerHtml.StartsWith("<"))
-            secondaryList = secondaryPage.DocumentNode.InnerHtml.Split('\u000A').ToList();
-
-        List<RollMarkReportDto> list = new();
-
-        foreach (string entry in primaryList)
+        for (int campus = 1; campus < 4; campus++)
         {
-            string[] splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
-            
-            if (splitString[0] == "\"Date\"" || splitString.Length != 7)
+            HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/roll_report?campus_id={campus}&range=single_day&date={sentralDate}&export=1", CancellationToken.None);
+
+            if (page is null)
                 continue;
 
-            list.Add(new RollMarkReportDto
+            List<string> list = [];
+            if (!page.DocumentNode.InnerHtml.StartsWith('<'))
+                list = page.DocumentNode.InnerHtml.Split('\u000A').ToList();
+
+            foreach (string entry in list)
             {
-                Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
-                Period = splitString[1].TrimStart('"').TrimEnd('"'),
-                ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
-                Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
-                Year = splitString[4].TrimStart('"').TrimEnd('"'),
-                Room = splitString[5].TrimStart('"').TrimEnd('"'),
-                Submitted = splitString[6].TrimStart('"').TrimEnd('"') == "Submitted"
-            });
+                string[] splitString = Regex.Split(entry, "[,]{1}(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+
+                if (splitString[0] == "\"Date\"" || splitString.Length != 7)
+                    continue;
+
+                response.Add(new RollMarkReportDto
+                {
+                    Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
+                    Period = splitString[1].TrimStart('"').TrimEnd('"'),
+                    ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
+                    Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
+                    Year = splitString[4].TrimStart('"').TrimEnd('"'),
+                    Room = splitString[5].TrimStart('"').TrimEnd('"'),
+                    Submitted = splitString[6].TrimStart('"').TrimEnd('"') == "Submitted"
+                });
+            }
         }
 
-        foreach (string entry in secondaryList)
-        {
-            string[] splitString = entry.Split(',');
-
-            if (splitString[0] == "\"Date\"" || splitString.Length != 7)
-                continue;
-
-            list.Add(new RollMarkReportDto
-            {
-                Date = DateTime.Parse(splitString[0].TrimStart('"').TrimEnd('"')),
-                Period = splitString[1].TrimStart('"').TrimEnd('"'),
-                ClassName = splitString[2].TrimStart('"').TrimEnd('"'),
-                Teacher = splitString[3].TrimStart('"').TrimEnd('"'),
-                Year = splitString[4].TrimStart('"').TrimEnd('"'),
-                Room = splitString[5].TrimStart('"').TrimEnd('"'),
-                Submitted = splitString[6].TrimStart('"').TrimEnd('"') == "Submitted"
-            });
-        }
-
-        return list;
+        return response;
     }
 
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger)
