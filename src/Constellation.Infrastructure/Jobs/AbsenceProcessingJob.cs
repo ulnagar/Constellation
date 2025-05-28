@@ -22,6 +22,7 @@ using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
+using System.Globalization;
 using System.Threading;
 
 internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
@@ -237,10 +238,21 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     // This should be a single contiguous block of periods for the day.
                     // Find all absences from the day (group) that occur during this periodGroup
                     List<SentralPeriodAbsenceDto> absencesToProcess = group
-                        .Where(absence => 
-                            coursePeriods.Any(period => 
-                                period.SentralPeriodName() == absence.Period))
+                        .Where(absence =>
+                            coursePeriods.Any(period =>
+                                // TODO: 2026: Remove this when there are no historical absences for the old grid prefix
+                                absence.Date <= DateOnly.Parse("2025-05-27", new DateTimeFormatInfo()) &&
+                                absence.Period.Length == 1
+                                    ? period.PeriodCode.ToString() == absence.Period
+                                    : period.SentralPeriodName() == absence.Period))
                         .ToList();
+                    
+                    // Original Code for TODO above
+                    // List<SentralPeriodAbsenceDto> absencesToProcess = group
+                    //    .Where(absence =>
+                    //        coursePeriods.Any(period =>
+                    //            period.SentralPeriodName() == absence.Period))
+                    //    .ToList();
 
                     if (absencesToProcess.Count == 0)
                         continue;
@@ -256,7 +268,16 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                         if (absenceTime.Type == SentralPeriodAbsenceDto.Whole)
                         {
                             Period period = coursePeriods
-                                .First(period => period.SentralPeriodName() == absenceTime.Period);
+                                .First(period =>
+                                    // TODO: 2026: Remove this when there are no historical absences for the old grid prefix
+                                    absenceTime.Date <= DateOnly.Parse("2025-05-27", new DateTimeFormatInfo()) &&
+                                    absenceTime.Period.Length == 1
+                                        ? period.PeriodCode.ToString() == absenceTime.Period
+                                        : period.SentralPeriodName() == absenceTime.Period);
+
+                            // Original Code for TODO above
+                            // Period period = coursePeriods
+                            //    .First(period => period.SentralPeriodName() == absenceTime.Period);
 
                             absenceTime.MinutesAbsent = period.Duration;
                         }
