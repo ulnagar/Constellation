@@ -20,7 +20,21 @@ public interface IOfferingRepository
     Task<List<Offering>> GetAllFuture(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAllInactive(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Get all current Course Offerings where the provided StaffId is listed as Classroom Teacher (only)
+    /// </summary>
+    /// <param name="StaffId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     Task<List<Offering>> GetActiveForTeacher(string StaffId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get all current Course Offerings where the provided StaffId is listed as any type of Teacher
+    /// </summary>
+    /// <param name="staffId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<List<Offering>> GetAllTypesActiveForTeacher(string staffId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByGrade(Grade grade, CancellationToken cancellationToken = default);

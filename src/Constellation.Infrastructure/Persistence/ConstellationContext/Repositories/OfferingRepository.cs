@@ -88,6 +88,19 @@ public class OfferingRepository : IOfferingRepository
                 offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Offering>> GetAllTypesActiveForTeacher(
+        string staffId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.Teachers.Any(teacher =>
+                    teacher.StaffId == staffId &&
+                    !teacher.IsDeleted) &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .ToListAsync(cancellationToken);
+
     public async Task<List<Offering>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context

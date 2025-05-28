@@ -78,7 +78,7 @@ internal sealed class ResignStaffMemberCommandHandler
         staffMember.IsDeleted = true;
         staffMember.DateDeleted = DateTime.Now;
 
-        List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(request.StaffId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetAllTypesActiveForTeacher(request.StaffId, cancellationToken);
 
         foreach (Offering offering in offerings)
         {
