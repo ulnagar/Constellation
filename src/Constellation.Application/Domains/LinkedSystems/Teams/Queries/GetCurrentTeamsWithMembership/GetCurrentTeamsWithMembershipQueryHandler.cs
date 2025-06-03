@@ -19,6 +19,8 @@ using Core.Models.GroupTutorials;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -102,7 +104,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             .ToList();
 
         List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
         List<Offering> offerings = await _offeringRepository.GetAllActive(cancellationToken);
         List<ClassCover> covers = await _coverRepository.GetAllCurrent(cancellationToken);
         List<Casual> casuals = await _casualRepository.GetAll(cancellationToken);
@@ -185,7 +187,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
     private async Task<List<TeamWithMembership.Member>> ProcessGroupTutorialTeam(
         Team team, 
         List<Student> students, 
-        List<Staff> staff, 
+        List<StaffMember> staff, 
         CancellationToken cancellationToken)
     {
         List<TeamWithMembership.Member> members = [];
@@ -225,7 +227,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         }
 
         // Class Teachers
-        List<string> teacherIds = tutorial
+        List<StaffId> teacherIds = tutorial
             .Teachers
             .Where(member =>
                 !member.IsDeleted &&
@@ -234,14 +236,14 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             .Select(member => member.StaffId)
             .ToList();
 
-        List<Staff> teachers = staff
-            .Where(staffMember => teacherIds.Contains(staffMember.StaffId))
+        List<StaffMember> teachers = staff
+            .Where(staffMember => teacherIds.Contains(staffMember.Id))
             .ToList();
 
-        foreach (Staff teacher in teachers)
+        foreach (StaffMember teacher in teachers)
         {
             TeamWithMembership.Member entry = new(
-                teacher.EmailAddress,
+                teacher.EmailAddress.Email,
                 TeamsMembershipLevel.Owner.Value,
                 []);
 
@@ -258,7 +260,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         List<ClassCover> covers,
         List<Offering> offerings, 
         List<Student> students, 
-        List<Staff> staff, 
+        List<StaffMember> staff, 
         IList<AppUser> additionalRecipients,
         CancellationToken cancellationToken = default)
     {
@@ -307,16 +309,16 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             }
 
             // Class Teachers
-            List<Staff> teachers = staff.Where(staffMember => 
+            List<StaffMember> teachers = staff.Where(staffMember => 
                     offering.Teachers.Any(assignment =>
                         assignment.Type == AssignmentType.ClassroomTeacher &&
-                        assignment.StaffId == staffMember.StaffId))
+                        assignment.StaffId == staffMember.Id))
                 .ToList();
 
-            foreach (Staff teacher in teachers)
+            foreach (StaffMember teacher in teachers)
             {
                 TeamWithMembership.Member entry = new(
-                    teacher.EmailAddress,
+                    teacher.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value,
                     []);
 
@@ -333,12 +335,12 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 {
                     if (cover.TeacherType == CoverTeacherType.Staff)
                     {
-                        var staffMember = staff.FirstOrDefault(staffMember => cover.TeacherId == staffMember.StaffId);
+                        var staffMember = staff.FirstOrDefault(staffMember => cover.TeacherId == staffMember.Id.ToString());
 
                         if (staffMember is not null)
                         {
                             TeamWithMembership.Member entry = new(
-                                staffMember.EmailAddress,
+                                staffMember.EmailAddress.Email,
                                 TeamsMembershipLevel.Owner.Value,
                                 []);
 
@@ -390,19 +392,19 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             }
             else
             {
-                List<Staff> headTeachers = staff.Where(staffMember =>
+                List<StaffMember> headTeachers = staff.Where(staffMember =>
                         faculty.Members
                             .Where(facultyMember =>
                                 !facultyMember.IsDeleted &&
                                 facultyMember.Role == FacultyMembershipRole.Manager)
                             .Select(facultyMember => facultyMember.StaffId)
-                            .Contains(staffMember.StaffId))
+                            .Contains(staffMember.Id))
                     .ToList();
 
-                foreach (Staff teacher in headTeachers)
+                foreach (StaffMember teacher in headTeachers)
                 {
                     TeamWithMembership.Member entry = new(
-                        teacher.EmailAddress,
+                        teacher.EmailAddress.Email,
                         TeamsMembershipLevel.Owner.Value,
                         []);
 
@@ -431,19 +433,19 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Deputy Principals
-                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<string> deputyIds);
+                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<StaffId> deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
 
                     foreach (var deputyId in deputyIds)
                     {
-                        Staff deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.StaffId == deputyId);
+                        StaffMember deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.Id == deputyId);
 
                         if (deputyPrincipal is null) continue;
 
                         TeamWithMembership.Member deputyEntry = new(
-                            deputyPrincipal.EmailAddress,
+                            deputyPrincipal.EmailAddress.Email,
                             TeamsMembershipLevel.Owner.Value,
                             []);
 
@@ -453,18 +455,18 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<string> lastStaffIds);
+                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<StaffId> lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (string staffId in lastStaffIds)
+                    foreach (StaffId staffId in lastStaffIds)
                     {
-                        Staff learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.StaffId == staffId);
+                        StaffMember learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.Id == staffId);
 
                         if (learningSupportTeacher is null) continue;
 
                         TeamWithMembership.Member lastEntry = new(
-                            learningSupportTeacher.EmailAddress,
+                            learningSupportTeacher.EmailAddress.Email,
                             TeamsMembershipLevel.Owner.Value,
                             []);
 
@@ -478,20 +480,20 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         return members;
     }
 
-    private List<TeamWithMembership.Member> ProcessMandatoryOwners(List<Staff> staff)
+    private List<TeamWithMembership.Member> ProcessMandatoryOwners(List<StaffMember> staff)
     {
         List<TeamWithMembership.Member> members = [];
 
         if (_teamConfiguration.MandatoryOwnerIds.Count > 0)
         {
-            foreach (string staffId in _teamConfiguration.MandatoryOwnerIds)
+            foreach (StaffId staffId in _teamConfiguration.MandatoryOwnerIds)
             {
-                Staff mandatoryOwner = staff.FirstOrDefault(staffMember => staffMember.StaffId == staffId);
+                StaffMember mandatoryOwner = staff.FirstOrDefault(staffMember => staffMember.Id == staffId);
 
                 if (mandatoryOwner is null) continue;
 
                 TeamWithMembership.Member mandatoryOwnerEntry = new(
-                    mandatoryOwner.EmailAddress,
+                    mandatoryOwner.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value,
                     []);
 
@@ -522,7 +524,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         return members;
     }
 
-    private List<TeamWithMembership.Member> ProcessStudentTeam(List<Student> students, List<Staff> staff)
+    private List<TeamWithMembership.Member> ProcessStudentTeam(List<Student> students, List<StaffMember> staff)
     {
         List<TeamWithMembership.Member> members = [];
 
@@ -544,22 +546,22 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 members.Add(entry);
         }
 
-        foreach (Staff staffMember in staff)
+        foreach (StaffMember staffMember in staff)
         {
             Dictionary<string, string> staffChannels = new();
 
             foreach (var grade in _teamConfiguration.StudentTeamChannelOwnerIds)
             {
-                if (grade.Value.Contains(staffMember.StaffId))
+                if (grade.Value.Contains(staffMember.Id))
                     staffChannels.Add($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Owner.Value);
                 else
                     staffChannels.Add($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Member.Value);
             }
 
-            if (_teamConfiguration.StudentTeamOwnerIds.Contains(staffMember.StaffId))
+            if (_teamConfiguration.StudentTeamOwnerIds.Contains(staffMember.Id))
             {
                 TeamWithMembership.Member entry = new(
-                    staffMember.EmailAddress,
+                    staffMember.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value,
                     staffChannels);
 
@@ -569,7 +571,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             else
             {
                 TeamWithMembership.Member entry = new(
-                    staffMember.EmailAddress,
+                    staffMember.EmailAddress.Email,
                     TeamsMembershipLevel.Member.Value,
                     staffChannels);
 

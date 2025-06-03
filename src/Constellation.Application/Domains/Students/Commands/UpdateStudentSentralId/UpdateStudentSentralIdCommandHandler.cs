@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Students.Commands.UpdateStudentSentralId;
 
 using Abstractions.Messaging;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Enums;

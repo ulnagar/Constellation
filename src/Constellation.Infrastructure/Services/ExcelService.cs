@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Application.Assets.ImportAssetsFromFile;
+using Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Application.Domains.Contacts.Models;

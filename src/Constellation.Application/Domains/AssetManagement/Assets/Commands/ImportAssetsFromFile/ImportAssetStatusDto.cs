@@ -1,7 +1,7 @@
 ﻿#nullable enable
-namespace Constellation.Application.Assets.ImportAssetsFromFile;
+namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 
-using Core.Shared;
+using Constellation.Core.Shared;
 
 public sealed record ImportAssetStatusDto(
     int RowNumber,

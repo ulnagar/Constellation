@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.ClassCovers.Queries.GetCoversSummaryByDateAndOffering;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.StaffMembers.Identifiers;
+using Constellation.Core.Models.StaffMembers;
 using Core.Abstractions.Repositories;
 using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -58,12 +60,14 @@ internal sealed class GetCoversSummaryByDateAndOfferingQueryHandler
             }
             else
             {
-                var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
+                StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
+
+                StaffMember teacher = staffId == StaffId.Empty
+                    ? null
+                    : await _staffRepository.GetById(staffId, cancellationToken);
 
                 if (teacher is not null)
-                {
-                    teacherName = teacher.DisplayName;
-                }
+                    teacherName = teacher.Name.DisplayName;
             }
 
             var entry = new CoverSummaryByDateAndOfferingResponse(cover.CreatedAt, teacherName, cover.TeacherType.Value);

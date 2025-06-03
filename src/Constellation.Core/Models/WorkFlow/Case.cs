@@ -8,6 +8,7 @@ using Events;
 using Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,7 +92,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
 
     public Result ReassignAction(
         ActionId actionId,
-        Staff newAssignee,
+        StaffMember newAssignee,
         string currentUser)
     {
         Action? action = _actions.FirstOrDefault(entry => entry.Id == actionId);
@@ -99,7 +100,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         if (action is null)
             return Result.Failure(ActionErrors.NotFound(actionId));
 
-        if (action.AssignedToId == newAssignee.StaffId)
+        if (action.AssignedToId == newAssignee.Id.ToString())
             return Result.Success();
 
         Result assignmentUpdate = action.AssignAction(newAssignee, currentUser);
@@ -107,7 +108,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         if (assignmentUpdate.IsFailure)
             return assignmentUpdate;
 
-        RaiseDomainEvent(new CaseActionAssignedDomainEvent(new(), Id, action.Id, newAssignee.StaffId));
+        RaiseDomainEvent(new CaseActionAssignedDomainEvent(new(), Id, action.Id, newAssignee.Id.ToString()));
 
         return assignmentUpdate;
     }

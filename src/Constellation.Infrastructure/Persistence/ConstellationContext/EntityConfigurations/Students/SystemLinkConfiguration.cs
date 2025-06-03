@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Students;
 
+using Constellation.Core.Enums;
+using Constellation.Core.Primitives;
 using Core.Models.Students;
 using Core.Models.Students.Enums;
 using Microsoft.EntityFrameworkCore;

@@ -10,6 +10,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Core.Models.Assignments;
 using Core.Models.SchoolContacts;
+using Core.Models.StaffMembers;
 using Core.Models.Subjects;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
@@ -29,7 +30,7 @@ using Action = Core.Models.WorkFlow.Action;
 public interface IEmailService
 {
     // Awards Emails
-    Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, Attachment certificate, StudentAward award, Student? student, Staff? teacher, CancellationToken cancellationToken = default);
+    Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, Attachment certificate, StudentAward award, Student? student, StaffMember? teacher, CancellationToken cancellationToken = default);
 
     // Lesson Emails
     Task SendLessonMissedEmail(LessonMissedNotificationEmail notification);
@@ -95,8 +96,8 @@ public interface IEmailService
     Task SendWelcomeEmailToSciencePracTeacher(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
 
     // WorkFlow Emails
-    Task SendActionAssignedEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
-    Task SendActionCancelledEmail(List<EmailRecipient> recipients, Case item, Action action, Staff assignee, CancellationToken cancellationToken = default);
+    Task SendActionAssignedEmail(List<EmailRecipient> recipients, Case item, Action action, StaffMember assignee, CancellationToken cancellationToken = default);
+    Task SendActionCancelledEmail(List<EmailRecipient> recipients, Case item, Action action, StaffMember assignee, CancellationToken cancellationToken = default);
     Task SendEnteredEmailForAction(List<EmailRecipient> recipients, EmailRecipient sender, string subject, string body, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendComplianceWorkFlowNotificationEmail(List<EmailRecipient> recipients, CaseId caseId, ComplianceCaseDetail detail, int incidentAge, string incidentLink, CancellationToken cancellationToken = default);
     Task SendTrainingWorkFlowNotificationEmail(List<EmailRecipient> recipients, TrainingCaseDetail detail, string reviewer, CancellationToken cancellationToken = default);

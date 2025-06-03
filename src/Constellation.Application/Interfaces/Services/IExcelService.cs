@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Assets.ImportAssetsFromFile;
 using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
@@ -13,6 +12,7 @@ using Constellation.Infrastructure.Jobs;
 using Core.Models.Assets;
 using Core.Models.Training;
 using Core.Shared;
+using Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 using Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Domains.Contacts.Models;

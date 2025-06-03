@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Reports;
 
+using Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 using Application.Models.Auth;
-using Constellation.Application.Assets.ImportAssetsFromFile;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;

@@ -1,15 +1,15 @@
-﻿namespace Constellation.Application.Assets.SightAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.SightAsset;
 
-using Abstractions.Messaging;
-using Core.Abstractions.Clock;
-using Core.Errors;
-using Core.Models;
-using Core.Models.Assets;
-using Core.Models.Assets.Errors;
-using Core.Models.Assets.Repositories;
-using Core.Models.StaffMembers.Repositories;
-using Core.Shared;
-using Interfaces.Repositories;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Assets;
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Models.Assets.Repositories;
+using Constellation.Core.Models.StaffMembers.Repositories;
+using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,21 +51,21 @@ internal sealed class SightAssetCommandHandler
             return Result.Failure(AssetErrors.NotFoundByAssetNumber(request.AssetNumber));
         }
 
-        Staff sightedBy = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember sightedBy = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (sightedBy is null)
         {
             _logger
                 .ForContext(nameof(SightAssetCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId), true)
                 .Warning("Failed to register asset sighting");
 
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
         }
 
         Result<Sighting> sighting = Sighting.Create(
             asset.Id,
-            sightedBy.GetName()?.DisplayName ?? string.Empty,
+            sightedBy.Name.DisplayName,
             request.SightedAt,
             request.Note,
             _dateTime);

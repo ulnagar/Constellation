@@ -2,6 +2,7 @@ namespace Constellation.Core.Models.Students;
 
 using Abstractions.Clock;
 using Constellation.Core.Enums;
+using Constellation.Core.Errors;
 using Constellation.Core.ValueObjects;
 using Enums;
 using Errors;
@@ -18,7 +19,7 @@ public class Student : AggregateRoot, IAuditableEntity
 {
     private readonly List<AbsenceConfiguration> _absenceConfigurations = new();
     private readonly List<SchoolEnrolment> _schoolEnrolments = new();
-    private readonly List<SystemLink> _systemLinks = new();
+    private readonly List<StudentSystemLink> _systemLinks = new();
 
     private Student() { }
 
@@ -64,7 +65,7 @@ public class Student : AggregateRoot, IAuditableEntity
             entry.StartDate <= DateOnly.FromDateTime(DateTime.Today) &&
             (entry.EndDate == null || entry.EndDate >= DateOnly.FromDateTime(DateTime.Today)));
 
-    public IReadOnlyCollection<SystemLink> SystemLinks => _systemLinks.AsReadOnly();
+    public IReadOnlyCollection<StudentSystemLink> SystemLinks => _systemLinks.AsReadOnly();
 
     public static Result<Student> Create(
         Name name,
@@ -184,9 +185,9 @@ public class Student : AggregateRoot, IAuditableEntity
         SystemType type,
         string value)
     {
-        SystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+        StudentSystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
 
-        Result<SystemLink> entry = SystemLink.Create(Id, type, value);
+        Result<StudentSystemLink> entry = StudentSystemLink.Create(Id, type, value);
 
         if (entry.IsFailure)
             return Result.Failure(entry.Error);
@@ -202,7 +203,7 @@ public class Student : AggregateRoot, IAuditableEntity
     public Result RemoveSystemLink(
         SystemType type)
     {
-        SystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+        StudentSystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
 
         if (existingEntry is null)
             return Result.Failure(SystemLinkErrors.NotFound(type));
