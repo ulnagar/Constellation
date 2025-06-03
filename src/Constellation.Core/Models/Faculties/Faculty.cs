@@ -5,6 +5,7 @@ using Events;
 using Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +49,7 @@ public sealed class Faculty : AggregateRoot, IAuditableEntity
     public void Delete() => IsDeleted = true;
 
     public Result AddMember(
-        string staffId,
+        StaffId staffId,
         FacultyMembershipRole role)
     {
         if (_members.Any(entry => entry.StaffId == staffId && !entry.IsDeleted))
@@ -64,7 +65,7 @@ public sealed class Faculty : AggregateRoot, IAuditableEntity
     }
 
     public Result RemoveMember(
-        string staffId)
+        StaffId staffId)
     {
         List<FacultyMembership> entries = _members
             .Where(entry => entry.StaffId == staffId && !entry.IsDeleted)

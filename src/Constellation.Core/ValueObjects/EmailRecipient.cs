@@ -33,6 +33,9 @@ public sealed class EmailRecipient : ValueObject
         return new EmailRecipient(name, email);
     }
 
+    public static Result<EmailRecipient> Create(Name name, EmailAddress email) =>
+        new EmailRecipient(name.DisplayName, email.Email);
+
     public string Name { get; }
     public string Email { get; }
 

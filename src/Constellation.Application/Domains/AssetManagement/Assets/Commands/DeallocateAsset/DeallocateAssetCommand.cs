@@ -1,7 +1,7 @@
-﻿namespace Constellation.Application.Assets.DeallocateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.DeallocateAsset;
 
 using Constellation.Application.Abstractions.Messaging;
-using Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.Assets.ValueObjects;
 
 public sealed record DeallocateAssetCommand(
     AssetNumber AssetNumber)

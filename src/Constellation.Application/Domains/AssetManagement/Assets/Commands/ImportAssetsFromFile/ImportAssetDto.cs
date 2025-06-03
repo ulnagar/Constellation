@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Assets.ImportAssetsFromFile;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 
 using System;
 

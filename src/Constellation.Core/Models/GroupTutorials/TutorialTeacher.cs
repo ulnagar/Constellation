@@ -2,6 +2,7 @@
 
 using Identifiers;
 using Primitives;
+using StaffMembers.Identifiers;
 using System;
 
 public sealed class TutorialTeacher : IAuditableEntity
@@ -11,7 +12,7 @@ public sealed class TutorialTeacher : IAuditableEntity
 
     public TutorialTeacher(
         TutorialTeacherId id,
-        string staffId,
+        StaffId staffId,
         DateOnly? effectiveTo)
     {
         Id = id;
@@ -21,7 +22,7 @@ public sealed class TutorialTeacher : IAuditableEntity
     }
 
     public TutorialTeacherId Id { get; private set; }
-    public string StaffId { get; private set; }
+    public StaffId StaffId { get; private set; }
     public GroupTutorialId TutorialId { get; private set; }
     public DateOnly EffectiveFrom { get; private set; }
     public DateOnly? EffectiveTo { get; internal set; }

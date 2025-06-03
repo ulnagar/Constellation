@@ -2,11 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
-using Core.Models;
 using Core.Models.Families;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -67,7 +67,7 @@ internal sealed class AuditAllUsersCommandHandler
 
         _logger.Information("Found {count} parents currently registered", parents.Count);
         
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         _logger.Information("Found {count} staff members currently registered", staff.Count);
         
@@ -142,13 +142,13 @@ internal sealed class AuditAllUsersCommandHandler
             }
         }
 
-        foreach (Staff member in staff)
+        foreach (StaffMember member in staff)
         {
             _logger
-                .ForContext(nameof(Staff), member, true)
-                .Information("Checking staff member {name}", $"{member.FirstName} {member.LastName}");
+                .ForContext(nameof(StaffMember), member, true)
+                .Information("Checking staff member {name}", $"{member.Name.FirstName} {member.Name.LastName}");
 
-            AppUser? existingUser = users.FirstOrDefault(user => user.Email == member.EmailAddress);
+            AppUser? existingUser = users.FirstOrDefault(user => user.Email == member.EmailAddress.Email);
 
             if (existingUser is null)
             {
@@ -209,8 +209,8 @@ internal sealed class AuditAllUsersCommandHandler
                 .Where(parent => parent.EmailAddress == user.Email)
                 .ToList();
 
-            Staff? matchingStaff = staff
-                .FirstOrDefault(member => member.EmailAddress == user.Email);
+            StaffMember? matchingStaff = staff
+                .FirstOrDefault(member => member.EmailAddress.Email == user.Email);
             
             SchoolContact? contact = contacts.FirstOrDefault(contact => contact.EmailAddress == user.Email);
 
@@ -254,13 +254,13 @@ internal sealed class AuditAllUsersCommandHandler
             parent.LastName,
             isParent: true);
 
-    private Task CreateUserFromStaffMember(Staff staffMember) =>
+    private Task CreateUserFromStaffMember(StaffMember staffMember) =>
         CreateUser(
-            staffMember.EmailAddress,
-            staffMember.FirstName,
-            staffMember.LastName,
+            staffMember.EmailAddress.Email,
+            staffMember.Name.FirstName,
+            staffMember.Name.LastName,
             isStaff: true,
-            staffId: staffMember.StaffId);
+            staffId: staffMember.Id.ToString());
 
     private Task CreateUserFromStudent(Student student) =>
         CreateUser(
@@ -384,20 +384,20 @@ internal sealed class AuditAllUsersCommandHandler
         await _userManager.UpdateAsync(user);
     }
 
-    private async Task CheckStaffUserDetails(AppUser user, Staff staffMember)
+    private async Task CheckStaffUserDetails(AppUser user, StaffMember staffMember)
     {
-        if (user.FirstName != staffMember.FirstName)
+        if (user.FirstName != staffMember.Name.FirstName)
         {
-            _logger.Information("Updating FirstName to {firstName}", staffMember.FirstName);
+            _logger.Information("Updating FirstName to {firstName}", staffMember.Name.FirstName);
 
-            user.FirstName = staffMember.FirstName;
+            user.FirstName = staffMember.Name.FirstName;
         }
 
-        if (user.LastName != staffMember.LastName)
+        if (user.LastName != staffMember.Name.LastName)
         {
-            _logger.Information("Updating LastName to {lastName}", staffMember.LastName);
+            _logger.Information("Updating LastName to {lastName}", staffMember.Name.LastName);
 
-            user.LastName = staffMember.LastName;
+            user.LastName = staffMember.Name.LastName;
         }
 
         if (user.IsStaffMember != true)
@@ -407,11 +407,11 @@ internal sealed class AuditAllUsersCommandHandler
             user.IsStaffMember = true;
         }
 
-        if (user.StaffId != staffMember.StaffId)
+        if (user.StaffId != staffMember.Id.ToString())
         {
-            _logger.Information("Updating StaffId to {staffId}", staffMember.StaffId);
+            _logger.Information("Updating StaffId to {staffId}", staffMember.Id);
 
-            user.StaffId = staffMember.StaffId;
+            user.StaffId = staffMember.Id.ToString();
         }
 
         await _userManager.UpdateAsync(user);

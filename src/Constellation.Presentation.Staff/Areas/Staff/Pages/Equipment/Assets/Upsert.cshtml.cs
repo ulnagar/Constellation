@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.CreateFullAsset;
-using Application.Assets.UpdateAsset;
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Commands.CreateFullAsset;
+using Application.Domains.AssetManagement.Assets.Commands.UpdateAsset;
 using Application.Domains.AssetManagement.Assets.Queries.GetAssetByAssetNumber;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.Enums;

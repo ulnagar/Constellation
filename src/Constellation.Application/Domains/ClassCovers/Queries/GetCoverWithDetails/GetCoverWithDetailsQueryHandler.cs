@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.ClassCovers.Queries.GetCoverWithDetails;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Identifiers;
@@ -68,15 +70,19 @@ internal sealed class GetCoverWithDetailsQueryHandler
         }
         else
         {
-            var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
+            StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
+
+            StaffMember teacher = staffId == StaffId.Empty
+                ? null
+                : await _staffRepository.GetById(staffId, cancellationToken);
 
             if (teacher is not null)
             {
-                teacherName = teacher.DisplayName;
+                teacherName = teacher.Name.DisplayName;
 
-                var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
-
-                teacherSchool = school?.Name;
+                teacherSchool = (teacher.CurrentAssignment is null)
+                    ? string.Empty
+                    : (await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken))?.Name;
             }
         }
 

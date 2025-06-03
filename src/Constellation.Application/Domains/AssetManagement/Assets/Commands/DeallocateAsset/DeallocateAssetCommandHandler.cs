@@ -1,12 +1,12 @@
-﻿namespace Constellation.Application.Assets.DeallocateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.DeallocateAsset;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.Repositories;
 using Constellation.Core.Shared;
-using Core.Abstractions.Clock;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;

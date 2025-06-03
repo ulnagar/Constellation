@@ -1,7 +1,7 @@
-﻿using Constellation.Core.Common;
-using System.Collections.Generic;
+﻿namespace Constellation.Core.Enums;
 
-namespace Constellation.Core.Models.Students.Enums;
+using Constellation.Core.Common;
+using System.Collections.Generic;
 
 public sealed class SystemType : StringEnumeration<SystemType>
 {

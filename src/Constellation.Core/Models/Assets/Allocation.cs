@@ -8,6 +8,7 @@ using Core.ValueObjects;
 using Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers;
 using Students;
 using System;
 
@@ -63,14 +64,14 @@ public class Allocation : IAuditableEntity
 
     public static Result<Allocation> Create(
         AssetId assetId,
-        Staff staffMember,
+        StaffMember staffMember,
         DateOnly allocatedOn)
     {
         Allocation allocation = new(
             assetId,
             AllocationType.Staff, 
-            staffMember.StaffId, 
-            staffMember.GetName()?.DisplayName ?? staffMember.StaffId);
+            staffMember.Id.ToString(), 
+            staffMember.Name.DisplayName);
 
         allocation.SetAllocationDate(allocatedOn);
 

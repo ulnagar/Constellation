@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models;
 
 using SchoolContacts;
+using StaffMembers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +11,7 @@ public class School
     public School()
     {
         StaffAssignments = new List<SchoolContactRole>();
-        Staff = new List<Staff>();
+        Staff = new List<StaffMember>();
     }
 
     public string Code { get; set; }
@@ -33,5 +34,5 @@ public class School
     public string Website { get; set; }
     public bool HasStaff => (Staff.Any(staff => !staff.IsDeleted));
     public ICollection<SchoolContactRole> StaffAssignments { get; set; }
-    public virtual ICollection<Staff> Staff { get; set; }
+    public virtual ICollection<StaffMember> Staff { get; set; }
 }

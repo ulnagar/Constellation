@@ -2,17 +2,18 @@
 namespace Constellation.Core.Models.Offerings;
 
 using Canvas.Models;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Errors;
 using Events;
 using Identifiers;
-using ValueObjects;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Timetables.Identifiers;
+using ValueObjects;
 
 public sealed class Offering : AggregateRoot
 {
@@ -67,7 +68,7 @@ public sealed class Offering : AggregateRoot
     }
 
     public Result AddTeacher(
-        string staffId,
+        StaffId staffId,
         AssignmentType type)
     {
         if (_teachers.Any(assignment => 
@@ -92,7 +93,7 @@ public sealed class Offering : AggregateRoot
     }
 
     public Result RemoveTeacher(
-        string staffId,
+        StaffId staffId,
         AssignmentType type)
     {
         TeacherAssignment? assignment = _teachers.FirstOrDefault(assignment =>

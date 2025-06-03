@@ -1,16 +1,16 @@
-﻿namespace Constellation.Core.Models.Students.Errors;
+﻿namespace Constellation.Core.Errors;
 
-using Enums;
+using Constellation.Core.Enums;
 using Shared;
 using System;
 
 public static class SystemLinkErrors
 {
     public static readonly Error EmptyValue = new(
-        "Student.SystemLink.Empty",
+        "SystemLink.Empty",
         "A System Link must have a value");
 
     public static readonly Func<SystemType, Error> NotFound = type => new(
-        "Student.SystemLink.NotFound",
+        "SystemLink.NotFound",
         $"Could not find a SystemLink of type {type}");
 }

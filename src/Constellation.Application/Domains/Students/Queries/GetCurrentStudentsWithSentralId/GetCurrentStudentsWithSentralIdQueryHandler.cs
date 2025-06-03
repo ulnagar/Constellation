@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Students.Queries.GetCurrentStudentsWithSentralId;
 
 using Abstractions.Messaging;
+using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Primitives;
 using Core.Models.Students;
 using Core.Models.Students.Enums;
 using Core.Shared;

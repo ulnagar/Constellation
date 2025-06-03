@@ -12,6 +12,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -93,12 +94,12 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        List<Staff> teachers = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
+        List<StaffMember> teachers = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
 
         EmailDtos.AbsenceResponseEmail notificationEmail = new();
 
         notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-        notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress));
+        notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress.Email));
         notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, offering));
         notificationEmail.StudentName = student.Name.DisplayName;
 

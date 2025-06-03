@@ -1,8 +1,8 @@
-﻿namespace Constellation.Application.Assets.AllocateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.AllocateAsset;
 
-using Abstractions.Messaging;
-using Core.Models.Assets.ValueObjects;
-using Core.Models.Students.Identifiers;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.Students.Identifiers;
 
 public sealed record AllocateAssetToStudentCommand(
     AssetNumber AssetNumber,
