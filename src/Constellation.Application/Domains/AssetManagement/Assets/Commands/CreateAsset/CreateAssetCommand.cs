@@ -1,8 +1,8 @@
-﻿namespace Constellation.Application.Assets.CreateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.CreateAsset;
 
-using Abstractions.Messaging;
-using Core.Models.Assets.Enums;
-using Core.Models.Assets.ValueObjects;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Assets.Enums;
+using Constellation.Core.Models.Assets.ValueObjects;
 
 public sealed record CreateAssetCommand(
     AssetNumber AssetNumber,

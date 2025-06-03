@@ -1,20 +1,21 @@
 ﻿#nullable enable
-namespace Constellation.Application.Assets.ImportAssetsFromFile;
+namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 
-using Abstractions.Messaging;
-using Core.Abstractions.Clock;
-using Core.Errors;
-using Core.Models;
-using Core.Models.Assets;
-using Core.Models.Assets.Enums;
-using Core.Models.Assets.Repositories;
-using Core.Models.Assets.ValueObjects;
-using Core.Models.StaffMembers.Repositories;
-using Core.Models.Students;
-using Core.Models.Students.Repositories;
-using Core.Shared;
-using Interfaces.Repositories;
-using Interfaces.Services;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Errors;
+using Constellation.Core.Models;
+using Constellation.Core.Models.Assets;
+using Constellation.Core.Models.Assets.Enums;
+using Constellation.Core.Models.Assets.Repositories;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.StaffMembers.Repositories;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -62,7 +63,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
 
         List<School> schools = await _schoolRepository.GetAll(cancellationToken);
 
-        List<Staff> staff = await _staffRepository.GetAll(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAll(cancellationToken);
 
         List<Student> students = await _studentRepository.GetAll(cancellationToken);
 
@@ -194,7 +195,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
             if (!string.IsNullOrWhiteSpace(importAsset.ResponsibleOfficer))
             {
                 School? allocationSchool = schools.FirstOrDefault(entry => entry.Code == importAsset.ResponsibleOfficer);
-                Staff? staffMember = staff.FirstOrDefault(entry => entry.StaffId == importAsset.ResponsibleOfficer);
+                StaffMember? staffMember = staff.FirstOrDefault(entry => entry.Id.ToString() == importAsset.ResponsibleOfficer);
                 Student? student = students.FirstOrDefault(entry => entry.StudentReferenceNumber.ToString() == importAsset.ResponsibleOfficer);
 
                 if (allocationSchool is not null)

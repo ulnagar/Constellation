@@ -4,6 +4,8 @@ using Core.Enums;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.SchoolContacts;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Core.Shared;
@@ -18,7 +20,7 @@ public class CompletionRecordExtendedDetailsDto
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleFrequency { get; set; }
 
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
     public EmailRecipient StaffEntry { get; set; }
     public List<EmailRecipient> StaffHeadTeachers { get; set; } = new();
     public List<EmailRecipient> PrincipalContacts { get; set; } = new();
@@ -37,13 +39,13 @@ public class CompletionRecordExtendedDetailsDto
         ModuleFrequency = module.Expiry;
     }
 
-    public void AddStaffDetails(Staff staff)
+    public void AddStaffDetails(StaffMember staff)
     {
-        StaffId = staff.StaffId;
+        StaffId = staff.Id;
 
         Result<EmailRecipient> request = EmailRecipient.Create(
-            staff.DisplayName,
-            staff.EmailAddress);
+            staff.Name.DisplayName,
+            staff.EmailAddress.Email);
 
         if (request.IsFailure)
             return;
@@ -51,11 +53,11 @@ public class CompletionRecordExtendedDetailsDto
         StaffEntry = request.Value;
     }
 
-    public void AddHeadTeacherDetails(Faculty faculty, Staff headTeacher)
+    public void AddHeadTeacherDetails(Faculty faculty, StaffMember headTeacher)
     {
         Result<EmailRecipient> request = EmailRecipient.Create(
-            headTeacher.DisplayName,
-            headTeacher.EmailAddress);
+            headTeacher.Name.DisplayName,
+            headTeacher.EmailAddress.Email);
 
         if (request.IsFailure)
             return;

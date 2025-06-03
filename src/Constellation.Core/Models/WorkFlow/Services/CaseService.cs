@@ -14,6 +14,9 @@ using Constellation.Core.Models.Training.Repositories;
 using Core.Errors;
 using Enums;
 using Shared;
+using StaffMembers;
+using StaffMembers.Errors;
+using StaffMembers.Identifiers;
 using StaffMembers.Repositories;
 using Students;
 using Students.Errors;
@@ -55,10 +58,10 @@ public sealed class CaseService : ICaseService
         AttendanceValueId attendanceValueId,
         CancellationToken cancellationToken = default)
     {
-        Staff? currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        StaffMember? currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
 
         if (currentUser is null)
-            return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress));
+            return Result.Failure<Case>(StaffMemberErrors.NotFoundByEmail(_currentUserService.EmailAddress));
 
         AttendanceValue? value = await _attendanceRepository.GetById(attendanceValueId, cancellationToken);
 
@@ -96,17 +99,17 @@ public sealed class CaseService : ICaseService
 
     public async Task<Result<Case>> CreateComplianceCase(
         StudentId studentId,
-        string teacherId,
+        StaffId teacherId,
         string incidentId,
         string incidentType,
         string subject,
         DateOnly createdDate,
         CancellationToken cancellationToken = default)
     {
-        Staff? teacher = await _staffRepository.GetById(teacherId, cancellationToken);
+        StaffMember? teacher = await _staffRepository.GetById(teacherId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFound(teacherId));
+            return Result.Failure<Case>(StaffMemberErrors.NotFound(teacherId));
 
         Student? student = await _studentRepository.GetById(studentId, cancellationToken);
 
@@ -151,15 +154,15 @@ public sealed class CaseService : ICaseService
     }
 
     public async Task<Result<Case>> CreateTrainingCase(
-        string staffId,
+        StaffId staffId,
         TrainingModuleId moduleId,
         TrainingCompletionId? completionId = null,
         CancellationToken cancellationToken = default)
     {
-        Staff? teacher = await _staffRepository.GetById(staffId, cancellationToken);
+        StaffMember? teacher = await _staffRepository.GetById(staffId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure<Case>(DomainErrors.Partners.Staff.NotFound(staffId));
+            return Result.Failure<Case>(StaffMemberErrors.NotFound(staffId));
 
         TrainingModule module = await _moduleRepository.GetModuleById(moduleId, cancellationToken);
 

@@ -3,6 +3,8 @@
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
+using Constellation.Core.Enums;
+using Constellation.Core.Primitives;
 using Core.Extensions;
 using Core.Models.Attachments;
 using Core.Models.Attachments.Repository;

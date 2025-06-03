@@ -1,11 +1,11 @@
-﻿namespace Constellation.Application.Assets.TransferAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.TransferAsset;
 
-using Abstractions.Messaging;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Assets.Errors;
-using Core.Models.Assets.Repositories;
-using Core.Shared;
-using Interfaces.Repositories;
+using Constellation.Core.Models.Assets.Repositories;
+using Constellation.Core.Shared;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;

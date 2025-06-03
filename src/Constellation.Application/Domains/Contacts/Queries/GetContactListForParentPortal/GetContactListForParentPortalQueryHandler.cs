@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Contacts.Queries.GetContactListForParentPortal;
 
 using Abstractions.Messaging;
-using Core.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -65,9 +66,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Counsellor
-        foreach (string staffId in _configuration.Contacts.CounsellorIds)
+        foreach (StaffId staffId in _configuration.Contacts.CounsellorIds)
         {
-            Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -77,19 +78,19 @@ internal sealed class GetContactListForParentPortalQueryHandler
             }
 
             response.Add(new(
-                member.FirstName,
-                member.LastName,
-                member.DisplayName,
-                member.EmailAddress,
+                member.Name.FirstName,
+                member.Name.LastName,
+                member.Name.DisplayName,
+                member.EmailAddress.Email,
                 string.Empty,
                 "Support",
                 "School Counsellor"));
         }
 
         // Add Careers Advisor
-        foreach (string staffId in _configuration.Contacts.CareersAdvisorIds)
+        foreach (StaffId staffId in _configuration.Contacts.CareersAdvisorIds)
         {
-            Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -99,19 +100,19 @@ internal sealed class GetContactListForParentPortalQueryHandler
             }
 
             response.Add(new(
-                member.FirstName,
-                member.LastName,
-                member.DisplayName,
-                member.EmailAddress,
+                member.Name.FirstName,
+                member.Name.LastName,
+                member.Name.DisplayName,
+                member.EmailAddress.Email,
                 string.Empty,
                 "Support",
                 "Careers Advisor"));
         }
 
         // Add Librarian
-        foreach (string staffId in _configuration.Contacts.LibrarianIds)
+        foreach (StaffId staffId in _configuration.Contacts.LibrarianIds)
         {
-            Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -121,10 +122,10 @@ internal sealed class GetContactListForParentPortalQueryHandler
             }
 
             response.Add(new(
-                member.FirstName,
-                member.LastName,
-                member.DisplayName,
-                member.EmailAddress,
+                member.Name.FirstName,
+                member.Name.LastName,
+                member.Name.DisplayName,
+                member.EmailAddress.Email,
                 string.Empty,
                 "Support",
                 "School Librarian"));
@@ -139,7 +140,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
 
         foreach (Offering offering in offerings)
         {
-            List<Staff> members = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
+            List<StaffMember> members = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
 
             if (members.Count == 0)
             {
@@ -150,13 +151,13 @@ internal sealed class GetContactListForParentPortalQueryHandler
 
             Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-            foreach (Staff member in members)
+            foreach (StaffMember member in members)
             {
                 response.Add(new(
-                    member.FirstName,
-                    member.LastName,
-                    member.DisplayName,
-                    member.EmailAddress,
+                    member.Name.FirstName,
+                    member.Name.LastName,
+                    member.Name.DisplayName,
+                    member.EmailAddress.Email,
                     string.Empty,
                     "Teacher",
                     course is not null ? $"{offering.Name} - {course.Name}" : offering.Name));
@@ -168,22 +169,22 @@ internal sealed class GetContactListForParentPortalQueryHandler
         if (enrolment is null)
             return response;
 
-        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(enrolment.Grade, out List<string> lastStaffIds);
+        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(enrolment.Grade, out List<StaffId> lastStaffIds);
 
         if (!success)
             return response;
         
-        foreach (string staffId in lastStaffIds)
+        foreach (StaffId staffId in lastStaffIds)
         {
-            Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (member is not null)
             {
                 response.Add(new(
-                    member.FirstName,
-                    member.LastName,
-                    member.DisplayName,
-                    member.EmailAddress,
+                    member.Name.FirstName,
+                    member.Name.LastName,
+                    member.Name.DisplayName,
+                    member.EmailAddress.Email,
                     string.Empty,
                     "Support",
                     "Learning Support"));

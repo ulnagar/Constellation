@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.MeritAwards.Awards.Commands.IssueAwardInSentral;
 
 using Abstractions.Messaging;
+using Constellation.Core.Enums;
 using Core.Abstractions.Repositories;
 using Core.Abstractions.Services;
 using Core.Models.Awards;

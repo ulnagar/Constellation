@@ -247,11 +247,6 @@ public static class DomainErrors
         }
     }
 
-    public static class MandatoryTraining
-    {
-
-    }
-
     public static class Partners
     {
         public static class Contact
@@ -273,29 +268,6 @@ public static class DomainErrors
             public static readonly Func<string, Error> NotFound = id => new(
                 "Partners.School.NotFound",
                 $"A school with the code {id} could not be found");
-        }
-
-        public static class Staff
-        {
-            public static readonly Func<string, Error> AlreadyExists = id => new(
-                "Partners.Staff.AlreadyExists",
-                $"A staff member with the Id {id} already exists");
-
-            public static readonly Func<int, Error> NotFoundLinkedToOffering = id => new Error(
-                "Partners.Staff.NotFoundLinkedToOffering",
-                $"Could not retrieve list of teachers for the offering {id}");
-
-            public static readonly Func<string, Error> NotFound = id => new Error(
-                "Partners.Staff.TeacherNotFound",
-                $"A teacher with the Id {id} could not be found");
-
-            public static readonly Func<string, Error> NotFoundByEmail = email => new Error(
-                "Partners.Staff.TeacherNotFound",
-                $"A teacher with the Email Address {email} could not be found");
-
-            public static readonly Error NoneFound = new(
-                "Partners.Staff.NoneFound",
-                "Could not find any active staff in the database");
         }
     }
 

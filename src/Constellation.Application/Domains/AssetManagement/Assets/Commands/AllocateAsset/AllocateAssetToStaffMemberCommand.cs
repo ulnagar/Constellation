@@ -1,9 +1,10 @@
-﻿namespace Constellation.Application.Assets.AllocateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.AllocateAsset;
 
-using Abstractions.Messaging;
-using Core.Models.Assets.ValueObjects;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 
 public sealed record AllocateAssetToStaffMemberCommand(
     AssetNumber AssetNumber,
-    string StaffId)
+    StaffId StaffId)
     : ICommand;

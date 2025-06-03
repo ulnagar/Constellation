@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.GetAllActiveAssets;
-using Application.Assets.GetAllDisposedAssets;
-using Application.Assets.SightAsset;
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Commands.SightAsset;
 using Application.Domains.AssetManagement.Assets.Queries.ExportAssetsToExcel;
+using Application.Domains.AssetManagement.Assets.Queries.GetAllActiveAssets;
 using Application.Domains.AssetManagement.Assets.Queries.GetAllAssets;
+using Application.Domains.AssetManagement.Assets.Queries.GetAllDisposedAssets;
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
 using Constellation.Application.Domains.AssetManagement.Assets.Enums;

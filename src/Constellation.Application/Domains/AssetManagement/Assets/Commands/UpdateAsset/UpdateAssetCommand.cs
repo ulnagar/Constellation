@@ -1,7 +1,7 @@
-﻿namespace Constellation.Application.Assets.UpdateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.UpdateAsset;
 
-using Abstractions.Messaging;
-using Core.Models.Assets.ValueObjects;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Assets.ValueObjects;
 using System;
 
 public sealed record UpdateAssetCommand(

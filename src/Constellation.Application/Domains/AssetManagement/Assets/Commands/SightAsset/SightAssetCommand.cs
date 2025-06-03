@@ -1,12 +1,13 @@
-﻿namespace Constellation.Application.Assets.SightAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.SightAsset;
 
-using Abstractions.Messaging;
-using Core.Models.Assets.ValueObjects;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using System;
 
 public sealed record SightAssetCommand(
     AssetNumber AssetNumber,
-    string StaffId,
+    StaffId StaffId,
     DateTime SightedAt,
     string Note)
     : ICommand;

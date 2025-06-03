@@ -1,13 +1,13 @@
 #nullable enable
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.AddAssetNote;
-using Application.Assets.AllocateAsset;
-using Application.Assets.DeallocateAsset;
-using Application.Assets.SightAsset;
-using Application.Assets.TransferAsset;
-using Application.Assets.UpdateAssetStatus;
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Commands.AddAssetNote;
+using Application.Domains.AssetManagement.Assets.Commands.AllocateAsset;
+using Application.Domains.AssetManagement.Assets.Commands.DeallocateAsset;
+using Application.Domains.AssetManagement.Assets.Commands.SightAsset;
+using Application.Domains.AssetManagement.Assets.Commands.TransferAsset;
+using Application.Domains.AssetManagement.Assets.Commands.UpdateAssetStatus;
 using Application.Domains.AssetManagement.Assets.Queries.GetAssetByAssetNumber;
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Core.Abstractions.Clock;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -72,14 +73,14 @@ internal sealed class StocktakeRepository : IStocktakeRepository
 
     public async Task<List<StocktakeSighting>> GetForStaffMember(
         Guid stocktakeEventId,
-        string staffId,
+        StaffId staffId,
         string emailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StocktakeSighting>()
             .Where(sighting => 
                 sighting.StocktakeEventId == stocktakeEventId &&
-                ((sighting.UserType == StocktakeSighting.UserTypes.Staff && sighting.UserCode == staffId) ||
+                ((sighting.UserType == StocktakeSighting.UserTypes.Staff && sighting.UserCode == staffId.ToString()) ||
                  sighting.SightedBy == emailAddress))
             .ToListAsync(cancellationToken);
 

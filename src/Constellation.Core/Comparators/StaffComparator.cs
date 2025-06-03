@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Core.Comparators;
 
-using Models;
+using Models.StaffMembers;
 using System;
 using System.Collections.Generic;
+using ValueObjects;
 
-public class StaffComparator : IEqualityComparer<Staff>
+public class StaffComparator : IEqualityComparer<StaffMember>
 {
-    public bool Equals(Staff? x, Staff? y)
+    public bool Equals(StaffMember? x, StaffMember? y)
     {
         // Check whether the compared objects reference the same data
         if (ReferenceEquals(x, y))
@@ -20,13 +21,13 @@ public class StaffComparator : IEqualityComparer<Staff>
         return x.EmailAddress == y.EmailAddress;
     }
 
-    public int GetHashCode(Staff obj)
+    public int GetHashCode(StaffMember obj)
     {
         //Get hash code for the room field if it is not null.
         int hashProductName = 
-            string.IsNullOrWhiteSpace(obj.EmailAddress) 
+            obj.EmailAddress.Equals(EmailAddress.None)
                 ? 0 
-                : obj.EmailAddress.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
+                : obj.EmailAddress.Email.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
 
         //Calculate the hash code for the room.
         return hashProductName;
