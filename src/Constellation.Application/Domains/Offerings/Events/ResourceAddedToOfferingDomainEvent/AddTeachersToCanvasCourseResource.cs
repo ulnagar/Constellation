@@ -12,6 +12,8 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
 using Core.Models.Operations.Enums;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -74,14 +76,14 @@ internal sealed class AddTeachersToCanvasCourseResource
             return;
         }
 
-        List<string> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
+        List<StaffId> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
 
-        List<Staff> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                staffMember.StaffId,
+                staffMember.Id.ToString(),
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,

@@ -14,6 +14,8 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -80,7 +82,7 @@ internal sealed class GetContactListForStudentQueryHandler
         if (school is null)
             return Result.Failure<List<ContactResponse>>(DomainErrors.Partners.School.NotFound(enrolment.SchoolCode));
 
-        List<Staff> staffMembers = await _staffRepository
+        List<StaffMember> staffMembers = await _staffRepository
             .GetAll(cancellationToken);
 
         List<Faculty> faculties = await _facultyRepository
@@ -258,7 +260,7 @@ internal sealed class GetContactListForStudentQueryHandler
 
         foreach (Offering offering in studentOfferings)
         {
-            List<string> staffIds = offering
+            List<StaffId> staffIds = offering
                 .Teachers
                 .Where(teacher =>
                     !teacher.IsDeleted &&
@@ -266,17 +268,12 @@ internal sealed class GetContactListForStudentQueryHandler
                 .Select(entry => entry.StaffId)
                 .ToList();
 
-            List<Staff> teachers = staffMembers.Where(entry => staffIds.Contains(entry.StaffId)).ToList();
+            List<StaffMember> teachers = staffMembers.Where(entry => staffIds.Contains(entry.Id)).ToList();
 
-            foreach (Staff teacher in teachers)
+            foreach (StaffMember teacher in teachers)
             {
-                string teacherName = teacher.GetName().DisplayName;
+                string teacherName = teacher.Name.DisplayName;
                 teacherName += $" ({offering.Name})";
-
-                Result<EmailAddress> teacherEmail = EmailAddress.Create(teacher.EmailAddress);
-
-                if (teacherEmail.IsFailure)
-                    continue;
 
                 result.Add(new(
                     student.StudentReferenceNumber,
@@ -285,7 +282,7 @@ internal sealed class GetContactListForStudentQueryHandler
                     enrolment.SchoolName,
                     ContactCategory.AuroraTeacher,
                     teacherName,
-                    teacherEmail.Value,
+                    teacher.EmailAddress,
                     null,
                     null));
             }
@@ -294,7 +291,7 @@ internal sealed class GetContactListForStudentQueryHandler
 
             Faculty faculty = faculties.First(entry => entry.Id == course.FacultyId);
 
-            List<string> headTeacherIds = faculty
+            List<StaffId> headTeacherIds = faculty
                 .Members
                 .Where(member =>
                     !member.IsDeleted &&
@@ -303,18 +300,13 @@ internal sealed class GetContactListForStudentQueryHandler
                 .ToList();
 
             teachers = staffMembers
-                .Where(entry => headTeacherIds.Contains(entry.StaffId))
+                .Where(entry => headTeacherIds.Contains(entry.Id))
                 .ToList();
 
-            foreach (Staff headTeacher in teachers)
+            foreach (StaffMember headTeacher in teachers)
             {
-                string teacherName = headTeacher.GetName().DisplayName;
+                string teacherName = headTeacher.Name.DisplayName;
                 teacherName += $" ({faculty.Name})";
-
-                Result<EmailAddress> teacherEmail = EmailAddress.Create(headTeacher.EmailAddress);
-
-                if (teacherEmail.IsFailure)
-                    continue;
 
                 bool existingEntry = result.Any(entry =>
                     entry.Category.Equals(ContactCategory.AuroraHeadTeacher) &&
@@ -331,7 +323,7 @@ internal sealed class GetContactListForStudentQueryHandler
                     enrolment.SchoolName,
                     ContactCategory.AuroraHeadTeacher,
                     teacherName,
-                    teacherEmail.Value,
+                    headTeacher.EmailAddress,
                     null,
                     null));
             }

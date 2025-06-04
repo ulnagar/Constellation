@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffByEmail;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Models;
@@ -21,8 +21,8 @@ internal sealed class GetStaffByEmailQueryHandler
 
     public async Task<Result<StaffSelectionListResponse>> Handle(GetStaffByEmailQuery request, CancellationToken cancellationToken) 
     {
-        Staff teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
 
-        return new StaffSelectionListResponse(teacher.StaffId, teacher.FirstName, teacher.LastName);
+        return new StaffSelectionListResponse(teacher.Id, teacher.Name);
     }
 }

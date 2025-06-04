@@ -2,7 +2,6 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
@@ -13,6 +12,8 @@ using Core.Models.Enrolments.Repositories;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
 using Serilog;
@@ -87,22 +88,22 @@ internal sealed class GetCourseDetailsQueryHandler
 
         foreach (Offering offering in offerings)
         {
-            List<string> teacherIds = offering
+            List<StaffId> teacherIds = offering
                 .Teachers
                 .Where(assignment => assignment.Type == AssignmentType.ClassroomTeacher)
                 .Where(assignment => !assignment.IsDeleted)
                 .Select(assignment => assignment.StaffId)
                 .ToList();
 
-            List<Staff> teachers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
+            List<StaffMember> teachers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
 
             List<CourseDetailsResponse.Teacher> responseTeachers = new();
 
-            foreach (Staff teacher in teachers)
+            foreach (StaffMember teacher in teachers)
             {
                 responseTeachers.Add(new(
-                    teacher.StaffId,
-                    teacher.DisplayName));
+                    teacher.Id,
+                    teacher.Name));
             }
 
             responseOfferings.Add(new(

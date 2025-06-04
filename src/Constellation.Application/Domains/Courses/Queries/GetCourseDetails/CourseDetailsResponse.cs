@@ -5,6 +5,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Faculties.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -24,7 +25,7 @@ public sealed record CourseDetailsResponse(
         string Colour);
 
     public sealed record Teacher(
-        string StaffId,
+        StaffId StaffId,
         string Name);
 
     public sealed record Offering(

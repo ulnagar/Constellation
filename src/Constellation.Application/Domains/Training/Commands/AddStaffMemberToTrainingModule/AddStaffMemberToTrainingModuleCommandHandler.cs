@@ -3,6 +3,9 @@
 using Abstractions.Messaging;
 using Core.Errors;
 using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
@@ -47,19 +50,19 @@ internal sealed class AddStaffMemberToTrainingModuleCommandHandler
             return Result.Failure(TrainingModuleErrors.NotFound(request.ModuleId));
         }
 
-        foreach (string staffId in request.StaffMemberIds)
+        foreach (StaffId staffId in request.StaffMemberIds)
         {
-            Staff member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (member is null)
             {
                 _logger
                     .ForContext(nameof(AddStaffMemberToTrainingModuleCommand), request, true)
-                    .ForContext(nameof(Staff.StaffId), staffId, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(staffId), true)
+                    .ForContext(nameof(StaffMember.Id), staffId, true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(staffId), true)
                     .Warning("Failed to add Staff Member to Training Module");
 
-                return Result.Failure(DomainErrors.Partners.Staff.NotFound(staffId));
+                return Result.Failure(StaffMemberErrors.NotFound(staffId));
             }
 
             Result assignee = module.AddAssignee(staffId);
@@ -68,7 +71,7 @@ internal sealed class AddStaffMemberToTrainingModuleCommandHandler
             {
                 _logger
                     .ForContext(nameof(AddStaffMemberToTrainingModuleCommand), request, true)
-                    .ForContext(nameof(Staff.StaffId), staffId, true)
+                    .ForContext(nameof(StaffMember.Id), staffId, true)
                     .ForContext(nameof(Error), assignee.Error, true)
                     .Warning("Failed to add Staff Member to Training Module");
 

@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Commands.CreateComplianceCase;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -77,21 +78,21 @@ internal sealed class CreateComplianceCaseCommandHandler
         string lastName = nameFragments[0].Trim();
         string staffName = $"{firstName} {lastName}";
 
-        Staff teacher = await _staffRepository.GetFromName(staffName);
+        StaffMember teacher = await _staffRepository.GetFromName(staffName, cancellationToken);
 
         if (teacher is null)
         {
             _logger
                 .ForContext(nameof(CreateComplianceCaseCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(string.Empty), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(StaffId.Empty), true)
                 .Warning("Failed to create WorkFlow Case");
 
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(string.Empty));
+            return Result.Failure(StaffMemberErrors.NotFound(StaffId.Empty));
         }
 
         Result<Case> caseResult = await _caseService.CreateComplianceCase(
             student.Id,
-            teacher.StaffId, 
+            teacher.Id, 
             request.Incident.IncidentId, 
             request.Incident.Type,
             request.Incident.Subject,

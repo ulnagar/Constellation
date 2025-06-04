@@ -2,6 +2,7 @@
 
 using Identifiers;
 using Shared;
+using StaffMembers.Identifiers;
 using System;
 
 public static class TrainingModuleErrors
@@ -14,11 +15,11 @@ public static class TrainingModuleErrors
         "Training.Module.NotFound",
         $"A training module with the Id {id.Value} could not be found");
 
-    public static readonly Func<string, Error> AssigneeAlreadyExists = id => new(
+    public static readonly Func<StaffId, Error> AssigneeAlreadyExists = id => new(
         "Training.Module.AssigneeAlreadyExists",
         $"An Assignee with the id {id} already exists in the Module");
         
-    public static readonly Func<string, Error> AssigneeNotFound = id => new(
+    public static readonly Func<StaffId, Error> AssigneeNotFound = id => new(
         "Training.Module.AssigneeNotFound",
         $"An Assignee with the id {id} could not be found in the Module");
 }

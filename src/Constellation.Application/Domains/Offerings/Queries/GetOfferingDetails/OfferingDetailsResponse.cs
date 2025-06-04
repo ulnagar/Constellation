@@ -6,6 +6,7 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -48,7 +49,7 @@ public sealed record OfferingDetailsResponse(
         int Duration);
 
     public sealed record TeacherSummary(
-        string StaffId,
+        StaffId StaffId,
         Name Name,
         AssignmentType Type);
 

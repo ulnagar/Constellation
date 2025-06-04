@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -66,13 +66,13 @@ internal sealed class AddPhoneParentActionForBandThreeAttendanceCase
         if (!caseDetail!.Severity.Equals(AttendanceSeverity.BandThree))
             return;
 
-        Staff reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
+        StaffMember reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
 
         if (reviewer is null)
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(_configuration.WorkFlow.AttendanceReviewer), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(_configuration.WorkFlow.AttendanceReviewer), true)
                 .Warning("Could not create default Action for new Case");
 
             return;

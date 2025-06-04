@@ -2,14 +2,15 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -87,12 +88,12 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         if (!severityList.Contains(caseDetail!.Severity))
             return;
 
-        Staff reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
+        StaffMember reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
         if (reviewer is null)
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(_configuration.WorkFlow.AttendanceReviewer), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(_configuration.WorkFlow.AttendanceReviewer), true)
                 .Warning("Could not create default Action for new Case");
             return;
         }
@@ -116,16 +117,16 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
             if (offering.Sessions.Count == 0)
                 continue;
 
-            List<string> teacherIds = offering.Teachers
+            List<StaffId> teacherIds = offering.Teachers
                 .Where(entry =>
                     entry.Type == AssignmentType.ClassroomTeacher &&
                     !entry.IsDeleted)
                 .Select(entry => entry.StaffId)
                 .ToList();
 
-            foreach (string teacherId in teacherIds)
+            foreach (StaffId teacherId in teacherIds)
             {
-                Staff teacher = await _staffRepository.GetById(teacherId, cancellationToken);
+                StaffMember teacher = await _staffRepository.GetById(teacherId, cancellationToken);
 
                 if (teacher is null)
                     continue;

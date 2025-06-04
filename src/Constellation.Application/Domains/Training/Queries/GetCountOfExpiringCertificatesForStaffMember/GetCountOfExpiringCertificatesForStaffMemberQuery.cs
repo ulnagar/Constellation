@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.GetCountOfExpiringCertificatesForStaffMember;
 
 using Abstractions.Messaging;
+using Core.Models.StaffMembers.Identifiers;
 
 public sealed record GetCountOfExpiringCertificatesForStaffMemberQuery(
-    string StaffId)
+    StaffId StaffId)
     : IQuery<int>;

@@ -4,13 +4,14 @@ using Core.Models.Faculties.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.ValueObjects;
 using System.Collections.Generic;
 
 public sealed record StaffDetailsResponse(
-    string StaffId,
+    StaffId StaffId,
     Name StaffName,
-    string EmailAddress,
+    EmailAddress EmailAddress,
     string SchoolName,
     string SchoolCode,
     bool IsShared,

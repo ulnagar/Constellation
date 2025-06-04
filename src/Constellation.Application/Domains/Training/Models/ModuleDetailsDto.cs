@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Training.Models;
 
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Training.Identifiers;
 using Core.ValueObjects;
 using System.Collections.Generic;
@@ -14,6 +15,6 @@ public sealed record ModuleDetailsDto(
     List<ModuleDetailsDto.Assignee> Assignees)
 {
     public sealed record Assignee(
-        string StaffId,
+        StaffId StaffId,
         Name Name);
 }

@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Canvas.Queries.GetCourseMembershipByCourseCode;
 
 using Abstractions.Messaging;
-using Core.Models;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -74,34 +75,34 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
             }
 
             // Get Teachers
-            List<Staff> teachers = await _staffRepository.GetCurrentTeachersForOffering(offering.Id, cancellationToken);
+            List<StaffMember> teachers = await _staffRepository.GetCurrentTeachersForOffering(offering.Id, cancellationToken);
 
-            foreach (Staff teacher in teachers)
+            foreach (StaffMember teacher in teachers)
             {
                 response.Add(new(
                     request.CourseCode,
-                    teacher.StaffId,
+                    teacher.Id.ToString(),
                     CanvasSectionCode.Empty, 
                     CanvasPermissionLevel.Teacher));
             }
 
             // Get Head Teachers
-            List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(offering.Id, cancellationToken);
+            List<StaffMember> headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(offering.Id, cancellationToken);
 
-            foreach (Staff headTeacher in headTeachers)
+            foreach (StaffMember headTeacher in headTeachers)
             {
                 response.Add(new(
                     request.CourseCode,
-                    headTeacher.StaffId,
+                    headTeacher.Id.ToString(),
                     CanvasSectionCode.Empty, 
                     CanvasPermissionLevel.Teacher));
             }
         }
 
         // Add defined CourseAdmins
-        foreach (string staffId in _configuration.CourseAdmins)
+        foreach (StaffId staffId in _configuration.CourseAdmins)
         {
-            Staff admin = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember admin = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (admin is null)
             {
@@ -112,7 +113,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
 
             response.Add(new(
                 request.CourseCode,
-                admin.StaffId,
+                admin.Id.ToString(),
                 CanvasSectionCode.Empty, 
                 CanvasPermissionLevel.Teacher));
         }

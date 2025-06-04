@@ -2,11 +2,10 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Faculties;
-using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
@@ -68,25 +67,19 @@ internal sealed class GetCompletionRecordDetailsQueryHandler
             return Result.Failure<CompletionRecordDto>(TrainingCompletionErrors.NotFound(request.CompletionId));
         }
 
-        Staff staff = await _staffRepository.GetById(record.StaffId, cancellationToken);
+        StaffMember staff = await _staffRepository.GetById(record.StaffId, cancellationToken);
 
         if (staff is null)
         {
             _logger
                 .ForContext(nameof(GetCompletionRecordDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(record.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(record.StaffId), true)
                 .Warning("Could not find staff member with Id {id}", record.StaffId);
 
-            return Result.Failure<CompletionRecordDto>(DomainErrors.Partners.Staff.NotFound(record.StaffId));
+            return Result.Failure<CompletionRecordDto>(StaffMemberErrors.NotFound(record.StaffId));
         }
 
-        List<FacultyId> facultyIds = staff
-            .Faculties
-            .Where(member => !member.IsDeleted)
-            .Select(member => member.FacultyId)
-            .ToList();
-
-        List<Faculty> faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
+        List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staff.Id, cancellationToken);
 
         CompletionRecordDto entity = new()
         {
@@ -95,8 +88,8 @@ internal sealed class GetCompletionRecordDetailsQueryHandler
             ModuleName = module.Name,
             ModuleExpiry = module.Expiry,
             StaffId = record.StaffId,
-            StaffFirstName = staff.FirstName,
-            StaffLastName = staff.LastName,
+            StaffFirstName = staff.Name.FirstName,
+            StaffLastName = staff.Name.LastName,
             StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name).ToList()),
             CompletedDate = record.CompletedDate,
             CreatedAt = record.CreatedAt

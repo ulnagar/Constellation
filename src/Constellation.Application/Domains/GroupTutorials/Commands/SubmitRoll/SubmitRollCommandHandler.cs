@@ -2,9 +2,10 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Core.Errors;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -41,10 +42,10 @@ internal sealed class SubmitRollCommandHandler
         if (roll is null)
             return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
 
-        Staff staffMember = await _staffRepository.FromEmailForExistCheck(request.StaffEmail);
+        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(request.StaffEmail, cancellationToken);
 
         if (staffMember is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFoundByEmail(request.StaffEmail));
+            return Result.Failure(StaffMemberErrors.NotFoundByEmail(request.StaffEmail));
 
         Result result = tutorial.SubmitRoll(roll, staffMember, request.StudentPresence);
 

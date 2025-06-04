@@ -29,9 +29,8 @@ internal sealed class GetStaffLinkedToOfferingQueryHandler
         return staffList
             .Select(member => 
                 new StaffSelectionListResponse(
-                    member.StaffId, 
-                    member.FirstName, 
-                    member.LastName))
+                    member.Id, 
+                    member.Name))
             .ToList();
     }
 }
