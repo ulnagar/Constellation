@@ -3,8 +3,8 @@
 using Abstractions.Messaging;
 using Core.Models;
 using Core.Models.Faculties;
-using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Faculties.Queries.GetFaculty;
@@ -39,22 +39,16 @@ internal sealed class GetStaffListQueryHandler
     {
         List<StaffResponse> response = new();
 
-        List<Staff> staff = await _staffRepository.GetAll(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAll(cancellationToken);
 
         List<Faculty> faculties = await _facultyRepository.GetAll(cancellationToken);
 
         List<School> schools = await _schoolRepository.GetAll(cancellationToken);
 
-        foreach (Staff member in staff)
+        foreach (StaffMember member in staff)
         {
-            List<FacultyId> memberFacultyIds = member
-                .Faculties
-                .Where(faculty => !faculty.IsDeleted)
-                .Select(faculty => faculty.FacultyId)
-                .ToList();
-
             List<FacultyResponse> memberFaculties = faculties
-                .Where(entry => memberFacultyIds.Contains(entry.Id))
+                .Where(entry => entry.Members.Any(membership => membership.StaffId == member.Id))
                 .Select(faculty => 
                     new FacultyResponse(
                         faculty.Id, 
@@ -62,11 +56,13 @@ internal sealed class GetStaffListQueryHandler
                         faculty.Colour))
                 .ToList();
 
-            School school = schools.FirstOrDefault(school => school.Code == member.SchoolCode);
+            School school = member.CurrentAssignment is not null
+                ? schools.FirstOrDefault(school => school.Code == member.CurrentAssignment.SchoolCode)
+                : null;
 
             response.Add(new(
-                member.StaffId,
-                member.GetName(),
+                member.Id,
+                member.Name,
                 memberFaculties,
                 school?.Name,
                 member.IsDeleted));

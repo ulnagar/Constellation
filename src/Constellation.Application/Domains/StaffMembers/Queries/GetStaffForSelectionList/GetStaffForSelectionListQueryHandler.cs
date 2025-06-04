@@ -31,9 +31,8 @@ internal sealed class GetStaffForSelectionListQueryHandler
         foreach (var member in staff)
         {
             returnData.Add(new StaffSelectionListResponse(
-                member.StaffId,
-                member.FirstName,
-                member.LastName));
+                member.Id,
+                member.Name));
         }
 
         return returnData;

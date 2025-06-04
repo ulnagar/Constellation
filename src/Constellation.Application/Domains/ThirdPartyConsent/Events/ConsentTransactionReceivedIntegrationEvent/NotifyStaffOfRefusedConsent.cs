@@ -1,12 +1,11 @@
 ﻿#nullable enable
-using Constellation;
-
 namespace Constellation.Application.Domains.ThirdPartyConsent.Events.ConsentTransactionReceivedIntegrationEvent;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.IntegrationEvents;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Errors;
@@ -70,18 +69,18 @@ internal class NotifyStaffOfRefusedConsent
 
         List<EmailRecipient> recipients = new();
 
-        Staff? instructionalLeader = await _staffRepository.GetById(_configuration.Contacts.InstructionalLeader, cancellationToken);
+        StaffMember? instructionalLeader = await _staffRepository.GetById(_configuration.Contacts.InstructionalLeader, cancellationToken);
 
         if (instructionalLeader is null)
         {
             _logger
                 .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(_configuration.Contacts.InstructionalLeader), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(_configuration.Contacts.InstructionalLeader), true)
                 .Warning("Failed to send notification of refused consent");
         }
         else
         {
-            Result<EmailRecipient> instructionalLeaderRecipient = EmailRecipient.Create(instructionalLeader.DisplayName, instructionalLeader.EmailAddress);
+            Result<EmailRecipient> instructionalLeaderRecipient = EmailRecipient.Create(instructionalLeader.Name, instructionalLeader.EmailAddress);
 
             if (instructionalLeaderRecipient.IsFailure)
             {
@@ -96,22 +95,22 @@ internal class NotifyStaffOfRefusedConsent
             }
         }
 
-        List<string> deputyIds = _configuration.Contacts.DeputyPrincipalIds[transaction.Grade].ToList();
+        List<StaffId> deputyIds = _configuration.Contacts.DeputyPrincipalIds[transaction.Grade].ToList();
 
-        foreach (string staffId in deputyIds)
+        foreach (StaffId staffId in deputyIds)
         {
-            Staff? deputy = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember? deputy = await _staffRepository.GetById(staffId, cancellationToken);
 
             if (deputy is null)
             {
                 _logger
                     .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(staffId), true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(staffId), true)
                     .Warning("Failed to send notification of refused consent");
             }
             else
             {
-                Result<EmailRecipient> deputyRecipient = EmailRecipient.Create(deputy.DisplayName, deputy.EmailAddress);
+                Result<EmailRecipient> deputyRecipient = EmailRecipient.Create(deputy.Name, deputy.EmailAddress);
 
                 if (deputyRecipient.IsFailure)
                 {

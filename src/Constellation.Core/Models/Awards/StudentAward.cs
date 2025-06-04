@@ -4,6 +4,7 @@ using Constellation.Core.Models.Students.Identifiers;
 using Events;
 using Identifiers;
 using Primitives;
+using StaffMembers.Identifiers;
 using System;
 
 public class StudentAward : AggregateRoot
@@ -27,7 +28,7 @@ public class StudentAward : AggregateRoot
 
     public StudentAwardId Id { get; private set; } = new();
     public StudentId StudentId { get; private set; }
-    public string? TeacherId { get; private set; }
+    public StaffId TeacherId { get; private set; } = StaffId.Empty;
     public DateTime AwardedOn { get; private set; }
     public string Category { get; private set; }
     public string Type { get; private set; }
@@ -52,7 +53,7 @@ public class StudentAward : AggregateRoot
     public static StudentAward Create(
         DateTime awardedOn,
         string incidentId,
-        string teacherId,
+        StaffId teacherId,
         string reason,
         StudentId studentId)
     {
@@ -72,7 +73,7 @@ public class StudentAward : AggregateRoot
 
     public void Update(
         string incidentId,
-        string teacherId,
+        StaffId teacherId,
         string reason)
     {
         IncidentId = incidentId;

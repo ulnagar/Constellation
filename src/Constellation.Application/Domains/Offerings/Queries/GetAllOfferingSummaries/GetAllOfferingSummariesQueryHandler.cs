@@ -9,6 +9,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables.Identifiers;
@@ -65,9 +66,9 @@ internal sealed class GetAllOfferingSummariesQueryHandler
         foreach (Offering offering in offerings)
         {
             // Get Teachers
-            List<Staff> teachers = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
+            List<StaffMember> teachers = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
 
-            List<string> teacherNames = teachers.Select(teacher => teacher.DisplayName).ToList();
+            List<string> teacherNames = teachers.Select(teacher => teacher.Name.DisplayName).ToList();
 
             // Calculate minPerFn
             List<PeriodId> periodIds = offering.Sessions

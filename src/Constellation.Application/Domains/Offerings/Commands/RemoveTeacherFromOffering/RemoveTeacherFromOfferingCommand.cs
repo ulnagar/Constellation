@@ -3,9 +3,10 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 
 public sealed record RemoveTeacherFromOfferingCommand(
     OfferingId OfferingId,
-    string StaffId,
+    StaffId StaffId,
     AssignmentType AssignmentType)
     : ICommand;

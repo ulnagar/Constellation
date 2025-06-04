@@ -2,6 +2,7 @@
 
 using Constellation.Core.ValueObjects;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -14,7 +15,7 @@ public class AppUser : IdentityUser<Guid>
     public bool IsSchoolContact { get; set; }
     public SchoolContactId SchoolContactId { get; set; }
     public bool IsStaffMember { get; set; }
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
     public bool IsParent { get; set; }
     public bool IsStudent { get; set; }
     public StudentId StudentId { get; set; }

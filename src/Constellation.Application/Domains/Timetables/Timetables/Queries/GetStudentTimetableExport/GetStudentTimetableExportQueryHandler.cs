@@ -9,6 +9,7 @@ using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -184,12 +185,12 @@ internal sealed class GetStudentTimetableExportQueryHandler
 
                 foreach (TeacherAssignment assignment in assignments)
                 {
-                    Staff teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+                    StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
                     if (teacher is null)
                         continue;
 
-                    entry.ClassTeacher = teacher.DisplayName;
+                    entry.ClassTeacher = teacher.Name.DisplayName;
                 }
             }
 

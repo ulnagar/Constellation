@@ -4,8 +4,9 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Shared;
-using Core.Models;
 using Core.Models.Awards;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,12 +44,12 @@ internal sealed class GetSummaryForStudentQueryHandler
         {
             string teacherName = string.Empty;
 
-            if (!string.IsNullOrEmpty(entry.TeacherId))
+            if (entry.TeacherId != StaffId.Empty)
             {
-                Staff teacher = await _staffRepository.GetById(entry.TeacherId, cancellationToken);
+                StaffMember teacher = await _staffRepository.GetById(entry.TeacherId, cancellationToken);
 
                 if (teacher is not null)
-                    teacherName = teacher.DisplayName;
+                    teacherName = teacher.Name.DisplayName;
             }
 
             bool hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(entry.Id.ToString(), cancellationToken);

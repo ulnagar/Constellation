@@ -8,6 +8,8 @@ using Core.Models.Edval.Events;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Identifiers;
@@ -51,7 +53,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
     {
         List<Period> periods = await _periodRepository.GetCurrent(cancellationToken);
         List<Offering> offerings = await _offeringRepository.GetAllActive(cancellationToken);
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         List<EdvalTeacher> teachers = await _edvalRepository.GetTeachers(cancellationToken);
         List<EdvalTimetable> timetables = await _edvalRepository.GetTimetables(cancellationToken);
@@ -74,9 +76,9 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                 continue;
             }
 
-            Staff staffMember = staff.FirstOrDefault(member =>
-                member.FirstName.Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                member.LastName.Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
+            StaffMember staffMember = staff.FirstOrDefault(member =>
+                member.Name.FirstName.Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                member.Name.LastName.Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
 
             if (staffMember is null)
             {
@@ -99,7 +101,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
             }
 
             if (!offering.Teachers.Any(assignment =>
-                    assignment.StaffId == staffMember.StaffId && 
+                    assignment.StaffId == staffMember.Id && 
                     assignment.Type == AssignmentType.ClassroomTeacher &&
                     !assignment.IsDeleted))
             {
@@ -107,7 +109,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                     EdvalDifferenceType.EdvalTimetable,
                     EdvalDifferenceSystem.EdvalDifference,
                     timetable.Identifier,
-                    $"{staffMember.FirstName} {staffMember.LastName} is not a Classroom Teacher for {offering.Name} in Constellation",
+                    $"{staffMember.Name} is not a Classroom Teacher for {offering.Name} in Constellation",
                     ignored));
             }
 
@@ -139,7 +141,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
 
         foreach (Offering offering in offerings)
         {
-            List<string> classTeacherIds = offering.Teachers
+            List<StaffId> classTeacherIds = offering.Teachers
                 .Where(assignment =>
                     assignment.Type == AssignmentType.ClassroomTeacher &&
                     !assignment.IsDeleted)
@@ -147,24 +149,24 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                 .Distinct()
                 .ToList();
 
-            List<Staff> classTeachers = staff
-                .Where(staffMember => classTeacherIds.Contains(staffMember.StaffId))
+            List<StaffMember> classTeachers = staff
+                .Where(staffMember => classTeacherIds.Contains(staffMember.Id))
                 .ToList();
 
-            foreach (Staff classTeacher in classTeachers)
+            foreach (StaffMember classTeacher in classTeachers)
             {
                 bool ignored = ignoredTimetables
                     .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
-                    .Any(ignore => ignore.Identifier == $"{offering.Id}--{classTeacher.StaffId}");
+                    .Any(ignore => ignore.Identifier == $"{offering.Id}--{classTeacher.Id}");
 
                 EdvalTeacher edvalTeacher = teachers.FirstOrDefault(teacher =>
-                    teacher.FirstName.Equals(classTeacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                    teacher.LastName.Equals(classTeacher.LastName, StringComparison.OrdinalIgnoreCase));
+                    teacher.FirstName.Equals(classTeacher.Name.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                    teacher.LastName.Equals(classTeacher.Name.LastName, StringComparison.OrdinalIgnoreCase));
 
                 if (edvalTeacher is null)
                 {
                     _logger
-                        .ForContext(nameof(Staff), classTeacher, true)
+                        .ForContext(nameof(StaffMember), classTeacher, true)
                         .Warning("Unable to find matching Edval Teacher by Name");
 
                     continue;
@@ -177,8 +179,8 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTimet
                     _edvalRepository.Insert(new Difference(
                         EdvalDifferenceType.EdvalTimetable,
                         EdvalDifferenceSystem.ConstellationDifference,
-                        $"{offering.Id}--{classTeacher.StaffId}",
-                        $"{classTeacher.FirstName} {classTeacher.LastName} is not a Classroom Teacher for {offering.Name} in Edval",
+                        $"{offering.Id}--{classTeacher.Id}",
+                        $"{classTeacher.Name} is not a Classroom Teacher for {offering.Name} in Edval",
                         ignored));
                 }
             }

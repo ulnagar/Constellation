@@ -9,6 +9,7 @@ using Core.Models.Enrolments.Repositories;
 using Core.Models.Families;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -85,9 +86,9 @@ internal sealed class CreateInterviewsImportQueryHandler
                     if (course is null)
                         continue;
 
-                    List<Staff> teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
+                    List<StaffMember> teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
 
-                    foreach (Staff teacher in teachers)
+                    foreach (StaffMember teacher in teachers)
                     {
                         InterviewExportDto dto = new()
                         {
@@ -97,11 +98,11 @@ internal sealed class CreateInterviewsImportQueryHandler
                             ClassCode = offering.Name,
                             ClassGrade = course.Grade.AsNumber(),
                             ClassName = course.Name,
-                            TeacherCode = teacher.StaffId,
+                            TeacherCode = teacher.EmployeeId.Number,
                             TeacherTitle = "",
-                            TeacherFirstName = teacher.FirstName,
-                            TeacherLastName = teacher.LastName,
-                            TeacherEmailAddress = teacher.EmailAddress
+                            TeacherFirstName = teacher.Name.FirstName,
+                            TeacherLastName = teacher.Name.LastName,
+                            TeacherEmailAddress = teacher.EmailAddress.Email
                         };
 
                         if (request.PerFamily)

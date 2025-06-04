@@ -2,12 +2,12 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
 using Core.Extensions;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using DTOs;
@@ -78,13 +78,13 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
                     student.Present));
             }
 
-            Staff staffMember = await _staffRepository.GetForExistCheck(roll.StaffId);
+            StaffMember staffMember = await _staffRepository.GetById(roll.StaffId, cancellationToken);
 
             rolls.Add(new(
                 roll.Id,
                 roll.SessionDate,
                 roll.StaffId,
-                staffMember.DisplayName,
+                staffMember?.Name.DisplayName,
                 students));
         }
 

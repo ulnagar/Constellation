@@ -3,6 +3,7 @@
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.ValueObjects;
 using Students.Queries.GetCurrentStudentsWithCurrentOfferings;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ public sealed record SchoolDetailsResponse(
     List<SchoolDetailsResponse.SchoolContact> Contacts)
 {
     public sealed record SchoolStaff(
-        string StaffId,
+        StaffId StaffId,
         Name Name,
         Dictionary<string, string> Faculties,
         List<OfferingResponse> Offerings);

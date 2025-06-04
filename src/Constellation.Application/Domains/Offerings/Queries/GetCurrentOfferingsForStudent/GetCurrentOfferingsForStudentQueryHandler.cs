@@ -1,17 +1,16 @@
 ﻿namespace Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForStudent;
 
 using Abstractions.Messaging;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
-using Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +47,7 @@ internal sealed class GetCurrentOfferingsForStudentQueryHandler
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         foreach (Enrolment enrolment in enrolments)
         {
@@ -66,17 +65,12 @@ internal sealed class GetCurrentOfferingsForStudentQueryHandler
 
             foreach (TeacherAssignment teacher in offering.Teachers.Where(entry => entry.Type == AssignmentType.ClassroomTeacher && !entry.IsDeleted))
             {
-                Staff staffMember = staff.FirstOrDefault(entry => entry.StaffId == teacher.StaffId);
+                StaffMember staffMember = staff.FirstOrDefault(entry => entry.Id == teacher.StaffId);
 
                 if (staffMember is null)
                     continue;
-
-                Result<EmailAddress> email = EmailAddress.Create(staffMember.EmailAddress);
-
-                if (email.IsFailure)
-                    continue;
-
-                teachers.Add(new(staffMember.GetName(), email.Value));
+                
+                teachers.Add(new(staffMember.Name, staffMember.EmailAddress));
             }
 
             List<OfferingDetailResponse.Resource> resources = new();

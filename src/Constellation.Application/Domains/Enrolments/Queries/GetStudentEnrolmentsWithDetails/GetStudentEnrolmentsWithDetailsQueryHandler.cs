@@ -4,10 +4,10 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Shared;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
@@ -64,7 +64,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
                 continue;
             }
 
-            List<Staff> teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
+            List<StaffMember> teachers = await _staffRepository.GetPrimaryTeachersForOffering(enrolment.OfferingId, cancellationToken);
 
             if (teachers is null || !teachers.Any())
             {
@@ -92,7 +92,7 @@ internal sealed class GetStudentEnrolmentsWithDetailsQueryHandler
                 enrolment.OfferingId,
                 offering.Name,
                 course.Name,
-                teachers?.Select(teacher => teacher.DisplayName).ToList(),
+                teachers?.Select(teacher => teacher.Name.DisplayName).ToList(),
                 resources,
                 false));
         }

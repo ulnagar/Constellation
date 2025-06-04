@@ -3,9 +3,10 @@
 using Abstractions.Messaging;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 
 public sealed record AddStaffToFacultyCommand(
-        string StaffId,
+        StaffId StaffId,
         FacultyId FacultyId,
         FacultyMembershipRole Role)
     : ICommand;

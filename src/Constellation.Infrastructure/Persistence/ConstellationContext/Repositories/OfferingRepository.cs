@@ -10,6 +10,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Enums;
@@ -75,21 +76,21 @@ public class OfferingRepository : IOfferingRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetActiveForTeacher(
-        string StaffId,
+        StaffId staffId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Offering>()
             .Where(offering =>
                 offering.Teachers.Any(teacher =>
                     teacher.Type == AssignmentType.ClassroomTeacher &&
-                    teacher.StaffId == StaffId &&
+                    teacher.StaffId == staffId &&
                     !teacher.IsDeleted) &&
                 offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Offering>> GetAllTypesActiveForTeacher(
-        string staffId,
+        StaffId staffId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Offering>()

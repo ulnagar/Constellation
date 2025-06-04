@@ -8,6 +8,7 @@ using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Repositories;
@@ -72,7 +73,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
                     !assignment.IsDeleted)
                 .ToList();
 
-            List<Staff> teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
+            List<StaffMember> teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
             
             foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
             {
@@ -89,7 +90,7 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
                     period.SortOrder,
                     period.ToString(),
                     offering.Name,
-                    teachers?.Select(teacher => teacher.DisplayName).ToList(),
+                    teachers?.Select(teacher => teacher.Name.DisplayName).ToList(),
                     period.Duration));
             }
         }

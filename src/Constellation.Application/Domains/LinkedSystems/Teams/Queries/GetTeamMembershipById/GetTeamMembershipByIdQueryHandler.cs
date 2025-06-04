@@ -16,6 +16,8 @@ using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -117,25 +119,25 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     returnData.Add(entry);
             }
 
-            List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+            List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
-            foreach (Staff staffMember in staff)
+            foreach (StaffMember staffMember in staff)
             {
                 List<TeamMembershipResponse.TeamMembershipChannelResponse> staffChannels = new();
 
                 foreach (var grade in _teamsConfiguration.StudentTeamChannelOwnerIds)
                 {
-                    if (grade.Value.Contains(staffMember.StaffId))
+                    if (grade.Value.Contains(staffMember.Id))
                         staffChannels.Add(new ($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Owner.Value));
                     else
                         staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Member.Value));
                 }
 
-                if (_teamsConfiguration.StudentTeamOwnerIds.Contains(staffMember.StaffId))
+                if (_teamsConfiguration.StudentTeamOwnerIds.Contains(staffMember.Id))
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
-                        staffMember.EmailAddress,
+                        staffMember.EmailAddress.Email,
                         TeamsMembershipLevel.Owner.Value,
                         staffChannels);
 
@@ -146,7 +148,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
-                        staffMember.EmailAddress,
+                        staffMember.EmailAddress.Email,
                         TeamsMembershipLevel.Member.Value,
                         staffChannels);
 
@@ -191,13 +193,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Class Teachers
-                List<Staff> teachers = await _staffRepository.GetCurrentTeachersForOffering(offering.Id, cancellationToken);
+                List<StaffMember> teachers = await _staffRepository.GetCurrentTeachersForOffering(offering.Id, cancellationToken);
 
-                foreach (Staff teacher in teachers)
+                foreach (StaffMember teacher in teachers)
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
-                        teacher.EmailAddress,
+                        teacher.EmailAddress.Email,
                         TeamsMembershipLevel.Owner.Value);
 
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
@@ -246,13 +248,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     return Result.Failure<List<TeamMembershipResponse>>(new Error("Partners.Faculty.SearchFailed", $"Could not identify faculty from offering {offering.Name}."));
                 }
 
-                List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken);
+                List<StaffMember> headTeachers = await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken);
 
-                foreach (Staff teacher in headTeachers)
+                foreach (StaffMember teacher in headTeachers)
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
-                        teacher.EmailAddress,
+                        teacher.EmailAddress.Email,
                         TeamsMembershipLevel.Owner.Value);
 
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
@@ -266,20 +268,20 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 if (course is null) continue;
 
                 // Deputy Principals
-                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<string> deputyIds);
+                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<StaffId> deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
 
-                    foreach (var deputyId in deputyIds)
+                    foreach (StaffId deputyId in deputyIds)
                     {
-                        Staff deputyPrincipal = await _staffRepository.GetById(deputyId, cancellationToken);
+                        StaffMember deputyPrincipal = await _staffRepository.GetById(deputyId, cancellationToken);
 
                         if (deputyPrincipal is null) continue;
 
                         TeamMembershipResponse deputyEntry = new(
                             team.Id,
-                            deputyPrincipal.EmailAddress,
+                            deputyPrincipal.EmailAddress.Email,
                             TeamsMembershipLevel.Owner.Value);
 
                         if (returnData.All(value => value.EmailAddress != deputyEntry.EmailAddress))
@@ -288,19 +290,19 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<string> lastStaffIds);
+                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<StaffId> lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (string staffId in lastStaffIds)
+                    foreach (StaffId staffId in lastStaffIds)
                     {
-                        Staff learningSupportTeacher = await _staffRepository.GetById(staffId, cancellationToken);
+                        StaffMember learningSupportTeacher = await _staffRepository.GetById(staffId, cancellationToken);
 
                         if (learningSupportTeacher is null) continue;
 
                         TeamMembershipResponse lastEntry = new(
                             team.Id,
-                            learningSupportTeacher.EmailAddress,
+                            learningSupportTeacher.EmailAddress.Email,
                             TeamsMembershipLevel.Owner.Value);
 
                         if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
@@ -345,7 +347,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             }
 
             // Class Teachers
-            List<string> teacherIds = tutorial
+            List<StaffId> teacherIds = tutorial
                 .Teachers
                 .Where(member =>
                     !member.IsDeleted &&
@@ -354,13 +356,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 .Select(member => member.StaffId)
                 .ToList();
 
-            List<Staff> teachers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
+            List<StaffMember> teachers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
 
-            foreach (Staff teacher in teachers)
+            foreach (StaffMember teacher in teachers)
             {
                 TeamMembershipResponse entry = new(
                     team.Id,
-                    teacher.EmailAddress,
+                    teacher.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value);
 
                 if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
@@ -369,19 +371,19 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         }
 
         // Mandatory Owners
-        List<string> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
+        List<StaffId> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
 
         if (mandatoryOwners.Any())
         {
-            foreach (string staffId in mandatoryOwners)
+            foreach (StaffId staffId in mandatoryOwners)
             {
-                Staff mandatoryOwner = await _staffRepository.GetById(staffId, cancellationToken);
+                StaffMember mandatoryOwner = await _staffRepository.GetById(staffId, cancellationToken);
 
                 if (mandatoryOwner is null) continue;
 
                 TeamMembershipResponse lastEntry = new(
                     team.Id,
-                    mandatoryOwner.EmailAddress,
+                    mandatoryOwner.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value);
 
                 if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))

@@ -2,9 +2,9 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Edval.Enums;
-using Core.Models;
 using Core.Models.Edval;
 using Core.Models.Edval.Events;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Interfaces.Repositories;
 using Repositories;
@@ -36,7 +36,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
     }
     public async Task Handle(EdvalTeachersUpdatedIntegrationEvent notification, CancellationToken cancellationToken)
     {
-        List<Staff> existingStaff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> existingStaff = await _staffRepository.GetAllActive(cancellationToken);
 
         List<EdvalTeacher> edvalTeachers = await _edvalRepository.GetTeachers(cancellationToken);
         List<EdvalIgnore> ignoredTeachers = await _edvalRepository.GetIgnoreRecords(EdvalDifferenceType.EdvalTeacher, cancellationToken);
@@ -47,9 +47,9 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
                 .Where(ignore => ignore.System == EdvalDifferenceSystem.EdvalDifference)
                 .Any(ignore => ignore.Identifier == teacher.UniqueId);
 
-            Staff staffMember = existingStaff.FirstOrDefault(member =>
-                member.FirstName.Trim().Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                member.LastName.Trim().Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
+            StaffMember staffMember = existingStaff.FirstOrDefault(member =>
+                member.Name.FirstName.Trim().Equals(teacher.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                member.Name.LastName.Trim().Equals(teacher.LastName, StringComparison.OrdinalIgnoreCase));
 
             if (staffMember is null)
             {
@@ -64,32 +64,32 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalTeach
                 continue;
             }
 
-            if (!staffMember.EmailAddress.Equals(teacher.EmailAddress, StringComparison.OrdinalIgnoreCase))
+            if (!staffMember.EmailAddress.Email.Equals(teacher.EmailAddress, StringComparison.OrdinalIgnoreCase))
             {
                 _edvalRepository.Insert(new Difference(
                     EdvalDifferenceType.EdvalTeacher,
                     EdvalDifferenceSystem.EdvalDifference,
                     teacher.UniqueId,
-                    $"{staffMember.FirstName} {staffMember.LastName} has a different Email Address ({teacher.EmailAddress}) in Edval",
+                    $"{staffMember.Name} has a different Email Address ({teacher.EmailAddress}) in Edval",
                     ignored));
             }
         }
 
-        foreach (Staff staffMember in existingStaff)
+        foreach (StaffMember staffMember in existingStaff)
         {
             bool ignored = ignoredTeachers
                 .Where(ignore => ignore.System == EdvalDifferenceSystem.ConstellationDifference)
-                .Any(ignore => ignore.Identifier == staffMember.StaffId);
+                .Any(ignore => ignore.Identifier == staffMember.Id.ToString());
 
             if (!edvalTeachers.Any(teacher => 
-                    teacher.FirstName.Equals(staffMember.FirstName.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                    teacher.LastName.Equals(staffMember.LastName.Trim(), StringComparison.OrdinalIgnoreCase)))
+                    teacher.FirstName.Equals(staffMember.Name.FirstName.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    teacher.LastName.Equals(staffMember.Name.LastName.Trim(), StringComparison.OrdinalIgnoreCase)))
             {
                 _edvalRepository.Insert(new Difference(
                     EdvalDifferenceType.EdvalTeacher,
                     EdvalDifferenceSystem.ConstellationDifference,
-                    staffMember.StaffId,
-                    $"{staffMember.FirstName} {staffMember.LastName} is not present in Edval",
+                    staffMember.Id.ToString(),
+                    $"{staffMember.Name} is not present in Edval",
                     ignored));
             }
         }

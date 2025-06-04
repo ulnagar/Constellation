@@ -4,6 +4,8 @@ using Abstractions.Messaging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -55,10 +57,10 @@ internal sealed class AddSentralIncidentStatusActionCommandHandler
         if (!item.Type!.Equals(CaseType.Compliance))
             return Result.Failure(ActionErrors.CreateCaseTypeMismatch(CaseType.Compliance.Value, item.Type.Value));
 
-        Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
 
         Result<SentralIncidentStatusAction> action = SentralIncidentStatusAction.Create(item.Id, teacher, _currentUserService.UserName);
 

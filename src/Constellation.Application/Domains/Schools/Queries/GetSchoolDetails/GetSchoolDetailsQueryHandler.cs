@@ -12,6 +12,7 @@ using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -130,18 +131,18 @@ internal sealed class GetSchoolDetailsQueryHandler
                 currentEnrolment));
         }
 
-        List<Staff> teachers = await _staffRepository.GetActiveFromSchool(school.Code, cancellationToken);
+        List<StaffMember> teachers = await _staffRepository.GetActiveFromSchool(school.Code, cancellationToken);
         List<Faculty> faculties = await _facultyRepository.GetAll(cancellationToken);
         List<SchoolDetailsResponse.SchoolStaff> staffResponse = new();
 
-        foreach (Staff teacher in teachers)
+        foreach (StaffMember teacher in teachers)
         {
-            List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.Id, cancellationToken);
 
             List<SchoolDetailsResponse.OfferingResponse> teacherOfferings = offerings
                 .Where(offering => 
                     offering.Teachers.Any(entry => 
-                        entry.StaffId == teacher.StaffId && 
+                        entry.StaffId == teacher.Id && 
                         entry.Type == AssignmentType.ClassroomTeacher))
                 .Select(offering => new SchoolDetailsResponse.OfferingResponse(
                     offering.Id,
@@ -149,17 +150,13 @@ internal sealed class GetSchoolDetailsQueryHandler
                     offering.IsCurrent))
                 .ToList();
 
-            Dictionary<string, string> teacherFaculties = faculties
-                .Where(faculty => teacher.Faculties
-                    .Where(membership => !membership.IsDeleted)
-                    .Select(membership => membership.FacultyId)
-                    .Contains(faculty.Id))
-                .ToDictionary(key => key.Name, value => value.Colour);
-
+            List<Faculty> teacherFaculties = await _facultyRepository.GetCurrentForStaffMember(teacher.Id, cancellationToken);
+            Dictionary<string, string> teacherFacultyList = teacherFaculties.ToDictionary(key => key.Name, value => value.Colour);
+            
             staffResponse.Add(new(
-                teacher.StaffId,
-                teacher.GetName(),
-                teacherFaculties,
+                teacher.Id,
+                teacher.Name,
+                teacherFacultyList,
                 teacherOfferings));
         }
 

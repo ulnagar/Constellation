@@ -2,12 +2,13 @@
 
 using Identifiers;
 using Primitives;
+using StaffMembers.Identifiers;
 using System;
 
 public sealed class TrainingCompletion : IAuditableEntity
 {
     public TrainingCompletion(
-        string staffId,
+        StaffId staffId,
         TrainingModuleId trainingModuleId,
         DateOnly completedDate)
     {
@@ -18,7 +19,7 @@ public sealed class TrainingCompletion : IAuditableEntity
     }
 
     public TrainingCompletionId Id { get; private set; }
-    public string StaffId { get; private set; }
+    public StaffId StaffId { get; private set; }
     public DateOnly CompletedDate { get; private set; }
     public TrainingModuleId TrainingModuleId { get; private set; }
     public TrainingModule Module { get; set; }
@@ -31,7 +32,7 @@ public sealed class TrainingCompletion : IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static TrainingCompletion Create(
-        string staffId,
+        StaffId staffId,
         TrainingModuleId moduleId,
         DateOnly completedDate)
     {

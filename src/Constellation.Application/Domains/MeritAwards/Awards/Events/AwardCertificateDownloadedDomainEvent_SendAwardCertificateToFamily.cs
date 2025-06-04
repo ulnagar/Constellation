@@ -11,6 +11,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Awards;
 using Core.Models.Families;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Shared;
@@ -146,7 +147,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
             return;
         }
 
-        Staff teacher = await _staffRepository.GetById(award.TeacherId, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetById(award.TeacherId, cancellationToken);
 
         if (teacher is null)
         {

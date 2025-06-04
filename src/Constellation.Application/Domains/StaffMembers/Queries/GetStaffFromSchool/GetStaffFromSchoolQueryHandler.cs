@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffFromSchool;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Models;
@@ -28,14 +28,13 @@ internal sealed class GetStaffFromSchoolQueryHandler
     {
         List<StaffSelectionListResponse> response = new();
         
-        List<Staff> staff = await _staffRepository.GetActiveFromSchool(request.SchoolCode, cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetActiveFromSchool(request.SchoolCode, cancellationToken);
 
-        foreach (Staff member in staff)
+        foreach (StaffMember member in staff)
         {
             response.Add(new(
-                member.StaffId,
-                member.FirstName,
-                member.LastName));
+                member.Id,
+                member.Name));
         }
 
         return response;

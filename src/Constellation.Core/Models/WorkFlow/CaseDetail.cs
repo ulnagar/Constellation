@@ -14,6 +14,7 @@ using Extensions;
 using Identifiers;
 using Shared;
 using StaffMembers;
+using StaffMembers.Identifiers;
 using Students;
 using System;
 using Training;
@@ -108,7 +109,7 @@ public sealed class ComplianceCaseDetail : CaseDetail
     public string IncidentType { get; private set; } = string.Empty;
     public DateOnly CreatedDate { get; private set; }
     public string Subject { get; private set; } = string.Empty;
-    public string CreatedById { get; private set; } = string.Empty;
+    public StaffId CreatedById { get; private set; } = StaffId.Empty;
     public string CreatedBy { get; private set; } = string.Empty;
 
     public static Result<CaseDetail> Create(
@@ -153,7 +154,7 @@ public sealed class ComplianceCaseDetail : CaseDetail
             IncidentType = incidentType,
             Subject = subject,
             CreatedDate = createdDate,
-            CreatedById = teacher.Id.ToString(),
+            CreatedById = teacher.Id,
             CreatedBy = teacher.Name.DisplayName
         };
 
@@ -165,7 +166,7 @@ public sealed class ComplianceCaseDetail : CaseDetail
 
 public sealed class TrainingCaseDetail : CaseDetail
 {
-    public string StaffId { get; private set; } = string.Empty;
+    public StaffId StaffId { get; private set; } = StaffId.Empty;
     public string Name { get; private set; } = string.Empty;
     public TrainingModuleId TrainingModuleId { get; private set;}
     public string ModuleName { get; private set; } = string.Empty;
@@ -190,7 +191,7 @@ public sealed class TrainingCaseDetail : CaseDetail
 
         TrainingCaseDetail detail = new()
         {
-            StaffId = teacher.Id.ToString(),
+            StaffId = teacher.Id,
             Name = teacher.Name.DisplayName,
             TrainingModuleId = module.Id,
             ModuleName = module.Name,

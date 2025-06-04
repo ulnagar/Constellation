@@ -8,6 +8,8 @@ using Constellation.Core.Models.Families.Events;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -78,12 +80,12 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 oldUser.IsParent = false;
             }
 
-            Staff staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.OldEmail, cancellationToken);
+            StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.OldEmail, cancellationToken);
 
             if (staffMember is null)
             {
                 oldUser.IsStaffMember = false;
-                oldUser.StaffId = null;
+                oldUser.StaffId = StaffId.Empty;
             }
 
             SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.OldEmail, cancellationToken);

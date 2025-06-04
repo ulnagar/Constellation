@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Commands.CreateTrainingCase;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
@@ -45,16 +45,16 @@ internal sealed class CreateTrainingCaseCommandHandler
 
     public async Task<Result> Handle(CreateTrainingCaseCommand request, CancellationToken cancellationToken)
     {
-        Staff staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
             _logger
                 .ForContext(nameof(CreateTrainingCaseCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId), true)
                 .Warning("Failed to create WorkFlow Case");
 
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
         }
 
         TrainingModule module = await _moduleRepository.GetModuleById(request.ModuleId, cancellationToken);
@@ -70,11 +70,11 @@ internal sealed class CreateTrainingCaseCommandHandler
         }
 
         TrainingCompletion? completion = request.CompletionId != null
-            ? module.Completions.Where(completion => completion.StaffId == staffMember.StaffId).MaxBy(completion => completion.CompletedDate)
+            ? module.Completions.Where(completion => completion.StaffId == staffMember.Id).MaxBy(completion => completion.CompletedDate)
             : null;
 
         Result<Case> caseResult = await _caseService.CreateTrainingCase(
-            staffMember.StaffId,
+            staffMember.Id,
             module.Id,
             completion?.Id,
             cancellationToken);

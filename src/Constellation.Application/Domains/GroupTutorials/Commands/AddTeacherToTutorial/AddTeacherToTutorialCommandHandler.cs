@@ -4,9 +4,10 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,10 +36,10 @@ internal sealed class AddTeacherToTutorialCommandHandler
         if (tutorial is null)
             return Result.Failure(DomainErrors.GroupTutorials.GroupTutorial.NotFound(request.TutorialId));
 
-        Staff teacher = await _staffRepository.GetForExistCheck(request.StaffId);
+        StaffMember teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
 
         Result<TutorialTeacher> result = tutorial.AddTeacher(teacher, request.EffectiveTo);
 
