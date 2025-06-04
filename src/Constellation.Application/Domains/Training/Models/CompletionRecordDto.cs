@@ -2,6 +2,7 @@
 
 using Core.Abstractions.Clock;
 using Core.Enums;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Training.Identifiers;
 using Core.ValueObjects;
 using System;
@@ -12,7 +13,7 @@ public class CompletionRecordDto
     public TrainingModuleId ModuleId { get; set; }
     public string ModuleName { get; set; }
     public TrainingModuleExpiryFrequency ModuleExpiry { get; set; }
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
     public Name StaffName { get; set; }
     public string StaffFirstName { get; set; }
     public string StaffLastName { get; set; }
@@ -43,6 +44,6 @@ public class CompletionRecordDto
     {
         Unknown,
         Active,
-        Superceded
+        Superseded
     }
 }

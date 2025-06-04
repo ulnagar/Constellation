@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.DoesEmailBelongToStaffMember;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Serilog;
@@ -24,7 +24,7 @@ internal sealed class DoesEmailBelongToStaffMemberQueryHandler
 
     public async Task<Result<bool>> Handle(DoesEmailBelongToStaffMemberQuery request, CancellationToken cancellationToken)
     {
-        Staff? response = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+        StaffMember? response = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
 
         return response is not null;
     }

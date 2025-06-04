@@ -2,11 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -73,10 +73,10 @@ internal sealed class AddSentralEntryActionCommandHandler
             return Result.Failure(OfferingErrors.NotFound(request.OfferingId));
         }
 
-        Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
 
         Result<CreateSentralEntryAction> action = CreateSentralEntryAction.Create(item.Id, teacher, offering, _currentUserService.UserName);
 

@@ -11,6 +11,7 @@ using Offerings;
 using SchoolContacts;
 using SchoolContacts.Identifiers;
 using StaffMembers;
+using StaffMembers.Identifiers;
 using Students;
 using System;
 
@@ -84,7 +85,7 @@ public class StudentEnrolledMSTeamOperation : EventMSTeamOperation
 
 public class TeacherEmployedMSTeamOperation : EventMSTeamOperation
 {
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
     public StaffMember Staff { get; set; }
 }
 
@@ -102,7 +103,7 @@ public class GroupTutorialCreatedMSTeamOperation : EventMSTeamOperation
 
 public sealed class TeacherAssignmentMSTeamOperation : EventMSTeamOperation
 {
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
 }
 
 public sealed class StudentOfferingMSTeamOperation : EventMSTeamOperation

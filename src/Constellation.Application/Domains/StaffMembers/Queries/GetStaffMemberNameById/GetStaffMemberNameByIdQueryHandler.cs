@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffMemberNameById;
 
 using Abstractions.Messaging;
-using Core.Errors;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using System.Threading;
@@ -22,8 +22,8 @@ internal sealed class GetStaffMemberNameByIdQueryHandler : IQueryHandler<GetStaf
         var staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
-            return Result.Failure<string>(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure<string>(StaffMemberErrors.NotFound(request.StaffId));
 
-        return staffMember.DisplayName;
+        return staffMember.Name.DisplayName;
     }
 }

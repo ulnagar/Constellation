@@ -5,6 +5,8 @@ using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
@@ -50,15 +52,15 @@ internal sealed class GenerateOverviewReportCommandHandler
 
     public async Task<Result<FileDto>> Handle(GenerateOverviewReportCommand request, CancellationToken cancellationToken)
     {
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         if (!staff.Any())
         {
             _logger
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NoneFound, true)
+                .ForContext(nameof(Error), StaffMemberErrors.NoneFound, true)
                 .Warning("Could not generate Overview Report");
 
-            return Result.Failure<FileDto>(DomainErrors.Partners.Staff.NoneFound);
+            return Result.Failure<FileDto>(StaffMemberErrors.NoneFound);
         }
 
         List<TrainingModule> modules = await _moduleRepository.GetAllModules(cancellationToken);
@@ -90,22 +92,24 @@ internal sealed class GenerateOverviewReportCommandHandler
                 module.Expiry));
         }
 
-        foreach (Staff member in staff)
+        foreach (StaffMember member in staff)
         {
-            School school = schools.FirstOrDefault(entry => entry.Code == member.SchoolCode);
+            School school = member.CurrentAssignment is not null
+                ? schools.FirstOrDefault(entry => entry.Code == member.CurrentAssignment.SchoolCode)
+                : null;
 
             if (school is null)
             {
                 _logger
-                    .ForContext(nameof(Staff), member, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(member.SchoolCode), true)
+                    .ForContext(nameof(StaffMember), member, true)
+                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(member.CurrentAssignment?.SchoolCode), true)
                     .Warning("Could not include staff member in report");
             }
 
             List<Faculty> memberFaculties = faculties
                 .Where(faculty =>
                     faculty.Members.Any(entry =>
-                        entry.StaffId == member.StaffId &&
+                        entry.StaffId == member.Id &&
                         !entry.IsDeleted))
                 .ToList();
 
@@ -115,11 +119,11 @@ internal sealed class GenerateOverviewReportCommandHandler
             {
                 if (module.IsDeleted) continue;
 
-                bool required = module.Assignees.Any(entry => entry.StaffId == member.StaffId);
+                bool required = module.Assignees.Any(entry => entry.StaffId == member.Id);
 
                 DateOnly? completed = module
                     .Completions
-                    .Where(entry => entry.StaffId == member.StaffId)
+                    .Where(entry => entry.StaffId == member.Id)
                     .MaxBy(entry => entry.CompletedDate)
                     ?.CompletedDate;
 
@@ -130,8 +134,8 @@ internal sealed class GenerateOverviewReportCommandHandler
             }
 
             staffStatuses.Add(new(
-                member.StaffId,
-                member.GetName(),
+                member.Id,
+                member.Name,
                 school?.Code ?? string.Empty,
                 school?.Name ?? string.Empty,
                 memberFaculties.Select(entry => entry.Name).ToArray(),

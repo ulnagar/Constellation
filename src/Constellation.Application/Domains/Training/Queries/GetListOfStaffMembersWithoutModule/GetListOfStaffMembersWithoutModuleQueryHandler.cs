@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.GetListOfStaffMembersWithoutModule;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -33,21 +33,21 @@ internal sealed class GetListOfStaffMembersWithoutModuleQueryHandler
     {
         List<StaffResponse> response = new();
 
-        List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
         List<TrainingModule> modules = await _moduleRepository.GetAllModules(cancellationToken);
 
         modules = modules.Where(entry => !entry.IsDeleted).ToList();
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
-            int staffModules = modules.Count(module => module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId));
+            int staffModules = modules.Count(module => module.Assignees.Any(entry => entry.StaffId == staffMember.Id));
 
             if (staffModules == 0)
             {
                 response.Add(new(
-                    staffMember.StaffId,
-                    staffMember.GetName()));
+                    staffMember.Id,
+                    staffMember.Name));
             }
         }
 

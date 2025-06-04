@@ -8,6 +8,7 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -33,7 +34,7 @@ internal sealed class FacultyRepository : IFacultyRepository
             .FirstOrDefaultAsync(faculty => faculty.Id == facultyId, cancellationToken);
 
     public async Task<List<Faculty>> GetCurrentForStaffMember(
-        string staffId,
+        StaffId staffId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
             .Set<Faculty>()

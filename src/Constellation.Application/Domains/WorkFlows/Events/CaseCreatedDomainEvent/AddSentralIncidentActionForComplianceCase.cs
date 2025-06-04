@@ -2,8 +2,8 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -58,12 +58,12 @@ internal sealed class AddSentralIncidentActionForComplianceCase
 
         ComplianceCaseDetail caseDetail = item.Detail as ComplianceCaseDetail;
 
-        Staff teacher = await _staffRepository.GetById(caseDetail.CreatedById, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetById(caseDetail.CreatedById, cancellationToken);
         if (teacher is null)
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(caseDetail.CreatedById), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(caseDetail.CreatedById), true)
                 .Warning("Could not create default Action for new Case");
             return;
         }

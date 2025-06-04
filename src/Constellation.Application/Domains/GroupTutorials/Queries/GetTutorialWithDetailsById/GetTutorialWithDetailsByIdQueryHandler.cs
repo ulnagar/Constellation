@@ -3,12 +3,13 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Extensions;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,14 +43,14 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
         List<TutorialTeacher> teacherLinks = tutorial.Teachers.Where(teacher => !teacher.IsDeleted).ToList();
         List<TutorialEnrolment> studentLinks = tutorial.CurrentEnrolments.ToList();
 
-        List<Staff> teacherEntities = await _staffRepository.GetListFromIds(teacherLinks.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
+        List<StaffMember> teacherEntities = await _staffRepository.GetListFromIds(teacherLinks.Select(teacher => teacher.StaffId).ToList(), cancellationToken);
         List<Student> studentEntities = await _studentRepository.GetListFromIds(studentLinks.Select(student => student.StudentId).ToList(), cancellationToken);
 
         List<TutorialTeacherResponse> teachers = teacherLinks
             .Select(teacher => 
                 new TutorialTeacherResponse(
                     teacher.Id, 
-                    teacherEntities.First(entity => entity.StaffId == teacher.StaffId).DisplayName,
+                    teacherEntities.First(entity => entity.Id == teacher.StaffId).Name.DisplayName,
                     teacher.EffectiveTo))
             .ToList();
 
@@ -74,7 +75,7 @@ internal sealed class GetTutorialWithDetailsByIdQueryHandler
                     new TutorialRollResponse(
                         roll.Id, 
                         roll.SessionDate, 
-                        !string.IsNullOrWhiteSpace(roll.StaffId), 
+                        roll.StaffId != StaffId.Empty, 
                         roll.Students.Count, 
                         roll.Students.Count(student => student.Present)))
                 .ToList());

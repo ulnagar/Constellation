@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.GenerateStaffReport;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Services;
@@ -11,6 +10,9 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.Faculties.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -65,31 +67,36 @@ internal sealed class GenerateStaffReportCommandHandler
         StaffCompletionListDto data = new();
 
         // - Get all staff
-        Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staff is null)
         {
             _logger
                 .ForContext(nameof(GenerateStaffReportCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId))
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId))
                 .Warning("Failed to generate Staff Report for Mandatory Training");
 
-            return Result.Failure<ReportDto>(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure<ReportDto>(StaffMemberErrors.NotFound(request.StaffId));
         }
 
         List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
 
-        School school = await _schoolRepository.GetById(staff.SchoolCode, cancellationToken);
+        School school = staff.CurrentAssignment is not null
+            ? await _schoolRepository.GetById(staff.CurrentAssignment.SchoolCode, cancellationToken)
+            : null;
 
-        List<SchoolContact> principals = await _schoolContactRepository.GetPrincipalsForSchool(staff.SchoolCode, cancellationToken);
+        List<SchoolContact> principals =
+            staff.CurrentAssignment is not null
+                ? await _schoolContactRepository.GetPrincipalsForSchool(staff.CurrentAssignment.SchoolCode, cancellationToken)
+                : null;
 
         data.StaffId = request.StaffId;
-        data.Name = staff.DisplayName;
-        data.SchoolName = staff.School.Name;
-        data.EmailAddress = staff.EmailAddress;
+        data.Name = staff.Name.DisplayName;
+        data.SchoolName = school?.Name;
+        data.EmailAddress = staff.EmailAddress.Email;
         data.Faculties = faculties.Select(faculty => faculty.Name).ToList();
 
-        List<TrainingModule> modules = await _trainingRepository.GetModulesByAssignee(staff.StaffId, cancellationToken);
+        List<TrainingModule> modules = await _trainingRepository.GetModulesByAssignee(staff.Id, cancellationToken);
 
         foreach (TrainingModule module in modules)
         {
@@ -97,7 +104,7 @@ internal sealed class GenerateStaffReportCommandHandler
 
             TrainingCompletion record = module.Completions
                 .Where(record =>
-                    record.StaffId == staff.StaffId &&
+                    record.StaffId == staff.Id &&
                     !record.IsDeleted)
                 .MaxBy(record => record.CompletedDate);
 
@@ -107,7 +114,7 @@ internal sealed class GenerateStaffReportCommandHandler
 
             foreach (Faculty faculty in faculties)
             {
-                List<string> headTeacherIds = faculty
+                List<StaffId> headTeacherIds = faculty
                     .Members
                     .Where(member =>
                         !member.IsDeleted &&
@@ -115,10 +122,10 @@ internal sealed class GenerateStaffReportCommandHandler
                     .Select(member => member.StaffId)
                     .ToList();
 
-                List<Staff> headTeachers = await _staffRepository
+                List<StaffMember> headTeachers = await _staffRepository
                     .GetListFromIds(headTeacherIds, cancellationToken);
 
-                foreach (Staff headTeacher in headTeachers)
+                foreach (StaffMember headTeacher in headTeachers)
                     entry.AddHeadTeacherDetails(faculty, headTeacher);
             }
 

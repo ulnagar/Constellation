@@ -95,7 +95,7 @@ public class IndexModel : BasePageModel
 
             if (CompletionRecords.Any(s => s.ModuleId == record.ModuleId && s.StaffId == record.StaffId && s.CompletedDate > record.CompletedDate))
             {
-                record.Status = CompletionRecordDto.ExpiryStatus.Superceded;
+                record.Status = CompletionRecordDto.ExpiryStatus.Superseded;
             }
         }
 

@@ -3,7 +3,6 @@
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
 using Core.Models.StaffMembers.Identifiers;
-using System;
 using System.Collections.Generic;
 
 public sealed class AppConfiguration
@@ -83,8 +82,8 @@ public sealed class AppConfiguration
 
     public class WorkFlowConfiguration
     {
-        public string AttendanceReviewer { get; set; }
-        public string ComplianceReviewer { get; set; }
-        public string TrainingReviewer { get; set; }
+        public StaffId AttendanceReviewer { get; set; }
+        public StaffId ComplianceReviewer { get; set; }
+        public StaffId TrainingReviewer { get; set; }
     }
 }

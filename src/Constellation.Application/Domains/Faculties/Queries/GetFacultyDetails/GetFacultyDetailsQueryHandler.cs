@@ -7,6 +7,8 @@ using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -51,34 +53,22 @@ internal sealed class GetFacultyDetailsQueryHandler
 
         foreach (FacultyMembership member in faculty.Members.Where(member => !member.IsDeleted))
         {
-            Staff staff = await _staffRepository.GetById(member.StaffId, cancellationToken);
+            StaffMember staff = await _staffRepository.GetById(member.StaffId, cancellationToken);
 
             if (staff is null)
             {
                 _logger
                     .ForContext(nameof(UpdateFacultyCommand), request, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(member.StaffId), true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(member.StaffId), true)
                     .Warning("Failed to retrieve faculty details");
 
-                return Result.Failure<FacultyDetailsResponse>(DomainErrors.Partners.Staff.NotFound(member.StaffId));
-            }
-
-            Result<Name> staffName = Name.Create(staff.FirstName, string.Empty, staff.LastName);
-
-            if (staffName.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(UpdateFacultyCommand), request, true)
-                    .ForContext(nameof(Error), staffName.Error, true)
-                    .Warning("Failed to retrieve faculty details");
-
-                return Result.Failure<FacultyDetailsResponse>(staffName.Error);
+                return Result.Failure<FacultyDetailsResponse>(StaffMemberErrors.NotFound(member.StaffId));
             }
 
             staffMembers.Add(new(
                 member.Id,
                 member.StaffId,
-                staffName.Value,
+                staff.Name,
                 member.Role));
         }
 

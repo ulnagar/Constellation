@@ -1,14 +1,14 @@
-﻿namespace Constellation.Application.Faculties.Events.FacultyMemberAddedDomainEvent;
+﻿namespace Constellation.Application.Domains.Faculties.Events.FacultyMemberAddedDomainEvent;
 
-using Abstractions.Messaging;
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Enums;
 using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
-using Core.Abstractions.Clock;
-using Core.Models.Faculties;
-using Core.Models.Faculties.Events;
-using Core.Models.Faculties.Repositories;
+using Constellation.Core.Models.Faculties;
+using Constellation.Core.Models.Faculties.Events;
+using Constellation.Core.Models.Faculties.Repositories;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

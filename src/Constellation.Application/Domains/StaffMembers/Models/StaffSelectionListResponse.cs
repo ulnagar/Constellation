@@ -1,9 +1,8 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Models;
 
+using Core.Models.StaffMembers.Identifiers;
+using Core.ValueObjects;
+
 public sealed record StaffSelectionListResponse(
-    string StaffId,
-    string FirstName,
-    string LastName)
-{
-    public string DisplayName => $"{FirstName} {LastName}";
-}
+    StaffId StaffId,
+    Name Name);

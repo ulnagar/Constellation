@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Training;
 
 using Identifiers;
+using StaffMembers.Identifiers;
 
 public sealed class TrainingModuleAssignee
 {
@@ -8,18 +9,18 @@ public sealed class TrainingModuleAssignee
 
     private TrainingModuleAssignee(
         TrainingModuleId moduleId,
-        string staffId)
+        StaffId staffId)
     {
         ModuleId = moduleId;
         StaffId = staffId;
     }
 
     public TrainingModuleId ModuleId { get; private set; }
-    public string StaffId { get; private set; }
+    public StaffId StaffId { get; private set; }
 
     public static TrainingModuleAssignee Create(
         TrainingModuleId moduleId,
-        string staffId)
+        StaffId staffId)
     {
         TrainingModuleAssignee member = new(moduleId, staffId);
 

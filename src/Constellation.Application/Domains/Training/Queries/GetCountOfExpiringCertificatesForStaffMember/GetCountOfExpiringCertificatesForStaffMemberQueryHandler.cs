@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.GetCountOfExpiringCertificatesForStaffMember;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -34,7 +34,7 @@ internal sealed class GetCountOfExpiringCertificatesForStaffMemberQueryHandler
         List<TrainingModule> modules = await _trainingModuleRepository.GetModulesByAssignee(request.StaffId, cancellationToken);
 
         // - Get staff member
-        Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         foreach (TrainingModule module in modules)
         {
@@ -42,7 +42,7 @@ internal sealed class GetCountOfExpiringCertificatesForStaffMemberQueryHandler
 
             TrainingCompletion record = module.Completions
                 .Where(record =>
-                    record.StaffId == staff.StaffId &&
+                    record.StaffId == staff.Id &&
                     !record.IsDeleted)
                 .MaxBy(record => record.CompletedDate);
 

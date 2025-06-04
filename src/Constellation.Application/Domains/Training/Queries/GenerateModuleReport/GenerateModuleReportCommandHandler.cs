@@ -9,6 +9,7 @@ using Core.Models.Attachments.ValueObjects;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -56,29 +57,23 @@ internal sealed class GenerateModuleReportCommandHandler
         // Get info from database
         TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
         
-        List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
         List<CompletionRecordDto> completions = new();
         List<ModuleDetailsDto.Assignee> assignees = new();
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
-            if (module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId))
+            if (module.Assignees.Any(entry => entry.StaffId == staffMember.Id))
                 assignees.Add(new(
-                    staffMember.StaffId,
-                    staffMember.GetName()));
+                    staffMember.Id,
+                    staffMember.Name));
 
-            List<FacultyId> facultyIds = staffMember
-                .Faculties
-                .Where(member => !member.IsDeleted)
-                .Select(member => member.FacultyId)
-                .ToList();
-
-            List<Faculty> faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
+            List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.Id, cancellationToken);
 
             List<TrainingCompletion> records = module.Completions
                     .Where(record =>
-                        record.StaffId == staffMember.StaffId &&
+                        record.StaffId == staffMember.Id &&
                         !record.IsDeleted)
                     .ToList();
 
@@ -86,11 +81,11 @@ internal sealed class GenerateModuleReportCommandHandler
 
             CompletionRecordDto entry = new()
             {
-                StaffId = staffMember.StaffId,
-                StaffFirstName = staffMember.FirstName,
-                StaffLastName = staffMember.LastName,
+                StaffId = staffMember.Id,
+                StaffFirstName = staffMember.Name.FirstName,
+                StaffLastName = staffMember.Name.LastName,
                 StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
-                Mandatory = module.Assignees.Any(item => item.StaffId == staffMember.StaffId)
+                Mandatory = module.Assignees.Any(item => item.StaffId == staffMember.Id)
             };
 
             if (record is null)

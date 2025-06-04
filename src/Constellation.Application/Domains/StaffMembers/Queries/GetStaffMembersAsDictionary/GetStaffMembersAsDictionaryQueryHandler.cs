@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class GetStaffMembersAsDictionaryQueryHandler : IQueryHandler<GetStaffMembersAsDictionaryQuery, Dictionary<string, string>>
+internal sealed class GetStaffMembersAsDictionaryQueryHandler : IQueryHandler<GetStaffMembersAsDictionaryQuery, Dictionary<StaffId, string>>
 {
     private readonly IStaffRepository _staffRepository;
 
@@ -20,15 +21,15 @@ internal sealed class GetStaffMembersAsDictionaryQueryHandler : IQueryHandler<Ge
         _staffRepository = staffRepository;
     }
 
-    public async Task<Result<Dictionary<string, string>>> Handle(GetStaffMembersAsDictionaryQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Dictionary<StaffId, string>>> Handle(GetStaffMembersAsDictionaryQuery request, CancellationToken cancellationToken)
     {
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         if (staff.Count == 0)
-            return Result.Failure<Dictionary<string, string>>(DomainErrors.Partners.Staff.NoneFound);
+            return Result.Failure<Dictionary<StaffId, string>>(StaffMemberErrors.NoneFound);
 
         return staff
-            .OrderBy(staff => staff.LastName)
-            .ToDictionary(staff => staff.StaffId, staff => $"{staff.FirstName} {staff.LastName}");
+            .OrderBy(member => member.Name.SortOrder)
+            .ToDictionary(member => member.Id, member => member.Name.DisplayName);
     }
 }

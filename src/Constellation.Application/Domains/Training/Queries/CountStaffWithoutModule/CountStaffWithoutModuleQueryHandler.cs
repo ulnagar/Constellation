@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Training.Queries.CountStaffWithoutModule;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -33,15 +33,15 @@ internal sealed class CountStaffWithoutModuleQueryHandler
     {
         int staffWithoutModule = 0;
 
-        List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
         List<TrainingModule> modules = await _moduleRepository.GetAllModules(cancellationToken);
 
         modules = modules.Where(entry => !entry.IsDeleted).ToList();
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
-            int staffModules = modules.Count(module => module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId));
+            int staffModules = modules.Count(module => module.Assignees.Any(entry => entry.StaffId == staffMember.Id));
 
             if (staffModules == 0)
                 staffWithoutModule++;
