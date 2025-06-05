@@ -4,9 +4,9 @@
 
 @foreach (ShowDashboardUpdatesViewComponentModel.RecentChange update in Model.Changes.OrderByDescending(entry => entry.Datestamp))
 {
-    <div class="card bg-light mb-3">
+    <div class="card bg-light mb-3 border-@update.Type">
         <div class="card-header h6">@update.Title</div>
-        <div class="card-body">
+        <div class="card-body text-@update.Type">
             <p>@update.Body</p>
         </div>
     </div>

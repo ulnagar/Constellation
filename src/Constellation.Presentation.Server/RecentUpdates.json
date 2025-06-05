@@ -1,5 +1,11 @@
 [
   {
+    "Datestamp": "2025-06-06 09:14",
+    "Title": "Canvas Server Errors",
+    "Body": "Provded graceful fallback path when communication errors are experienced with the Canvas service.",
+    "Type": "danger"
+  },
+  {
     "Datestamp": "2025-05-08 15:14",
     "Title": "Staff Timetable Lookup",
     "Body": "Add ability to view integrated timetable for any staff member."
