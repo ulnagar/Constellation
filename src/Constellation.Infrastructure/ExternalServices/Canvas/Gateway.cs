@@ -74,62 +74,84 @@ internal sealed class Gateway : ICanvasGateway
         CancellationToken cancellationToken = default) 
         where T : class
     {
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-
-        List<T> completeResponse = new List<T>();
-
-        bool nextPageExists = true;
-
-        while (nextPageExists)
+        try
         {
-            Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
-            
-            HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
-            if (!response.IsSuccessStatusCode)
-                return completeResponse;
+            List<T> completeResponse = new List<T>();
 
-            string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+            bool nextPageExists = true;
 
-            completeResponse.AddRange(JsonConvert.DeserializeObject<List<T>>(responseText));
-
-            bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string> linkHeaders);
-
-            if (!responseHeaders)
-                nextPageExists = false;
-
-            string[] links = linkHeaders!.First().Split(',');
-            string nextLinkHeader = links.FirstOrDefault(entry => entry.Contains(@"rel=""next"""));
-
-            if (nextLinkHeader is null)
+            while (nextPageExists)
             {
-                nextPageExists = false;
+                Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
+
+                HttpResponseMessage response = await _client.GetAsync(uri, cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                    return completeResponse;
+
+                string responseText = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                completeResponse.AddRange(JsonConvert.DeserializeObject<List<T>>(responseText));
+
+                bool responseHeaders = response.Headers.TryGetValues("link", out IEnumerable<string> linkHeaders);
+
+                if (!responseHeaders)
+                    nextPageExists = false;
+
+                string[] links = linkHeaders!.First().Split(',');
+                string nextLinkHeader = links.FirstOrDefault(entry => entry.Contains(@"rel=""next"""));
+
+                if (nextLinkHeader is null)
+                {
+                    nextPageExists = false;
+                }
+                else
+                {
+                    string[] parts = nextLinkHeader.Split(";");
+                    path = parts[0].TrimStart('<').TrimEnd('>');
+                }
             }
-            else
-            {
-                string[] parts = nextLinkHeader.Split(";");
-                path = parts[0].TrimStart('<').TrimEnd('>');
-            }
+
+            return completeResponse;
         }
+        catch (Exception e)
+        {
+            _logger
+                .ForContext(nameof(Exception), e, true)
+                .Error("Failed to communicate with Canvas Server");
 
-        return completeResponse;
+            return [];
+        }
     }
 
     private async Task<HttpResponseMessage> RequestAsync(string path, HttpVerb action, object payload = null,
         CancellationToken cancellationToken = default)
     {
-        Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
-
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-        HttpResponseMessage response = action switch
+        try
         {
-            HttpVerb.Get => await _client.GetAsync(uri, cancellationToken),
-            HttpVerb.Post => await _client.PostAsJsonAsync(uri, payload, cancellationToken),
-            HttpVerb.Put => await _client.PutAsJsonAsync(uri, payload, cancellationToken),
-            HttpVerb.Delete => await _client.DeleteAsync(uri, cancellationToken),
-            _ => new HttpResponseMessage { StatusCode = HttpStatusCode.BadRequest },
-        };
-        return response;
+            Uri uri = path.StartsWith("http") ? new Uri(path) : new Uri($"{_url}/{path}");
+
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            HttpResponseMessage response = action switch
+            {
+                HttpVerb.Get => await _client.GetAsync(uri, cancellationToken),
+                HttpVerb.Post => await _client.PostAsJsonAsync(uri, payload, cancellationToken),
+                HttpVerb.Put => await _client.PutAsJsonAsync(uri, payload, cancellationToken),
+                HttpVerb.Delete => await _client.DeleteAsync(uri, cancellationToken),
+                _ => new HttpResponseMessage { StatusCode = HttpStatusCode.BadRequest }
+            };
+            return response;
+        }
+        catch (Exception e)
+        {
+            _logger
+                .ForContext(nameof(Exception), e, true)
+                .Error("Failed to communicate with Canvas Server");
+
+            return new HttpResponseMessage { StatusCode = HttpStatusCode.BadRequest };
+        }
     }
 
     private async Task<Result<int>> SearchForUserLogin(
