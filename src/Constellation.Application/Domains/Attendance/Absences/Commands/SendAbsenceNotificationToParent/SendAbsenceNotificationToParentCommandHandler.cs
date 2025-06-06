@@ -129,13 +129,15 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 .Distinct()
                 .ToList();
 
-            foreach (string number in numbers)
-            {
-                Result<PhoneNumber> result = PhoneNumber.Create(number);
+            // TODO: R1.17.2: Removed to force notifications to be sent via Email as SMS Gateway is unavailable
 
-                if (result.IsSuccess)
-                    phoneNumbers.Add(result.Value);
-            }
+            //foreach (string number in numbers)
+            //{
+            //    Result<PhoneNumber> result = PhoneNumber.Create(number);
+
+            //    if (result.IsSuccess)
+            //        phoneNumbers.Add(result.Value);
+            //}
 
             foreach (Parent parent in family.Parents)
             {
