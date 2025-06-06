@@ -10,6 +10,8 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 
+// TODO: R1.18: Convert to return RESULT objects to give explicit feedback on success
+
 internal sealed class Gateway : ISMSGateway
 {
     private Uri _uri;
@@ -110,12 +112,8 @@ internal sealed class Gateway : ISMSGateway
         {
             _logger.Warning("{id}: FAILED with error {ex}", messageId, ex.Message);
 
-            var data = new SentMessages
-            {
-                messages = Array.Empty<SentMessage>()
-            };
-
-            return ConvertToDto(data);
+            // This is an error, so return null so the caller knows it did not complete
+            return null;
         }
     }
 
