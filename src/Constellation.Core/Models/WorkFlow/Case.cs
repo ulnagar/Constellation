@@ -100,7 +100,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
         if (action is null)
             return Result.Failure(ActionErrors.NotFound(actionId));
 
-        if (action.AssignedToId == newAssignee.Id.ToString())
+        if (action.AssignedToId == newAssignee.Id)
             return Result.Success();
 
         Result assignmentUpdate = action.AssignAction(newAssignee, currentUser);

@@ -7,6 +7,7 @@ using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -45,17 +46,17 @@ internal sealed class AuditUserCommandHandler
         if (user is null)
             return Result.Failure(DomainErrors.Auth.UserNotFound);
 
-        StaffMember staffMember = await _staffRepository.FromEmailForExistCheck(user.Email);
+        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(user.Email, cancellationToken);
 
         if (staffMember is null)
         {
             user.IsStaffMember = false;
-            user.StaffId = string.Empty;
+            user.StaffId = StaffId.Empty;
         } 
         else
         {
             user.IsStaffMember = true;
-            user.StaffId = staffMember.Id.ToString();
+            user.StaffId = staffMember.Id;
         }
 
         SchoolContact contact = await _schoolContactRepository.GetWithRolesByEmailAddress(user.Email, cancellationToken);

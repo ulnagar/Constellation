@@ -115,7 +115,7 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
             TeacherMSTeamOperation addOperation = new()
             {
                 OfferingId = cover.OfferingId,
-                StaffId = coverAdmin.StaffId,
+                StaffId = coverAdmin.StaffId.ToString(),
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
@@ -127,7 +127,7 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
             TeacherMSTeamOperation removeOperation = new()
             {
                 OfferingId = cover.OfferingId,
-                StaffId = coverAdmin.StaffId,
+                StaffId = coverAdmin.StaffId.ToString(),
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),

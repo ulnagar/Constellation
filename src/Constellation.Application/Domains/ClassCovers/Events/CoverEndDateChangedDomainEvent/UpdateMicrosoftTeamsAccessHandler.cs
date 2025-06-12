@@ -104,7 +104,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 TeacherMSTeamOperation existingAdminOperation = existingRequests
                     .OfType<TeacherMSTeamOperation>()
                     .FirstOrDefault(operation =>
-                        operation.StaffId == coverAdmin.StaffId &&
+                        operation.StaffId == coverAdmin.StaffId.ToString() &&
                         operation.Action == MSTeamOperationAction.Remove);
 
                 if (existingAdminOperation is not null)
@@ -183,7 +183,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation existingAdminRemoveOperation = existingRequests
                         .OfType<TeacherMSTeamOperation>()
                         .FirstOrDefault(operation =>
-                            operation.StaffId == coverAdmin.StaffId &&
+                            operation.StaffId == coverAdmin.StaffId.ToString() &&
                             operation.Action == MSTeamOperationAction.Remove &&
                             operation.DateScheduled == alreadyRemoved.DateScheduled);
 
@@ -194,7 +194,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                         TeacherMSTeamOperation adminAddOperation = new()
                         {
                             OfferingId = cover.OfferingId,
-                            StaffId = coverAdmin.StaffId,
+                            StaffId = coverAdmin.StaffId.ToString(),
                             Action = MSTeamOperationAction.Add,
                             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                             DateScheduled = DateTime.Now,
@@ -207,7 +207,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation adminRemoveOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = coverAdmin.StaffId,
+                        StaffId = coverAdmin.StaffId.ToString(),
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,

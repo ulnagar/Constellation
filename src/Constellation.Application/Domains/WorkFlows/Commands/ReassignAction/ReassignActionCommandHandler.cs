@@ -4,6 +4,8 @@ using Abstractions.Messaging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
@@ -65,7 +67,7 @@ internal sealed class ReassignActionCommandHandler
             return Result.Failure(ActionErrors.NotFound(request.ActionId));
         }
 
-        Staff staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -73,10 +75,10 @@ internal sealed class ReassignActionCommandHandler
                 .ForContext(nameof(ReassignActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
                 .ForContext(nameof(Action), action, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId), true)
                 .Warning("Failed to reassign Action");
 
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
         }
 
         Result assignRequest = item.ReassignAction(action.Id, staffMember, _currentUserService.UserName);
@@ -87,7 +89,7 @@ internal sealed class ReassignActionCommandHandler
                 .ForContext(nameof(ReassignActionCommand), request, true)
                 .ForContext(nameof(Case), item, true)
                 .ForContext(nameof(Action), action, true)
-                .ForContext(nameof(Staff), staffMember, true)
+                .ForContext(nameof(StaffMember), staffMember, true)
                 .ForContext(nameof(Error), assignRequest.Error, true)
                 .Warning("Failed to reassign Action");
 

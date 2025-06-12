@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Training.Commands.ProcessTrainingImportFile;
 
 using Abstractions.Messaging;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
@@ -45,7 +46,7 @@ internal sealed class ProcessTrainingImportFileCommandHandler
             // check if it exists in the db
             TrainingModule existing = await _trainingRepository.GetModuleByName(module.Name, cancellationToken);
 
-            List<string> staff = await _staffRepository.GetAllActiveStaffIds(cancellationToken);
+            List<StaffId> staff = await _staffRepository.GetAllActiveStaffIds(cancellationToken);
 
             if (existing is not null)
             {

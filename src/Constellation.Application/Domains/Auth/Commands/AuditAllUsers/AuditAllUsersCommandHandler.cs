@@ -7,6 +7,7 @@ using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -260,7 +261,7 @@ internal sealed class AuditAllUsersCommandHandler
             staffMember.Name.FirstName,
             staffMember.Name.LastName,
             isStaff: true,
-            staffId: staffMember.Id.ToString());
+            staffId: staffMember.Id);
 
     private Task CreateUserFromStudent(Student student) =>
         CreateUser(
@@ -282,7 +283,7 @@ internal sealed class AuditAllUsersCommandHandler
         string email,
         string firstName,
         string lastName,
-        string? staffId = null,
+        StaffId? staffId = null,
         Guid? contactId = null,
         Guid? studentId = null,
         bool? isParent = null,
@@ -306,10 +307,10 @@ internal sealed class AuditAllUsersCommandHandler
             user.IsParent = isParent.Value;
         }
 
-        if (isStaff.HasValue && !string.IsNullOrWhiteSpace(staffId))
+        if (isStaff.HasValue && staffId.HasValue)
         {
             user.IsStaffMember = isStaff.Value;
-            user.StaffId = staffId;
+            user.StaffId = staffId.Value;
         }
 
         if (isContact.HasValue && contactId.HasValue)
@@ -407,11 +408,11 @@ internal sealed class AuditAllUsersCommandHandler
             user.IsStaffMember = true;
         }
 
-        if (user.StaffId != staffMember.Id.ToString())
+        if (user.StaffId != staffMember.Id)
         {
             _logger.Information("Updating StaffId to {staffId}", staffMember.Id);
 
-            user.StaffId = staffMember.Id.ToString();
+            user.StaffId = staffMember.Id;
         }
 
         await _userManager.UpdateAsync(user);

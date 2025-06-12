@@ -3,8 +3,8 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -71,17 +71,17 @@ internal sealed class UpdateCaseStatusCommandHandler
             return Result.Failure(update.Error);
         }
 
-        Staff currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        StaffMember currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
 
         if (currentUser is null)
         {
             _logger
                 .ForContext(nameof(UpdateCaseStatusCommand), request, true)
                 .ForContext(nameof(Case), item, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmail(_currentUserService.EmailAddress), true)
                 .Warning("Failed to update Case Status");
 
-            return Result.Failure(DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress));
+            return Result.Failure(StaffMemberErrors.NotFoundByEmail(_currentUserService.EmailAddress));
         }
 
         Result<CaseDetailUpdateAction> updateAction = CaseDetailUpdateAction.Create(
