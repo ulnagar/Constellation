@@ -37,9 +37,7 @@ internal sealed class UpdateStaffMemberCommandHandler
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<UpdateStaffMemberCommand>();
     }
-
-    //TODO : R1.18: Create StaffMemberEmailAddressChangedDomainEvent handler to update user account, Canvas, Teams, etc.
-
+    
     public async Task<Result> Handle(UpdateStaffMemberCommand request, CancellationToken cancellationToken)
     {
         StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
