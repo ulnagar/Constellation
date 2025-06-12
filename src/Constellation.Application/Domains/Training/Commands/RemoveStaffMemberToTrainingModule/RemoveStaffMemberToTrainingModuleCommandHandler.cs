@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
 using Core.Models.Training.Repositories;
@@ -48,7 +49,7 @@ internal sealed class RemoveStaffMemberToTrainingModuleCommandHandler
         {
             _logger
                 .ForContext(nameof(RemoveStaffMemberToTrainingModuleCommand), request, true)
-                .ForContext(nameof(Staff.StaffId), request.StaffId, true)
+                .ForContext(nameof(StaffId), request.StaffId, true)
                 .ForContext(nameof(Error), assignee.Error, true)
                 .Warning("Failed to add Staff Member to Training Module");
 

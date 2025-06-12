@@ -2,10 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
@@ -96,13 +97,13 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
 
         ComplianceCaseDetail detail = item.Detail as ComplianceCaseDetail;
         
-        Staff assignee = await _staffRepository.GetById(detail!.CreatedById, cancellationToken);
+        StaffMember assignee = await _staffRepository.GetById(detail!.CreatedById, cancellationToken);
 
         if (assignee is null)
         {
             _logger
                 .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(detail.CreatedById), true)
                 .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
             return;
@@ -110,12 +111,12 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
 
         List<EmailRecipient> recipients = new();
 
-        Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.DisplayName, assignee.EmailAddress);
+        Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.Name, assignee.EmailAddress);
         if (teacher.IsFailure)
         {
             _logger
                 .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(Staff), assignee, true)
+                .ForContext(nameof(StaffMember), assignee, true)
                 .ForContext(nameof(Error), teacher.Error, true)
                 .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -131,19 +132,19 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
             if (faculty.Name is "Administration" or "Executive" or "Support")
                 continue;
 
-            List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken);
+            List<StaffMember> headTeachers = await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken);
 
-            foreach (Staff headTeacher in headTeachers)
+            foreach (StaffMember headTeacher in headTeachers)
             {
-                if (recipients.Any(entry => entry.Email == headTeacher.EmailAddress))
+                if (recipients.Any(entry => entry.Email == headTeacher.EmailAddress.Email))
                     continue;
 
-                Result<EmailRecipient> headTeacherEmail = EmailRecipient.Create(headTeacher.DisplayName, headTeacher.EmailAddress);
+                Result<EmailRecipient> headTeacherEmail = EmailRecipient.Create(headTeacher.Name, headTeacher.EmailAddress);
                 if (headTeacherEmail.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                        .ForContext(nameof(Staff), headTeacher, true)
+                        .ForContext(nameof(StaffMember), headTeacher, true)
                         .ForContext(nameof(Error), headTeacherEmail.Error, true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -171,31 +172,31 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (age >= 17)
         {
             // Add DP to recipients
-            List<string> deputies = _configuration.Contacts.DeputyPrincipalIds[detail.Grade];
+            List<StaffId> deputies = _configuration.Contacts.DeputyPrincipalIds[detail.Grade];
 
-            foreach (string deputyId in deputies)
+            foreach (StaffId deputyId in deputies)
             {
-                Staff deputy = await _staffRepository.GetById(deputyId, cancellationToken);
+                StaffMember deputy = await _staffRepository.GetById(deputyId, cancellationToken);
 
                 if (deputy is null)
                 {
                     _logger
                         .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                        .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(deputyId), true)
+                        .ForContext(nameof(Error), StaffMemberErrors.NotFound(deputyId), true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
                     return;
                 }
 
-                if (recipients.Any(entry => entry.Email == deputy.EmailAddress))
+                if (recipients.Any(entry => entry.Email == deputy.EmailAddress.Email))
                     continue;
 
-                Result<EmailRecipient> deputyEmail = EmailRecipient.Create(assignee.DisplayName, assignee.EmailAddress);
+                Result<EmailRecipient> deputyEmail = EmailRecipient.Create(assignee.Name, assignee.EmailAddress);
                 if (deputyEmail.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                        .ForContext(nameof(Staff), deputy, true)
+                        .ForContext(nameof(StaffMember), deputy, true)
                         .ForContext(nameof(Error), deputyEmail.Error, true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
@@ -209,28 +210,28 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (age >= 22)
         {
             // Add P to recipients
-            string principalId = _configuration.Contacts.PrincipalId;
+            StaffId principalId = _configuration.Contacts.PrincipalId;
             
-            Staff principal = await _staffRepository.GetById(principalId, cancellationToken);
+            StaffMember principal = await _staffRepository.GetById(principalId, cancellationToken);
 
             if (principal is null)
             {
                 _logger
                     .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(detail.CreatedById), true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(detail.CreatedById), true)
                     .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
                 return;
             }
 
-            if (recipients.All(entry => entry.Email != principal.EmailAddress))
+            if (recipients.All(entry => entry.Email != principal.EmailAddress.Email))
             {
-                Result<EmailRecipient> principalEmail = EmailRecipient.Create(principal.DisplayName, principal.EmailAddress);
+                Result<EmailRecipient> principalEmail = EmailRecipient.Create(principal.Name, principal.EmailAddress);
                 if (principalEmail.IsFailure)
                 {
                     _logger
                         .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                        .ForContext(nameof(Staff), principal, true)
+                        .ForContext(nameof(StaffMember), principal, true)
                         .ForContext(nameof(Error), principalEmail.Error, true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 

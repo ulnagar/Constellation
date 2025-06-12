@@ -108,7 +108,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 TeacherMSTeamOperation existingAddOperation = existingRequests
                     .OfType<TeacherMSTeamOperation>()
                     .FirstOrDefault(operation =>
-                        operation.StaffId == coverAdmin.StaffId &&
+                        operation.StaffId == coverAdmin.StaffId.ToString() &&
                         operation.Action == MSTeamOperationAction.Add);
 
                 if (existingAddOperation is not null)
@@ -186,7 +186,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation existingAddOperation = existingRequests
                         .OfType<TeacherMSTeamOperation>()
                         .FirstOrDefault(operation =>
-                            operation.StaffId == coverAdmin.StaffId &&
+                            operation.StaffId == coverAdmin.StaffId.ToString() &&
                             operation.Action == MSTeamOperationAction.Add &&
                             operation.DateScheduled == alreadyGranted.DateScheduled);
 
@@ -197,7 +197,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                         TeacherMSTeamOperation removeOperation = new()
                         {
                             OfferingId = cover.OfferingId,
-                            StaffId = coverAdmin.StaffId,
+                            StaffId = coverAdmin.StaffId.ToString(),
                             Action = MSTeamOperationAction.Remove,
                             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                             DateScheduled = DateTime.Today,
@@ -210,7 +210,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation addOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = coverAdmin.StaffId,
+                        StaffId = coverAdmin.StaffId.ToString(),
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,

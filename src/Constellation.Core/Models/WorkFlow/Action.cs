@@ -11,6 +11,7 @@ using Offerings.Identifiers;
 using Primitives;
 using Shared;
 using StaffMembers;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ public abstract class Action : IAuditableEntity
     public IReadOnlyList<ActionNote> Notes => _notes.ToList();
     
     // string StaffId column
-    public string AssignedToId { get; protected set; } = string.Empty;
+    public StaffId AssignedToId { get; protected set; } = StaffId.Empty;
     // string Staff Name column
     public string AssignedTo { get; protected set; } = string.Empty;
     public DateTime AssignedAt { get; protected set; } = DateTime.MinValue;
@@ -69,7 +70,7 @@ public abstract class Action : IAuditableEntity
                 return noteAttempt;
         }
 
-        AssignedToId = assignee.Id.ToString();
+        AssignedToId = assignee.Id;
         AssignedTo = assignee.Name.DisplayName;
         AssignedAt = DateTime.Now;
 
