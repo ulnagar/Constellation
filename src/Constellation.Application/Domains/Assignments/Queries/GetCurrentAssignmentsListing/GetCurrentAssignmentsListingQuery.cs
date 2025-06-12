@@ -3,5 +3,14 @@
 using Abstractions.Messaging;
 using System.Collections.Generic;
 
-public sealed record GetCurrentAssignmentsListingQuery()
-    : IQuery<List<CurrentAssignmentSummaryResponse>>;
+public sealed record GetCurrentAssignmentsListingQuery(
+    GetCurrentAssignmentsListingQuery.Filter Selected = GetCurrentAssignmentsListingQuery.Filter.Current)
+    : IQuery<List<CurrentAssignmentSummaryResponse>>
+{
+    public enum Filter
+    {
+        All,
+        Current,
+        Expired
+    }
+}

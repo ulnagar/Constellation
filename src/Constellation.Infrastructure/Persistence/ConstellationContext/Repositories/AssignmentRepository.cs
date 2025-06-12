@@ -79,6 +79,33 @@ internal class AssignmentRepository : IAssignmentRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<CanvasAssignment>> GetFromCurrentYear(
+        CancellationToken cancellationToken = default)
+    {
+        DateTime Jan1 = _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue);
+
+        return await _context
+            .Set<CanvasAssignment>()
+            .Where(assignment =>
+                assignment.DueDate >= Jan1 ||
+                (!assignment.LockDate.HasValue || assignment.LockDate.Value > Jan1))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<CanvasAssignment>> GetExpiredFromCurrentYear(
+        CancellationToken cancellationToken = default)
+    {
+        DateTime today = _dateTime.Today.ToDateTime(TimeOnly.MinValue);
+        DateTime Jan1 = _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue);
+
+        return await _context
+            .Set<CanvasAssignment>()
+            .Where(assignment =>
+                (assignment.DueDate >= Jan1 || (!assignment.LockDate.HasValue || assignment.LockDate.Value > Jan1)) &&
+                (assignment.DueDate < today || (!assignment.LockDate.HasValue || assignment.LockDate.Value < today)))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<CanvasAssignment>> GetAllDueForUpload(
         CancellationToken cancellationToken = default) =>
         await _context

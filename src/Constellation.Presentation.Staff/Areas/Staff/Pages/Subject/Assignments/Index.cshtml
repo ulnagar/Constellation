@@ -1,9 +1,37 @@
 ﻿@page
+@using Constellation.Application.Domains.Assignments.Queries.GetCurrentAssignmentsListing
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Assignments.IndexModel
 
 <h2>Canvas Assignments</h2>
 
-<a asp-page="/Subject/Assignments/Create" asp-area="Staff" class="btn btn-primary">Create New</a>
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var current_style = all_style;
+        var inactive_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case GetCurrentAssignmentsListingQuery.Filter.All:
+                all_style = "btn-primary";
+                break;
+            case GetCurrentAssignmentsListingQuery.Filter.Current:
+                current_style = "btn-primary";
+                break;
+            case GetCurrentAssignmentsListingQuery.Filter.Expired:
+                inactive_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@GetCurrentAssignmentsListingQuery.Filter.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@GetCurrentAssignmentsListingQuery.Filter.Current" class="btn @current_style">Current</a>
+        <a asp-page="Index" asp-route-filter="@GetCurrentAssignmentsListingQuery.Filter.Expired" class="btn @inactive_style">Expired</a>
+    </div>
+
+    <a asp-page="/Subject/Assignments/Create" asp-area="Staff" class="btn btn-success">Create New</a>
+</div>
 
 <hr />
 

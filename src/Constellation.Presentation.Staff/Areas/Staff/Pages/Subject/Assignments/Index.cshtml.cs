@@ -9,7 +9,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -38,13 +37,16 @@ public class IndexModel : BasePageModel
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Subject_Assignments_Assignments;
     [ViewData] public string PageTitle => "Assignment List";
 
+    [BindProperty(SupportsGet = true)]
+    public GetCurrentAssignmentsListingQuery.Filter Filter { get; set; } = GetCurrentAssignmentsListingQuery.Filter.Current;
+
     public List<CurrentAssignmentSummaryResponse> Assignments { get; set; } = new();
 
     public async Task OnGet(CancellationToken cancellationToken)
     {
         _logger.Information("Requested to retrieve list of Assignments by user {User}", _currentUserService.UserName);
 
-        Result<List<CurrentAssignmentSummaryResponse>> assignmentRequest = await _mediator.Send(new GetCurrentAssignmentsListingQuery(), cancellationToken);
+        Result<List<CurrentAssignmentSummaryResponse>> assignmentRequest = await _mediator.Send(new GetCurrentAssignmentsListingQuery(Filter), cancellationToken);
 
         if (assignmentRequest.IsFailure)
         {

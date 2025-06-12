@@ -30,7 +30,13 @@ internal sealed class GetCurrentAssignmentsListingQueryHandler
     {
         List<CurrentAssignmentSummaryResponse> response = new();
 
-        List<CanvasAssignment> assignments = await _assignmentRepository.GetAllCurrentAndFuture(cancellationToken);
+        List<CanvasAssignment> assignments = request.Selected switch
+        {
+            GetCurrentAssignmentsListingQuery.Filter.Current => await _assignmentRepository.GetAllCurrentAndFuture(cancellationToken),
+            GetCurrentAssignmentsListingQuery.Filter.All => await _assignmentRepository.GetFromCurrentYear(cancellationToken),
+            GetCurrentAssignmentsListingQuery.Filter.Expired => await _assignmentRepository.GetExpiredFromCurrentYear(cancellationToken),
+            _ => await _assignmentRepository.GetAllCurrentAndFuture(cancellationToken)
+        };
 
         if (assignments.Count == 0)
             return response;
@@ -44,7 +50,7 @@ internal sealed class GetCurrentAssignmentsListingQueryHandler
 
             string courseName = $"Y{course.Grade.AsNumber()} {course.Name}";
 
-            CurrentAssignmentSummaryResponse entry = new CurrentAssignmentSummaryResponse(
+            CurrentAssignmentSummaryResponse entry = new(
                 assignment.Id,
                 courseName,
                 assignment.Name,
