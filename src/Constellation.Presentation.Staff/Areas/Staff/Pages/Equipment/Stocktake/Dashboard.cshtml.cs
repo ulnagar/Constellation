@@ -5,6 +5,7 @@ using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEvent;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
@@ -60,9 +61,9 @@ public class DashboardModel : BasePageModel
         _logger
             .Information("Requested to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
         
-        string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(staffId))
+        if (string.IsNullOrWhiteSpace(claimStaffId))
         {
             ModalContent = new ErrorDisplay(
                 DomainErrors.Auth.UserNotFound,
@@ -74,6 +75,9 @@ public class DashboardModel : BasePageModel
 
             return Page();
         }
+
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
 
         Result<StocktakeEventResponse> eventRequest = await _mediator.Send(new GetStocktakeEventQuery(Id));
 

@@ -7,7 +7,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyVersion>1.0.25154.0</AssemblyVersion>
+    <AssemblyVersion>1.0.25164.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

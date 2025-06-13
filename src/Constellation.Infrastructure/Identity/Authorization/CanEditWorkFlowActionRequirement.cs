@@ -56,7 +56,7 @@ public sealed class IsAssignedToActionByRoute : AuthorizationHandler<CanEditWork
             .Set<Action>()
             .AnyAsync(record =>
                 record.Id == actionId &&
-                record.AssignedToId == userStaffId);
+                record.AssignedToId.ToString() == userStaffId);
 
         if (assignedToUser)
             context.Succeed(requirement);
@@ -94,7 +94,7 @@ public sealed class IsAssignedToActionByResource : AuthorizationHandler<CanEditW
             .Set<Action>()
             .AnyAsync(record =>
                 record.Id == actionId &&
-                record.AssignedToId == userStaffId);
+                record.AssignedToId.ToString() == userStaffId);
 
         if (assignedToUser) 
             context.Succeed(requirement);

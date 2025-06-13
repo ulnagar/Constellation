@@ -12,6 +12,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -146,7 +147,7 @@ public class DetailsModel : BasePageModel
         return Partial("RemoveStaffMemberFromTrainingModuleModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetRemoveStaff(string staffId)
+    public async Task<IActionResult> OnGetRemoveStaff(StaffId staffId)
     {
         AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 

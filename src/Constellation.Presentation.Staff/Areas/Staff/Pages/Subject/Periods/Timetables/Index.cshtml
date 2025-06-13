@@ -19,7 +19,7 @@
         <div class="form-group row">
             <label class="col-md-2">Teacher</label>
             <div class="col-md-5">
-                <select name="staffId" asp-items="@(new SelectList(Model.Staff, nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.DisplayName)))" class="form-control combo custom-select">
+                <select name="staffId" asp-items="@(new SelectList(Model.Staff, nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.Name.DisplayName)))" class="form-control combo custom-select">
                     <option selected="selected" value=""> -- Please Select -- </option>
                 </select>
             </div>

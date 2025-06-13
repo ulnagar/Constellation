@@ -51,7 +51,7 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
                 .Set<TrainingCompletion>()
                 .AnyAsync(record => 
                     record.Id == completionId && 
-                    record.StaffId == userStaffId);
+                    record.StaffId.ToString() == userStaffId);
 
             if (userOwns)
                 context.Succeed(requirement);
@@ -82,7 +82,7 @@ public class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanVi
                 .Set<TrainingCompletion>()
                 .AnyAsync(record => 
                     record.Id == completionId && 
-                    record.StaffId == userStaffId);
+                    record.StaffId.ToString() == userStaffId);
 
             if (userOwns)
                 context.Succeed(requirement);

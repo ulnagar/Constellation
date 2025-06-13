@@ -10,6 +10,7 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -222,7 +223,7 @@ public class RollModel : BasePageModel
                 TutorialId,
                 string.Empty,
                 DateOnly.MinValue,
-                string.Empty,
+                StaffId.Empty,
                 string.Empty,
                 Core.Enums.TutorialRollStatus.Unsubmitted,
                 new List<TutorialRollStudentResponse>());
@@ -245,7 +246,7 @@ public class RollModel : BasePageModel
             TutorialId,
             string.Empty,
             DateOnly.MinValue,
-            string.Empty,
+            StaffId.Empty,
             string.Empty,
             Core.Enums.TutorialRollStatus.Unsubmitted,
             new List<TutorialRollStudentResponse>());

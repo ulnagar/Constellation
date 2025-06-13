@@ -1,10 +1,11 @@
 ﻿@page "{id?}"
+@using Constellation.Core.Models.StaffMembers.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Staff.UpsertModel
 
 @{
 }
 
-<h2>@(string.IsNullOrWhiteSpace(Model.Id) ? "New Staff Member" : "Edit Staff Member")</h2>
+<h2>@(Model.Id == null || Model.Id == StaffId.Empty ? "New Staff Member" : "Edit Staff Member")</h2>
 
 <div class="page-menu">
     <a asp-page="/Partner/Staff/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -15,12 +16,12 @@
 <form method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
+        
         <div class="form-group row">
-            <label asp-for="StaffId" class="col-md-2">Staff Id</label>
+            <label asp-for="EmployeeId" class="col-md-2">Employee Id</label>
             <div class="col-md-3">
-                <input asp-for="StaffId" class="form-control" readonly="@(!string.IsNullOrWhiteSpace(Model.Id))" />
-                <span asp-validation-for="StaffId" class="text-danger"></span>
+                <input asp-for="EmployeeId" class="form-control" />
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
             </div>
         </div>
 
@@ -33,18 +34,36 @@
         </div>
 
         <div class="form-group row">
+            <label asp-for="PreferredName" class="col-md-2">Preferred Name</label>
+            <div class="col-md-3">
+                <input asp-for="PreferredName" class="form-control" />
+                <span asp-validation-for="PreferredName" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
             <label asp-for="LastName" class="col-md-2">Last Name</label>
             <div class="col-md-3">
                 <input asp-for="LastName" class="form-control" />
                 <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
         </div>
+        
+        <div class="form-group row">
+            <label asp-for="Gender" class="col-md-2"></label>
+            <div class="col-md-3">
+                <select asp-for="Gender" asp-items="Model.GenderList" class="form-control">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Gender" class="text-danger"></span>
+            </div>
+        </div>
 
         <div class="form-group row">
-            <label asp-for="PortalUsername" class="col-md-2">DoE Username</label>
+            <label asp-for="EmailAddress" class="col-md-2">Email Address</label>
             <div class="col-md-3">
-                <input asp-for="PortalUsername" class="form-control" />
-                <span asp-validation-for="PortalUsername" class="text-danger"></span>
+                <input asp-for="EmailAddress" class="form-control" />
+                <span asp-validation-for="EmailAddress" class="text-danger"></span>
             </div>
         </div>
 

@@ -5,12 +5,12 @@ using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Domains.Training.Queries.GetModuleStatusByStaffMember;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -41,7 +41,7 @@ public class StaffMemberModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; }
+    public StaffId Id { get; set; }
 
     public List<ModuleStatusResponse> Modules { get; set; } = new();
     public StaffResponse? StaffMember { get; set; }

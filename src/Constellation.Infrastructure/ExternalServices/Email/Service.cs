@@ -18,6 +18,7 @@ using Core.Models.Awards;
 using Core.Models.Covers;
 using Core.Models.Offerings;
 using Core.Models.SchoolContacts;
+using Core.Models.StaffMembers;
 using Core.Models.Students;
 using Core.Models.Subjects;
 using Core.Models.ThirdPartyConsent;
@@ -1195,7 +1196,7 @@ public sealed class Service : IEmailService
         Attachment certificate, 
         StudentAward award,
         Student? student,
-        Staff? teacher,
+        StaffMember? teacher,
         CancellationToken cancellationToken = default)
     {
         NewAwardCertificateEmailViewModel viewModel = new()
@@ -1208,7 +1209,7 @@ public sealed class Service : IEmailService
             AwardedOn = award.AwardedOn,
             AwardReason = award.Reason,
             StudentName = student?.Name.DisplayName,
-            TeacherName = teacher?.DisplayName
+            TeacherName = teacher?.Name.DisplayName
         };
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Awards/NewAwardCertificateEmail.cshtml", viewModel);
@@ -1304,7 +1305,7 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients,
         Case item,
         Action action,
-        Staff assignee,
+        StaffMember assignee,
         CancellationToken cancellationToken = default)
     {
         ActionAssignedEmailViewModel viewModel = new()
@@ -1313,7 +1314,7 @@ public sealed class Service : IEmailService
             SenderName = "Aurora College",
             SenderTitle = "",
             Preheader = "",
-            TeacherName = assignee.DisplayName,
+            TeacherName = assignee.Name.DisplayName,
             ActionDescription = action.ToString(),
             CaseDescription = item.ToString(),
             Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
@@ -1328,7 +1329,7 @@ public sealed class Service : IEmailService
         List<EmailRecipient> recipients,
         Case item,
         Action action,
-        Staff assignee,
+        StaffMember assignee,
         CancellationToken cancellationToken = default)
     {
         ActionAssignedEmailViewModel viewModel = new()
@@ -1337,7 +1338,7 @@ public sealed class Service : IEmailService
             SenderName = "Aurora College",
             SenderTitle = "",
             Preheader = "",
-            TeacherName = assignee.DisplayName,
+            TeacherName = assignee.Name.DisplayName,
             ActionDescription = action.ToString(),
             CaseDescription = item.ToString(),
             Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"

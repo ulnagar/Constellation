@@ -13,6 +13,7 @@ using Areas;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -151,9 +152,9 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxStaffModal(string reportType)
     {
-        Dictionary<string, string> staffList = new();
+        Dictionary<StaffId, string> staffList = new();
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {

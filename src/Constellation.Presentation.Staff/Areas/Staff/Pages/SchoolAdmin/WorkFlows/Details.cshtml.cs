@@ -17,6 +17,7 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -206,9 +207,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxReassignAction(Guid actionId)
     {
-        Dictionary<string, string> staffList = new();
+        Dictionary<StaffId, string> staffList = new();
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
@@ -232,7 +233,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostReassignAction(
         ActionId actionId, 
-        string staffId)
+        StaffId staffId)
     {
         ReassignActionCommand command = new(Id, actionId, staffId);
 
@@ -265,9 +266,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxNewAction(string actionType)
     {
-        Dictionary<string, string> staffResult = new();
+        Dictionary<StaffId, string> staffResult = new();
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
@@ -339,7 +340,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewSentralAction(AddCreateSentralEntryActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
@@ -384,9 +385,11 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewDetailAction(AddCaseDetailUpdateActionViewModel viewModel)
     {
-        string staffMemberId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
 
-        AddCaseDetailUpdateActionCommand command = new(Id, staffMemberId, viewModel.Details);
+        AddCaseDetailUpdateActionCommand command = new(Id, staffId, viewModel.Details);
 
         _logger
             .ForContext(nameof(AddCaseDetailUpdateActionCommand), command, true)
@@ -417,7 +420,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewInterviewAction(AddParentInterviewActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
@@ -462,7 +465,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewPhoneAction(AddPhoneParentActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
@@ -507,7 +510,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewEmailAction(AddSendEmailActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 
@@ -552,7 +555,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewIncidentAction(AddSentralIncidentStatusActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
 

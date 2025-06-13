@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
@@ -61,7 +62,7 @@ internal sealed class CaseRepository : ICaseRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<int> CountActiveActionsForUser(
-        string staffId, 
+        StaffId staffId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Case>()
@@ -82,7 +83,7 @@ internal sealed class CaseRepository : ICaseRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<Case?> GetTrainingCaseForStaffAndModule(
-        string staffId, 
+        StaffId staffId, 
         TrainingModuleId moduleId, 
         CancellationToken cancellationToken = default) =>
         await _context

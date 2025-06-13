@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Presentation.Server.Services;
 
+using Application.Models.Auth;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using System.Security.Claims;
 
 /// <summary>
@@ -32,4 +34,21 @@ public class CurrentUserService : ICurrentUserService
         User.Claims.First(claim => claim.Type == ClaimTypes.Email).Value;
 
     public bool IsAuthenticated => User is not null && (User.Identity?.IsAuthenticated ?? false);
+
+    public StaffId StaffId => GetStaffId();
+
+    private StaffId GetStaffId()
+    {
+        string? claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+
+        if (claimStaffId is null)
+            return StaffId.Empty;
+
+        bool guidSuccess = Guid.TryParse(claimStaffId, out Guid guidStaffId);
+
+        if (!guidSuccess)
+            return StaffId.Empty;
+
+        return StaffId.FromValue(guidStaffId);
+    }
 }

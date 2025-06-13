@@ -98,7 +98,7 @@ public class SubmitModel : BasePageModel
         }
 
         StaffList = teachers.Value
-            .OrderBy(teacher => teacher.LastName)
+            .OrderBy(teacher => teacher.Name.SortOrder)
             .ToList();
     }
 

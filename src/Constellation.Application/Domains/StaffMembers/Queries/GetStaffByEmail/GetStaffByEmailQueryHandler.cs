@@ -23,6 +23,6 @@ internal sealed class GetStaffByEmailQueryHandler
     {
         StaffMember teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
 
-        return new StaffSelectionListResponse(teacher.Id, teacher.Name);
+        return new StaffSelectionListResponse(teacher.Id, teacher.EmployeeId, teacher.Name);
     }
 }

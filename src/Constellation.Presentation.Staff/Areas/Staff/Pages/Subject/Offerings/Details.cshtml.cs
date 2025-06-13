@@ -23,6 +23,7 @@ using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Canvas.Models;
 using Core.Models.Offerings.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Errors;
 using Core.Models.Timetables.Identifiers;
@@ -327,7 +328,7 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnGetRemoveTeacher(
-        string staffId,
+        StaffId staffId,
         [ModelBinder(typeof(FromValueBinder))] AssignmentType assignmentType)
     {
         RemoveTeacherFromOfferingCommand command = new(Id, staffId, assignmentType);

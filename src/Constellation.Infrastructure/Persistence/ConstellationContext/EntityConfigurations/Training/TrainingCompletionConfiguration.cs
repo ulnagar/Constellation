@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Training;
 
-using Constellation.Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -22,8 +22,8 @@ internal sealed class TrainingCompletionConfiguration : IEntityTypeConfiguration
                 value => TrainingCompletionId.FromValue(value));
 
         builder
-            .HasOne<Staff>()
-            .WithMany(staff => staff.TrainingCompletionRecords)
+            .HasOne<StaffMember>()
+            .WithMany()
             .HasForeignKey(completion => completion.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
     }

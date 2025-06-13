@@ -9,11 +9,11 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -50,7 +50,7 @@ public class BulkAddMembersModel : BasePageModel
     public List<StaffResponse> StaffMembers { get; set; } = new();
 
     [BindProperty]
-    public List<string> SelectedStaffIds { get; set; } = new();
+    public List<StaffId> SelectedStaffIds { get; set; } = new();
 
    
     public async Task OnGet() => await PreparePage();

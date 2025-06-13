@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TeacherAddFaculty;
 
 using Application.Domains.Faculties.Queries.GetFacultiesAsDictionary;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -23,7 +24,7 @@ public class TeacherAddFacultyViewComponent : ViewComponent
         _staffRepository = staffRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(string staffId)
+    public async Task<IViewComponentResult> InvokeAsync(StaffId staffId)
     {
         TeacherAddFacultySelection viewModel = new();
 
@@ -36,13 +37,13 @@ public class TeacherAddFacultyViewComponent : ViewComponent
             viewModel.Faculties = new SelectList(null, "");
         }
 
-        Staff staffMember = await _staffRepository.FromIdForExistCheck(staffId);
+        StaffMember? staffMember = await _staffRepository.GetById(staffId);
 
         if (staffMember is null)
             return View(viewModel);
 
         viewModel.StaffId = staffId;
-        viewModel.StaffName = staffMember.DisplayName;
+        viewModel.StaffName = staffMember.Name.DisplayName;
         viewModel.FacultyRoles = new SelectList(FacultyMembershipRole.Enumerations(), "");
 
         return View(viewModel);

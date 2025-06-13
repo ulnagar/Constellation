@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
 using Core.Abstractions.Clock;
 using Core.Enums;
+using Core.Models.StaffMembers;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,12 +36,24 @@ public class SchoolRepository : ISchoolRepository
             .Select(enrolment => enrolment.SchoolCode)
             .Distinct()
             .ToListAsync(cancellationToken);
-        
+
+        List<string> staffSchoolCodes = await _context
+            .Set<StaffMember>()
+            .Where(member => !member.IsDeleted)
+            .SelectMany(member => member.SchoolAssignments)
+            .Where(assignment =>
+                !assignment.IsDeleted &&
+                assignment.StartDate <= _dateTime.Today &&
+                (assignment.EndDate == null || assignment.EndDate >= _dateTime.Today))
+            .Select(assignment => assignment.SchoolCode)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         return await _context
             .Set<School>()
             .Where(school =>
                 studentSchoolCodes.Contains(school.Code) ||
-                school.Staff.Any(staff => !staff.IsDeleted))
+                staffSchoolCodes.Contains(school.Code))
             .ToListAsync(cancellationToken);
     }
 
@@ -57,12 +70,24 @@ public class SchoolRepository : ISchoolRepository
                 (enrolment.EndDate == null || enrolment.EndDate >= _dateTime.Today))
             .Select(enrolment => enrolment.SchoolCode)
             .ToListAsync(cancellationToken);
-        
+
+        List<string> staffSchoolCodes = await _context
+            .Set<StaffMember>()
+            .Where(member => !member.IsDeleted)
+            .SelectMany(member => member.SchoolAssignments)
+            .Where(assignment =>
+                !assignment.IsDeleted &&
+                assignment.StartDate <= _dateTime.Today &&
+                (assignment.EndDate == null || assignment.EndDate >= _dateTime.Today))
+            .Select(assignment => assignment.SchoolCode)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
         return await _context
             .Set<School>()
             .Where(school =>
                 !studentSchoolCodes.Contains(school.Code) &&
-                school.Staff.All(staff => staff.IsDeleted))
+                !staffSchoolCodes.Contains(school.Code))
             .ToListAsync(cancellationToken);
     }
 

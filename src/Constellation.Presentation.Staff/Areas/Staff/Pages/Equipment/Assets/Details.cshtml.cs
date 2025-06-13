@@ -18,6 +18,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -140,7 +141,7 @@ public class DetailsModel : BasePageModel
 
         if (viewModel.AllocationType.Equals(AllocationType.Staff))
         {
-            if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+            if (viewModel.StaffId == StaffId.Empty)
             {
                 ModalContent = new ErrorDisplay(AllocationErrors.StaffEmpty);
 
@@ -475,16 +476,19 @@ public class DetailsModel : BasePageModel
 
         if (currentStaffId is null)
         {
-            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
+            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.Name.SortOrder), nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.Name.DisplayName));
         }
         else
         {
-            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == currentStaffId);
+            var guidStaffId = Guid.Parse(currentStaffId);
+            StaffId staffId = StaffId.FromValue(guidStaffId);
+
+            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == staffId);
 
             viewModel.StaffList = new SelectList(
-                staff.Value.OrderBy(entry => entry.LastName),
-                "StaffId",
-                "DisplayName",
+                staff.Value.OrderBy(entry => entry.Name.SortOrder),
+                nameof(StaffSelectionListResponse.StaffId),
+                nameof(StaffSelectionListResponse.Name.DisplayName),
                 currentStaffMember?.StaffId);
         }
 

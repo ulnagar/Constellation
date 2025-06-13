@@ -7,6 +7,7 @@ using Constellation.Core.Models.Casuals;
 using Constellation.Infrastructure.DependencyInjection;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.Students;
 using Core.Models.Timetables;
 using Microsoft.EntityFrameworkCore;
@@ -73,7 +74,7 @@ public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonSer
             .ToListAsync();
 
         var staff = await context
-            .Set<Staff>()
+            .Set<StaffMember>()
             .Where(teacher => !teacher.IsDeleted)
             .AsNoTracking()
             .ToListAsync();
@@ -101,16 +102,16 @@ public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonSer
 
         foreach (var teacher in staff)
         {
-            var dto = new ClassMonitorDtos.MonitorUser
-            {
-                Id = teacher.StaffId,
-                DisplayName = teacher.DisplayName,
-                UserType = "Staff",
-                UserPrincipalId = teacher.AdobeConnectPrincipalId,
-                IsDeleted = teacher.IsDeleted
-            };
+            //var dto = new ClassMonitorDtos.MonitorUser
+            //{
+            //    Id = teacher.Id.ToString(),
+            //    DisplayName = teacher.Name.DisplayName,
+            //    UserType = "Staff",
+            //    UserPrincipalId = teacher.AdobeConnectPrincipalId,
+            //    IsDeleted = teacher.IsDeleted
+            //};
 
-            Cache.Users.Add(dto);
+            //Cache.Users.Add(dto);
         }
 
         foreach (var casual in casuals)

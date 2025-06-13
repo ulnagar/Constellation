@@ -2,6 +2,7 @@
 
 using Core.Models;
 using Core.Models.Offerings;
+using Core.Models.StaffMembers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Identifiers;
@@ -43,7 +44,7 @@ internal sealed class ActionConfiguration : IEntityTypeConfiguration<Action>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .HasOne<Staff>()
+            .HasOne<StaffMember>() 
             .WithMany()
             .HasForeignKey(action => action.AssignedToId)
             .IsRequired(false)

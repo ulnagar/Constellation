@@ -6,15 +6,14 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Primitives;
 using Core.Abstractions.Clock;
 using Core.Extensions;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.Students.Enums;
 using Core.Shared;
 using System;
 using System.Threading;
@@ -73,7 +72,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             .ThenBy(student => student.Name.SortOrder)
             .ToList();
 
-        List<Staff> teachers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> teachers = await _staffRepository.GetAllActive(cancellationToken);
 
         _logger
             .Information("Found {count} students to process.", students.Count);
@@ -182,18 +181,20 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
             .Information("Stopping Sentral Awards Scan.");
     }
 
-    private void ProcessAward(AwardIncidentResponse award, StudentAward matchingAward, Student student, List<Staff> teachers)
+    private void ProcessAward(AwardIncidentResponse award, StudentAward matchingAward, Student student, List<StaffMember> teachers)
     {
-        Staff teacher = teachers.FirstOrDefault(staff =>
+        StaffMember teacher = teachers.FirstOrDefault(staff =>
         {
             string[] splitName = award.TeacherName.Trim().Split(' ');
 
-            if (staff.FirstName.Contains(splitName[0], StringComparison.InvariantCultureIgnoreCase) && staff.LastName.Contains(splitName[1], StringComparison.InvariantCultureIgnoreCase))
+            if (
+                (staff.Name.FirstName.Contains(splitName[0], StringComparison.InvariantCultureIgnoreCase) || staff.Name.PreferredName.Contains(splitName[0], StringComparison.InvariantCultureIgnoreCase)) && 
+                staff.Name.LastName.Contains(splitName[1], StringComparison.InvariantCultureIgnoreCase))
                 return true;
 
             string username = award.TeacherName.Trim().Replace(' ', '.').Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase);
 
-            return staff.PortalUsername.Contains(username, StringComparison.InvariantCultureIgnoreCase);
+            return staff.EmailAddress.Email.Contains(username, StringComparison.InvariantCultureIgnoreCase);
         });
 
         if (teacher is null)
@@ -209,7 +210,7 @@ internal sealed class SentralAwardSyncJob : ISentralAwardSyncJob
         // Update existing entry with the new details
         matchingAward.Update(
             award.IncidentId,
-            teacher.StaffId,
+            teacher.Id,
             award.IssueReason);
     }
 }

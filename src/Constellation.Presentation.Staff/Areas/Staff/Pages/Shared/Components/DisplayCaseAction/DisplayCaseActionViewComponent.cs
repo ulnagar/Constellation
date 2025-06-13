@@ -2,6 +2,7 @@
 
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.WorkFlow;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Core.Models.WorkFlow.Repositories;
@@ -38,12 +39,12 @@ public class DisplayCaseActionViewComponent : ViewComponent
 
         List<Action> subActions = item.Actions.Where(entry => entry.ParentActionId == action.Id).ToList();
 
-        string? currentUserId = UserClaimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        StaffId staffId = _currentUserService.StaffId;
 
-        bool assignedToMe = action.AssignedToId == currentUserId;
+        bool assignedToMe = action.AssignedToId == staffId;
 
-        bool assignedToMeInChain = action.AssignedToId == currentUserId ||
-                            subActions.Any(subAction => subAction.AssignedToId == currentUserId);
+        bool assignedToMeInChain = action.AssignedToId == staffId ||
+                            subActions.Any(subAction => subAction.AssignedToId == staffId);
 
         AuthorizationResult isAdmin = await _authorizationService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.CanManageWorkflows);
 

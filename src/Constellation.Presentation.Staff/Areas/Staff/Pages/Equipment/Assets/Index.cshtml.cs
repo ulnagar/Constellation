@@ -13,6 +13,7 @@ using Constellation.Application.Domains.AssetManagement.Assets.Models;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
@@ -115,16 +116,19 @@ public class IndexModel : BasePageModel
 
         if (currentStaffId is null)
         {
-            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
+            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.Name.SortOrder), nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.Name.DisplayName));
         }
         else
         {
-            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == currentStaffId);
+            Guid guidStaffId = Guid.Parse(currentStaffId);
+            StaffId staffId = StaffId.FromValue(guidStaffId);
+
+            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == staffId);
 
             viewModel.StaffList = new(
-                staff.Value.OrderBy(entry => entry.LastName),
-                "StaffId",
-                "DisplayName",
+                staff.Value.OrderBy(entry => entry.Name.SortOrder),
+                nameof(StaffSelectionListResponse.StaffId),
+                nameof(StaffSelectionListResponse.Name.DisplayName),
                 currentStaffMember?.StaffId);
         }
 

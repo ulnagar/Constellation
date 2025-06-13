@@ -5,6 +5,7 @@ using Application.Domains.Training.Models;
 using Application.Domains.Training.Queries.GetModuleDetails;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -26,14 +27,14 @@ public class AddStaffMemberToTrainingModuleViewComponent : ViewComponent
         if (module.IsFailure)
             return Content(string.Empty);
         
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
             return Content(string.Empty);
         }
 
-        Dictionary<string, string> staffResult = staffListRequest.Value;
+        Dictionary<StaffId, string> staffResult = staffListRequest.Value;
 
         foreach (ModuleDetailsDto.Assignee assignee in module.Value.Assignees)
             staffResult.Remove(assignee.StaffId);

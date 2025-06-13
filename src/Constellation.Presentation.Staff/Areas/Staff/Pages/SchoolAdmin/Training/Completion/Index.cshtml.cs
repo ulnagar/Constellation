@@ -7,11 +7,11 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.StaffTrainingReport;
@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
 
         _logger.Information("Requested to retrieve list of Training Completion records by user {User}", _currentUserService.UserName);
 
-        Result<List<CompletionRecordDto>> recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(null));
+        Result<List<CompletionRecordDto>> recordsRequest = await _mediator.Send(new GetListOfCompletionRecordsQuery(StaffId.Empty));
 
         if (recordsRequest.IsFailure)
         {

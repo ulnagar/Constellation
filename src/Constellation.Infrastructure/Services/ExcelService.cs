@@ -15,7 +15,6 @@ using Application.Domains.Training.Queries.GenerateOverallReport;
 using Application.Domains.WorkFlows.Queries.ExportOpenCaseReport;
 using Application.DTOs;
 using Application.Extensions;
-using Application.Helpers;
 using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
@@ -25,10 +24,10 @@ using Constellation.Application.Domains.MeritAwards.Nominations.Queries.ExportAw
 using Constellation.Application.Domains.Students.Commands.ImportStudentsFromFile;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Assets;
-using Constellation.Core.Models.Students.Enums;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -656,8 +655,12 @@ public class ExcelService : IExcelService
                 if (module is null)
                     continue;
 
+                string stringId = workSheet.Cells[1, column].GetCellValue<string>();
+                Guid guidId = Guid.Parse(stringId);
+                StaffId staffId = StaffId.FromValue(guidId);
+
                 TrainingCompletion entry = TrainingCompletion.Create(
-                    workSheet.Cells[1, column].GetCellValue<string>(),
+                    staffId,
                     module.Id,
                     dateCompleted);
 

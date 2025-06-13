@@ -6,9 +6,9 @@ using Constellation.Application.Domains.Offerings.Queries.GetOfferingDetails;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Shared.Helpers.ModelBinders;
 
 public class AddTeacherToOfferingViewComponent : ViewComponent
 {
@@ -25,11 +25,11 @@ public class AddTeacherToOfferingViewComponent : ViewComponent
         Result<OfferingDetailsResponse> offering = await _mediator.Send(new GetOfferingDetailsQuery(id));
         Result<List<StaffSelectionListResponse>> staffResult = await _mediator.Send(new GetStaffForSelectionListQuery());
 
-        Dictionary<string, string> staffList = new();
+        Dictionary<StaffId, string> staffList = new();
 
-        foreach (StaffSelectionListResponse staff in staffResult.Value.OrderBy(staff => staff.LastName))
+        foreach (StaffSelectionListResponse staff in staffResult.Value.OrderBy(staff => staff.Name.LastName))
         {
-            staffList.Add(staff.StaffId, $"{staff.FirstName} {staff.LastName}");
+            staffList.Add(staff.StaffId, staff.Name.DisplayName);
         }
 
         Dictionary<string, string> resourceList = new();

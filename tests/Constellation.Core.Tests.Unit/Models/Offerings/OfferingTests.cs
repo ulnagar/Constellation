@@ -5,7 +5,7 @@ using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Identifiers;
-using Core.Models.Timetables.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 
 public class OfferingTests
 {
@@ -154,7 +154,7 @@ public class OfferingTests
         );
 
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.AddTeacher(new(), AssignmentType.ClassroomTeacher);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -172,9 +172,11 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
+        var staffId = new StaffId();
+
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
-        var entry = sut.Teachers.FirstOrDefault(assignment => assignment.StaffId == "1");
+        var result = sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
+        var entry = sut.Teachers.FirstOrDefault(assignment => assignment.StaffId == staffId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -193,11 +195,13 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
+        var staffId = new StaffId();
+        
         // Arrange
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
@@ -216,12 +220,14 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var staffId = new StaffId();
+        
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
-        sut.RemoveTeacher("1", AssignmentType.ClassroomTeacher);
+        sut.RemoveTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -239,10 +245,12 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var staffId = new StaffId();
+        
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.Supervisor);
+        var result = sut.AddTeacher(staffId, AssignmentType.Supervisor);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -263,8 +271,10 @@ public class OfferingTests
 
         sut.ClearDomainEvents();
 
+        var staffId = new StaffId();
+        
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -284,13 +294,15 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today)
         );
-
-        sut.AddTeacher("1", AssignmentType.Supervisor);
+        
+        var staffId = new StaffId();
+        
+        sut.AddTeacher(staffId, AssignmentType.Supervisor);
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -310,12 +322,14 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var staffId = new StaffId();
+
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.RemoveTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -333,13 +347,15 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var staffId = new StaffId();
+        
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
         sut.ClearDomainEvents();
 
-        var assignment = sut.Teachers.FirstOrDefault(entry => entry.StaffId == "1");
+        var assignment = sut.Teachers.FirstOrDefault(entry => entry.StaffId == staffId);
 
         // Act
-        var result = sut.RemoveTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.RemoveTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -358,12 +374,14 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
+        var staffId = new StaffId();
+
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.RemoveTeacher(staffId, AssignmentType.ClassroomTeacher);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -384,12 +402,14 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.Supervisor);
+        var staffId = new StaffId();
+
+        sut.AddTeacher(staffId, AssignmentType.Supervisor);
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.RemoveTeacher(staffId, AssignmentType.ClassroomTeacher);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -408,13 +428,15 @@ public class OfferingTests
             DateOnly.FromDateTime(DateTime.Today)
         );
 
-        sut.AddTeacher("1", AssignmentType.ClassroomTeacher);
-        sut.AddTeacher("1", AssignmentType.Supervisor);
+        var staffId = new StaffId();
+
+        sut.AddTeacher(staffId, AssignmentType.ClassroomTeacher);
+        sut.AddTeacher(staffId, AssignmentType.Supervisor);
 
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher("1", AssignmentType.ClassroomTeacher);
+        var result = sut.RemoveTeacher(staffId, AssignmentType.ClassroomTeacher);
         var events = sut.GetDomainEvents();
 
         // Assert

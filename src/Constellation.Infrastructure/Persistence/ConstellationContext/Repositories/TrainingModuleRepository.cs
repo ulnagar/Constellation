@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Core.Models.Training.Repositories;
@@ -39,7 +40,7 @@ internal sealed class TrainingModuleRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<TrainingModule>> GetModulesByAssignee(
-        string staffId, 
+        StaffId staffId, 
         CancellationToken cancellationToken = default) => 
         await _context
             .Set<TrainingModule>()

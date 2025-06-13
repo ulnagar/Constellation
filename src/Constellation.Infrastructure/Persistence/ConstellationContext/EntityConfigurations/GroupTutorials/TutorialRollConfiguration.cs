@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.GroupTutorials;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.StaffMembers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,7 +28,7 @@ internal sealed class TutorialRollConfiguration : IEntityTypeConfiguration<Tutor
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasOne<Staff>()
+            .HasOne<StaffMember>()
             .WithMany()
             .HasForeignKey(roll => roll.StaffId)
             .OnDelete(DeleteBehavior.Restrict);

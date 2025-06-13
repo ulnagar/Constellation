@@ -120,7 +120,7 @@ public class IndexModel : BasePageModel
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
                 course.Name,
-                $"{primaryTeacher.FirstName[..1]} {primaryTeacher.LastName}",
+                $"{primaryTeacher.Name.FirstName[..1]} {primaryTeacher.Name.LastName}",
                 $"Year {course.Name[..2]}"));
         }
 

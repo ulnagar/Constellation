@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
 using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
@@ -24,7 +25,7 @@ public sealed class HasActiveStaffRecord : AuthorizationHandler<IsCurrentStaffMe
         if (emailClaim is null)
             return;
 
-        Staff? isStaffMember = await _staffRepository.GetCurrentByEmailAddress(emailClaim.Value);
+        StaffMember? isStaffMember = await _staffRepository.GetCurrentByEmailAddress(emailClaim.Value);
 
         if (isStaffMember is not null)
             context.Succeed(requirement);

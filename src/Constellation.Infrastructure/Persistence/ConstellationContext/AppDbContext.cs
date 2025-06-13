@@ -19,7 +19,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbCon
 
     public DbSet<MSTeamOperation> MSTeamOperations { get; set; }
     public DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
-    public DbSet<Staff> Staff { get; set; }
     public DbSet<JobActivation> JobActivations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

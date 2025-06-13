@@ -147,9 +147,9 @@ public class CreateModel : BasePageModel
             .Value
             .Select(teacher =>
                 new CoveringTeacherRecord(
-                    teacher.StaffId,
-                    $"{teacher.FirstName} {teacher.LastName}",
-                    $"{teacher.LastName}-{teacher.FirstName}",
+                    teacher.StaffId.ToString(),
+                    teacher.Name.DisplayName,
+                    teacher.Name.SortOrder,
                     "Teachers"
                 ))
             .ToList());
@@ -195,7 +195,7 @@ public class CreateModel : BasePageModel
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
                 course.Name,
-                $"{teachers.Value.First().FirstName[..1]} {teachers.Value.First().LastName}",
+                $"{teachers.Value.First().Name.FirstName[..1]} {teachers.Value.First().Name.LastName}",
                 $"Year {course.Name[..2]}"));
         }
     }

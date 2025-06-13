@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Models.StaffMembers.Identifiers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
@@ -11,7 +12,7 @@ public sealed class AddAssetSightingViewModel
     [ModelBinder(typeof(AssetNumberBinder))]
     public AssetNumber AssetNumber { get; set; } = AssetNumber.Empty;
 
-    public string StaffId { get; set; } = string.Empty;
+    public StaffId StaffId { get; set; } = StaffId.Empty;
 
     [DataType(DataType.DateTime)] //, DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
     public DateTime SightedAt { get; set; }

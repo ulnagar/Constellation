@@ -7,6 +7,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +54,7 @@ public class DetailsModel : BasePageModel
             Faculty = facultyRequest.Value;
     }
 
-    public async Task<IActionResult> OnPostRemoveMember([FromQuery]string staffId)
+    public async Task<IActionResult> OnPostRemoveMember([FromQuery]StaffId staffId)
     {
         FacultyId facultyId = Core.Models.Faculties.Identifiers.FacultyId.FromValue(FacultyId);
 

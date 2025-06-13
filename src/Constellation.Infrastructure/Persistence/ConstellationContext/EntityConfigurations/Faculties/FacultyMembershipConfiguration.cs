@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Faculties;
 
-using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,8 +28,8 @@ internal sealed class FacultyMembershipConfiguration : IEntityTypeConfiguration<
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne<Staff>()
-            .WithMany(staff => staff.Faculties)
+            .HasOne<StaffMember>()
+            .WithMany()
             .OnDelete(DeleteBehavior.NoAction);
 
         builder

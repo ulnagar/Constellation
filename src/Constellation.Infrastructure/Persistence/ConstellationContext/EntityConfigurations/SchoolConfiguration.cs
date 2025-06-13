@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 
 using Constellation.Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -27,8 +28,9 @@ public class SchoolConfiguration : IEntityTypeConfiguration<School>
             .HasForeignKey(s => s.SchoolCode)
             .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasMany(s => s.Staff)
-            .WithOne(s => s.School)
+        builder
+            .HasMany<SchoolAssignment>()
+            .WithOne()
             .HasForeignKey(s => s.SchoolCode)
             .OnDelete(DeleteBehavior.NoAction);
     }

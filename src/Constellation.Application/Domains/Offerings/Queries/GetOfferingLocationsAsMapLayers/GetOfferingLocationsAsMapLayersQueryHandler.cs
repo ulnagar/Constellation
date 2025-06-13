@@ -109,7 +109,7 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
         foreach (var school in schools)
         {
             int studentCount = await _studentRepository.GetCountCurrentStudentsFromSchool(school.Code, cancellationToken);
-            int staffCount = school.Staff.Count(entry => !entry.IsDeleted);
+            int staffCount = await _staffRepository.GetCountCurrentStaffFromSchool(school.Code, cancellationToken);
 
             MapItem marker = new()
             {

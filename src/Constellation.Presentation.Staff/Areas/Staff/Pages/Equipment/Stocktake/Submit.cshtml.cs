@@ -12,6 +12,7 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
@@ -116,9 +117,9 @@ public class SubmitModel : BasePageModel
 
     private async Task PreparePage()
     {
-        string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(staffId))
+        if (string.IsNullOrWhiteSpace(claimStaffId))
         {
             ModalContent = new ErrorDisplay(
                 DomainErrors.Auth.UserNotFound,
@@ -126,6 +127,9 @@ public class SubmitModel : BasePageModel
             
             return;
         }
+
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
 
         Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(staffId));
 
@@ -166,7 +170,7 @@ public class SubmitModel : BasePageModel
         }
 
         StaffList = teachers.Value
-            .OrderBy(teacher => teacher.LastName)
+            .OrderBy(teacher => teacher.Name.SortOrder)
             .ToList();
 
         Result<List<string>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());

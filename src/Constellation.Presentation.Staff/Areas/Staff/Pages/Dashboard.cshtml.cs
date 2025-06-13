@@ -61,9 +61,9 @@ public class DashboardModel : BasePageModel
         if (teacherRequest.IsFailure)
             return Page();
         
-        UserName = $"{teacherRequest.Value.FirstName} {teacherRequest.Value.LastName}";
+        UserName = teacherRequest.Value.Name.DisplayName;
 
-        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest.Value?.StaffId), cancellationToken);
+        Result<string> messageRequest = await _mediator.Send(new GetAffirmationQuery(teacherRequest.Value?.EmployeeId), cancellationToken);
 
         if (messageRequest.IsSuccess)
             Message = messageRequest.Value;

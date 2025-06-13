@@ -13,6 +13,7 @@ using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +52,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Staff Details";
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; } = string.Empty;
+    public StaffId Id { get; set; } = StaffId.Empty;
 
     public StaffDetailsResponse StaffMember { get; set; }
 

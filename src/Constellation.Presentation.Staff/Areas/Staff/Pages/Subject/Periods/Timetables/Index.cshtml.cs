@@ -72,6 +72,6 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Staff = staffRequest.Value.OrderBy(staff => staff.LastName).ThenBy(staff => staff.FirstName).ToList();
+        Staff = staffRequest.Value.OrderBy(staff => staff.Name.SortOrder).ToList();
     }
 }

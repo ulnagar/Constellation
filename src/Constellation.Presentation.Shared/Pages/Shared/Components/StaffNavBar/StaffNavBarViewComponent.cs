@@ -3,6 +3,7 @@
 using Application.Models.Auth;
 using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,7 +37,7 @@ public sealed class StaffNavBarViewComponent : ViewComponent
         viewModel.CanAccessSchoolPortal = schoolPortal.Succeeded;
 
         Result<List<TeacherOfferingResponse>> query =
-            await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+            await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(StaffId.Empty, username));
 
         if (query.IsFailure)
             return View("Default", viewModel);

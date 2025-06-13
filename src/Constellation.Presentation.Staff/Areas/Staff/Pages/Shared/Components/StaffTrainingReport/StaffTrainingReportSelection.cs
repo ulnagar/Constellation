@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffTrainingReport;
 
+using Core.Models.StaffMembers.Identifiers;
+
 public class StaffTrainingReportSelection
 {
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
     public bool IncludeCertificates { get; set; }
 
-    public Dictionary<string, string> StaffList { get; set; }
+    public Dictionary<StaffId, string> StaffList { get; set; }
 }

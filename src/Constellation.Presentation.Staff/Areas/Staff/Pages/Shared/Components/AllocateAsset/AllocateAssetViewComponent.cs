@@ -37,7 +37,7 @@ public class AllocateAssetViewComponent : ViewComponent
         if (staff.IsFailure)
             return Content(string.Empty);
 
-        viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
+        viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.Name.SortOrder), "StaffId", "DisplayName");
 
         Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
 

@@ -6,6 +6,8 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Enums;
 using Core.Models.Students.ValueObjects;
@@ -28,6 +30,15 @@ public class GroupTutorialTests
             _dateTimeProvider)
         .Value;
 
+    private StaffMember Teacher => StaffMember.Create(
+            EmployeeId.FromValue("1234567"),
+            Name.Create("John", string.Empty, "Tester").Value,
+            EmailAddress.Create("john.tester@det.nsw.edu.au").Value,
+            School,
+            Gender.Male,
+            false,
+            _dateTimeProvider)
+        .Value;
 
     [Fact]
     public void AddTeacher_ShouldReturnFailure_WhenTutorialHasExpired()
@@ -39,13 +50,8 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddDays(-1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
         // Act
-        var result = sut.AddTeacher(teacher);
+        var result = sut.AddTeacher(Teacher);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -64,13 +70,8 @@ public class GroupTutorialTests
 
         sut.Delete();
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
         // Act
-        var result = sut.AddTeacher(teacher);
+        var result = sut.AddTeacher(Teacher);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -87,17 +88,12 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
-        var initialResult = sut.AddTeacher(teacher);
+        var initialResult = sut.AddTeacher(Teacher);
 
         TutorialTeacherId? existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : null;
 
         // Act
-        var result = sut.AddTeacher(teacher);
+        var result = sut.AddTeacher(Teacher);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -115,19 +111,14 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
-        var initialResult = sut.AddTeacher(teacher);
+        var initialResult = sut.AddTeacher(Teacher);
 
         TutorialTeacherId? existingRecord = initialResult.IsSuccess ? initialResult.Value.Id : null;
 
-        sut.RemoveTeacher(teacher);
+        sut.RemoveTeacher(Teacher);
 
         // Act
-        var result = sut.AddTeacher(teacher);
+        var result = sut.AddTeacher(Teacher);
 
         // Assert
         existingRecord.Should().NotBeNull();
@@ -150,15 +141,10 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddTeacher(teacher, effectiveTo);
+        var result = sut.AddTeacher(Teacher, effectiveTo);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -178,18 +164,13 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
         // Act
-        var result = sut.RemoveTeacher(teacher);
+        var result = sut.RemoveTeacher(Teacher);
         var teachers = sut.Teachers.ToList();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        teachers.Any(member => member.StaffId == teacher.StaffId).Should().BeFalse();
+        teachers.Any(member => member.StaffId == Teacher.Id).Should().BeFalse();
     }
 
     [Fact]
@@ -202,15 +183,10 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher(teacher);
+        var result = sut.RemoveTeacher(Teacher);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -228,21 +204,16 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
-        var initialResult = sut.AddTeacher(teacher);
-        sut.RemoveTeacher(teacher);
+        var initialResult = sut.AddTeacher(Teacher);
+        sut.RemoveTeacher(Teacher);
 
         // Act
-        var result = sut.RemoveTeacher(teacher);
+        var result = sut.RemoveTeacher(Teacher);
         var teachers = sut.Teachers.ToList();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        teachers.Any(member => member.StaffId == teacher.StaffId && !member.IsDeleted).Should().BeFalse();
+        teachers.Any(member => member.StaffId == Teacher.Id && !member.IsDeleted).Should().BeFalse();
     }
 
     [Fact]
@@ -255,24 +226,19 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
-        var initialResult = sut.AddTeacher(teacher);
-        sut.RemoveTeacher(teacher);
+        var initialResult = sut.AddTeacher(Teacher);
+        sut.RemoveTeacher(Teacher);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher(teacher);
+        var result = sut.RemoveTeacher(Teacher);
         var teachers = sut.Teachers.ToList();
         var events = sut.GetDomainEvents();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         events.Should().HaveCount(0);
-        teachers.Any(member => member.StaffId == teacher.StaffId && !member.IsDeleted).Should().BeFalse();
+        teachers.Any(member => member.StaffId == Teacher.Id && !member.IsDeleted).Should().BeFalse();
     }
 
     [Fact]
@@ -285,20 +251,15 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
-        var initialResult = sut.AddTeacher(teacher);
+        var initialResult = sut.AddTeacher(Teacher);
 
         // Act
-        var result = sut.RemoveTeacher(teacher);
+        var result = sut.RemoveTeacher(Teacher);
         var teachers = sut.Teachers.ToList();
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        teachers.Any(member => member.StaffId == teacher.StaffId && !member.IsDeleted).Should().BeFalse();
+        teachers.Any(member => member.StaffId == Teacher.Id && !member.IsDeleted).Should().BeFalse();
     }
 
     [Fact]
@@ -310,17 +271,12 @@ public class GroupTutorialTests
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
-
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
-        sut.AddTeacher(teacher);
+        
+        sut.AddTeacher(Teacher);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher(teacher);
+        var result = sut.RemoveTeacher(Teacher);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -338,19 +294,14 @@ public class GroupTutorialTests
             "Stage 4 Mathematics",
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
-
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
+        
         var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(5));
 
-        sut.AddTeacher(teacher);
+        sut.AddTeacher(Teacher);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher(teacher, takesEffectOn);
+        var result = sut.RemoveTeacher(Teacher, takesEffectOn);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -368,20 +319,15 @@ public class GroupTutorialTests
             DateOnly.FromDateTime(DateTime.Today.AddMonths(-1)),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)));
 
-        var teacher = new Staff
-        {
-            StaffId = "123456789"
-        };
-
         var takesEffectOn = DateOnly.FromDateTime(DateTime.Today.AddDays(-5));
 
-        sut.AddTeacher(teacher);
+        sut.AddTeacher(Teacher);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.RemoveTeacher(teacher, takesEffectOn);
+        var result = sut.RemoveTeacher(Teacher, takesEffectOn);
         var events = sut.GetDomainEvents();
-        var teacherEntry = sut.Teachers.First(member => member.StaffId == teacher.StaffId);
+        var teacherEntry = sut.Teachers.First(member => member.StaffId == Teacher.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();

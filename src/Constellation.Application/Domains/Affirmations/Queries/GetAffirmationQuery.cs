@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Affirmations.Queries;
 
 using Abstractions.Messaging;
+using Core.Models.StaffMembers.ValueObjects;
 
 public sealed record GetAffirmationQuery(
-    string UserId)
+    EmployeeId EmployeeId)
     : IQuery<string>;

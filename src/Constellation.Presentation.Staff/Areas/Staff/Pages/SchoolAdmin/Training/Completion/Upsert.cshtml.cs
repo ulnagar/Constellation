@@ -17,6 +17,7 @@ using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.Sel
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Attachments.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -76,7 +77,7 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     [Required(ErrorMessage = "You must select a staff member")]
-    public string SelectedStaffId { get; set; }
+    public StaffId SelectedStaffId { get; set; } = StaffId.Empty;
 
     [BindProperty, DataType(DataType.Date)]
     [NotFutureDate]
@@ -86,9 +87,9 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public IFormFile? FormFile { get; set; }
 
-    public Dictionary<string, string> StaffOptions { get; set; } = new();
+    public Dictionary<StaffId, string> StaffOptions { get; set; } = new();
     public Dictionary<Guid, string> ModuleOptions { get; set; } = new();
-    public KeyValuePair<string, string> SoloStaffMember { get; set; }
+    public KeyValuePair<StaffId, string> SoloStaffMember { get; set; }
     public KeyValuePair<Guid, string> SoloModule { get; set; }
 
     public bool CanEditRecords { get; set; }
@@ -96,7 +97,9 @@ public class UpsertModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        var guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
 
         AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
         CanEditRecords = canEditTest.Succeeded;
@@ -172,7 +175,7 @@ public class UpsertModel : BasePageModel
 
         await SetUpForm();
 
-        if (Id != TrainingCompletionId.Empty && !CanEditRecords && SoloStaffMember.Key == string.Empty)
+        if (Id != TrainingCompletionId.Empty && !CanEditRecords && SoloStaffMember.Key == StaffId.Empty)
         {
             // This staff member is not on the list of staff. Something has gone wrong here.
 
@@ -184,9 +187,9 @@ public class UpsertModel : BasePageModel
 
     private async Task SetUpForm()
     {
-        string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
-        if (staffId is null)
+        if (claimStaffId is null)
         {
             _logger
                 .Warning("Could not determine current users Staff Id");
@@ -194,7 +197,10 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
+
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {

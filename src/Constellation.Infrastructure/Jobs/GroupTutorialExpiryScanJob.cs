@@ -8,6 +8,7 @@ using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 
 internal class GroupTutorialExpiryScanJob : IGroupTutorialExpiryScanJob
@@ -53,20 +54,20 @@ internal class GroupTutorialExpiryScanJob : IGroupTutorialExpiryScanJob
 
             _logger.Information("{id}: Found {count} teachers that have expired", jobId, teachers.Count);
 
-            List<Staff> staffMembers = await _staffRepository
+            List<StaffMember> staffMembers = await _staffRepository
                 .GetListFromIds(
                     teachers.Select(teacher => teacher.StaffId).ToList(),
                     token);
 
-            foreach (Staff staffMember in staffMembers)
+            foreach (StaffMember staffMember in staffMembers)
             {
-                _logger.Information("{id}: Removing {member}", jobId, staffMember.DisplayName);
+                _logger.Information("{id}: Removing {member}", jobId, staffMember.Name.DisplayName);
                 Result result = tutorial.RemoveTeacher(staffMember);
 
                 if (result.IsFailure)
-                    _logger.Warning("{id}: Failed to remove {member} from tutorial {tutorial}", jobId, staffMember.DisplayName, tutorial.Name);
+                    _logger.Warning("{id}: Failed to remove {member} from tutorial {tutorial}", jobId, staffMember.Name.DisplayName, tutorial.Name);
                 else
-                    _logger.Information("{id}: Successfully removed {member}", jobId, staffMember.DisplayName);
+                    _logger.Information("{id}: Successfully removed {member}", jobId, staffMember.Name.DisplayName);
             }
 
             List<TutorialEnrolment> enrolments = tutorial

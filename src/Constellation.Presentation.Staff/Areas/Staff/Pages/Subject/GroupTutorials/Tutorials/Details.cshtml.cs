@@ -14,6 +14,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -137,7 +138,7 @@ public class DetailsModel : BasePageModel
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
