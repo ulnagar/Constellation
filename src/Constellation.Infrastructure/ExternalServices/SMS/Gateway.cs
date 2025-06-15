@@ -152,9 +152,12 @@ internal sealed class Gateway : ISMSGateway
 
                 return response;
             }
-            catch
+            catch (Exception ex)
             {
                 // Wait and retry
+                _logger
+                    .Error("SMS Connection Failed: Attempt {attempt}, Error {error}", i, ex.Message);
+
                 await Task.Delay(5000);
             }
         }
