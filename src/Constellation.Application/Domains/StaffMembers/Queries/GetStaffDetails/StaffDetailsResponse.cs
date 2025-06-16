@@ -5,22 +5,32 @@ using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.ValueObjects;
+using System;
 using System.Collections.Generic;
 
 public sealed record StaffDetailsResponse(
     StaffId StaffId,
+    EmployeeId EmployeeId,
     Name StaffName,
     EmailAddress EmailAddress,
-    string SchoolName,
-    string SchoolCode,
     bool IsShared,
     bool IsDeleted,
+    List<StaffDetailsResponse.SchoolAssignmentResponse> SchoolAssignments,
     List<StaffDetailsResponse.FacultyMembershipResponse> Faculties,
     List<StaffDetailsResponse.OfferingResponse> Offerings,
     List<StaffDetailsResponse.SessionResponse> Sessions,
     List<StaffDetailsResponse.SchoolContactResponse> Contacts)
 {
+    public sealed record SchoolAssignmentResponse(
+        SchoolAssignmentId AssignmentId,
+        string SchoolCode,
+        string SchoolName,
+        bool IsDeleted,
+        DateOnly StartDate,
+        DateOnly? EndDate);
+
     public sealed record FacultyMembershipResponse(
         FacultyMembershipId MembershipId,
         FacultyId FacultyId,

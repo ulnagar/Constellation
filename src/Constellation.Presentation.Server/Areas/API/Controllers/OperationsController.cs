@@ -8,6 +8,7 @@ using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models;
 using Core.Models.Casuals;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -66,7 +67,7 @@ public class OperationsController : ControllerBase
 
         foreach (TeacherAssignmentMSTeamOperation operation in operations.AssignmentOperations)
         {
-            Staff staffMember = await _staffRepository.GetById(operation.StaffId);
+            StaffMember staffMember = await _staffRepository.GetById(operation.StaffId);
 
             if (staffMember is null)
                 continue;
@@ -75,7 +76,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = staffMember.EmailAddress
+                UserEmail = staffMember.EmailAddress.Email
             };
 
             teamOperation.Action = operation.Action switch
@@ -185,7 +186,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                UserEmail = operation.Staff.EmailAddress,
+                UserEmail = operation.Staff.EmailAddress.Email,
                 AdditionalInformation = "AllOwner"
             };
 
@@ -327,7 +328,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = operation.Staff.EmailAddress,
+                UserEmail = operation.Staff.EmailAddress.Email,
                 AdditionalInformation = "All"
             };
 

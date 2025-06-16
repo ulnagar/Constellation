@@ -161,6 +161,11 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
+    public void RemoveSchoolAssignment(SchoolAssignment assignment, IDateTimeProvider dateTime)
+    {
+        assignment.Delete(dateTime.Today, dateTime);
+    }
+
     public Result AddSystemLink(
         SystemType type,
         string value)

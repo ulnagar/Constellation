@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffDetails;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
@@ -75,14 +74,17 @@ internal sealed class GetStaffDetailsQueryHandler
             ? await _schoolRepository.GetById(staffMember.CurrentAssignment.SchoolCode, cancellationToken)
             : null;
 
-        if (school is null)
-        {
-            _logger
-                .ForContext(nameof(GetStaffDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(staffMember.CurrentAssignment?.SchoolCode), true)
-                .Warning("Failed to retrieve details of staff member");
+        List<StaffDetailsResponse.SchoolAssignmentResponse> schoolAssignments = new();
 
-            return Result.Failure<StaffDetailsResponse>(DomainErrors.Partners.School.NotFound(staffMember.CurrentAssignment?.SchoolCode));
+        foreach (SchoolAssignment assignment in staffMember.SchoolAssignments)
+        {
+            schoolAssignments.Add(new(
+                assignment.Id,
+                assignment.SchoolCode,
+                assignment.SchoolName,
+                assignment.IsDeleted,
+                assignment.StartDate,
+                assignment.EndDate));
         }
 
         List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
@@ -146,38 +148,42 @@ internal sealed class GetStaffDetailsQueryHandler
             }
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(school.Code, cancellationToken);
-
         List<StaffDetailsResponse.SchoolContactResponse> schoolContacts = new();
-
-        foreach (SchoolContact contact in contacts)
+        
+        if (school is not null)
         {
-            List<SchoolContactRole> assignments = contact.Assignments
-                .Where(entry => 
-                    entry.SchoolCode == school.Code && 
-                    !entry.IsDeleted)
-                .ToList();
+            List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(school.Code, cancellationToken);
 
-            foreach (SchoolContactRole assignment in assignments)
+
+            foreach (SchoolContact contact in contacts)
             {
-                schoolContacts.Add(new(
-                    contact.Id,
-                    contact.DisplayName,
-                    contact.EmailAddress,
-                    string.IsNullOrWhiteSpace(contact.PhoneNumber) ? school.PhoneNumber : contact.PhoneNumber,
-                    assignment.Role,
-                    school.Name));
-            }   
+                List<SchoolContactRole> assignments = contact.Assignments
+                    .Where(entry =>
+                        entry.SchoolCode == school.Code &&
+                        !entry.IsDeleted)
+                    .ToList();
+
+                foreach (SchoolContactRole assignment in assignments)
+                {
+                    schoolContacts.Add(new(
+                        contact.Id,
+                        contact.DisplayName,
+                        contact.EmailAddress,
+                        string.IsNullOrWhiteSpace(contact.PhoneNumber) ? school.PhoneNumber : contact.PhoneNumber,
+                        assignment.Role,
+                        school.Name));
+                }
+            }
         }
 
         return new StaffDetailsResponse(
             staffMember.Id,
+            staffMember.EmployeeId,
             staffMember.Name,
             staffMember.EmailAddress,
-            school.Name,
-            school.Code,
             staffMember.IsShared,
             staffMember.IsDeleted,
+            schoolAssignments,
             facultyMemberships,
             linkedOfferings,
             linkedSessions,
