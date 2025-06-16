@@ -2,6 +2,7 @@
 
 using Application.Models.Identity;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,5 +22,11 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
             .HasConversion(
                 id => id.Value,
                 value => StudentId.FromValue(value));
+
+        builder
+            .Property(user => user.StaffId)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
     }
 }

@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Auth;
 using Application.Models.Identity;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.DomainEvents;
 using Core.Enums;
@@ -78,7 +79,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
         {
             coveringTeacherRequests = existingRequests
                 .OfType<TeacherMSTeamOperation>()
-                .Where(operation => operation.StaffId == cover.TeacherId)
+                .Where(operation => operation.StaffId.ToString() == cover.TeacherId)
                 .ToList<MSTeamOperation>();
         }
 
@@ -113,7 +114,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 TeacherMSTeamOperation existingAddOperation = existingRequests
                     .OfType<TeacherMSTeamOperation>()
                     .FirstOrDefault(operation =>
-                        operation.StaffId == coverAdmin.StaffId.ToString() &&
+                        operation.StaffId == coverAdmin.StaffId &&
                         operation.Action == MSTeamOperationAction.Add);
 
                 if (existingAddOperation is not null)
@@ -158,10 +159,15 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 }
                 else
                 {
+                    bool success = Guid.TryParse(cover.TeacherId, out Guid staffIdGuid);
+                    StaffId staffId = success
+                        ? StaffId.FromValue(staffIdGuid)
+                        : StaffId.Empty;
+
                     TeacherMSTeamOperation removeEarlyOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -173,7 +179,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation addTimelyOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -191,7 +197,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation existingAddOperation = existingRequests
                         .OfType<TeacherMSTeamOperation>()
                         .FirstOrDefault(operation =>
-                            operation.StaffId == coverAdmin.StaffId.ToString() &&
+                            operation.StaffId == coverAdmin.StaffId &&
                             operation.Action == MSTeamOperationAction.Add &&
                             operation.DateScheduled == alreadyGranted.DateScheduled);
 
@@ -202,7 +208,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                         TeacherMSTeamOperation removeOperation = new()
                         {
                             OfferingId = cover.OfferingId,
-                            StaffId = coverAdmin.StaffId.ToString(),
+                            StaffId = coverAdmin.StaffId,
                             Action = MSTeamOperationAction.Remove,
                             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                             DateScheduled = DateTime.Today,
@@ -215,7 +221,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation addOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = coverAdmin.StaffId.ToString(),
+                        StaffId = coverAdmin.StaffId,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,
@@ -247,7 +253,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 TeacherMSTeamOperation existingRemoveOperation = existingRequests
                     .OfType<TeacherMSTeamOperation>()
                     .FirstOrDefault(operation =>
-                        operation.StaffId == coverAdmin.StaffId.ToString() &&
+                        operation.StaffId == coverAdmin.StaffId &&
                         operation.Action == MSTeamOperationAction.Remove);
 
                 if (existingRemoveOperation is not null)
@@ -293,10 +299,15 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 }
                 else
                 {
+                    bool success = Guid.TryParse(cover.TeacherId, out Guid staffIdGuid);
+                    StaffId staffId = success
+                        ? StaffId.FromValue(staffIdGuid)
+                        : StaffId.Empty;
+
                     TeacherMSTeamOperation reAddOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -308,7 +319,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation removeTimelyOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -326,7 +337,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation existingRemoveOperation = existingRequests
                         .OfType<TeacherMSTeamOperation>()
                         .FirstOrDefault(operation =>
-                            operation.StaffId == coverAdmin.StaffId.ToString() &&
+                            operation.StaffId == coverAdmin.StaffId &&
                             operation.Action == MSTeamOperationAction.Remove &&
                             operation.DateScheduled == alreadyRemoved.DateScheduled);
 
@@ -337,7 +348,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                         TeacherMSTeamOperation addOperation = new()
                         {
                             OfferingId = cover.OfferingId,
-                            StaffId = coverAdmin.StaffId.ToString(),
+                            StaffId = coverAdmin.StaffId,
                             Action = MSTeamOperationAction.Add,
                             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                             DateScheduled = DateTime.Now,
@@ -350,7 +361,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation removeOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = coverAdmin.StaffId.ToString(),
+                        StaffId = coverAdmin.StaffId,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,

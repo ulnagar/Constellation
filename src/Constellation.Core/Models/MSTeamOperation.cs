@@ -57,7 +57,7 @@ public class StudentMSTeamOperation : OfferingMSTeamOperation
 
 public class TeacherMSTeamOperation : OfferingMSTeamOperation
 {
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
     public StaffMember Staff { get; set; }
 }
 

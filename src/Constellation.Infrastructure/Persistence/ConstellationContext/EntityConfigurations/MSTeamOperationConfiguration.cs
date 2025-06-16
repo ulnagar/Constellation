@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
@@ -59,6 +60,12 @@ public class TeacherMSTeamOperationConfiguration : IEntityTypeConfiguration<Teac
             .WithMany()
             .HasForeignKey(o => o.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
+        
+        builder
+            .Property(member => member.StaffId)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
     }
 }
 
@@ -121,8 +128,37 @@ public class TeacherAssignmentMSTeamOperationConfiguration : IEntityTypeConfigur
             .WithMany()
             .HasForeignKey(operation => operation.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(member => member.StaffId)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
     }
 }
+
+public class TeacherEmployedMSTeamOperationConfiguration : IEntityTypeConfiguration<TeacherEmployedMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<TeacherEmployedMSTeamOperation> builder)
+    {
+        builder
+            .Property(operation => operation.StaffId)
+            .HasColumnName(nameof(TeacherEmployedMSTeamOperation.StaffId));
+
+        builder
+            .HasOne<StaffMember>()
+            .WithMany()
+            .HasForeignKey(operation => operation.StaffId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(member => member.StaffId)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
+    }
+}
+
 
 public class StudentOfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentOfferingMSTeamOperation>
 {

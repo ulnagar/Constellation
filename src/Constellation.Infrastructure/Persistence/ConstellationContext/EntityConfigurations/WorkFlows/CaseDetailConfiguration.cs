@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.WorkFlows;
 
 using Core.Models.Attendance.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Training.Identifiers;
 using Core.Models.WorkFlow;
@@ -105,6 +106,12 @@ internal sealed class ComplianceCaseDetailConfiguration : IEntityTypeConfigurati
         builder
             .Property(detail => detail.SchoolName)
             .HasColumnName(nameof(ComplianceCaseDetail.SchoolName));
+
+        builder
+            .Property(member => member.CreatedById)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
     }
 }
 
@@ -115,6 +122,12 @@ internal sealed class TrainingCaseDetailConfiguration : IEntityTypeConfiguration
         builder
             .Property(detail => detail.StaffId)
             .HasColumnName(nameof(TrainingCaseDetail.StaffId));
+        
+        builder
+            .Property(member => member.StaffId)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
 
         builder
             .Property(detail => detail.Name)
