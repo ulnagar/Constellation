@@ -26,6 +26,7 @@ public sealed class AwardTally
     public int CalculatedUniversalAchievers => Astras / 125;
 
     public void AddAstra() => Astras++;
+    public void RemoveAstra() => Astras--;
     public void AddStellar() => Stellars++;
     public void AddGalaxyMedal() => GalaxyMedals++;
     public void AddUniversalAchiever() => UniversalAchievers++;
