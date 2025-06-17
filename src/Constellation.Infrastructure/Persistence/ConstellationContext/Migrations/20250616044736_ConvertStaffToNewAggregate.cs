@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,207 +12,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Assignees_Staff_StaffId",
-                schema: "Training",
-                table: "Assignees");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Awards_StudentAwards_Staff_TeacherId",
-                table: "Awards_StudentAwards");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Completions_Staff_StaffId",
-                schema: "Training",
-                table: "Completions");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Faculties_Memberships_Staff_StaffId",
-                table: "Faculties_Memberships");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_GroupTutorials_Roll_Staff_StaffId",
-                table: "GroupTutorials_Roll");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_GroupTutorials_Teachers_Staff_StaffId",
-                table: "GroupTutorials_Teachers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MSTeamOperations_Staff_StaffId",
-                table: "MSTeamOperations");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MSTeamOperations_Staff_TeacherEmployedMSTeamOperation_StaffId",
-                table: "MSTeamOperations");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MSTeamOperations_Staff_TeacherMSTeamOperation_StaffId",
-                table: "MSTeamOperations");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Offerings_Teachers_Staff_StaffId",
-                table: "Offerings_Teachers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_WorkFlows_Actions_Staff_AssignedToId",
-                table: "WorkFlows_Actions");
-
-            migrationBuilder.DropTable(
-                name: "Staff");
-
-            migrationBuilder.DropIndex(
-                name: "IX_MSTeamOperations_TeacherEmployedMSTeamOperation_StaffId",
-                table: "MSTeamOperations");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Faculties_Memberships_StaffId",
-                table: "Faculties_Memberships");
-
-            migrationBuilder.DropColumn(
-                name: "TeacherEmployedMSTeamOperation_StaffId",
-                table: "MSTeamOperations");
-
             migrationBuilder.EnsureSchema(
                 name: "Staff");
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "WorkFlows_CaseDetails",
-                type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "CreatedById",
-                table: "WorkFlows_CaseDetails",
-                type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "AssignedToId",
-                table: "WorkFlows_Actions",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "Offerings_Teachers",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "TeacherMSTeamOperation_StaffId",
-                table: "MSTeamOperations",
-                type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "MSTeamOperations",
-                type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "StaffId1",
-                table: "MSTeamOperations",
-                type: "uniqueidentifier",
-                nullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "GroupTutorials_Teachers",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "GroupTutorials_Roll",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "Faculties_Memberships",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "StaffMemberId",
-                table: "Faculties_Memberships",
-                type: "uniqueidentifier",
-                nullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                schema: "Training",
-                table: "Completions",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "TeacherId",
-                table: "Awards_StudentAwards",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)",
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                schema: "Training",
-                table: "Assignees",
-                type: "uniqueidentifier",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)");
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "StaffId",
-                table: "AspNetUsers",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
 
             migrationBuilder.CreateTable(
                 name: "Members",
@@ -220,6 +22,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PreferredName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EmailAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsShared = table.Column<bool>(type: "bit", nullable: false),
@@ -230,10 +35,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateDeleted = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PreferredName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    DateDeleted = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -296,6 +98,501 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "Id",
+                table: "Staff",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Staff]
+                    SET [Id] = NEWID()
+                    WHERE 1 = 1;");
+
+            migrationBuilder.Sql(
+                @"INSERT INTO [Staff].[Members]
+                    ([Id],
+                     [EmployeeId],
+                     [FirstName],
+                     [PreferredName],
+                     [LastName],
+                     [EmailAddress],
+                     [Gender],
+                     [IsShared],
+                     [CreatedBy],
+                     [CreatedAt],
+                     [ModifiedBy],
+                     [ModifiedAt],
+                     [IsDeleted],
+                     [DeletedBy],
+                     [DeletedAt])
+                    SELECT
+                     Id,
+                     StaffId,
+                     FirstName,
+                     FirstName,
+                     LastName,
+                     LTRIM(CONCAT(PortalUsername, '@det.nsw.edu.au')),
+                     'Male',
+                     IsShared,
+                     'System Migration',
+                      DateEntered,
+                      NULL,
+                      CAST('0001-01-01' as DateTime2),
+                      IsDeleted,
+                      CASE 
+                          WHEN IsDeleted = '1' THEN 'System Migration'
+                          ELSE NULL
+				      END,
+                      CASE 
+                          WHEN IsDeleted = '1' THEN DateDeleted
+                          ELSE CAST('0001-01-01' as DateTime2)
+					  END
+                    FROM [dbo].[Staff]");
+
+            migrationBuilder.Sql(
+                @"INSERT INTO [Staff].[SchoolAssignments]
+                    ([Id],
+                     [StaffId],
+                     [SchoolCode],
+                     [SchoolName],
+                     [StartDate],
+                     [EndDate],
+                     [CreatedBy],
+                     [CreatedAt],
+                     [ModifiedBy],
+                     [ModifiedAt],
+                     [IsDeleted],
+                     [DeletedBy],
+                     [DeletedAt])
+                    SELECT
+                     NEWID(),
+                     Id,
+                     SchoolCode,
+                     Schools.Name,
+                     'System Migration',
+                     DateEntered,
+                     NULL,
+                     CAST('0001-01-01' as DateTime2),
+                     '0',
+                     NULL,
+                     CAST('0001-01-01' as DateTime2)
+                    FROM [dbo].[Staff]
+                    JOIN [dbo].[Schools] on Staff.SchoolCode = Schools.Code");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Assignees_Staff_StaffId",
+                schema: "Training",
+                table: "Assignees");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Awards_StudentAwards_Staff_TeacherId",
+                table: "Awards_StudentAwards");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Completions_Staff_StaffId",
+                schema: "Training",
+                table: "Completions");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Faculties_Memberships_Staff_StaffId",
+                table: "Faculties_Memberships");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_GroupTutorials_Roll_Staff_StaffId",
+                table: "GroupTutorials_Roll");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_GroupTutorials_Teachers_Staff_StaffId",
+                table: "GroupTutorials_Teachers");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_MSTeamOperations_Staff_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_MSTeamOperations_Staff_TeacherEmployedMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_MSTeamOperations_Staff_TeacherMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Offerings_Teachers_Staff_StaffId",
+                table: "Offerings_Teachers");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_WorkFlows_Actions_Staff_AssignedToId",
+                table: "WorkFlows_Actions");
+
+            #region WorkFlows_CaseDetails
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "WorkFlows_CaseDetails",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "WorkFlows_CaseDetails",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[WorkFlows_CaseDetails]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[WorkFlows_CaseDetails]
+                    ON [dbo].[WorkFlows_CaseDetails].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "WorkFlows_CaseDetails");
+
+            migrationBuilder.RenameColumn(
+                name: "CreatedById",
+                table: "WorkFlows_CaseDetails",
+                newName: "xCreatedById");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "CreatedById",
+                table: "WorkFlows_CaseDetails",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[WorkFlows_CaseDetails]
+                    SET [CreatedById] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[WorkFlows_CaseDetails]
+                    ON [dbo].[WorkFlows_CaseDetails].[xCreatedById] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xCreatedById",
+                table: "WorkFlows_CaseDetails");
+
+            #endregion
+
+            #region WorkFlows_Actions
+
+            migrationBuilder.RenameColumn(
+                name: "AssignedToId",
+                table: "WorkFlows_Actions",
+                newName: "xAssignedToId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "AssignedToId",
+                table: "WorkFlows_Actions",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[WorkFlows_Actions]
+                    SET [AssignedToId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[WorkFlows_Actions]
+                    ON [dbo].[WorkFlows_Actions].[xAssignedToId] = [Staff].[Members].[EmployeeId];");
+            
+            migrationBuilder.DropColumn(
+                name: "xAssignedToId",
+                table: "WorkFlows_Actions");
+
+            #endregion
+
+            #region Offerings_Teachers
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "Offerings_Teachers",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "Offerings_Teachers",
+                type: "uniqueidentifier",
+                nullable: false);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Offerings_Teachers]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[Offerings_Teachers]
+                    ON [dbo].[Offerings_Teachers].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "Offerings_Teachers");
+
+            #endregion
+
+            #region MSTeamOperations
+
+            migrationBuilder.DropIndex(
+                name: "IX_MSTeamOperations_TeacherEmployedMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.DropColumn(
+                name: "TeacherEmployedMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.RenameColumn(
+                name: "TeacherMSTeamOperation_StaffId",
+                table: "MSTeamOperations",
+                newName: "xTeacherMSTeamOperation_StaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "TeacherMSTeamOperation_StaffId",
+                table: "MSTeamOperations",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[MSTeamOperations]
+                    SET [TeacherMSTeamOperation_StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[MSTeamOperations]
+                    ON [dbo].[MSTeamOperations].[xTeacherMSTeamOperation_StaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xTeacherMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "MSTeamOperations",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "MSTeamOperations",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[MSTeamOperations]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[MSTeamOperations]
+                    ON [dbo].[MSTeamOperations].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId1",
+                table: "MSTeamOperations",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            #endregion
+
+            #region GroupTutorials_Teachers
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "GroupTutorials_Teachers",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "GroupTutorials_Teachers",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[GroupTutorials_Teachers]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[GroupTutorials_Teachers]
+                    ON [dbo].[GroupTutorials_Teachers].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "GroupTutorials_Teachers");
+
+            #endregion
+
+            #region GroupTutorials_Roll
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "GroupTutorials_Roll",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "GroupTutorials_Roll",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[GroupTutorials_Roll]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[GroupTutorials_Roll]
+                    ON [dbo].[GroupTutorials_Roll].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "GroupTutorials_Roll");
+
+            #endregion
+
+            #region Faculties_Memberships
+
+            migrationBuilder.DropIndex(
+                name: "IX_Faculties_Memberships_StaffId",
+                table: "Faculties_Memberships");
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "Faculties_Memberships",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "Faculties_Memebrships",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Faculties_Memberships]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[Faculties_Memberships]
+                    ON [dbo].[Faculties_Memberships].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "Faculties_Memberships");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffMemberId",
+                table: "Faculties_Memberships",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            #endregion
+
+            #region Training.Completions
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                schema: "Training",
+                table: "Completions",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                schema: "Training",
+                table: "Completions",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [Training].[Completions]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [Training].[Completions]
+                    ON [Training].[Completions].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                schema: "Training",
+                table: "Completions");
+
+            #endregion
+
+            #region Training.Assignees
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                schema: "Training",
+                table: "Assignees",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                schema: "Training",
+                table: "Assignees",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [Training].[Assignees]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [Training].[Assignees]
+                    ON [Training].[Assignees].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                schema: "Training",
+                table: "Assignees");
+
+            #endregion
+
+            #region Awards_StudentAwards
+
+            migrationBuilder.RenameColumn(
+                name: "TeacherId",
+                table: "Awards_StudentAwards",
+                newName: "xTeacherId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "TeacherId",
+                table: "Awards_StudentAwards",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Awards_StudentAwards]
+                    SET [TeacherId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[Awards_StudentAwards]
+                    ON [dbo].[Awards_StudentAwards].[xTeacherId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xTeacherId",
+                table: "Awards_StudentAwards");
+
+            #endregion
+
+            #region AspNetUsers
+
+            migrationBuilder.RenameColumn(
+                name: "StaffId",
+                table: "AspNetUsers",
+                newName: "xStaffId");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "StaffId",
+                table: "AspNetUsers",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[AspNetUsers]
+                    SET [StaffId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[AspNetUsers]
+                    ON [dbo].[AspNetUsers].[xStaffId] = [Staff].[Members].[EmployeeId];");
+
+            migrationBuilder.DropColumn(
+                name: "xStaffId",
+                table: "AspNetUsers");
+
+            #endregion
 
             migrationBuilder.CreateIndex(
                 name: "IX_MSTeamOperations_StaffId1",
@@ -419,6 +716,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 principalSchema: "Staff",
                 principalTable: "Members",
                 principalColumn: "Id");
+
+            migrationBuilder.DropTable(
+                name: "Staff");
         }
 
         /// <inheritdoc />
