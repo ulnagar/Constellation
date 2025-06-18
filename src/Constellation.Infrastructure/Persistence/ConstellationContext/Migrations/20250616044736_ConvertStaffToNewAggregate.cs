@@ -493,8 +493,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "StaffId",
                 table: "GroupTutorials_Roll",
                 type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                nullable: true);
 
             migrationBuilder.Sql(
                 @"UPDATE [dbo].[GroupTutorials_Roll]
@@ -679,8 +678,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "TeacherId",
                 table: "Awards_StudentAwards",
                 type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                nullable: true);
 
             migrationBuilder.Sql(
                 @"UPDATE [dbo].[Awards_StudentAwards]
