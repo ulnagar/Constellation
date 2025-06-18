@@ -48,7 +48,7 @@ internal sealed class GetStaffListQueryHandler
         foreach (StaffMember member in staff)
         {
             List<FacultyResponse> memberFaculties = faculties
-                .Where(entry => entry.Members.Any(membership => membership.StaffId == member.Id))
+                .Where(entry => entry.Members.Any(membership => membership.StaffId == member.Id && !membership.IsDeleted))
                 .Select(faculty => 
                     new FacultyResponse(
                         faculty.Id, 
