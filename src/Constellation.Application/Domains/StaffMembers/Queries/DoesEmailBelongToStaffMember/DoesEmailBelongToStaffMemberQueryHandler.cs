@@ -4,6 +4,7 @@ using Abstractions.Messaging;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,11 @@ internal sealed class DoesEmailBelongToStaffMemberQueryHandler
 
     public async Task<Result<bool>> Handle(DoesEmailBelongToStaffMemberQuery request, CancellationToken cancellationToken)
     {
-        StaffMember? response = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+        StaffMember? response = emailAddress.IsSuccess
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+            : null;
 
         return response is not null;
     }

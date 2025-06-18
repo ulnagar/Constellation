@@ -2,8 +2,10 @@
 
 using Abstractions.Messaging;
 using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Models;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,10 +21,16 @@ internal sealed class GetStaffByEmailQueryHandler
         _staffRepository = staffRepository;
     }
 
-    public async Task<Result<StaffSelectionListResponse>> Handle(GetStaffByEmailQuery request, CancellationToken cancellationToken) 
+    public async Task<Result<StaffSelectionListResponse>> Handle(GetStaffByEmailQuery request, CancellationToken cancellationToken)
     {
-        StaffMember teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
 
-        return new StaffSelectionListResponse(teacher.Id, teacher.EmployeeId, teacher.Name);
+        StaffMember? teacher = emailAddress.IsSuccess 
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken) 
+            : null;
+
+        return teacher is null 
+            ? Result.Failure<StaffSelectionListResponse>(StaffMemberErrors.NotFoundByEmail(request.EmailAddress)) 
+            : new StaffSelectionListResponse(teacher.Id, teacher.EmployeeId, teacher.Name);
     }
 }

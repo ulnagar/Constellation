@@ -72,7 +72,7 @@
     @foreach (var item in Model.Staff)
     {
         <tr>
-            <td>@item.StaffId</td>
+            <td>@item.EmployeeId</td>
             <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
             <td>
                 @foreach (var entry in item.Faculties)

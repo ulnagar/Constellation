@@ -10,6 +10,7 @@ using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Threading;
@@ -52,7 +53,9 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
             existingUser.IsParent = false;
         }
 
-        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.EmailAddress, cancellationToken);
+        EmailAddress emailAddress = EmailAddress.FromValue(notification.EmailAddress);
+
+        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(emailAddress, cancellationToken);
 
         if (staffMember is null)
         {

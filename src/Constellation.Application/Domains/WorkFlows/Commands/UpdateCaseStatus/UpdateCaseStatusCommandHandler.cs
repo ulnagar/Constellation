@@ -11,6 +11,7 @@ using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
@@ -71,7 +72,11 @@ internal sealed class UpdateCaseStatusCommandHandler
             return Result.Failure(update.Error);
         }
 
-        StaffMember currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
+
+        StaffMember currentUser = emailAddress.IsSuccess
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+            : null;
 
         if (currentUser is null)
         {

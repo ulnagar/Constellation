@@ -13,6 +13,7 @@ using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
@@ -73,7 +74,11 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
             return Result.Failure(AttendanceValueErrors.NotFoundForStudent(request.StudentId));
         }
 
-        StaffMember teacher = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
+
+        StaffMember teacher = emailAddress.IsSuccess
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+            : null;
 
         if (teacher is null)
         {

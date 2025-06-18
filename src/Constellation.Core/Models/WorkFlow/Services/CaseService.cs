@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Training;
+using ValueObjects;
 using WorkFlow;
 
 public sealed class CaseService : ICaseService
@@ -58,7 +59,11 @@ public sealed class CaseService : ICaseService
         AttendanceValueId attendanceValueId,
         CancellationToken cancellationToken = default)
     {
-        StaffMember? currentUser = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
+
+        StaffMember? currentUser = emailAddress.IsSuccess 
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken) 
+            : null;
 
         if (currentUser is null)
             return Result.Failure<Case>(StaffMemberErrors.NotFoundByEmail(_currentUserService.EmailAddress));

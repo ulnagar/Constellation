@@ -28,7 +28,7 @@
     
     <button class="btn btn-secondary" data-toggle="modal" data-target="#lifecycleDetailsModal">View Extended Details</button>
     
-    <a asp-page="/Partner/Staff/Timetable" asp-area="Staff" asp-route-id="@Model.StaffMember.StaffId" class="btn btn-secondary">View Timetable</a>
+    <a asp-page="/Subject/Periods/Timetables/Staff" asp-area="Staff" asp-route-id="@Model.StaffMember.StaffId" class="btn btn-secondary">View Timetable</a>
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
@@ -48,7 +48,7 @@
             <label asp-for="StaffMember.EmployeeId">Employee Id</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.StaffMember.StaffId</span>
+            <span>@Model.StaffMember.EmployeeId</span>
         </dd>
 
         <dt class="col-md-2">

@@ -62,6 +62,7 @@ internal sealed class GetStaffListQueryHandler
 
             response.Add(new(
                 member.Id,
+                member.EmployeeId,
                 member.Name,
                 memberFaculties,
                 school?.Name,

@@ -8,6 +8,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using System.Linq;
 using System.Threading;
@@ -42,7 +43,11 @@ internal sealed class SubmitRollCommandHandler
         if (roll is null)
             return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.NotFound(request.RollId));
 
-        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(request.StaffEmail, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.StaffEmail);
+
+        StaffMember staffMember = emailAddress.IsSuccess
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+            : null;
 
         if (staffMember is null)
             return Result.Failure(StaffMemberErrors.NotFoundByEmail(request.StaffEmail));

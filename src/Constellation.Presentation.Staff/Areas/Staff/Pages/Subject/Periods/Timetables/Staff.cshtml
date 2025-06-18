@@ -140,7 +140,10 @@
                                             else
                                             {
                                                 // if not, create an oob entry between this period and the next
-                                                var next = classPeriods.Where(period => period.StartTime > classPeriods[i].EndTime).OrderBy(period => period.StartTime).First();
+                                                var next = classPeriods[i + 1];
+
+                                                if (classPeriods[i].EndTime > next.StartTime)
+                                                    continue;
 
                                                 customPeriods.Add(new(
                                                     PeriodId.Empty,

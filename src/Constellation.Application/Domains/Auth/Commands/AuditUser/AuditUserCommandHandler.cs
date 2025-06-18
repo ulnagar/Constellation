@@ -10,6 +10,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Models.Auth;
 using Models.Identity;
@@ -46,7 +47,9 @@ internal sealed class AuditUserCommandHandler
         if (user is null)
             return Result.Failure(DomainErrors.Auth.UserNotFound);
 
-        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(user.Email, cancellationToken);
+        EmailAddress emailAddress = EmailAddress.FromValue(user.Email);
+
+        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(emailAddress, cancellationToken);
 
         if (staffMember is null)
         {

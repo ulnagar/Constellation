@@ -3,6 +3,8 @@
 using Core.Models;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -25,7 +27,11 @@ public sealed class HasActiveStaffRecord : AuthorizationHandler<IsCurrentStaffMe
         if (emailClaim is null)
             return;
 
-        StaffMember? isStaffMember = await _staffRepository.GetCurrentByEmailAddress(emailClaim.Value);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(emailClaim.Value);
+
+        StaffMember? isStaffMember = emailAddress.IsSuccess 
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value)
+            : null;
 
         if (isStaffMember is not null)
             context.Succeed(requirement);

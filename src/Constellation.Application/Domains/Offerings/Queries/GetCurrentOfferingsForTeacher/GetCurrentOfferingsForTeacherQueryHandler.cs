@@ -9,6 +9,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
+using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -68,7 +69,11 @@ public class GetCurrentOfferingsForTeacherQueryHandler
         
         if (!string.IsNullOrWhiteSpace(request.EmailAddress))
         {
-            StaffMember teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+            Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+            StaffMember teacher = emailAddress.IsSuccess
+                ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+                : null;
 
             if (teacher is not null)
             {

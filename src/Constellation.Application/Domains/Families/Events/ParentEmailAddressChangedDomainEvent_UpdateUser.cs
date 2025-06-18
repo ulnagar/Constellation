@@ -11,6 +11,7 @@ using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
@@ -80,7 +81,9 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 oldUser.IsParent = false;
             }
 
-            StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(notification.OldEmail, cancellationToken);
+            EmailAddress oldEmailAddress = EmailAddress.FromValue(notification.OldEmail);
+
+            StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(oldEmailAddress, cancellationToken);
 
             if (staffMember is null)
             {

@@ -7,11 +7,13 @@ using Constellation.Core.Models.StaffMembers;
 using Constellation.Core.Models.StaffMembers.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Errors;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 public class StaffRepository : IStaffRepository
@@ -180,22 +182,22 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
     public async Task<StaffMember?> GetCurrentByEmailAddress(
-        string emailAddress,
+        EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StaffMember>()
             .Where(staff => 
-                staff.EmailAddress.Email == emailAddress && 
+                staff.EmailAddress == emailAddress && 
                 !staff.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<StaffMember?> GetAnyByEmailAddress(
-        string emailAddress,
+        EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StaffMember>()
             .Where(staff =>
-                staff.EmailAddress.Email == emailAddress)
+                staff.EmailAddress == emailAddress)
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<StaffMember> GetFromName(

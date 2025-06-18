@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Core.ValueObjects;
 using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
@@ -29,7 +30,7 @@ public interface IStaffRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<StaffMember?> GetCurrentByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<StaffMember?> GetCurrentByEmailAddress(EmailAddress emailAddress, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get any staff member with the specified email address. Can include a deleted staff member.
@@ -37,7 +38,7 @@ public interface IStaffRepository
     /// <param name="emailAddress"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<StaffMember?> GetAnyByEmailAddress(string emailAddress, CancellationToken cancellationToken = default);
+    Task<StaffMember?> GetAnyByEmailAddress(EmailAddress emailAddress, CancellationToken cancellationToken = default);
     Task<StaffMember> GetFromName(string name, CancellationToken cancellationToken = default);
 
     void Insert(StaffMember member);

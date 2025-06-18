@@ -13,6 +13,7 @@ using Core.Abstractions.Clock;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Enums;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -37,8 +38,10 @@ public class StaffSidebarMenuViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(string activePage)
     {
-        string? staffEmailAddress = _currentUserService.EmailAddress;
-        StaffMember? staffMember = staffEmailAddress is not null ? await _staffRepository.GetCurrentByEmailAddress(staffEmailAddress) : null;
+        Result<EmailAddress> staffEmailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
+        StaffMember? staffMember = staffEmailAddress.IsSuccess 
+            ? await _staffRepository.GetCurrentByEmailAddress(staffEmailAddress.Value) 
+            : null;
         StaffId staffId = staffMember?.Id ?? StaffId.Empty;
 
         string[] segments = activePage.Split('.');
