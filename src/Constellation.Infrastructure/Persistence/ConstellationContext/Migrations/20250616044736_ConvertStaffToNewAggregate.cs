@@ -725,6 +725,17 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             #endregion
 
+            #region Assets.Allocations
+
+            migrationBuilder.Sql(
+                @"UPDATE [Assets].[Allocations]
+                    SET [UserId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [Assets].[Allocations]
+                    ON [Assets].[Allocations].[UserId] = [Staff].[Members].[EmployeeId]
+                    WHERE [AllocationType] = 'Staff';");
+
+            #endregion
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_EmployeeId",
