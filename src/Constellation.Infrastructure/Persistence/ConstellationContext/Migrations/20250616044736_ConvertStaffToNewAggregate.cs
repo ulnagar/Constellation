@@ -137,7 +137,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                      'Male',
                      IsShared,
                      'System Migration',
-                      DateEntered,
+                      CASE
+                        WHEN DateEntered is null THEN CAST('0001-01-01' as DateTime2)
+                        ELSE DateEntered
+                      End,
                       NULL,
                       CAST('0001-01-01' as DateTime2),
                       IsDeleted,
@@ -171,8 +174,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                      Id,
                      SchoolCode,
                      Schools.Name,
+                     CASE
+                        WHEN DateEntered is null THEN DateDeleted
+                        ELSE DateEntered
+                     End,
+                     NULL,
                      'System Migration',
-                     DateEntered,
+                     CASE
+                        WHEN DateEntered is null THEN CAST('0001-01-01' as DateTime2)
+                        ELSE DateEntered
+                     END,
                      NULL,
                      CAST('0001-01-01' as DateTime2),
                      '0',
@@ -277,6 +288,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             #region WorkFlows_Actions
 
+            migrationBuilder.DropIndex(
+                name: "IX_WorkFlows_Actions_AssignedToId",
+                table: "WorkFlows_Actions");
+
             migrationBuilder.RenameColumn(
                 name: "AssignedToId",
                 table: "WorkFlows_Actions",
@@ -299,9 +314,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "xAssignedToId",
                 table: "WorkFlows_Actions");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_WorkFlows_Actions_AssignedToId",
+                table: "WorkFlows_Actions",
+                column: "AssignedToId");
+
             #endregion
 
             #region Offerings_Teachers
+
+            migrationBuilder.DropIndex(
+                name: "IX_Offerings_Teachers_StaffId",
+                table: "Offerings_Teachers");
 
             migrationBuilder.RenameColumn(
                 name: "StaffId",
@@ -312,7 +336,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "StaffId",
                 table: "Offerings_Teachers",
                 type: "uniqueidentifier",
-                nullable: false);
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
             migrationBuilder.Sql(
                 @"UPDATE [dbo].[Offerings_Teachers]
@@ -325,12 +350,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "xStaffId",
                 table: "Offerings_Teachers");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Offerings_Teachers_StaffId",
+                table: "Offerings_Teachers",
+                column: "StaffId");
+
             #endregion
 
             #region MSTeamOperations
 
             migrationBuilder.DropIndex(
+                name: "IX_MSTeamOperations_TeacherMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.DropIndex(
                 name: "IX_MSTeamOperations_TeacherEmployedMSTeamOperation_StaffId",
+                table: "MSTeamOperations");
+
+            migrationBuilder.DropIndex(
+                name: "IX_MSTeamOperations_StaffId",
                 table: "MSTeamOperations");
 
             migrationBuilder.DropColumn(
@@ -387,9 +425,28 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 type: "uniqueidentifier",
                 nullable: true);
 
+            migrationBuilder.CreateIndex(
+                name: "IX_MSTeamOperations_TeacherMSTeamOperation_StaffId",
+                table: "MSTeamOperations",
+                column: "TeacherMSTeamOperation_StaffId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MSTeamOperations_StaffId1",
+                table: "MSTeamOperations",
+                column: "StaffId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MSTeamOperations_StaffId",
+                table: "MSTeamOperations",
+                column: "StaffId");
+
             #endregion
 
             #region GroupTutorials_Teachers
+
+            migrationBuilder.DropIndex(
+                name: "IX_GroupTutorials_Teachers_StaffId",
+                table: "GroupTutorials_Teachers");
 
             migrationBuilder.RenameColumn(
                 name: "StaffId",
@@ -414,9 +471,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "xStaffId",
                 table: "GroupTutorials_Teachers");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_GroupTutorials_Teachers_StaffId",
+                table: "GroupTutorials_Teachers",
+                column: "StaffId");
+
             #endregion
 
             #region GroupTutorials_Roll
+
+            migrationBuilder.DropIndex(
+                name: "IX_GroupTutorials_Roll_StaffId",
+                table: "GroupTutorials_Roll");
 
             migrationBuilder.RenameColumn(
                 name: "StaffId",
@@ -441,12 +507,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "xStaffId",
                 table: "GroupTutorials_Roll");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_GroupTutorials_Roll_StaffId",
+                table: "GroupTutorials_Roll",
+                column: "StaffId");
+
             #endregion
 
             #region Faculties_Memberships
 
             migrationBuilder.DropIndex(
                 name: "IX_Faculties_Memberships_StaffId",
+                table: "Faculties_Memberships");
+
+            migrationBuilder.DropIndex(
+                name: "IX_FacultyMembership_StaffId",
                 table: "Faculties_Memberships");
 
             migrationBuilder.RenameColumn(
@@ -456,7 +531,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.AddColumn<Guid>(
                 name: "StaffId",
-                table: "Faculties_Memebrships",
+                table: "Faculties_Memberships",
                 type: "uniqueidentifier",
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
@@ -478,9 +553,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 type: "uniqueidentifier",
                 nullable: true);
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Faculties_Memberships_StaffMemberId",
+                table: "Faculties_Memberships",
+                column: "StaffMemberId");
+
             #endregion
 
             #region Training.Completions
+
+            migrationBuilder.DropIndex(
+                name: "IX_Training_Modules_Completions_StaffId",
+                schema: "Training",
+                table: "Completions");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Completions_StaffId",
+                schema: "Training",
+                table: "Completions");
 
             migrationBuilder.RenameColumn(
                 name: "StaffId",
@@ -508,9 +598,31 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 schema: "Training",
                 table: "Completions");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Training_Modules_Completions_StaffId",
+                schema: "Training",
+                table: "Completions",
+                column: "StaffId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Completions_StaffId",
+                schema: "Training",
+                table: "Completions",
+                column: "StaffId");
+
             #endregion
 
             #region Training.Assignees
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Assignees",
+                schema: "Training",
+                table: "Assignees");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Assignees_StaffId",
+                schema: "Training",
+                table: "Assignees");
 
             migrationBuilder.RenameColumn(
                 name: "StaffId",
@@ -538,9 +650,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 schema: "Training",
                 table: "Assignees");
 
+            migrationBuilder.CreateIndex(
+                name: "IX_Assignees_StaffId",
+                schema: "Training",
+                table: "Assignees",
+                column: "StaffId");
+
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_Assignees",
+                schema: "Training",
+                table: "Assignees",
+                columns: ["ModuleId", "StaffId"]);
+
             #endregion
 
             #region Awards_StudentAwards
+
+            migrationBuilder.DropIndex(
+                name: "IX_Awards_StudentAwards_TeacherId",
+                table: "Awards_StudentAwards");
 
             migrationBuilder.RenameColumn(
                 name: "TeacherId",
@@ -564,6 +692,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
             migrationBuilder.DropColumn(
                 name: "xTeacherId",
                 table: "Awards_StudentAwards");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Awards_StudentAwards_TeacherId",
+                table: "Awards_StudentAwards",
+                column: "TeacherId");
 
             #endregion
 
@@ -594,15 +727,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             #endregion
 
-            migrationBuilder.CreateIndex(
-                name: "IX_MSTeamOperations_StaffId1",
-                table: "MSTeamOperations",
-                column: "StaffId1");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Faculties_Memberships_StaffMemberId",
-                table: "Faculties_Memberships",
-                column: "StaffMemberId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_EmployeeId",
