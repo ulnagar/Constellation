@@ -737,6 +737,30 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             #endregion
 
+            #region Covers_ClassCovers
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[Covers_ClassCovers]
+                    SET [TeacherId] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[Covers_ClassCovers]
+                    ON [dbo].[Covers_ClassCovers].[TeacherId] = [Staff].[Members].[EmployeeId]
+                    WHERE [TeacherType] = 'Staff';");
+
+            #endregion
+
+            #region StocktakeSightings
+
+            migrationBuilder.Sql(
+                @"UPDATE [dbo].[StocktakeSightings]
+                    SET [UserCode] = [Staff].[Members].[Id]
+                    FROM [Staff].[Members]
+                    INNER JOIN [dbo].[StocktakeSightings]
+                    ON [dbo].[StocktakeSightings].[UserCode] = [Staff].[Members].[EmployeeId]
+                    WHERE [UserType] = 'Staff Member';");
+
+            #endregion
+
             migrationBuilder.CreateIndex(
                 name: "IX_Members_EmployeeId",
                 schema: "Staff",

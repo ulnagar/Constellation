@@ -4,11 +4,9 @@ using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models.Covers;
-using Core.Models.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,13 +20,14 @@ public class CreateCoverCommandHandler : ICommandHandler<CreateCoverCommand, Cla
     {
         _classCoverRepository = classCoverRepository;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<CreateCoverCommandHandler>();
+        _logger = logger
+            .ForContext<CreateCoverCommandHandler>();
     }
 
     public async Task<Result<ClassCover>> Handle(CreateCoverCommand request, CancellationToken cancellationToken)
     {
         Result<ClassCover> coverResult = ClassCover.Create(
-            new ClassCoverId(Guid.NewGuid()),
+            new(),
             request.OfferingId,
             request.StartDate,
             request.EndDate,
@@ -37,11 +36,12 @@ public class CreateCoverCommandHandler : ICommandHandler<CreateCoverCommand, Cla
 
         if (coverResult.IsFailure)
         {
-            var result = Result.Failure<ClassCover>(DomainErrors.GroupTutorials.GroupTutorial.CouldNotCreateTutorial);
+            _logger
+                .ForContext(nameof(CreateCoverCommand), request, true)
+                .ForContext(nameof(Error), coverResult.Error, true)
+                .Warning("Failed to create Class Cover");
 
-            _logger.Warning("Error: {@error}", result);
-
-            return result;
+            return Result.Failure<ClassCover>(DomainErrors.GroupTutorials.GroupTutorial.CouldNotCreateTutorial);
         }
 
         _classCoverRepository.Insert(coverResult.Value);

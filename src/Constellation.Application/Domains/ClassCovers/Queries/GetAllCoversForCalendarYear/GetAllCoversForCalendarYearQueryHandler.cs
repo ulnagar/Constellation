@@ -1,11 +1,14 @@
 ﻿namespace Constellation.Application.Domains.ClassCovers.Queries.GetAllCoversForCalendarYear;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.Models;
+using Core.Models.Casuals;
+using Core.Models.Covers;
 using Core.Models.Identifiers;
+using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
@@ -44,40 +47,32 @@ internal sealed class GetAllCoversForCalendarYearQueryHandler
     {
         List<CoversListResponse> returnData = new();
 
-        var covers = await _classCoverRepository
-            .GetAllForCurrentCalendarYear(cancellationToken);
+        List<ClassCover> covers = await _classCoverRepository.GetAllForCurrentCalendarYear(cancellationToken);
 
         if (covers.Count == 0)
-        {
             return returnData;
-        }
 
-        foreach (var cover in covers)
+        foreach (ClassCover cover in covers)
         {
-            var offering = await _offeringRepository
-                .GetById(cover.OfferingId, cancellationToken);
+            Offering offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
 
-            var offeringName = offering is null ? "" : offering.Name;
-
+            string offeringName = offering?.Name ?? "";
             string teacherName = "";
             string teacherSchool = "";
 
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
-                var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
+                Casual teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
                 if (teacher is null)
-                {
                     continue;
-                }
+
                 teacherName = teacher.DisplayName;
 
-                var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
+                School school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 
                 if (school is null)
-                {
                     continue;
-                }
 
                 teacherSchool = school.Name;
             }
@@ -105,7 +100,7 @@ internal sealed class GetAllCoversForCalendarYearQueryHandler
                 teacherSchool = school.Name;
             }
 
-            var entry = new CoversListResponse(
+            CoversListResponse entry = new (
                 cover.Id,
                 offeringName,
                 cover.TeacherId,

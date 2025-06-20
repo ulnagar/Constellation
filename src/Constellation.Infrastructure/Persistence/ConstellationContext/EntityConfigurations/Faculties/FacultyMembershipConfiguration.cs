@@ -31,6 +31,7 @@ internal sealed class FacultyMembershipConfiguration : IEntityTypeConfiguration<
         builder
             .HasOne<StaffMember>()
             .WithMany()
+            .HasForeignKey(member => member.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
