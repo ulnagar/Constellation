@@ -116,7 +116,7 @@ public class IndexModel : BasePageModel
 
         if (currentStaffId is null)
         {
-            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.Name.SortOrder), nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.Name.DisplayName));
+            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.Name.SortOrder), nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.DisplayName));
         }
         else
         {
@@ -128,7 +128,7 @@ public class IndexModel : BasePageModel
             viewModel.StaffList = new(
                 staff.Value.OrderBy(entry => entry.Name.SortOrder),
                 nameof(StaffSelectionListResponse.StaffId),
-                nameof(StaffSelectionListResponse.Name.DisplayName),
+                nameof(StaffSelectionListResponse.DisplayName),
                 currentStaffMember?.StaffId);
         }
 
