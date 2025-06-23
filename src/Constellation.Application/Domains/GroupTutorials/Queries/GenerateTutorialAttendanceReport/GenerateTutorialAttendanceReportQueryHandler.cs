@@ -78,12 +78,15 @@ internal sealed class GenerateTutorialAttendanceReportQueryHandler
                     student.Present));
             }
 
-            StaffMember staffMember = await _staffRepository.GetById(roll.StaffId, cancellationToken);
+            if (!roll.StaffId.HasValue)
+                continue;
+
+            StaffMember staffMember = await _staffRepository.GetById(roll.StaffId.Value, cancellationToken);
 
             rolls.Add(new(
                 roll.Id,
                 roll.SessionDate,
-                roll.StaffId,
+                roll.StaffId.Value,
                 staffMember?.Name.DisplayName,
                 students));
         }

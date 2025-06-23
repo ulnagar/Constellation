@@ -8,13 +8,13 @@ using System.Text.RegularExpressions;
 
 public sealed class EmployeeId : ValueObject
 {
-    private const string _srnRegex = @"^\d{9}$";
+    private const string _srnRegex = @"^\d{6,9}$";
 
     public static readonly EmployeeId Empty = new(string.Empty);
 
     public string Number { get; }
 
-    private EmployeeId() { }
+    //private EmployeeId() { }
 
     private EmployeeId(string number)
     {
@@ -29,7 +29,7 @@ public sealed class EmployeeId : ValueObject
         if (!Regex.IsMatch(value, _srnRegex))
             return Result.Failure<EmployeeId>(EmployeeIdErrors.InvalidValue(value));
 
-        return new EmployeeId();
+        return new EmployeeId(value);
     }
 
     public override IEnumerable<object> GetAtomicValues()

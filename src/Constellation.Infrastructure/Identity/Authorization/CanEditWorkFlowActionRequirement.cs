@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
 using Application.Models.Auth;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.WorkFlow.Identifiers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -50,13 +51,15 @@ public sealed class IsAssignedToActionByRoute : AuthorizationHandler<CanEditWork
         if (userStaffId is null)
             return;
 
+        StaffId staffId = StaffId.FromValue(Guid.Parse(userStaffId));
+
         ActionId actionId = ActionId.FromValue(Guid.Parse(recordId));
         
         bool assignedToUser = await _context
             .Set<Action>()
             .AnyAsync(record =>
                 record.Id == actionId &&
-                record.AssignedToId.ToString() == userStaffId);
+                record.AssignedToId == staffId);
 
         if (assignedToUser)
             context.Succeed(requirement);
@@ -85,6 +88,8 @@ public sealed class IsAssignedToActionByResource : AuthorizationHandler<CanEditW
 
         if (userStaffId is null) return;
 
+        StaffId staffId = StaffId.FromValue(Guid.Parse(userStaffId));
+        
         ActionId actionId = ActionId.FromValue(resource);
 
         _logger.ForContext(nameof(ActionId), actionId, true)
@@ -94,7 +99,7 @@ public sealed class IsAssignedToActionByResource : AuthorizationHandler<CanEditW
             .Set<Action>()
             .AnyAsync(record =>
                 record.Id == actionId &&
-                record.AssignedToId.ToString() == userStaffId);
+                record.AssignedToId == staffId);
 
         if (assignedToUser) 
             context.Succeed(requirement);

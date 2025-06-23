@@ -187,7 +187,7 @@
             <table class="table-striped table-hover data-table">
                 <thead>
                     <tr>
-                        <th>Staff Id</th>
+                        <th>Employee Id</th>
                         <th>Name</th>
                         <th>Type</th>
                         <th></th>
@@ -197,7 +197,7 @@
                     @foreach (var item in Model.Offering.Teachers)
                     {
                         <tr>
-                            <td>@item.StaffId</td>
+                            <td>@item.EmployeeId</td>
                             <td data-order="@item.Name.SortOrder">@item.Name.DisplayName</td>
                             <td>@item.Type</td>
                             <td>

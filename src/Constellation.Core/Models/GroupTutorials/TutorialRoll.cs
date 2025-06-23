@@ -24,14 +24,12 @@ public sealed class TutorialRoll : IAuditableEntity
         Id = id;
         TutorialId = tutorial.Id;
         SessionDate = sessionDate;
-
-        StaffId = StaffId.Empty;
     }
 
     public TutorialRollId Id { get; private set; }
     public GroupTutorialId TutorialId { get; private set; }
     public DateOnly SessionDate { get; private set; }
-    public StaffId StaffId { get; private set; }
+    public StaffId? StaffId { get; private set; }
     public TutorialRollStatus Status => GetStatus();
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
     public string CreatedBy { get; set; }
@@ -100,7 +98,7 @@ public sealed class TutorialRoll : IAuditableEntity
         if (IsDeleted)
             return TutorialRollStatus.Cancelled;
 
-        if (StaffId != StaffId.Empty)
+        if (StaffId.HasValue && StaffId.Value != StaffMembers.Identifiers.StaffId.Empty)
             return TutorialRollStatus.Submitted;
 
         return TutorialRollStatus.Unsubmitted;

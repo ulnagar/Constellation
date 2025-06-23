@@ -47,10 +47,10 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Staff Member";
 
     [BindProperty(SupportsGet = true)]
-    public StaffId? Id { get; set; } = StaffId.Empty;
+    public StaffId Id { get; set; } = StaffId.Empty;
 
     [BindProperty]
-    public string EmployeeId { get; set; } = string.Empty;
+    public string? EmployeeId { get; set; } = string.Empty;
 
     [BindProperty]
     public string FirstName { get; set; } = string.Empty;
@@ -94,7 +94,7 @@ public class UpsertModel : BasePageModel
 
         GenderList = new(genders, "Value", "Value");
 
-        if (Id is null || Id == StaffId.Empty)
+        if (Id == StaffId.Empty)
         {
             SchoolList = new(schools.Value, "Code", "Name");
 
@@ -104,7 +104,7 @@ public class UpsertModel : BasePageModel
         _logger
             .Information("Requested to retrieve Staff Member with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-        Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(Id.Value));
+        Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(Id));
 
         if (staffMember.IsFailure)
         {
@@ -119,7 +119,7 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        EmployeeId = staffMember.Value.EmployeeId.Number;
+        EmployeeId = staffMember.Value.EmployeeId?.Number ?? string.Empty;
         FirstName = staffMember.Value.Name.FirstName;
         PreferredName = staffMember.Value.Name.PreferredName;
         LastName = staffMember.Value.Name.LastName;
@@ -144,7 +144,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        if (Id is null || Id == StaffId.Empty)
+        if (Id == StaffId.Empty)
         {
             // Create new student
             CreateStaffMemberCommand createCommand = new(
@@ -183,7 +183,7 @@ public class UpsertModel : BasePageModel
 
         // Edit existing student
         UpdateStaffMemberCommand updateCommand = new(
-            Id.Value,
+            Id,
             EmployeeId,
             FirstName,
             PreferredName,

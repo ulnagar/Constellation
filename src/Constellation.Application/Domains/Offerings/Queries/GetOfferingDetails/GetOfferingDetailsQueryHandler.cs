@@ -161,6 +161,7 @@ internal sealed class GetOfferingDetailsQueryHandler
 
             teachers.Add(new(
                 teacher.Id,
+                teacher.EmployeeId,
                 teacher.Name,
                 assignment.Type));
         }

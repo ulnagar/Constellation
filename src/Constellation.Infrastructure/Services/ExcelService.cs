@@ -1502,10 +1502,13 @@ public class ExcelService : IExcelService
             // Index 22: DOB
             // Index 23: Years
             // Index 24: Months
-            // Index 25: School Year
-            // Index 26: House
-            // Index 27: Roll Class
-            // Index 28: Location
+            // Index 25: Historical School Year
+            // Index 26: Current School Year
+            // Index 27: House
+            // Index 28: Historical Roll Class
+            // Index 29: Current Roll Class
+            // Index 30: Location
+            // Index 31: Official Reasons
 
             // detailFile
             // Index 0: Student Id
@@ -1517,14 +1520,16 @@ public class ExcelService : IExcelService
             // Index 6: Date
             // Index 7: Incident Record Description
             // Index 8: Incident Record Details
-            // Index 9: Subject
-            // Index 10: Faculty
-            // Index 11: Type
-            // Index 12: Status
-            // Index 13: Task Name / Course Requirement
-            // Index 14: Initial Due Date
-            // Index 15: Required Student Actions
-            // Index 16: New Due Date
+            // Index 9: N Award School Reasons
+            // Index 10: N Award Official Reasons
+            // Index 11: Subject
+            // Index 12: Faculty
+            // Index 13: Type
+            // Index 14: Status
+            // Index 15: Task Name / Course Requirement
+            // Index 16: Initial Due Date
+            // Index 17: Required Student Actions
+            // Index 18: New Due Date
 
             string incidentId = row[5].ToString().FormatField();
 
@@ -1560,8 +1565,8 @@ public class ExcelService : IExcelService
                 srn,
                 dateCreated,
                 row[5].ToString().FormatField(),
-                row[9].ToString().FormatField(),
                 row[11].ToString().FormatField(),
+                row[13].ToString().FormatField(),
                 matchingRow[19].ToString().FormatField(),
                 row[1].ToString().FormatField(),
                 row[2].ToString().FormatField(),

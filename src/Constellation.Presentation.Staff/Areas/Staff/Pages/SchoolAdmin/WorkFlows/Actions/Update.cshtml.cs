@@ -11,6 +11,7 @@ using Application.Domains.WorkFlows.Commands.UpdateUploadTrainingCertificateActi
 using Application.Domains.WorkFlows.Queries.GetCaseById;
 using Application.Models.Auth;
 using Constellation.Application.DTOs;
+using Constellation.Core.Enums;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
@@ -195,9 +196,26 @@ public class UpdateModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdateIncidentStatusEntryAction(SentralIncidentStatusActionViewModel viewModel)
     {
-        if (viewModel.Status == "Not Completed" && viewModel.IncidentNumber == 0)
+        if (viewModel is { Status: "Not Completed", IncidentNumber: 0 })
         {
+            _logger
+                .ForContext(nameof(Error), ActionErrors.UpdateIncidentNumberZero, true)
+                .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
+
             ModalContent = new ErrorDisplay(ActionErrors.UpdateIncidentNumberZero);
+
+            await PreparePage();
+
+            return Page();
+        }
+        
+        if (viewModel is { Status: "Not Completed", IncidentNumber: < 50000 })
+        {
+            _logger
+                .ForContext(nameof(Error), ActionErrors.UpdateIncidentNumberTooLow, true)
+                .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(ActionErrors.UpdateIncidentNumberTooLow);
 
             await PreparePage();
 
