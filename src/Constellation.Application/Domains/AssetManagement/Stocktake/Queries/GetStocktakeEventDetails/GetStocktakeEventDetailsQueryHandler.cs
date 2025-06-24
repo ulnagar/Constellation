@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
 
 using Abstractions.Messaging;
+using Core.Models.Assets.ValueObjects;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Errors;
 using Core.Models.Stocktake.Repositories;
@@ -32,10 +33,10 @@ internal sealed class GetStocktakeEventDetailsQueryHandler
         {
             _logger
                 .ForContext(nameof(GetStocktakeEventDetailsQuery), request, true)
-                .ForContext(nameof(Error), StocktakeErrors.EventNotFound(request.Id), true)
+                .ForContext(nameof(Error), StocktakeEventErrors.EventNotFound(request.Id), true)
                 .Warning("Failed to retrieve Stocktake Event details");
 
-            return Result.Failure<StocktakeEventDetailsResponse>(StocktakeErrors.EventNotFound(request.Id));
+            return Result.Failure<StocktakeEventDetailsResponse>(StocktakeEventErrors.EventNotFound(request.Id));
         }
 
         List<StocktakeEventDetailsResponse.Sighting> sightings = new();
@@ -44,7 +45,7 @@ internal sealed class GetStocktakeEventDetailsQueryHandler
         {
             sightings.Add(new(
                 sighting.Id,
-                sighting.AssetNumber,
+                sighting.AssetNumber ?? AssetNumber.Empty,
                 sighting.SerialNumber,
                 sighting.Description,
                 sighting.LocationName,

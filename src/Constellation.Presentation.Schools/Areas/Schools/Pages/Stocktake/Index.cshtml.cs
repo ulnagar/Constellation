@@ -10,6 +10,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -55,7 +56,7 @@ public class IndexModel : BasePageModel
     public StocktakeEventResponse Stocktake { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Guid EventId { get; set; }
+    public StocktakeEventId EventId { get; set; } = StocktakeEventId.Empty;
 
     public List<StocktakeSightingResponse> Sightings { get; set; } = new();
 
@@ -81,7 +82,7 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        if (EventId == Guid.Empty)
+        if (EventId.Equals(StocktakeEventId.Empty))
         {
             EventId = eventsRequest.Value.First().Id;
         }
@@ -107,7 +108,7 @@ public class IndexModel : BasePageModel
         Sightings = sightingsRequest.Value;
     }
 
-    public async Task<IActionResult> OnPostAjaxRemoveSighting(Guid eventId, Guid sightingId)
+    public async Task<IActionResult> OnPostAjaxRemoveSighting(StocktakeEventId eventId, StocktakeSightingId sightingId)
     {
         Result<List<StocktakeSightingResponse>> sightingsRequest = await _mediator.Send(new GetStocktakeSightingsForSchoolQuery(CurrentSchoolCode, EventId));
         StocktakeSightingResponse? sighting = sightingsRequest.Value.FirstOrDefault(entry => entry.Id == sightingId);
@@ -135,6 +136,7 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnPostRemoveSighting(RemoveSightingConfirmationViewModel viewModel)
     {
         CancelSightingCommand command = new(
+            viewModel.EventId,
             viewModel.SightingId,
             viewModel.Comment,
             _currentUserService.UserName,

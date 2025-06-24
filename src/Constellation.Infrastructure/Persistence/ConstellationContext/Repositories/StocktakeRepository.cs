@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Stocktake.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Stocktake;
+using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -27,7 +29,7 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .ToListAsync(cancellationToken);
 
     public async Task<StocktakeEvent> GetById(
-        Guid eventId,
+        StocktakeEventId eventId,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StocktakeEvent>()
@@ -35,7 +37,7 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<StocktakeEvent> GetByIdWithSightings(
-        Guid eventId, 
+        StocktakeEventId eventId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StocktakeEvent>()
@@ -53,7 +55,7 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<StocktakeSighting>> GetActiveSightingsForSchool(
-        Guid stocktakeEventId, 
+        StocktakeEventId stocktakeEventId, 
         string schoolCode, 
         CancellationToken cancellationToken = default) =>
         await _context
@@ -64,15 +66,8 @@ internal sealed class StocktakeRepository : IStocktakeRepository
                 !sighting.IsCancelled)
             .ToListAsync(cancellationToken);
 
-    public async Task<StocktakeSighting> GetSightingById(
-        Guid sightingId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<StocktakeSighting>()
-            .FirstOrDefaultAsync(sighting => sighting.Id == sightingId, cancellationToken);
-
     public async Task<List<StocktakeSighting>> GetForStaffMember(
-        Guid stocktakeEventId,
+        StocktakeEventId stocktakeEventId,
         StaffId staffId,
         string emailAddress,
         CancellationToken cancellationToken = default) =>
@@ -80,10 +75,9 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .Set<StocktakeSighting>()
             .Where(sighting => 
                 sighting.StocktakeEventId == stocktakeEventId &&
-                ((sighting.UserType == StocktakeSighting.UserTypes.Staff && sighting.UserCode == staffId.ToString()) ||
+                ((sighting.UserType == UserType.Staff && sighting.UserCode == staffId.ToString()) ||
                  sighting.SightedBy == emailAddress))
             .ToListAsync(cancellationToken);
 
-    public void Insert(StocktakeSighting sighting) => _context.Set<StocktakeSighting>().Add(sighting);
     public void Insert(StocktakeEvent stocktake) => _context.Set<StocktakeEvent>().Add(stocktake);
 }

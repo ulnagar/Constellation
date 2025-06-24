@@ -15,11 +15,15 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Enums;
+using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -48,7 +52,7 @@ public class SubmitModel : BasePageModel
     [ViewData] public string PageTitle => "Stocktake Sighting Submission";
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public StocktakeEventId Id { get; set; }
     [BindProperty]
     public string SerialNumber { get; set; }
     [BindProperty]
@@ -56,13 +60,15 @@ public class SubmitModel : BasePageModel
     [BindProperty]
     public string Description { get; set; }
     [BindProperty]
-    public string LocationCategory { get; set; }
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public LocationCategory LocationCategory { get; set; }
     [BindProperty]
     public string LocationName { get; set; }
     [BindProperty]
     public string LocationCode { get; set; }
     [BindProperty]
-    public string UserType { get; set; }
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public UserType UserType { get; set; }
     [BindProperty]
     public string UserName { get; set; }
     [BindProperty]
@@ -78,10 +84,13 @@ public class SubmitModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        AssetNumber assetNumber = Core.Models.Assets.ValueObjects.AssetNumber.FromValue(AssetNumber);
+
+        
         RegisterSightingCommand command = new(
             Id,
             SerialNumber,
-            AssetNumber,
+            assetNumber,
             Description,
             LocationCategory,
             LocationName,

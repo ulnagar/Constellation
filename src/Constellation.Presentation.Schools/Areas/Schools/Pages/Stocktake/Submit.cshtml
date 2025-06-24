@@ -1,5 +1,5 @@
-﻿@page "{eventId:guid}"
-@using Constellation.Core.Models.Stocktake
+﻿@page "{eventId}"
+@using Constellation.Core.Models.Stocktake.Enums
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.SubmitModel
 @{
 }
@@ -58,11 +58,11 @@
                     <div class="col-md-7 ps-1">
                         <select asp-for="UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
                             <option value="">-- Select --</option>
-                            <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
-                            <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
-                            <option value="@StocktakeSighting.UserTypes.School">@StocktakeSighting.UserTypes.School</option>
-                            <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
-                            <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
+                            <option value="@UserType.Student">@UserType.Student</option>
+                            <option value="@UserType.Staff">@UserType.Staff</option>
+                            <option value="@UserType.School">@UserType.School</option>
+                            <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
+                            <option value="@UserType.Other">@UserType.Other</option>
                         </select>
                         <span asp-validation-for="UserType" class="text-danger"></span>
                         <span asp-validation-for="UserName" class="text-danger"></span>
@@ -147,12 +147,12 @@
         $('#Command_UserName').val('');
 
         // Show appropriate UserName option based on UserType value
-        if (userType.val() === "@StocktakeSighting.UserTypes.Student") {
+        if (userType.val() === "@UserType.Student") {
             $('#UserTypeStudent').show();
-        } else if (userType.val() === "@StocktakeSighting.UserTypes.Staff") {
+        } else if (userType.val() === "@UserType.Staff") {
             $('#UserTypeStaff').show();
-        } else if (userType.val() === "@StocktakeSighting.UserTypes.CommunityMember" ||
-            userType.val() === "@StocktakeSighting.UserTypes.Other") {
+        } else if (userType.val() === "@UserType.CommunityMember" ||
+            userType.val() === "@UserType.Other") {
             $('#UserTypeOther').show();
         }
     }

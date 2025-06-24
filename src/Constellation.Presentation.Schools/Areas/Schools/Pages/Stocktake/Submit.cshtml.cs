@@ -8,16 +8,19 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
 using Constellation.Application.Domains.Students.Models;
-using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
+using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Enums;
+using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -48,12 +51,14 @@ public class SubmitModel : BasePageModel
     [ViewData] public string ActivePage => Models.ActivePage.Stocktake;
 
     [BindProperty(SupportsGet = true)]
-    public Guid EventId { get; set; }
+    public StocktakeEventId EventId { get; set; }
 
     [BindProperty] public string? SerialNumber { get; set; } = string.Empty;
     [BindProperty] public string? AssetNumber { get; set; } = string.Empty;
     [BindProperty] public string Description { get; set; } = string.Empty;
-    [BindProperty] public string UserType { get; set; } = string.Empty;
+    [BindProperty]
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public UserType UserType { get; set; }
     [BindProperty] public string UserName { get; set; } = string.Empty;
     [BindProperty] public string UserCode { get; set; } = string.Empty;
     [BindProperty] public string? Comment { get; set; } = string.Empty;
@@ -116,18 +121,20 @@ public class SubmitModel : BasePageModel
 
         Result<SchoolResponse> school = await _mediator.Send(new GetSchoolByIdQuery(CurrentSchoolCode));
 
-        if (UserType == StocktakeSighting.UserTypes.School)
+        if (UserType.Equals(UserType.School))
         {
             UserName = school.Value.Name;
             UserCode = school.Value.SchoolCode;
         }
 
+        AssetNumber? assetNumber = Core.Models.Assets.ValueObjects.AssetNumber.FromValue(AssetNumber);
+
         RegisterSightingCommand command = new(
             EventId,
             SerialNumber,
-            AssetNumber,
+            assetNumber,
             Description,
-            StocktakeSighting.LocationCategories.PublicSchool,
+            LocationCategory.PublicSchool,
             school.Value.Name,
             school.Value.SchoolCode,
             UserType,
@@ -137,7 +144,9 @@ public class SubmitModel : BasePageModel
             _currentUserService.EmailAddress,
             DateTime.Now);
 
-        _logger.Information("Requested to submit stocktake sighting by user {user} with data {@command}", _currentUserService.UserName, command);
+        _logger
+            .ForContext(nameof(RegisterSightingCommand), command, true)
+            .Information("Requested to submit stocktake sighting by user {user}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);
 

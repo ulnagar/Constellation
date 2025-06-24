@@ -1,10 +1,12 @@
 ﻿namespace Constellation.Presentation.Schools.Pages.Shared.PartialViews.RemoveSightingConfirmation;
+
+using Core.Models.Stocktake.Identifiers;
 using System;
 
 public sealed class RemoveSightingConfirmationViewModel
 {
-    public Guid EventId { get; set; }
-    public Guid SightingId { get; set; }
+    public StocktakeEventId EventId { get; set; }
+    public StocktakeSightingId SightingId { get; set; }
     public string SerialNumber { get; set; } = string.Empty;
     public string AssetNumber { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

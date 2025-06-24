@@ -1,17 +1,20 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
 
 using Abstractions.Messaging;
+using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Enums;
+using Core.Models.Stocktake.Identifiers;
 using System;
 
 public sealed record RegisterSightingCommand(
-    Guid StocktakeEventId,
+    StocktakeEventId StocktakeEventId,
     string SerialNumber,
-    string AssetNumber,
+    AssetNumber AssetNumber,
     string Description,
-    string LocationCategory,
+    LocationCategory LocationCategory,
     string LocationName,
     string LocationCode,
-    string UserType,
+    UserType UserType,
     string UserName,
     string UserCode,
     string Comment,

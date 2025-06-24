@@ -8,6 +8,7 @@ using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ public class DashboardModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public StocktakeEventId Id { get; set; }
 
     public string Name { get; set; }
     public DateOnly StartDate { get; set; }
@@ -53,7 +54,7 @@ public class DashboardModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        if (Id == Guid.Empty)
+        if (Id == StocktakeEventId.Empty)
         {
             return RedirectToPage("/Dashboard", new { area = "Staff" });
         }

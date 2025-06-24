@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
 
 using Abstractions.Messaging;
-using System;
+using Core.Models.Stocktake.Identifiers;
 
 public sealed record GetStocktakeEventDetailsQuery(
-    Guid Id)
+    StocktakeEventId Id)
     : IQuery<StocktakeEventDetailsResponse>;

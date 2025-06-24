@@ -29,19 +29,32 @@ internal sealed class CancelSightingCommandHandler
 
     public async Task<Result> Handle(CancelSightingCommand request, CancellationToken cancellationToken)
     {
-        StocktakeSighting sighting = await _stocktakeRepository.GetSightingById(request.SightingId, cancellationToken);
+        StocktakeEvent @event = await _stocktakeRepository.GetById(request.EventId, cancellationToken);
 
-        if (sighting is null)
+        if (@event is null)
         {
             _logger
                 .ForContext(nameof(CancelSightingCommand), request, true)
-                .ForContext(nameof(Error), StocktakeErrors.SightingNotFound(request.SightingId), true)
+                .ForContext(nameof(Error), StocktakeEventErrors.EventNotFound(request.EventId), true)
                 .Warning("Failed to cancel Stocktake Sighting");
 
-            return Result.Failure(StocktakeErrors.SightingNotFound(request.SightingId));
+            return Result.Failure(StocktakeEventErrors.EventNotFound(request.EventId));
         }
 
-        sighting.Cancel(request.Comment, request.CancelledBy);
+        Result cancel = @event.CancelSighting(
+            request.SightingId,
+            request.Comment,
+            request.CancelledBy);
+
+        if (cancel.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CancelSightingCommand), request, true)
+                .ForContext(nameof(Error), cancel.Error, true)
+                .Warning("Failed to cancel Stocktake Sighting");
+
+            return Result.Failure(cancel.Error);
+        }
 
         await _uniOfWork.CompleteAsync(cancellationToken);
 

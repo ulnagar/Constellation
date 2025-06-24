@@ -1,18 +1,20 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
 
+using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Identifiers;
 using System;
 using System.Collections.Generic;
 
 public sealed record StocktakeEventDetailsResponse(
-    Guid Id,
+    StocktakeEventId Id,
     string Name,
     DateTime StartDate,
     DateTime EndDate,
     List<StocktakeEventDetailsResponse.Sighting> Sightings)
 {
     public sealed record Sighting(
-        Guid Id,
-        string AssetNumber,
+        StocktakeSightingId Id,
+        AssetNumber AssetNumber,
         string SerialNumber,
         string Description,
         string Location,

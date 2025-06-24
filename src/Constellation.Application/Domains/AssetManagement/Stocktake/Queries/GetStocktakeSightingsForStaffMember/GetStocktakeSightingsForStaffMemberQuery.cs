@@ -2,11 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Stocktake.Identifiers;
 using Models;
-using System;
 using System.Collections.Generic;
 
 public sealed record GetStocktakeSightingsForStaffMemberQuery(
     StaffId StaffId,
-    Guid StocktakeEventId)
+    StocktakeEventId StocktakeEventId)
     : IQuery<List<StocktakeSightingResponse>>;

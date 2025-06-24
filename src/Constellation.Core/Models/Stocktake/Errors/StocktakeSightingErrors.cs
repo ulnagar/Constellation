@@ -1,14 +1,11 @@
 ﻿namespace Constellation.Core.Models.Stocktake.Errors;
 
+using Identifiers;
 using Shared;
 using System;
 
-public static class StocktakeErrors
+public static class StocktakeSightingErrors
 {
-    public static readonly Func<Guid, Error> EventNotFound = id => new(
-        "Stocktake.Event.NotFound",
-        $"Could not find a Stocktake Event with the Id {id}");
-
     public static Error SightingAlreadyCancelled => new(
         "Stocktake.Sighting.AlreadyCancelled",
         "The selected stocktake sighting record has already been cancelled");
@@ -17,7 +14,7 @@ public static class StocktakeErrors
         "Stocktake.Sighting.InvalidSerialOrAsset",
         "A valid Serial Number or Asset Number is required to register a sighting");
 
-    public static readonly Func<Guid, Error> SightingNotFound = id => new(
-            "Stocktake.Sighting.NotFound",
-            $"Could not find a stocktake sighting record with the id {id}");
+    public static readonly Func<StocktakeSightingId, Error> SightingNotFound = id => new(
+        "Stocktake.Sighting.NotFound",
+        $"Could not find a stocktake sighting record with the id {id}");
 }

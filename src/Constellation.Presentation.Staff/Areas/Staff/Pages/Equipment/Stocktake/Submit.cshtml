@@ -1,8 +1,8 @@
-﻿@page "{id:guid}"
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.SubmitModel
 
 @using Constellation.Core.Models.Stocktake
-@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using Constellation.Core.Models.Stocktake.Enums
 
 @{
 }
@@ -66,11 +66,11 @@
                     <div class="col-md-7 pl-1">
                         <select asp-for="UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
                             <option value="">-- Select --</option>
-                            <option value="@StocktakeSighting.UserTypes.Student">@StocktakeSighting.UserTypes.Student</option>
-                            <option value="@StocktakeSighting.UserTypes.Staff">@StocktakeSighting.UserTypes.Staff</option>
-                            <option value="@StocktakeSighting.UserTypes.School">@StocktakeSighting.UserTypes.School</option>
-                            <option value="@StocktakeSighting.UserTypes.CommunityMember">@StocktakeSighting.UserTypes.CommunityMember</option>
-                            <option value="@StocktakeSighting.UserTypes.Other">@StocktakeSighting.UserTypes.Other</option>
+                            <option value="@UserType.Student">@UserType.Student</option>
+                            <option value="@UserType.Staff">@UserType.Staff</option>
+                            <option value="@UserType.School">@UserType.School</option>
+                            <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
+                            <option value="@UserType.Other">@UserType.Other</option>
                         </select>
                         <span asp-validation-for="UserType" class="text-danger"></span>
                         <span asp-validation-for="UserName" class="text-danger"></span>
@@ -129,11 +129,11 @@
             <div class="col-md-3">
                 <select asp-for="LocationCategory" onchange="UpdateLocationType()" class="form-control" id="LocationType">
                     <option value="">-- Select --</option>
-                    <option value="@StocktakeSighting.LocationCategories.AuroraCollege">@StocktakeSighting.LocationCategories.AuroraCollege</option>
-                    <option value="@StocktakeSighting.LocationCategories.PublicSchool">@StocktakeSighting.LocationCategories.PublicSchool</option>
-                    <option value="@StocktakeSighting.LocationCategories.StateOffice">@StocktakeSighting.LocationCategories.StateOffice</option>
-                    <option value="@StocktakeSighting.LocationCategories.PrivateResidence">@StocktakeSighting.LocationCategories.PrivateResidence</option>
-                    <option value="@StocktakeSighting.LocationCategories.Other">@StocktakeSighting.LocationCategories.Other</option>
+                    <option value="@LocationCategory.AuroraCollege">@LocationCategory.AuroraCollege</option>
+                    <option value="@LocationCategory.PublicSchool">@LocationCategory.PublicSchool</option>
+                    <option value="@LocationCategory.StateOffice">@LocationCategory.StateOffice</option>
+                    <option value="@LocationCategory.PrivateResidence">@LocationCategory.PrivateResidence</option>
+                    <option value="@LocationCategory.Other">@LocationCategory.Other</option>
                 </select>
                 <span asp-validation-for="LocationCategory" class="text-danger"></span>
                 <span asp-validation-for="LocationName" class="text-danger"></span>
@@ -215,14 +215,14 @@
             $('#Command_UserName').val('');
 
             // Show appropriate UserName option based on UserType value
-            if (userType.val() === "@StocktakeSighting.UserTypes.Student") {
+            if (userType.val() === "@UserType.Student") {
                 $('#UserTypeStudent').show();
-            } else if (userType.val() === "@StocktakeSighting.UserTypes.Staff") {
+            } else if (userType.val() === "@UserType.Staff") {
                 $('#UserTypeStaff').show();
-            } else if (userType.val() === "@StocktakeSighting.UserTypes.School") {
+            } else if (userType.val() === "@UserType.School") {
                 $('#UserTypeSchool').show();
-            } else if (userType.val() === "@StocktakeSighting.UserTypes.CommunityMember" ||
-                userType.val() === "@StocktakeSighting.UserTypes.Other") {
+            } else if (userType.val() === "@UserType.CommunityMember" ||
+                userType.val() === "@UserType.Other") {
                 $('#UserTypeOther').show();
             }
         }
@@ -272,19 +272,19 @@
             $('#LocationHelpText').html('');
 
             // Show appropriate UserName option based on UserType value
-            if (locationType.val() === "@StocktakeSighting.LocationCategories.AuroraCollege") {
+            if (locationType.val() === "@LocationCategory.AuroraCollege") {
                 $('#LocationTypeOther').show();
                 $('#LocationHelpText').html('Enter the closest description for where this device usually is located. E.g. "Studio 10", or "Level 4", or "Conference Room".')
-            } else if (locationType.val() === "@StocktakeSighting.LocationCategories.PublicSchool") {
+            } else if (locationType.val() === "@LocationCategory.PublicSchool") {
                 $('#LocationTypeSchool').show();
                 $('#LocationHelpText').html('Select which partner school the device is located at.')
-            } else if (locationType.val() === "@StocktakeSighting.LocationCategories.StateOffice") {
+            } else if (locationType.val() === "@LocationCategory.StateOffice") {
                 $('#LocationTypeOther').show();
                 $('#LocationHelpText').html('Enter the name of the State Office you are located at.')
-            } else if (locationType.val() === "@StocktakeSighting.LocationCategories.PrivateResidence") {
+            } else if (locationType.val() === "@LocationCategory.PrivateResidence") {
                 $('#LocationTypeOther').show();
                 $('#LocationHelpText').html('Enter the address of the private residence where the device is based.')
-            } else if (locationType.val() === "@StocktakeSighting.UserTypes.Other") {
+            } else if (locationType.val() === "@LocationCategory.Other") {
                 $('#LocationTypeOther').show();
                 $('#LocationHelpText').html('Enter the best description for where this device usually is located.')
             }

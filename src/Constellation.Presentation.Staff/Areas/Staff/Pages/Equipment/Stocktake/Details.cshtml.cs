@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
 using Core.Abstractions.Services;
+using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +40,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle => "Stocktake Event Details";
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public StocktakeEventId Id { get; set; }
 
     public StocktakeEventDetailsResponse Stocktake { get; set; }
 
