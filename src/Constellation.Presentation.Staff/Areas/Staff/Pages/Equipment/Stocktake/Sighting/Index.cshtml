@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.Sighting.IndexModel
 @{
 }
@@ -9,4 +9,142 @@
 
 <hr/>
 
-<  
+<div class="jumbotron">
+    <h3 class="display-4">Search for a device</h3>
+    <p class="lead">Search for an Aurora College Asset either by Asset Number, or Serial Number</p>
+    <hr class="my-4">
+    <p>Asset Numbers start with "AC" and have eight digits. You do not need to include the "AC" or any zeros at the start. E.g. AC00004321 could be entered as "4321".</p>
+    <form method="post">
+        <div class="form-row">
+            <div class="col-4">
+                <input asp-for="AssetNumber" class="form-control" placeholder="Asset Number" />
+            </div>
+            <div class="col-1 align-middle text-center">
+                <span class="align-middle">OR</span>
+            </div>
+            <div class="col-4">
+                <input asp-for="SerialNumber" class="form-control" placeholder="Serial Number" />
+            </div>
+            <div class="col-3">
+                <button type="submit" class="btn btn-success btn-block">Search</button>
+            </div>
+        </div>
+    </form>
+    <div class="alert alert-warning mt-3">TIP: You can use a barcode scanner to scan the Asset Number barcode on a device directly into the portal!</div>
+</div>
+
+@if (Model.Asset is not null)
+{
+    <div class="modal" tabindex="-1" id="found-modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asset Found!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Is this the asset you searched for?</p>
+
+                    <dt>Asset Number:</dt>
+                    <dd>@Model.Asset.AssetNumber</dd>
+
+                    <dt>Serial Number:</dt>
+                    <dd>@Model.Asset.SerialNumber</dd>
+
+                    <dt>Description:</dt>
+                    <dd>@Model.Asset.Description</dd>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, Search Again!</button>
+                    <button type="button" class="btn btn-primary" onclick="goToDetails()">Yes!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" id="details-modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asset Found!</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Are the following details still correct?</p>
+
+                    <dt>Location Type:</dt>
+                    <dd>@Model.Asset.LocationCategory</dd>
+        
+                    <dt>Location Site:</dt>
+                    <dd>@Model.Asset.LocationName</dd>
+        
+                    <dt>User Type:</dt>
+                    <dd>@Model.Asset.UserType</dd>
+        
+                    <dt>User Name:</dt>
+                    <dd>@Model.Asset.UserName</dd>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, Update</button>
+                    <button type="button" class="btn btn-primary" onclick="goToCondition()">Yes!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-page-handler="FinalSubmit" method="post">
+        <div class="modal" tabindex="-1" id="condition-modal">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Asset Found!</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Is the asset in good condition?</p>
+                        <p>If yes, click the Submit button.</p>
+                        <p>If not, please enter a description below then click the Submit button.</p>
+                        
+                        <textarea name="comment" rows="5" cols="100" class="form-control"></textarea>
+                        <input type="hidden" name="assetId" value="@Model.Asset.AssetId" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+
+@section scripts {
+    @if (Model.Asset is not null)
+    {
+        <script>
+            $(document).ready(function () {
+                $('#found-modal').modal('show');
+            });
+        </script>
+    }
+
+    <script>        
+        function goToDetails() {
+            $('#found-modal').modal('hide');
+
+            $('.spinner-overlay').removeClass('d-none');
+
+            setTimeout(function() {
+                $('.spinner-overlay').addClass('d-none');
+                $('#details-modal').modal('show');
+            }, 1500);
+        }
+
+        function goToCondition() {
+            $('#details-modal').modal('hide');
+
+            $('.spinner-overlay').removeClass('d-none');
+
+            setTimeout(function() {
+                $('.spinner-overlay').addClass('d-none');
+                $('#condition-modal').modal('show');
+            }, 1500);
+        }
+    </script>
+}

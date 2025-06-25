@@ -14,6 +14,7 @@ using System.Linq;
 public sealed class StocktakeEvent : AggregateRoot
 {
     private readonly List<StocktakeSighting> _sightings = [];
+    private readonly List<Difference> _differences = [];
 
     public StocktakeEvent(
         string name,
@@ -34,6 +35,7 @@ public sealed class StocktakeEvent : AggregateRoot
     public bool AcceptLateResponses { get; private set; }
     public string Name { get; private set; }
     public IReadOnlyCollection<StocktakeSighting> Sightings => _sightings.AsReadOnly();
+    public IReadOnlyCollection<Difference> Differences => _differences.AsReadOnly();
 
     public Result Update(
         string name,
@@ -64,7 +66,8 @@ public sealed class StocktakeEvent : AggregateRoot
         string userCode,
         string comment,
         string sightedBy,
-        DateTime sightedAt)
+        DateTime sightedAt,
+        DifferenceCategory changes)
     {
         Result<StocktakeSighting> sighting = StocktakeSighting.Create(
             Id,
@@ -86,6 +89,16 @@ public sealed class StocktakeEvent : AggregateRoot
 
         _sightings.Add(sighting.Value);
 
+        if (!changes.Equals(DifferenceCategory.None))
+        {
+            Difference difference = new(
+                Id,
+                sighting.Value.Id,
+                changes);
+
+            _differences.Add(difference);
+        }
+
         return Result.Success();
     }
 
@@ -102,4 +115,16 @@ public sealed class StocktakeEvent : AggregateRoot
         return sighting.Cancel(comment, cancelledBy);
     }
 
+    public Result ResolveDifference(
+        DifferenceId differenceId)
+    {
+        Difference difference = _differences.FirstOrDefault(entry => entry.Id == differenceId);
+
+        if (difference is null)
+            return Result.Failure(StocktakeDifferenceErrors.DifferenceNotFound(differenceId));
+
+        difference.SetResolved();
+
+        return Result.Success();
+    }
 }

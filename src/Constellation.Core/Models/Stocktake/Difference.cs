@@ -11,6 +11,9 @@ public sealed class Difference
         DifferenceCategory category) 
     {
         Id = new();
+        EventId = eventId;
+        SightingId = sightingId;
+        Category = category;
     }
 
     private Difference() { }
@@ -21,5 +24,5 @@ public sealed class Difference
     public DifferenceCategory Category { get; init; }
     public bool Resolved { get; private set; }
 
-    public void SetResolved() => Resolved = true;
+    internal void SetResolved() => Resolved = true;
 }

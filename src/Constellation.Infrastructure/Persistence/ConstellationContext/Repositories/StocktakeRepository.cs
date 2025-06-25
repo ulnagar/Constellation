@@ -78,6 +78,6 @@ internal sealed class StocktakeRepository : IStocktakeRepository
                 ((sighting.UserType == UserType.Staff && sighting.UserCode == staffId.ToString()) ||
                  sighting.SightedBy == emailAddress))
             .ToListAsync(cancellationToken);
-
+    
     public void Insert(StocktakeEvent stocktake) => _context.Set<StocktakeEvent>().Add(stocktake);
 }

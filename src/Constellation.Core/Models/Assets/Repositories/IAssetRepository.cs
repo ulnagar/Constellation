@@ -14,6 +14,7 @@ public interface IAssetRepository
 {
     Task<Asset?> GetById(AssetId assetId, CancellationToken cancellationToken = default);
     Task<Asset?> GetByAssetNumber(AssetNumber assetNumber, CancellationToken cancellationToken = default);
+    Task<Asset?> GetBySerialNumber(string serialNumber, CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Asset>> GetAllActiveAllocatedToStudents(CancellationToken cancellationToken = default);

@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake;
 
+using Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
 using Application.Domains.Schools.Queries.GetSchoolById;
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffFromSchool;
 using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
@@ -129,10 +129,9 @@ public class SubmitModel : BasePageModel
 
         AssetNumber? assetNumber = Core.Models.Assets.ValueObjects.AssetNumber.FromValue(AssetNumber);
 
-        RegisterSightingCommand command = new(
+        RegisterManualSightingCommand command = new(
             EventId,
             SerialNumber,
-            assetNumber,
             Description,
             LocationCategory.PublicSchool,
             school.Value.Name,
@@ -140,12 +139,10 @@ public class SubmitModel : BasePageModel
             UserType,
             UserName,
             UserCode,
-            Comment,
-            _currentUserService.EmailAddress,
-            DateTime.Now);
+            Comment);
 
         _logger
-            .ForContext(nameof(RegisterSightingCommand), command, true)
+            .ForContext(nameof(RegisterManualSightingCommand), command, true)
             .Information("Requested to submit stocktake sighting by user {user}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);

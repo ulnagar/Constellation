@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250625002418_AddStocktakeSightingDifferenceRecords")]
+    partial class AddStocktakeSightingDifferenceRecords
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -115,7 +118,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("AccessToken");
 
-                    b.ToTable("AspNetAccessTokens", (string)null);
+                    b.ToTable("AspNetAccessTokens");
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.Identity.AppRole", b =>
@@ -263,7 +266,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsUnique()
                         .HasFilter("[JobName] IS NOT NULL");
 
-                    b.ToTable("JobActivations", (string)null);
+                    b.ToTable("JobActivations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -1334,7 +1337,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes", (string)null);
+                    b.ToTable("DeviceNotes");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -2038,7 +2041,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("MSTeamOperations", (string)null);
+                    b.ToTable("MSTeamOperations");
 
                     b.HasDiscriminator<string>("UserType").HasValue("MSTeamOperation");
 
@@ -4068,7 +4071,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("MSTeamOperations", null, t =>
+                    b.ToTable("MSTeamOperations", t =>
                         {
                             t.Property("StudentId")
                                 .HasColumnName("StudentEnrolledMSTeamOperation_StudentId");
@@ -4548,7 +4551,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("MSTeamOperations", null, t =>
+                    b.ToTable("MSTeamOperations", t =>
                         {
                             t.Property("StudentId")
                                 .HasColumnName("StudentMSTeamOperation_StudentId");
@@ -4566,7 +4569,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("MSTeamOperations", null, t =>
+                    b.ToTable("MSTeamOperations", t =>
                         {
                             t.Property("StaffId")
                                 .HasColumnName("TeacherMSTeamOperation_StaffId");
@@ -4672,7 +4675,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlan.FreePeriods#Constellation.Core.Models.Attendance.AttendancePlanFreePeriod", "FreePeriods", b1 =>
+                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanFreePeriod", "FreePeriods", b1 =>
                         {
                             b1.Property<Guid>("AttendancePlanId")
                                 .HasColumnType("uniqueidentifier");
@@ -4710,7 +4713,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasForeignKey("AttendancePlanId");
                         });
 
-                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlan.MissedLessons#Constellation.Core.Models.Attendance.AttendancePlanMissedLesson", "MissedLessons", b1 =>
+                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanMissedLesson", "MissedLessons", b1 =>
                         {
                             b1.Property<Guid>("AttendancePlanId")
                                 .HasColumnType("uniqueidentifier");
@@ -5464,7 +5467,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.SendEmailAction", b =>
                 {
-                    b.OwnsMany("Constellation.Core.Models.WorkFlow.SendEmailAction.Recipients#Constellation.Core.ValueObjects.EmailRecipient", "Recipients", b1 =>
+                    b.OwnsMany("Constellation.Core.ValueObjects.EmailRecipient", "Recipients", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -5493,7 +5496,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasForeignKey("OwnerId");
                         });
 
-                    b.OwnsOne("Constellation.Core.Models.WorkFlow.SendEmailAction.Sender#Constellation.Core.ValueObjects.EmailRecipient", "Sender", b1 =>
+                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "Sender", b1 =>
                         {
                             b1.Property<Guid>("SendEmailActionId")
                                 .HasColumnType("uniqueidentifier");
@@ -5508,7 +5511,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions", (string)null);
+                            b1.ToTable("WorkFlows_Actions");
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");

@@ -24,12 +24,14 @@ internal sealed class DifferenceConfiguration : IEntityTypeConfiguration<Differe
         builder
             .HasOne<StocktakeEvent>()
             .WithMany()
-            .HasForeignKey(difference => difference.EventId);
+            .HasForeignKey(difference => difference.EventId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .HasOne<StocktakeSighting>()
             .WithMany()
-            .HasForeignKey(difference => difference.SightingId);
+            .HasForeignKey(difference => difference.SightingId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder
             .Property(difference => difference.Category)

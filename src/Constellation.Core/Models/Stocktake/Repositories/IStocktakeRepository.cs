@@ -15,12 +15,5 @@ public interface IStocktakeRepository
     Task<List<StocktakeSighting>> GetActiveSightingsForSchool(StocktakeEventId stocktakeEventId, string schoolCode, CancellationToken cancellationToken = default);
     Task<List<StocktakeSighting>> GetForStaffMember(StocktakeEventId stocktakeEventId, StaffId staffId, string emailAddress, CancellationToken cancellationToken = default);
 
-    Task<List<Difference>> GetDifferencesForEvent(StocktakeEventId stocktakeEventId, CancellationToken cancellationToken = default);
-    Task<Difference> GetDifferenceById(DifferenceId differenceId, CancellationToken cancellationToken = default);
-
-    Task<StocktakeSighting> GetSightingById(StocktakeEventId eventId, StocktakeSightingId sightingId, CancellationToken cancellationToken = default);
-
-
     void Insert(StocktakeEvent stocktake);
-    void Insert(Difference difference);
 }

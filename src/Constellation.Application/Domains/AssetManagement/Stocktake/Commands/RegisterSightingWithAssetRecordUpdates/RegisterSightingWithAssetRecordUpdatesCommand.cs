@@ -1,12 +1,12 @@
-﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
+﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSightingWithAssetRecordUpdates;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Stocktake.Identifiers;
 using Core.Models.Assets.ValueObjects;
 using Core.Models.Stocktake.Enums;
-using Core.Models.Stocktake.Identifiers;
 using System;
 
-public sealed record RegisterSightingCommand(
+public sealed record RegisterSightingWithAssetRecordUpdatesCommand(
     StocktakeEventId StocktakeEventId,
     string SerialNumber,
     AssetNumber AssetNumber,
@@ -19,5 +19,5 @@ public sealed record RegisterSightingCommand(
     string UserCode,
     string Comment,
     string SightedBy,
-    DateTime SightedAt)
+    DateTime SightedA)
     : ICommand;

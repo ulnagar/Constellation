@@ -1,40 +1,50 @@
-﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
+﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
 
-using Abstractions.Messaging;
+using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
-using Core.Models.Stocktake;
-using Core.Models.Stocktake.Errors;
-using Core.Models.Stocktake.Repositories;
-using Core.Shared;
+using Constellation.Core.Models.Stocktake;
+using Constellation.Core.Models.Stocktake.Errors;
+using Constellation.Core.Models.Stocktake.Repositories;
+using Constellation.Core.Shared;
+using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
+using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Enums;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class RegisterSightingCommandHandler 
-    : ICommandHandler<RegisterSightingCommand>
+internal sealed class RegisterManualSightingCommandHandler 
+    : ICommandHandler<RegisterManualSightingCommand>
 {
     private readonly IStocktakeRepository _stocktakeRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public RegisterSightingCommandHandler(
+    public RegisterManualSightingCommandHandler(
         IStocktakeRepository stocktakeRepository,
+        ICurrentUserService currentUserService,
+        IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _stocktakeRepository = stocktakeRepository;
+        _currentUserService = currentUserService;
+        _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger.ForContext<RegisterSightingCommand>();
+        _logger = logger.ForContext<RegisterManualSightingCommand>();
     }
 
-    public async Task<Result> Handle(RegisterSightingCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RegisterManualSightingCommand request, CancellationToken cancellationToken)
     {
         StocktakeEvent @event = await _stocktakeRepository.GetById(request.StocktakeEventId, cancellationToken);
 
         if (@event is null)
         {
             _logger
-                .ForContext(nameof(RegisterSightingCommand), request, true)
+                .ForContext(nameof(RegisterManualSightingCommand), request, true)
                 .ForContext(nameof(Error), StocktakeEventErrors.EventNotFound(request.StocktakeEventId), true)
                 .Warning("Failed to create new Stocktake Sighting record");
 
@@ -43,7 +53,7 @@ internal sealed class RegisterSightingCommandHandler
 
         Result sighting = @event.AddSighting(
             request.SerialNumber,
-            request.AssetNumber,
+            AssetNumber.Empty, 
             request.Description,
             request.LocationCategory,
             request.LocationName,
@@ -52,13 +62,14 @@ internal sealed class RegisterSightingCommandHandler
             request.UserName,
             request.UserCode,
             request.Comment,
-            request.SightedBy,
-            request.SightedAt);
+            _currentUserService.UserName,
+            _dateTime.Now,
+            DifferenceCategory.ManualEntry);
 
         if (sighting.IsFailure)
         {
             _logger
-                .ForContext(nameof(RegisterSightingCommand), request, true)
+                .ForContext(nameof(RegisterManualSightingCommand), request, true)
                 .ForContext(nameof(Error), sighting.Error, true)
                 .Warning("Failed to create new Stocktake Sighting record");
 

@@ -81,7 +81,8 @@ internal sealed class RegisterSightingFromAssetRecordCommandHandler
             asset.CurrentAllocation?.UserId ?? string.Empty,
             request.Comment,
             _currentUserService.UserName,
-            _dateTime.Now);
+            _dateTime.Now,
+            string.IsNullOrWhiteSpace(request.Comment) ? DifferenceCategory.None : DifferenceCategory.ConditionComment);
 
         if (sighting.IsFailure)
         {

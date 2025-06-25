@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
 using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolCodes;
 using Application.Domains.Schools.Queries.GetSchoolsFromList;
 using Application.Domains.StaffMembers.Models;
@@ -9,13 +10,11 @@ using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
 using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
 using Application.DTOs;
 using Application.Models.Auth;
-using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSighting;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Models.Assets.ValueObjects;
 using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
@@ -56,8 +55,6 @@ public class SubmitModel : BasePageModel
     [BindProperty]
     public string SerialNumber { get; set; }
     [BindProperty]
-    public string AssetNumber { get; set; }
-    [BindProperty]
     public string Description { get; set; }
     [BindProperty]
     [ModelBinder(typeof(BaseFromValueBinder))]
@@ -84,13 +81,9 @@ public class SubmitModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        AssetNumber assetNumber = Core.Models.Assets.ValueObjects.AssetNumber.FromValue(AssetNumber);
-
-        
-        RegisterSightingCommand command = new(
+        RegisterManualSightingCommand command = new(
             Id,
             SerialNumber,
-            assetNumber,
             Description,
             LocationCategory,
             LocationName,
@@ -98,12 +91,10 @@ public class SubmitModel : BasePageModel
             UserType,
             UserName,
             UserCode,
-            Comment,
-            _currentUserService.EmailAddress,
-            DateTime.Now);
+            Comment);
 
         _logger
-            .ForContext(nameof(RegisterSightingCommand), command, true)
+            .ForContext(nameof(RegisterManualSightingCommand), command, true)
             .Information("Requested to add stocktake sighting by user {User}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);

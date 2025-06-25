@@ -48,11 +48,9 @@ public class UpsertModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    [ModelBinder(typeof(AssetNumberBinder))]
     public AssetNumber? Id { get; set; }
 
     [BindProperty]
-    [ModelBinder(typeof(AssetNumberBinder))]
     public AssetNumber AssetNumber { get; set; }
 
     [BindProperty]
