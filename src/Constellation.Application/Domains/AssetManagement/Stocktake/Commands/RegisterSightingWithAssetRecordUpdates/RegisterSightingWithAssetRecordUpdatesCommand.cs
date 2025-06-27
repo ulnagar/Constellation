@@ -8,16 +8,12 @@ using System;
 
 public sealed record RegisterSightingWithAssetRecordUpdatesCommand(
     StocktakeEventId StocktakeEventId,
-    string SerialNumber,
     AssetNumber AssetNumber,
-    string Description,
     LocationCategory LocationCategory,
     string LocationName,
     string LocationCode,
     UserType UserType,
     string UserName,
     string UserCode,
-    string Comment,
-    string SightedBy,
-    DateTime SightedA)
+    string Comment)
     : ICommand;

@@ -26,8 +26,16 @@ internal sealed class StocktakeEventConfiguration : IEntityTypeConfiguration<Sto
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
+            .Navigation(stocktake => stocktake.Sightings)
+            .AutoInclude();
+
+        builder
             .HasMany(stocktake => stocktake.Differences)
             .WithOne()
             .HasForeignKey(difference => difference.EventId);
+
+        builder
+            .Navigation(stocktake => stocktake.Differences)
+            .AutoInclude();
     }
 }

@@ -5,6 +5,7 @@ using StaffMembers.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ValueObjects;
 
 public interface IStocktakeRepository
 {
@@ -13,7 +14,7 @@ public interface IStocktakeRepository
     Task<StocktakeEvent?> GetByIdWithSightings(StocktakeEventId eventId, CancellationToken cancellationToken = default);
     Task<List<StocktakeEvent>> GetCurrentEvents(CancellationToken cancellationToken = default);
     Task<List<StocktakeSighting>> GetActiveSightingsForSchool(StocktakeEventId stocktakeEventId, string schoolCode, CancellationToken cancellationToken = default);
-    Task<List<StocktakeSighting>> GetForStaffMember(StocktakeEventId stocktakeEventId, StaffId staffId, string emailAddress, CancellationToken cancellationToken = default);
+    Task<List<StocktakeSighting>> GetForStaffMember(StocktakeEventId stocktakeEventId, StaffId staffId, Name name, CancellationToken cancellationToken = default);
 
     void Insert(StocktakeEvent stocktake);
 }

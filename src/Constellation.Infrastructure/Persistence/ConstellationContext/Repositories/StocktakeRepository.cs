@@ -6,6 +6,7 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -69,14 +70,14 @@ internal sealed class StocktakeRepository : IStocktakeRepository
     public async Task<List<StocktakeSighting>> GetForStaffMember(
         StocktakeEventId stocktakeEventId,
         StaffId staffId,
-        string emailAddress,
+        Name name,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StocktakeSighting>()
             .Where(sighting => 
                 sighting.StocktakeEventId == stocktakeEventId &&
                 ((sighting.UserType == UserType.Staff && sighting.UserCode == staffId.ToString()) ||
-                 sighting.SightedBy == emailAddress))
+                 sighting.SightedBy == name.DisplayName))
             .ToListAsync(cancellationToken);
     
     public void Insert(StocktakeEvent stocktake) => _context.Set<StocktakeEvent>().Add(stocktake);

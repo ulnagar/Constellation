@@ -6,7 +6,7 @@
 <h2>Stocktake Data Collection</h2>
 
 <div>
-    <a asp-page="/Equipment/Stocktake/Submit" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-primary">Sight Device</a>
+    <a asp-page="/Equipment/Stocktake/Sighting/Index" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-primary">Sight Device</a>
 </div>
 
 <hr />
@@ -34,23 +34,60 @@
 <table class="table-striped table-hover data-table">
     <thead>
     <tr>
-        <th>Serial / Asset</th>
+        <th>Asset / Serial</th>
         <th>Description</th>
         <th>Location</th>
         <th>User</th>
         <th>Sighted</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
     @foreach (var item in Model.Sightings)
     {
         <tr>
-            <td>@item.SerialNumber / @item.AssetNumber</td>
+            <td>@item.AssetNumber / @item.SerialNumber</td>
             <td>@item.Description</td>
             <td>@item.LocationName</td>
             <td>@item.UserName</td>
             <td>@item.SightedBy (@item.SightedAt.ToShortDateString())</td>
+            <td>
+                <button data-event-id="@Model.Id" data-sighting-id="@item.Id" class="btn btn-sm btn-outline-danger btn-show-hover remove-sighting-button">Delete</button>
+            </td>
         </tr>
     }
     </tbody>
 </table>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $('.remove-sighting-button').click(function (event) {
+            var eventId = $(this).data("eventId");
+            var sightingId = $(this).data("sightingId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDeleteSighting",
+                type: "POST",
+                data: {
+                    eventId: eventId,
+                    sightingId: sightingId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}

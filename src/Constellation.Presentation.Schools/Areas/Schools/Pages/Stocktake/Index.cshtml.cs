@@ -138,9 +138,7 @@ public class IndexModel : BasePageModel
         CancelSightingCommand command = new(
             viewModel.EventId,
             viewModel.SightingId,
-            viewModel.Comment,
-            _currentUserService.UserName,
-            _dateTime.Now);
+            viewModel.Comment);
 
         _logger.Information("Requested to remove stocktake sighting by user {user} with data {@command}", _currentUserService.UserName, command);
 

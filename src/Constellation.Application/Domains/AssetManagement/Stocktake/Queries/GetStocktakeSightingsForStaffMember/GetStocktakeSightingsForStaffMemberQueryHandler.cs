@@ -44,11 +44,14 @@ internal sealed class GetStocktakeSightingsForStaffMemberQueryHandler
         List<StocktakeSighting> sightings = await _stocktakeRepository.GetForStaffMember(
             request.StocktakeEventId, 
             request.StaffId, 
-            staffMember.EmailAddress.Email, 
+            staffMember.Name, 
             cancellationToken);
 
         foreach (StocktakeSighting sighting in sightings)
         {
+            if (sighting.IsCancelled)
+                continue;
+
             response.Add(new(
                 sighting.Id,
                 sighting.SerialNumber,

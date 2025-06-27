@@ -1,0 +1,33 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.DeleteStocktakeSightingConfirmationModal.DeleteStocktakeSightingConfirmationModalViewModel
+
+<form asp-page-handler="DeleteSighting">
+    <div class="modal-header">
+        <h5 class="modal-title">Delete Record</h5>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="form-group col">
+                <span class="control-label">Are you sure you wish to remove this Stocktake record?</span>
+            </div>
+        </div>
+        <div class="mb-3 row mt-3">
+            <label class="form-label col-5">Reason for deleting</label>
+            <div class="w-100"></div>
+            <div class="col">
+                <input asp-for="EventId" type="hidden" />
+                <input asp-for="SightingId" type="hidden" />
+                <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+            </div>
+            <div class="w-100"></div>
+            <div class="col">
+                <span asp-validation-for="Comment" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-danger">Delete Record</button>
+    </div>
+</form>
+
+<partial name="_ValidationScriptsPartial" />

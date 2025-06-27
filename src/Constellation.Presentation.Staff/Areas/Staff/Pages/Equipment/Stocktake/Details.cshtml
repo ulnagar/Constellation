@@ -40,7 +40,7 @@
 <table class="table-hover table-striped data-table">
     <thead>
         <tr>
-            <th>Serial / Asset</th>
+            <th>Asset / Serial</th>
             <th>Description</th>
             <th>Location</th>
             <th>User</th>
@@ -51,7 +51,7 @@
         @foreach (var item in Model.Stocktake.Sightings)
         {
             <tr class="cancelled-@item.IsCancelled">
-                <td>@item.SerialNumber / @item.AssetNumber</td>
+                <td>@item.AssetNumber / @item.SerialNumber</td>
                 <td>@item.Description</td>
                 <td>@item.Location</td>
                 <td>@item.User</td>

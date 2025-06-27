@@ -1,39 +1,39 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.Sighting;
 
-using Application.Common.PresentationModels;
-using Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
-using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolCodes;
-using Application.Domains.Schools.Queries.GetSchoolsFromList;
-using Application.Domains.StaffMembers.Models;
-using Application.Domains.StaffMembers.Queries.GetStaffById;
-using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
-using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
-using Application.DTOs;
-using Application.Models.Auth;
+using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
+using Constellation.Application.Domains.Schools.Queries.GetCurrentPartnerSchoolCodes;
+using Constellation.Application.Domains.Schools.Queries.GetSchoolsFromList;
+using Constellation.Application.Domains.StaffMembers.Models;
+using Constellation.Application.Domains.StaffMembers.Queries.GetStaffById;
+using Constellation.Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
 using Constellation.Application.Domains.Students.Models;
+using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
+using Constellation.Application.DTOs;
+using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.StaffMembers.Identifiers;
+using Constellation.Core.Models.Stocktake.Enums;
+using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Core.Shared;
-using Core.Abstractions.Services;
-using Core.Models.Stocktake.Enums;
-using Core.Models.Stocktake.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Logging;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
-public class SubmitModel : BasePageModel
+public class ManualModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly LinkGenerator _linkGenerator;
     private readonly ILogger _logger;
 
-    public SubmitModel(
+    public ManualModel(
         ISender mediator,
         ICurrentUserService currentUserService,
         LinkGenerator linkGenerator,
@@ -43,7 +43,7 @@ public class SubmitModel : BasePageModel
         _currentUserService = currentUserService;
         _linkGenerator = linkGenerator;
         _logger = logger
-            .ForContext<SubmitModel>()
+            .ForContext<ManualModel>()
             .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 

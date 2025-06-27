@@ -1,11 +1,15 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEvent;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
+using Constellation.Application.Domains.Offerings.Commands.RemoveSession;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.StaffMembers.Identifiers;
+using Constellation.Core.Models.Students.Enums;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Stocktake.Identifiers;
@@ -16,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
+using Shared.PartialViews.DeleteStocktakeSightingConfirmationModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
@@ -116,5 +121,45 @@ public class DashboardModel : BasePageModel
         EndDate = DateOnly.FromDateTime(eventRequest.Value.EndDate);
 
         return Page();
+    }
+
+    public IActionResult OnPostAjaxDeleteSighting(
+        StocktakeEventId eventId,
+        StocktakeSightingId sightingId)
+    {
+        DeleteStocktakeSightingConfirmationModalViewModel viewModel = new(
+            eventId,
+            sightingId);
+
+        return Partial("DeleteStocktakeSightingConfirmationModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostDeleteSighting(DeleteStocktakeSightingConfirmationModalViewModel viewModel)
+    {
+        CancelSightingCommand command = new(
+            viewModel.EventId,
+            viewModel.SightingId,
+            viewModel.Comment);
+
+        _logger
+            .ForContext(nameof(CancelSightingCommand), command, true)
+            .Information("Requested to remove sighting by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to remove sighting by user {User}", _currentUserService.UserName);
+
+            ModalContent = new ErrorDisplay(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

@@ -4,8 +4,8 @@ using Application.Common.PresentationModels;
 using Application.Domains.AssetManagement.Stocktake.Commands.RegisterSightingFromAssetRecord;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetAssetForSightingConfirmation;
 using Application.Models.Auth;
-using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Stocktake.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Errors;
 using Core.Models.Assets.Identifiers;
@@ -35,7 +35,8 @@ public class IndexModel : BasePageModel
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _logger = logger
-            .ForContext<IndexModel>();
+            .ForContext<IndexModel>()
+            .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_Dashboard;
@@ -50,6 +51,9 @@ public class IndexModel : BasePageModel
     [BindProperty]
     public string SerialNumber { get; set; } = string.Empty;
 
+    [BindProperty]
+    public int Misses { get; set; } = 0;
+
     public AssetSightingResponse? Asset { get; set; } = null;
 
     public async Task OnGet()
@@ -62,6 +66,8 @@ public class IndexModel : BasePageModel
         {
             ModalContent = new ErrorDisplay(AssetNumberErrors.Empty);
 
+            Misses++;
+
             return Page();
         }
 
@@ -70,6 +76,8 @@ public class IndexModel : BasePageModel
         if (asset.IsFailure)
         {
             ModalContent = new ErrorDisplay(asset.Error);
+
+            Misses++;
 
             return Page();
         }

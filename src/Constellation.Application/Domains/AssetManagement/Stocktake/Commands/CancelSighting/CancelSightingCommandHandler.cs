@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
 
 using Abstractions.Messaging;
+using Core.Abstractions.Services;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Errors;
 using Core.Models.Stocktake.Repositories;
@@ -14,15 +15,18 @@ internal sealed class CancelSightingCommandHandler
     : ICommandHandler<CancelSightingCommand>
 {
     private readonly IStocktakeRepository _stocktakeRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _uniOfWork;
     private readonly ILogger _logger;
 
     public CancelSightingCommandHandler(
         IStocktakeRepository stocktakeRepository,
+        ICurrentUserService currentUserService,
         IUnitOfWork uniOfWork,
         ILogger logger)
     {
         _stocktakeRepository = stocktakeRepository;
+        _currentUserService = currentUserService;
         _uniOfWork = uniOfWork;
         _logger = logger;
     }
@@ -44,7 +48,7 @@ internal sealed class CancelSightingCommandHandler
         Result cancel = @event.CancelSighting(
             request.SightingId,
             request.Comment,
-            request.CancelledBy);
+            _currentUserService.UserName);
 
         if (cancel.IsFailure)
         {

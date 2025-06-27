@@ -1,15 +1,16 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSightingWithAssetRecordUpdates;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterManualSighting;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Models.Stocktake.Enums;
 using Constellation.Core.Models.Stocktake.Errors;
 using Constellation.Core.Models.Stocktake.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Models.Assets;
+using Core.Models.Assets.Errors;
+using Core.Models.Assets.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -18,6 +19,7 @@ using System.Threading.Tasks;
 internal sealed class RegisterSightingWithAssetRecordUpdatesCommandHandler
 : ICommandHandler<RegisterSightingWithAssetRecordUpdatesCommand>
 {
+    private readonly IAssetRepository _assetRepository;
     private readonly IStocktakeRepository _stocktakeRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
@@ -25,12 +27,14 @@ internal sealed class RegisterSightingWithAssetRecordUpdatesCommandHandler
     private readonly ILogger _logger;
 
     public RegisterSightingWithAssetRecordUpdatesCommandHandler(
+        IAssetRepository assetRepository,
         IStocktakeRepository stocktakeRepository,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
+        _assetRepository = assetRepository;
         _stocktakeRepository = stocktakeRepository;
         _currentUserService = currentUserService;
         _dateTime = dateTime;
@@ -53,10 +57,22 @@ internal sealed class RegisterSightingWithAssetRecordUpdatesCommandHandler
             return Result.Failure(StocktakeEventErrors.EventNotFound(request.StocktakeEventId));
         }
 
+        Asset asset = await _assetRepository.GetByAssetNumber(request.AssetNumber, cancellationToken);
+
+        if (asset is null)
+        {
+            _logger
+                .ForContext(nameof(RegisterSightingWithAssetRecordUpdatesCommand), request, true)
+                .ForContext(nameof(Error), AssetErrors.NotFoundByAssetNumber(request.AssetNumber), true)
+                .Warning("Failed to create new Stocktake Sighting record");
+
+            return Result.Failure(AssetErrors.NotFoundByAssetNumber(request.AssetNumber));
+        }
+
         Result sighting = @event.AddSighting(
-            request.SerialNumber,
+            asset.SerialNumber,
             request.AssetNumber,
-            request.Description,
+            asset.ModelDescription,
             request.LocationCategory,
             request.LocationName,
             request.LocationCode,
