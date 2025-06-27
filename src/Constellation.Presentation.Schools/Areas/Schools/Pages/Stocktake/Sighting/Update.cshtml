@@ -1,0 +1,161 @@
+﻿@page "{EventId}/{AssetNumber}"
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.Sighting.UpdateModel
+@using Constellation.Core.Models.Stocktake.Enums
+@{
+}
+
+<form method="post">
+    <div class="jumbotron">
+        <h3 class="display-4">Update details</h3>
+        <p class="lead">Please provide updated details for the following categories:</p>
+        <hr class="my-4">
+        <div class="row">
+            <dl class="row col-6">
+                <dt class="col-sm-3">Asset Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.AssetNumber</dd>
+
+                <dt class="col-sm-3">Serial Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.SerialNumber</dd>
+
+                <dt class="col-sm-3">Description:</dt>
+                <dd class="col-sm-9">@Model.Asset.Description</dd>
+                    
+                <dt class="col-sm-3">Location Type:</dt>
+                <dd class="col-sm-9">@Model.Asset.LocationCategory</dd>
+
+                <dt class="col-sm-3">Location Site:</dt>
+                <dd class="col-sm-9">@Model.Asset.LocationName</dd>
+            </dl>
+        </div>
+        <hr class="my-4">
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label class="col-md-3">User Type</label>
+                    <div class="col-md-7">
+                        <select asp-for="UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
+                            <option value="">-- Select --</option>
+                            <option value="@UserType.Student">@UserType.Student</option>
+                            <option value="@UserType.Staff">@UserType.Staff</option>
+                            <option value="@UserType.School">@UserType.School</option>
+                            <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
+                            <option value="@UserType.Other">@UserType.Other</option>
+                        </select>
+                        <span asp-validation-for="UserType" class="text-danger"></span>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                    <div class="w-100"></div>
+                    <label class="col-md-3 mt-3">User</label>
+                    <div class="col-md-7 mt-3">
+                        @Html.HiddenFor(model => model.UserCode)
+                        <div id="UserTypeStudent">
+                            <select id="Student_UserCode" onchange="UpdateStudent()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var student in Model.StudentList)
+                                {
+                                    <option value="@student.StudentId">@student.Name (@student.Grade)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeStaff">
+                            <select id="Staff_UserCode" onchange="UpdateStaff()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var staff in Model.StaffList)
+                                {
+                                    <option value="@staff.StaffId">@staff.Name.DisplayName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeOther">
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 alert alert-warning">
+                Select the type of user (Student, Aurora College Staff Member, School, Community Member, or Other), and then the relevant user.
+            </div>
+        </div>
+    
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label class="col-md-3">Condition</label>
+                    <div class="col-md-7">
+                        <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 alert alert-warning">
+                If the device has any damage, please record it here.
+            </div>
+        </div>
+    
+        <div class="form-row mt-3">
+            <div class="col-4">
+                <button type="submit" class="btn btn-success btn-block">Submit</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            UpdateUserType();
+        })
+
+        function UpdateUserType() {
+            // Get current value of the UserType field
+            var userType = $('select#UserType>option:selected');
+
+            // Hide all UserName options
+            $('#UserTypeStudent').hide();
+            $('#UserTypeStaff').hide();
+            $('#UserTypeOther').hide();
+
+            // Reset all UserName options to blank
+            $('#Command_UserCode').val('');
+            $('#Student_UserCode').val('');
+            $('#Staff_UserCode').val('');
+            $('#Command_UserName').val('');
+
+            // Show appropriate UserName option based on UserType value
+            if (userType.val() === "@UserType.Student") {
+                $('#UserTypeStudent').show();
+            } else if (userType.val() === "@UserType.Staff") {
+                $('#UserTypeStaff').show();
+            } else if (userType.val() === "@UserType.CommunityMember" ||
+                userType.val() === "@UserType.Other") {
+                $('#UserTypeOther').show();
+            }
+        }
+
+        function UpdateStudent() {
+            // Get current value of select
+            var studentId = $('#Student_UserCode').val();
+            var studentName = $('#Student_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(studentId);
+            $('#UserName').val(studentName);
+        }
+
+        function UpdateStaff() {
+            // Get current value of select
+            var staffId = $('#Staff_UserCode').val();
+            var staffName = $('#Staff_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(staffId);
+            $('#UserName').val(staffName);
+        }
+    </script>
+}

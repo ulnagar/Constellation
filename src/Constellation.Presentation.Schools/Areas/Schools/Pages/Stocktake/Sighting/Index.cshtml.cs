@@ -1,0 +1,130 @@
+namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.Sighting;
+
+using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSightingFromAssetRecord;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetAssetForSightingConfirmation;
+using Constellation.Application.Models.Auth;
+using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Models.Assets.Identifiers;
+using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.Stocktake.Identifiers;
+using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Logging;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+
+[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+public class IndexModel : BasePageModel
+{
+    private readonly ISender _mediator;
+    private readonly LinkGenerator _linkGenerator;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger _logger;
+
+    public IndexModel(
+        ISender mediator,
+        LinkGenerator linkGenerator,
+        ICurrentUserService currentUserService,
+        ILogger logger,
+        IHttpContextAccessor httpContextAccessor,
+        IServiceScopeFactory serviceFactory)
+        : base(httpContextAccessor, serviceFactory)
+    {
+        _mediator = mediator;
+        _linkGenerator = linkGenerator;
+        _currentUserService = currentUserService;
+        _logger = logger
+            .ForContext<IndexModel>()
+            .ForContext(LogDefaults.Application, LogDefaults.SchoolsPortal);
+    }
+
+    [ViewData] public string ActivePage => Models.ActivePage.Stocktake;
+
+    [BindProperty(SupportsGet = true)]
+    public StocktakeEventId Id { get; set; }
+
+    [BindProperty]
+    public AssetNumber AssetNumber { get; set; } = AssetNumber.Empty;
+    
+    [BindProperty]
+    public string SerialNumber { get; set; } = string.Empty;
+
+    [BindProperty]
+    public int Misses { get; set; } = 0;
+
+    public AssetSightingResponse? Asset { get; set; } = null;
+
+    public async Task OnGet()
+    {
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+        if (AssetNumber == AssetNumber.Empty && string.IsNullOrWhiteSpace(SerialNumber))
+        {
+            ModalContent = new ErrorDisplay(AssetNumberErrors.Empty);
+
+            Misses++;
+
+            return Page();
+        }
+
+        Result<AssetSightingResponse> asset = await _mediator.Send(new GetAssetForSightingConfirmationQuery(AssetNumber, SerialNumber));
+
+        if (asset.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(asset.Error);
+
+            Misses++;
+
+            return Page();
+        }
+
+        Asset = asset.Value;
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostFinalSubmit(AssetId assetId, string comment)
+    {
+        if (assetId == AssetId.Empty)
+        {
+            Result<AssetSightingResponse> asset = await _mediator.Send(new GetAssetForSightingConfirmationQuery(AssetNumber, SerialNumber));
+
+            if (asset.IsFailure)
+            {
+                ModalContent = new ErrorDisplay(asset.Error);
+
+                return Page();
+            }
+
+            Asset = asset.Value;
+
+            return Page();
+        }
+
+        RegisterSightingFromAssetRecordCommand command = new(
+            Id,
+            assetId,
+            comment);
+
+        Result sighting = await _mediator.Send(command);
+
+        if (sighting.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(
+                sighting.Error,
+                _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+}

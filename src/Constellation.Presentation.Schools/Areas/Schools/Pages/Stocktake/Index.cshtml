@@ -42,7 +42,7 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th>Serial / Asset</th>
+        <th>Asset / Serial</th>
         <th>Description</th>
         <th>User</th>
         <th>Sighted</th>
@@ -61,7 +61,7 @@
         foreach (var entry in items)
         {
             <tr>
-                <td>@entry.SerialNumber / @entry.AssetNumber</td>
+                <td>@entry.AssetNumber / @entry.SerialNumber</td>
                 <td>@entry.Description</td>
                 <td>@entry.UserName</td>
                 <td>@entry.SightedBy (@entry.SightedAt.ToShortDateString())</td>
