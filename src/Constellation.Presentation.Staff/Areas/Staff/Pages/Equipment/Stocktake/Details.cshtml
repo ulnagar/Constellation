@@ -1,21 +1,14 @@
 @page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.DetailsModel
 
-@inject IAuthorizationService authService
-
-@{
-    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
-}
-
 <h2>Stocktake details</h2>
 
 <div class="page-menu">
-    @if (authorised.Succeeded)
-    {
-        <a asp-page="/Equipment/Stocktake/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-    }    
+    <a asp-page="/Equipment/Stocktake/Upsert" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
 
     <a asp-page="/Equipment/Stocktake/Sighting/Index" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Sight Device</a>
+    
+    <a asp-page-handler="export" class="btn btn-warning show-loader-5">Export</a>
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>

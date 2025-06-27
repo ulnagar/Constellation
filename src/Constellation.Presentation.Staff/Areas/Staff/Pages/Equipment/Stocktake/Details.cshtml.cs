@@ -1,8 +1,10 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Queries.ExportStocktakeSightingsAndDifferences;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
+using Constellation.Application.DTOs;
 using Core.Abstractions.Services;
 using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
@@ -65,5 +67,26 @@ public class DetailsModel : BasePageModel
         }
 
         Stocktake = stocktake.Value;
+    }
+
+    public async Task<IActionResult> OnGetExport()
+    {
+        _logger
+            .Information("Requested to export list of Stocktake Sightings by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> file = await _mediator.Send(new ExportStocktakeSightingsAndDifferencesQuery(Id));
+
+        if (file.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(file.Error);
+
+            _logger
+                .ForContext(nameof(Error), file.Error, true)
+                .Warning("Requested to export list of Stocktake Sightings by user {User}", _currentUserService.UserName);
+
+            return Page();
+        }
+
+        return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
     }
 }

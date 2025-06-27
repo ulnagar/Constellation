@@ -15,6 +15,7 @@ using Application.Domains.Training.Queries.GenerateOverallReport;
 using Application.Domains.WorkFlows.Queries.ExportOpenCaseReport;
 using Application.DTOs;
 using Application.Extensions;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.ExportStocktakeSightingsAndDifferences;
 using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
@@ -47,6 +48,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using static Constellation.Core.Errors.DomainErrors;
 
 public class ExcelService : IExcelService
 {
@@ -289,6 +291,58 @@ public class ExcelService : IExcelService
         worksheet.View.FreezePanes(2, 1);
         worksheet.Cells[1, 1, row, 18].AutoFilter = true;
         worksheet.Cells[1, 1, row, 17].AutoFitColumns();
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateStocktakeSightingsReport(
+        List<StocktakeSightingWithDifferenceResponse> items,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        worksheet.Cells[1, 1].Value = "Asset Number";
+        worksheet.Cells[1, 2].Value = "Serial Number";
+        worksheet.Cells[1, 3].Value = "Description";
+        worksheet.Cells[1, 4].Value = "Location Category";
+        worksheet.Cells[1, 5].Value = "Location Site";
+        worksheet.Cells[1, 6].Value = "User Type";
+        worksheet.Cells[1, 7].Value = "User Name";
+        worksheet.Cells[1, 8].Value = "Comment";
+        worksheet.Cells[1, 9].Value = "Sighted By";
+        worksheet.Cells[1, 10].Value = "Sighted At";
+        worksheet.Cells[1, 11].Value = "Difference";
+
+        int row = 2;
+
+        foreach (StocktakeSightingWithDifferenceResponse item in items)
+        {
+            worksheet.Cells[row, 1].Value = item.AssetNumber;
+            worksheet.Cells[row, 2].Value = item.SerialNumber;
+            worksheet.Cells[row, 3].Value = item.Description;
+            worksheet.Cells[row, 4].Value = item.LocationCategory;
+            worksheet.Cells[row, 5].Value = item.LocationName;
+            worksheet.Cells[row, 6].Value = item.UserType;
+            worksheet.Cells[row, 7].Value = item.UserName;
+            worksheet.Cells[row, 8].Value = item.Comment;
+            worksheet.Cells[row, 9].Value = item.SightedBy;
+            worksheet.Cells[row, 10].Value = item.SightedAt;
+            worksheet.Cells[row, 10].Style.Numberformat.Format = "dd/MM/yyyy HH:mm";
+            worksheet.Cells[row, 11].Value = item.Difference;
+
+            row++;
+        }
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, row, 11].AutoFilter = true;
+        worksheet.Cells[1, 1, row, 11].AutoFitColumns();
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
