@@ -48,8 +48,16 @@
                     <div class="col-md-7 ps-1">
                         <select asp-for="UserType" id="UserType" onchange="UpdateUserType()" class="form-control">
                             <option value="">-- Select --</option>
-                            <option value="@UserType.Student">@UserType.Student</option>
-                            <option value="@UserType.Staff">@UserType.Staff</option>
+                            @if (Model.StudentList.Count > 0)
+                            {
+                                <option value="@UserType.Student">@UserType.Student</option>
+                            }
+
+                            @if (Model.StaffList.Count > 0)
+                            {
+                                <option value="@UserType.Staff">@UserType.Staff</option>
+                            }
+                            
                             <option value="@UserType.School">@UserType.School</option>
                             <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
                             <option value="@UserType.Other">@UserType.Other</option>
@@ -59,7 +67,7 @@
                     </div>
                     <div class="w-100"></div>
                     <label class="form-label col-md-5 mt-3">User</label>
-                    <div class="col-md-7 mt-3 pl-1">
+                    <div class="col-md-7 mt-3 ps-1">
                         @Html.HiddenFor(model => model.UserCode)
                         <div id="UserTypeStudent">
                             <select id="Student_UserCode" onchange="UpdateStudent()" class="form-control">

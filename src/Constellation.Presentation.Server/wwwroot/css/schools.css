@@ -90,3 +90,11 @@ dl.help-documentation {
 h3.help-documentation {
     margin-top: 1.5rem;
 }
+
+/* Pull Jumbotron item from B4 */
+.jumbotron {
+    padding: 4rem 2rem;
+    margin-bottom: 2rem;
+    background-color: var(--bs-light);
+    border-radius: .3rem;
+}

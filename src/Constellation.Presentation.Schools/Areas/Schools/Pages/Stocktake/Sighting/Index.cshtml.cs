@@ -1,5 +1,6 @@
 namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.Sighting;
 
+using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingForAsset;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.RegisterSightingFromAssetRecord;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetAssetForSightingConfirmation;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System.Diagnostics.Eventing.Reader;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
@@ -86,7 +88,60 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        Asset = asset.Value;
+        if (asset.Value.LocationCode != CurrentSchoolCode)
+        {
+            ModalContent = new FeedbackDisplay(
+                "Stocktake Sighting",
+                "This device registered at another school! Please check the Serial Number or Asset Number and try again. If this error persists, please contact the Technology Support Team on 1300 610 733.",
+                "Ok",
+                "btn-success",
+                _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+
+            Misses++;
+
+            return Page();
+        }
+
+        Result<StocktakeSightingForAssetResponse> sightingRecord = await _mediator.Send(new GetStocktakeSightingForAssetQuery(Id, asset.Value.AssetNumber));
+
+        if (sightingRecord.IsFailure)
+        {
+            ModalContent = new ErrorDisplay(sightingRecord.Error);
+
+            Misses++;
+
+            return Page();
+        }
+
+        if (!sightingRecord.Value.HasSighting)
+        {
+            Asset = asset.Value;
+
+            return Page();
+        }
+
+        if (sightingRecord.Value.SightingSchoolCode == CurrentSchoolCode)
+        {
+            ModalContent = new FeedbackDisplay(
+                "Stocktake Sighting",
+                "This device has already been entered. If there are mistakes, please remove the previous sighting first",
+                "Ok",
+                "btn-success",
+                _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+
+            Misses++;
+
+            return Page();
+        }
+
+        ModalContent = new FeedbackDisplay(
+            "Stocktake Sighting",
+            "This device has already been sighted at another location! Please check the Serial Number or Asset Number and try again. If this error persists, please contact the Technology Support Team on 1300 610 733.",
+            "Ok",
+            "btn-success",
+            _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+
+        Misses++;
 
         return Page();
     }

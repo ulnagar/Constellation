@@ -8,6 +8,7 @@ using Constellation.Core.Models.Stocktake.Enums;
 using Core.Extensions;
 using Core.Models.Assets.Repositories;
 using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Errors;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -49,7 +50,7 @@ internal sealed class GetAssetForSightingConfirmationQueryHandler
 
             return Result.Failure<AssetSightingResponse>(error);
         }
-        
+
         AssetSightingResponse response = new(
             asset.Id,
             asset.SerialNumber,

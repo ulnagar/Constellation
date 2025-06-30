@@ -9,7 +9,7 @@
 @if (!Model.EventId.Equals(StocktakeEventId.Empty))
 {
     <div>
-        <a asp-page="/Stocktake/Submit" asp-area="Schools" asp-route-eventId="@Model.EventId" class="btn btn-primary">Sight Device</a>
+        <a asp-page="/Stocktake/Sighting/Index" asp-area="Schools" asp-route-id="@Model.EventId" class="btn btn-primary">Sight Device</a>
     </div>
 }
 

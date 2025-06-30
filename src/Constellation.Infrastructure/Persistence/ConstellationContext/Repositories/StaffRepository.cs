@@ -15,6 +15,7 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
 
 public class StaffRepository : IStaffRepository
 {
@@ -158,8 +159,9 @@ public class StaffRepository : IStaffRepository
             .Set<StaffMember>()
             .Where(staff => 
                 !staff.IsDeleted &&
-                staff.CurrentAssignment != null &&
-                staff.CurrentAssignment.SchoolCode == schoolCode)
+                staff.SchoolAssignments.Any(assignment =>
+                    !assignment.IsDeleted &&
+                    assignment.SchoolCode == schoolCode))
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountCurrentStaffFromSchool(
@@ -169,8 +171,9 @@ public class StaffRepository : IStaffRepository
             .Set<StaffMember>()
             .Where(staff =>
                 !staff.IsDeleted &&
-                staff.CurrentAssignment != null &&
-                staff.CurrentAssignment.SchoolCode == schoolCode)
+                staff.SchoolAssignments.Any(assignment =>
+                    !assignment.IsDeleted &&
+                    assignment.SchoolCode == schoolCode))
             .CountAsync(cancellationToken);
 
     public async Task<List<StaffId>> GetAllActiveStaffIds(
