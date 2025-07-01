@@ -50,7 +50,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to download Overdue Lesson report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }
@@ -70,7 +70,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to download YTD Lesson Roll Status report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }

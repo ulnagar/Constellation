@@ -79,7 +79,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), recordsRequest.Error, true)
                 .Warning("Failed to retrieve list of Training Completion records by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 recordsRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 

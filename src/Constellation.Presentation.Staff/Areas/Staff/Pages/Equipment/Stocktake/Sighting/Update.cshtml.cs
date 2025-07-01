@@ -107,7 +107,7 @@ public class UpdateModel : BasePageModel
         {
             await PreparePage();
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -123,7 +123,7 @@ public class UpdateModel : BasePageModel
     {
         if (AssetNumber == AssetNumber.Empty)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 AssetNumberErrors.Empty,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
             
@@ -134,7 +134,7 @@ public class UpdateModel : BasePageModel
 
         if (asset.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 asset.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
                 
@@ -147,7 +147,7 @@ public class UpdateModel : BasePageModel
 
         if (string.IsNullOrWhiteSpace(claimStaffId))
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
 
@@ -161,7 +161,7 @@ public class UpdateModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
 
@@ -172,7 +172,7 @@ public class UpdateModel : BasePageModel
 
         if (students.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
 
@@ -188,7 +188,7 @@ public class UpdateModel : BasePageModel
 
         if (teachers.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 teachers.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
 
@@ -203,7 +203,7 @@ public class UpdateModel : BasePageModel
 
         if (schoolCodes.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schoolCodes.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
 
@@ -214,7 +214,7 @@ public class UpdateModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id = EventId }));
 

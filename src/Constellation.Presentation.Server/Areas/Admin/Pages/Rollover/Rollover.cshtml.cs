@@ -70,7 +70,7 @@ public class RolloverModel : BasePageModel
 
                 if (registerAttempt.IsFailure)
                 {
-                    ModalContent = new ErrorDisplay(registerAttempt.Error);
+                    ModalContent = ErrorDisplay.Create(registerAttempt.Error);
 
                     return Page();
                 }
@@ -100,7 +100,7 @@ public class RolloverModel : BasePageModel
 
         if (attempt.IsFailure)
         {
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             return Page();
         }
@@ -125,7 +125,7 @@ public class RolloverModel : BasePageModel
 
         if (results.IsFailure)
         {
-            ModalContent = new ErrorDisplay(results.Error);
+            ModalContent = ErrorDisplay.Create(results.Error);
 
             return Page();
         }

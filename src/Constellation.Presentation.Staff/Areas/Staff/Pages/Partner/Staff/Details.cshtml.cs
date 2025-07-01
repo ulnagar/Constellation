@@ -76,7 +76,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -92,7 +92,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -111,7 +111,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -127,7 +127,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
             
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -150,7 +150,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
                 .Warning("Failed to remove School Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(DomainErrors.Permissions.Unauthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Permissions.Unauthorised);
             await PreparePage();
             return Page();
         }
@@ -171,7 +171,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to remove School Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
             await PreparePage();
             return Page();
         }
@@ -185,7 +185,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -204,7 +204,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -223,7 +223,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage();
             return Page();
@@ -241,7 +241,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -260,7 +260,7 @@ public class DetailsModel : BasePageModel
 
         if (staffRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 

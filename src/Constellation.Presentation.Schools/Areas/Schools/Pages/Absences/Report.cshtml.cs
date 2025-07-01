@@ -72,7 +72,7 @@ public class ReportModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentsRequest.Error,
                 _linkGenerator.GetPathByPage("/Absences/Index", values: new { area = "Schools" }));
 

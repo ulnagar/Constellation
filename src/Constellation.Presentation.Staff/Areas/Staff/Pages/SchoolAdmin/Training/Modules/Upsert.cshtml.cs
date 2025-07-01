@@ -74,7 +74,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), entityRequest.Error, true)
                     .Warning("Failed to retrieve Training Module with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     DomainErrors.Permissions.Unauthorised,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
@@ -114,7 +114,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to create Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
@@ -150,7 +150,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to update Training Module with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 

@@ -67,7 +67,7 @@ public class BulkAddMembersModel : BasePageModel
                 .ForContext(nameof(Error), moduleRequest.Error, true)
                 .Warning("Failed to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
 
@@ -84,7 +84,7 @@ public class BulkAddMembersModel : BasePageModel
                 .ForContext(nameof(Error), staffRequest.Error, true)
                 .Warning("Failed to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
 
@@ -119,7 +119,7 @@ public class BulkAddMembersModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add Members to Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }

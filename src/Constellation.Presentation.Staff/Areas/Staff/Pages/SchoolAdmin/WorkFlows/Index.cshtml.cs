@@ -74,7 +74,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve list of WorkFlow Cases by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }

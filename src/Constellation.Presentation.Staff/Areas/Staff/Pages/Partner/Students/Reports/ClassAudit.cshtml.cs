@@ -43,7 +43,7 @@ public sealed class ClassAuditModel : BasePageModel
 
         if (studentRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentRequest.Error);
 
             _logger
                 .ForContext(nameof(Error), studentRequest.Error, true)

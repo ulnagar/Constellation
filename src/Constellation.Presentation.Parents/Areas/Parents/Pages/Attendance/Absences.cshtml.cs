@@ -58,7 +58,7 @@ public class AbsencesModel : BasePageModel
 
         if (absencesRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(absencesRequest.Error);
+            ModalContent = ErrorDisplay.Create(absencesRequest.Error);
 
             return;
         }

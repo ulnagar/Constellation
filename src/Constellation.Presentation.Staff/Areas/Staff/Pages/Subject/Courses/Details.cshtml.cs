@@ -56,7 +56,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve details of Course with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Courses/Index", values: new { area = "Staff" }));
 

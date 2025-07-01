@@ -57,7 +57,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), completionRequest.Error, true)
                 .Warning("Failed to retrieve Training Completion details for staff member with id {Id} by user {User}", StaffId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 completionRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 

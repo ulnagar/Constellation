@@ -68,7 +68,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), fileResponse.Error, true)
                 .Warning("Failed to retrieve award certificate by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Awards/Index", values: new { area = "Students" }));
 
@@ -92,7 +92,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve award summary by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return;
         }
@@ -107,7 +107,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), studentRequest.Error, true)
                 .Warning("Failed to retrieve award summary by user {user}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(studentRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentRequest.Error);
 
             return;
         }
@@ -122,7 +122,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), awardSummaryRequest.Error, true)
                 .Warning("Failed to retrieve award summary by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(awardSummaryRequest.Error);
+            ModalContent = ErrorDisplay.Create(awardSummaryRequest.Error);
 
             return;
         }

@@ -68,14 +68,14 @@ public class IndexModel : BasePageModel
 
         if (!eventsRequest.IsSuccess)
         {
-            ModalContent = new ErrorDisplay(eventsRequest.Error);
+            ModalContent = ErrorDisplay.Create(eventsRequest.Error);
 
             return;
         }
 
         if (eventsRequest.Value.Count == 0)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("No Stocktake", "Not current Stocktake Event found"),
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Schools" }));
 
@@ -100,7 +100,7 @@ public class IndexModel : BasePageModel
 
         if (sightingsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(sightingsRequest.Error);
+            ModalContent = ErrorDisplay.Create(sightingsRequest.Error);
 
             return;
         }
@@ -146,7 +146,7 @@ public class IndexModel : BasePageModel
         
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", EventId }));
 

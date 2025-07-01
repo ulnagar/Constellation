@@ -98,7 +98,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), file.Error, true)
                 .Information("Failed to export list of Absences by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(file.Error);
+            ModalContent = ErrorDisplay.Create(file.Error);
 
             return Page();
         }
@@ -118,7 +118,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), classesResponse.Error, true)
                 .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(classesResponse.Error);
+            ModalContent = ErrorDisplay.Create(classesResponse.Error);
 
             return Page();
         }
@@ -162,7 +162,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), schoolsRequest.Error, true)
                 .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(schoolsRequest.Error);
+            ModalContent = ErrorDisplay.Create(schoolsRequest.Error);
 
             return Page();
         }
@@ -177,7 +177,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), studentsRequest.Error, true)
                 .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return Page();
         }
@@ -200,7 +200,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), absenceRequest.Error, true)
                 .Warning("Failed to retrieve list of Absences by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(absenceRequest.Error);
+            ModalContent = ErrorDisplay.Create(absenceRequest.Error);
 
             return Page();
         }

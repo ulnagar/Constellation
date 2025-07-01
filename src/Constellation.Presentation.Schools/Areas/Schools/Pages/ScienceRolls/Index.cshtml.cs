@@ -55,7 +55,7 @@ public class IndexModel : BasePageModel
 
         if (lessonsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(lessonsRequest.Error);
+            ModalContent = ErrorDisplay.Create(lessonsRequest.Error);
 
             return;
         }

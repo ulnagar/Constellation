@@ -318,7 +318,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to retrieve details of GroupTutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
@@ -340,7 +340,7 @@ public class DetailsModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             error,
             _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 

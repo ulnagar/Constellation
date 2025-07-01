@@ -104,7 +104,7 @@ public class ManualModel : BasePageModel
         {
             await PreparePage();
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -120,7 +120,7 @@ public class ManualModel : BasePageModel
 
         if (students.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", Id }));
 
@@ -139,7 +139,7 @@ public class ManualModel : BasePageModel
 
         if (teachers.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 teachers.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", Id }));
 

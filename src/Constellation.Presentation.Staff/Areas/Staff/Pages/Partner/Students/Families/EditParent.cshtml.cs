@@ -84,7 +84,7 @@ public class EditParentModel : BasePageModel
 
         if (parentResult.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 parentResult.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -131,7 +131,7 @@ public class EditParentModel : BasePageModel
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Index", new { area = "Staff" });
 
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             result.Error,
             _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 

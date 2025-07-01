@@ -51,7 +51,7 @@ public class LocationsModel : BasePageModel
                 .ForContext(nameof(Error), layerRequest.Error, true)
                 .Warning("Failed to retrieve map of Schools by anonymous user");
 
-            ModalContent = new ErrorDisplay(layerRequest.Error);
+            ModalContent = ErrorDisplay.Create(layerRequest.Error);
         }
 
         Layers = layerRequest.Value;
@@ -71,7 +71,7 @@ public class LocationsModel : BasePageModel
                 .ForContext(nameof(Error), layerRequest.Error, true)
                 .Warning("Failed to retrieve map of Schools by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(layerRequest.Error);
+            ModalContent = ErrorDisplay.Create(layerRequest.Error);
         }
 
         Layers = layerRequest.Value;

@@ -88,7 +88,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), query.Error, true)
                 .Warning("Failed to retrieve details of Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 query.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
@@ -105,7 +105,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), query.Error, true)
                 .Warning("Failed to retrieve details of Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            //ModalContent = new ErrorDisplay(assignments.Error);
+            //ModalContent = ErrorDisplay.Create(assignments.Error);
 
             return;
         }
@@ -146,7 +146,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove Student from Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -190,7 +190,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove Session from Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -230,7 +230,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove all Sessions from Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -251,7 +251,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), TeacherAssignmentErrors.InvalidType, true)
                 .Warning("Failed to add Teacher to Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(TeacherAssignmentErrors.InvalidType);
+            ModalContent = ErrorDisplay.Create(TeacherAssignmentErrors.InvalidType);
 
             await PreparePage();
 
@@ -272,7 +272,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add Teacher to Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -299,7 +299,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add Student to Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -345,7 +345,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove Teacher from Offering by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -391,7 +391,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove Resource from Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -408,7 +408,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.PeriodId == PeriodId.Empty)
         {
-            ModalContent = new ErrorDisplay(PeriodErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(PeriodErrors.InvalidId);
 
             await PreparePage();
 
@@ -429,7 +429,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add Session to Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
             
@@ -458,7 +458,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to export Canvas Assignment Rubric Results for Offering by User {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -487,7 +487,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to export Canvas Assignment Comments for Offering by User {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 

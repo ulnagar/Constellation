@@ -74,7 +74,7 @@ public class GenerateModel : BasePageModel
                 .ForContext(nameof(Error), students.Error, true)
                 .Warning("Failed to start creation of Student Absence Plans by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Index", values: new { area = "Staff" }));
 
@@ -91,7 +91,7 @@ public class GenerateModel : BasePageModel
                 .ForContext(nameof(Error), schools.Error, true)
                 .Warning("Failed to start creation of Student Absence Plans by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Index", values: new { area = "Staff" }));
 
@@ -113,7 +113,7 @@ public class GenerateModel : BasePageModel
                 .ForContext(nameof(Error), error, true)
                 .Warning("Failed to create new Student Attendance Plan by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(error);
+            ModalContent = ErrorDisplay.Create(error);
 
             await PreparePage(cancellationToken);
 
@@ -150,7 +150,7 @@ public class GenerateModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to create new Student Attendance Plan by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Plans/Index", values: new { area = "Staff" }));
 

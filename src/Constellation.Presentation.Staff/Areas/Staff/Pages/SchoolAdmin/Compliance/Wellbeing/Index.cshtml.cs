@@ -52,7 +52,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve N-Award Incidents from Sentral by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }
@@ -72,7 +72,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), dataRequest.Error, true)
                 .Warning("Failed to export N-Award Incidents from Sentral by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(dataRequest.Error);
+            ModalContent = ErrorDisplay.Create(dataRequest.Error);
 
             return Page();
         }
@@ -85,7 +85,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to export N-Award Incidents from Sentral by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(fileRequest.Error);
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
 
             return Page();
         }

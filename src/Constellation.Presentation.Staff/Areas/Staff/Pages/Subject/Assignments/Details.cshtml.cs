@@ -65,7 +65,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve details of Assignment with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -88,7 +88,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to download Assignment Submissions by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -116,7 +116,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to resend Assignment Submission to Canvas by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -142,7 +142,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to download Assignment Submission by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -156,7 +156,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.StudentId == StudentId.Empty)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("Page.Parameter.InvalidValue", "The student Id value is invalid"),
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id }));
 
@@ -165,7 +165,7 @@ public class DetailsModel : BasePageModel
 
         if (viewModel.File is null)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("Page.Parameter.InvalidValue", "You must upload a file to submit to Canvas"),
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id }));
 
@@ -187,7 +187,7 @@ public class DetailsModel : BasePageModel
         catch (Exception ex)
         {
             //Whats going on here?
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("Page.Parameter.ProcessingError", "Could not read the uploaded file"),
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Details", values: new { area = "Staff", Id }));
 
@@ -208,7 +208,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to upload new Assignment Submission by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

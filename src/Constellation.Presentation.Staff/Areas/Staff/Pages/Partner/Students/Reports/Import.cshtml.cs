@@ -72,7 +72,7 @@ public class ImportModel : BasePageModel
 
             if (request.IsFailure)
             {
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 _logger
                     .ForContext(nameof(Error), request.Error, true)
@@ -90,7 +90,7 @@ public class ImportModel : BasePageModel
         }
         catch (Exception ex)
         {
-            ModalContent = new ErrorDisplay(new(ex.Source, ex.Message));
+            ModalContent = ErrorDisplay.Create(new(ex.Source, ex.Message));
 
             _logger
                 .ForContext(nameof(Exception), ex, true)

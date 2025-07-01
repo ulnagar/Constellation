@@ -96,7 +96,7 @@ public class AddParentModel : BasePageModel
         if (result.IsSuccess)
             return RedirectToPage("/Partner/Students/Families/Details", new { area = "Staff", Id = FamilyId.Value });
 
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             result.Error,
             _linkGenerator.GetPathByPage("/Partner/Students/Families/Details", values: new { area = "Staff", Id = FamilyId.Value }));
 

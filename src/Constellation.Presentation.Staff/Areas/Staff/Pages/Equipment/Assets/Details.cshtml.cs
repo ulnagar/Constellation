@@ -74,7 +74,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), AssetNumberErrors.Empty, true)
                 .Warning("Failed to convert provided Asset Number into object");
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 AssetNumberErrors.Empty,
                 _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" }));
 
@@ -91,7 +91,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to retrieve Asset with AssetNumber {AssetNumber} by user {User}", AssetNumber, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Assets/Index", values: new { area = "Staff" }));
 
@@ -107,7 +107,7 @@ public class DetailsModel : BasePageModel
         {
             if (viewModel.StudentId == StudentId.Empty)
             {
-                ModalContent = new ErrorDisplay(AllocationErrors.StudentEmpty);
+                ModalContent = ErrorDisplay.Create(AllocationErrors.StudentEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -127,7 +127,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -142,7 +142,7 @@ public class DetailsModel : BasePageModel
         {
             if (viewModel.StaffId == StaffId.Empty)
             {
-                ModalContent = new ErrorDisplay(AllocationErrors.StaffEmpty);
+                ModalContent = ErrorDisplay.Create(AllocationErrors.StaffEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -162,7 +162,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -177,7 +177,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.SchoolCode))
             {
-                ModalContent = new ErrorDisplay(AllocationErrors.SchoolEmpty);
+                ModalContent = ErrorDisplay.Create(AllocationErrors.SchoolEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -197,7 +197,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -212,7 +212,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.UserName) || string.IsNullOrWhiteSpace(viewModel.UserEmail))
             {
-                ModalContent = new ErrorDisplay(AllocationErrors.RecipientEmpty);
+                ModalContent = ErrorDisplay.Create(AllocationErrors.RecipientEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -233,7 +233,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -244,7 +244,7 @@ public class DetailsModel : BasePageModel
             return RedirectToPage();
         }
 
-        ModalContent = new ErrorDisplay(AllocationErrors.UnknownType);
+        ModalContent = ErrorDisplay.Create(AllocationErrors.UnknownType);
 
         _logger
             .ForContext(nameof(Error), AllocationErrors.UnknownType, true)
@@ -270,7 +270,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -300,7 +300,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 _logger
                     .ForContext(nameof(Error), result.Error, true)
@@ -331,7 +331,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 _logger
                     .ForContext(nameof(Error), result.Error, true)
@@ -350,7 +350,7 @@ public class DetailsModel : BasePageModel
         {
             if (string.IsNullOrWhiteSpace(viewModel.Site))
             {
-                ModalContent = new ErrorDisplay(LocationErrors.SiteEmpty);
+                ModalContent = ErrorDisplay.Create(LocationErrors.SiteEmpty);
 
                 Result<AssetResponse> resetResult = await _mediator.Send(new GetAssetByAssetNumberQuery(AssetNumber));
                 Asset = resetResult.Value;
@@ -372,7 +372,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 _logger
                     .ForContext(nameof(Error), result.Error, true)
@@ -402,7 +402,7 @@ public class DetailsModel : BasePageModel
 
             if (result.IsFailure)
             {
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 _logger
                     .ForContext(nameof(Error), result.Error, true)
@@ -417,7 +417,7 @@ public class DetailsModel : BasePageModel
             return RedirectToPage();
         }
 
-        ModalContent = new ErrorDisplay(LocationErrors.UnknownCategory);
+        ModalContent = ErrorDisplay.Create(LocationErrors.UnknownCategory);
 
         _logger
             .ForContext(nameof(Error), LocationErrors.UnknownCategory, true)
@@ -443,7 +443,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -517,7 +517,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -546,7 +546,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)

@@ -83,7 +83,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), applicationRequest.Error, true)
                     .Warning("Failed to retrieve Consent Application with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
                 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     applicationRequest.Error,
                     _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id.Value }));
 
@@ -148,7 +148,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to update Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 return Page();
             }
@@ -178,7 +178,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to create Consent Application by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(result.Error);
+                ModalContent = ErrorDisplay.Create(result.Error);
 
                 return Page();
             }

@@ -51,7 +51,7 @@ public class NotPresentModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve marked Lesson Rolls with no students present by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }

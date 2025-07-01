@@ -214,7 +214,7 @@ public class RollModel : BasePageModel
                 .ForContext(nameof(Error), rollResult.Error, true)
                 .Warning("Failed to retrieve Group Tutorial Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 rollResult.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
@@ -237,7 +237,7 @@ public class RollModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             error,
             _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Roll", values: new { area = "Staff", TutorialId, RollId, Mode }));
 

@@ -81,7 +81,7 @@ public class UpsertModel : BasePageModel
 
         if (stocktake.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 stocktake.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" }));
 

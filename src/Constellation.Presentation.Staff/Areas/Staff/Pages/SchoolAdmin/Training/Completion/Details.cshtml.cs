@@ -72,7 +72,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), certificateRequest.Error, true)
                 .Warning("Failed to retrieve certificate for Training Completion by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 certificateRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
@@ -104,7 +104,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to delete Training Completion by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
 
@@ -129,7 +129,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), recordRequest.Error, true)
                 .Warning("Failed to retrieve details of Training Completion by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 recordRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 

@@ -58,7 +58,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -80,7 +80,7 @@ public class IndexModel : BasePageModel
             
             if (contactsRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(contactsRequest.Error);
+                ModalContent = ErrorDisplay.Create(contactsRequest.Error);
 
                 return;
             }

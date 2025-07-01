@@ -69,7 +69,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), auditRequest.Error, true)
                 .Warning("Failed to audit user details for School Contact with id {Id} by user {User}", id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(auditRequest.Error);
+            ModalContent = ErrorDisplay.Create(auditRequest.Error);
 
             await PreparePage();
         }
@@ -128,7 +128,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove role from Contact by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -158,7 +158,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Information("Requested to assign role to Contact by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -202,7 +202,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to update Note for Contact by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -224,7 +224,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), contactRequest.Error, true)
                 .Warning("Failed to retrieve list of Science Prac Teachers by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(contactRequest.Error);
+            ModalContent = ErrorDisplay.Create(contactRequest.Error);
 
             return;
         }

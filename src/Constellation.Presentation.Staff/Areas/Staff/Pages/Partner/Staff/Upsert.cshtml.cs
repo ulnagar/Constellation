@@ -83,7 +83,7 @@ public class UpsertModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 
@@ -108,7 +108,7 @@ public class UpsertModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 
@@ -165,7 +165,7 @@ public class UpsertModel : BasePageModel
 
             if (createResult.IsFailure)
             {
-                ModalContent = new ErrorDisplay(createResult.Error);
+                ModalContent = ErrorDisplay.Create(createResult.Error);
 
                 _logger
                     .ForContext(nameof(Error), createResult.Error, true)
@@ -201,7 +201,7 @@ public class UpsertModel : BasePageModel
 
         if (updateResult.IsFailure)
         {
-            ModalContent = new ErrorDisplay(updateResult.Error);
+            ModalContent = ErrorDisplay.Create(updateResult.Error);
 
             _logger
                 .ForContext(nameof(Error), updateResult.Error, true)

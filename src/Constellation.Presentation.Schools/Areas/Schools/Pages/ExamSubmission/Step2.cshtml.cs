@@ -62,7 +62,7 @@ public class Step2Model : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentsRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
@@ -87,7 +87,7 @@ public class Step2Model : BasePageModel
 
         if (coursesRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 coursesRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 

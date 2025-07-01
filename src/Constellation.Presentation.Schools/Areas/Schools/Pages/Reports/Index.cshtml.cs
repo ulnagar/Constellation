@@ -57,7 +57,7 @@ public class IndexModel : BasePageModel
         
         if (reportsResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(reportsResponse.Error);
+            ModalContent = ErrorDisplay.Create(reportsResponse.Error);
 
             return;
         }
@@ -77,7 +77,7 @@ public class IndexModel : BasePageModel
         
         if (file.IsFailure)
         {
-            ModalContent = new ErrorDisplay(file.Error);
+            ModalContent = ErrorDisplay.Create(file.Error);
 
             _logger.Information("Requested to retrieve report data by user {user} for school {school}", _currentUserService.UserName, CurrentSchoolCode);
             

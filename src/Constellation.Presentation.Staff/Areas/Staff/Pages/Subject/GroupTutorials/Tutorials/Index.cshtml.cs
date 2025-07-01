@@ -50,7 +50,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), tutorialResponse.Error, true)
                 .Warning("Failed to retrieve list of Group Tutorials by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(tutorialResponse.Error);
+            ModalContent = ErrorDisplay.Create(tutorialResponse.Error);
 
             return;
         }

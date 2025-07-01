@@ -54,7 +54,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), assignmentRequest.Error, true)
                 .Warning("Failed to retrieve list of Assignments by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(assignmentRequest.Error);
+            ModalContent = ErrorDisplay.Create(assignmentRequest.Error);
 
             return;
         }

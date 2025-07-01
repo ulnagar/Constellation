@@ -57,7 +57,7 @@ public class ChangesModel : BasePageModel
                 .ForContext(nameof(Error), statisticsRequest.Error, true)
                 .Warning("Failed to retrieve list of Awards changes for user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(statisticsRequest.Error);
+            ModalContent = ErrorDisplay.Create(statisticsRequest.Error);
 
             return;
         }
@@ -99,7 +99,7 @@ public class ChangesModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to complete Award Tally Audit by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -125,7 +125,7 @@ public class ChangesModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to issue awards by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

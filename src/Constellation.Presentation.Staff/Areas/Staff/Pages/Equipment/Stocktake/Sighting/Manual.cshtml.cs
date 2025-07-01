@@ -103,7 +103,7 @@ public class ManualModel : BasePageModel
         {
             await PreparePage();
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)
@@ -121,7 +121,7 @@ public class ManualModel : BasePageModel
 
         if (string.IsNullOrWhiteSpace(claimStaffId))
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
             
@@ -135,7 +135,7 @@ public class ManualModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
@@ -146,7 +146,7 @@ public class ManualModel : BasePageModel
 
         if (students.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
@@ -162,7 +162,7 @@ public class ManualModel : BasePageModel
 
         if (teachers.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 teachers.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
@@ -177,7 +177,7 @@ public class ManualModel : BasePageModel
 
         if (schoolCodes.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schoolCodes.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 
@@ -188,7 +188,7 @@ public class ManualModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff" }));
 

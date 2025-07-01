@@ -53,7 +53,7 @@ public class StaffModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Subject/Period/Timetables/Index", values: new { area = "Staff" }));
 
@@ -70,7 +70,7 @@ public class StaffModel : BasePageModel
 
         if (timetableRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 timetableRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Period/Timetables/Index", values: new { area = "Staff" }));
 

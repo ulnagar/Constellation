@@ -77,7 +77,7 @@ public class UpdateModel : BasePageModel
             
             await PreparePage(cancellationToken);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -97,7 +97,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), coverResult.Error, true)
                 .Warning("Failed to retrieve Class Cover with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 coverResult.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 

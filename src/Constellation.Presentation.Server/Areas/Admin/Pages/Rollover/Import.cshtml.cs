@@ -47,18 +47,20 @@ public class ImportModel : BasePageModel
     {
         if (FormFile is null)
         {
-            ModalContent = new ErrorDisplay(new("Page.Form.File", "A file must be specified"));
+            ModalContent = ErrorDisplay.Create(new("Page.Form.File", "A file must be specified"));
 
             return Page();
         }
 
         try
         {
+            // TODO: R1.18: Move these manual errors to a common location
+
             // Verify that FormFile is xlsx/xls
             string[] allowedExtensions = { "xlsx", "xls" };
             if (!allowedExtensions.Contains(FormFile.FileName.Split('.').Last()))
             {
-                ModalContent = new ErrorDisplay(new("Page.Form.File", "You must provide an Excel file (.xls or .xlsx)"));
+                ModalContent = ErrorDisplay.Create(new("Page.Form.File", "You must provide an Excel file (.xls or .xlsx)"));
 
                 return Page();
             }
@@ -76,7 +78,7 @@ public class ImportModel : BasePageModel
                     .ForContext(nameof(Error), processRequest.Error, true)
                     .Warning("Failed to import Students from file by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(processRequest.Error);
+                ModalContent = ErrorDisplay.Create(processRequest.Error);
 
                 return Page();
             }
@@ -85,7 +87,7 @@ public class ImportModel : BasePageModel
         }
         catch (Exception ex)
         {
-            ModalContent = new ErrorDisplay(new("Exception", ex.Message));
+            ModalContent = ExceptionDisplay.Create(ex);
         }
         
         return Page();

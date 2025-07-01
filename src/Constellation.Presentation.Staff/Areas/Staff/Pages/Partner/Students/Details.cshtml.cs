@@ -375,7 +375,7 @@ public class DetailsModel : BasePageModel
 
     private void GenerateError(Error error)
     {
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             error,
             _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
         

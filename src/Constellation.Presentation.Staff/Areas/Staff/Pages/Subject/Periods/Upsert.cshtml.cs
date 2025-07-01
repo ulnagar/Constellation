@@ -86,7 +86,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve details of Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Periods/Index", values: new { area = "Staff"}));
 
@@ -137,7 +137,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Requested to update Period by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

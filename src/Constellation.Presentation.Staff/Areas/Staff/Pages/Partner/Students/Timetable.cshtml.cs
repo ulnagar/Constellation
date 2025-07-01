@@ -52,7 +52,7 @@ public sealed class TimetableModel : BasePageModel
 
         if (timetableRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(timetableRequest.Error);
+            ModalContent = ErrorDisplay.Create(timetableRequest.Error);
 
             return;
         }
@@ -68,7 +68,7 @@ public sealed class TimetableModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }

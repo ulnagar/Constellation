@@ -78,7 +78,7 @@ public class ApplicationsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to submit Consent Responses by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -94,7 +94,7 @@ public class ApplicationsModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return Page();
         }

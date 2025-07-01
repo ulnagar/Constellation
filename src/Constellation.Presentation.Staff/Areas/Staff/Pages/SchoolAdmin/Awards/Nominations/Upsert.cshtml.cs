@@ -67,7 +67,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), details.Error, true)
                     .Warning("Failed to retrieve Award Nomination Period with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     details.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = Id }));
 
@@ -106,7 +106,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), editRequest.Error, true)
                     .Warning("Failed to update Award Nomination Period by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(editRequest.Error);
+                ModalContent = ErrorDisplay.Create(editRequest.Error);
 
                 PageTitle = $"Award Period - {Name}";
                 
@@ -129,7 +129,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create new Award Nomination Period by user {User}", _currentUserService.UserName);
                 
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 return Page();
             }

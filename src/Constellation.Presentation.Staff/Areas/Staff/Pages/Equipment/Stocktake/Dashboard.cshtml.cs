@@ -71,7 +71,7 @@ public class DashboardModel : BasePageModel
 
         if (string.IsNullOrWhiteSpace(claimStaffId))
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -89,7 +89,7 @@ public class DashboardModel : BasePageModel
 
         if (eventRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 eventRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -104,7 +104,7 @@ public class DashboardModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -153,7 +153,7 @@ public class DashboardModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove sighting by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id }));
 

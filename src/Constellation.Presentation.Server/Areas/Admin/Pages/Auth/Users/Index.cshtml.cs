@@ -122,7 +122,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Auth/Users/Index", values: new { area = "Admin" }));
 

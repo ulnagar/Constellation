@@ -78,7 +78,7 @@ public class AddMemberModel : BasePageModel
                 .ForContext(nameof(Error), staffListRequest.Error, true)
                 .Warning("Failed to add member to Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffListRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Faculties/Details", values: new { area = "Staff", FacultyId }));
 
@@ -108,7 +108,7 @@ public class AddMemberModel : BasePageModel
                     .ForContext(nameof(Error), staffListRequest.Error, true)
                     .Warning("Failed to add member to Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     staffListRequest.Error,
                     _linkGenerator.GetPathByPage("/Partner/Staff/Faculties/Details", values: new { area = "Staff", FacultyId }));
 

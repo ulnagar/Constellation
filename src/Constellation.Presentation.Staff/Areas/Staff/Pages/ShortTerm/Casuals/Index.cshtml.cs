@@ -56,7 +56,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage(cancellationToken);
 
@@ -77,7 +77,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to delete Casual Teacher by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage(cancellationToken);
 
@@ -95,7 +95,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage(cancellationToken);
 
@@ -116,7 +116,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to reinstate Casual Teacher by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage(cancellationToken);
 
@@ -144,7 +144,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), casualsRequest.Error, true)
                 .Warning("Failed to retrieve list of Casual Teachers by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(casualsRequest.Error);
+            ModalContent = ErrorDisplay.Create(casualsRequest.Error);
 
             return;
         }

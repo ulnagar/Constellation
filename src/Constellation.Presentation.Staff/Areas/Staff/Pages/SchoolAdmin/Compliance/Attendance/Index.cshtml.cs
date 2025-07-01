@@ -56,7 +56,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve Compliance Attendance Percentages by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }
@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), periodRequest.Error, true)
                 .Warning("Failed to retrieve Compliance Attendance Percentages by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(periodRequest.Error);
+            ModalContent = ErrorDisplay.Create(periodRequest.Error);
 
             return;
         }
@@ -83,7 +83,7 @@ public class IndexModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(SelectedPeriod))
         {
-            ModalContent = new ErrorDisplay(new("", "You must select an Attendance Period to update"));
+            ModalContent = ErrorDisplay.Create(new("", "You must select an Attendance Period to update"));
 
             return Page();
         }
@@ -115,7 +115,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to update Attendance Percentage for period {Period} by user {User}", SelectedPeriod, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -135,7 +135,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to update all Attendance Percentage periods by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

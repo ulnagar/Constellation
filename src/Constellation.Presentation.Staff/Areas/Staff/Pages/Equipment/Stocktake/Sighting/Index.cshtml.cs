@@ -64,7 +64,7 @@ public class IndexModel : BasePageModel
     {
         if (AssetNumber == AssetNumber.Empty && string.IsNullOrWhiteSpace(SerialNumber))
         {
-            ModalContent = new ErrorDisplay(AssetNumberErrors.Empty);
+            ModalContent = ErrorDisplay.Create(AssetNumberErrors.Empty);
 
             Misses++;
 
@@ -75,7 +75,7 @@ public class IndexModel : BasePageModel
 
         if (asset.IsFailure)
         {
-            ModalContent = new ErrorDisplay(asset.Error);
+            ModalContent = ErrorDisplay.Create(asset.Error);
 
             Misses++;
 
@@ -95,7 +95,7 @@ public class IndexModel : BasePageModel
 
             if (asset.IsFailure)
             {
-                ModalContent = new ErrorDisplay(asset.Error);
+                ModalContent = ErrorDisplay.Create(asset.Error);
 
                 return Page();
             }
@@ -114,7 +114,7 @@ public class IndexModel : BasePageModel
 
         if (sighting.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 sighting.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Sighting/Index", values: new { area = "Staff", Id }));
 

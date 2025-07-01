@@ -67,7 +67,7 @@ public class FTEBreakdownModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" }));
 

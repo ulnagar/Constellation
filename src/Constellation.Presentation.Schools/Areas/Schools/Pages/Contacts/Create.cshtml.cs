@@ -75,7 +75,7 @@ public class CreateModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }
@@ -120,7 +120,7 @@ public class CreateModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

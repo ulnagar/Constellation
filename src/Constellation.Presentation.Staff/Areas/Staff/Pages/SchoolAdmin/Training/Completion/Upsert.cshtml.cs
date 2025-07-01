@@ -108,7 +108,7 @@ public class UpsertModel : BasePageModel
         if (Mode == CompletionPageMode.Full && !CanEditRecords)
         {
             // Editor mode selected without edit access
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
@@ -118,7 +118,7 @@ public class UpsertModel : BasePageModel
         if (Mode == CompletionPageMode.SoloModule && !CanEditRecords)
         {
             // Editor insert mode selected without edit access
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId }));
 
@@ -138,7 +138,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), entityRequest.Error, true)
                     .Warning("Failed to retrieve details of Training Completion for edit by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     entityRequest.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id = ModuleId.Value }));
 
@@ -165,7 +165,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
                     .Warning("Failed to retrieve details of Training Completion for edit by user {User}", _currentUserService.UserName);
                 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     DomainErrors.Permissions.Unauthorised,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
@@ -328,7 +328,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to update Training Completion with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 
@@ -356,7 +356,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to create new Training Completion by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Index", values: new { area = "Staff" }));
 

@@ -64,7 +64,7 @@ public class SearchModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to retrieve Lesson Rolls for Student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
                 
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 return;
             }
@@ -88,7 +88,7 @@ public class SearchModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to retrieve Lesson Rolls for School with id {Id} by user {User}", SchoolCode, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 return;
             }
@@ -120,7 +120,7 @@ public class SearchModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to bulk cancel Science Prac Rolls by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

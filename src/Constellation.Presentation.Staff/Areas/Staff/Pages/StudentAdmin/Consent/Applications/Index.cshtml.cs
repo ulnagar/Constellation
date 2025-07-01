@@ -50,7 +50,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), applicationsRequest.Error, true)
                 .Warning("Failed to retrieve list of Consent Applications by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(applicationsRequest.Error);
+            ModalContent = ErrorDisplay.Create(applicationsRequest.Error);
 
             return;
         }

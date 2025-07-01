@@ -55,7 +55,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reports.Error, true)
                 .Warning("Failed to retrieve Academic Reports by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 reports.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/Academic/Index", values: new { area = "Staff" }));
 
@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Reports/Index", values: new { area = "Parents" }));
 

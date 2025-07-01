@@ -54,7 +54,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), applications.Error, true)
                 .Warning("Failed to retrieve approved Applications by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 applications.Error,
                 _linkGenerator.GetPathByPage("/Index", values: new { area = "Parents" }));
 
@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), isResidentialParent.Error, true)
                 .Warning("Failed to retrieve approved Applications by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 isResidentialParent.Error,
                 _linkGenerator.GetPathByPage("/Index", values: new { area = "Parents" }));
 

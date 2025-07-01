@@ -55,7 +55,7 @@ public class DetailsModel : BasePageModel
 
         if (stocktake.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 stocktake.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" }));
 
@@ -78,7 +78,7 @@ public class DetailsModel : BasePageModel
 
         if (file.IsFailure)
         {
-            ModalContent = new ErrorDisplay(file.Error);
+            ModalContent = ErrorDisplay.Create(file.Error);
 
             _logger
                 .ForContext(nameof(Error), file.Error, true)

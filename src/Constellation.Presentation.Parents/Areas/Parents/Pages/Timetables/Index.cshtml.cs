@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Timetables/Index", values: new { area = "Parents" }));
 
@@ -91,7 +91,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -113,7 +113,7 @@ public class IndexModel : BasePageModel
 
             if (timetableRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(timetableRequest.Error);
+                ModalContent = ErrorDisplay.Create(timetableRequest.Error);
 
                 return;
             }

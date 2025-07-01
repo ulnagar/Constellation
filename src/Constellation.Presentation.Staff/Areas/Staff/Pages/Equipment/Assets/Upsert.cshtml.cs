@@ -102,7 +102,7 @@ public class UpsertModel : BasePageModel
 
             if (asset.IsFailure)
             {
-                ModalContent = new ErrorDisplay(asset.Error);
+                ModalContent = ErrorDisplay.Create(asset.Error);
 
                 _logger
                     .ForContext(nameof(Error), asset.Error, true)
@@ -114,7 +114,7 @@ public class UpsertModel : BasePageModel
             if (!asset.Value.Status.Equals(AssetStatus.Active) &&
                 !asset.Value.Status.Equals(AssetStatus.PendingDisposal))
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     AssetErrors.CannotUpdateDisposedItem,
                     _linkGenerator.GetPathByPage("/Equipment/Asses/Details", values: new { area = "Staff", AssetNumber = Id }));
 
@@ -159,7 +159,7 @@ public class UpsertModel : BasePageModel
 
             if (createResult.IsFailure)
             {
-                ModalContent = new ErrorDisplay(createResult.Error);
+                ModalContent = ErrorDisplay.Create(createResult.Error);
 
                 _logger
                     .ForContext(nameof(Error), createResult.Error, true)
@@ -190,7 +190,7 @@ public class UpsertModel : BasePageModel
 
         if (updateResult.IsFailure)
         {
-            ModalContent = new ErrorDisplay(updateResult.Error);
+            ModalContent = ErrorDisplay.Create(updateResult.Error);
 
             _logger
                 .ForContext(nameof(Error), updateResult.Error, true)

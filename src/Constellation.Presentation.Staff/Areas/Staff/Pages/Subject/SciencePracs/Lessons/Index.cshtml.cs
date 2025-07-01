@@ -51,7 +51,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), lessonRequest.Error, true)
                 .Warning("Failed to retrieve list of Lessons by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(lessonRequest.Error);
+            ModalContent = ErrorDisplay.Create(lessonRequest.Error);
 
             return;
         }

@@ -82,7 +82,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve details of Case with Id {Id} by user {User}", Id, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" }));
 
@@ -109,7 +109,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), action.Error, true)
                 .Warning("Failed to update status of Case with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(action.Error);
+            ModalContent = ErrorDisplay.Create(action.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -147,7 +147,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), cancelRequest, true)
                 .Warning("Failed to cancel Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(cancelRequest.Error);
+            ModalContent = ErrorDisplay.Create(cancelRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -190,7 +190,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), noteRequest.Error, true)
                 .Warning("Failed to cancel Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(noteRequest.Error);
+            ModalContent = ErrorDisplay.Create(noteRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -249,7 +249,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), reassignRequest.Error, true)
                 .Warning("Failed to reassign Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reassignRequest.Error);
+            ModalContent = ErrorDisplay.Create(reassignRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -342,7 +342,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -368,7 +368,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -403,7 +403,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -422,7 +422,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -448,7 +448,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -467,7 +467,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -493,7 +493,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -512,7 +512,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -538,7 +538,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -557,7 +557,7 @@ public class DetailsModel : BasePageModel
     {
         if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -583,7 +583,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 

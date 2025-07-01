@@ -68,7 +68,7 @@ public class ReportsModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff"}));
 
@@ -93,7 +93,7 @@ public class ReportsModel : BasePageModel
 
         if (file.IsFailure)
         {
-            ModalContent = new ErrorDisplay(file.Error);
+            ModalContent = ErrorDisplay.Create(file.Error);
 
             _logger
                 .ForContext(nameof(Error), file.Error, true)
@@ -143,7 +143,7 @@ public class ReportsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 

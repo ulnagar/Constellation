@@ -77,7 +77,7 @@ public class AddStudentsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add bulk Students to Group Tutorial by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 
@@ -101,7 +101,7 @@ public class AddStudentsModel : BasePageModel
                 .ForContext(nameof(Error), tutorial.Error, true)
                 .Warning("Failed to retrieve defaults to add bulk Students to Group Tutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 tutorial.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 
@@ -118,7 +118,7 @@ public class AddStudentsModel : BasePageModel
                 .ForContext(nameof(Error), enrolmentRequest.Error, true)
                 .Warning("Failed to retrieve defaults to add bulk Students to Group Tutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 enrolmentRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 
@@ -135,7 +135,7 @@ public class AddStudentsModel : BasePageModel
                 .ForContext(nameof(Error), studentsRequest.Error, true)
                 .Warning("Failed to retrieve defaults to add bulk Students to Group Tutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentsRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 

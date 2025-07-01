@@ -101,7 +101,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to create Class Covers by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
         
             return Page();
         }
@@ -121,7 +121,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), teacherResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 teacherResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
@@ -136,7 +136,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), casualResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 casualResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
             
@@ -178,7 +178,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), classesResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 classesResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 

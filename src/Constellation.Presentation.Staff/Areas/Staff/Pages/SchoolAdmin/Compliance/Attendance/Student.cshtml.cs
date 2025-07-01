@@ -63,7 +63,7 @@ public class StudentModel : BasePageModel
                 .ForContext(nameof(Error), error, true)
                 .Warning("Failed to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 
@@ -78,7 +78,7 @@ public class StudentModel : BasePageModel
                 .ForContext(nameof(Error), studentRequest.Error, true)
                 .Warning("Failed to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 
@@ -95,7 +95,7 @@ public class StudentModel : BasePageModel
                 .ForContext(nameof(Error), valueRequest.Error, true)
                 .Warning("Failed to retrieve Attendance Details for student with id {Id} by user {User}", StudentId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 valueRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/Attendance/Index", values: new { area = "Staff" }));
 

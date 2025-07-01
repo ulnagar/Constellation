@@ -134,7 +134,7 @@ public class IndexModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             error,
             _linkGenerator.GetPathByPage("/Auth/Roles/Index", values: new { area = "Admin", RoleId }));
 

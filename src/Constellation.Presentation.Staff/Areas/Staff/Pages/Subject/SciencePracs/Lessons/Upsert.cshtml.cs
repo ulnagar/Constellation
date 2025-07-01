@@ -77,7 +77,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), lessonResponse.Error, true)
                     .Warning("Failed to retrieve Lesson with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     lessonResponse.Error,
                     _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", Id }));
 
@@ -90,7 +90,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), SciencePracLessonErrors.CannotEdit, true)
                     .Warning("Failed to retrieve Lesson with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     SciencePracLessonErrors.CannotEdit,
                     _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", Id }));
             }
@@ -136,7 +136,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), updateRequest.Error, true)
                 .Warning("Failed to update Lesson by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(updateRequest.Error);
+            ModalContent = ErrorDisplay.Create(updateRequest.Error);
 
             await BuildCourseSelectList();
 
@@ -179,7 +179,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), createRequest.Error, true)
                 .Warning("Failed to create new Lesson by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(createRequest.Error);
+            ModalContent = ErrorDisplay.Create(createRequest.Error);
 
             await BuildCourseSelectList();
 
@@ -195,7 +195,7 @@ public class UpsertModel : BasePageModel
 
         if (coursesResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(coursesResponse.Error);
+            ModalContent = ErrorDisplay.Create(coursesResponse.Error);
 
             return;
         }

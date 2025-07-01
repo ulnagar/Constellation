@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using System.Diagnostics.Eventing.Reader;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
 public class IndexModel : BasePageModel
@@ -70,7 +69,7 @@ public class IndexModel : BasePageModel
     {
         if (AssetNumber == AssetNumber.Empty && string.IsNullOrWhiteSpace(SerialNumber))
         {
-            ModalContent = new ErrorDisplay(AssetNumberErrors.Empty);
+            ModalContent = ErrorDisplay.Create(AssetNumberErrors.Empty);
 
             Misses++;
 
@@ -81,21 +80,7 @@ public class IndexModel : BasePageModel
 
         if (asset.IsFailure)
         {
-            ModalContent = new ErrorDisplay(asset.Error);
-
-            Misses++;
-
-            return Page();
-        }
-
-        if (asset.Value.LocationCode != CurrentSchoolCode)
-        {
-            ModalContent = new FeedbackDisplay(
-                "Stocktake Sighting",
-                "This device registered at another school! Please check the Serial Number or Asset Number and try again. If this error persists, please contact the Technology Support Team on 1300 610 733.",
-                "Ok",
-                "btn-success",
-                _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+            ModalContent = ErrorDisplay.Create(asset.Error);
 
             Misses++;
 
@@ -106,7 +91,7 @@ public class IndexModel : BasePageModel
 
         if (sightingRecord.IsFailure)
         {
-            ModalContent = new ErrorDisplay(sightingRecord.Error);
+            ModalContent = ErrorDisplay.Create(sightingRecord.Error);
 
             Misses++;
 
@@ -115,6 +100,22 @@ public class IndexModel : BasePageModel
 
         if (!sightingRecord.Value.HasSighting)
         {
+            if (asset.Value.LocationCode != CurrentSchoolCode)
+            {
+                ModalContent = FeedbackDisplay.Create(
+                    "Stocktake Sighting",
+                    "This device is registered at another school! Please check the Serial Number or Asset Number and try again. If this error persists, please contact the Technology Support Team on 1300 610 733.",
+                    [
+                        ("Ok", "btn-success", string.Empty),
+                        ("Update", "btn-warning", _linkGenerator.GetPathByPage("/Stocktake/Sighting/Update", values: new { area = "Schools", EventId = Id, AssetNumber = asset.Value.AssetNumber }))
+                    ]
+                );
+
+                Misses++;
+
+                return Page();
+            }
+
             Asset = asset.Value;
 
             return Page();
@@ -122,24 +123,22 @@ public class IndexModel : BasePageModel
 
         if (sightingRecord.Value.SightingSchoolCode == CurrentSchoolCode)
         {
-            ModalContent = new FeedbackDisplay(
+            ModalContent = FeedbackDisplay.Create(
                 "Stocktake Sighting",
                 "This device has already been entered. If there are mistakes, please remove the previous sighting first",
                 "Ok",
-                "btn-success",
-                _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+                "btn-success");
 
             Misses++;
 
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Stocktake Sighting",
             "This device has already been sighted at another location! Please check the Serial Number or Asset Number and try again. If this error persists, please contact the Technology Support Team on 1300 610 733.",
             "Ok",
-            "btn-success",
-            _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
+            "btn-success");
 
         Misses++;
 
@@ -154,7 +153,7 @@ public class IndexModel : BasePageModel
 
             if (asset.IsFailure)
             {
-                ModalContent = new ErrorDisplay(asset.Error);
+                ModalContent = ErrorDisplay.Create(asset.Error);
 
                 return Page();
             }
@@ -173,7 +172,7 @@ public class IndexModel : BasePageModel
 
         if (sighting.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 sighting.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Sighting/Index", values: new { area = "Schools", Id }));
 

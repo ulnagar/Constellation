@@ -55,7 +55,7 @@ public class DetailsModel : BasePageModel
 
         if (device.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 device.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Devices/Index", values: new { area = "Staff"}));
 

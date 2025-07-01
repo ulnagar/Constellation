@@ -60,7 +60,7 @@ public class IndexModel : BasePageModel
 
         if (schoolDetailsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(schoolDetailsRequest.Error);
+            ModalContent = ErrorDisplay.Create(schoolDetailsRequest.Error);
 
             return;
         }
@@ -73,7 +73,7 @@ public class IndexModel : BasePageModel
 
         if (contactsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(contactsRequest.Error);
+            ModalContent = ErrorDisplay.Create(contactsRequest.Error);
 
             return;
         }
@@ -117,12 +117,12 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Schools Portal",
             "A request has been sent to Aurora College for this contact to be removed.",
             "Ok",

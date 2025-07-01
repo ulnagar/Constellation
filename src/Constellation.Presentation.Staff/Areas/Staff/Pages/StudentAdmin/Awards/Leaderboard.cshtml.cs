@@ -51,7 +51,7 @@ public class LeaderboardModel : BasePageModel
                 .ForContext(nameof(Error), statisticsRequest.Error, true)
                 .Warning("Failed to retrieve Student Award Leaderboards by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(statisticsRequest.Error);
+            ModalContent = ErrorDisplay.Create(statisticsRequest.Error);
 
             return;
         }

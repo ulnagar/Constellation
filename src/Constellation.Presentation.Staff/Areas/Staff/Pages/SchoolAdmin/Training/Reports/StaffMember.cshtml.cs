@@ -58,7 +58,7 @@ public class StaffMemberModel : BasePageModel
                 .ForContext(nameof(Error), staffRequest.Error, true)
                 .Warning("Failed to retrieve Training report for staff member with id {Id} by user {User}", Id, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" }));
 
@@ -75,7 +75,7 @@ public class StaffMemberModel : BasePageModel
                 .ForContext(nameof(Error), moduleRequest.Error, true)
                 .Warning("Failed to retrieve Training report for staff member with id {Id} by user {User}", Id, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Reports/Index", values: new { area = "Staff" }));
 

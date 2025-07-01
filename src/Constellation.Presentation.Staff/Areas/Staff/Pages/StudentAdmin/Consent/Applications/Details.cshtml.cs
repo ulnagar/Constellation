@@ -65,7 +65,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), applicationRequest.Error, true)
                 .Warning("Failed to disable Consent Application by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 applicationRequest.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id }));
 
@@ -93,7 +93,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), applicationRequest.Error, true)
                 .Warning("Failed to enable Consent Application by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 applicationRequest.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id = Id }));
 
@@ -115,7 +115,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to revoke Consent Requirement by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
 
@@ -137,7 +137,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), applicationRequest.Error, true)
                 .Warning("Failed to retrieve details for Consent Application with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 applicationRequest.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Index", values: new { area = "Staff" }));
 

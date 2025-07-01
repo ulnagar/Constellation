@@ -72,7 +72,7 @@ public class IndexModel : BasePageModel
 
         if (contacts.IsFailure)
         {
-            ModalContent = new ErrorDisplay(contacts.Error);
+            ModalContent = ErrorDisplay.Create(contacts.Error);
 
             _logger
                 .ForContext(nameof(Error), contacts.Error, true)
@@ -120,7 +120,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" }));
 
@@ -169,7 +169,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolContacts/Index", values: new { area = "Partner" }));
 

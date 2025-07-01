@@ -78,7 +78,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), awardRequest.Error, true)
                 .Warning("Failed to retrieve list of Awards by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 awardRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -102,7 +102,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to retrieve Award Certificate with id {Id} by user {User}", id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileRequest.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Awards/Index", values: new { area = "Staff" }));
 

@@ -109,7 +109,7 @@ public class UpdateModel : BasePageModel
         {
             await PreparePage();
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
@@ -121,7 +121,7 @@ public class UpdateModel : BasePageModel
     {
         if (AssetNumber == AssetNumber.Empty)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 AssetNumberErrors.Empty,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", Id = EventId }));
             
@@ -132,7 +132,7 @@ public class UpdateModel : BasePageModel
 
         if (asset.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 asset.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", Id = EventId }));
                 
@@ -145,7 +145,7 @@ public class UpdateModel : BasePageModel
 
         if (students.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", Id = EventId }));
 
@@ -161,7 +161,7 @@ public class UpdateModel : BasePageModel
 
         if (teachers.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 teachers.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", Id = EventId }));
 

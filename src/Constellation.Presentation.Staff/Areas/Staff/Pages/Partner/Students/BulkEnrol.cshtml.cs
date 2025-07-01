@@ -124,7 +124,7 @@ public class BulkEnrolModel : BasePageModel
 
             if (response.IsFailure)
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     response.Error,
                     _linkGenerator.GetPathByPage("/Partner/Students/Details", values: new { area = "Staff", id = Id }));
 

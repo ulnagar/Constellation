@@ -64,7 +64,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), response.Error, true)
                 .Warning("Failed to retrieve filtered Consent data by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(response.Error);
+            ModalContent = ErrorDisplay.Create(response.Error);
 
             return Page();
         }
@@ -86,7 +86,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), classesResponse.Error, true)
                 .Warning("Failed to retrieve reports for Consent data by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(classesResponse.Error);
+            ModalContent = ErrorDisplay.Create(classesResponse.Error);
 
             return Page();
         }

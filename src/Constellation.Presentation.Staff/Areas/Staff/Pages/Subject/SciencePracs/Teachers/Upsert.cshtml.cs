@@ -88,7 +88,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), contactRequest.Error, true)
                     .Warning("Failed to retrieve details of School Contact with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     contactRequest.Error,
                     _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
 
@@ -140,7 +140,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to create School Contact by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -178,7 +178,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to update School Contact by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }
@@ -196,7 +196,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), schoolsRequest.Error, true)
                 .Warning("Failed to retrieve defaults for School Contact by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schoolsRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/SciencePracs/Teachers/Index", values: new { area = "Staff" }));
 

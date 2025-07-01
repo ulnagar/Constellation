@@ -66,7 +66,7 @@ public class UploadModel : BasePageModel
                         .ForContext(nameof(Error), request.Error, true)
                         .Warning("Failed to upload certificate for Training Completion by user {User}", _currentUserService.UserName);
                     
-                    ModalContent = new ErrorDisplay(
+                    ModalContent = ErrorDisplay.Create(
                         request.Error,
                         _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" }));
 
@@ -79,7 +79,7 @@ public class UploadModel : BasePageModel
                     .ForContext(nameof(Exception), ex, true)
                     .Warning("Failed to upload certificate for Training Completion by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     new(ex.Source, ex.Message),
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Completion/Upload", values: new { area = "Staff" }));
 

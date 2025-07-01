@@ -52,7 +52,7 @@ public class DashboardModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
         {
-            ModalContent = new ErrorDisplay(ApplicationErrors.SchoolInvalid);
+            ModalContent = ErrorDisplay.Create(ApplicationErrors.SchoolInvalid);
 
             return;
         }
@@ -75,7 +75,7 @@ public class DashboardModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }

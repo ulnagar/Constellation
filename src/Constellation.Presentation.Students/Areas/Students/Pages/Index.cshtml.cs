@@ -49,7 +49,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve Student Dashboard by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return;
         }
@@ -64,7 +64,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve Student Dashboard by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }

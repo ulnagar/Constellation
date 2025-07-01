@@ -83,7 +83,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), offering.Error, true)
                     .Warning("Failed to retrieve details of Offering with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     offering.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
@@ -129,7 +129,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to create new Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
@@ -158,7 +158,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to update Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id.Value }));
 
@@ -174,7 +174,7 @@ public class UpsertModel : BasePageModel
 
         if (coursesResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(coursesResponse.Error);
+            ModalContent = ErrorDisplay.Create(coursesResponse.Error);
 
             return;
         }
