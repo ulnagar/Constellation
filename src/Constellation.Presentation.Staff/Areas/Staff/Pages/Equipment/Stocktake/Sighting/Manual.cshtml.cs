@@ -75,6 +75,8 @@ public class ManualModel : BasePageModel
 
     public List<StudentResponse> StudentList { get; set; } = new();
     public List<StaffSelectionListResponse> StaffList { get; set; } = new();
+
+    public StaffResponse CurrentStaffMember { get; set; }
     public List<SchoolDto> SchoolList { get; set; } = new();
 
     public async Task OnGet() => await PreparePage();
@@ -141,6 +143,8 @@ public class ManualModel : BasePageModel
 
             return;
         }
+
+        CurrentStaffMember = staffMember.Value;
 
         Result<List<StudentResponse>> students = await _mediator.Send(new GetCurrentStudentsFromSchoolQuery(staffMember.Value.SchoolCode));
 

@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.AssetManagement.Stocktake.Commands.RegisterSightingFromAssetRecord;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetAssetForSightingConfirmation;
 using Application.Models.Auth;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingForAsset;
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
@@ -82,7 +83,31 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        Asset = asset.Value;
+        Result<StocktakeSightingForAssetResponse> sightingRecord = await _mediator.Send(new GetStocktakeSightingForAssetQuery(Id, asset.Value.AssetNumber));
+
+        if (sightingRecord.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(sightingRecord.Error);
+
+            Misses++;
+
+            return Page();
+        }
+
+        if (!sightingRecord.Value.HasSighting)
+        {
+            Asset = asset.Value;
+
+            return Page();
+        }
+
+        ModalContent = FeedbackDisplay.Create(
+            "Stocktake Sighting",
+            "This device has already been sighted. Please check the Serial Number or Asset Number and try again. If this error persists, please contact the Technology Support Team on 1300 610 733.",
+            "Ok",
+            "btn-success");
+
+        Misses++;
 
         return Page();
     }

@@ -54,7 +54,10 @@
                     <div class="col-md-7 pl-1">
                         <select asp-for="UserType" id="UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
                             <option value="">-- Select --</option>
-                            <option value="@UserType.Student">@UserType.Student</option>
+                            @if (Model.StudentList.Count > 0)
+                            {
+                                <option value="@UserType.Student">@UserType.Student</option>
+                            }
                             <option value="@UserType.Staff">@UserType.Staff</option>
                             <option value="@UserType.School">@UserType.School</option>
                             <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
@@ -83,7 +86,14 @@
                                 <option value="">-- Select --</option>
                                 @foreach (var staff in Model.StaffList)
                                 {
-                                    <option value="@staff.StaffId">@staff.Name.DisplayName</option>
+                                    if (staff.StaffId == Model.CurrentStaffMember.StaffId)
+                                    {
+                                        <option value="@staff.StaffId" selected="selected">@staff.Name.DisplayName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@staff.StaffId">@staff.Name.DisplayName</option>
+                                    }
                                 }
                             </select>
                             <span asp-validation-for="UserCode" class="text-danger"></span>
@@ -94,7 +104,14 @@
                                 <option value="">-- Select --</option>
                                 @foreach (var school in Model.SchoolList)
                                 {
-                                    <option value="@school.Code">@school.Name</option>
+                                    if (school.Code == Model.CurrentStaffMember.SchoolCode)
+                                    {
+                                        <option value="@school.Code" selected="selected">@school.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@school.Code">@school.Name</option>
+                                    }
                                 }
                             </select>
                             <span asp-validation-for="UserCode" class="text-danger"></span>
@@ -198,68 +215,20 @@
                 $('#DescriptionHelpText').addClass('d-none');
             });
 
-            $('#UserType').on('focus', function() {
+            $('#UserType, #Student_UserCode, #Staff_UserCode, #School_UserCode, #UserName').on('focus', function() {
                 $('#UserTypeHelpText').removeClass('d-none');
             });
-            $('#UserType').on('blur', function() {
+            $('#UserType, #Student_UserCode, #Staff_UserCode, #School_UserCode, #UserName').on('blur', function() {
                 $('#UserTypeHelpText').addClass('d-none');
             });
 
-            $('#Command_UserCode').on('focus', function() {
-                $('#UserTypeHelpText').removeClass('d-none');
-            });
-            $('#Command_UserCode').on('blur', function() {
-                $('#UserTypeHelpText').addClass('d-none');
-            });
-
-            $('#Student_UserCode').on('focus', function() {
-                $('#UserTypeHelpText').removeClass('d-none');
-            });
-            $('#Student_UserCode').on('blur', function() {
-                $('#UserTypeHelpText').addClass('d-none');
-            });
-
-            $('#Staff_UserCode').on('focus', function() {
-                $('#UserTypeHelpText').removeClass('d-none');
-            });
-            $('#Staff_UserCode').on('blur', function() {
-                $('#UserTypeHelpText').addClass('d-none');
-            });
-
-            $('#School_UserCode').on('focus', function() {
-                $('#UserTypeHelpText').removeClass('d-none');
-            });
-            $('#School_UserCode').on('blur', function() {
-                $('#UserTypeHelpText').addClass('d-none');
-            });
-
-            $('#UserName').on('focus', function() {
-                $('#UserTypeHelpText').removeClass('d-none');
-            });
-            $('#UserName').on('blur', function() {
-                $('#UserTypeHelpText').addClass('d-none');
-            });
-
-            $('#LocationType').on('focus', function() {
+            $('#LocationType, #School_LocationCode, #LocationName').on('focus', function() {
                 $('#LocationTypeHelpText').removeClass('d-none');
             });
-            $('#LocationType').on('blur', function() {
+            $('#LocationType, #School_LocationCode, #LocationName').on('blur', function() {
                 $('#LocationTypeHelpText').addClass('d-none');
             });
 
-            $('#School_LocationCode').on('focus', function() {
-                $('#LocationHelpText').removeClass('d-none');
-            });
-            $('#School_LocationCode').on('blur', function() {
-                $('#LocationHelpText').addClass('d-none');
-            });
-
-            $('#LocationName').on('focus', function() {
-                $('#LocationHelpText').removeClass('d-none');
-            });
-            $('#LocationName').on('blur', function() {
-                $('#LocationHelpText').addClass('d-none');
-            });
 
             $('#Comment').on('focus', function() {
                 $('#CommentHelpText').removeClass('d-none');
@@ -280,11 +249,11 @@
             $('#UserTypeOther').hide();
 
             // Reset all UserName options to blank
-            $('#Command_UserCode').val('');
+            $('#UserCode').val('');
             $('#Student_UserCode').val('');
             $('#Staff_UserCode').val('');
             $('#School_UserCode').val('');
-            $('#Command_UserName').val('');
+            $('#UserName').val('');
 
             // Show appropriate UserName option based on UserType value
             if (userType.val() === "@UserType.Student") {
@@ -325,8 +294,8 @@
             var schoolName = $('#School_UserCode option:selected').text();
 
             // Set the UserCode field to that value
-            $('#Command_UserCode').val(schoolId);
-            $('#Command_UserName').val(schoolName);
+            $('#UserCode').val(schoolId);
+            $('#UserName').val(schoolName);
         }
 
         function UpdateLocationType() {
