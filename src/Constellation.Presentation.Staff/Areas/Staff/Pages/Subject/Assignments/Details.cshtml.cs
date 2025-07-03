@@ -194,7 +194,10 @@ public class DetailsModel : BasePageModel
             return Page();
         }
 
-        UploadAssignmentSubmissionCommand command = new(Id, viewModel.StudentId, file);
+        UploadAssignmentSubmissionCommand command = new(Id, viewModel.StudentId, file)
+        {
+            SubmittedBy = _currentUserService.UserName
+        };
 
         _logger
             .ForContext(nameof(UploadAssignmentSubmissionCommand), command, true)

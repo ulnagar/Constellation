@@ -95,14 +95,13 @@ internal class AssignmentRepository : IAssignmentRepository
     public async Task<List<CanvasAssignment>> GetExpiredFromCurrentYear(
         CancellationToken cancellationToken = default)
     {
-        DateTime today = _dateTime.Today.ToDateTime(TimeOnly.MinValue);
-        DateTime Jan1 = _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue);
+        DateTime jan1 = _dateTime.FirstDayOfYear.ToDateTime(TimeOnly.MinValue);
 
         return await _context
             .Set<CanvasAssignment>()
             .Where(assignment =>
-                (assignment.DueDate >= Jan1 || (!assignment.LockDate.HasValue || assignment.LockDate.Value > Jan1)) &&
-                (assignment.DueDate < today || (!assignment.LockDate.HasValue || assignment.LockDate.Value < today)))
+                assignment.DueDate >= jan1 || 
+                (assignment.LockDate.HasValue && assignment.LockDate.Value > jan1))
             .ToListAsync(cancellationToken);
     }
 
