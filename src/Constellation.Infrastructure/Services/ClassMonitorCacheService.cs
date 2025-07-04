@@ -116,16 +116,16 @@ public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonSer
 
         foreach (var casual in casuals)
         {
-            var dto = new ClassMonitorDtos.MonitorUser
-            {
-                Id = casual.Id.ToString(),
-                DisplayName = casual.DisplayName,
-                UserType = "Casual",
-                UserPrincipalId = casual.AdobeConnectId,
-                IsDeleted = casual.IsDeleted
-            };
+            //var dto = new ClassMonitorDtos.MonitorUser
+            //{
+            //    Id = casual.Id.ToString(),
+            //    DisplayName = casual.Name.DisplayName,
+            //    UserType = "Casual",
+            //    UserPrincipalId = casual.AdobeConnectId,
+            //    IsDeleted = casual.IsDeleted
+            //};
 
-            Cache.Users.Add(dto);
+            //Cache.Users.Add(dto);
         }
     }
 

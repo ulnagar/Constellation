@@ -61,7 +61,7 @@ internal sealed class GetCoverWithDetailsQueryHandler
 
             if (teacher is not null)
             {
-                teacherName = teacher.DisplayName;
+                teacherName = teacher.Name.DisplayName;
 
                 var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 

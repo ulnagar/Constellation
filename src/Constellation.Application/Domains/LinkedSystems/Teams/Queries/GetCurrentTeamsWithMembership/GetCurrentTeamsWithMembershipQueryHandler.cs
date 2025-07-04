@@ -356,7 +356,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                         if (casual is not null)
                         {
                             TeamWithMembership.Member entry = new(
-                                casual.EmailAddress,
+                                casual.EmailAddress.Email,
                                 TeamsMembershipLevel.Owner.Value,
                                 []);
 

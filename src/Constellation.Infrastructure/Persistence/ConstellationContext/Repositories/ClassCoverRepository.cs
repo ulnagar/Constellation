@@ -102,8 +102,8 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             {
                 returnData.AddRange(await _context
                     .Set<Casual>()
-                    .Where(casual => casual.Id == new CasualId(Guid.Parse(cover.TeacherId)))
-                    .Select(casual => casual.EmailAddress)
+                    .Where(casual => casual.Id.ToString() == cover.TeacherId)
+                    .Select(casual => casual.EmailAddress.Email)
                     .ToListAsync(cancellationToken));
             }
             else

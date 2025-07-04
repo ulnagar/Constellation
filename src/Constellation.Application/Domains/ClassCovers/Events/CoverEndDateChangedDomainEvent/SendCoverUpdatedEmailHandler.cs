@@ -135,12 +135,12 @@ internal sealed class SendCoverUpdatedEmailHandler
         {
             Casual teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
-            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress.Email) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress.Email))
             {
-                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.Name, teacher.EmailAddress);
 
                 if (address.IsFailure)
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverUpdatedEmailHandler), teacher.DisplayName, cover.Id);
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverUpdatedEmailHandler), teacher.Name.DisplayName, cover.Id);
                 else
                 {
                     primaryRecipients.Add(address.Value);

@@ -67,7 +67,7 @@ internal sealed class GetAllCoversForCalendarYearQueryHandler
                 if (teacher is null)
                     continue;
 
-                teacherName = teacher.DisplayName;
+                teacherName = teacher.Name.DisplayName;
 
                 School school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 

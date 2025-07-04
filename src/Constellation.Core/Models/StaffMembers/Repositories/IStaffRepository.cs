@@ -14,6 +14,7 @@ public interface IStaffRepository
     Task<List<StaffMember>> GetAll(CancellationToken cancellationToken = default);
     Task<StaffMember?> GetById(StaffId staffId, CancellationToken cancellationToken = default);
     Task<StaffMember?> GetByEmployeeId(EmployeeId employeeId, CancellationToken cancellationToken = default);
+    Task<StaffMember?> GetByEdvalCode(string edvalCode, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetListFromIds(List<StaffId> staffIds, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetCurrentTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetPrimaryTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);

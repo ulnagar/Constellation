@@ -11,4 +11,5 @@ public interface ILissServerGateway
     Task<ILissResponse> PublishTeachers(object[] request, CancellationToken cancellationToken = default);
     Task<ILissResponse> PublishClassMemberships(object[] request, CancellationToken cancellationToken = default);
     Task<ILissResponse> PublishClasses(object[] request, CancellationToken cancellationToken = default);
+    Task<ILissResponse> PublishDailyData(object[] request, CancellationToken cancellationToken = default);
 }

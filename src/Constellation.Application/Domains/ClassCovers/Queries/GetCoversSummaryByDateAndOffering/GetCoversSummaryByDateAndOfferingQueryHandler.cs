@@ -55,7 +55,7 @@ internal sealed class GetCoversSummaryByDateAndOfferingQueryHandler
 
                 if (casual is not null)
                 {
-                    teacherName = casual.DisplayName;
+                    teacherName = casual.Name.DisplayName;
                 }
             }
             else

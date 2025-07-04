@@ -224,7 +224,7 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
-                UserEmail = casual.EmailAddress,
+                UserEmail = casual.EmailAddress.Email,
                 AdditionalInformation = "AllOwner"
             };
 

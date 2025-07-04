@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 
 public sealed record BulkCreateCoversCommand(
-    Guid Id,
     List<OfferingId> OfferingId,
     DateOnly StartDate,
     DateOnly EndDate,

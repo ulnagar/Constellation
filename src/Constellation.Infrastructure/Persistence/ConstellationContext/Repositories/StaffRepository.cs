@@ -7,7 +7,7 @@ using Constellation.Core.Models.StaffMembers;
 using Constellation.Core.Models.StaffMembers.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Core.Errors;
+using Core.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
@@ -15,7 +15,6 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using System.Drawing;
 
 public class StaffRepository : IStaffRepository
 {
@@ -46,6 +45,17 @@ public class StaffRepository : IStaffRepository
         await _context
             .Set<StaffMember>()
             .FirstOrDefaultAsync(member => member.EmployeeId == employeeId, cancellationToken);
+
+    public async Task<StaffMember?> GetByEdvalCode(
+        string edvalCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StaffMember>()
+            .FirstOrDefaultAsync(
+                member => member.SystemLinks.Any(link => 
+                        link.System.Equals(SystemType.Edval) && 
+                        link.Value == edvalCode),
+                cancellationToken);
 
     public async Task<List<StaffMember>> GetListFromIds(
         List<StaffId> staffIds,

@@ -72,7 +72,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
                     continue;
                 }
 
-                teacherName = teacher.DisplayName;
+                teacherName = teacher.Name.DisplayName;
 
                 var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 

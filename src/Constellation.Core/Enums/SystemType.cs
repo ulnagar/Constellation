@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public sealed class SystemType : StringEnumeration<SystemType>
 {
     public static readonly SystemType Sentral = new("Sentral");
+    public static readonly SystemType Edval = new("Edval");
 
     private SystemType(string value)
         : base(value, value) { }

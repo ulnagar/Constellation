@@ -82,7 +82,6 @@ public class CreateModel : BasePageModel
         List<OfferingId> offeringIds = CoveredClasses.Select(OfferingId.FromValue).ToList();
 
         BulkCreateCoversCommand command = new(
-            Guid.NewGuid(),
             offeringIds,
             StartDate,
             EndDate,
@@ -159,8 +158,8 @@ public class CreateModel : BasePageModel
             .Select(casual =>
                 new CoveringTeacherRecord(
                     casual.Id.ToString(),
-                    $"{casual.FirstName} {casual.LastName}",
-                    $"{casual.LastName}-{casual.FirstName}",
+                    casual.Name.DisplayName,
+                    casual.Name.SortOrder,
                     "Casuals"
                 ))
             .ToList());

@@ -30,8 +30,7 @@ internal sealed class GetCasualsForSelectionListQueryHandler
         {
             returnData.Add(new CasualsSelectionListResponse(
                 casual.Id,
-                casual.FirstName,
-                casual.LastName));
+                casual.Name));
         }
 
         return returnData;

@@ -2,35 +2,31 @@
 
 using Identifiers;
 using Primitives;
-using ValueObjects;
 using System;
+using ValueObjects;
 
 public sealed class Casual : AggregateRoot, IAuditableEntity
 {
+    /// <summary>
+    /// For EF Core Use Only
+    /// </summary>
+    private Casual() { }
+
     private Casual(
-        CasualId id,
-        string firstName,
-        string lastName,
-        string displayName,
-        string emailAddress,
-        string adobeConnectId,
+        Name name,
+        EmailAddress emailAddress,
         string schoolCode)
     {
-        Id = id;
-        FirstName = firstName;
-        LastName = lastName;
-        DisplayName = displayName;
+        Id = new();
+        Name = name;
         EmailAddress = emailAddress;
-        AdobeConnectId = adobeConnectId;
         SchoolCode = schoolCode;
     }
 
     public CasualId Id { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public string DisplayName { get; private set; }
-    public string EmailAddress { get; private set; }
-    public string AdobeConnectId { get; private set; }
+    public Name Name { get; private set; }
+    public EmailAddress EmailAddress { get; private set; }
+    public string EdvalTeacherId { get; private set; }
     public string SchoolCode { get; private set; }
 
     public string CreatedBy { get; set; }
@@ -42,13 +38,11 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     public static Casual Create(
-        CasualId id,
         Name name,
         EmailAddress email,
-        string adobeConnectId,
         string schoolCode)
     {
-        var casual = new Casual(id, name.FirstName, name.LastName, name.DisplayName, email.Email, adobeConnectId, schoolCode);
+        Casual casual = new Casual(name, email, schoolCode);
 
         // Raise domain events if necessary
 
@@ -69,13 +63,11 @@ public sealed class Casual : AggregateRoot, IAuditableEntity
 
     public void Update(
         Name name,
-        string adobeConnectId,
+        string edvalTeacherId,
         string schoolCode)
     {
-        FirstName = name.FirstName;
-        LastName = name.LastName;
-        DisplayName = name.DisplayName;
-        AdobeConnectId = adobeConnectId;
+        Name = name;
+        EdvalTeacherId = edvalTeacherId;
         SchoolCode = schoolCode;
     }
 }

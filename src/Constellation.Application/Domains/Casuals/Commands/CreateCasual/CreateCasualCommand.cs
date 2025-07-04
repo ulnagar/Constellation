@@ -7,5 +7,5 @@ public sealed record CreateCasualCommand(
     string LastName,
     string EmailAddress,
     string SchoolCode,
-    string AdobeConnectId)
+    string EdvalTeacherId)
     : ICommand;

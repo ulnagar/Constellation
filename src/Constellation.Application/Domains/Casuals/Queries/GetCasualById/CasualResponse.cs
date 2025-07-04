@@ -8,4 +8,4 @@ public sealed record CasualResponse(
     string LastName,
     string EmailAddress,
     string SchoolCode,
-    string AdobeConnectId);
+    string EdvalTeacherCode);
