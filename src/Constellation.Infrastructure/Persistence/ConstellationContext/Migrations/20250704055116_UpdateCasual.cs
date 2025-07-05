@@ -20,6 +20,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 type: "nvarchar(max)",
                 nullable: true);
 
+            migrationBuilder.Sql(@"
+                UPDATE [dbo].[Casuals_Casuals]
+                SET PreferredName = FirstName
+                WHERE 1 = 1;");
+
             migrationBuilder.RenameColumn(
                 name: "AdobeConnectId",
                 table: "Casuals_Casuals",

@@ -14,8 +14,10 @@ using Core.Models.Covers;
 using Core.Models.Edval;
 using Core.Models.Edval.Events;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -32,6 +34,7 @@ internal sealed class LissServerGateway : ILissServerGateway
     private readonly IDateTimeProvider _dateTime;
     private readonly ISender _mediator;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
 
     public LissServerGateway(
         IEdvalRepository edvalRepository,
@@ -41,7 +44,8 @@ internal sealed class LissServerGateway : ILissServerGateway
         IClassCoverRepository coverRepository,
         IDateTimeProvider dateTime,
         ISender mediator,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
         _edvalRepository = edvalRepository;
         _casualRepository = casualRepository;
@@ -51,6 +55,8 @@ internal sealed class LissServerGateway : ILissServerGateway
         _dateTime = dateTime;
         _mediator = mediator;
         _unitOfWork = unitOfWork;
+        _logger = logger
+            .ForContext<ILissServerGateway>();
     }
 
     public async Task<ILissResponse> PublishStudents(
@@ -144,6 +150,8 @@ internal sealed class LissServerGateway : ILissServerGateway
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
+        List<string> errors = [];
+
         List<LissPublishTeachers> teachers = JsonSerializer.Deserialize<List<LissPublishTeachers>>(requestValue);
 
         foreach (LissPublishTeachers teacher in teachers.Where(entry => entry.StaffType == "Casual"))
@@ -199,6 +207,12 @@ internal sealed class LissServerGateway : ILissServerGateway
 
             if (staffMember is null)
             {
+                _logger
+                    .ForContext(nameof(LissPublishTeachers), teacher, true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmail(teacher.EmailAddress), true)
+                    .Warning("Failed to link Edval Teacher with Staff Member");
+
+                errors.Add($"Could not match Staff Member to teacher code {teacher.TeacherId}");
 
                 continue;
             }
@@ -216,6 +230,9 @@ internal sealed class LissServerGateway : ILissServerGateway
         }
         
         await _unitOfWork.CompleteAsync(cancellationToken);
+
+        if (errors.Count > 0)
+            return LissResponseError.ProcessingErrors(errors);
 
         return new LissResponseBlank();
     }
@@ -325,6 +342,8 @@ internal sealed class LissServerGateway : ILissServerGateway
                 !string.IsNullOrWhiteSpace(entry.Replacing))
             .ToList();
 
+        List<string> errors = [];
+
         foreach (LissPublishDailyData coveredClass in coveredClasses)
         {
             string offeringName = coveredClass.ClassCode.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase).PadLeft(7, '0');
@@ -333,7 +352,12 @@ internal sealed class LissServerGateway : ILissServerGateway
 
             if (offering is null)
             {
-                // Throw a fit
+                _logger
+                    .ForContext(nameof(LissPublishDailyData), coveredClass, true)
+                    .ForContext(nameof(Error), OfferingErrors.NotFoundForName(offeringName))
+                    .Warning("Failed to process Daily Data entry provided by Edval Daily");
+
+                errors.Add($"Cannot find Class with name {coveredClass.ClassCode}");
 
                 continue;
             }
@@ -352,15 +376,20 @@ internal sealed class LissServerGateway : ILissServerGateway
 
                 if (teacherType is null)
                 {
-                    // Throw a fit
+                    _logger
+                        .ForContext(nameof(LissPublishDailyData), coveredClass, true)
+                        .ForContext(nameof(Error), StaffMemberErrors.NoneFound)
+                        .Warning("Failed to process Daily Data entry provided by Edval Daily");
+
+                    errors.Add($"Cannot find Teacher with code {edvalTeacherId}");
 
                     continue;
                 }
 
                 string teacherId = teacherType switch
                 {
-                    _ when teacherType == CoverTeacherType.Casual => coveringCasual.Id.ToString(),
-                    _ when teacherType == CoverTeacherType.Staff => coveringTeacher.Id.ToString(),
+                    _ when teacherType == CoverTeacherType.Casual => coveringCasual!.Id.ToString(),
+                    _ when teacherType == CoverTeacherType.Staff => coveringTeacher!.Id.ToString(),
                     _ => null
                 };
 
@@ -379,6 +408,9 @@ internal sealed class LissServerGateway : ILissServerGateway
                 }
             }
         }
+
+        if (errors.Count > 0)
+            return LissResponseError.ProcessingErrors(errors);
 
         return new LissResponseBlank();
     }

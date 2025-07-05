@@ -32,6 +32,10 @@ public static class OfferingErrors
         "Offerings.Offering.NotFoundForResource",
         $"Could not find any Offering linked with Resource with Id {id}");
 
+    public static readonly Func<string, Error> NotFoundForName = name => new(
+        "Offerings.Offering.NotFoundForName",
+        $"Could not find any Offering with Name {name}");
+
     public static readonly Error IsNull = new(
         "Offerings.Offering.IsNull",
         "An Offering is required, but none supplied");
