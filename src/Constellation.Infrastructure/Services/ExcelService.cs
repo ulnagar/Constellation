@@ -1055,8 +1055,6 @@ public class ExcelService : IExcelService
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
 
-        // TODO: R1.16: Ensure that code is rebased from master once this action has been completed and before publishing
-
         workSheet.Cells[1, 1].Value = "SRN";
         workSheet.Cells[1, 2].Value = "Student First Name";
         workSheet.Cells[1, 3].Value = "Student Last Name";

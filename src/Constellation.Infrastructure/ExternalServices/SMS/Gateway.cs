@@ -1,18 +1,18 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Gateways;
-using Constellation.Infrastructure.ExternalServices.SMS.Model;
+using Application.DTOs;
+using Application.Interfaces.Gateways;
+using Core.Shared;
+using Errors;
 using Microsoft.Extensions.Options;
+using Model;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 
-// TODO: R1.18: Convert to return RESULT objects to give explicit feedback on success
-
-internal sealed class Gateway : ISMSGateway
+internal sealed class Gateway : ISMSGateway, IDisposable
 {
     private Uri _uri;
     private readonly HttpClient _client;
@@ -57,7 +57,7 @@ internal sealed class Gateway : ISMSGateway
     /// Gets the credit balance.
     /// </summary>
     /// <returns>Task</returns>
-    public async Task<double> GetCreditBalanceAsync()
+    public async Task<Result<double>> GetCreditBalanceAsync()
     {
         if (_logOnly)
         {
@@ -68,8 +68,13 @@ internal sealed class Gateway : ISMSGateway
 
         HttpResponseMessage response = await RequestAsync("user/credit-balance");
 
-        var content = await response.Content.ReadAsStringAsync();
-        var balance = JsonConvert.DeserializeObject<CreditBalance>(content);
+        if (!response.IsSuccessStatusCode)
+        {
+            return Result.Failure<double>(SMSGatewayErrors.IncorrectResponseFromServer);
+        }
+
+        string content = await response.Content.ReadAsStringAsync();
+        CreditBalance balance = JsonConvert.DeserializeObject<CreditBalance>(content);
 
         return balance.balance;
     }
@@ -78,7 +83,7 @@ internal sealed class Gateway : ISMSGateway
     /// Sends an sms message.
     /// </summary>
     /// <returns>Task</returns>
-    public async Task<SMSMessageCollectionDto> SendSmsAsync(object payload)
+    public async Task<Result<SMSMessageCollectionDto>> SendSmsAsync(object payload)
     {
         if (_logOnly)
         {
@@ -87,7 +92,7 @@ internal sealed class Gateway : ISMSGateway
             return new SMSMessageCollectionDto();
         }
 
-        var messageId = Guid.NewGuid();
+        Guid messageId = Guid.NewGuid();
         _logger.Information("{id}: Sending SMS {sms}", messageId, JsonConvert.SerializeObject(payload));
 
         try
@@ -97,14 +102,14 @@ internal sealed class Gateway : ISMSGateway
             if (!response.IsSuccessStatusCode)
             {
                 _logger.Warning("{id}: Failed to send sms with error {error}", messageId, response.ReasonPhrase);
-            }
-            else
-            {
-                _logger.Information("{id}: Sent successfully", messageId);
+
+                return Result.Failure<SMSMessageCollectionDto>(SMSGatewayErrors.IncorrectResponseFromServer);
             }
 
-            var content = await response.Content.ReadAsStringAsync();
-            var collection = JsonConvert.DeserializeObject<SentMessages>(content);
+            _logger.Information("{id}: Sent successfully", messageId);
+
+            string content = await response.Content.ReadAsStringAsync();
+            SentMessages collection = JsonConvert.DeserializeObject<SentMessages>(content);
 
             return ConvertToDto(collection);
         }
@@ -113,7 +118,7 @@ internal sealed class Gateway : ISMSGateway
             _logger.Warning("{id}: FAILED with error {ex}", messageId, ex.Message);
 
             // This is an error, so return null so the caller knows it did not complete
-            return null;
+            return Result.Failure<SMSMessageCollectionDto>(SMSGatewayErrors.IncorrectResponseFromServer);
         }
     }
 
@@ -132,22 +137,24 @@ internal sealed class Gateway : ISMSGateway
         _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("MAC", credentials);
 
-        HttpResponseMessage response;
 
         for (int i = 1; i < 6; i++)
         {
             try
             {
+                HttpResponseMessage response;
+
                 if (payload == null)
                 {
-                    response = await _client.GetAsync(_uri.ToString());
+                    response = await _client.GetAsync(_uri);
                 }
                 else
                 {
-                    var jsonPayload = JsonConvert.SerializeObject(payload);
-                    var content = new StringContent(jsonPayload.ToString(), Encoding.UTF8, "application/json");
+                    string jsonPayload = JsonConvert.SerializeObject(payload);
+                    StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                    response = await _client.PostAsync(_uri.ToString(), content);
+                    response = await _client.PostAsync(_uri, content);
+                    content.Dispose();
                 }
 
                 return response;
@@ -159,7 +166,7 @@ internal sealed class Gateway : ISMSGateway
             }
         }
 
-        throw new Exception($"Could not connect to SMS Gateway");
+        return new HttpResponseMessage(HttpStatusCode.GatewayTimeout);
     }
 
     /// <summary>
@@ -170,16 +177,19 @@ internal sealed class Gateway : ISMSGateway
     /// <returns>The credential string.</returns>
     private string Credentials(string path, string method = "GET", string filter = "")
     {
+        var fullPath = $"https://{_settings.Host}/{_settings.Version}/{path}/";
         if (!string.IsNullOrWhiteSpace(filter))
-            _uri = new Uri($"https://{_settings.Host}/{_settings.Version}/{path}/?{filter}");
-        else
-            _uri = new Uri($"https://{_settings.Host}/{_settings.Version}/{path}/");
+            fullPath = $"{fullPath}?{filter}";
+
+        _uri = new Uri(fullPath);
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
         var nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
         var mac = $"{timestamp}\n{nonce}\n{method}\n{_uri.PathAndQuery}\n{_uri.Host}\n{_settings.Port}\n\n";
 
-        mac = Convert.ToBase64String(new HMACSHA256(Encoding.ASCII.GetBytes(_settings.Secret)).ComputeHash(Encoding.ASCII.GetBytes(mac)));
+        var hmac = new HMACSHA256(Encoding.ASCII.GetBytes(_settings.Secret));
+        mac = Convert.ToBase64String(hmac.ComputeHash(Encoding.ASCII.GetBytes(mac)));
+        hmac.Dispose();
 
         return $"id=\"{_settings.Key}\", ts=\"{timestamp}\", nonce=\"{nonce}\", mac=\"{mac}\"";
     }
@@ -203,5 +213,10 @@ internal sealed class Gateway : ISMSGateway
         }
 
         return data;
+    }
+
+    public void Dispose()
+    {
+        _client?.Dispose();
     }
 }

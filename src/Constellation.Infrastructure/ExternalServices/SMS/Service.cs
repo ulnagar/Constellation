@@ -5,6 +5,7 @@ using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Core.Models.Students;
+using Core.Shared;
 using Core.ValueObjects;
 
 public class Service : ISMSService
@@ -16,7 +17,7 @@ public class Service : ISMSService
         _service = service;
     }
 
-    public async Task<SMSMessageCollectionDto> SendAbsenceNotification(
+    public async Task<Result<SMSMessageCollectionDto>> SendAbsenceNotification(
         List<AbsenceEntry> absences,
         Student student,
         List<PhoneNumber> phoneNumbers,
@@ -26,9 +27,9 @@ public class Service : ISMSService
         foreach (string offering in absences.Select(absence => absence.OfferingName).OrderBy(c => c))
             classListString += $"{offering}\r\n";
 
-        string link = $"http://aurora.link/";
+        string link = $"http://edu.nsw.link/aurora";
 
-        string messageText = $"{student.Name.PreferredName} was reported absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
+        string messageText = $"{student.Name.PreferredName} was absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
         
         SMSMessageToSend messageContent = new()
         {
@@ -40,7 +41,7 @@ public class Service : ISMSService
         return await _service.SendSmsAsync(messageContent);
     }
 
-    public async Task SendLoginToken(
+    public async Task<Result> SendLoginToken(
         string token,
         PhoneNumber phoneNumber,
         CancellationToken cancellationToken = default)
@@ -54,6 +55,6 @@ public class Service : ISMSService
             message = messageText
         };
 
-        await _service.SendSmsAsync(messageContent);
+        return await _service.SendSmsAsync(messageContent);
     }
 }
