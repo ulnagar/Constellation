@@ -1,12 +1,18 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEvent;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
+using Constellation.Application.Domains.Offerings.Commands.RemoveSession;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.StaffMembers.Identifiers;
+using Constellation.Core.Models.Students.Enums;
 using Core.Abstractions.Services;
 using Core.Errors;
+using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
+using Shared.PartialViews.DeleteStocktakeSightingConfirmationModal;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DashboardModel : BasePageModel
@@ -42,7 +49,7 @@ public class DashboardModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public StocktakeEventId Id { get; set; }
 
     public string Name { get; set; }
     public DateOnly StartDate { get; set; }
@@ -52,7 +59,7 @@ public class DashboardModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        if (Id == Guid.Empty)
+        if (Id == StocktakeEventId.Empty)
         {
             return RedirectToPage("/Dashboard", new { area = "Staff" });
         }
@@ -60,11 +67,11 @@ public class DashboardModel : BasePageModel
         _logger
             .Information("Requested to view Stocktake Dashboard by user {User}", _currentUserService.UserName);
         
-        string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(staffId))
+        if (string.IsNullOrWhiteSpace(claimStaffId))
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Auth.UserNotFound,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -75,11 +82,14 @@ public class DashboardModel : BasePageModel
             return Page();
         }
 
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
+
         Result<StocktakeEventResponse> eventRequest = await _mediator.Send(new GetStocktakeEventQuery(Id));
 
         if (eventRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 eventRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -94,7 +104,7 @@ public class DashboardModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -111,5 +121,45 @@ public class DashboardModel : BasePageModel
         EndDate = DateOnly.FromDateTime(eventRequest.Value.EndDate);
 
         return Page();
+    }
+
+    public IActionResult OnPostAjaxDeleteSighting(
+        StocktakeEventId eventId,
+        StocktakeSightingId sightingId)
+    {
+        DeleteStocktakeSightingConfirmationModalViewModel viewModel = new(
+            eventId,
+            sightingId);
+
+        return Partial("DeleteStocktakeSightingConfirmationModal", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostDeleteSighting(DeleteStocktakeSightingConfirmationModalViewModel viewModel)
+    {
+        CancelSightingCommand command = new(
+            viewModel.EventId,
+            viewModel.SightingId,
+            viewModel.Comment);
+
+        _logger
+            .ForContext(nameof(CancelSightingCommand), command, true)
+            .Information("Requested to remove sighting by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to remove sighting by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                request.Error,
+                _linkGenerator.GetPathByPage("/Equipment/Stocktake/Dashboard", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

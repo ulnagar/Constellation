@@ -95,7 +95,7 @@ public class SubmitModel : BasePageModel
                 .ForContext(nameof(Error), commandRequest.Error, true)
                 .Warning("Failed to submit Lesson Roll by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(commandRequest.Error);
+            ModalContent = ErrorDisplay.Create(commandRequest.Error);
 
             await PreparePage();
 
@@ -117,7 +117,7 @@ public class SubmitModel : BasePageModel
                 .ForContext(nameof(Error), rollRequest.Error, true)
                 .Warning("Failed to retrieve details of Lesson Roll with id {Id} for submit by user {User}", RollId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 rollRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Roll", values: new { area = "Staff", LessonId, RollId }));
 

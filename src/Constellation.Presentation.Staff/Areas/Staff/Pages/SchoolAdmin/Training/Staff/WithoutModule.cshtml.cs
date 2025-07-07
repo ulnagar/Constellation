@@ -48,7 +48,7 @@ public class WithoutModuleModel : BasePageModel
                 .ForContext(nameof(Error), response.Error, true)
                 .Warning("Failed to retrieve list of Staff Members without registered Training Module by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(response.Error);
+            ModalContent = ErrorDisplay.Create(response.Error);
 
             return;
         }

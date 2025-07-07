@@ -7,7 +7,6 @@ using Core.ValueObjects;
 using System;
 
 public sealed record CreateCoverCommand(
-    Guid Id,
     OfferingId OfferingId,
     DateOnly StartDate,
     DateOnly EndDate,

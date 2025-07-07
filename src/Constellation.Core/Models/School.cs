@@ -2,7 +2,6 @@
 
 using SchoolContacts;
 using System.Collections.Generic;
-using System.Linq;
 
 
 public class School
@@ -10,7 +9,6 @@ public class School
     public School()
     {
         StaffAssignments = new List<SchoolContactRole>();
-        Staff = new List<Staff>();
     }
 
     public string Code { get; set; }
@@ -31,7 +29,5 @@ public class School
     public double Longitude { get; set; }
     public double Latitude { get; set; }
     public string Website { get; set; }
-    public bool HasStaff => (Staff.Any(staff => !staff.IsDeleted));
     public ICollection<SchoolContactRole> StaffAssignments { get; set; }
-    public virtual ICollection<Staff> Staff { get; set; }
 }

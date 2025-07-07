@@ -75,7 +75,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to export Award Nominations by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(fileRequest.Error);
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
 
             await PreparePage(cancellationToken);
 
@@ -103,7 +103,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to remove Award Nomination by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage(cancellationToken);
 
@@ -125,7 +125,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), periodRequest.Error, true)
                 .Warning("Failed to retrieve details of Award Nomination Period with id {Id} by user {User}", PeriodId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 periodRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Index", values: new { area = "Staff" }));
 

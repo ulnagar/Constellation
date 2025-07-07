@@ -10,6 +10,7 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -213,7 +214,7 @@ public class RollModel : BasePageModel
                 .ForContext(nameof(Error), rollResult.Error, true)
                 .Warning("Failed to retrieve Group Tutorial Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 rollResult.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
@@ -222,7 +223,7 @@ public class RollModel : BasePageModel
                 TutorialId,
                 string.Empty,
                 DateOnly.MinValue,
-                string.Empty,
+                StaffId.Empty,
                 string.Empty,
                 Core.Enums.TutorialRollStatus.Unsubmitted,
                 new List<TutorialRollStudentResponse>());
@@ -236,7 +237,7 @@ public class RollModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             error,
             _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Roll", values: new { area = "Staff", TutorialId, RollId, Mode }));
 
@@ -245,7 +246,7 @@ public class RollModel : BasePageModel
             TutorialId,
             string.Empty,
             DateOnly.MinValue,
-            string.Empty,
+            StaffId.Empty,
             string.Empty,
             Core.Enums.TutorialRollStatus.Unsubmitted,
             new List<TutorialRollStudentResponse>());

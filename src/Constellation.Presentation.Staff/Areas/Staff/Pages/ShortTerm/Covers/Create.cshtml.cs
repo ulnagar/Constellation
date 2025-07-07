@@ -82,7 +82,6 @@ public class CreateModel : BasePageModel
         List<OfferingId> offeringIds = CoveredClasses.Select(OfferingId.FromValue).ToList();
 
         BulkCreateCoversCommand command = new(
-            Guid.NewGuid(),
             offeringIds,
             StartDate,
             EndDate,
@@ -101,7 +100,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to create Class Covers by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
         
             return Page();
         }
@@ -121,7 +120,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), teacherResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 teacherResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
@@ -136,7 +135,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), casualResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 casualResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
             
@@ -147,9 +146,9 @@ public class CreateModel : BasePageModel
             .Value
             .Select(teacher =>
                 new CoveringTeacherRecord(
-                    teacher.StaffId,
-                    $"{teacher.FirstName} {teacher.LastName}",
-                    $"{teacher.LastName}-{teacher.FirstName}",
+                    teacher.StaffId.ToString(),
+                    teacher.Name.DisplayName,
+                    teacher.Name.SortOrder,
                     "Teachers"
                 ))
             .ToList());
@@ -159,8 +158,8 @@ public class CreateModel : BasePageModel
             .Select(casual =>
                 new CoveringTeacherRecord(
                     casual.Id.ToString(),
-                    $"{casual.FirstName} {casual.LastName}",
-                    $"{casual.LastName}-{casual.FirstName}",
+                    casual.Name.DisplayName,
+                    casual.Name.SortOrder,
                     "Casuals"
                 ))
             .ToList());
@@ -178,7 +177,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), classesResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 classesResponse.Error,
                 _linkGenerator.GetPathByPage("/ShortTerm/Covers/Index", values: new { area = "Staff" }));
 
@@ -195,7 +194,7 @@ public class CreateModel : BasePageModel
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
                 course.Name,
-                $"{teachers.Value.First().FirstName[..1]} {teachers.Value.First().LastName}",
+                $"{teachers.Value.First().Name.FirstName[..1]} {teachers.Value.First().Name.LastName}",
                 $"Year {course.Name[..2]}"));
         }
     }

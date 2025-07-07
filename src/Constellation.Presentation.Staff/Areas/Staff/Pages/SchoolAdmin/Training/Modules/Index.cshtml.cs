@@ -58,7 +58,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), moduleRequest.Error, true)
                 .Warning("Failed to retrieve list of Training Modules by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 

@@ -60,7 +60,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Awards/Index", values: new { area = "Parents" }));
 
@@ -80,7 +80,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -102,7 +102,7 @@ public class IndexModel : BasePageModel
 
             if (awardSummaryRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(awardSummaryRequest.Error);
+                ModalContent = ErrorDisplay.Create(awardSummaryRequest.Error);
 
                 return;
             }

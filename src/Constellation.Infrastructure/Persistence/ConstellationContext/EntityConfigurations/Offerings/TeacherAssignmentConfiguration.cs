@@ -5,6 +5,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Models.StaffMembers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -25,7 +26,7 @@ internal sealed class TeacherAssignmentConfiguration
                 value => AssignmentId.FromValue(value));
 
         builder
-            .HasOne<Staff>()
+            .HasOne<StaffMember>()
             .WithMany()
             .HasForeignKey(assignment => assignment.StaffId)
             .OnDelete(DeleteBehavior.NoAction);

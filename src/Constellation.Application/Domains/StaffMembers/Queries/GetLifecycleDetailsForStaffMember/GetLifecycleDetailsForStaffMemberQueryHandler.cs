@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetLifecycleDetailsForStaffMember;
 
 using Abstractions.Messaging;
-using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Students.Queries.GetLifecycleDetailsForStudent;
@@ -22,7 +22,7 @@ internal sealed class GetLifecycleDetailsForStaffMemberQueryHandler
 
     public async Task<Result<RecordLifecycleDetailsResponse>> Handle(GetLifecycleDetailsForStaffMemberQuery request, CancellationToken cancellationToken)
     {
-        Staff staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -36,11 +36,11 @@ internal sealed class GetLifecycleDetailsForStaffMemberQueryHandler
         }
 
         return new RecordLifecycleDetailsResponse(
-            string.Empty,
-            staffMember.DateEntered ?? DateTime.MinValue,
-            string.Empty,
-            DateTime.MinValue,
-            string.Empty,
-            staffMember.DateDeleted ?? DateTime.MinValue);
+            staffMember.CreatedBy,
+            staffMember.CreatedAt,
+            staffMember.ModifiedBy,
+            staffMember.ModifiedAt,
+            staffMember.DeletedBy,
+            staffMember.DeletedAt);
     }
 }

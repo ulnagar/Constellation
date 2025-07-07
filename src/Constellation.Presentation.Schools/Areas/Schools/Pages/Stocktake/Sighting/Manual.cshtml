@@ -1,0 +1,238 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.Sighting.ManualModel
+@using Constellation.Core.Models.Stocktake.Enums
+@{
+}
+
+<h2>Stocktake Device Sighting</h2>
+
+<div class="form-horizontal">
+    <form method="post">
+        <div class="mb-3 row">
+            <div class="col-md-8 alert alert-warning">
+                Please note that the following are not included in the stocktake and do not need to be entered:
+                <ul>
+                    <li>Device accessories, such as chargers or pens</li>
+                    <li>Keyboards and mice</li>
+                    <li>Headsets and webcams</li>
+                    <li>Laptop docks</li>
+                </ul>
+                If you are unsure, please contact the Technology Support Team on <strong>1300 610 733</strong> or at <strong>support@aurora.nsw.edu.au</strong> first.
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Serial Number</label>
+            <div class="col-md-3">
+                <input asp-for="SerialNumber" id="SerialNumber" class="form-control" placeholder="e.g. LT01F123" required />
+            </div>
+            <div id="SerialNumberHelpText" class="col-md-5 alert alert-warning d-none">
+                The vendor serial number for the equipment. This can be in a range of locations, depending on the vendor. Student laptop serial numbers are usually on a sticker on the bottom of the device.
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Device Description</label>
+            <div class="col-md-3">
+                <input asp-for="Description" id="Description" class="form-control" placeholder="e.g. Lenovo Laptop" required />
+            </div>
+            <div id="DescriptionHelpText" class="col-md-5 alert alert-warning d-none">
+                A description or the type of the device. E.g. "Lenovo Laptop", or "HP Monitor", etc.
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="col-md-5">
+                <div class="mb-3 row">
+                    <label class="form-label col-md-5">User Type</label>
+                    <div class="col-md-7 ps-1">
+                        <select asp-for="UserType" id="UserType" onchange="UpdateUserType()" class="form-control">
+                            <option value="">-- Select --</option>
+                            @if (Model.StudentList.Count > 0)
+                            {
+                                <option value="@UserType.Student">@UserType.Student</option>
+                            }
+
+                            @if (Model.StaffList.Count > 0)
+                            {
+                                <option value="@UserType.Staff">@UserType.Staff</option>
+                            }
+                            <option value="@UserType.School">@UserType.School</option>
+                            <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
+                            <option value="@UserType.Other">@UserType.Other</option>
+                        </select>
+                        <span asp-validation-for="UserType" class="text-danger"></span>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                    <div class="w-100"></div>
+                    <label class="form-label col-md-5 mt-3">User</label>
+                    <div class="col-md-7 mt-3 ps-1">
+                        @Html.HiddenFor(model => model.UserCode)
+                        <div id="UserTypeStudent">
+                            <select id="Student_UserCode" onchange="UpdateStudent()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var student in Model.StudentList)
+                                {
+                                    <option value="@student.StudentId">@student.Name (@student.Grade)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeStaff">
+                            <select id="Staff_UserCode" onchange="UpdateStaff()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var staff in Model.StaffList)
+                                {
+                                    <option value="@staff.StaffId">@staff.Name.DisplayName</option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeOther">
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="UserTypeHelpText" class="col-md-5 alert alert-warning d-none">
+                Select the type of user (Student, Aurora College Staff Member, School, Community Member, or Other), and then the relevant user.
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="form-label col-md-2">Comment</label>
+            <div class="col-md-3">
+                <textarea asp-for="Comment" id="Comment" rows="5" cols="100" class="form-control"></textarea>
+                <span asp-validation-for="Comment" class="text-danger"></span>
+            </div>
+            <div id="CommentHelpText" class="col-md-5 alert alert-warning d-none">
+                Any notes you have about the condition of the device. E.g. "Has a cracked screen", or "Missing pen", etc.
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="offset-1 col-md-3">
+                <input type="submit" value="Save" class="btn btn-success btn-block btn-lg" />
+            </div>
+            <div class="col-md-2 ml-3">
+                <a asp-page="/Stocktake/Dashboard" asp-area="Schools" asp-route-id="@Model.Id" class="btn btn-danger btn-block btn-lg">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            UpdateUserType();
+
+            $('#SerialNumber').on('focus', function() {
+                $('#SerialNumberHelpText').removeClass('d-none');
+            });
+            $('#SerialNumber').on('blur', function() {
+                $('#SerialNumberHelpText').addClass('d-none');
+            });
+
+            $('#Description').on('focus', function() {
+                $('#DescriptionHelpText').removeClass('d-none');
+            });
+            $('#Description').on('blur', function() {
+                $('#DescriptionHelpText').addClass('d-none');
+            });
+
+            $('#UserType').on('focus', function() {
+                $('#UserTypeHelpText').removeClass('d-none');
+            });
+            $('#UserType').on('blur', function() {
+                $('#UserTypeHelpText').addClass('d-none');
+            });
+
+            $('#Command_UserCode').on('focus', function() {
+                $('#UserTypeHelpText').removeClass('d-none');
+            });
+            $('#Command_UserCode').on('blur', function() {
+                $('#UserTypeHelpText').addClass('d-none');
+            });
+
+            $('#Student_UserCode').on('focus', function() {
+                $('#UserTypeHelpText').removeClass('d-none');
+            });
+            $('#Student_UserCode').on('blur', function() {
+                $('#UserTypeHelpText').addClass('d-none');
+            });
+
+            $('#Staff_UserCode').on('focus', function() {
+                $('#UserTypeHelpText').removeClass('d-none');
+            });
+            $('#Staff_UserCode').on('blur', function() {
+                $('#UserTypeHelpText').addClass('d-none');
+            });
+
+            $('#UserName').on('focus', function() {
+                $('#UserTypeHelpText').removeClass('d-none');
+            });
+            $('#UserName').on('blur', function() {
+                $('#UserTypeHelpText').addClass('d-none');
+            });
+
+            $('#Comment').on('focus', function() {
+                $('#CommentHelpText').removeClass('d-none');
+            });
+            $('#Comment').on('blur', function() {
+                $('#CommentHelpText').addClass('d-none');
+            });
+        })
+
+        function UpdateUserType() {
+            // Get current value of the UserType field
+            var userType = $('select#UserType>option:selected');
+
+            // Hide all UserName options
+            $('#UserTypeStudent').hide();
+            $('#UserTypeStaff').hide();
+            $('#UserTypeOther').hide();
+
+            // Reset all UserName options to blank
+            $('#Command_UserCode').val('');
+            $('#Student_UserCode').val('');
+            $('#Staff_UserCode').val('');
+            $('#Command_UserName').val('');
+
+            // Show appropriate UserName option based on UserType value
+            if (userType.val() === "@UserType.Student") {
+                $('#UserTypeStudent').show();
+            } else if (userType.val() === "@UserType.Staff") {
+                $('#UserTypeStaff').show();
+            } else if (userType.val() === "@UserType.CommunityMember" ||
+                userType.val() === "@UserType.Other") {
+                $('#UserTypeOther').show();
+            }
+        }
+
+        function UpdateStudent() {
+            // Get current value of select
+            var studentId = $('#Student_UserCode').val();
+            var studentName = $('#Student_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(studentId);
+            $('#UserName').val(studentName);
+        }
+
+        function UpdateStaff() {
+            // Get current value of select
+            var staffId = $('#Staff_UserCode').val();
+            var staffName = $('#Staff_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(staffId);
+            $('#UserName').val(staffName);
+        }
+    </script>
+}

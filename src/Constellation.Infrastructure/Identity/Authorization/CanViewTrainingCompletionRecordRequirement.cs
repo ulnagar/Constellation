@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
 using Constellation.Application.Models.Auth;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Training;
 using Core.Models.Training.Identifiers;
 using Microsoft.AspNetCore.Authorization;
@@ -45,13 +46,15 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
 
         if (!string.IsNullOrWhiteSpace(recordId) && userStaffId is not null)
         {
+            StaffId staffId = StaffId.FromValue(Guid.Parse(userStaffId));
+
             TrainingCompletionId completionId = TrainingCompletionId.FromValue(Guid.Parse(recordId));
 
             bool userOwns = await _context
                 .Set<TrainingCompletion>()
                 .AnyAsync(record => 
                     record.Id == completionId && 
-                    record.StaffId == userStaffId);
+                    record.StaffId == staffId);
 
             if (userOwns)
                 context.Succeed(requirement);
@@ -76,13 +79,15 @@ public class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanVi
 
         if (userStaffId is not null)
         {
+            StaffId staffId = StaffId.FromValue(Guid.Parse(userStaffId));
+
             TrainingCompletionId completionId = TrainingCompletionId.FromValue(resource);
 
             bool userOwns = await _context
                 .Set<TrainingCompletion>()
                 .AnyAsync(record => 
                     record.Id == completionId && 
-                    record.StaffId == userStaffId);
+                    record.StaffId == staffId);
 
             if (userOwns)
                 context.Succeed(requirement);

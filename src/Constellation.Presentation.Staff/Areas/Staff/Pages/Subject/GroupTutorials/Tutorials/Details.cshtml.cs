@@ -14,6 +14,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -137,7 +138,7 @@ public class DetailsModel : BasePageModel
             return ShowError(DomainErrors.Permissions.Unauthorised);
         }
 
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
             _logger
                 .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
@@ -317,7 +318,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to retrieve details of GroupTutorial with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Index", values: new { area = "Staff" }));
 
@@ -339,7 +340,7 @@ public class DetailsModel : BasePageModel
 
     private IActionResult ShowError(Error error)
     {
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             error,
             _linkGenerator.GetPathByPage("/Subject/GroupTutorials/Tutorials/Details", values: new { area = "Staff", Id = Id }));
 

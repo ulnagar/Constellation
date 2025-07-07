@@ -44,7 +44,7 @@ public class IndexModel : BasePageModel
 
         if (faculties.IsFailure)
         {
-            ModalContent = new ErrorDisplay(faculties.Error);
+            ModalContent = ErrorDisplay.Create(faculties.Error);
 
             _logger
                 .ForContext(nameof(Error), faculties.Error, true)

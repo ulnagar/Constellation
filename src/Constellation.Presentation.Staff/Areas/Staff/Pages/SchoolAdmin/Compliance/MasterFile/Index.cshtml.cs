@@ -79,7 +79,7 @@ public class IndexModel : BasePageModel
                         .ForContext(nameof(Error), outputRequest.Error, true)
                         .Warning("Failed to import and process MasterFile data by user {User}", _currentUserService.UserName);
                     
-                    ModalContent = new ErrorDisplay(
+                    ModalContent = ErrorDisplay.Create(
                         outputRequest.Error,
                         _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" }));
 
@@ -94,7 +94,7 @@ public class IndexModel : BasePageModel
                     .ForContext(nameof(Exception), ex, true)
                     .Warning("Failed to import and process MasterFile data by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     new Error("Exception", ex.Message),
                     _linkGenerator.GetPathByPage("/SchoolAdmin/Compliance/MasterFile/Index", values: new { area = "Staff" }));
 

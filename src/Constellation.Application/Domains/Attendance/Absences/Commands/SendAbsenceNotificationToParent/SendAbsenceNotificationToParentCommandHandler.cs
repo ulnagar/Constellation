@@ -129,15 +129,13 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 .Distinct()
                 .ToList();
 
-            // TODO: R1.17.2: Removed to force notifications to be sent via Email as SMS Gateway is unavailable
+            foreach (string number in numbers)
+            {
+                Result<PhoneNumber> result = PhoneNumber.Create(number);
 
-            //foreach (string number in numbers)
-            //{
-            //    Result<PhoneNumber> result = PhoneNumber.Create(number);
-
-            //    if (result.IsSuccess)
-            //        phoneNumbers.Add(result.Value);
-            //}
+                if (result.IsSuccess)
+                    phoneNumbers.Add(result.Value);
+            }
 
             foreach (Parent parent in family.Parents)
             {
@@ -157,13 +155,13 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             {
                 if (phoneNumbers.Any() && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
                 {
-                    SMSMessageCollectionDto sentMessages = await _smsService.SendAbsenceNotification(
+                    Result<SMSMessageCollectionDto> sentMessages = await _smsService.SendAbsenceNotification(
                         group.ToList(),
                         student,
                         phoneNumbers,
                         cancellationToken);
 
-                    if (sentMessages == null)
+                    if (sentMessages.IsFailure)
                     {
                         // SMS Gateway failed. Send via email instead.
                         _logger.Warning("{id}: SMS Sending Failed! Fallback to Email notifications.", request.JobId);
@@ -196,7 +194,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                     }
 
                     // Once the message has been sent, add it to the database.
-                    if (sentMessages.Messages.Count > 0)
+                    if (sentMessages.Value.Messages.Count > 0)
                     {
                         foreach (AbsenceEntry entry in group)
                         {
@@ -204,8 +202,8 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                                 phoneNumbers.Select(entry => entry.ToString(PhoneNumber.Format.Mobile)));
                             Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                            absence.AddNotification(NotificationType.SMS, sentMessages.Messages.First().MessageBody,
-                                sentToNumbers, sentMessages.Messages.First().OutgoingId, _dateTime.Now);
+                            absence.AddNotification(NotificationType.SMS, sentMessages.Value.Messages.First().MessageBody,
+                                sentToNumbers, sentMessages.Value.Messages.First().OutgoingId, _dateTime.Now);
 
                             foreach (PhoneNumber number in phoneNumbers)
                                 _logger.Information(

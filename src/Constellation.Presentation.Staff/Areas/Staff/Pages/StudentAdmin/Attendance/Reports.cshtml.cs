@@ -58,7 +58,7 @@ public class ReportsModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to export Partial Absences report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(fileRequest.Error);
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
             return Page();
         }
 
@@ -85,7 +85,7 @@ public class ReportsModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to export Student Absences report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(fileRequest.Error);
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
 
             return Page();
         }

@@ -1,20 +1,20 @@
 ﻿namespace Constellation.Core.Models.Stocktake.Repositories;
 
-using System;
+using Identifiers;
+using StaffMembers.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ValueObjects;
 
 public interface IStocktakeRepository
 {
     Task<List<StocktakeEvent>> GetAll(CancellationToken cancellationToken = default);
-    Task<StocktakeEvent?> GetById(Guid eventId, CancellationToken cancellationToken = default);
-    Task<StocktakeEvent?> GetByIdWithSightings(Guid eventId, CancellationToken cancellationToken = default);
+    Task<StocktakeEvent?> GetById(StocktakeEventId eventId, CancellationToken cancellationToken = default);
+    Task<StocktakeEvent?> GetByIdWithSightings(StocktakeEventId eventId, CancellationToken cancellationToken = default);
     Task<List<StocktakeEvent>> GetCurrentEvents(CancellationToken cancellationToken = default);
-    Task<List<StocktakeSighting>> GetActiveSightingsForSchool(Guid stocktakeEventId, string schoolCode, CancellationToken cancellationToken = default);
-    Task<StocktakeSighting?> GetSightingById(Guid sightingId, CancellationToken cancellationToken = default);
-    Task<List<StocktakeSighting>> GetForStaffMember(Guid stocktakeEventId, string staffId, string emailAddress, CancellationToken cancellationToken = default);
+    Task<List<StocktakeSighting>> GetActiveSightingsForSchool(StocktakeEventId stocktakeEventId, string schoolCode, CancellationToken cancellationToken = default);
+    Task<List<StocktakeSighting>> GetForStaffMember(StocktakeEventId stocktakeEventId, StaffId staffId, Name name, CancellationToken cancellationToken = default);
 
-    void Insert(StocktakeSighting sighting);
     void Insert(StocktakeEvent stocktake);
 }

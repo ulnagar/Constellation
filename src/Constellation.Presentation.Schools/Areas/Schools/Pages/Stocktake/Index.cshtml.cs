@@ -10,6 +10,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -55,7 +56,7 @@ public class IndexModel : BasePageModel
     public StocktakeEventResponse Stocktake { get; set; }
 
     [BindProperty(SupportsGet = true)]
-    public Guid EventId { get; set; }
+    public StocktakeEventId EventId { get; set; } = StocktakeEventId.Empty;
 
     public List<StocktakeSightingResponse> Sightings { get; set; } = new();
 
@@ -67,21 +68,21 @@ public class IndexModel : BasePageModel
 
         if (!eventsRequest.IsSuccess)
         {
-            ModalContent = new ErrorDisplay(eventsRequest.Error);
+            ModalContent = ErrorDisplay.Create(eventsRequest.Error);
 
             return;
         }
 
         if (eventsRequest.Value.Count == 0)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("No Stocktake", "Not current Stocktake Event found"),
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Schools" }));
 
             return;
         }
 
-        if (EventId == Guid.Empty)
+        if (EventId.Equals(StocktakeEventId.Empty))
         {
             EventId = eventsRequest.Value.First().Id;
         }
@@ -99,7 +100,7 @@ public class IndexModel : BasePageModel
 
         if (sightingsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(sightingsRequest.Error);
+            ModalContent = ErrorDisplay.Create(sightingsRequest.Error);
 
             return;
         }
@@ -107,7 +108,7 @@ public class IndexModel : BasePageModel
         Sightings = sightingsRequest.Value;
     }
 
-    public async Task<IActionResult> OnPostAjaxRemoveSighting(Guid eventId, Guid sightingId)
+    public async Task<IActionResult> OnPostAjaxRemoveSighting(StocktakeEventId eventId, StocktakeSightingId sightingId)
     {
         Result<List<StocktakeSightingResponse>> sightingsRequest = await _mediator.Send(new GetStocktakeSightingsForSchoolQuery(CurrentSchoolCode, EventId));
         StocktakeSightingResponse? sighting = sightingsRequest.Value.FirstOrDefault(entry => entry.Id == sightingId);
@@ -135,10 +136,9 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnPostRemoveSighting(RemoveSightingConfirmationViewModel viewModel)
     {
         CancelSightingCommand command = new(
+            viewModel.EventId,
             viewModel.SightingId,
-            viewModel.Comment,
-            _currentUserService.UserName,
-            _dateTime.Now);
+            viewModel.Comment);
 
         _logger.Information("Requested to remove stocktake sighting by user {user} with data {@command}", _currentUserService.UserName, command);
 
@@ -146,7 +146,7 @@ public class IndexModel : BasePageModel
         
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Stocktake/Index", values: new { area = "Schools", EventId }));
 

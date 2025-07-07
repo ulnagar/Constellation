@@ -1,15 +1,16 @@
 ﻿namespace Constellation.Core.Models.Offerings;
 
 using Identifiers;
-using ValueObjects;
 using Primitives;
+using StaffMembers.Identifiers;
 using System;
+using ValueObjects;
 
 public sealed class TeacherAssignment : IAuditableEntity
 {
     public TeacherAssignment(
         OfferingId offeringId,
-        string staffId,
+        StaffId staffId,
         AssignmentType type)
     {
         Id = new();
@@ -23,7 +24,7 @@ public sealed class TeacherAssignment : IAuditableEntity
     public OfferingId OfferingId { get; private set; }
     public Offering Offering { get; private set; }
 
-    public string StaffId { get; private set; }
+    public StaffId StaffId { get; private set; }
 
     public AssignmentType Type { get; private set; }
 

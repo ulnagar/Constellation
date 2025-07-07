@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 
 using Abstractions.Messaging;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Models;
@@ -21,7 +22,7 @@ internal sealed class GetStaffLinkedToOfferingQueryHandler
 
     public async Task<Result<List<StaffSelectionListResponse>>> Handle(GetStaffLinkedToOfferingQuery request, CancellationToken cancellationToken)
     {
-        var staffList = await _staffRepository.GetPrimaryTeachersForOffering(request.OfferingId, cancellationToken);
+        List<StaffMember> staffList = await _staffRepository.GetPrimaryTeachersForOffering(request.OfferingId, cancellationToken);
 
         if (staffList.Count == 0)
             return new List<StaffSelectionListResponse>();
@@ -29,9 +30,9 @@ internal sealed class GetStaffLinkedToOfferingQueryHandler
         return staffList
             .Select(member => 
                 new StaffSelectionListResponse(
-                    member.StaffId, 
-                    member.FirstName, 
-                    member.LastName))
+                    member.Id, 
+                    member.EmployeeId,
+                    member.Name))
             .ToList();
     }
 }

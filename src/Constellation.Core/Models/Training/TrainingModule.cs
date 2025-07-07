@@ -7,6 +7,7 @@ namespace Constellation.Core.Models.Training;
 using Enums;
 using Identifiers;
 using Primitives;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -67,7 +68,7 @@ public sealed class TrainingModule : AggregateRoot, IAuditableEntity
 
     public void RemoveCompletion(TrainingCompletion completion) => _completions.Remove(completion);
 
-    public Result AddAssignee(string staffId)
+    public Result AddAssignee(StaffId staffId)
     {
         if (_assignees.Any(entry => entry.StaffId == staffId))
             return Result.Failure(TrainingModuleErrors.AssigneeAlreadyExists(staffId));
@@ -81,7 +82,7 @@ public sealed class TrainingModule : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
-    public Result RemoveAssignee(string staffId)
+    public Result RemoveAssignee(StaffId staffId)
     {
         TrainingModuleAssignee? assignee = _assignees.FirstOrDefault(entry => entry.StaffId == staffId);
 

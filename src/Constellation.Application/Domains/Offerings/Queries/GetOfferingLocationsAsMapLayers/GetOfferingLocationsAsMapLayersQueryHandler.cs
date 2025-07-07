@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Offerings.Queries.GetOfferingLocationsAsMapLayers;
 
 using Abstractions.Messaging;
-using Constellation.Application.Helpers;
 using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments;
 using Constellation.Core.Models.Offerings;
@@ -10,15 +9,14 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using DTOs;
 using Interfaces.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -86,10 +84,10 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
 
         foreach (TeacherAssignment assignment in offering.Teachers)
         {
-            Staff staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+            StaffMember staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
-            if (!staffSchoolCodes.Contains(staffMember.SchoolCode))
-                staffSchoolCodes.Add(staffMember.SchoolCode);
+            if (staffMember is not null && staffMember.CurrentAssignment is not null)
+                staffSchoolCodes.Add(staffMember.CurrentAssignment.SchoolCode);
         }
 
         List<string> schoolCodes = studentSchoolCodes.ToList();
@@ -111,7 +109,7 @@ internal sealed class GetOfferingLocationsAsMapLayersQueryHandler
         foreach (var school in schools)
         {
             int studentCount = await _studentRepository.GetCountCurrentStudentsFromSchool(school.Code, cancellationToken);
-            int staffCount = school.Staff.Count(entry => !entry.IsDeleted);
+            int staffCount = await _staffRepository.GetCountCurrentStaffFromSchool(school.Code, cancellationToken);
 
             MapItem marker = new()
             {

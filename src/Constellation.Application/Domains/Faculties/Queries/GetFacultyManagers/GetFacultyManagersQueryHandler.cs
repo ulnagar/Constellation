@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Faculties.Queries.GetFacultyManagers;
 
 using Abstractions.Messaging;
-using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Errors;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Serilog;
@@ -15,7 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetFacultyManagersQueryHandler
-: IQueryHandler<GetFacultyManagersQuery, List<Staff>>
+: IQueryHandler<GetFacultyManagersQuery, List<StaffMember>>
 {
     private readonly IFacultyRepository _facultyRepository;
     private readonly IStaffRepository _staffRepository;
@@ -31,7 +32,7 @@ internal sealed class GetFacultyManagersQueryHandler
         _logger = logger.ForContext<GetFacultyManagersQuery>();
     }
 
-    public async Task<Result<List<Staff>>> Handle(GetFacultyManagersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<StaffMember>>> Handle(GetFacultyManagersQuery request, CancellationToken cancellationToken)
     {
         Faculty faculty = await _facultyRepository.GetById(request.FacultyId, cancellationToken);
 
@@ -42,10 +43,10 @@ internal sealed class GetFacultyManagersQueryHandler
                 .ForContext(nameof(Error), FacultyErrors.NotFound(request.FacultyId), true)
                 .Warning("Failed to retrieve list of Faculty managers");
 
-            return Result.Failure<List<Staff>>(FacultyErrors.NotFound(request.FacultyId));
+            return Result.Failure<List<StaffMember>>(FacultyErrors.NotFound(request.FacultyId));
         }
 
-        List<string> facultyManagerIds = faculty
+        List<StaffId> facultyManagerIds = faculty
             .Members
             .Where(member =>
                 !member.IsDeleted &&

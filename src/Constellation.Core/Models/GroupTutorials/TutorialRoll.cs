@@ -4,6 +4,7 @@ using Constellation.Core.Models.Students.Identifiers;
 using Enums;
 using Identifiers;
 using Primitives;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ public sealed class TutorialRoll : IAuditableEntity
     public TutorialRollId Id { get; private set; }
     public GroupTutorialId TutorialId { get; private set; }
     public DateOnly SessionDate { get; private set; }
-    public string StaffId { get; private set; }
+    public StaffId? StaffId { get; private set; }
     public TutorialRollStatus Status => GetStatus();
     public IReadOnlyCollection<TutorialRollStudent> Students => _students;
     public string CreatedBy { get; set; }
@@ -70,7 +71,7 @@ public sealed class TutorialRoll : IAuditableEntity
         }
     }
 
-    public void Submit(string staffId, Dictionary<StudentId, bool> students)
+    public void Submit(StaffId staffId, Dictionary<StudentId, bool> students)
     {
         StaffId = staffId;
 
@@ -97,7 +98,7 @@ public sealed class TutorialRoll : IAuditableEntity
         if (IsDeleted)
             return TutorialRollStatus.Cancelled;
 
-        if (!string.IsNullOrWhiteSpace(StaffId))
+        if (StaffId.HasValue && StaffId.Value != StaffMembers.Identifiers.StaffId.Empty)
             return TutorialRollStatus.Submitted;
 
         return TutorialRollStatus.Unsubmitted;

@@ -12,7 +12,6 @@ public interface IAppDbContext
     DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
     DbSet<JobActivation> JobActivations { get; set; }
     DbSet<MSTeamOperation> MSTeamOperations { get; set; }
-    DbSet<Staff> Staff { get; set; }
     
     Task AddIntegrationEvent(IIntegrationEvent integrationEvent);
 }

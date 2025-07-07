@@ -7,6 +7,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ public class StaffModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "Staff Timetable";
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; } = string.Empty;
+    public StaffId Id { get; set; } = StaffId.Empty;
 
     public List<StaffIntegratedTimetableResponse> TimetableData { get; set; } = [];
 
@@ -52,7 +53,7 @@ public class StaffModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Subject/Period/Timetables/Index", values: new { area = "Staff" }));
 
@@ -69,7 +70,7 @@ public class StaffModel : BasePageModel
 
         if (timetableRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 timetableRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Period/Timetables/Index", values: new { area = "Staff" }));
 

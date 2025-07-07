@@ -4,6 +4,8 @@ using Abstractions.Messaging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Errors;
@@ -64,12 +66,12 @@ internal sealed class AddUploadTrainingCertificationActionForTrainingCase
 
         TrainingCaseDetail caseDetail = item.Detail as TrainingCaseDetail;
 
-        Staff assignee = await _staffRepository.GetById(caseDetail!.StaffId, cancellationToken);
+        StaffMember assignee = await _staffRepository.GetById(caseDetail!.StaffId, cancellationToken);
         if (assignee is null)
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(caseDetail!.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(caseDetail!.StaffId), true)
                 .Warning("Could not create default Action for new Case");
 
             return;

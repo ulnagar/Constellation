@@ -78,7 +78,7 @@ public class SubmitModel : BasePageModel
 
         if (rollRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(rollRequest.Error);
+            ModalContent = ErrorDisplay.Create(rollRequest.Error);
 
             return;
         }
@@ -138,7 +138,7 @@ public class SubmitModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }

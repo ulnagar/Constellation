@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
-using Application.Assets.ImportAssetsFromFile;
+using Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 using Application.Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Application.Domains.Contacts.Models;
@@ -15,7 +15,7 @@ using Application.Domains.Training.Queries.GenerateOverallReport;
 using Application.Domains.WorkFlows.Queries.ExportOpenCaseReport;
 using Application.DTOs;
 using Application.Extensions;
-using Application.Helpers;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.ExportStocktakeSightingsAndDifferences;
 using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
@@ -25,10 +25,10 @@ using Constellation.Application.Domains.MeritAwards.Nominations.Queries.ExportAw
 using Constellation.Application.Domains.Students.Commands.ImportStudentsFromFile;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Assets;
-using Constellation.Core.Models.Students.Enums;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -48,6 +48,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using static Constellation.Core.Errors.DomainErrors;
 
 public class ExcelService : IExcelService
 {
@@ -290,6 +291,58 @@ public class ExcelService : IExcelService
         worksheet.View.FreezePanes(2, 1);
         worksheet.Cells[1, 1, row, 18].AutoFilter = true;
         worksheet.Cells[1, 1, row, 17].AutoFitColumns();
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
+    public async Task<MemoryStream> CreateStocktakeSightingsReport(
+        List<StocktakeSightingWithDifferenceResponse> items,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        worksheet.Cells[1, 1].Value = "Asset Number";
+        worksheet.Cells[1, 2].Value = "Serial Number";
+        worksheet.Cells[1, 3].Value = "Description";
+        worksheet.Cells[1, 4].Value = "Location Category";
+        worksheet.Cells[1, 5].Value = "Location Site";
+        worksheet.Cells[1, 6].Value = "User Type";
+        worksheet.Cells[1, 7].Value = "User Name";
+        worksheet.Cells[1, 8].Value = "Comment";
+        worksheet.Cells[1, 9].Value = "Sighted By";
+        worksheet.Cells[1, 10].Value = "Sighted At";
+        worksheet.Cells[1, 11].Value = "Difference";
+
+        int row = 2;
+
+        foreach (StocktakeSightingWithDifferenceResponse item in items)
+        {
+            worksheet.Cells[row, 1].Value = item.AssetNumber;
+            worksheet.Cells[row, 2].Value = item.SerialNumber;
+            worksheet.Cells[row, 3].Value = item.Description;
+            worksheet.Cells[row, 4].Value = item.LocationCategory;
+            worksheet.Cells[row, 5].Value = item.LocationName;
+            worksheet.Cells[row, 6].Value = item.UserType;
+            worksheet.Cells[row, 7].Value = item.UserName;
+            worksheet.Cells[row, 8].Value = item.Comment;
+            worksheet.Cells[row, 9].Value = item.SightedBy;
+            worksheet.Cells[row, 10].Value = item.SightedAt;
+            worksheet.Cells[row, 10].Style.Numberformat.Format = "dd/MM/yyyy HH:mm";
+            worksheet.Cells[row, 11].Value = item.Difference;
+
+            row++;
+        }
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, row, 11].AutoFilter = true;
+        worksheet.Cells[1, 1, row, 11].AutoFitColumns();
 
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
@@ -656,8 +709,12 @@ public class ExcelService : IExcelService
                 if (module is null)
                     continue;
 
+                string stringId = workSheet.Cells[1, column].GetCellValue<string>();
+                Guid guidId = Guid.Parse(stringId);
+                StaffId staffId = StaffId.FromValue(guidId);
+
                 TrainingCompletion entry = TrainingCompletion.Create(
-                    workSheet.Cells[1, column].GetCellValue<string>(),
+                    staffId,
                     module.Id,
                     dateCompleted);
 
@@ -997,8 +1054,6 @@ public class ExcelService : IExcelService
     {
         ExcelPackage excel = new();
         ExcelWorksheet workSheet = excel.Workbook.Worksheets.Add("Nominations");
-
-        // TODO: R1.16: Ensure that code is rebased from master once this action has been completed and before publishing
 
         workSheet.Cells[1, 1].Value = "SRN";
         workSheet.Cells[1, 2].Value = "Student First Name";
@@ -1499,10 +1554,13 @@ public class ExcelService : IExcelService
             // Index 22: DOB
             // Index 23: Years
             // Index 24: Months
-            // Index 25: School Year
-            // Index 26: House
-            // Index 27: Roll Class
-            // Index 28: Location
+            // Index 25: Historical School Year
+            // Index 26: Current School Year
+            // Index 27: House
+            // Index 28: Historical Roll Class
+            // Index 29: Current Roll Class
+            // Index 30: Location
+            // Index 31: Official Reasons
 
             // detailFile
             // Index 0: Student Id
@@ -1514,14 +1572,16 @@ public class ExcelService : IExcelService
             // Index 6: Date
             // Index 7: Incident Record Description
             // Index 8: Incident Record Details
-            // Index 9: Subject
-            // Index 10: Faculty
-            // Index 11: Type
-            // Index 12: Status
-            // Index 13: Task Name / Course Requirement
-            // Index 14: Initial Due Date
-            // Index 15: Required Student Actions
-            // Index 16: New Due Date
+            // Index 9: N Award School Reasons
+            // Index 10: N Award Official Reasons
+            // Index 11: Subject
+            // Index 12: Faculty
+            // Index 13: Type
+            // Index 14: Status
+            // Index 15: Task Name / Course Requirement
+            // Index 16: Initial Due Date
+            // Index 17: Required Student Actions
+            // Index 18: New Due Date
 
             string incidentId = row[5].ToString().FormatField();
 
@@ -1557,8 +1617,8 @@ public class ExcelService : IExcelService
                 srn,
                 dateCreated,
                 row[5].ToString().FormatField(),
-                row[9].ToString().FormatField(),
                 row[11].ToString().FormatField(),
+                row[13].ToString().FormatField(),
                 matchingRow[19].ToString().FormatField(),
                 row[1].ToString().FormatField(),
                 row[2].ToString().FormatField(),

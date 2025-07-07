@@ -81,7 +81,7 @@ public class SettingsModel : BasePageModel
                 .ForContext(nameof(Error), error, true)
                 .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(error);
+            ModalContent = ErrorDisplay.Create(error);
 
             await PreparePage(cancellationToken);
 
@@ -110,7 +110,7 @@ public class SettingsModel : BasePageModel
                     .ForContext(nameof(Error), partialRequest.Error, true)
                     .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     partialRequest.Error,
                     _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
 
@@ -137,7 +137,7 @@ public class SettingsModel : BasePageModel
                     .ForContext(nameof(Error), wholeRequest.Error, true)
                     .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     wholeRequest.Error,
                     _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
 
@@ -166,7 +166,7 @@ public class SettingsModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create new Student Absence Setting by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     request.Error,
                     _linkGenerator.GetPathByPage(page: "/StudentAdmin/Attendance/Configuration", values: new { area = "Staff" }));
 
@@ -191,7 +191,7 @@ public class SettingsModel : BasePageModel
                 .ForContext(nameof(Error), students.Error, true)
                 .Warning("Failed to start creation of Student Absence Setting by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 
@@ -208,7 +208,7 @@ public class SettingsModel : BasePageModel
                 .ForContext(nameof(Error), schools.Error, true)
                 .Warning("Failed to start creation of Student Absence Setting by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 

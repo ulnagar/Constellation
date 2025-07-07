@@ -70,7 +70,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to submit absence explanation by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             await PreparePage();
 
@@ -93,7 +93,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), commandRequest.Error, true)
                 .Warning("Failed to submit absence explanation by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(commandRequest.Error);
+            ModalContent = ErrorDisplay.Create(commandRequest.Error);
             
             await PreparePage();
 
@@ -115,7 +115,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), absenceRequest.Error, true)
                 .Warning("Failed to retrieve absence details by user {user} with Id {id}", _currentUserService.UserName, Id);
 
-            ModalContent = new ErrorDisplay(absenceRequest.Error);
+            ModalContent = ErrorDisplay.Create(absenceRequest.Error);
 
             return;
         }

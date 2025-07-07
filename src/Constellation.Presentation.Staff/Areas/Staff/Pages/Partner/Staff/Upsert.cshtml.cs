@@ -8,13 +8,16 @@ using Application.Domains.StaffMembers.Commands.UpdateStaffMember;
 using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
+using Core.Models;
+using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Students.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -44,19 +47,26 @@ public class UpsertModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Staff Member";
 
     [BindProperty(SupportsGet = true)]
-    public string? Id { get; set; } = string.Empty;
+    public StaffId Id { get; set; } = StaffId.Empty;
 
     [BindProperty]
-    public string StaffId { get; set; } = string.Empty;
+    public string? EmployeeId { get; set; } = string.Empty;
 
     [BindProperty]
     public string FirstName { get; set; } = string.Empty;
 
     [BindProperty]
+    public string PreferredName { get; set; } = string.Empty;
+
+    [BindProperty]
     public string LastName { get; set; } = string.Empty;
 
     [BindProperty]
-    public string PortalUsername { get; set; } = string.Empty;
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public Gender Gender { get; set; }
+
+    [BindProperty]
+    public string EmailAddress { get; set; } = string.Empty;
 
     [BindProperty]
     public string SchoolCode { get; set; } = string.Empty;
@@ -65,6 +75,7 @@ public class UpsertModel : BasePageModel
     public bool IsShared { get; set; }
 
     public SelectList SchoolList { get; set; }
+    public SelectList GenderList { get; set; }
 
     public async Task OnGet()
     {
@@ -72,14 +83,18 @@ public class UpsertModel : BasePageModel
 
         if (schools.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schools.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 
             return;
         }
+        
+        IEnumerable<Gender> genders = Gender.GetOptions;
 
-        if (string.IsNullOrWhiteSpace(Id))
+        GenderList = new(genders, "Value", "Value");
+
+        if (Id == StaffId.Empty)
         {
             SchoolList = new(schools.Value, "Code", "Name");
 
@@ -93,7 +108,7 @@ public class UpsertModel : BasePageModel
 
         if (staffMember.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffMember.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Index", values: new { area = "Staff" }));
 
@@ -104,14 +119,16 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        StaffId = staffMember.Value.StaffId;
+        EmployeeId = staffMember.Value.EmployeeId?.Number ?? string.Empty;
         FirstName = staffMember.Value.Name.FirstName;
+        PreferredName = staffMember.Value.Name.PreferredName;
         LastName = staffMember.Value.Name.LastName;
-        PortalUsername = staffMember.Value.PortalUsername;
+        Gender = staffMember.Value.Gender;
+        EmailAddress = staffMember.Value.EmailAddress.Email;
         SchoolCode = staffMember.Value.SchoolCode;
         IsShared = staffMember.Value.IsShared;
 
-        SchoolList = new(schools.Value, "Code", "Name", staffMember.Value.SchoolCode);
+        SchoolList = new(schools.Value, nameof(School.Code), nameof(School.Name), staffMember.Value.SchoolCode);
 
         PageTitle = $"Editing {staffMember.Value.Name.DisplayName}";
     }
@@ -127,14 +144,16 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        if (string.IsNullOrWhiteSpace(Id))
+        if (Id == StaffId.Empty)
         {
             // Create new student
             CreateStaffMemberCommand createCommand = new(
-                StaffId,
+                EmployeeId,
                 FirstName,
+                PreferredName,
                 LastName,
-                PortalUsername,
+                Gender,
+                EmailAddress,
                 SchoolCode,
                 IsShared);
 
@@ -146,7 +165,7 @@ public class UpsertModel : BasePageModel
 
             if (createResult.IsFailure)
             {
-                ModalContent = new ErrorDisplay(createResult.Error);
+                ModalContent = ErrorDisplay.Create(createResult.Error);
 
                 _logger
                     .ForContext(nameof(Error), createResult.Error, true)
@@ -164,26 +183,29 @@ public class UpsertModel : BasePageModel
 
         // Edit existing student
         UpdateStaffMemberCommand updateCommand = new(
-            StaffId,
+            Id,
+            EmployeeId,
             FirstName,
+            PreferredName,
             LastName,
-            PortalUsername,
+            Gender,
+            EmailAddress,
             SchoolCode,
             IsShared);
 
         _logger
             .ForContext(nameof(UpdateStaffMemberCommand), updateCommand, true)
-            .Information("Requested to update Staff Member with id {Id} by user {User}", StaffId, _currentUserService.UserName);
+            .Information("Requested to update Staff Member with id {Id} by user {User}", Id, _currentUserService.UserName);
 
         Result updateResult = await _mediator.Send(updateCommand);
 
         if (updateResult.IsFailure)
         {
-            ModalContent = new ErrorDisplay(updateResult.Error);
+            ModalContent = ErrorDisplay.Create(updateResult.Error);
 
             _logger
                 .ForContext(nameof(Error), updateResult.Error, true)
-                .Warning("Failed to update Staff Member with id {Id} by user {User}", StaffId, _currentUserService.UserName);
+                .Warning("Failed to update Staff Member with id {Id} by user {User}", Id, _currentUserService.UserName);
 
             Result<List<SchoolSelectionListResponse>> schools = await _mediator.Send(new GetSchoolsForSelectionListQuery());
 

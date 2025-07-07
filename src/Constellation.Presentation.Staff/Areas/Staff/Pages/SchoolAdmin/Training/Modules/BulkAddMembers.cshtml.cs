@@ -9,11 +9,11 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -50,7 +50,7 @@ public class BulkAddMembersModel : BasePageModel
     public List<StaffResponse> StaffMembers { get; set; } = new();
 
     [BindProperty]
-    public List<string> SelectedStaffIds { get; set; } = new();
+    public List<StaffId> SelectedStaffIds { get; set; } = new();
 
    
     public async Task OnGet() => await PreparePage();
@@ -67,7 +67,7 @@ public class BulkAddMembersModel : BasePageModel
                 .ForContext(nameof(Error), moduleRequest.Error, true)
                 .Warning("Failed to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
 
@@ -84,7 +84,7 @@ public class BulkAddMembersModel : BasePageModel
                 .ForContext(nameof(Error), staffRequest.Error, true)
                 .Warning("Failed to retrieve defaults for adding Members to Training Module by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Details", values: new { area = "Staff", Id }));
 
@@ -119,7 +119,7 @@ public class BulkAddMembersModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add Members to Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }

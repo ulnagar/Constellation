@@ -1,0 +1,26 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ReinstateStaffMember.ReinstateStaffMemberSelection
+
+<form asp-page-handler="Reinstate">
+    <div class="modal fade" tabindex="-1" id="reinstateStaffMemberModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reinstate Staff Member</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label asp-for="SchoolCode" class="col-md-3">Partner School</label>
+                        <div class="col-md-9">
+                            <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="combo" data-select2-id="Reinstate.SchoolCode">
+                                <option value=""> -- Select Partner School -- </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

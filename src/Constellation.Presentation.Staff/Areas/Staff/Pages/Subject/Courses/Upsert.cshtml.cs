@@ -74,7 +74,7 @@ public class UpsertModel : BasePageModel
                     .ForContext(nameof(Error), courseRequest.Error, true)
                     .Warning("Failed to retrieve Course with id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(courseRequest.Error);
+                ModalContent = ErrorDisplay.Create(courseRequest.Error);
 
                 return;
             }
@@ -121,7 +121,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to create new Course by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -161,7 +161,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to update Course with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             await PreparePage();
 
@@ -177,7 +177,7 @@ public class UpsertModel : BasePageModel
 
         if (facultyRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(facultyRequest.Error);
+            ModalContent = ErrorDisplay.Create(facultyRequest.Error);
 
             return;
         }

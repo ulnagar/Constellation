@@ -29,6 +29,9 @@ public sealed class LissResponseError : ILissResponse
     public static readonly LissResponseError InvalidAuthentication = new("Invalid Authentication Object");
     public static readonly LissResponseError InvalidParameters = new("Invalid parameters provided!");
 
+    public static Func<List<string>, LissResponseError> ProcessingErrors = errors =>
+        new(string.Join(Environment.NewLine, errors));
+
     private LissResponseError(string error)
         => Error = error;
     

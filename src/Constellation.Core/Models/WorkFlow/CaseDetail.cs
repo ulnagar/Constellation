@@ -1,14 +1,11 @@
-﻿using Constellation.Core.Models.Students.Errors;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Constellation.Core.Models.WorkFlow;
+﻿namespace Constellation.Core.Models.WorkFlow;
 
 using Abstractions.Clock;
 using Attendance;
 using Constellation.Core.Enums;
 using Constellation.Core.Errors;
 using Constellation.Core.Models.Attendance.Identifiers;
+using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Training.Identifiers;
 using Enums;
@@ -16,6 +13,8 @@ using Errors;
 using Extensions;
 using Identifiers;
 using Shared;
+using StaffMembers;
+using StaffMembers.Identifiers;
 using Students;
 using System;
 using Training;
@@ -110,12 +109,12 @@ public sealed class ComplianceCaseDetail : CaseDetail
     public string IncidentType { get; private set; } = string.Empty;
     public DateOnly CreatedDate { get; private set; }
     public string Subject { get; private set; } = string.Empty;
-    public string CreatedById { get; private set; } = string.Empty;
+    public StaffId CreatedById { get; private set; } = StaffId.Empty;
     public string CreatedBy { get; private set; } = string.Empty;
 
     public static Result<CaseDetail> Create(
         Student student,
-        Staff teacher,
+        StaffMember teacher,
         string incidentId,
         string incidentType,
         string subject,
@@ -155,8 +154,8 @@ public sealed class ComplianceCaseDetail : CaseDetail
             IncidentType = incidentType,
             Subject = subject,
             CreatedDate = createdDate,
-            CreatedById = teacher.StaffId,
-            CreatedBy = teacher.GetName().DisplayName
+            CreatedById = teacher.Id,
+            CreatedBy = teacher.Name.DisplayName
         };
 
         return detail;
@@ -167,7 +166,7 @@ public sealed class ComplianceCaseDetail : CaseDetail
 
 public sealed class TrainingCaseDetail : CaseDetail
 {
-    public string StaffId { get; private set; } = string.Empty;
+    public StaffId StaffId { get; private set; } = StaffId.Empty;
     public string Name { get; private set; } = string.Empty;
     public TrainingModuleId TrainingModuleId { get; private set;}
     public string ModuleName { get; private set; } = string.Empty;
@@ -175,7 +174,7 @@ public sealed class TrainingCaseDetail : CaseDetail
     public int DaysUntilDue => (int)DueDate.ToDateTime(TimeOnly.MinValue).Subtract(DateTime.Today).TotalDays;
 
     public static Result<CaseDetail> Create(
-        Staff teacher,
+        StaffMember teacher,
         TrainingModule module,
         TrainingCompletion? completion,
         IDateTimeProvider dateTime)
@@ -192,8 +191,8 @@ public sealed class TrainingCaseDetail : CaseDetail
 
         TrainingCaseDetail detail = new()
         {
-            StaffId = teacher.StaffId,
-            Name = teacher.GetName().DisplayName,
+            StaffId = teacher.Id,
+            Name = teacher.Name.DisplayName,
             TrainingModuleId = module.Id,
             ModuleName = module.Name,
             DueDate = dueDate

@@ -7,6 +7,7 @@ using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -51,19 +52,19 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
         // Find all staff with required modules that are due in 30 days, 14 days, 1 day, and overdue.
-        List<Staff> staff = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
 
         List<TrainingModule> modules = await _trainingModuleRepository.GetAllModules(cancellationToken);
 
-        foreach (Staff staffMember in staff)
+        foreach (StaffMember staffMember in staff)
         {
-            _logger.Information($"Checking {staffMember.DisplayName}");
+            _logger.Information($"Checking {staffMember.Name.DisplayName}");
 
             // Get all roles for the staff member
             List<TrainingModule> staffModules = modules
                 .Where(module =>
                     module.Assignees.Any(entry =>
-                        entry.StaffId == staffMember.StaffId))
+                        entry.StaffId == staffMember.Id))
                 .ToList();
 
             // Get all completions for staff member
@@ -74,7 +75,7 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
                 TrainingCompletion? completion = module
                     .Completions
                     .Where(record =>
-                        record.StaffId == staffMember.StaffId &&
+                        record.StaffId == staffMember.Id &&
                         !record.IsDeleted)
                     .MaxBy(record => record.CompletedDate);
 
@@ -97,11 +98,11 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
                     .Information($" Found Module nearing due date");
                     
                 // Check for an existing WorkFlow for these items, and create one if not existing
-                Case? existingCase = await _caseRepository.GetTrainingCaseForStaffAndModule(staffMember.StaffId, module.Id, cancellationToken);
+                Case? existingCase = await _caseRepository.GetTrainingCaseForStaffAndModule(staffMember.Id, module.Id, cancellationToken);
 
                 if (existingCase is null)
                 {
-                    await _mediator.Send(new CreateTrainingCaseCommand(staffMember.StaffId, module.Id, completion?.Id), cancellationToken);
+                    await _mediator.Send(new CreateTrainingCaseCommand(staffMember.Id, module.Id, completion?.Id), cancellationToken);
                         
                     continue;
                 }

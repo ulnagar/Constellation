@@ -10,6 +10,8 @@ using Offerings;
 using Offerings.Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +30,7 @@ public abstract class Action : IAuditableEntity
     public IReadOnlyList<ActionNote> Notes => _notes.ToList();
     
     // string StaffId column
-    public string AssignedToId { get; protected set; } = string.Empty;
+    public StaffId AssignedToId { get; protected set; } = StaffId.Empty;
     // string Staff Name column
     public string AssignedTo { get; protected set; } = string.Empty;
     public DateTime AssignedAt { get; protected set; } = DateTime.MinValue;
@@ -45,7 +47,7 @@ public abstract class Action : IAuditableEntity
     public abstract override string ToString();
     public abstract string AsStatus();
 
-    internal Result AssignAction(Staff? assignee, string currentUser)
+    internal Result AssignAction(StaffMember? assignee, string currentUser)
     {
         if (assignee is null)
             return Result.Failure(ActionErrors.AssignStaffNull);
@@ -55,21 +57,21 @@ public abstract class Action : IAuditableEntity
 
         if (!string.IsNullOrWhiteSpace(AssignedTo))
         {
-            Result noteAttempt = AddNote($"Assignee changed from {AssignedTo} to {assignee.GetName()!.DisplayName}", currentUser);
+            Result noteAttempt = AddNote($"Assignee changed from {AssignedTo} to {assignee.Name.DisplayName}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
         }
         else
         {
-            Result noteAttempt = AddNote($"Assignee set to {assignee.GetName()!.DisplayName}", currentUser);
+            Result noteAttempt = AddNote($"Assignee set to {assignee.Name.DisplayName}", currentUser);
 
             if (noteAttempt.IsFailure)
                 return noteAttempt;
         }
 
-        AssignedToId = assignee.StaffId;
-        AssignedTo = assignee.GetName()!.DisplayName;
+        AssignedToId = assignee.Id;
+        AssignedTo = assignee.Name.DisplayName;
         AssignedAt = DateTime.Now;
 
         return Result.Success();
@@ -146,7 +148,7 @@ public sealed class SendEmailAction : Action
 
     public static Result<SendEmailAction> Create(
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         string currentUser)
     {
         SendEmailAction action = new()
@@ -229,7 +231,7 @@ public sealed class PhoneParentAction : Action
 
     public static Result<PhoneParentAction> Create(
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         string currentUser)
     {
         PhoneParentAction action = new()
@@ -306,7 +308,7 @@ public sealed class ParentInterviewAction : Action
     
     public static Result<ParentInterviewAction> Create(
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         string currentUser)
     {
         ParentInterviewAction action = new()
@@ -433,7 +435,7 @@ public sealed class CreateSentralEntryAction : Action
 
     public static Result<CreateSentralEntryAction> Create(
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         Offering offering,
         string currentUser)
     {
@@ -493,7 +495,7 @@ public sealed class ConfirmSentralEntryAction : Action
     public static Result<ConfirmSentralEntryAction> Create(
         ActionId parentId,
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         string currentUser)
     {
         ConfirmSentralEntryAction action = new()
@@ -537,7 +539,7 @@ public sealed class CaseDetailUpdateAction : Action
     public static Result<CaseDetailUpdateAction> Create(
         ActionId? parentId,
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         string details)
     {
         CaseDetailUpdateAction action = new()
@@ -547,12 +549,12 @@ public sealed class CaseDetailUpdateAction : Action
             Details = details
         };
 
-        Result assignment = action.AssignAction(assignee, assignee.DisplayName);
+        Result assignment = action.AssignAction(assignee, assignee.Name.DisplayName);
 
         if (assignment.IsFailure)
             return Result.Failure<CaseDetailUpdateAction>(assignment.Error);
 
-        Result status = action.UpdateStatus(ActionStatus.Completed, assignee.DisplayName);
+        Result status = action.UpdateStatus(ActionStatus.Completed, assignee.Name.DisplayName);
 
         if (status.IsFailure)
             return Result.Failure<CaseDetailUpdateAction>(status.Error);
@@ -594,7 +596,7 @@ public sealed class SentralIncidentStatusAction : Action
 
     public static Result<SentralIncidentStatusAction> Create(
         CaseId caseId,
-        Staff assignee,
+        StaffMember assignee,
         string currentUser)
     {
         SentralIncidentStatusAction action = new()
@@ -675,7 +677,7 @@ public sealed class UploadTrainingCertificateAction : Action
     public static Result<UploadTrainingCertificateAction> Create(
         CaseId caseId,
         TrainingModule module,
-        Staff assignee,
+        StaffMember assignee,
         string currentUser)
     {
         UploadTrainingCertificateAction action = new()

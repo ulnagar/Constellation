@@ -76,14 +76,14 @@ public class VerifyModel : BasePageModel
 
         if (response.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 response.Error,
                 _linkGenerator.GetPathByPage("/Absences/Index", values: new { area = "Schools" }));
 
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Absence Verification", 
             "Absence explanation verification has been forwarded to our Administration Team. Thank you!",
             "Ok",
@@ -116,7 +116,7 @@ public class VerifyModel : BasePageModel
 
         if (response.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 response.Error,
                 _linkGenerator.GetPathByPage("/Absences/Index", values: new { area = "Schools" }));
 
@@ -125,7 +125,7 @@ public class VerifyModel : BasePageModel
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Absence Verification",
             "Absence explanation rejection has been forwarded to our Administration Team. Thank you!",
             "Ok",
@@ -143,7 +143,7 @@ public class VerifyModel : BasePageModel
 
         if (responseRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 responseRequest.Error,
                 _linkGenerator.GetPathByPage("/Absences/Index", values: new { area = "Schools" }));
 

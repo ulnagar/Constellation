@@ -100,7 +100,7 @@ public class ResourceModel : BasePageModel
                     .ForContext(nameof(Error), teamRequest.Error, true)
                     .Warning("Failed to retrieve defaults for new Team Resource in Offering by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     teamRequest.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -134,7 +134,7 @@ public class ResourceModel : BasePageModel
                     .ForContext(nameof(Error), offeringRequest.Error, true)
                     .Warning("Failed to retrieve defaults for new Canvas Resource in Offering by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     offeringRequest.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -149,7 +149,7 @@ public class ResourceModel : BasePageModel
                     .ForContext(nameof(Error), courseRequest.Error, true)
                     .Warning("Failed to retrieve defaults for new Canvas Resource in Offering by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     courseRequest.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -185,7 +185,7 @@ public class ResourceModel : BasePageModel
                     .ForContext(nameof(Error), teamRequest.Error, true)
                     .Warning("Failed to create new Team Resource for Offering by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     teamRequest.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
@@ -206,7 +206,7 @@ public class ResourceModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create new Team Resource for Offering by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     request.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 
@@ -230,7 +230,7 @@ public class ResourceModel : BasePageModel
                     .ForContext(nameof(Error), request.Error, true)
                     .Warning("Failed to create new Canvas Resource for Offering by user {User}", _currentUserService.UserName);
                 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     request.Error,
                     _linkGenerator.GetPathByPage("/Subject/Offerings/Resource", values: new { area = "Staff", Id = Id }));
 

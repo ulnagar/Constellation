@@ -2,12 +2,13 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
 using Core.Extensions;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using System.Collections.Generic;
@@ -48,9 +49,9 @@ internal sealed class GetTutorialRollWithDetailsByIdQueryHandler
 
         if (roll.Status == Core.Enums.TutorialRollStatus.Submitted)
         {
-            Staff staffMember = await _staffRepository.GetForExistCheck(roll.StaffId);
+            StaffMember staffMember = await _staffRepository.GetById(roll.StaffId.Value, cancellationToken);
 
-            staffName = staffMember.DisplayName;
+            staffName = staffMember?.Name.DisplayName;
         }
 
         List<Student> studentEntities = await _studentRepository.GetListFromIds(roll.Students.Select(student => student.StudentId).ToList(), cancellationToken);
@@ -70,7 +71,7 @@ internal sealed class GetTutorialRollWithDetailsByIdQueryHandler
             tutorial.Id,
             tutorial.Name,
             roll.SessionDate,
-            roll.StaffId,
+            roll.StaffId ?? StaffId.Empty, 
             staffName,
             roll.Status,
             students);

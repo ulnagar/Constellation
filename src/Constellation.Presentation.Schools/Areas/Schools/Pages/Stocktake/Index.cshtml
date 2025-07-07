@@ -1,14 +1,15 @@
 ﻿@page
+@using Constellation.Core.Models.Stocktake.Identifiers
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.IndexModel
 @{
 }
 
 <h2>Stocktake Data Collection</h2>
 
-@if (Model.EventId != Guid.Empty)
+@if (!Model.EventId.Equals(StocktakeEventId.Empty))
 {
     <div>
-        <a asp-page="/Stocktake/Submit" asp-area="Schools" asp-route-eventId="@Model.EventId" class="btn btn-primary">Sight Device</a>
+        <a asp-page="/Stocktake/Sighting/Index" asp-area="Schools" asp-route-id="@Model.EventId" class="btn btn-primary">Sight Device</a>
     </div>
 }
 
@@ -41,7 +42,7 @@
 <table class="table table-striped">
     <thead>
     <tr>
-        <th>Serial / Asset</th>
+        <th>Asset / Serial</th>
         <th>Description</th>
         <th>User</th>
         <th>Sighted</th>
@@ -60,7 +61,7 @@
         foreach (var entry in items)
         {
             <tr>
-                <td>@entry.SerialNumber / @entry.AssetNumber</td>
+                <td>@entry.AssetNumber / @entry.SerialNumber</td>
                 <td>@entry.Description</td>
                 <td>@entry.UserName</td>
                 <td>@entry.SightedBy (@entry.SightedAt.ToShortDateString())</td>

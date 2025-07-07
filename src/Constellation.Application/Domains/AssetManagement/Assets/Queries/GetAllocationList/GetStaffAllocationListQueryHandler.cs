@@ -1,13 +1,13 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Queries.GetAllocationList;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Assets.Identifiers;
 using Constellation.Core.Models.Assets.Repositories;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,21 +35,21 @@ internal sealed class GetStaffAllocationListQueryHandler
     {
         List<AllocationListItem> response = new();
 
-        List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
         List<Asset> assets = await _assetRepository.GetAllActiveAllocatedToStaff(cancellationToken);
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
             List<Asset> staffAssets = assets
-                .Where(entry => entry.CurrentAllocation?.UserId == staffMember.StaffId)
+                .Where(entry => entry.CurrentAllocation?.UserId == staffMember.Id.ToString())
                 .ToList();
 
             if (!staffAssets.Any())
             {
                 response.Add(new(
-                    staffMember.StaffId,
-                    staffMember.GetName()?.DisplayName,
+                    staffMember.Id.ToString(),
+                    staffMember.Name.DisplayName,
                     string.Empty,
                     AssetId.Empty,
                     AssetNumber.Empty,
@@ -66,8 +66,8 @@ internal sealed class GetStaffAllocationListQueryHandler
             foreach (Asset asset in staffAssets)
             {
                 response.Add(new(
-                    staffMember.StaffId,
-                    staffMember.GetName()?.DisplayName,
+                    staffMember.Id.ToString(),
+                    staffMember.Name.DisplayName,
                     string.Empty,
                     asset.Id,
                     asset.AssetNumber,

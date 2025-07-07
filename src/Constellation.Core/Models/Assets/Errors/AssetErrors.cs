@@ -16,6 +16,10 @@ public static class AssetErrors
         "Assets.Asset.NotFound",
         $"An Asset with the Id {id} could not be found");
 
+    public static readonly Func<string, Error> NotFoundBySerialNumber = id => new(
+        "Assets.Asset.NotFound",
+        $"An Asset with the Serial Number {id} could not be found");
+
     public static readonly Error SerialNumberEmpty = new(
         "Assets.Asset.SerialNumberEmpty",
         "Serial Number cannot be empty");

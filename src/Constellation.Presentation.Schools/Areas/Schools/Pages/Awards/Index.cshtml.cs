@@ -59,7 +59,7 @@ public class IndexModel : BasePageModel
     {
         if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
         {
-            ModalContent = new ErrorDisplay(ApplicationErrors.SchoolInvalid);
+            ModalContent = ErrorDisplay.Create(ApplicationErrors.SchoolInvalid);
 
             return;
         }
@@ -73,7 +73,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(fileResponse.Error);
+            ModalContent = ErrorDisplay.Create(fileResponse.Error);
 
             await PreparePage();
 
@@ -91,7 +91,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -110,7 +110,7 @@ public class IndexModel : BasePageModel
 
             if (awardSummaryRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(awardSummaryRequest.Error);
+                ModalContent = ErrorDisplay.Create(awardSummaryRequest.Error);
 
                 return;
             }

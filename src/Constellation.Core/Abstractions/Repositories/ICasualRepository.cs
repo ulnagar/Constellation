@@ -5,6 +5,7 @@ using Constellation.Core.Models.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ValueObjects;
 
 public interface ICasualRepository
 {
@@ -12,6 +13,7 @@ public interface ICasualRepository
     Task<List<Casual>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Casual>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Casual>> GetAllInactive(CancellationToken cancellationToken = default);
-    Task<List<Casual>> GetWithoutAdobeConnectId(CancellationToken cancellationToken = default);
+    Task<Casual> GetByEmailAddress(EmailAddress email, CancellationToken cancellationToken = default);
+    Task<Casual> GetByEdvalCode(string edvalCode, CancellationToken cancellationToken = default);
     void Insert(Casual casual);
 }

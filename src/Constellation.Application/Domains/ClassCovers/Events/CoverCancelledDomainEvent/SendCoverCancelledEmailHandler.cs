@@ -11,6 +11,8 @@ using Core.Models.Covers;
 using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Repositories;
@@ -79,18 +81,18 @@ internal sealed class SendCoverCancelledEmailHandler
         List<EmailRecipient> primaryRecipients = new(); // Casual, Classroom Teacher
         List<EmailRecipient> secondaryRecipients = new(); // Head Teacher, Additional Recipients
 
-        List<Staff> teachers = await _staffRepository.GetCurrentTeachersForOffering(cover.OfferingId, cancellationToken);
+        List<StaffMember> teachers = await _staffRepository.GetCurrentTeachersForOffering(cover.OfferingId, cancellationToken);
 
-        foreach (Staff teacher in teachers)
+        foreach (StaffMember teacher in teachers)
         {
-            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress))
+            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress.Email))
                 continue;
 
-            Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+            Result<EmailRecipient> address = EmailRecipient.Create(teacher.Name.DisplayName, teacher.EmailAddress.Email);
 
             if (address.IsFailure)
             {
-                _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+                _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.Name.DisplayName, cover.Id);
 
                 continue;
             }
@@ -98,19 +100,19 @@ internal sealed class SendCoverCancelledEmailHandler
             primaryRecipients.Add(address.Value);
         }
 
-        List<Staff> headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(cover.OfferingId, cancellationToken);
+        List<StaffMember> headTeachers = await _staffRepository.GetFacultyHeadTeachersForOffering(cover.OfferingId, cancellationToken);
 
-        foreach (Staff teacher in headTeachers)
+        foreach (StaffMember teacher in headTeachers)
         {
-            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress) || 
-                secondaryRecipients.Any(entry => entry.Email == teacher.EmailAddress)) 
+            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress.Email) || 
+                secondaryRecipients.Any(entry => entry.Email == teacher.EmailAddress.Email)) 
                 continue;
 
-            Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+            Result<EmailRecipient> address = EmailRecipient.Create(teacher.Name.DisplayName, teacher.EmailAddress.Email);
 
             if (address.IsFailure)
             {
-                _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+                _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.Name.DisplayName, cover.Id);
 
                 continue;
             }
@@ -124,12 +126,12 @@ internal sealed class SendCoverCancelledEmailHandler
         {
             Casual teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
-            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+            if (primaryRecipients.All(entry => entry.Email != teacher.EmailAddress.Email) && secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress.Email))
             {
-                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.Name, teacher.EmailAddress);
 
                 if (address.IsFailure)
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.Name.DisplayName, cover.Id);
                 else
                 {
                     primaryRecipients.Add(address.Value);
@@ -140,16 +142,20 @@ internal sealed class SendCoverCancelledEmailHandler
 
         if (cover.TeacherType == CoverTeacherType.Staff)
         {
-            Staff teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
+            StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
+
+            StaffMember teacher = staffId == StaffId.Empty
+                ? null
+                : await _staffRepository.GetById(staffId, cancellationToken);
 
             if (teacher is not null && 
-                primaryRecipients.All(entry => entry.Email != teacher.EmailAddress) && 
-                secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress))
+                primaryRecipients.All(entry => entry.Email != teacher.EmailAddress.Email) && 
+                secondaryRecipients.All(entry => entry.Email != teacher.EmailAddress.Email))
             {
-                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.EmailAddress);
+                Result<EmailRecipient> address = EmailRecipient.Create(teacher.Name.DisplayName, teacher.EmailAddress.Email);
 
                 if (address.IsFailure)
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.DisplayName, cover.Id);
+                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverCancelledEmailHandler), teacher.Name.DisplayName, cover.Id);
                 else
                 {
                     primaryRecipients.Add(address.Value);

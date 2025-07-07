@@ -53,7 +53,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Reports/Index", values: new { area = "Students" }));
 
@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Reports/Index", values: new { area = "Students" }));
 
@@ -95,7 +95,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve reports by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return;
         }
@@ -106,7 +106,7 @@ public class IndexModel : BasePageModel
 
         if (reportsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(reportsRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportsRequest.Error);
 
             return;
         }

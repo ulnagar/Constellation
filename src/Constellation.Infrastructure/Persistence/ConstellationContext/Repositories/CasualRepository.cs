@@ -3,6 +3,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Casuals;
 using Constellation.Core.Models.Identifiers;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 public class CasualRepository : ICasualRepository
@@ -40,14 +41,22 @@ public class CasualRepository : ICasualRepository
             .Set<Casual>()
             .Where(casual => casual.IsDeleted)
             .ToListAsync(cancellationToken);
-
-    public async Task<List<Casual>> GetWithoutAdobeConnectId(
+    
+    public async Task<Casual> GetByEmailAddress(
+        EmailAddress email,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Casual>()
-            .Where(casual => string.IsNullOrWhiteSpace(casual.AdobeConnectId))
-            .ToListAsync(cancellationToken);
+            .Where(casual => casual.EmailAddress == email)
+            .SingleOrDefaultAsync(cancellationToken);
 
-    public void Insert(Casual casual) =>
-    _context.Set<Casual>().Add(casual);
+    public async Task<Casual> GetByEdvalCode(
+        string edvalCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Casual>()
+            .Where(casual => casual.EdvalTeacherId == edvalCode)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    public void Insert(Casual casual) => _context.Set<Casual>().Add(casual);
 }

@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Models.StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -18,6 +19,6 @@ public interface IClassCoverRepository
     Task<List<string>> GetCurrentCoveringTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<ClassCover>> GetAllWithCasualId(CasualId casualId, CancellationToken cancellationToken = default);
     Task<List<ClassCover>> GetAllForDateAndOfferingId(DateOnly coverDate, OfferingId OfferingId, CancellationToken cancellationToken = default);
-    Task<List<ClassCover>> GetCurrentForStaff(string staffId, CancellationToken cancellationToken = default);
+    Task<List<ClassCover>> GetCurrentForStaff(StaffId staffId, CancellationToken cancellationToken = default);
     void Insert(ClassCover cover);
 }

@@ -99,7 +99,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), courseRequest.Error, true)
                 .Warning("Failed to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 courseRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -146,7 +146,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), courseRequest.Error, true)
                 .Warning("Failed to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 courseRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -165,7 +165,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), canvasAssignmentsRequest.Error, true)
                 .Warning("Failed to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 canvasAssignmentsRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -207,7 +207,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), courseRequest.Error, true)
                 .Warning("Failed to retrieve course list for new Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 courseRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -226,7 +226,7 @@ public class CreateModel : BasePageModel
                 .ForContext(nameof(Error), canvasAssignmentsRequest.Error, true)
                 .Warning("Failed to retrieve Assignment list from Canvas for new Assignment by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 canvasAssignmentsRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -237,7 +237,7 @@ public class CreateModel : BasePageModel
 
         if (assignment is null)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("Assignments.Assignment.NotFoundInCanvas", "Could not find the selected Assignment in Canvas"),
                 _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
 
@@ -284,13 +284,13 @@ public class CreateModel : BasePageModel
 
             if (result is IValidationResult validationResult)
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     validationResult.Errors.First(),
                     _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
             }
             else
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/Subject/Assignments/Index", values: new { area = "Staff" }));
             }

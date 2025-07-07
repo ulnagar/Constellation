@@ -5,6 +5,7 @@ using Application.DTOs;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Core.Models.Students;
+using Core.Shared;
 using Core.ValueObjects;
 
 public class Service : ISMSService
@@ -16,7 +17,7 @@ public class Service : ISMSService
         _service = service;
     }
 
-    public async Task<SMSMessageCollectionDto> SendAbsenceNotification(
+    public async Task<Result<SMSMessageCollectionDto>> SendAbsenceNotification(
         List<AbsenceEntry> absences,
         Student student,
         List<PhoneNumber> phoneNumbers,
@@ -40,7 +41,7 @@ public class Service : ISMSService
         return await _service.SendSmsAsync(messageContent);
     }
 
-    public async Task SendLoginToken(
+    public async Task<Result> SendLoginToken(
         string token,
         PhoneNumber phoneNumber,
         CancellationToken cancellationToken = default)
@@ -54,6 +55,6 @@ public class Service : ISMSService
             message = messageText
         };
 
-        await _service.SendSmsAsync(messageContent);
+        return await _service.SendSmsAsync(messageContent);
     }
 }

@@ -6,6 +6,7 @@ using Constellation.Core.Models.Subjects.Identifiers;
 using Enums;
 using Identifiers;
 using Offerings;
+using StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -23,10 +24,10 @@ public interface IOfferingRepository
     /// <summary>
     /// Get all current Course Offerings where the provided StaffId is listed as Classroom Teacher (only)
     /// </summary>
-    /// <param name="StaffId"></param>
+    /// <param name="staffId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<List<Offering>> GetActiveForTeacher(string StaffId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetActiveForTeacher(StaffId staffId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all current Course Offerings where the provided StaffId is listed as any type of Teacher
@@ -34,7 +35,7 @@ public interface IOfferingRepository
     /// <param name="staffId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<List<Offering>> GetAllTypesActiveForTeacher(string staffId, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetAllTypesActiveForTeacher(StaffId staffId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetActiveByGrade(Grade grade, CancellationToken cancellationToken = default);

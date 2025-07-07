@@ -89,7 +89,7 @@ public class CreateModel : BasePageModel
         Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         if (rolesRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 rolesRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -104,7 +104,7 @@ public class CreateModel : BasePageModel
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
         if (schoolsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schoolsRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -126,7 +126,7 @@ public class CreateModel : BasePageModel
             Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
             if (rolesRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     rolesRequest.Error,
                     _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -141,7 +141,7 @@ public class CreateModel : BasePageModel
             Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
             if (schoolsRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     schoolsRequest.Error,
                     _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -180,7 +180,7 @@ public class CreateModel : BasePageModel
 
             if (request.IsFailure)
             {
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 _logger
                     .ForContext(nameof(Error), request.Error, true)
@@ -189,7 +189,7 @@ public class CreateModel : BasePageModel
                 Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
                 if (rolesRequest.IsFailure)
                 {
-                    ModalContent = new ErrorDisplay(
+                    ModalContent = ErrorDisplay.Create(
                         rolesRequest.Error,
                         _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -204,7 +204,7 @@ public class CreateModel : BasePageModel
                 Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
                 if (schoolsRequest.IsFailure)
                 {
-                    ModalContent = new ErrorDisplay(
+                    ModalContent = ErrorDisplay.Create(
                         schoolsRequest.Error,
                         _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -239,7 +239,7 @@ public class CreateModel : BasePageModel
 
             if (request.IsFailure)
             {
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 _logger
                     .ForContext(nameof(Error), request.Error, true)
@@ -248,7 +248,7 @@ public class CreateModel : BasePageModel
                 Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
                 if (rolesRequest.IsFailure)
                 {
-                    ModalContent = new ErrorDisplay(
+                    ModalContent = ErrorDisplay.Create(
                         rolesRequest.Error,
                         _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -263,7 +263,7 @@ public class CreateModel : BasePageModel
                 Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));
                 if (schoolsRequest.IsFailure)
                 {
-                    ModalContent = new ErrorDisplay(
+                    ModalContent = ErrorDisplay.Create(
                         schoolsRequest.Error,
                         _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 

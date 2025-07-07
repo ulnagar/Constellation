@@ -59,7 +59,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reports.Error, true)
                 .Warning("Failed to retrieve External Reports by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 reports.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/Index", values: new { area = "Staff" }));
 
@@ -76,7 +76,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(fileResponse.Error, null);
+            ModalContent = ErrorDisplay.Create(fileResponse.Error, null);
 
             return Page();
         }

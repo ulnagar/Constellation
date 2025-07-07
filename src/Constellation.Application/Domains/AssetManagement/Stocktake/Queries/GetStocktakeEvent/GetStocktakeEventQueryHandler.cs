@@ -32,10 +32,10 @@ internal sealed class GetStocktakeEventQueryHandler
         {
             _logger
                 .ForContext(nameof(GetStocktakeEventQuery), request, true)
-                .ForContext(nameof(Error), StocktakeErrors.EventNotFound(request.EventId), true)
+                .ForContext(nameof(Error), StocktakeEventErrors.EventNotFound(request.EventId), true)
                 .Warning("Failed to retrieve Stocktake Event");
 
-            return Result.Failure<StocktakeEventResponse>(StocktakeErrors.EventNotFound(request.EventId));
+            return Result.Failure<StocktakeEventResponse>(StocktakeEventErrors.EventNotFound(request.EventId));
         }
 
         return new StocktakeEventResponse(

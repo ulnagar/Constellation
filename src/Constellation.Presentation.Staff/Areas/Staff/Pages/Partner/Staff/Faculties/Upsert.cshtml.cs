@@ -61,7 +61,7 @@ public class UpsertModel : BasePageModel
 
             if (request.IsFailure)
             {
-                ModalContent = new ErrorDisplay(request.Error);
+                ModalContent = ErrorDisplay.Create(request.Error);
 
                 _logger
                     .ForContext(nameof(Error), request.Error, true)

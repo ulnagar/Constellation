@@ -1,0 +1,307 @@
+﻿@page "{EventId}/{AssetNumber}"
+@using Constellation.Core.Models.Stocktake.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.Sighting.UpdateModel
+@{
+}
+
+<form method="post">
+    <div class="jumbotron">
+        <h3 class="display-4">Update details</h3>
+        <p class="lead">Please provide updated details for the following categories:</p>
+        <hr class="my-4">
+        <div class="row">
+            <dl class="row col-6">
+                <dt class="col-sm-3">Asset Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.AssetNumber</dd>
+
+                <dt class="col-sm-3">Serial Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.SerialNumber</dd>
+
+                <dt class="col-sm-3">Description:</dt>
+                <dd class="col-sm-9">@Model.Asset.Description</dd>
+            </dl>
+        </div>
+        <hr class="my-4">
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label class="col-md-3">User Type</label>
+                    <div class="col-md-7">
+                        <select asp-for="UserType" onchange="UpdateUserType()" class="form-control" id="UserType">
+                            <option value="">-- Select --</option>
+                            @if (Model.StudentList.Count > 0)
+                            {
+                                <option value="@UserType.Student">@UserType.Student</option>
+                            }
+                            <option value="@UserType.Staff">@UserType.Staff</option>
+                            <option value="@UserType.School">@UserType.School</option>
+                            <option value="@UserType.CommunityMember">@UserType.CommunityMember</option>
+                            <option value="@UserType.Other">@UserType.Other</option>
+                        </select>
+                        <span asp-validation-for="UserType" class="text-danger"></span>
+                        <span asp-validation-for="UserName" class="text-danger"></span>
+                    </div>
+                    <div class="w-100"></div>
+                    <label class="col-md-3 mt-3">User</label>
+                    <div class="col-md-7 mt-3">
+                        @Html.HiddenFor(model => model.UserCode)
+                        <div id="UserTypeStudent">
+                            <select id="Student_UserCode" onchange="UpdateStudent()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var student in Model.StudentList)
+                                {
+                                    <option value="@student.StudentId">@student.Name (@student.Grade)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeStaff">
+                            <select id="Staff_UserCode" onchange="UpdateStaff()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var staff in Model.StaffList)
+                                {
+                                    if (staff.StaffId == Model.CurrentStaffMember?.StaffId)
+                                    {
+                                        <option value="@staff.StaffId" selected="selected">@staff.Name.DisplayName</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@staff.StaffId">@staff.Name.DisplayName</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeSchool">
+                            <select id="School_UserCode" onchange="UpdateSchool()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var school in Model.SchoolList)
+                                {
+                                    if (school.Code == Model.CurrentStaffMember?.SchoolCode)
+                                    {
+                                        <option value="@school.Code" selected="selected">@school.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@school.Code">@school.Name</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="UserCode" class="text-danger"></span>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div id="UserTypeOther">
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="UserHelpText" class="col-md-5 alert alert-warning d-none">
+                Select the type of user (Student, Aurora College Staff Member, School, Community Member, or Other), and then the relevant user.
+            </div>
+        </div>
+    
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label class="col-md-3">Location Type</label>
+                    <div class="col-md-7">
+                        <select asp-for="LocationCategory" onchange="UpdateLocationType()" class="form-control" id="LocationType">
+                            <option value="">-- Select --</option>
+                            <option value="@LocationCategory.AuroraCollege">@LocationCategory.AuroraCollege</option>
+                            <option value="@LocationCategory.PublicSchool">@LocationCategory.PublicSchool</option>
+                            <option value="@LocationCategory.StateOffice">@LocationCategory.StateOffice</option>
+                            <option value="@LocationCategory.PrivateResidence">@LocationCategory.PrivateResidence</option>
+                            <option value="@LocationCategory.Other">@LocationCategory.Other</option>
+                        </select>
+                        <span asp-validation-for="LocationCategory" class="text-danger"></span>
+                        <span asp-validation-for="LocationName" class="text-danger"></span>
+                    </div>
+
+                    <div class="w-100"></div>
+                
+                    <label class="col-md-3 mt-3">Location</label>
+                    <div class="col-md-7 mt-3">
+                        @Html.HiddenFor(model => model.LocationCode)
+                        <div id="LocationTypeSchool">
+                            <select id="School_LocationCode" onchange="UpdateSchoolLocation()" class="form-control">
+                                <option value="">-- Select --</option>
+                                @foreach (var school in Model.SchoolList)
+                                {
+                                    <option value="@school.Code">@school.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="LocationCode" class="text-danger"></span>
+                            <span asp-validation-for="LocationName" class="text-danger"></span>
+                        </div>
+                        <div id="LocationTypeOther">
+                            <input asp-for="LocationName" class="form-control" />
+                            <span asp-validation-for="LocationName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="LocationHelpAlert" class="col-md-5 alert alert-warning d-none">
+                Select the type of location (Aurora College Coordinating Office, Partner School, State Office, Private Residence, or Other).
+                <div class="pt-3" id="LocationHelpText"></div>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="form-group row">
+                    <label class="col-md-3">Condition</label>
+                    <div class="col-md-7">
+                        <textarea asp-for="Comment" rows="5" cols="100" class="form-control" id="Comment"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div id="ConditionHelpText" class="col-md-5 alert alert-warning d-none">
+                If the device has any damage, please record it here.
+            </div>
+        </div>
+    
+        <div class="form-row mt-3">
+            <div class="col-4">
+                <button type="submit" class="btn btn-success btn-block">Submit</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            UpdateUserType();
+            UpdateLocationType();
+
+            $('#UserType, #Student_UserCode, #Staff_UserCode, #School_UserCode, #UserName').on('focus', function() {
+                $('#UserHelpText').removeClass('d-none');
+            });
+            $('#UserType, #Student_UserCode, #Staff_UserCode, #School_UserCode, #UserName').on('blur', function() {
+                $('#UserHelpText').addClass('d-none');
+            });
+
+            $('#LocationType, #School_LocationCode, #LocationName').on('focus', function() {
+                $('#LocationHelpAlert').removeClass('d-none');
+            });
+            $('#LocationType, #School_LocationCode, #LocationName').on('blur', function() {
+                $('#LocationHelpAlert').addClass('d-none');
+            });
+            $('#Comment').on('focus', function() {
+                $('#ConditionHelpText').removeClass('d-none');
+            });
+            $('#Comment').on('blur', function() {
+                $('#ConditionHelpText').addClass('d-none');
+            });
+        });
+
+        function UpdateUserType() {
+            // Get current value of the UserType field
+            var userType = $('select#UserType>option:selected');
+
+            // Hide all UserName options
+            $('#UserTypeStudent').hide();
+            $('#UserTypeStaff').hide();
+            $('#UserTypeSchool').hide();
+            $('#UserTypeOther').hide();
+
+            // Reset all UserName options to blank
+            $('#UserCode').val('');
+            $('#Student_UserCode').val('');
+            $('#Staff_UserCode').val('');
+            $('#School_UserCode').val('');
+            $('#UserName').val('');
+
+            // Show appropriate UserName option based on UserType value
+            if (userType.val() === "@UserType.Student") {
+                $('#UserTypeStudent').show();
+            } else if (userType.val() === "@UserType.Staff") {
+                $('#UserTypeStaff').show();
+            } else if (userType.val() === "@UserType.School") {
+                $('#UserTypeSchool').show();
+            } else if (userType.val() === "@UserType.CommunityMember" ||
+                userType.val() === "@UserType.Other") {
+                $('#UserTypeOther').show();
+            }
+        }
+
+        function UpdateStudent() {
+            // Get current value of select
+            var studentId = $('#Student_UserCode').val();
+            var studentName = $('#Student_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(studentId);
+            $('#UserName').val(studentName);
+        }
+
+        function UpdateStaff() {
+            // Get current value of select
+            var staffId = $('#Staff_UserCode').val();
+            var staffName = $('#Staff_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(staffId);
+            $('#UserName').val(staffName);
+        }
+
+        function UpdateSchool() {
+            // Get current value of select
+            var schoolId = $('#School_UserCode').val();
+            var schoolName = $('#School_UserCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#UserCode').val(schoolId);
+            $('#UserName').val(schoolName);
+        }
+
+        function UpdateLocationType() {
+            // Get current value of the UserType field
+            var locationType = $('select#LocationType>option:selected');
+
+            // Hide all Location options
+            $('#LocationTypeSchool').hide();
+            $('#LocationTypeOther').hide();
+
+            // Reset all Location options to blank
+            $('#LocationCode').val('');
+            $('#School_LocationCode').val('');
+            $('#LocationName').val('');
+            $('#LocationHelpText').html('');
+
+            // Show appropriate UserName option based on UserType value
+            if (locationType.val() === "@LocationCategory.AuroraCollege") {
+                $('#LocationTypeOther').show();
+                $('#LocationHelpText').html('Enter the closest description for where this device usually is located. E.g. "Studio 10", or "Level 4", or "Conference Room".')
+            } else if (locationType.val() === "@LocationCategory.PublicSchool") {
+                $('#LocationTypeSchool').show();
+                $('#LocationHelpText').html('Select which partner school where the device is located.')
+            } else if (locationType.val() === "@LocationCategory.StateOffice") {
+                $('#LocationTypeOther').show();
+                $('#LocationHelpText').html('Enter the name of the State Office where you are located.')
+            } else if (locationType.val() === "@LocationCategory.PrivateResidence") {
+                $('#LocationTypeOther').show();
+                $('#LocationHelpText').html('Enter the address of the private residence where the device is based.')
+            } else if (locationType.val() === "@LocationCategory.Other") {
+                $('#LocationTypeOther').show();
+                $('#LocationHelpText').html('Enter the best description for where this device usually is located.')
+            }
+        }
+
+        function UpdateSchoolLocation() {
+            // Get current value of select
+            var schoolId = $('#School_LocationCode').val();
+            var schoolName = $('#School_LocationCode option:selected').text();
+
+            // Set the UserCode field to that value
+            $('#LocationCode').val(schoolId);
+            $('#LocationName').val(schoolName);
+        }
+    </script>
+}

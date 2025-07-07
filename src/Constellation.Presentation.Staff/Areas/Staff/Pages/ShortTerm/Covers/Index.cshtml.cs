@@ -59,7 +59,7 @@ public class IndexModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage(cancellationToken);
 
@@ -80,7 +80,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to cancel Class Cover by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage(cancellationToken);
 
@@ -108,7 +108,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), coverRequest.Error, true)
                 .Warning("Failed to retrieve list of Class Covers by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(coverRequest.Error);
+            ModalContent = ErrorDisplay.Create(coverRequest.Error);
 
             return;
         }

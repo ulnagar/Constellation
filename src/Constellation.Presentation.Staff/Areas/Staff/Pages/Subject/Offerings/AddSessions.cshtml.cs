@@ -74,7 +74,7 @@ public class AddSessionsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to add bulk Sessions to Offering by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -98,7 +98,7 @@ public class AddSessionsModel : BasePageModel
                 .ForContext(nameof(Error), periodRequest.Error, true)
                 .Warning("Failed to retrieve defaults for Bulk Add Sessions to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 periodRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -116,7 +116,7 @@ public class AddSessionsModel : BasePageModel
                 .ForContext(nameof(Error), sessionRequest.Error, true)
                 .Warning("Failed to retrieve defaults for Bulk Add Sessions to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 sessionRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 
@@ -134,7 +134,7 @@ public class AddSessionsModel : BasePageModel
                 .ForContext(nameof(Error), offeringRequest.Error, true)
                 .Warning("Failed to retrieve defaults for Bulk Add Sessions to Offering with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 offeringRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Details", values: new { area = "Staff", Id = Id }));
 

@@ -4,6 +4,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -36,8 +37,8 @@ public class EditModel : BasePageModel
     [BindProperty]
     public bool IsStaffMember { get; set; }
 
-    [BindProperty]
-    public string StaffId { get; set; }
+    [BindProperty] 
+    public StaffId StaffId { get; set; } = StaffId.Empty;
 
     [BindProperty]
     public bool IsSchoolContact { get; set; }

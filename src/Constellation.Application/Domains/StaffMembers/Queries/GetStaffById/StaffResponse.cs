@@ -1,11 +1,15 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffById;
 
+using Core.Models.StaffMembers.Identifiers;
+using Core.Models.StaffMembers.ValueObjects;
+using Core.Models.Students.Enums;
 using Core.ValueObjects;
 
 public sealed record StaffResponse(
-    string StaffId,
+    StaffId StaffId,
+    EmployeeId EmployeeId,
     Name Name,
+    Gender Gender,
     EmailAddress EmailAddress,
-    string PortalUsername,
     string SchoolCode,
     bool IsShared);

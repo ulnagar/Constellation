@@ -1,6 +1,6 @@
-﻿namespace Constellation.Application.Assets.ImportAssetsFromFile;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 
-using Abstractions.Messaging;
+using Constellation.Application.Abstractions.Messaging;
 using System.Collections.Generic;
 using System.IO;
 

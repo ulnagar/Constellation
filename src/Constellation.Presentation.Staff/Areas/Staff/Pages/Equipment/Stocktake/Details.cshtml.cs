@@ -1,9 +1,12 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake;
 
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Stocktake.Queries.ExportStocktakeSightingsAndDifferences;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
+using Constellation.Application.DTOs;
 using Core.Abstractions.Services;
+using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +42,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle => "Stocktake Event Details";
 
     [BindProperty(SupportsGet = true)]
-    public Guid Id { get; set; }
+    public StocktakeEventId Id { get; set; }
 
     public StocktakeEventDetailsResponse Stocktake { get; set; }
 
@@ -52,7 +55,7 @@ public class DetailsModel : BasePageModel
 
         if (stocktake.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 stocktake.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" }));
 
@@ -64,5 +67,26 @@ public class DetailsModel : BasePageModel
         }
 
         Stocktake = stocktake.Value;
+    }
+
+    public async Task<IActionResult> OnGetExport()
+    {
+        _logger
+            .Information("Requested to export list of Stocktake Sightings by user {User}", _currentUserService.UserName);
+
+        Result<FileDto> file = await _mediator.Send(new ExportStocktakeSightingsAndDifferencesQuery(Id));
+
+        if (file.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(file.Error);
+
+            _logger
+                .ForContext(nameof(Error), file.Error, true)
+                .Warning("Requested to export list of Stocktake Sightings by user {User}", _currentUserService.UserName);
+
+            return Page();
+        }
+
+        return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
     }
 }

@@ -7,11 +7,13 @@ using Application.Domains.Training.Queries.GetCountOfExpiringCertificatesForStaf
 using Application.Extensions;
 using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models;
 using Constellation.Core.Models.StaffMembers.Repositories;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Enums;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,9 +38,11 @@ public class StaffSidebarMenuViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(string activePage)
     {
-        string? staffEmailAddress = _currentUserService.EmailAddress;
-        Staff? staffMember = staffEmailAddress is not null ? await _staffRepository.GetCurrentByEmailAddress(staffEmailAddress) : null;
-        string staffId = staffMember?.StaffId ?? string.Empty;
+        Result<EmailAddress> staffEmailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
+        StaffMember? staffMember = staffEmailAddress.IsSuccess 
+            ? await _staffRepository.GetCurrentByEmailAddress(staffEmailAddress.Value) 
+            : null;
+        StaffId staffId = staffMember?.Id ?? StaffId.Empty;
 
         string[] segments = activePage.Split('.');
         string module = segments[0];
@@ -64,7 +68,7 @@ public class StaffSidebarMenuViewComponent : ViewComponent
 
         if (username is not null)
         {
-            Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(null, username));
+            Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(StaffId.Empty, username));
 
             if (query.IsSuccess)
                 model.Classes = query.Value.ToDictionary(k => k.OfferingName.Value, k => k.OfferingId);

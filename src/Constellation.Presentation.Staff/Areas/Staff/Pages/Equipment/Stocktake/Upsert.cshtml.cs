@@ -7,6 +7,7 @@ using Constellation.Application.Domains.AssetManagement.Stocktake.Commands.Upser
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
+using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -44,10 +45,10 @@ public class UpsertModel : BasePageModel
     }
 
     [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Equipment_Stocktake_List;
-    [ViewData] public string PageTitle => Id is null ? "New Stocktake Event" : "Edit Stocktake Event";
+    [ViewData] public string PageTitle => Id.Equals(StocktakeEventId.Empty) ? "New Stocktake Event" : "Edit Stocktake Event";
 
-    [BindProperty(SupportsGet = true)]
-    public Guid? Id { get; set; }
+    [BindProperty(SupportsGet = true)] 
+    public StocktakeEventId Id { get; set; } = StocktakeEventId.Empty;
 
     [BindProperty]
     public string Name { get; set; }
@@ -70,17 +71,17 @@ public class UpsertModel : BasePageModel
         StartDate = _dateTime.Today;
         EndDate = _dateTime.Today;
 
-        if (!Id.HasValue)
+        if (Id == StocktakeEventId.Empty)
             return;
 
         _logger
             .Information("Requested to retrieve Stocktake Event with Id {Id} for edit by user {User}", Id, _currentUserService.UserName);
 
-        Result<StocktakeEventResponse> stocktake = await _mediator.Send(new GetStocktakeEventQuery(Id.Value));
+        Result<StocktakeEventResponse> stocktake = await _mediator.Send(new GetStocktakeEventQuery(Id));
 
         if (stocktake.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 stocktake.Error,
                 _linkGenerator.GetPathByPage("/Equipment/Stocktake/Index", values: new { area = "Staff" }));
 

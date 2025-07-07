@@ -63,7 +63,7 @@ public class ExplainModel : BasePageModel
 
         if (!absenceRequest.IsSuccess)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 absenceRequest.Error,
                 _linkGenerator.GetPathByPage("/Absences/Index", values: new { area = "Schools" }));
 
@@ -90,12 +90,12 @@ public class ExplainModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Absence Explanation",
             "Absence explanation has been forwarded to our Administration Team. Thank you!",
             "Ok",

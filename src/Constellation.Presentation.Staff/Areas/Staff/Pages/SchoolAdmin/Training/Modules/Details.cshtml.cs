@@ -12,6 +12,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +66,7 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
@@ -86,7 +87,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to retire Training Module with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
 
@@ -102,7 +103,7 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
@@ -123,7 +124,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to reinstate Training Module with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             await PreparePage();
 
@@ -146,13 +147,13 @@ public class DetailsModel : BasePageModel
         return Partial("RemoveStaffMemberFromTrainingModuleModal", viewModel);
     }
 
-    public async Task<IActionResult> OnGetRemoveStaff(string staffId)
+    public async Task<IActionResult> OnGetRemoveStaff(StaffId staffId)
     {
         AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
 
         if (!isAuthorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
@@ -177,7 +178,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), response.Error, true)
                 .Warning("Failed to remove member from Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(response.Error);
+            ModalContent = ErrorDisplay.Create(response.Error);
 
             await PreparePage();
 
@@ -193,7 +194,7 @@ public class DetailsModel : BasePageModel
 
         if (!isAuthorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 
@@ -218,7 +219,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), response.Error, true)
                 .Warning("Failed to add member to Training Module by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(response.Error);
+            ModalContent = ErrorDisplay.Create(response.Error);
 
             await PreparePage();
 
@@ -240,7 +241,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), moduleRequest.Error, true)
                 .Warning("Failed to retrieve details of Training Module with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 moduleRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Training/Modules/Index", values: new { area = "Staff" }));
 

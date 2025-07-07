@@ -3,7 +3,6 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
@@ -15,6 +14,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Enums;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Repositories;
@@ -150,7 +150,7 @@ internal sealed class GetOfferingDetailsQueryHandler
             if (assignment.IsDeleted)
                 continue;
 
-            Staff teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+            StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
             if (teacher is null)
             {
@@ -160,8 +160,9 @@ internal sealed class GetOfferingDetailsQueryHandler
             }
 
             teachers.Add(new(
-                teacher.StaffId,
-                teacher.GetName(),
+                teacher.Id,
+                teacher.EmployeeId,
+                teacher.Name,
                 assignment.Type));
         }
 

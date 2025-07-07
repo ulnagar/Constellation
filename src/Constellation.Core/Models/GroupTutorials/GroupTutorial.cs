@@ -6,6 +6,7 @@ using Errors;
 using Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers;
 using Students;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
                 (!member.EffectiveTo.HasValue || member.EffectiveTo.Value >= date))
             .ToList();
 
-    public Result<TutorialTeacher> AddTeacher(Staff teacher, DateOnly? effectiveTo = null)
+    public Result<TutorialTeacher> AddTeacher(StaffMember teacher, DateOnly? effectiveTo = null)
     {
         bool hasEndedOrBeenDeleted =
             EndDate < DateOnly.FromDateTime(DateTime.Today) ||
@@ -83,14 +84,14 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         if (effectiveTo.HasValue && effectiveTo.Value < DateOnly.FromDateTime(DateTime.Today))
             return Result.Failure<TutorialTeacher>(DomainErrors.GroupTutorials.TutorialTeacher.TimeExpired);
 
-        if (_teachers.Any(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted))
+        if (_teachers.Any(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted))
         {
-            TutorialTeacher existingEntry = _teachers.FirstOrDefault(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted);
+            TutorialTeacher existingEntry = _teachers.FirstOrDefault(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted);
 
             return existingEntry;
         }
 
-        TutorialTeacher entry = new TutorialTeacher(new TutorialTeacherId(), teacher.StaffId, effectiveTo);
+        TutorialTeacher entry = new TutorialTeacher(new TutorialTeacherId(), teacher.Id, effectiveTo);
 
         RaiseDomainEvent(new TeacherAddedToGroupTutorialDomainEvent(new DomainEventId(), Id, entry.Id));
 
@@ -99,14 +100,14 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return entry;
     }
 
-    public Result RemoveTeacher(Staff teacher, DateOnly? takesEffectOn = null)
+    public Result RemoveTeacher(StaffMember teacher, DateOnly? takesEffectOn = null)
     {
-        if (_teachers.Where(enrol => enrol.StaffId == teacher.StaffId).All(enrol => enrol.IsDeleted))
+        if (_teachers.Where(enrol => enrol.StaffId == teacher.Id).All(enrol => enrol.IsDeleted))
         {
             return Result.Success();
         }
 
-        var tutorialTeachers = _teachers.Where(enrol => enrol.StaffId == teacher.StaffId && !enrol.IsDeleted).ToList();
+        var tutorialTeachers = _teachers.Where(enrol => enrol.StaffId == teacher.Id && !enrol.IsDeleted).ToList();
 
         foreach (var tutorialTeacher in tutorialTeachers)
         {
@@ -205,14 +206,14 @@ public sealed class GroupTutorial : AggregateRoot, IAuditableEntity
         return roll;
     }
 
-    public Result SubmitRoll(TutorialRoll roll, Staff staffMember, Dictionary<StudentId, bool> studentPresence)
+    public Result SubmitRoll(TutorialRoll roll, StaffMember staffMember, Dictionary<StudentId, bool> studentPresence)
     {
         if (roll.Status != Enums.TutorialRollStatus.Unsubmitted)
         {
             return Result.Failure(DomainErrors.GroupTutorials.TutorialRoll.SubmitInvalidStatus);
         }
 
-        roll.Submit(staffMember.StaffId, studentPresence);
+        roll.Submit(staffMember.Id, studentPresence);
 
         RaiseDomainEvent(new TutorialRollSubmittedDomainEvent(new DomainEventId(), Id, roll.Id));
 

@@ -2,6 +2,7 @@
 
 using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,7 @@ public class StaffTrainingReportViewComponent : ViewComponent
     public async Task<IViewComponentResult> InvokeAsync()
     {
         var viewModel = new StaffTrainingReportSelection();
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsSuccess)
         {

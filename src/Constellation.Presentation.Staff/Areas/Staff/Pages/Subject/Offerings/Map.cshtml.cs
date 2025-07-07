@@ -60,7 +60,7 @@ public class MapModel : BasePageModel
                 .ForContext(nameof(Error), offeringResult.Error, true)
                 .Warning("Failed to retrieve map of locations by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 offeringResult.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 
@@ -77,7 +77,7 @@ public class MapModel : BasePageModel
                 .ForContext(nameof(Error), layers.Error, true)
                 .Warning("Failed to retrieve map of locations by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 layers.Error,
                 _linkGenerator.GetPathByPage("/Subject/Offerings/Index", values: new { area = "Staff" }));
 

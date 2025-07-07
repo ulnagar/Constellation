@@ -1,13 +1,11 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Constellation.Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using System.Threading.Tasks;
 
 public interface IOperationService
 {
-
-    Task CreateTeacherEmployedMSTeamAccess(string staffId);
-    Task RemoveTeacherEmployedMSTeamAccess(string staffId);
-    Task CreateCanvasUserFromStaff(Staff staff);
+    Task RemoveTeacherEmployedMSTeamAccess(StaffId staffId);
     Task DisableCanvasUser(string userId);
 }

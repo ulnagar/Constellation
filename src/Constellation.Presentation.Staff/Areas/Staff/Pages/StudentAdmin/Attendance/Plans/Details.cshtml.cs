@@ -58,7 +58,7 @@ public class DetailsModel : BasePageModel
 
         if (versionAttempt.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 versionAttempt.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Index", values: new { area = "Staff" }));
 
@@ -117,7 +117,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), update.Error, true)
                 .Information("Failed to approve Attendance Plan by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 update.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Details", values: new { area = "Staff", Id }));
 
@@ -144,7 +144,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), update.Error, true)
                 .Information("Failed to reject Attendance Plan by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 update.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Details", values: new { area = "Staff", Id }));
 
@@ -171,7 +171,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), update.Error, true)
                 .Information("Failed to add note to Attendance Plan by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 update.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Attendance/Plans/Details", values: new { area = "Staff", Id }));
 

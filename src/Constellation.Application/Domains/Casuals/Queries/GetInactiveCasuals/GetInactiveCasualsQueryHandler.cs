@@ -49,10 +49,10 @@ internal sealed class GetInactiveCasualsQueryHandler
 
             var entry = new CasualsListResponse(
                 casual.Id,
-                casual.FirstName,
-                casual.LastName,
+                casual.Name.FirstName,
+                casual.Name.LastName,
                 schoolName,
-                casual.EmailAddress,
+                casual.EmailAddress.Email,
                 !casual.IsDeleted);
 
             returnData.Add(entry);

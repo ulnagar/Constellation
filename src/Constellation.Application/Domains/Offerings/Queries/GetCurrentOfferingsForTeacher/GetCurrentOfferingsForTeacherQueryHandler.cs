@@ -1,13 +1,15 @@
 ﻿namespace Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects.Repositories;
+using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -34,17 +36,17 @@ public class GetCurrentOfferingsForTeacherQueryHandler
     {
         List<TeacherOfferingResponse> response = new();
 
-        if (!string.IsNullOrWhiteSpace(request.StaffId))
+        if (request.StaffId != StaffId.Empty)
         {
-            Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
+            StaffMember teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
             if (teacher is not null)
             {
-                List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
+                List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.Id, cancellationToken);
 
                 foreach (Offering offering in offerings)
                 {
-                    TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == teacher.StaffId);
+                    TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == teacher.Id);
 
                     if (assignment is null)
                         continue;
@@ -64,17 +66,22 @@ public class GetCurrentOfferingsForTeacherQueryHandler
 
             return response;
         }
-        else if (!string.IsNullOrWhiteSpace(request.EmailAddress))
+        
+        if (!string.IsNullOrWhiteSpace(request.EmailAddress))
         {
-            Staff teacher = await _staffRepository.GetCurrentByEmailAddress(request.EmailAddress, cancellationToken);
+            Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+            StaffMember teacher = emailAddress.IsSuccess
+                ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+                : null;
 
             if (teacher is not null)
             {
-                List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.StaffId, cancellationToken);
+                List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.Id, cancellationToken);
 
                 foreach (Offering offering in offerings)
                 {
-                    TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == teacher.StaffId);
+                    TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == teacher.Id);
 
                     if (assignment is null)
                         continue;

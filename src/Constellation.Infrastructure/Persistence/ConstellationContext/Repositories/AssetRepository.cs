@@ -35,6 +35,13 @@ internal sealed class AssetRepository : IAssetRepository
             .Set<Asset>()
             .SingleOrDefaultAsync(asset => asset.AssetNumber == assetNumber, cancellationToken);
 
+    public async Task<Asset?> GetBySerialNumber(
+        string serialNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Asset>()
+            .SingleOrDefaultAsync(asset => asset.SerialNumber == serialNumber, cancellationToken);
+
     public async Task<List<Asset>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context

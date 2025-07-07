@@ -2,17 +2,18 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Errors;
-using Core.Models;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Errors;
 using Core.Models.Attendance.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
@@ -73,16 +74,20 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
             return Result.Failure(AttendanceValueErrors.NotFoundForStudent(request.StudentId));
         }
 
-        Staff teacher = await _staffRepository.GetCurrentByEmailAddress(_currentUserService.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
+
+        StaffMember teacher = emailAddress.IsSuccess
+            ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
+            : null;
 
         if (teacher is null)
         {
             _logger
                 .ForContext(nameof(UpdateAttendanceCaseDetailsCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmail(_currentUserService.EmailAddress), true)
                 .Warning("Failed to update existing Case");
             
-            return Result.Failure(DomainErrors.Partners.Staff.NotFoundByEmail(_currentUserService.EmailAddress));
+            return Result.Failure(StaffMemberErrors.NotFoundByEmail(_currentUserService.EmailAddress));
         }
 
         string details = $"Attendance percentage for period {value.PeriodLabel} is {value.PerMinuteWeekPercentage}";

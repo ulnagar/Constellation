@@ -67,6 +67,10 @@ public static class ActionErrors
         "Case.Action.Update.IncidentNumberZero",
         "Cannot update Action with zero value Incident Number");
 
+    public static readonly Error UpdateIncidentNumberTooLow = new(
+        "Case.Action.Update.IncidentNumberTooLow",
+        "Cannot update Action with Incident ID Number set too low");
+
     public static readonly Error UpdateNotRequiredFalse = new(
         "Case.Action.Update.NotRequiredFalse",
         "Cannot update Action with Not Required set to false");

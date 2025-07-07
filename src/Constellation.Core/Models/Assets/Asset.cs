@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ValueObjects;
-using static Constellation.Core.Errors.DomainErrors.Assets;
 
 public sealed class Asset : AggregateRoot, IAuditableEntity
 {

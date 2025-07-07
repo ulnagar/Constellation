@@ -37,7 +37,7 @@ public sealed class IsCurrentTeacherAddedToTutorial : AuthorizationHandler<CanSu
             .SelectMany(tutorial => tutorial.Teachers.Where(teacher => !teacher.IsDeleted))
             .ToListAsync();
 
-        if (teachers.Select(teacher => teacher.StaffId).Contains(userStaffId))
+        if (teachers.Select(teacher => teacher.StaffId.ToString()).Contains(userStaffId))
         {
             context.Succeed(requirement);
         }

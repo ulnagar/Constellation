@@ -38,7 +38,7 @@
 
     @if (canManageAssets.Succeeded)
     {
-        <a asp-page-handler="export" class="btn btn-warning">Export</a>
+        <a asp-page-handler="export" class="btn btn-warning show-loader-5">Export</a>
 
         <a asp-page="/Equipment/Assets/Upsert" asp-area="Staff" class="btn btn-success">Create</a>
     }

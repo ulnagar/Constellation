@@ -2,6 +2,7 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +11,7 @@ public sealed record TutorialRollDetailResponse(
     GroupTutorialId TutorialId,
     string TutorialName,
     DateOnly SessionDate,
-    string StaffId,
+    StaffId StaffId,
     string StaffName,
     TutorialRollStatus Status,
     IReadOnlyCollection<TutorialRollStudentResponse> Students);

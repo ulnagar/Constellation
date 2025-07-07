@@ -21,9 +21,10 @@
             }
                 
             <div class="form-group row">
-                <label asp-for="IncidentNumber" class="col-md-2">Sentral Incident Number</label>
+                <label asp-for="IncidentNumber" class="col-md-2">Sentral Incident Id Number</label>
                 <div class="col-md-5">
                     <input asp-for="IncidentNumber" class="form-control" />
+                    <span class="text-danger">This is the Sentral Wellbeing Incident ID number for the follow-up incident</span>
                     <span asp-validation-for="IncidentNumber" class="text-danger"></span>
                 </div>
             </div>

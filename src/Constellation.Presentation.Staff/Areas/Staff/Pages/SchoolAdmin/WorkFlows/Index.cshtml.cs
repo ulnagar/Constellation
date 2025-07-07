@@ -3,6 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflo
 using Application.Common.PresentationModels;
 using Application.Domains.WorkFlows.Queries.GetCaseSummaryList;
 using Application.Models.Auth;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow.Enums;
@@ -10,7 +11,6 @@ using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -58,7 +58,9 @@ public class IndexModel : BasePageModel
         if (isAdminTest.Succeeded)
             IsAdmin = true;
 
-        string staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
 
         Result<List<CaseSummaryResponse>> request = Filter switch
         {
@@ -72,7 +74,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve list of WorkFlow Cases by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }

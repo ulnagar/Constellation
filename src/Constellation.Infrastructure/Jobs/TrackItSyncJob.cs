@@ -10,6 +10,7 @@ using Core.Models.Faculties.Repositories;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
@@ -60,7 +61,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
         List<Student> acosStudents = await _studentRepository.GetAll(cancellationToken);
         List<School> acosSchools = await _schoolRepository.GetAllActive(cancellationToken);
-        List<Staff> acosStaff = await _staffRepository.GetAll(cancellationToken);
+        List<StaffMember> acosStaff = await _staffRepository.GetAll(cancellationToken);
         List<SchoolContact> acosContacts = await _contactRepository.GetAllByRole(Position.TimetableOfficer, cancellationToken);
         _faculties = await _facultyRepository.GetAll(cancellationToken);
 
@@ -109,7 +110,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
             if (emailAddress.Contains("@det.nsw.edu.au", StringComparison.OrdinalIgnoreCase))
             {
-                Staff? staffMember = acosStaff.FirstOrDefault(staff => staff.EmailAddress.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
+                StaffMember? staffMember = acosStaff.FirstOrDefault(staff => staff.EmailAddress.Email.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
 
                 if (staffMember is not null)
                 {
@@ -173,7 +174,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
             _logger.Information("{id}: Student: Name {student} - Email {emailAddress}", jobId, acosStudent.Name.DisplayName, acosStudent.EmailAddress);
             
-            string customerEmailId = ConvertEmailToEmailId(acosStudent.EmailAddress.Email);
+            string customerEmailId = ConvertEmailToEmailId(acosStudent.EmailAddress);
             Customer? tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == acosStudent.StudentReferenceNumber.Number || c.Emailid == customerEmailId);
             
             if (tiCustomer is not null)
@@ -190,15 +191,15 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         SetNextCustomerSequence();
         await _tiContext.SaveChangesAsync(cancellationToken);
 
-        foreach (Staff acosStaffMember in acosStaff.Where(staff => !staff.IsDeleted))
+        foreach (StaffMember acosStaffMember in acosStaff.Where(staff => !staff.IsDeleted))
         {
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            _logger.Information("{id}: Teacher: Name {teacher} - Email {emailAddress}", jobId, acosStaffMember.DisplayName, acosStaffMember.EmailAddress);
+            _logger.Information("{id}: Teacher: Name {teacher} - Email {emailAddress}", jobId, acosStaffMember.Name.PreferredName, acosStaffMember.EmailAddress);
 
             string customerEmailId = ConvertEmailToEmailId(acosStaffMember.EmailAddress);
-            Customer? tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == acosStaffMember.PortalUsername || c.Emailid == customerEmailId);
+            Customer? tiCustomer = tiCustomers.FirstOrDefault(c => acosStaffMember.EmailAddress.Email.Contains(c.Client, StringComparison.InvariantCultureIgnoreCase) || c.Emailid == customerEmailId);
             
             if (tiCustomer is not null)
             {
@@ -336,6 +337,9 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
     private static string ConvertEmailIdToEmail(string emailId) =>
         emailId[(emailId.LastIndexOf('}') + 1)..].ToLower(CultureInfo.InvariantCulture);
 
+    private static string ConvertEmailToEmailId(EmailAddress email) =>
+        $"SMTP:{{{email.Email.ToLower(CultureInfo.InvariantCulture)}}}{email.Email.ToLower(CultureInfo.InvariantCulture)}";
+    
     private static string ConvertEmailToEmailId(string email) =>
         $"SMTP:{{{email.ToLower(CultureInfo.InvariantCulture)}}}{email.ToLower(CultureInfo.InvariantCulture)}";
 
@@ -399,7 +403,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         if (!customer.Client.Equals(student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
             customer.Client = student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture);
 
-        customer.Emailid = ConvertEmailToEmailId(student.EmailAddress.Email);
+        customer.Emailid = ConvertEmailToEmailId(student.EmailAddress);
 
         if (customer.Fname != student.Name.PreferredName)
         {
@@ -426,31 +430,30 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         customer.Updated();
     }
 
-    private void CheckExistingCustomerDetail(Customer customer, Staff staff)
+    private void CheckExistingCustomerDetail(Customer customer, StaffMember staff)
     {
-        if (!customer.Client.Equals(staff.PortalUsername.ToUpper(CultureInfo.InvariantCulture), StringComparison.OrdinalIgnoreCase))
-            customer.Client = staff.PortalUsername.ToUpper(CultureInfo.InvariantCulture);
+        string staffShortId = staff.EmailAddress.Email.Split('@')[0].ToUpper(CultureInfo.InvariantCulture);
+
+        if (!customer.Client.Equals(staffShortId, StringComparison.OrdinalIgnoreCase))
+            customer.Client = staffShortId;
 
         customer.Emailid = ConvertEmailToEmailId(staff.EmailAddress);
 
-        if (customer.Fname != staff.FirstName)
+        if (customer.Fname != staff.Name.PreferredName)
         {
-            customer.Fname = staff.FirstName;
+            customer.Fname = staff.Name.PreferredName;
 
-            _logger.Information("{id}: Staff: Name {staff} - Email {emailAddress}: FirstName updated to {newName}", JobId, staff.DisplayName, staff.EmailAddress, staff.FirstName);
+            _logger.Information("{id}: Staff: Name {staff} - Email {emailAddress}: FirstName updated to {newName}", JobId, staff.Name.DisplayName, staff.EmailAddress.Email, staff.Name.PreferredName);
         }
 
-        if (customer.Name != staff.LastName)
+        if (customer.Name != staff.Name.LastName)
         {
-            customer.Name = staff.LastName;
+            customer.Name = staff.Name.LastName;
 
-            _logger.Information("{id}: Staff: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, staff.DisplayName, staff.EmailAddress, staff.LastName);
+            _logger.Information("{id}: Staff: Name {student} - Email {emailAddress}: LastName updated to {newName}", JobId, staff.Name.DisplayName, staff.EmailAddress, staff.Name.LastName);
         }
 
-        FacultyMembership? membership = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
-        Faculty? faculty = membership is null
-            ? null
-            : _faculties.FirstOrDefault(faculty => faculty.Id == membership.FacultyId);
+        Faculty? faculty = _faculties.FirstOrDefault(faculty => faculty.Members.Any(member => member.StaffId == staff.Id && !member.IsDeleted));
 
         if (faculty is not null) 
         {
@@ -458,7 +461,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Dept = department?.Sequence;
         }
         
-        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.SchoolCode);
+        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode);
         customer.Location = location?.Sequence;
 
         customer.Inactive = 0;
@@ -507,7 +510,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         Customer customer = new()
         {
             Client = student.StudentReferenceNumber.Number.ToUpper(CultureInfo.InvariantCulture),
-            Emailid = ConvertEmailToEmailId(student.EmailAddress.Email),
+            Emailid = ConvertEmailToEmailId(student.EmailAddress),
             Group = 2,
             Inactive = 0,
             Fname = student.Name.PreferredName,
@@ -527,25 +530,23 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         return customer;
     }
 
-    private Customer CreateCustomerFromStaff(Staff staff)
+    private Customer CreateCustomerFromStaff(StaffMember staff)
     {
+        string staffShortId = staff.EmailAddress.Email.Split('@')[0].ToUpper(CultureInfo.InvariantCulture);
+
         Customer customer = new()
         {
-            Client = staff.PortalUsername.ToUpper(CultureInfo.InvariantCulture),
+            Client = staffShortId,
             Emailid = ConvertEmailToEmailId(staff.EmailAddress),
             Group = 2,
             Inactive = 0,
-            Fname = staff.FirstName,
-            Name = staff.LastName
+            Fname = staff.Name.PreferredName,
+            Name = staff.Name.LastName
         };
 
-        _logger.Information("{id}: Teacher: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.DisplayName, staff.EmailAddress);
+        _logger.Information("{id}: Teacher: Name {staff} - Email {emailAddress}: Created new record", JobId, staff.Name.DisplayName, staff.EmailAddress);
 
-        FacultyMembership? membership = staff.Faculties.FirstOrDefault(member => !member.IsDeleted);
-
-        Faculty? faculty = membership is null
-            ? null
-            : _faculties.FirstOrDefault(faculty => faculty.Id == membership.FacultyId);
+        Faculty? faculty = _faculties.FirstOrDefault(faculty => faculty.Members.Any(member => member.StaffId == staff.Id && !member.IsDeleted));
 
         if (faculty is not null)
         {
@@ -553,7 +554,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Dept = department?.Sequence;
         }
 
-        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.SchoolCode);
+        Location? location = _tiLocations.FirstOrDefault(c => c.Note == staff.CurrentAssignment?.SchoolCode);
         customer.Location = location?.Sequence;
 
         customer.Sequence = GetNextCustomerSequence();

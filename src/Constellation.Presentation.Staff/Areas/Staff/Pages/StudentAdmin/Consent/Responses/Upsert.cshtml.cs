@@ -87,7 +87,7 @@ public class UpsertModel : BasePageModel
 
             ModelState.AddModelError("Responses", "You must include at least one valid application");
 
-            ModalContent = new ErrorDisplay(error);
+            ModalContent = ErrorDisplay.Create(error);
 
             return await PreparePage();
         }
@@ -100,7 +100,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), family.Error, true)
                 .Warning("Failed to create new Consent Response by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(family.Error);
+            ModalContent = ErrorDisplay.Create(family.Error);
 
             return await PreparePage();
         }
@@ -113,7 +113,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), ParentErrors.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value), true)
                 .Warning("Failed to create new Consent Response by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(ParentErrors.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value));
+            ModalContent = ErrorDisplay.Create(ParentErrors.NotFoundInFamily(Submitter, family.Value.First().FamilyId.Value));
 
             return await PreparePage();
         }
@@ -140,7 +140,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to create new Content Response by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             return await PreparePage();
         }
@@ -182,7 +182,7 @@ public class UpsertModel : BasePageModel
                 .ForContext(nameof(Error), students.Error, true)
                 .Warning("Failed to retrieve options for new Consent Response by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 students.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Index", values: new { area = "Staff" }));
 

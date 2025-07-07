@@ -72,7 +72,7 @@ public class DetailsModel : BasePageModel
 
         if (commandRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(commandRequest.Error);
+            ModalContent = ErrorDisplay.Create(commandRequest.Error);
 
             await PreparePage();
 
@@ -81,7 +81,7 @@ public class DetailsModel : BasePageModel
 
         if (!CanBeExplainedByParent)
         {
-            ModalContent = new FeedbackDisplay(
+            ModalContent = FeedbackDisplay.Create(
                 "Absence Explanation Forwarded",
                 "Your explanation for this absence has been forwarded to the school office for entry.",
                 "Ok",
@@ -104,7 +104,7 @@ public class DetailsModel : BasePageModel
 
         if (absenceRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(absenceRequest.Error);
+            ModalContent = ErrorDisplay.Create(absenceRequest.Error);
 
             return;
         }

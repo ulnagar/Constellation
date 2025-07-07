@@ -1,0 +1,175 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Stocktake.Sighting.IndexModel
+@{
+}
+
+<div class="jumbotron">
+    <h3 class="display-4">Search for a device</h3>
+    <p class="lead">Search for an Aurora College Asset either by Asset Number, or Serial Number</p>
+    <hr class="my-4">
+    <p>Asset Numbers start with "AC" and have eight digits. You do not need to include the "AC" or any zeros at the start. E.g. AC00004321 could be entered as "4321".</p>
+    <form method="post">
+        <div class="form-row">
+            <div class="col-4">
+                <input asp-for="AssetNumber" class="form-control" placeholder="Asset Number" />
+            </div>
+            <div class="col-1 align-middle text-center">
+                <span class="align-middle">OR</span>
+            </div>
+            <div class="col-4">
+                <input asp-for="SerialNumber" class="form-control" placeholder="Serial Number" />
+            </div>
+            <div class="col-3">
+                <button type="submit" class="btn btn-success btn-block">Search</button>
+                <input name="Misses" type="hidden" value="@Model.Misses" />
+            </div>
+        </div>
+    </form>
+    @if (Model.Misses < 3)
+    {
+        <div class="alert alert-warning mt-3">TIP: You can use a barcode scanner to scan the Asset Number barcode on a device directly into the portal!</div>
+    }
+    else
+    {
+        <div class="alert alert-danger mt-3">Can't find the device? Click <a asp-page="/Equipment/Stocktake/Sighting/Manual" asp-area="Staff" asp-route-id="@Model.Id">here</a> to enter the details manually.</div>
+    }
+
+</div>
+
+@if (Model.Asset is not null)
+{
+    <div class="jumbotron" id="device-found">
+        <h3 class="display-4">Asset found!</h3>
+        <p class="lead">Is this the correct asset? Please confirm all details</p>
+        <hr class="my-4">
+        <div class="row">
+            <dl class="row col-6">
+                <dt class="col-sm-3">Asset Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.AssetNumber</dd>
+
+                <dt class="col-sm-3">Serial Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.SerialNumber</dd>
+
+                <dt class="col-sm-3">Description:</dt>
+                <dd class="col-sm-9">@Model.Asset.Description</dd>
+            </dl>
+        </div>
+        <div class="form-row mt-3">
+            <div class="col-4">
+                <button type="button" class="btn btn-success btn-block" onclick="ShowDetails()">Yes, this is correct</button>
+            </div>
+            <div class="col-1 align-middle text-center">
+                
+            </div>
+            <div class="col-4">
+                <a asp-page="/Equipment/Stocktake/Sighting/Index" asp-area="Staff" class="btn btn-warning btn-block">No, search again</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="jumbotron d-none" id="display-details">
+        <h3 class="display-4">Confirm details</h3>
+        <p class="lead">Are the following details still correct?</p>
+        <hr class="my-4">
+        <div class="row">
+            <dl class="row col-6">
+                <dt class="col-sm-3">Asset Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.AssetNumber</dd>
+
+                <dt class="col-sm-3">Serial Number:</dt>
+                <dd class="col-sm-9">@Model.Asset.SerialNumber</dd>
+
+                <dt class="col-sm-3">Description:</dt>
+                <dd class="col-sm-9">@Model.Asset.Description</dd>
+            </dl>
+            <dl class="row col-6">
+                <dt class="col-sm-3">Location Type:</dt>
+                <dd class="col-sm-9">@Model.Asset.LocationCategory</dd>
+
+                <dt class="col-sm-3">Location Site:</dt>
+                <dd class="col-sm-9">@Model.Asset.LocationName</dd>
+
+                <dt class="col-sm-3">User Type:</dt>
+                <dd class="col-sm-9">@Model.Asset.UserType</dd>
+
+                <dt class="col-sm-3">User Name:</dt>
+                <dd class="col-sm-9">@Model.Asset.UserName</dd>
+            </dl>
+        </div>
+        <div class="form-row mt-3">
+            <div class="col-4">
+                <button type="button" class="btn btn-success btn-block" onclick="ShowCondition()">Yes, this is correct</button>
+            </div>
+            <div class="col-1 align-middle text-center">
+            </div>
+            <div class="col-4">
+                <a asp-page="/Equipment/Stocktake/Sighting/Update" asp-area="Staff" asp-route-eventId="@Model.Id" asp-route-assetNumber="@Model.AssetNumber" class="btn btn-warning btn-block">No, update them</a>
+            </div>
+        </div>
+    </div>
+
+    <form asp-page-handler="FinalSubmit" method="post">
+        <div class="jumbotron d-none" id="confirm-condition">
+            <h3 class="display-4">Confirm condition</h3>
+            <p class="lead">Is the asset in good condition?</p>
+            <hr class="my-4">
+            <div class="row">
+                <dl class="row col-6">
+                    <dt class="col-sm-3">Asset Number:</dt>
+                    <dd class="col-sm-9">@Model.Asset.AssetNumber</dd>
+
+                    <dt class="col-sm-3">Serial Number:</dt>
+                    <dd class="col-sm-9">@Model.Asset.SerialNumber</dd>
+
+                    <dt class="col-sm-3">Description:</dt>
+                    <dd class="col-sm-9">@Model.Asset.Description</dd>
+                </dl>
+                <dl class="row col-6">
+                    <dt class="col-sm-3">Location Type:</dt>
+                    <dd class="col-sm-9">@Model.Asset.LocationCategory</dd>
+
+                    <dt class="col-sm-3">Location Site:</dt>
+                    <dd class="col-sm-9">@Model.Asset.LocationName</dd>
+
+                    <dt class="col-sm-3">User Type:</dt>
+                    <dd class="col-sm-9">@Model.Asset.UserType</dd>
+
+                    <dt class="col-sm-3">User Name:</dt>
+                    <dd class="col-sm-9">@Model.Asset.UserName</dd>
+                </dl>
+            </div>
+            <hr class="my-4">
+            <p>If not, please enter a description of the device's condition below</p>
+            <textarea name="comment" rows="5" cols="100" class="form-control"></textarea>
+            <input type="hidden" name="assetId" value="@Model.Asset.AssetId" />
+
+            <div class="form-row mt-3">
+                <div class="col-4">
+                    <button type="submit" class="btn btn-success btn-block">Submit</button>
+                </div>
+                <div class="col-offset-1 col-2">
+                    <a asp-page="/Equipment/Stocktake/Sighting/Index" asp-area="Staff" class="btn btn-warning btn-block">Reset</a>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+
+@section scripts
+{
+    <script>        
+        function ShowDetails() {
+            $('#device-found').addClass('d-none');
+
+            $('#display-details').removeClass('d-none');
+            $('html, body').scrollTop($('#display-details').offset().top);
+        }
+
+        function ShowCondition() {
+            $('#display-details').addClass('d-none');
+
+            $('#confirm-condition').removeClass('d-none');
+            $('html, body').scrollTop($('#confirm-condition').offset().top);
+        }
+    </script>
+}

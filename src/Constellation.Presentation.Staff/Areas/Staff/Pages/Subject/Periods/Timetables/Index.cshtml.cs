@@ -65,13 +65,13 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), staffRequest.Error, true)
                 .Warning("Failed to retrieve list of staff for Timetable view by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffRequest.Error,
                 _linkGenerator.GetPathByPage("Dashboard", values: new { area = "Staff" }));
 
             return;
         }
 
-        Staff = staffRequest.Value.OrderBy(staff => staff.LastName).ThenBy(staff => staff.FirstName).ToList();
+        Staff = staffRequest.Value.OrderBy(staff => staff.Name.SortOrder).ToList();
     }
 }

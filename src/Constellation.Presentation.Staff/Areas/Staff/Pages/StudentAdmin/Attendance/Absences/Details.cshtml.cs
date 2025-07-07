@@ -62,7 +62,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed tor retrieve details of Absence with id {Id} for user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 Request.Headers["Referer"].ToString());
 
@@ -87,7 +87,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
                 .Warning("Failed to send notification for Absence with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             return RedirectToPage();
         }

@@ -10,6 +10,7 @@ using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +48,7 @@ public class AddMemberModel : BasePageModel
         public Guid? FacultyId { get; set; }
         public string? FacultyName { get; set; }
         [Required]
-        public string StaffId { get; set; }
+        public StaffId StaffId { get; set; }
         [Required]
         public string Role { get; set; }
     }
@@ -61,7 +62,7 @@ public class AddMemberModel : BasePageModel
     [BindProperty]
     public AddMemberDto MemberDefinition { get; set; } = new();
 
-    public Dictionary<string, string> StaffList { get; set; } = new();
+    public Dictionary<StaffId, string> StaffList { get; set; } = new();
 
     public SelectList FacultyRoles { get; set; } = new(FacultyMembershipRole.Enumerations(), "");
 
@@ -69,7 +70,7 @@ public class AddMemberModel : BasePageModel
     {
         _logger.Information("Requested to add member to Faculty with Id {FaultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
@@ -77,7 +78,7 @@ public class AddMemberModel : BasePageModel
                 .ForContext(nameof(Error), staffListRequest.Error, true)
                 .Warning("Failed to add member to Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 staffListRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Staff/Faculties/Details", values: new { area = "Staff", FacultyId }));
 
@@ -99,7 +100,7 @@ public class AddMemberModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+            Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
             if (staffListRequest.IsFailure)
             {
@@ -107,7 +108,7 @@ public class AddMemberModel : BasePageModel
                     .ForContext(nameof(Error), staffListRequest.Error, true)
                     .Warning("Failed to add member to Faculty with id {FacultyId} by user {User}", FacultyId, _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     staffListRequest.Error,
                     _linkGenerator.GetPathByPage("/Partner/Staff/Faculties/Details", values: new { area = "Staff", FacultyId }));
 

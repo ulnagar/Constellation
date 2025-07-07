@@ -1,17 +1,20 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
+using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Core.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 public class StaffRepository : IStaffRepository
 {
@@ -23,41 +26,50 @@ public class StaffRepository : IStaffRepository
         _context = context;
     }
 
-    private IQueryable<Staff> Collection()
-    {
-        return _context.Staff
-            .Include(s => s.School)
-            .Include(staff => staff.Faculties);
-    }
-
-    public async Task<List<Staff>> GetAll(
+    public async Task<List<StaffMember>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
-            .Include(member => member.Faculties)
+            .Set<StaffMember>()
             .ToListAsync(cancellationToken);
 
-    public async Task<Staff?> GetById(
-        string staffId,
+    public async Task<StaffMember?> GetById(
+        StaffId staffId,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
-            .Include(staff => staff.Faculties)
-            .FirstOrDefaultAsync(staff => staff.StaffId == staffId, cancellationToken);
+            .Set<StaffMember>()
+            .FirstOrDefaultAsync(staff => staff.Id == staffId, cancellationToken);
 
-    public async Task<List<Staff>> GetListFromIds(
-        List<string> staffIds,
+    public async Task<StaffMember?> GetByEmployeeId(
+        EmployeeId employeeId,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
-            .Where(teacher => staffIds.Contains(teacher.StaffId))
+            .Set<StaffMember>()
+            .FirstOrDefaultAsync(member => member.EmployeeId == employeeId, cancellationToken);
+
+    public async Task<StaffMember?> GetByEdvalCode(
+        string edvalCode,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StaffMember>()
+            .FirstOrDefaultAsync(
+                member => member.SystemLinks.Any(link => 
+                        link.System.Equals(SystemType.Edval) && 
+                        link.Value == edvalCode),
+                cancellationToken);
+
+    public async Task<List<StaffMember>> GetListFromIds(
+        List<StaffId> staffIds,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StaffMember>()
+            .Where(teacher => staffIds.Contains(teacher.Id))
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Staff>> GetCurrentTeachersForOffering(
+    public async Task<List<StaffMember>> GetCurrentTeachersForOffering(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        List<string> staffIds = await _context
+        List<StaffId> staffIds = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .SelectMany(offering => offering.Teachers)
@@ -66,16 +78,16 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
         return await _context
-            .Set<Staff>()
-            .Where(staff => staffIds.Contains(staff.StaffId))
+            .Set<StaffMember>()
+            .Where(staff => staffIds.Contains(staff.Id))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Staff>> GetPrimaryTeachersForOffering(
+    public async Task<List<StaffMember>> GetPrimaryTeachersForOffering(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {
-        List<string> staffIds = await _context
+        List<StaffId> staffIds = await _context
             .Set<Offering>()
             .Where(offering => offering.Id == offeringId)
             .SelectMany(offering => offering.Teachers)
@@ -86,25 +98,32 @@ public class StaffRepository : IStaffRepository
             .ToListAsync(cancellationToken);
 
         return await _context
-            .Set<Staff>()
-            .Where(staff => staffIds.Contains(staff.StaffId))
+            .Set<StaffMember>()
+            .Where(staff => staffIds.Contains(staff.Id))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Staff>> GetFacultyHeadTeachers(
+    public async Task<List<StaffMember>> GetFacultyHeadTeachers(
         FacultyId facultyId,
-        CancellationToken cancellationToken = default) =>
-        await _context
-            .Set<Staff>()
-            .Where(teacher => 
-                teacher.Faculties
-                    .Any(faculty => 
-                        faculty.FacultyId == facultyId && 
-                        faculty.Role == FacultyMembershipRole.Manager && 
-                        !faculty.IsDeleted))
+        CancellationToken cancellationToken = default)
+    {
+        List<StaffId> staffIds = await _context
+            .Set<Faculty>()
+            .Where(faculty => faculty.Id == facultyId)
+            .SelectMany(faculty => faculty.Members)
+            .Where(membership =>
+                membership.Role == FacultyMembershipRole.Manager &&
+                !membership.IsDeleted)
+            .Select(membership => membership.StaffId)
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Staff>> GetFacultyHeadTeachersForOffering(
+        return await _context
+            .Set<StaffMember>()
+            .Where(staff => staffIds.Contains(staff.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<StaffMember>> GetFacultyHeadTeachersForOffering(
         OfferingId offeringId, 
         CancellationToken cancellationToken = default)
     {
@@ -120,164 +139,102 @@ public class StaffRepository : IStaffRepository
             .Select(course => course.FacultyId)
             .ToListAsync(cancellationToken);
 
-        List<string> staffIds = await _context
+        List<StaffId> staffIds = await _context
             .Set<Faculty>()
             .Where(faculty => facultyIds.Contains(faculty.Id))
             .SelectMany(faculty => faculty.Members)
-            .Where(member => 
-                !member.IsDeleted &&
-                member.Role == FacultyMembershipRole.Manager)
-            .Select(member => member.StaffId)
-            .Distinct()
+            .Where(membership =>
+                membership.Role == FacultyMembershipRole.Manager &&
+                !membership.IsDeleted)
+            .Select(membership => membership.StaffId)
             .ToListAsync(cancellationToken);
 
         return await _context
-            .Set<Staff>()
-            .Where(staff => staffIds.Contains(staff.StaffId))
+            .Set<StaffMember>()
+            .Where(staff => staffIds.Contains(staff.Id))
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Staff>> GetAllActive(
+    public async Task<List<StaffMember>> GetAllActive(
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
-            .Include(staff => staff.Faculties)
+            .Set<StaffMember>()
             .Where(staff => !staff.IsDeleted)
             .ToListAsync(cancellationToken);
 
-    public async Task<List<Staff>> GetActiveFromSchool(
+    public async Task<List<StaffMember>> GetActiveFromSchool(
         string schoolCode, 
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
+            .Set<StaffMember>()
             .Where(staff => 
                 !staff.IsDeleted &&
-                staff.SchoolCode == schoolCode)
+                staff.SchoolAssignments.Any(assignment =>
+                    !assignment.IsDeleted &&
+                    assignment.SchoolCode == schoolCode))
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCountCurrentStaffFromSchool(
         string schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
+            .Set<StaffMember>()
             .Where(staff =>
                 !staff.IsDeleted &&
-                staff.SchoolCode == schoolCode)
+                staff.SchoolAssignments.Any(assignment =>
+                    !assignment.IsDeleted &&
+                    assignment.SchoolCode == schoolCode))
             .CountAsync(cancellationToken);
 
-    public async Task<List<string>> GetAllActiveStaffIds(
+    public async Task<List<StaffId>> GetAllActiveStaffIds(
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
+            .Set<StaffMember>()
             .Where(staff => !staff.IsDeleted)
-            .Select(staff => staff.StaffId)
+            .Select(staff => staff.Id)
             .ToListAsync(cancellationToken);
 
-    public async Task<Staff?> GetCurrentByEmailAddress(
-        string emailAddress,
+    public async Task<StaffMember?> GetCurrentByEmailAddress(
+        EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
+            .Set<StaffMember>()
             .Where(staff => 
-                emailAddress.Contains(staff.PortalUsername) && 
+                staff.EmailAddress == emailAddress && 
                 !staff.IsDeleted)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<Staff?> GetAnyByEmailAddress(
-        string emailAddress,
+    public async Task<StaffMember?> GetAnyByEmailAddress(
+        EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
-            .Set<Staff>()
+            .Set<StaffMember>()
             .Where(staff =>
-                emailAddress.Contains(staff.PortalUsername))
+                staff.EmailAddress == emailAddress)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public void Insert(Staff member) => _context.Set<Staff>().Add(member);
-        
-    public Staff WithDetails(string id)
-    {
-        return Collection()
-            .SingleOrDefault(d => d.StaffId == id);
-    }
-
-    public async Task<Staff> GetForExistCheck(string id)
-    {
-        return await _context.Staff
-            .SingleOrDefaultAsync(staff => staff.StaffId == id);
-    }
-
-    public ICollection<Staff> AllWithoutAdobeConnectInfo()
-    {
-        return Collection()
-            .Where(s => s.AdobeConnectPrincipalId == null || s.AdobeConnectPrincipalId.Trim() == string.Empty)
-            .OrderBy(s => s.LastName)
-            .ToList();
-    }
-
-    public async Task<Staff> FromEmailForExistCheck(string email)
-    {
-        return await _context.Staff
-            .FirstOrDefaultAsync(member => email.Contains(member.PortalUsername));
-    }
-
-    public async Task<Staff> GetFromName(string name)
+    public async Task<StaffMember> GetFromName(
+        string name,
+        CancellationToken cancellationToken = default)
     {
         string[] splitName = name.ToLowerInvariant().Trim().Split(' ');
 
-        Staff straightMatch = await _context
-            .Set<Staff>()
-            .FirstOrDefaultAsync(staff => staff.FirstName.Contains(splitName[0]) && staff.LastName.Contains(splitName[1]));
+        StaffMember straightMatch = await _context
+            .Set<StaffMember>()
+            .FirstOrDefaultAsync(staff => 
+                (staff.Name.FirstName.Contains(splitName[0]) || staff.Name.PreferredName.Contains(splitName[0])) && 
+                staff.Name.LastName.Contains(splitName[1]),
+                cancellationToken);
 
         if (straightMatch is not null)
             return straightMatch;
 
         string username = name.ToLowerInvariant().Trim().Replace(' ', '.');
 
-        return await _context.Staff
-            .SingleOrDefaultAsync(member => member.PortalUsername.Contains(username));
+        return await _context
+            .Set<StaffMember>()
+            .SingleOrDefaultAsync(member => member.EmailAddress.Email.Contains(username), cancellationToken);
     }
 
-    public async Task<Staff> FromIdForExistCheck(string id)
-    {
-        return await _context.Staff
-            .FirstOrDefaultAsync(member => member.StaffId == id);
-    }
-
-    public async Task<ICollection<Staff>> ForListAsync(Expression<Func<Staff, bool>> predicate)
-    {
-        return await _context.Staff
-            .Include(staff => staff.School)
-            .Include(staff => staff.Faculties)
-            .OrderBy(staff => staff.LastName)
-            .Where(predicate)
-            .ToListAsync();
-    }
-
-    public async Task<Staff> ForDetailDisplayAsync(string id)
-    {
-        return await _context.Staff
-            .Include(staff => staff.Faculties)
-            .Include(staff => staff.School)
-            .ThenInclude(school => school.StaffAssignments)
-            .SingleOrDefaultAsync(staff => staff.StaffId == id);
-    }
-    
-    public async Task<Staff> ForEditAsync(string id)
-    {
-        return await _context.Staff
-            .SingleOrDefaultAsync(staff => staff.StaffId == id);
-    }
-
-    public async Task<bool> AnyWithId(string id)
-    {
-        return await _context.Staff
-            .AnyAsync(staff => staff.StaffId == id);
-    }
-
-    public async Task<Staff> ForDeletion(string id)
-    {
-        return await _context.Staff
-            .Include(staff => staff.Faculties)
-            .SingleOrDefaultAsync(staff => staff.StaffId == id);
-    }
+    public void Insert(StaffMember member) => _context.Set<StaffMember>().Add(member);
 }

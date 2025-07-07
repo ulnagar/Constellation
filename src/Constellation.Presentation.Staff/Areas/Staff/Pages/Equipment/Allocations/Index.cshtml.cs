@@ -67,7 +67,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to retrieve Allocations of type {Type} by {User}", AllocationType.Name, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return;
         }

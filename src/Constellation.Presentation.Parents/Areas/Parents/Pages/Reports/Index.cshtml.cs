@@ -60,7 +60,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Reports/Index", values: new { area = "Parents" }));
 
@@ -78,7 +78,7 @@ public class IndexModel : BasePageModel
 
         if (fileResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 fileResponse.Error,
                 _linkGenerator.GetPathByPage("/Reports/Index", values: new { area = "Parents" }));
 
@@ -98,7 +98,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -120,7 +120,7 @@ public class IndexModel : BasePageModel
 
             if (reportsRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(reportsRequest.Error);
+                ModalContent = ErrorDisplay.Create(reportsRequest.Error);
 
                 return;
             }

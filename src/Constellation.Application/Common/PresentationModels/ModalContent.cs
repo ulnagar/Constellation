@@ -2,88 +2,169 @@
 
 using Constellation.Core.Shared;
 using System;
+using System.Collections.Generic;
 
 public abstract class ModalContent
 {
+    private readonly List<ModalContentButton> _buttons = [];
+
     public string Title { get; protected set; }
     public string Content { get; protected set; }
-    public string ButtonText { get; protected set; }
-    public string ButtonColour { get; protected set; }
+    public IReadOnlyList<ModalContentButton> Buttons => _buttons.AsReadOnly();
     public bool ButtonHasLink { get; protected set; }
-    public string ButtonLink { get; protected set; }
+
+    public sealed class ModalContentButton
+    {
+        public ModalContentButton(
+            string text,
+            string colour,
+            string link)
+        {
+            Text = text;
+            Colour = colour;
+            Link = link;
+        }
+
+        public string Text { get; private set; }
+        public string Colour { get; private set; }
+        public string Link { get; private set; }
+    }
+
+    public void AddButton(
+        string text,
+        string colour,
+        string link)
+    {
+        _buttons.Add(new(
+            text,
+            colour,
+            link));
+    }
 }
 
 public sealed class ErrorDisplay : ModalContent
 {
-    public ErrorDisplay(Error error)
+    private ErrorDisplay() { }
+
+    public static ErrorDisplay Create(
+        Error error)
     {
-        Title = "Error";
-        Content = $@"<div>{error.Code}</div><span>{error.Message}</span>";
-        ButtonColour = "btn-warning";
-        ButtonText = "Ok";
-        ButtonHasLink = false;
+        ErrorDisplay modal = new()
+        {
+            Title = "Error", 
+            Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
+        };
+
+        modal.AddButton("Ok", "btn-warning", string.Empty);
+
+        return modal;
     }
 
-    public ErrorDisplay(Error error, string link)
+    public static ErrorDisplay Create(
+        Error error,
+        string link)
     {
-        Title = "Error";
-        Content = $@"<div>{error.Code}</div><span>{error.Message}</span>";
-        ButtonText = "Ok";
-        ButtonColour = "btn-warning";
-        ButtonHasLink = true;
-        ButtonLink = link;
+        ErrorDisplay modal = new()
+        {
+            Title = "Error",
+            Content = $@"<div>{error.Code}</div><span>{error.Message}</span>"
+        };
+
+        modal.AddButton("Ok", "btn-warning", link);
+
+        return modal;
     }
 }
 
 public sealed class ExceptionDisplay : ModalContent
 {
-    public ExceptionDisplay(Exception ex)
+    private ExceptionDisplay() { }
+
+    public static ExceptionDisplay Create(
+        Exception ex)
     {
-        Title = "Exception";
-        Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>";
-        ButtonColour = "btn-warning";
-        ButtonText = "Ok";
-        ButtonHasLink = false;
+        ExceptionDisplay modal = new()
+        {
+            Title = "Exception", 
+            Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>"
+        };
+
+        modal.AddButton("Ok", "btn-warning", string.Empty);
+
+        return modal;
     }
 
-    public ExceptionDisplay(Exception ex, string link)
+    public static ExceptionDisplay Create(
+        Exception ex,
+        string link)
     {
-        Title = "Exception";
-        Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>";
-        ButtonColour = "btn-warning";
-        ButtonText = "Ok";
-        ButtonHasLink = true;
-        ButtonLink = link;
+        ExceptionDisplay modal = new()
+        {
+            Title = "Exception",
+            Content = $@"<div>{ex.GetType()}</div><span>{ex.Message}</span>"
+        };
+
+        modal.AddButton("Ok", "btn-warning", link);
+
+        return modal;
     }
 }
 
 public sealed class FeedbackDisplay : ModalContent
 {
-    public FeedbackDisplay(
+    private FeedbackDisplay() { }
+
+    public static FeedbackDisplay Create(
         string title,
         string content,
         string buttonText,
         string buttonColour)
     {
-        Title = title;
-        Content = content;
-        ButtonText = buttonText;
-        ButtonColour = buttonColour;
-        ButtonHasLink = false;
+        FeedbackDisplay modal = new FeedbackDisplay()
+        {
+            Title = title,
+            Content = content
+        };
+
+        modal.AddButton(buttonText, buttonColour, string.Empty);
+
+        return modal;
     }
 
-    public FeedbackDisplay(
+    public static FeedbackDisplay Create(
         string title,
         string content,
         string buttonText,
         string buttonColour,
         string buttonLink)
     {
-        Title = title;
-        Content = content;
-        ButtonText = buttonText;
-        ButtonColour = buttonColour;
-        ButtonHasLink = true;
-        ButtonLink = buttonLink;
+        FeedbackDisplay modal = new FeedbackDisplay()
+        {
+            Title = title,
+            Content = content
+        };
+
+        modal.AddButton(buttonText, buttonColour, buttonLink);
+
+        return modal;
+    }
+
+    public static FeedbackDisplay Create(
+        string title,
+        string content,
+        List<(string Text, string Colour, string Link)> buttons)
+    {
+        FeedbackDisplay modal = new FeedbackDisplay()
+        {
+            Title = title,
+            Content = content
+        };
+
+        foreach (var button in buttons)
+        {
+            modal.AddButton(button.Text, button.Colour, button.Link);
+        }
+        
+        return modal;
     }
 }

@@ -59,7 +59,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve support contacts by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return;
         }
@@ -74,7 +74,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), contactsRequest.Error, true)
                 .Warning("Failed to retrieve support contacts by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(contactsRequest.Error);
+            ModalContent = ErrorDisplay.Create(contactsRequest.Error);
 
             return;
         }
@@ -95,7 +95,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve support contacts by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return Page();
         }
@@ -110,7 +110,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), student.Error, true)
                 .Warning("Failed to submit student support request by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(student.Error);
+            ModalContent = ErrorDisplay.Create(student.Error);
 
             return Page();
         }
@@ -123,7 +123,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), recipient.Error, true)
                 .Warning("Failed to submit student support request by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(recipient.Error);
+            ModalContent = ErrorDisplay.Create(recipient.Error);
 
             return Page();
         }
@@ -146,12 +146,12 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to submit student support request by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Success",
             "Thank you. Your request for support has been sent to our Technology Support Team!",
             "Close",

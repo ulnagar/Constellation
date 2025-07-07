@@ -58,7 +58,7 @@ public class AttendanceModel : BasePageModel
                 .ForContext(nameof(Error), studentAttendanceTrends.Error, true)
                 .Warning("Failed to retrieve Attendance Values for WorkFlow creation by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(studentAttendanceTrends.Error);
+            ModalContent = ErrorDisplay.Create(studentAttendanceTrends.Error);
 
             return;
         }
@@ -76,7 +76,7 @@ public class AttendanceModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Auth.NotAuthorised,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" }));
 
@@ -117,7 +117,7 @@ public class AttendanceModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to create WorkFlow Attendance Case by user {User}", _currentUserService.UserName);
                 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Reports/Index", values: new { area = "Staff" }));
 

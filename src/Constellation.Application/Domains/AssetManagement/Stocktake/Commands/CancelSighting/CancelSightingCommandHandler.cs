@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Commands.CancelSighting;
 
 using Abstractions.Messaging;
+using Core.Abstractions.Services;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Errors;
 using Core.Models.Stocktake.Repositories;
@@ -14,34 +15,50 @@ internal sealed class CancelSightingCommandHandler
     : ICommandHandler<CancelSightingCommand>
 {
     private readonly IStocktakeRepository _stocktakeRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _uniOfWork;
     private readonly ILogger _logger;
 
     public CancelSightingCommandHandler(
         IStocktakeRepository stocktakeRepository,
+        ICurrentUserService currentUserService,
         IUnitOfWork uniOfWork,
         ILogger logger)
     {
         _stocktakeRepository = stocktakeRepository;
+        _currentUserService = currentUserService;
         _uniOfWork = uniOfWork;
         _logger = logger;
     }
 
     public async Task<Result> Handle(CancelSightingCommand request, CancellationToken cancellationToken)
     {
-        StocktakeSighting sighting = await _stocktakeRepository.GetSightingById(request.SightingId, cancellationToken);
+        StocktakeEvent @event = await _stocktakeRepository.GetById(request.EventId, cancellationToken);
 
-        if (sighting is null)
+        if (@event is null)
         {
             _logger
                 .ForContext(nameof(CancelSightingCommand), request, true)
-                .ForContext(nameof(Error), StocktakeErrors.SightingNotFound(request.SightingId), true)
+                .ForContext(nameof(Error), StocktakeEventErrors.EventNotFound(request.EventId), true)
                 .Warning("Failed to cancel Stocktake Sighting");
 
-            return Result.Failure(StocktakeErrors.SightingNotFound(request.SightingId));
+            return Result.Failure(StocktakeEventErrors.EventNotFound(request.EventId));
         }
 
-        sighting.Cancel(request.Comment, request.CancelledBy);
+        Result cancel = @event.CancelSighting(
+            request.SightingId,
+            request.Comment,
+            _currentUserService.UserName);
+
+        if (cancel.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CancelSightingCommand), request, true)
+                .ForContext(nameof(Error), cancel.Error, true)
+                .Warning("Failed to cancel Stocktake Sighting");
+
+            return Result.Failure(cancel.Error);
+        }
 
         await _uniOfWork.CompleteAsync(cancellationToken);
 

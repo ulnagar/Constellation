@@ -1,11 +1,11 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Assets;
 
-using Application.Assets.GetAllActiveAssets;
-using Application.Assets.GetAllDisposedAssets;
-using Application.Assets.SightAsset;
 using Application.Common.PresentationModels;
+using Application.Domains.AssetManagement.Assets.Commands.SightAsset;
 using Application.Domains.AssetManagement.Assets.Queries.ExportAssetsToExcel;
+using Application.Domains.AssetManagement.Assets.Queries.GetAllActiveAssets;
 using Application.Domains.AssetManagement.Assets.Queries.GetAllAssets;
+using Application.Domains.AssetManagement.Assets.Queries.GetAllDisposedAssets;
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
 using Constellation.Application.Domains.AssetManagement.Assets.Enums;
@@ -13,6 +13,7 @@ using Constellation.Application.Domains.AssetManagement.Assets.Models;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.ValueObjects;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
@@ -65,7 +66,7 @@ public class IndexModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             _logger
                 .ForContext(nameof(Error), request.Error, true)
@@ -86,7 +87,7 @@ public class IndexModel : BasePageModel
 
         if (file.IsFailure)
         {
-            ModalContent = new ErrorDisplay(file.Error);
+            ModalContent = ErrorDisplay.Create(file.Error);
 
             _logger
                 .ForContext(nameof(Error), file.Error, true)
@@ -115,16 +116,19 @@ public class IndexModel : BasePageModel
 
         if (currentStaffId is null)
         {
-            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.LastName), "StaffId", "DisplayName");
+            viewModel.StaffList = new SelectList(staff.Value.OrderBy(entry => entry.Name.SortOrder), nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.DisplayName));
         }
         else
         {
-            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == currentStaffId);
+            Guid guidStaffId = Guid.Parse(currentStaffId);
+            StaffId staffId = StaffId.FromValue(guidStaffId);
+
+            StaffSelectionListResponse? currentStaffMember = staff.Value.FirstOrDefault(entry => entry.StaffId == staffId);
 
             viewModel.StaffList = new(
-                staff.Value.OrderBy(entry => entry.LastName),
-                "StaffId",
-                "DisplayName",
+                staff.Value.OrderBy(entry => entry.Name.SortOrder),
+                nameof(StaffSelectionListResponse.StaffId),
+                nameof(StaffSelectionListResponse.DisplayName),
                 currentStaffMember?.StaffId);
         }
 
@@ -154,7 +158,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             _logger
                 .ForContext(nameof(Error), result.Error, true)

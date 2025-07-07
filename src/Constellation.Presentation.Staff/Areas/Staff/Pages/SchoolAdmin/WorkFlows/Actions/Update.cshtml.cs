@@ -11,6 +11,7 @@ using Application.Domains.WorkFlows.Commands.UpdateUploadTrainingCertificateActi
 using Application.Domains.WorkFlows.Queries.GetCaseById;
 using Application.Models.Auth;
 using Constellation.Application.DTOs;
+using Constellation.Core.Enums;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
@@ -72,7 +73,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve WorkFlow Action with id {Id} for update by user {User}", CaseId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" }));
 
@@ -100,7 +101,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
 
@@ -126,7 +127,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
 
@@ -152,7 +153,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
             
@@ -183,7 +184,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
 
@@ -195,9 +196,26 @@ public class UpdateModel : BasePageModel
 
     public async Task<IActionResult> OnPostUpdateIncidentStatusEntryAction(SentralIncidentStatusActionViewModel viewModel)
     {
-        if (viewModel.Status == "Not Completed" && viewModel.IncidentNumber == 0)
+        if (viewModel is { Status: "Not Completed", IncidentNumber: 0 })
         {
-            ModalContent = new ErrorDisplay(ActionErrors.UpdateIncidentNumberZero);
+            _logger
+                .ForContext(nameof(Error), ActionErrors.UpdateIncidentNumberZero, true)
+                .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(ActionErrors.UpdateIncidentNumberZero);
+
+            await PreparePage();
+
+            return Page();
+        }
+        
+        if (viewModel is { Status: "Not Completed", IncidentNumber: < 50000 })
+        {
+            _logger
+                .ForContext(nameof(Error), ActionErrors.UpdateIncidentNumberTooLow, true)
+                .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(ActionErrors.UpdateIncidentNumberTooLow);
 
             await PreparePage();
 
@@ -221,7 +239,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
 
@@ -252,7 +270,7 @@ public class UpdateModel : BasePageModel
             }
             catch (Exception ex)
             {
-                ModalContent = new ErrorDisplay(new("Email.Attachment.Failure", $"Failed to read attachment: {file.FileName}"));
+                ModalContent = ErrorDisplay.Create(new("Email.Attachment.Failure", $"Failed to read attachment: {file.FileName}"));
 
                 await PreparePage();
 
@@ -268,7 +286,7 @@ public class UpdateModel : BasePageModel
 
             if (entry.IsFailure)
             {
-                ModalContent = new ErrorDisplay(new("Email.Recipient.Failure", $"Failed to add recipient: {recipient.Key} ({recipient.Value})"));
+                ModalContent = ErrorDisplay.Create(new("Email.Recipient.Failure", $"Failed to add recipient: {recipient.Key} ({recipient.Value})"));
 
                 await PreparePage();
 
@@ -282,7 +300,7 @@ public class UpdateModel : BasePageModel
 
         if (sender.IsFailure)
         {
-            ModalContent = new ErrorDisplay(new("Email.Sender.Failure", $"Failed to add sender: {viewModel.SenderName} ({viewModel.SenderEmail})"));
+            ModalContent = ErrorDisplay.Create(new("Email.Sender.Failure", $"Failed to add sender: {viewModel.SenderName} ({viewModel.SenderEmail})"));
 
             await PreparePage();
 
@@ -303,7 +321,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
 
@@ -329,7 +347,7 @@ public class UpdateModel : BasePageModel
                 .ForContext(nameof(Error), attempt.Error, true)
                 .Warning("Failed to update WorkFlow Action with id {Id} by user {User}", ActionId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(attempt.Error);
+            ModalContent = ErrorDisplay.Create(attempt.Error);
 
             await PreparePage();
 

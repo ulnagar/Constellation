@@ -113,7 +113,7 @@ public class ActionUpdateFormViewComponent : ViewComponent
                 emailViewModel.Senders.Add(
                     new()
                     {
-                        Name = staffMember.Value.DisplayName,
+                        Name = staffMember.Value.Name.DisplayName,
                         Email = staffEmail
                     });
 

@@ -17,6 +17,7 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -81,7 +82,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve details of Case with Id {Id} by user {User}", Id, _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/WorkFlows/Index", values: new { area = "Staff" }));
 
@@ -108,7 +109,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), action.Error, true)
                 .Warning("Failed to update status of Case with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(action.Error);
+            ModalContent = ErrorDisplay.Create(action.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -146,7 +147,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), cancelRequest, true)
                 .Warning("Failed to cancel Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(cancelRequest.Error);
+            ModalContent = ErrorDisplay.Create(cancelRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -189,7 +190,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), noteRequest.Error, true)
                 .Warning("Failed to cancel Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(noteRequest.Error);
+            ModalContent = ErrorDisplay.Create(noteRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -206,9 +207,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxReassignAction(Guid actionId)
     {
-        Dictionary<string, string> staffList = new();
+        Dictionary<StaffId, string> staffList = new();
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
@@ -232,7 +233,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostReassignAction(
         ActionId actionId, 
-        string staffId)
+        StaffId staffId)
     {
         ReassignActionCommand command = new(Id, actionId, staffId);
 
@@ -248,7 +249,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), reassignRequest.Error, true)
                 .Warning("Failed to reassign Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reassignRequest.Error);
+            ModalContent = ErrorDisplay.Create(reassignRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -265,9 +266,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxNewAction(string actionType)
     {
-        Dictionary<string, string> staffResult = new();
+        Dictionary<StaffId, string> staffResult = new();
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
@@ -339,9 +340,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewSentralAction(AddCreateSentralEntryActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -367,7 +368,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -384,9 +385,11 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewDetailAction(AddCaseDetailUpdateActionViewModel viewModel)
     {
-        string staffMemberId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string claimStaffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        Guid guidStaffId = Guid.Parse(claimStaffId);
+        StaffId staffId = StaffId.FromValue(guidStaffId);
 
-        AddCaseDetailUpdateActionCommand command = new(Id, staffMemberId, viewModel.Details);
+        AddCaseDetailUpdateActionCommand command = new(Id, staffId, viewModel.Details);
 
         _logger
             .ForContext(nameof(AddCaseDetailUpdateActionCommand), command, true)
@@ -400,7 +403,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -417,9 +420,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewInterviewAction(AddParentInterviewActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -445,7 +448,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -462,9 +465,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewPhoneAction(AddPhoneParentActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -490,7 +493,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -507,9 +510,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewEmailAction(AddSendEmailActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -535,7 +538,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -552,9 +555,9 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostNewIncidentAction(AddSentralIncidentStatusActionViewModel viewModel)
     {
-        if (string.IsNullOrWhiteSpace(viewModel.StaffId))
+        if (viewModel.StaffId == StaffId.Empty)
         {
-            ModalContent = new ErrorDisplay(ActionErrors.AssignStaffNull);
+            ModalContent = ErrorDisplay.Create(ActionErrors.AssignStaffNull);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 
@@ -580,7 +583,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), actionRequest.Error, true)
                 .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(actionRequest.Error);
+            ModalContent = ErrorDisplay.Create(actionRequest.Error);
 
             Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
 

@@ -54,7 +54,7 @@ public sealed class IndexModel : BasePageModel
                 .ForContext(nameof(Error), students.Error, true)
                 .Warning("Failed to retrieve list of Students by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(students.Error);
+            ModalContent = ErrorDisplay.Create(students.Error);
 
             return;
         }

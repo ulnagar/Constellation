@@ -13,6 +13,7 @@ using Areas;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -75,7 +76,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
+            ModalContent = ErrorDisplay.Create(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -92,7 +93,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to generate Training Module report by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }
@@ -112,7 +113,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Requested to generate Training overview report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }
@@ -124,7 +125,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
+            ModalContent = ErrorDisplay.Create(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -141,7 +142,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to generate Training Module detail report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }
@@ -151,9 +152,9 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostAjaxStaffModal(string reportType)
     {
-        Dictionary<string, string> staffList = new();
+        Dictionary<StaffId, string> staffList = new();
 
-        Result<Dictionary<string, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
+        Result<Dictionary<StaffId, string>> staffListRequest = await _mediator.Send(new GetStaffMembersAsDictionaryQuery());
 
         if (staffListRequest.IsFailure)
         {
@@ -183,7 +184,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
+            ModalContent = ErrorDisplay.Create(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -198,7 +199,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to generate staff Training report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }
@@ -210,7 +211,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
+            ModalContent = ErrorDisplay.Create(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }
@@ -225,7 +226,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), reportRequest.Error, true)
                 .Warning("Failed to generate staff Training detail report by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(reportRequest.Error);
+            ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
             return Page();
         }
@@ -237,7 +238,7 @@ public class IndexModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            ModalContent = new ErrorDisplay(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
+            ModalContent = ErrorDisplay.Create(new("Page.Validation", ModelState.First().Value.Errors.First().ErrorMessage));
 
             return Page();
         }

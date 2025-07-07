@@ -4,12 +4,11 @@ using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Attachments.Repository;
 using Constellation.Core.Models.Students.Repositories;
-using Core.Models;
 using Core.Models.Awards;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Shared;
-using Core.ValueObjects;
 using Models;
 using Serilog;
 using System.Collections.Generic;
@@ -48,7 +47,7 @@ internal sealed class GetRecentAwardsQueryHandler
 
         List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
 
-        List<Staff> staff = await _staffRepository.GetAll(cancellationToken);
+        List<StaffMember> staff = await _staffRepository.GetAll(cancellationToken);
 
         foreach (StudentAward award in awards)
         {
@@ -68,18 +67,7 @@ internal sealed class GetRecentAwardsQueryHandler
                 continue;
             }
 
-            Staff teacher = staff.FirstOrDefault(teacher => teacher.StaffId == award.TeacherId);
-            Name teacherName = null;
-
-            if (teacher is not null)
-            {
-                Result<Name> teacherNameRequest = Name.Create(teacher?.FirstName, string.Empty, teacher?.LastName);
-
-                if (teacherNameRequest.IsFailure)
-                    _logger.Warning("Could not create Name object from teacher {teacher} with error {@error}", teacher.DisplayName, teacherNameRequest.Error);
-                else
-                    teacherName = teacherNameRequest.Value;
-            }
+            StaffMember teacher = staff.FirstOrDefault(teacher => teacher.Id == award.TeacherId);
 
             bool hasCertificate = await _fileRepository.DoesAwardCertificateExistInDatabase(award.Id.ToString(), cancellationToken);
 
@@ -88,7 +76,7 @@ internal sealed class GetRecentAwardsQueryHandler
                 student.Name,
                 enrolment.Grade,
                 enrolment.SchoolName,
-                teacherName,
+                teacher?.Name,
                 award.AwardedOn,
                 award.Type,
                 hasCertificate);

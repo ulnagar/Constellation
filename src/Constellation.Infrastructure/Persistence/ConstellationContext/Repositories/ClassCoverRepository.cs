@@ -7,6 +7,8 @@ using Constellation.Core.Models.Covers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class ClassCoverRepository : IClassCoverRepository
@@ -100,16 +102,16 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             {
                 returnData.AddRange(await _context
                     .Set<Casual>()
-                    .Where(casual => casual.Id == new CasualId(Guid.Parse(cover.TeacherId)))
-                    .Select(casual => casual.EmailAddress)
+                    .Where(casual => casual.Id.ToString() == cover.TeacherId)
+                    .Select(casual => casual.EmailAddress.Email)
                     .ToListAsync(cancellationToken));
             }
             else
             {
                 returnData.AddRange(await _context
-                    .Set<Staff>()
-                    .Where(staff => staff.StaffId == cover.TeacherId)
-                    .Select(staff => $"{staff.PortalUsername}@det.nsw.edu.au")
+                    .Set<StaffMember>()
+                    .Where(staff => staff.Id.ToString() == cover.TeacherId)
+                    .Select(staff => staff.EmailAddress.Email)
                     .ToListAsync(cancellationToken));
             }
         }
@@ -141,7 +143,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<ClassCover>> GetCurrentForStaff(
-        string staffId,
+        StaffId staffId,
         CancellationToken cancellationToken = default)
     {
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
@@ -153,7 +155,7 @@ internal sealed class ClassCoverRepository : IClassCoverRepository
                 cover.StartDate <= today &&
                 cover.EndDate >= today &&
                 cover.TeacherType == CoverTeacherType.Staff &&
-                cover.TeacherId == staffId)
+                cover.TeacherId == staffId.ToString())
             .ToListAsync(cancellationToken);
     }
 

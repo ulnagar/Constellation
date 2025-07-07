@@ -2,16 +2,14 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
-using Core.Models;
 using Core.Models.Faculties;
-using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
 using Core.Shared;
 using Extensions;
-using Helpers;
 using Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,31 +41,25 @@ internal sealed class GetModuleDetailsQueryHandler
         // Get info from database
         TrainingModule module = await _trainingRepository.GetModuleById(request.Id, cancellationToken);
 
-        List<Staff> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
         List<CompletionRecordDto> completions = new();
         List<ModuleDetailsDto.Assignee> assignees = new();
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
-            if (module.Assignees.Any(entry => entry.StaffId == staffMember.StaffId))
+            if (module.Assignees.Any(entry => entry.StaffId == staffMember.Id))
             {
                 assignees.Add(new(
-                    staffMember.StaffId,
-                    staffMember.GetName()));
+                    staffMember.Id,
+                    staffMember.Name));
             }
 
-            List<FacultyId> facultyIds = staffMember
-                .Faculties
-                .Where(member => !member.IsDeleted)
-                .Select(member => member.FacultyId)
-                .ToList();
-
-            List<Faculty> faculties = await _facultyRepository.GetListFromIds(facultyIds, cancellationToken);
+            List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staffMember.Id, cancellationToken);
 
             List<TrainingCompletion> records = module.Completions
                     .Where(record =>
-                        record.StaffId == staffMember.StaffId &&
+                        record.StaffId == staffMember.Id &&
                         !record.IsDeleted)
                     .ToList();
 
@@ -77,10 +69,10 @@ internal sealed class GetModuleDetailsQueryHandler
             {
                 CompletionRecordDto entry = new()
                 {
-                    StaffId = staffMember.StaffId,
-                    StaffName = staffMember.GetName(),
-                    StaffFirstName = staffMember.FirstName,
-                    StaffLastName = staffMember.LastName,
+                    StaffId = staffMember.Id,
+                    StaffName = staffMember.Name,
+                    StaffFirstName = staffMember.Name.FirstName,
+                    StaffLastName = staffMember.Name.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = null,
                     ExpiryCountdown = -9999
@@ -97,9 +89,9 @@ internal sealed class GetModuleDetailsQueryHandler
                     ModuleName = module.Name,
                     ModuleExpiry = module.Expiry,
                     StaffId = record.StaffId,
-                    StaffName = staffMember.GetName(),
-                    StaffFirstName = staffMember.FirstName,
-                    StaffLastName = staffMember.LastName,
+                    StaffName = staffMember.Name,
+                    StaffFirstName = staffMember.Name.FirstName,
+                    StaffLastName = staffMember.Name.LastName,
                     StaffFaculty = string.Join(",", faculties.Select(faculty => faculty.Name)),
                     CompletedDate = record.CompletedDate,
                     CreatedAt = record.CreatedAt

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Assets.ImportAssetsFromFile;
+using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.ExportStocktakeSightingsAndDifferences;
 using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
@@ -13,6 +13,7 @@ using Constellation.Infrastructure.Jobs;
 using Core.Models.Assets;
 using Core.Models.Training;
 using Core.Shared;
+using Domains.AssetManagement.Assets.Commands.ImportAssetsFromFile;
 using Domains.Attendance.Reports.Commands.UpdateAttendanceDataForPeriodFromSentral;
 using Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Domains.Contacts.Models;
@@ -69,4 +70,5 @@ public interface IExcelService
     Task<MemoryStream> CreateCanvasAssignmentCommentExport(List<CourseEnrolmentEntry> enrolments, List<AssignmentResultEntry> results, Dictionary<string, List<Student>> students, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateCustomAttendanceReport(string periodLabel, List<ExportRecord> records, CancellationToken cancellationToken = default);
     Task<MemoryStream> CreateSefAttendanceDataExport(List<SefAttendanceData> attendanceData, CancellationToken cancellationToken = default);
+    Task<MemoryStream> CreateStocktakeSightingsReport(List<StocktakeSightingWithDifferenceResponse> items, CancellationToken cancellationToken = default);
 }

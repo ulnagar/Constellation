@@ -29,10 +29,10 @@ internal sealed class GetCasualByIdQueryHandler
 
         return new CasualResponse(
             casual.Id,
-            casual.FirstName,
-            casual.LastName,
-            casual.EmailAddress,
+            casual.Name.FirstName,
+            casual.Name.LastName,
+            casual.EmailAddress.Email,
             casual.SchoolCode,
-            casual.AdobeConnectId);
+            casual.EdvalTeacherId);
     }
 }

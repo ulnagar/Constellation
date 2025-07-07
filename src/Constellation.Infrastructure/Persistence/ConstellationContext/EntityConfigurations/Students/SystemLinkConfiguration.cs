@@ -1,21 +1,21 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Students;
 
+using Constellation.Core.Enums;
 using Core.Models.Students;
-using Core.Models.Students.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal sealed class SystemLinkConfiguration : IEntityTypeConfiguration<SystemLink>
+internal sealed class StudentSystemLinkConfiguration : IEntityTypeConfiguration<StudentSystemLink>
 {
-    public void Configure(EntityTypeBuilder<SystemLink> builder)
+    public void Configure(EntityTypeBuilder<StudentSystemLink> builder)
     {
         builder.ToTable("SystemLinks", "Students");
 
         builder
-            .HasKey(enrolment => new { enrolment.StudentId, enrolment.System });
+            .HasKey(systemLink => new { systemLink.StudentId, systemLink.System });
 
         builder
-            .Property(enrolment => enrolment.System)
+            .Property(systemLink => systemLink.System)
             .HasConversion(
                 system => system.Value,
                 value => SystemType.FromValue(value));

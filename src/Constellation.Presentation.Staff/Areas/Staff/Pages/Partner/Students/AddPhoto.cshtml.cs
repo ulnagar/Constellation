@@ -54,7 +54,7 @@ public class AddPhotoModel : BasePageModel
     {
         if (UploadFile is null)
         {
-            ModalContent = new ErrorDisplay(Error.NullValue);
+            ModalContent = ErrorDisplay.Create(Error.NullValue);
 
             Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
 
@@ -78,7 +78,7 @@ public class AddPhotoModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to update student photo by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(result.Error);
+            ModalContent = ErrorDisplay.Create(result.Error);
 
             Result<Dictionary<StudentId, string>> students = await _mediator.Send(new GetCurrentStudentsAsDictionaryQuery());
 

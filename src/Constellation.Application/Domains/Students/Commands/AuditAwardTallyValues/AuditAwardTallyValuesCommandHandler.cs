@@ -61,6 +61,11 @@ internal sealed class AuditAwardTallyValuesCommandHandler
                     .ForContext(nameof(issuedAstras), issuedAstras)
                     .ForContext(nameof(AwardTally.Astras), student.AwardTally.Astras)
                     .Error("Student Award Tally has become out of sync");
+
+                int difference = student.AwardTally.Astras - issuedAstras;
+
+                for (int i = 0; i < difference; i++)
+                    student.AwardTally.RemoveAstra();
             }
 
             if (issuedStellars > student.AwardTally.Stellars)

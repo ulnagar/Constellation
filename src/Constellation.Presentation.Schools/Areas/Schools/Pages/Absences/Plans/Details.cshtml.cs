@@ -76,7 +76,7 @@ public class DetailsModel : BasePageModel
 
         if (versionAttempt.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 versionAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
@@ -94,7 +94,7 @@ public class DetailsModel : BasePageModel
 
         if (saveDraftAttempt.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 saveDraftAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
@@ -110,7 +110,7 @@ public class DetailsModel : BasePageModel
     {
         if (!ModelState.IsValid)
         {
-            ModalContent = new FeedbackDisplay(
+            ModalContent = FeedbackDisplay.Create(
                 "Form Error",
                 "You must select an Entry Time and Exit Time for each period",
                 "Ok",
@@ -125,7 +125,7 @@ public class DetailsModel : BasePageModel
 
         if (saveDraftAttempt.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 saveDraftAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
@@ -138,7 +138,7 @@ public class DetailsModel : BasePageModel
 
         if (submitAttempt.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 submitAttempt.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
@@ -167,7 +167,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), operation.Error, true)
                 .Warning("Failed to copy Attendance Plan details by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 operation.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Details", values: new { area = "Schools", Id }));
 
@@ -198,7 +198,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), plan.Error, true)
                 .Warning("Failed to retrieve Attendance Plan with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 plan.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Index", values: new { area = "Schools" }));
 
@@ -215,7 +215,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), plan.Error, true)
                 .Warning("Failed to retrieve related Attendance Plans by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 plan.Error,
                 _linkGenerator.GetPathByPage("/Absences/Plans/Index", values: new { area = "Schools" }));
 

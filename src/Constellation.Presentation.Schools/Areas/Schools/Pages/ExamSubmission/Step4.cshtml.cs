@@ -79,9 +79,11 @@ public class Step4Model : BasePageModel
 
     public async Task<IActionResult> OnPostSubmit()
     {
+        // TODO: R1.18: Move these errors to a common location
+
         if (UploadFile is null)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new("FileEmpty", "You must select a file to upload"),
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
@@ -90,7 +92,7 @@ public class Step4Model : BasePageModel
 
         if (UploadFile.ContentType != FileContentTypes.PdfFile)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 new ("FileTypeMismatch", "You can only upload PDF files"),
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
@@ -121,14 +123,14 @@ public class Step4Model : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
             return Page();
         }
 
-        ModalContent = new FeedbackDisplay(
+        ModalContent = FeedbackDisplay.Create(
             "Upload Successful",
             "The file has been uploaded successfully. You will receive an email receipt shortly.",
             "Ok",
@@ -146,7 +148,7 @@ public class Step4Model : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentsRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
@@ -171,7 +173,7 @@ public class Step4Model : BasePageModel
 
         if (coursesRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 coursesRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
@@ -193,7 +195,7 @@ public class Step4Model : BasePageModel
 
         if (assignmentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 assignmentsRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 

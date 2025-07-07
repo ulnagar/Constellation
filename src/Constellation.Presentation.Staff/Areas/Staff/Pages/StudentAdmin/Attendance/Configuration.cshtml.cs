@@ -56,7 +56,7 @@ public class ConfigurationModel : BasePageModel
                 .ForContext(nameof(Error), studentRequest.Error, true)
                 .Warning("Failed to retrieve student absence settings by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Index", values: new { area = "Staff" }));
 

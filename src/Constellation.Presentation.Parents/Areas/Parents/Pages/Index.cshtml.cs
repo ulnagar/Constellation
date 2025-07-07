@@ -50,7 +50,7 @@ public class IndexModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -64,7 +64,7 @@ public class IndexModel : BasePageModel
 
             if (hasPendingApplicationConsents.IsFailure)
             {
-                ModalContent = new ErrorDisplay(studentsRequest.Error);
+                ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
                 return;
             }

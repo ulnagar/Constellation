@@ -100,7 +100,7 @@ public class IndexModel : BasePageModel
         
         if (file.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 file.Error,
                 _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
@@ -120,7 +120,7 @@ public class IndexModel : BasePageModel
 
         if (classesResponse.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 classesResponse.Error,
                 _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
@@ -150,7 +150,7 @@ public class IndexModel : BasePageModel
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,
                 course.Name,
-                $"{primaryTeacher.FirstName[..1]} {primaryTeacher.LastName}",
+                $"{primaryTeacher.Name.PreferredName[..1]} {primaryTeacher.Name.LastName}",
                 $"Year {course.Name[..2]}"));
         }
 
@@ -158,7 +158,7 @@ public class IndexModel : BasePageModel
 
         if (schoolsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 schoolsRequest.Error,
                 _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 
@@ -197,7 +197,7 @@ public class IndexModel : BasePageModel
 
             if (contactRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     contactRequest.Error,
                     _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
 

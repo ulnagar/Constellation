@@ -1,7 +1,10 @@
 ﻿namespace Constellation.Application.Domains.ClassCovers.Queries.GetAllCurrentAndFutureCovers;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Repositories;
+using Core.Models;
 using Core.Models.Identifiers;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers.Repositories;
@@ -69,7 +72,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
                     continue;
                 }
 
-                teacherName = teacher.DisplayName;
+                teacherName = teacher.Name.DisplayName;
 
                 var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 
@@ -82,21 +85,24 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
             }
             else
             {
-                var teacher = await _staffRepository.GetById(cover.TeacherId, cancellationToken);
+                StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
+
+                StaffMember teacher = staffId == StaffId.Empty
+                    ? null
+                    : await _staffRepository.GetById(staffId, cancellationToken);
 
                 if (teacher is null)
-                {
                     continue;
-                }
 
-                teacherName = teacher.DisplayName;
+                teacherName = teacher.Name.DisplayName;
 
-                var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
+                if (teacher.CurrentAssignment is null)
+                    continue;
+
+                School school = await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken);
 
                 if (school is null)
-                {
                     continue;
-                }
 
                 teacherSchool = school.Name;
             }

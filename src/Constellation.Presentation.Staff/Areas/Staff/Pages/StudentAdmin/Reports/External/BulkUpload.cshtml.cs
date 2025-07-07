@@ -67,7 +67,7 @@ public class BulkUploadModel : BasePageModel
         {
             var error = new Error("Page Upload", "You must select a valid file for upload");
 
-            ModalContent = new ErrorDisplay(error, null);
+            ModalContent = ErrorDisplay.Create(error, null);
 
             return;
         }
@@ -77,7 +77,7 @@ public class BulkUploadModel : BasePageModel
         {
             var error = new Error("Page Upload", "You must select a valid file for upload");
 
-            ModalContent = new ErrorDisplay(error, null);
+            ModalContent = ErrorDisplay.Create(error, null);
 
             return;
         }
@@ -89,7 +89,7 @@ public class BulkUploadModel : BasePageModel
             {
                 var error = new Error("Page Upload", "Only ZIP files are accepted");
 
-                ModalContent = new ErrorDisplay(error, null);
+                ModalContent = ErrorDisplay.Create(error, null);
 
                 return;
             }
@@ -105,7 +105,7 @@ public class BulkUploadModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to upload External Reports by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/Index", values: new { area = "Staff" }));
 
@@ -120,7 +120,7 @@ public class BulkUploadModel : BasePageModel
                 .ForContext(nameof(Exception), ex, true)
                 .Warning("Failed to upload External Reports by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ExceptionDisplay(
+            ModalContent = ExceptionDisplay.Create(
                 ex,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/Index", values: new { area = "Staff" }));
 
@@ -177,7 +177,7 @@ public class BulkUploadModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to update Temporary External Report by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
 
@@ -217,7 +217,7 @@ public class BulkUploadModel : BasePageModel
                 .Warning("Failed to bulk publish temporary file by user {User}", _currentUserService.UserName);
 
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 attempt.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
 
@@ -257,7 +257,7 @@ public class BulkUploadModel : BasePageModel
                 .Warning("Failed to publish temporary file by user {User}", _currentUserService.UserName);
 
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 attempt.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
 
@@ -297,7 +297,7 @@ public class BulkUploadModel : BasePageModel
                 .Warning("Failed to delete temporary file by user {User}", _currentUserService.UserName);
 
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 attempt.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/BulkUpload", values: new { area = "Staff" }));
 
@@ -317,7 +317,7 @@ public class BulkUploadModel : BasePageModel
                 .ForContext(nameof(Error), existingFiles.Error, true)
                 .Warning("Failed to retrieve External Reports by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 existingFiles.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/Index", values: new { area = "Staff" }));
 

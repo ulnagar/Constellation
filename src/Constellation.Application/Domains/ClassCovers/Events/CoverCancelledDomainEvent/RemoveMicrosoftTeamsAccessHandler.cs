@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.ClassCovers.Events.CoverCancelledDomainEvent;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.DomainEvents;
 using Core.Enums;
@@ -90,10 +91,15 @@ internal sealed class RemoveMicrosoftTeamsAccessHandler
                 }
                 else
                 {
+                    bool success = Guid.TryParse(cover.TeacherId, out Guid staffIdGuid);
+                    StaffId staffId = success
+                        ? StaffId.FromValue(staffIdGuid)
+                        : StaffId.Empty;
+
                     removeOperation = new TeacherMSTeamOperation
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,

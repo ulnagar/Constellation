@@ -63,7 +63,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), cancelRequest.Error, true)
                 .Warning("Failed to cancel Lesson by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(cancelRequest.Error);
+            ModalContent = ErrorDisplay.Create(cancelRequest.Error);
 
             await PreparePage();
 
@@ -85,7 +85,7 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(Error), lessonRequest.Error, true)
                 .Warning("Failed to retrieve details of Lesson with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 lessonRequest.Error,
                 _linkGenerator.GetPathByPage("/Subjects/SciencePracs/Lessons/Index", values: new { area = "Staff" }));
 

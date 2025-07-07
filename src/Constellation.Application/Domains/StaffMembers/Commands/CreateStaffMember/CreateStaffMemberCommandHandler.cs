@@ -1,122 +1,132 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Commands.CreateStaffMember;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
-using Application.Models.Identity;
+using Core.Abstractions.Clock;
 using Core.Errors;
 using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Shared;
-using DTOs;
+using Core.ValueObjects;
 using Interfaces.Repositories;
-using Interfaces.Services;
-using Microsoft.AspNetCore.Identity;
 using Serilog;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CreateStaffMemberCommandHandler
-: ICommandHandler<CreateStaffMemberCommand>
+    : ICommandHandler<CreateStaffMemberCommand>
 {
     private readonly IStaffRepository _staffRepository;
-    private readonly IOperationService _operationService;
+    private readonly ISchoolRepository _schoolRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public CreateStaffMemberCommandHandler(
         IStaffRepository staffRepository,
-        IOperationService operationService,
+        ISchoolRepository schoolRepository,
         IUnitOfWork unitOfWork,
-        UserManager<AppUser> userManager,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _staffRepository = staffRepository;
-        _operationService = operationService;
+        _schoolRepository = schoolRepository;
         _unitOfWork = unitOfWork;
-        _userManager = userManager;
+        _dateTime = dateTime;
         _logger = logger.ForContext<CreateStaffMemberCommand>();
     }
 
     public async Task<Result> Handle(CreateStaffMemberCommand request, CancellationToken cancellationToken)
     {
-        Staff existing = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        Result<Name> name = Name.Create(request.FirstName, request.PreferredName, request.LastName);
 
-        if (existing is not null)
+        if (name.IsFailure)
         {
             _logger
                 .ForContext(nameof(CreateStaffMemberCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.AlreadyExists(request.StaffId), true)
+                .ForContext(nameof(Error), name.Error, true)
                 .Warning("Failed to create new staff member");
 
-            return Result.Failure(DomainErrors.Partners.Staff.AlreadyExists(request.StaffId));
+            return Result.Failure(name.Error);
         }
 
-        Staff staffMember = new()
+        Result<StaffMember> staffMember = StaffMember.Create(
+            name.Value,
+            request.Gender,
+            request.IsShared);
+
+        if (staffMember.IsFailure)
         {
-            StaffId = request.StaffId,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            PortalUsername = request.PortalUsername,
-            SchoolCode = request.SchoolCode,
-            IsShared = request.IsShared
-        };
+            _logger
+                .ForContext(nameof(CreateStaffMemberCommand), request, true)
+                .ForContext(nameof(Error), staffMember.Error, true)
+                .Warning("Failed to create new staff member");
 
-        _staffRepository.Insert(staffMember);
-
-        await _unitOfWork.CompleteAsync(cancellationToken);
-
-        await _operationService.CreateTeacherEmployedMSTeamAccess(staffMember.StaffId);
-
-        await _operationService.CreateCanvasUserFromStaff(staffMember);
-
-        UserTemplateDto userDetails = new()
-        {
-            FirstName = staffMember.FirstName,
-            LastName = staffMember.LastName,
-            Email = staffMember.EmailAddress,
-            Username = staffMember.EmailAddress,
-            IsStaffMember = true,
-            StaffId = staffMember.StaffId
-        };
-
-        if (_userManager.Users.Any(u => u.UserName == userDetails.Username))
-        {
-            AppUser user = await _userManager.FindByEmailAsync(userDetails.Email);
-
-            user!.UserName = userDetails.Username;
-            user.Email = userDetails.Email;
-            user.FirstName = userDetails.FirstName;
-            user.LastName = userDetails.LastName;
-            user.IsStaffMember = true;
-            user.StaffId = userDetails.StaffId;
-
-            await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
-
-            await _userManager.UpdateAsync(user);
+            return Result.Failure(staffMember.Error);
         }
-        else
+
+        if (!string.IsNullOrWhiteSpace(request.SchoolCode))
         {
-            AppUser user = new()
+            School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+
+            if (school is null)
             {
-                UserName = userDetails.Username,
-                Email = userDetails.Email,
-                FirstName = userDetails.FirstName,
-                LastName = userDetails.LastName,
-                StaffId = userDetails.StaffId,
-                IsSchoolContact = false,
-                IsStaffMember = true
-            };
+                _logger
+                    .ForContext(nameof(CreateStaffMemberCommand), request, true)
+                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(request.SchoolCode), true)
+                    .Warning("Failed to create new staff member");
 
-            IdentityResult result = await _userManager.CreateAsync(user);
+                return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
+            }
 
-            if (result == IdentityResult.Success)
-                await _userManager.AddToRoleAsync(user, AuthRoles.StaffMember);
+            staffMember.Value.AddSchoolAssignment(
+                request.SchoolCode,
+                school.Name,
+                _dateTime);
         }
 
+        Result<EmployeeId> employeeId = EmployeeId.Create(request.EmployeeId);
+
+        if (!employeeId.IsFailure)
+        {
+            StaffMember? existing = await _staffRepository.GetByEmployeeId(employeeId.Value, cancellationToken);
+
+            if (existing is not null)
+            {
+                _logger
+                    .ForContext(nameof(CreateStaffMemberCommand), request, true)
+                    .ForContext(nameof(Error), StaffMemberErrors.AlreadyExists(existing.Id), true)
+                    .Warning("Failed to create new staff member");
+
+                return Result.Failure(StaffMemberErrors.AlreadyExists(existing.Id));
+            }
+
+            Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+            if (emailAddress.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(CreateStaffMemberCommand), request, true)
+                    .ForContext(nameof(Error), emailAddress.Error, true)
+                    .Warning("Failed to create new staff member");
+
+                return Result.Failure(emailAddress.Error);
+            }
+
+            staffMember.Value.UpdateStaffMember(
+                employeeId.Value,
+                name.Value,
+                emailAddress.Value,
+                request.Gender,
+                request.IsShared);
+        }
+
+        _staffRepository.Insert(staffMember.Value);
+
         await _unitOfWork.CompleteAsync(cancellationToken);
-        
+
         return Result.Success();
     }
 }

@@ -1,12 +1,11 @@
 ﻿namespace Constellation.Core.Models.Covers;
 
+using Constellation.Core.Models.Offerings.Identifiers;
 using DomainEvents;
 using Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Primitives;
-using ValueObjects;
 using System;
+using ValueObjects;
 
 public sealed class ClassCover : AggregateRoot, IAuditableEntity
 {
@@ -48,38 +47,38 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
         CoverTeacherType teacherType,
         string teacherId)
     {
-        var cover = new ClassCover(id, offeringId, startDate, endDate, teacherType, teacherId);
+        ClassCover cover = new(id, offeringId, startDate, endDate, teacherType, teacherId);
 
-        cover.RaiseDomainEvent(new CoverCreatedDomainEvent(new DomainEventId(Guid.NewGuid()), cover.Id));
+        cover.RaiseDomainEvent(new CoverCreatedDomainEvent(new(), cover.Id));
 
         return cover;
     }
 
     public void EditDates(DateOnly startDate, DateOnly endDate)
     {
-        var oldStartDate = StartDate;
-        var oldEndDate = EndDate;
+        DateOnly oldStartDate = StartDate;
+        DateOnly oldEndDate = EndDate;
 
         StartDate = startDate;
         EndDate = endDate;
 
         if (oldStartDate != StartDate && oldEndDate != EndDate)
         {
-            RaiseDomainEvent(new CoverStartAndEndDatesChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, oldStartDate, oldEndDate, StartDate, EndDate));
+            RaiseDomainEvent(new CoverStartAndEndDatesChangedDomainEvent(new (), Id, oldStartDate, oldEndDate, StartDate, EndDate));
 
             return;
         } 
 
         if (oldStartDate != StartDate)
         {
-            RaiseDomainEvent(new CoverStartDateChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, oldStartDate, StartDate));
+            RaiseDomainEvent(new CoverStartDateChangedDomainEvent(new (), Id, oldStartDate, StartDate));
 
             return;
         } 
 
         if (oldEndDate != EndDate)
         {
-            RaiseDomainEvent(new CoverEndDateChangedDomainEvent(new DomainEventId(Guid.NewGuid()), Id, oldEndDate, EndDate));
+            RaiseDomainEvent(new CoverEndDateChangedDomainEvent(new (), Id, oldEndDate, EndDate));
 
             return;
         }
@@ -89,6 +88,6 @@ public sealed class ClassCover : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        RaiseDomainEvent(new CoverCancelledDomainEvent(new DomainEventId(Guid.NewGuid()), Id));
+        RaiseDomainEvent(new CoverCancelledDomainEvent(new (), Id));
     }
 }

@@ -76,7 +76,7 @@ public class Step2Model : BasePageModel
                 .ForContext(nameof(Error), periodRequest.Error, true)
                 .Warning("Failed to create new Award Nomination by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 periodRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 
@@ -87,7 +87,7 @@ public class Step2Model : BasePageModel
 
         if (coursesRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 coursesRequest.Error,
                 _linkGenerator.GetPathByPage("/SchoolAdmin/Awards/Nominations/Details", values: new { area = "Staff", PeriodId = PeriodId }));
 

@@ -4,9 +4,10 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Errors;
-using Constellation.Core.Models;
 using Constellation.Core.Models.GroupTutorials;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using System.Linq;
 using System.Threading;
@@ -41,10 +42,10 @@ internal sealed class RemoveTeacherFromTutorialCommandHandler
         if (teacherRecord is null)
             return Result.Failure(DomainErrors.GroupTutorials.TutorialTeacher.NotFound);
 
-        Staff staffEntity = await _staffRepository.GetForExistCheck(teacherRecord.StaffId);
+        StaffMember staffEntity = await _staffRepository.GetById(teacherRecord.StaffId, cancellationToken);
 
         if (staffEntity is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(teacherRecord.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(teacherRecord.StaffId));
 
         tutorial.RemoveTeacher(staffEntity, request.TakesEffectOn);
 

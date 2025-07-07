@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 
 using Abstractions.Messaging;
-using GetStocktakeSightingsForSchool;
+using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Stocktake.Identifiers;
 using Models;
-using System;
 using System.Collections.Generic;
 
 public sealed record GetStocktakeSightingsForStaffMemberQuery(
-    string StaffId,
-    Guid StocktakeEventId)
+    StaffId StaffId,
+    StocktakeEventId StocktakeEventId)
     : IQuery<List<StocktakeSightingResponse>>;

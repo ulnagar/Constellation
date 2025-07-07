@@ -53,7 +53,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), DomainErrors.Auth.NotAuthorised, true)
                 .Information("Requested to generate Open Case Report for WorkFlow Cases by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             return Page();
         }
@@ -66,7 +66,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed to generate Open Case Report for WorkFlow Cases by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(fileRequest.Error);
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
 
             return Page();
         }

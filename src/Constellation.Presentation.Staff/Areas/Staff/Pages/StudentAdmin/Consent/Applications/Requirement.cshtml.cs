@@ -88,7 +88,7 @@ public class RequirementModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to create new Application Requirement by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id }));
 
@@ -106,7 +106,7 @@ public class RequirementModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to create new Application Requirement by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id }));
 
@@ -124,7 +124,7 @@ public class RequirementModel : BasePageModel
                     .ForContext(nameof(Error), result.Error, true)
                     .Warning("Failed to create new Application Requirement by user {User}", _currentUserService.UserName);
 
-                ModalContent = new ErrorDisplay(
+                ModalContent = ErrorDisplay.Create(
                     result.Error,
                     _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id }));
 
@@ -145,7 +145,7 @@ public class RequirementModel : BasePageModel
                 .ForContext(nameof(Error), applicationResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Application Requirement by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 applicationResponse.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id }));
 
@@ -162,7 +162,7 @@ public class RequirementModel : BasePageModel
                 .ForContext(nameof(Error), coursesResponse.Error, true)
                 .Warning("Failed to retrieve defaults for new Application Requirement by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 coursesResponse.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id }));
 
@@ -179,7 +179,7 @@ public class RequirementModel : BasePageModel
                 .ForContext(nameof(Error), studentsRequest.Error, true)
                 .Warning("Failed to retrieve defaults for new Application Requirement by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentsRequest.Error,
                 _linkGenerator.GetPathByPage("/StudentAdmin/Consent/Applications/Details", values: new { area = "Staff", Id }));
 

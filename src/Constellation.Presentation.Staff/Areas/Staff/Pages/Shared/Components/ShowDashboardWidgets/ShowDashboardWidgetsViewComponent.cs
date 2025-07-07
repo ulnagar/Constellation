@@ -10,17 +10,22 @@ using Application.Domains.Training.Queries.CountStaffWithoutModule;
 using Application.Domains.WorkFlows.Queries.CountActiveActionsForUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 public class ShowDashboardWidgetsViewComponent : ViewComponent
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly ISender _mediator;
 
     public ShowDashboardWidgetsViewComponent(
+        ICurrentUserService currentUserService,
         ISender mediator)
     {
+        _currentUserService = currentUserService;
         _mediator = mediator;
     }
 
@@ -33,11 +38,11 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
         bool isAbsencesManager = User.IsInRole(AuthRoles.AbsencesEditor);
         bool isAwardsManager = User.IsInRole(AuthRoles.AwardsManager);
 
-        string staffId = user.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value ?? string.Empty;
+        StaffId staffId = _currentUserService.StaffId;
 
         ShowDashboardWidgetsViewComponentModel viewModel = new();
 
-        if (!string.IsNullOrWhiteSpace(staffId))
+        if (staffId != StaffId.Empty)
         {
             Result<int> countOfActiveActions = await _mediator.Send(new CountActiveActionsForUserQuery(staffId), cancellationToken);
             if (countOfActiveActions.IsSuccess)

@@ -1,15 +1,15 @@
-﻿namespace Constellation.Application.Assets.AllocateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.AllocateAsset;
 
-using Abstractions.Messaging;
-using Core.Abstractions.Clock;
-using Core.Models.Assets;
-using Core.Models.Assets.Errors;
-using Core.Models.Assets.Repositories;
-using Core.Models.Students;
-using Core.Models.Students.Errors;
-using Core.Models.Students.Repositories;
-using Core.Shared;
-using Interfaces.Repositories;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Assets;
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Models.Assets.Repositories;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Shared;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;

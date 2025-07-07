@@ -73,7 +73,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to refresh Edval Differences for user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 null);
         }
@@ -96,7 +96,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(DifferenceId), differenceId)
                 .Warning("Failed to create Ignore record for Edval Difference by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 attempt.Error,
                 _linkGenerator.GetPathByPage("/Subject/Periods/Edval/Index", values: new { area = "Staff", Filter }));
 
@@ -121,7 +121,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(DifferenceId), differenceId)
                 .Warning("Failed to delete Ignore record for Edval Difference by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 attempt.Error,
                 _linkGenerator.GetPathByPage("/Subject/Periods/Edval/Index", values: new { area = "Staff", Filter }));
 
@@ -144,7 +144,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), differences.Error, true)
                 .Warning("Failed to retrieve list of Edval Differences for user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 differences.Error,
                 _linkGenerator.GetPathByPage("Dashboard", values: new { area = "Staff" }));
 

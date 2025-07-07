@@ -54,7 +54,7 @@ public class DetailsModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 request.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Index", values: new { area = "Staff" }));
 

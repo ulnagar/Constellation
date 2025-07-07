@@ -7,15 +7,14 @@ using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Models.Offerings;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
-using Core.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Options;
 using System;
@@ -103,7 +102,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             Offering offering = await _offeringRepository.GetFromYearAndName(date.Year, entry.ClassName, token);
 
-            Staff teacher = null;
+            StaffMember teacher = null;
 
             if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
@@ -124,7 +123,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                     teacher = await _staffRepository.GetById(assignment.StaffId, token);
 
                     if (teacher is not null)
-                        entry.Teacher = teacher.DisplayName;
+                        entry.Teacher = teacher.Name.DisplayName;
                 }
             }
 
@@ -141,13 +140,8 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             if (teacher is not null)
             {
-                Name teacherName = teacher.GetName();
-
-                if (teacherName is null)
-                    continue;
-
-                emailDto.Teachers.Add(teacher.EmailAddress, teacherName.DisplayName);
-                emailDto.TeacherName = teacherName.SortOrder;
+                emailDto.Teachers.Add(teacher.EmailAddress.Email, teacher.Name.DisplayName);
+                emailDto.TeacherName = teacher.Name.SortOrder;
             }
 
             if (offering is not null)
@@ -157,7 +151,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                 if (course is null)
                     continue;
 
-                Result<List<Staff>> headTeachersRequest = await _mediator.Send(new GetFacultyManagersQuery(course.FacultyId), token);
+                Result<List<StaffMember>> headTeachersRequest = await _mediator.Send(new GetFacultyManagersQuery(course.FacultyId), token);
                 if (headTeachersRequest.IsFailure)
                 {
                     _logger
@@ -167,7 +161,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                 else
                 {
                     emailDto.HeadTeachers = headTeachersRequest.Value
-                        .ToDictionary(member => member.EmailAddress, member => member.DisplayName);
+                        .ToDictionary(member => member.EmailAddress.Email, member => member.Name.DisplayName);
                 }
 
                 Result<List<CoverSummaryByDateAndOfferingResponse>> coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);

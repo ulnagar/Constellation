@@ -3,6 +3,7 @@
 using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Primitives;
+using StaffMembers.Identifiers;
 using System;
 
 public sealed class FacultyMembership : IAuditableEntity
@@ -10,7 +11,7 @@ public sealed class FacultyMembership : IAuditableEntity
     private FacultyMembership() {}
 
     private FacultyMembership(
-        string staffId,
+        StaffId staffId,
         FacultyId facultyId,
         FacultyMembershipRole role)
     {
@@ -21,7 +22,7 @@ public sealed class FacultyMembership : IAuditableEntity
     }
 
     public FacultyMembershipId Id { get; private set; }
-    public string StaffId { get; private set; }
+    public StaffId StaffId { get; private set; }
     public FacultyId FacultyId { get; private set; }
     public FacultyMembershipRole Role { get; private set; }
     public string CreatedBy { get; set; }
@@ -33,7 +34,7 @@ public sealed class FacultyMembership : IAuditableEntity
     public DateTime DeletedAt { get; set; }
 
     internal static FacultyMembership Create(
-        string staffId,
+        StaffId staffId,
         FacultyId facultyId,
         FacultyMembershipRole role)
     {

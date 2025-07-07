@@ -16,4 +16,11 @@ public static class IntegrationErrors
             }
         }
     }
+
+    public static class Exports
+    {
+        public static readonly Error NoItemsToInclude = new(
+            "Export.NoItemsToInclude",
+            "Could not find any items to include in report");
+    }
 }

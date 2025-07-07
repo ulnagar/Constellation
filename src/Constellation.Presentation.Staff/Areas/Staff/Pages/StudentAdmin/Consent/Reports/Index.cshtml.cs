@@ -64,7 +64,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), response.Error, true)
                 .Warning("Failed to retrieve filtered Consent data by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(response.Error);
+            ModalContent = ErrorDisplay.Create(response.Error);
 
             return Page();
         }
@@ -86,7 +86,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), classesResponse.Error, true)
                 .Warning("Failed to retrieve reports for Consent data by user {User}", _currentUserService.UserName);
             
-            ModalContent = new ErrorDisplay(classesResponse.Error);
+            ModalContent = ErrorDisplay.Create(classesResponse.Error);
 
             return Page();
         }
@@ -113,7 +113,7 @@ public class IndexModel : BasePageModel
                 ClassSelectionList.Add(new ClassRecord(
                     course.Id,
                     course.Name,
-                    $"{primaryTeacher.FirstName[..1]} {primaryTeacher.LastName}",
+                    $"{primaryTeacher.Name.FirstName[..1]} {primaryTeacher.Name.LastName}",
                     $"Year {course.Name[..2]}"));
 
                 continue;
@@ -122,7 +122,7 @@ public class IndexModel : BasePageModel
             string teacherNames = string.Join(
                 ", ", 
                 teachers.Value
-                    .Select(entry => $"{entry.FirstName[..1]} {entry.LastName}"));
+                    .Select(entry => $"{entry.Name.FirstName[..1]} {entry.Name.LastName}"));
 
             ClassSelectionList.Add(new ClassRecord(
                 course.Id,

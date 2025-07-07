@@ -77,7 +77,7 @@ public class UpdateModel : BasePageModel
 
         if (contact.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 contact.Error,
                 _linkGenerator.GetPathByPage("/Partner/Schools/Contacts/Index", values: new { area = "Staff" }));
 
@@ -119,7 +119,7 @@ public class UpdateModel : BasePageModel
 
         if (request.IsFailure)
         {
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             _logger
                 .ForContext(nameof(Error), request.Error, true)

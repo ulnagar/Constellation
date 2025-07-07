@@ -572,7 +572,7 @@ internal sealed class GetAffirmationQueryHandler
     public async Task<Result<string>> Handle(GetAffirmationQuery request, CancellationToken cancellationToken)
     {
         int dateTicks = (int)DateTime.Today.Ticks;
-        bool success = int.TryParse(request.UserId, out int userId);
+        bool success = int.TryParse(request.EmployeeId.Number, out int userId);
 
         Random random = !success ? new(dateTicks) : new(userId + dateTicks);
 

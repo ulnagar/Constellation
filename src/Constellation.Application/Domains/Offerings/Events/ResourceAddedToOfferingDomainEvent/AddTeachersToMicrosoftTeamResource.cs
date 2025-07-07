@@ -11,6 +11,8 @@ using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Serilog;
 using System.Collections.Generic;
@@ -73,16 +75,16 @@ internal sealed class AddTeachersToMicrosoftTeamResource
             return;
         }
 
-        List<string> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
+        List<StaffId> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
 
-        List<Staff> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
+        List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
 
-        foreach (Staff staffMember in staffMembers)
+        foreach (StaffMember staffMember in staffMembers)
         {
             TeacherAssignmentMSTeamOperation operation = new()
             {
                 TeamName = resource.TeamName,
-                StaffId = staffMember.StaffId,
+                StaffId = staffMember.Id,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = _dateTime.Now

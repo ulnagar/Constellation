@@ -8,6 +8,7 @@ using Core.DomainEvents;
 using Core.Enums;
 using Core.Models;
 using Core.Models.Covers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.ValueObjects;
 using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -79,10 +80,15 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
         }
         else
         {
+            bool success = Guid.TryParse(cover.TeacherId, out Guid staffIdGuid);
+            StaffId staffId = success 
+                ? StaffId.FromValue(staffIdGuid)
+                : StaffId.Empty;
+
             TeacherMSTeamOperation addOperation = new()
             {
                 OfferingId = cover.OfferingId,
-                StaffId = cover.TeacherId,
+                StaffId = staffId,
                 CoverId = cover.Id.Value,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -94,7 +100,7 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
             TeacherMSTeamOperation removeOperation = new()
             {
                 OfferingId = cover.OfferingId,
-                StaffId = cover.TeacherId,
+                StaffId = staffId,
                 CoverId = cover.Id.Value,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -111,7 +117,7 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
         {
             if (!coverAdmin.IsStaffMember)
                 continue;
-
+            
             TeacherMSTeamOperation addOperation = new()
             {
                 OfferingId = cover.OfferingId,

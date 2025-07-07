@@ -3,7 +3,6 @@
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways.LissServerGateway;
 using Application.Interfaces.Gateways.LissServerGateway.Models;
-using Constellation.Infrastructure.ExternalServices.LissServer;
 using Constellation.Infrastructure.ExternalServices.LissServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -64,21 +63,15 @@ public sealed class LissController : ControllerBase
         // Check Method
         LissCallMethod method = LissCallMethod.FromValue(callDetails.Method);
 
-        if (method == LissCallMethod.PublishStudents)
-            return await _lissServerGateway.PublishStudents(callDetails.Params);
-
-        if (method == LissCallMethod.PublishTimetable)
-            return await _lissServerGateway.PublishTimetable(callDetails.Params);
-
-        if (method == LissCallMethod.PublishTeachers)
-            return await _lissServerGateway.PublishTeachers(callDetails.Params);
-
-        if (method == LissCallMethod.PublishClassMemberships)
-            return await _lissServerGateway.PublishClassMemberships(callDetails.Params);
-
-        if (method == LissCallMethod.PublishClasses)
-            return await _lissServerGateway.PublishClasses(callDetails.Params);
-
-        return new LissResponse();
+        return method switch
+        {
+            _ when method == LissCallMethod.PublishStudents => await _lissServerGateway.PublishStudents(callDetails.Params),
+            _ when method == LissCallMethod.PublishTimetable => await _lissServerGateway.PublishTimetable(callDetails.Params),
+            _ when method == LissCallMethod.PublishTeachers => await _lissServerGateway.PublishTeachers(callDetails.Params),
+            _ when method == LissCallMethod.PublishClassMemberships => await _lissServerGateway.PublishClassMemberships(callDetails.Params),
+            _ when method == LissCallMethod.PublishClasses => await _lissServerGateway.PublishClasses(callDetails.Params),
+            _ when method == LissCallMethod.PublishDailyData => await _lissServerGateway.PublishDailyData(callDetails.Params),
+            _ => new LissResponse()
+        };
     }
 }

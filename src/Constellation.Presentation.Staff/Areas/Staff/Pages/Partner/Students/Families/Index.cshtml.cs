@@ -85,7 +85,7 @@ public class IndexModel : BasePageModel
 
         if (!authorized.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -102,7 +102,7 @@ public class IndexModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -145,7 +145,7 @@ public class IndexModel : BasePageModel
 
         if (!authorized.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -162,7 +162,7 @@ public class IndexModel : BasePageModel
         
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 
@@ -184,7 +184,7 @@ public class IndexModel : BasePageModel
 
         if (contactRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 contactRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 

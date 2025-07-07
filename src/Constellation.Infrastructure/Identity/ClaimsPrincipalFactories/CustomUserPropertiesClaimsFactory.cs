@@ -29,7 +29,7 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
 
         if (user.IsStaffMember)
         {
-            identity.AddClaim(new Claim(AuthClaimType.StaffEmployeeId, user.StaffId));
+            identity.AddClaim(new Claim(AuthClaimType.StaffEmployeeId, user.StaffId.ToString()));
         }
 
         if (user.IsStudent)

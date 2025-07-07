@@ -5,6 +5,7 @@ using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Stocktake;
 using Constellation.Core.Models.Stocktake.Repositories;
 using Core.Models.Stocktake.Errors;
+using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -29,34 +30,43 @@ internal sealed class UpsertStocktakeEventCommandHandler
 
     public async Task<Result> Handle(UpsertStocktakeEventCommand request, CancellationToken cancellationToken)
     {
-        if (request.Id.HasValue)
+        if (!request.Id.Equals(StocktakeEventId.Empty))
         {
-            StocktakeEvent existingEvent = await _stocktakeRepository.GetById(request.Id.Value, cancellationToken);
+            StocktakeEvent existingEvent = await _stocktakeRepository.GetById(request.Id, cancellationToken);
 
             if (existingEvent is null)
             {
                 _logger
                     .ForContext(nameof(UpsertStocktakeEventCommand), request, true)
-                    .ForContext(nameof(Error), StocktakeErrors.EventNotFound(request.Id.Value), true)
+                    .ForContext(nameof(Error), StocktakeEventErrors.EventNotFound(request.Id), true)
                     .Warning("Failed to update Stocktake Event");
 
-                return Result.Failure(StocktakeErrors.EventNotFound(request.Id.Value));
+                return Result.Failure(StocktakeEventErrors.EventNotFound(request.Id));
             }
 
-            existingEvent.StartDate = request.StartDate;
-            existingEvent.EndDate = request.EndDate;
-            existingEvent.Name = request.Name;
-            existingEvent.AcceptLateResponses = request.AcceptLateResponses;
+            Result update = existingEvent.Update(
+                request.Name,
+                request.StartDate,
+                request.EndDate,
+                request.AcceptLateResponses);
+
+            if (update.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(UpsertStocktakeEventCommand), request, true)
+                    .ForContext(nameof(Error), update.Error, true)
+                    .Warning("Failed to update Stocktake Event");
+
+                return Result.Failure(update.Error);
+            }
         }
         else
         {
-            StocktakeEvent stocktake = new()
-            {
-                Name = request.Name,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                AcceptLateResponses = request.AcceptLateResponses
-            };
+            StocktakeEvent stocktake = new(
+                request.Name,
+                request.StartDate,
+                request.EndDate,
+                request.AcceptLateResponses);
 
             _stocktakeRepository.Insert(stocktake);
         }

@@ -1,11 +1,11 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Application.Interfaces.Gateways;
+
+using Constellation.Application.DTOs;
+using Core.Shared;
 using System.Threading.Tasks;
 
-namespace Constellation.Application.Interfaces.Gateways
+public interface ISMSGateway
 {
-    public interface ISMSGateway
-    {
-        Task<double> GetCreditBalanceAsync();
-        Task<SMSMessageCollectionDto> SendSmsAsync(object payload);
-    }
+    Task<Result<double>> GetCreditBalanceAsync();
+    Task<Result<SMSMessageCollectionDto>> SendSmsAsync(object payload);
 }

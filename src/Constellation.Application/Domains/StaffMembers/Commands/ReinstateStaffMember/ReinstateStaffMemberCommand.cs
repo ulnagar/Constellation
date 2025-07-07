@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Commands.ReinstateStaffMember;
 
 using Abstractions.Messaging;
+using Core.Models.StaffMembers.Identifiers;
 
 public sealed record ReinstateStaffMemberCommand(
-    string StaffId)
+    StaffId StaffId,
+    string SchoolCode)
     : ICommand;

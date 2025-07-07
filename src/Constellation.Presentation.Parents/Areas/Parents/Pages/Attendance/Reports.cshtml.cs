@@ -72,7 +72,7 @@ public class ReportsModel : BasePageModel
             _logger
                 .Warning("Unauthorised attempt to download attendance report by parent {name}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(DomainErrors.Auth.NotAuthorised);
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
 
             await PreparePage();
 
@@ -94,7 +94,7 @@ public class ReportsModel : BasePageModel
                 .ForContext(nameof(Error), fileRequest.Error, true)
                 .Warning("Failed attempt to download attendance report by parent {name}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(fileRequest.Error);
+            ModalContent = ErrorDisplay.Create(fileRequest.Error);
 
             await PreparePage();
 
@@ -113,7 +113,7 @@ public class ReportsModel : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(studentsRequest.Error);
+            ModalContent = ErrorDisplay.Create(studentsRequest.Error);
 
             return;
         }
@@ -135,7 +135,7 @@ public class ReportsModel : BasePageModel
 
             if (datesRequest.IsFailure)
             {
-                ModalContent = new ErrorDisplay(datesRequest.Error);
+                ModalContent = ErrorDisplay.Create(datesRequest.Error);
 
                 return;
             }

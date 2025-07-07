@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Queries.GetCaseSummaryList;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -56,23 +56,23 @@ internal sealed class GetCaseSummaryListQueryHandler
             {
                 TrainingCaseDetail details = item.Detail as TrainingCaseDetail;
 
-                Staff staffMember = await _staffRepository.GetById(details.StaffId, cancellationToken);
+                StaffMember staffMember = await _staffRepository.GetById(details.StaffId, cancellationToken);
 
                 if (staffMember is null)
                 {
                     _logger
                         .ForContext(nameof(Case), item, true)
-                        .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(details.StaffId), true)
+                        .ForContext(nameof(Error), StaffMemberErrors.NotFound(details.StaffId), true)
                         .Warning("Could not generate list of Case Summary");
 
-                    return Result.Failure<List<CaseSummaryResponse>>(DomainErrors.Partners.Staff.NotFound(details.StaffId));
+                    return Result.Failure<List<CaseSummaryResponse>>(StaffMemberErrors.NotFound(details.StaffId));
                 }
 
                 description = $"Training Case for {details.ModuleName} - {details.DueDate:d}";
                 
                 responses.Add(new(
                     item.Id,
-                    staffMember.GetName(),
+                    staffMember.Name,
                     description,
                     item.Status,
                     item.CreatedAt,

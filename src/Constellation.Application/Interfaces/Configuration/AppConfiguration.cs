@@ -2,7 +2,7 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
-using System;
+using Core.Models.StaffMembers.Identifiers;
 using System.Collections.Generic;
 
 public sealed class AppConfiguration
@@ -58,13 +58,13 @@ public sealed class AppConfiguration
 
     public class ContactsConfiguration
     {
-        public List<string> CounsellorIds { get; set; }
-        public List<string> CareersAdvisorIds { get; set; }
-        public List<string> LibrarianIds { get; set; }
-        public Dictionary<Grade, List<string>> LearningSupportIds { get; set; }
-        public Dictionary<Grade, List<string>> DeputyPrincipalIds { get; set; }
-        public string PrincipalId { get; set; }
-        public string InstructionalLeader { get; set; }
+        public List<StaffId> CounsellorIds { get; set; }
+        public List<StaffId> CareersAdvisorIds { get; set; }
+        public List<StaffId> LibrarianIds { get; set; }
+        public Dictionary<Grade, List<StaffId>> LearningSupportIds { get; set; }
+        public Dictionary<Grade, List<StaffId>> DeputyPrincipalIds { get; set; }
+        public StaffId PrincipalId { get; set; }
+        public StaffId InstructionalLeader { get; set; }
     }
 
     public class AttachmentsConfiguration
@@ -82,8 +82,8 @@ public sealed class AppConfiguration
 
     public class WorkFlowConfiguration
     {
-        public string AttendanceReviewer { get; set; }
-        public string ComplianceReviewer { get; set; }
-        public string TrainingReviewer { get; set; }
+        public StaffId AttendanceReviewer { get; set; }
+        public StaffId ComplianceReviewer { get; set; }
+        public StaffId TrainingReviewer { get; set; }
     }
 }

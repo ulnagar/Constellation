@@ -90,7 +90,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -99,7 +99,7 @@ public class DetailsModel : BasePageModel
 
         if (studentId == StudentId.Empty)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 StudentErrors.InvalidId,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -116,7 +116,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -158,7 +158,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -175,7 +175,7 @@ public class DetailsModel : BasePageModel
 
         if (result.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 result.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -195,7 +195,7 @@ public class DetailsModel : BasePageModel
 
         if (!authorised.Succeeded)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 DomainErrors.Permissions.Unauthorised,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -204,7 +204,7 @@ public class DetailsModel : BasePageModel
 
         if (viewModel.StudentId == StudentId.Empty)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 StudentErrors.InvalidId,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -224,7 +224,7 @@ public class DetailsModel : BasePageModel
             return await PreparePage(cancellationToken);
         }
 
-        ModalContent = new ErrorDisplay(
+        ModalContent = ErrorDisplay.Create(
             result.Error,
             _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 
@@ -244,7 +244,7 @@ public class DetailsModel : BasePageModel
 
         if (familyRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 familyRequest.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Families/Index", values: new { area = "Staff" }));
 

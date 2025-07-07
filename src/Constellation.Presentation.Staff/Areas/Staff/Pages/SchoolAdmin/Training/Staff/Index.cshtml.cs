@@ -6,11 +6,11 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -41,7 +41,7 @@ public class IndexModel : BasePageModel
 
 
     [BindProperty(SupportsGet = true)]
-    public string StaffId { get; set; }
+    public StaffId StaffId { get; set; }
 
     public List<ModuleStatusResponse> Modules { get; set; }
 
@@ -57,7 +57,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), completionRequest.Error, true)
                 .Warning("Failed to retrieve Training Completion details for staff member with id {Id} by user {User}", StaffId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 completionRequest.Error,
                 _linkGenerator.GetPathByPage("/Dashboard", values: new { area = "Staff" }));
 

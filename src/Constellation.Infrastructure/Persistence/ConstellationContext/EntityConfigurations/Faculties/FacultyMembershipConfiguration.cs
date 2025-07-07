@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Faculties;
 
-using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -28,8 +29,9 @@ internal sealed class FacultyMembershipConfiguration : IEntityTypeConfiguration<
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
-            .HasOne<Staff>()
-            .WithMany(staff => staff.Faculties)
+            .HasOne<StaffMember>()
+            .WithMany()
+            .HasForeignKey(member => member.StaffId)
             .OnDelete(DeleteBehavior.NoAction);
 
         builder
@@ -37,5 +39,11 @@ internal sealed class FacultyMembershipConfiguration : IEntityTypeConfiguration<
             .HasConversion(
                 entry => entry.Value,
                 value => FacultyMembershipRole.FromValue(value));
+
+        builder
+            .Property(member => member.StaffId)
+            .HasConversion(
+                id => id.Value,
+                value => StaffId.FromValue(value));
     }
 }

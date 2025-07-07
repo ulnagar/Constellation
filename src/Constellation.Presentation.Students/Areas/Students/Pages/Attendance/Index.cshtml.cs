@@ -65,7 +65,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve absence data by user {user} of type {type}", _currentUserService.UserName, AbsencesType);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return;
         }
@@ -80,7 +80,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), absencesRequest.Error, true)
                 .Warning("Failed to retrieve absence data by user {user} of type {type}", _currentUserService.UserName, AbsencesType);
 
-            ModalContent = new ErrorDisplay(absencesRequest.Error);
+            ModalContent = ErrorDisplay.Create(absencesRequest.Error);
 
             return;
         }

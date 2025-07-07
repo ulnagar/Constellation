@@ -10,13 +10,16 @@
                 @Html.Raw(Model.Content)
             </div>
             <div class="modal-footer">
-                @if (Model.ButtonHasLink)
+                @foreach (var button in Model.Buttons)
                 {
-                    <a href="@Model.ButtonLink" class="btn @(Model.ButtonColour)">@Model.ButtonText</a>
-                }
-                else
-                {
-                    <button type="button" class="btn @(Model.ButtonColour)" data-bs-dismiss="modal" data-dismiss="modal">@Model.ButtonText</button>
+                    @if (!string.IsNullOrWhiteSpace(button.Link))
+                    {
+                        <a href="@button.Link" class="btn @(button.Colour)">@button.Text</a>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn @(button.Colour)" data-bs-dismiss="modal" data-dismiss="modal">@button.Text</button>
+                    }                    
                 }
             </div>
         </div>

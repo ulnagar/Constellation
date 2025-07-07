@@ -66,7 +66,7 @@ public class InterviewsModel : BasePageModel
 
         if (offerings.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 offerings.Error,
                 _linkGenerator.GetPathByPage("/Partner/Students/Reports/Index", values: new { area = "Staff" }));
 
@@ -88,7 +88,7 @@ public class InterviewsModel : BasePageModel
 
         if (data.IsFailure)
         {
-            ModalContent = new ErrorDisplay(data.Error);
+            ModalContent = ErrorDisplay.Create(data.Error);
 
             _logger
                 .ForContext(nameof(Error), data, true)

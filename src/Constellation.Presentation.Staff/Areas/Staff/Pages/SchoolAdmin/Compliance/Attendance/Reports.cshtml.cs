@@ -50,7 +50,7 @@ public class ReportModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to retrieve Attendance Percentage reports by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return;
         }
@@ -70,7 +70,7 @@ public class ReportModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to export Attendance Percentage Report for period {Period} by user {User}", selectedPeriod, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }
@@ -94,7 +94,7 @@ public class ReportModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to export custom Attendance Percentage Report for period {Period} by user {User}", selectedPeriod, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }

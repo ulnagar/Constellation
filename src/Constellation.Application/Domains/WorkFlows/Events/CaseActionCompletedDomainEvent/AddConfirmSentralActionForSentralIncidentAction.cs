@@ -2,9 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
@@ -76,7 +76,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
             return;
         }
 
-        List<Staff> headTeachers = new();
+        List<StaffMember> headTeachers = new();
 
         if (action is CreateSentralEntryAction sentralAction)
         {
@@ -96,14 +96,14 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
         } 
         else if (action is SentralIncidentStatusAction)
         {
-            var detail = item.Type!.Equals(CaseType.Compliance)
+            ComplianceCaseDetail detail = item.Type!.Equals(CaseType.Compliance)
                 ? item.Detail as ComplianceCaseDetail
                 : null;
 
             if (detail is null)
                 return;
 
-            List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(detail?.CreatedById, cancellationToken);
+            List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(detail.CreatedById, cancellationToken);
 
             foreach (Faculty faculty in faculties)
             {
@@ -113,7 +113,7 @@ internal sealed class AddConfirmSentralActionForSentralIncidentAction
                 headTeachers.AddRange(await _staffRepository.GetFacultyHeadTeachers(faculty.Id, cancellationToken));
             }
 
-            headTeachers = headTeachers.DistinctBy(entry => entry.StaffId).ToList();
+            headTeachers = headTeachers.DistinctBy(entry => entry.Id).ToList();
         }
         else
         {

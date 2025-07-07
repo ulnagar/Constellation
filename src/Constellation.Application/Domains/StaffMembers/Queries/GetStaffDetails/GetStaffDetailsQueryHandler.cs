@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffDetails;
 
 using Abstractions.Messaging;
-using Core.Errors;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
@@ -10,6 +9,8 @@ using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
@@ -57,28 +58,33 @@ internal sealed class GetStaffDetailsQueryHandler
 
     public async Task<Result<StaffDetailsResponse>> Handle(GetStaffDetailsQuery request, CancellationToken cancellationToken)
     {
-        Staff staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
             _logger
                 .ForContext(nameof(GetStaffDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId), true)
                 .Warning("Failed to retrieve details of staff member");
 
-            return Result.Failure<StaffDetailsResponse>(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure<StaffDetailsResponse>(StaffMemberErrors.NotFound(request.StaffId));
         }
 
-        School school = await _schoolRepository.GetById(staffMember.SchoolCode, cancellationToken);
+        School school = staffMember.CurrentAssignment is null
+            ? await _schoolRepository.GetById(staffMember.CurrentAssignment.SchoolCode, cancellationToken)
+            : null;
 
-        if (school is null)
+        List<StaffDetailsResponse.SchoolAssignmentResponse> schoolAssignments = new();
+
+        foreach (SchoolAssignment assignment in staffMember.SchoolAssignments)
         {
-            _logger
-                .ForContext(nameof(GetStaffDetailsQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(staffMember.SchoolCode), true)
-                .Warning("Failed to retrieve details of staff member");
-
-            return Result.Failure<StaffDetailsResponse>(DomainErrors.Partners.School.NotFound(staffMember.SchoolCode));
+            schoolAssignments.Add(new(
+                assignment.Id,
+                assignment.SchoolCode,
+                assignment.SchoolName,
+                assignment.IsDeleted,
+                assignment.StartDate,
+                assignment.EndDate));
         }
 
         List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(request.StaffId, cancellationToken);
@@ -87,14 +93,12 @@ internal sealed class GetStaffDetailsQueryHandler
 
         foreach (Faculty faculty in faculties)
         {
-            FacultyMembership membership = staffMember.Faculties.FirstOrDefault(entry => entry.FacultyId == faculty.Id);
-
-            if (membership is null)
-                continue;
+            FacultyMembership membership = faculty.Members
+                .FirstOrDefault(membership => membership.StaffId == staffMember.Id);
 
             facultyMemberships.Add(new(
                 membership.Id,
-                faculty.Id,
+                membership.FacultyId,
                 faculty.Name,
                 membership.Role));
         }
@@ -114,7 +118,7 @@ internal sealed class GetStaffDetailsQueryHandler
             if (course is null)
                 continue;
 
-            TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == staffMember.StaffId);
+            TeacherAssignment assignment = offering.Teachers.FirstOrDefault(entry => entry.StaffId == staffMember.Id);
 
             if (assignment is null)
                 continue;
@@ -144,38 +148,42 @@ internal sealed class GetStaffDetailsQueryHandler
             }
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(staffMember.SchoolCode, cancellationToken);
-
         List<StaffDetailsResponse.SchoolContactResponse> schoolContacts = new();
-
-        foreach (SchoolContact contact in contacts)
+        
+        if (school is not null)
         {
-            List<SchoolContactRole> assignments = contact.Assignments
-                .Where(entry => 
-                    entry.SchoolCode == staffMember.SchoolCode && 
-                    !entry.IsDeleted)
-                .ToList();
+            List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(school.Code, cancellationToken);
 
-            foreach (SchoolContactRole assignment in assignments)
+
+            foreach (SchoolContact contact in contacts)
             {
-                schoolContacts.Add(new(
-                    contact.Id,
-                    contact.DisplayName,
-                    contact.EmailAddress,
-                    string.IsNullOrWhiteSpace(contact.PhoneNumber) ? school.PhoneNumber : contact.PhoneNumber,
-                    assignment.Role,
-                    school.Name));
-            }   
+                List<SchoolContactRole> assignments = contact.Assignments
+                    .Where(entry =>
+                        entry.SchoolCode == school.Code &&
+                        !entry.IsDeleted)
+                    .ToList();
+
+                foreach (SchoolContactRole assignment in assignments)
+                {
+                    schoolContacts.Add(new(
+                        contact.Id,
+                        contact.DisplayName,
+                        contact.EmailAddress,
+                        string.IsNullOrWhiteSpace(contact.PhoneNumber) ? school.PhoneNumber : contact.PhoneNumber,
+                        assignment.Role,
+                        school.Name));
+                }
+            }
         }
 
         return new StaffDetailsResponse(
-            staffMember.StaffId,
-            staffMember.GetName(),
+            staffMember.Id,
+            staffMember.EmployeeId,
+            staffMember.Name,
             staffMember.EmailAddress,
-            school.Name,
-            school.Code,
             staffMember.IsShared,
             staffMember.IsDeleted,
+            schoolAssignments,
             facultyMemberships,
             linkedOfferings,
             linkedSessions,

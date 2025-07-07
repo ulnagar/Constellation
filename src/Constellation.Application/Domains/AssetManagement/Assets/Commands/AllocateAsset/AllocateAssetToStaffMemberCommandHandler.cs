@@ -1,15 +1,15 @@
-﻿namespace Constellation.Application.Assets.AllocateAsset;
+﻿namespace Constellation.Application.Domains.AssetManagement.Assets.Commands.AllocateAsset;
 
-using Abstractions.Messaging;
-using Core.Abstractions.Clock;
-using Core.Errors;
-using Core.Models;
-using Core.Models.Assets;
-using Core.Models.Assets.Errors;
-using Core.Models.Assets.Repositories;
-using Core.Models.StaffMembers.Repositories;
-using Core.Shared;
-using Interfaces.Repositories;
+using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Interfaces.Repositories;
+using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Assets;
+using Constellation.Core.Models.Assets.Errors;
+using Constellation.Core.Models.Assets.Repositories;
+using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.Repositories;
+using Constellation.Core.Shared;
+using Core.Models.StaffMembers.Errors;
 using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,16 +51,16 @@ internal sealed class AllocateAssetToStaffMemberCommandHandler
             return Result.Failure(AssetErrors.NotFoundByAssetNumber(request.AssetNumber));
         }
 
-        Staff staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
             _logger
                 .ForContext(nameof(AllocateAssetToStaffMemberCommand), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId), true)
                 .Warning("Failed to allocate device to staff member");
 
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
         }
 
         Result<Allocation> allocation = Allocation.Create(asset.Id, staffMember, _dateTime.Today);

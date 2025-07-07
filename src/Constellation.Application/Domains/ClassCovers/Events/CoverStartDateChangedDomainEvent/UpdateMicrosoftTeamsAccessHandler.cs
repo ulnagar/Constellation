@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Auth;
 using Application.Models.Identity;
+using Constellation.Core.Models.StaffMembers.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.DomainEvents;
 using Core.Enums;
@@ -78,7 +79,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
         {
             coveringTeacherRequests = existingRequests
                 .OfType<TeacherMSTeamOperation>()
-                .Where(operation => operation.StaffId == cover.TeacherId)
+                .Where(operation => operation.StaffId.ToString() == cover.TeacherId)
                 .ToList<MSTeamOperation>();
         }
 
@@ -153,10 +154,15 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 }
                 else
                 {
+                    bool success = Guid.TryParse(cover.TeacherId, out Guid staffIdGuid);
+                    StaffId staffId = success
+                        ? StaffId.FromValue(staffIdGuid)
+                        : StaffId.Empty;
+
                     TeacherMSTeamOperation removeEarlyOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = Guid.Empty,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
@@ -168,7 +174,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation addTimelyOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = cover.TeacherId,
+                        StaffId = staffId,
                         CoverId = cover.Id.Value,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,

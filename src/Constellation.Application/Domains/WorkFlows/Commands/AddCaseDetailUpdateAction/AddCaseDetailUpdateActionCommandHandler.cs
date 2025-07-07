@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
@@ -46,10 +46,10 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
             return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
-        Staff teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
 
         Result<CaseDetailUpdateAction> action = CaseDetailUpdateAction.Create(null, item.Id, teacher, request.Details);
 

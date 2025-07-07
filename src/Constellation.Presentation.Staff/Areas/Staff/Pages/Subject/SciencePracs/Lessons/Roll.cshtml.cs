@@ -73,7 +73,7 @@ public class RollModel : BasePageModel
                 .ForContext(nameof(Error), cancelRequest.Error, true)
                 .Warning("Failed to cancel Lesson Roll by user {User}", _currentUserService);
 
-            ModalContent = new ErrorDisplay(cancelRequest.Error);
+            ModalContent = ErrorDisplay.Create(cancelRequest.Error);
 
             return await PreparePage();
         }
@@ -97,7 +97,7 @@ public class RollModel : BasePageModel
                 .ForContext(nameof(Error), reinstateRequest.Error, true)
                 .Warning("Failed to reinstate Lesson Roll by user {User}", _currentUserService);
 
-            ModalContent = new ErrorDisplay(reinstateRequest.Error);
+            ModalContent = ErrorDisplay.Create(reinstateRequest.Error);
 
             await PreparePage();
 
@@ -123,7 +123,7 @@ public class RollModel : BasePageModel
                 .ForContext(nameof(Error), notificationRequest.Error, true)
                 .Warning("Failed to send notification for Lesson Roll by user {User}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(notificationRequest.Error);
+            ModalContent = ErrorDisplay.Create(notificationRequest.Error);
 
             await PreparePage();
             return Page();
@@ -144,7 +144,7 @@ public class RollModel : BasePageModel
                 .ForContext(nameof(Error), rollRequest.Error, true)
                 .Warning("Failed to retrieve details of Lesson Roll with id {Id} by user {User}", RollId, _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 rollRequest.Error,
                 _linkGenerator.GetPathByPage("/Subject/SciencePracs/Lessons/Details", values: new { area = "Staff", id = LessonId }));
 

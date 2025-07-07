@@ -68,7 +68,7 @@ public class Step3Model : BasePageModel
 
         if (studentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 studentsRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
             
@@ -91,7 +91,7 @@ public class Step3Model : BasePageModel
 
         if (coursesRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 coursesRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 
@@ -115,7 +115,7 @@ public class Step3Model : BasePageModel
 
         if (assignmentsRequest.IsFailure)
         {
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 assignmentsRequest.Error,
                 _linkGenerator.GetPathByPage("/ExamSubmission/Step1", values: new { area = "Schools" }));
 

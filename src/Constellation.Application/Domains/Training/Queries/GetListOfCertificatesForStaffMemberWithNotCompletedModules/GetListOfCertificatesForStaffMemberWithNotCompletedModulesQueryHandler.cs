@@ -6,6 +6,9 @@ using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.Faculties.ValueObjects;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
@@ -45,36 +48,38 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
     {
         StaffCompletionListDto data = new();
 
-        Staff staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember staff = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staff is null)
         {
             _logger
                 .ForContext(nameof(GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(request.StaffId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(request.StaffId), true)
                 .Warning("Failed to retrieve list of Training Completions for staff member");
 
-            return Result.Failure<StaffCompletionListDto>(DomainErrors.Partners.Staff.NotFound(request.StaffId));
+            return Result.Failure<StaffCompletionListDto>(StaffMemberErrors.NotFound(request.StaffId));
         }
 
-        School school = await _schoolRepository.GetById(staff.SchoolCode, cancellationToken);
+        School school = staff.CurrentAssignment is not null
+            ? await _schoolRepository.GetById(staff.CurrentAssignment.SchoolCode, cancellationToken)
+            : null;
 
         if (school is null)
         {
             _logger
                 .ForContext(nameof(GetListOfCertificatesForStaffMemberWithNotCompletedModulesQuery), request, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(staff.SchoolCode), true)
+                .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(staff.CurrentAssignment?.SchoolCode), true)
                 .Warning("Failed to retrieve list of Training Completions for staff member");
 
-            return Result.Failure<StaffCompletionListDto>(DomainErrors.Partners.School.NotFound(staff.SchoolCode));
+            return Result.Failure<StaffCompletionListDto>(DomainErrors.Partners.School.NotFound(staff.CurrentAssignment?.SchoolCode));
         }
 
-        List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staff.StaffId, cancellationToken);
+        List<Faculty> faculties = await _facultyRepository.GetCurrentForStaffMember(staff.Id, cancellationToken);
 
         data.StaffId = request.StaffId;
-        data.Name = staff.DisplayName;
+        data.Name = staff.Name.DisplayName;
         data.SchoolName = school!.Name;
-        data.EmailAddress = staff.EmailAddress;
+        data.EmailAddress = staff.EmailAddress.Email;
         data.Faculties = faculties.Select(faculty => faculty.Name).ToList();
 
         List<TrainingModule> modules = await _trainingRepository.GetAllModules(cancellationToken);
@@ -88,7 +93,7 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
             TrainingCompletion record = module.Completions
                 .Where(record =>
-                    record.StaffId == staff.StaffId &&
+                    record.StaffId == staff.Id &&
                     !record.IsDeleted)
                 .MaxBy(record => record.CompletedDate);
 
@@ -98,7 +103,7 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
 
             foreach (Faculty faculty in faculties)
             {
-                List<string> headTeacherIds = faculty
+                List<StaffId> headTeacherIds = faculty
                     .Members
                     .Where(member =>
                         !member.IsDeleted &&
@@ -106,10 +111,10 @@ internal sealed class GetListOfCertificatesForStaffMemberWithNotCompletedModules
                     .Select(member => member.StaffId)
                     .ToList();
 
-                List<Staff> headTeachers = await _staffRepository
+                List<StaffMember> headTeachers = await _staffRepository
                     .GetListFromIds(headTeacherIds, cancellationToken);
 
-                foreach (Staff headTeacher in headTeachers)
+                foreach (StaffMember headTeacher in headTeachers)
                     entry.AddHeadTeacherDetails(faculty, headTeacher);
             }
 

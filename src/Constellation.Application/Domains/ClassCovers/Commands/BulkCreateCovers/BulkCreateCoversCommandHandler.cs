@@ -36,7 +36,7 @@ public class BulkCreateCoversCommandHandler : ICommandHandler<BulkCreateCoversCo
         foreach (var offeringId in request.OfferingId)
         {
             Result<ClassCover> coverResult = ClassCover.Create(
-                new ClassCoverId(Guid.NewGuid()),
+                new(),
                 offeringId,
                 request.StartDate,
                 request.EndDate,

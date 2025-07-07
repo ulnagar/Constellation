@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseActionCancelledDomainEvent;
 
 using Abstractions.Messaging;
-using Core.Errors;
-using Core.Models;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
@@ -63,14 +63,14 @@ internal sealed class SendUpdateEmailToAssignee
             return;
         }
 
-        Staff assignee = await _staffRepository.GetById(action.AssignedToId, cancellationToken);
+        StaffMember assignee = await _staffRepository.GetById(action.AssignedToId, cancellationToken);
 
         if (assignee is null)
         {
             _logger
                 .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
                 .ForContext(nameof(Action), action, true)
-                .ForContext(nameof(Error), DomainErrors.Partners.Staff.NotFound(action.AssignedToId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(action.AssignedToId), true)
                 .Warning("Could not send cancellation notification to Assignee for Action");
 
             return;
@@ -78,12 +78,12 @@ internal sealed class SendUpdateEmailToAssignee
 
         List<EmailRecipient> recipients = new();
 
-        Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.DisplayName, assignee.EmailAddress);
+        Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.Name, assignee.EmailAddress);
         if (teacher.IsFailure)
         {
             _logger
                 .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
-                .ForContext(nameof(Staff), assignee, true)
+                .ForContext(nameof(StaffMember), assignee, true)
                 .ForContext(nameof(Error), teacher.Error, true)
                 .Warning("Could not send cancellation notification to Assignee for Action");
 

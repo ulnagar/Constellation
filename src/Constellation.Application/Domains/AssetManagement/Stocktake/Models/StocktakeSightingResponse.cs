@@ -1,11 +1,13 @@
 ﻿namespace Constellation.Application.Domains.AssetManagement.Stocktake.Models;
 
+using Core.Models.Assets.ValueObjects;
+using Core.Models.Stocktake.Identifiers;
 using System;
 
 public sealed record StocktakeSightingResponse(
-    Guid Id,
+    StocktakeSightingId Id,
     string SerialNumber,
-    string AssetNumber,
+    AssetNumber AssetNumber,
     string Description,
     string LocationName,
     string UserName,

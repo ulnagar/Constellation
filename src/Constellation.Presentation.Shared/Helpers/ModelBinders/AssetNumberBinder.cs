@@ -3,27 +3,25 @@ namespace Constellation.Presentation.Shared.Helpers.ModelBinders;
 
 using Core.Models.Assets.ValueObjects;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.ComponentModel;
-using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 public sealed class AssetNumberBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         string modelName = bindingContext.ModelName;
-        Type modelType = bindingContext.ModelType;
 
         ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
 
         if (valueProviderResult == ValueProviderResult.None) return Task.CompletedTask;
 
-        object? assetNumber = TryParse(modelType, valueProviderResult.FirstValue);
+        AssetNumber? assetNumber = TryParse(valueProviderResult.FirstValue);
         StoreResult(bindingContext, modelName, assetNumber);
 
         return Task.CompletedTask;
     }
 
-    private void StoreResult(ModelBindingContext bindingContext, string modelName, object? assetNumber)
+    private static void StoreResult(ModelBindingContext bindingContext, string modelName, AssetNumber? assetNumber)
     {
         if (assetNumber is not null)
             bindingContext.Result = ModelBindingResult.Success(assetNumber);
@@ -31,27 +29,18 @@ public sealed class AssetNumberBinder : IModelBinder
             bindingContext.ModelState.TryAddModelError(modelName, "Invalid Asset Number");
     }
 
-    private object? TryParse(Type assetNumberType, string? rawValue) =>
-        FromString(assetNumberType, rawValue) is string parsedValue
-            //? Activator.CreateInstance(assetNumberType, parsedValue) // For Public Constructors Only
-            //? assetNumberType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null)?.Invoke(new object[] { parsedValue }) // For Private Constructors with Parameters
-            ? AssetNumber.FromValue(parsedValue) //Forces the item creation through the validation in the FromValue method
-            : null;
+    private static AssetNumber? TryParse(string? rawValue) =>
+        AssetNumber.FromValue(rawValue);
+}
 
-    private object? FromString(Type assetNumberType, string? rawValue) =>
-        rawValue is string && !string.IsNullOrWhiteSpace(rawValue) && GetContainedType(assetNumberType) is Type containedType
-            ? TypeDescriptor.GetConverter(containedType).ConvertFromString(rawValue)
-            : null;
-
-    private Type? GetContainedType(Type assetNumberType)
+public sealed class AssetNumberBinderProvider : IModelBinderProvider
+{
+    public IModelBinder? GetBinder(ModelBinderProviderContext context)
     {
-        return typeof(string);
+        ArgumentNullException.ThrowIfNull(context);
 
-        PropertyInfo? property = assetNumberType.GetProperty("Number");
-
-        if (property is null)
-            return null;
-
-        return property.PropertyType;
+        return context.Metadata.ModelType == typeof(AssetNumber) 
+            ? new BinderTypeModelBinder(typeof(AssetNumberBinder)) 
+            : null;
     }
 }

@@ -59,7 +59,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to retrieve timetable data by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(StudentErrors.InvalidId);
+            ModalContent = ErrorDisplay.Create(StudentErrors.InvalidId);
 
             return;
         }
@@ -74,7 +74,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), timetableRequest.Error, true)
                 .Warning("Failed to retrieve timetable data by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(timetableRequest.Error);
+            ModalContent = ErrorDisplay.Create(timetableRequest.Error);
 
             return;
         }
@@ -94,7 +94,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), StudentErrors.InvalidId, true)
                 .Warning("Failed to download timetable file by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(
+            ModalContent = ErrorDisplay.Create(
                 StudentErrors.InvalidId,
                 _linkGenerator.GetPathByPage("/Timetables/Index", values: new { area = "Students" }));
 
@@ -111,7 +111,7 @@ public class IndexModel : BasePageModel
                 .ForContext(nameof(Error), request.Error, true)
                 .Warning("Failed to download timetable file by user {user}", _currentUserService.UserName);
 
-            ModalContent = new ErrorDisplay(request.Error);
+            ModalContent = ErrorDisplay.Create(request.Error);
 
             return Page();
         }
