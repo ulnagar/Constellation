@@ -88,12 +88,12 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         if (!severityList.Contains(caseDetail!.Severity))
             return;
 
-        StaffMember reviewer = await _staffRepository.GetById(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
+        StaffMember reviewer = await _staffRepository.GetByEmployeeId(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
         if (reviewer is null)
         {
             _logger
                 .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFound(_configuration.WorkFlow.AttendanceReviewer), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(_configuration.WorkFlow.AttendanceReviewer), true)
                 .Warning("Could not create default Action for new Case");
             return;
         }

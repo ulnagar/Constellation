@@ -19,6 +19,7 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -127,13 +128,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 foreach (var grade in _teamsConfiguration.StudentTeamChannelOwnerIds)
                 {
-                    if (grade.Value.Contains(staffMember.Id))
+                    if (grade.Value.Contains(staffMember.EmployeeId))
                         staffChannels.Add(new ($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Owner.Value));
                     else
                         staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Member.Value));
                 }
 
-                if (_teamsConfiguration.StudentTeamOwnerIds.Contains(staffMember.Id))
+                if (_teamsConfiguration.StudentTeamOwnerIds.Contains(staffMember.EmployeeId))
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
@@ -268,14 +269,14 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 if (course is null) continue;
 
                 // Deputy Principals
-                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<StaffId> deputyIds);
+                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<EmployeeId> deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
 
-                    foreach (StaffId deputyId in deputyIds)
+                    foreach (EmployeeId deputyId in deputyIds)
                     {
-                        StaffMember deputyPrincipal = await _staffRepository.GetById(deputyId, cancellationToken);
+                        StaffMember deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
 
                         if (deputyPrincipal is null) continue;
 
@@ -290,13 +291,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<StaffId> lastStaffIds);
+                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<EmployeeId> lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (StaffId staffId in lastStaffIds)
+                    foreach (EmployeeId staffId in lastStaffIds)
                     {
-                        StaffMember learningSupportTeacher = await _staffRepository.GetById(staffId, cancellationToken);
+                        StaffMember learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
                         if (learningSupportTeacher is null) continue;
 
@@ -371,13 +372,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         }
 
         // Mandatory Owners
-        List<StaffId> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
+        List<EmployeeId> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
 
         if (mandatoryOwners.Any())
         {
-            foreach (StaffId staffId in mandatoryOwners)
+            foreach (EmployeeId staffId in mandatoryOwners)
             {
-                StaffMember mandatoryOwner = await _staffRepository.GetById(staffId, cancellationToken);
+                StaffMember mandatoryOwner = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
                 if (mandatoryOwner is null) continue;
 

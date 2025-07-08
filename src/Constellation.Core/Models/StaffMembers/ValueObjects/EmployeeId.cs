@@ -3,9 +3,13 @@
 using Errors;
 using Primitives;
 using Shared;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
+[TypeConverter(typeof(EmployeeIdConverter))]
 public sealed class EmployeeId : ValueObject
 {
     private const string _srnRegex = @"^\d{6,9}$";
@@ -14,7 +18,7 @@ public sealed class EmployeeId : ValueObject
 
     public string Number { get; }
 
-    //private EmployeeId() { }
+    private EmployeeId() { }
 
     private EmployeeId(string number)
     {
@@ -50,5 +54,21 @@ public sealed class EmployeeId : ValueObject
             return Empty;
 
         return new(value);
+    }
+}
+
+public class EmployeeIdConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+    {
+        return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+    }
+
+    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+    {
+        if (value is string stringValue)
+            return EmployeeId.FromValue(stringValue);
+
+        return base.ConvertFrom(context, culture, value);
     }
 }

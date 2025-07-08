@@ -3,6 +3,7 @@
 using Constellation.Core.Shared;
 using Identifiers;
 using System;
+using ValueObjects;
 
 public static class StaffMemberErrors
 {
@@ -25,6 +26,10 @@ public static class StaffMemberErrors
     public static readonly Func<string, Error> NotFoundByEmail = email => new Error(
         "StaffMember.TeacherNotFound",
         $"A teacher with the Email Address {email} could not be found");
+
+    public static readonly Func<EmployeeId, Error> NotFoundByEmployeeId = id => new Error(
+        "StaffMember.TeacherNotFound",
+        $"A teacher with the Employee Id {id} could not be found");
 
     public static readonly Error NoneFound = new(
         "StaffMember.NoneFound",

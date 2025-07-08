@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Configuration;
 
 using Constellation.Core.Enums;
-using Core.Models.StaffMembers.Identifiers;
+using Constellation.Core.Models.StaffMembers.ValueObjects;
 using System.Collections.Generic;
 
 public sealed class TeamsGatewayConfiguration
@@ -20,8 +20,8 @@ public sealed class TeamsGatewayConfiguration
         return true;
     }
     
-    public List<StaffId> MandatoryOwnerIds { get; set; }
-    public List<StaffId> StudentTeamOwnerIds { get; set; }
-    public Dictionary<Grade, List<StaffId>> StudentTeamChannelOwnerIds { get; set; }
+    public List<EmployeeId> MandatoryOwnerIds { get; set; }
+    public List<EmployeeId> StudentTeamOwnerIds { get; set; }
+    public Dictionary<Grade, List<EmployeeId>> StudentTeamChannelOwnerIds { get; set; }
 
 }

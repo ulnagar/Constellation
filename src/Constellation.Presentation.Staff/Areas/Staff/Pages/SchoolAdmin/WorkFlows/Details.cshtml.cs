@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows;
 
 using Application.Common.PresentationModels;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
 using Application.Domains.WorkFlows.Commands.AddActionNote;
 using Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
@@ -389,7 +390,29 @@ public class DetailsModel : BasePageModel
         Guid guidStaffId = Guid.Parse(claimStaffId);
         StaffId staffId = StaffId.FromValue(guidStaffId);
 
-        AddCaseDetailUpdateActionCommand command = new(Id, staffId, viewModel.Details);
+        GetStaffByIdQuery query = new(staffId);
+
+        Result<StaffResponse> staffMember = await _mediator.Send(query);
+
+        if (staffMember.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), staffMember.Error, true)
+                .Warning("Failed to add Action in Case by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(staffMember.Error);
+
+            Result<CaseDetailsResponse> request = await _mediator.Send(new GetCaseByIdQuery(Id));
+
+            if (request.IsFailure)
+                return RedirectToPage();
+
+            Case = request.Value;
+
+            return Page();
+        }
+
+        AddCaseDetailUpdateActionCommand command = new(Id, staffMember.Value.EmployeeId, viewModel.Details);
 
         _logger
             .ForContext(nameof(AddCaseDetailUpdateActionCommand), command, true)

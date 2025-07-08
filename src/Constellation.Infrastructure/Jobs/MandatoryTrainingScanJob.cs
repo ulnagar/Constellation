@@ -6,7 +6,6 @@ using Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Enums;
-using Core.Models;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;

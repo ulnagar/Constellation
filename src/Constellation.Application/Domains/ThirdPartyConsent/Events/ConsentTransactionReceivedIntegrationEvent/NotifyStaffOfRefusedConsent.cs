@@ -7,6 +7,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Repositories;
@@ -69,13 +70,13 @@ internal class NotifyStaffOfRefusedConsent
 
         List<EmailRecipient> recipients = new();
 
-        StaffMember? instructionalLeader = await _staffRepository.GetById(_configuration.Contacts.InstructionalLeader, cancellationToken);
+        StaffMember? instructionalLeader = await _staffRepository.GetByEmployeeId(_configuration.Contacts.InstructionalLeader, cancellationToken);
 
         if (instructionalLeader is null)
         {
             _logger
                 .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFound(_configuration.Contacts.InstructionalLeader), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(_configuration.Contacts.InstructionalLeader), true)
                 .Warning("Failed to send notification of refused consent");
         }
         else
@@ -95,17 +96,17 @@ internal class NotifyStaffOfRefusedConsent
             }
         }
 
-        List<StaffId> deputyIds = _configuration.Contacts.DeputyPrincipalIds[transaction.Grade].ToList();
+        List<EmployeeId> deputyIds = _configuration.Contacts.DeputyPrincipalIds[transaction.Grade].ToList();
 
-        foreach (StaffId staffId in deputyIds)
+        foreach (EmployeeId staffId in deputyIds)
         {
-            StaffMember? deputy = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember? deputy = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (deputy is null)
             {
                 _logger
                     .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(staffId), true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(staffId), true)
                     .Warning("Failed to send notification of refused consent");
             }
             else
