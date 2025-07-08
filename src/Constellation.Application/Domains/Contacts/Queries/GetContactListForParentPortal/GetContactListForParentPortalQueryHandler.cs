@@ -6,6 +6,7 @@ using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
@@ -66,9 +67,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Counsellor
-        foreach (StaffId staffId in _configuration.Contacts.CounsellorIds)
+        foreach (EmployeeId staffId in _configuration.Contacts.CounsellorIds)
         {
-            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -88,9 +89,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Careers Advisor
-        foreach (StaffId staffId in _configuration.Contacts.CareersAdvisorIds)
+        foreach (EmployeeId staffId in _configuration.Contacts.CareersAdvisorIds)
         {
-            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -110,9 +111,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Librarian
-        foreach (StaffId staffId in _configuration.Contacts.LibrarianIds)
+        foreach (EmployeeId staffId in _configuration.Contacts.LibrarianIds)
         {
-            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -169,14 +170,14 @@ internal sealed class GetContactListForParentPortalQueryHandler
         if (enrolment is null)
             return response;
 
-        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(enrolment.Grade, out List<StaffId> lastStaffIds);
+        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(enrolment.Grade, out List<EmployeeId> lastStaffIds);
 
         if (!success)
             return response;
         
-        foreach (StaffId staffId in lastStaffIds)
+        foreach (EmployeeId staffId in lastStaffIds)
         {
-            StaffMember member = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (member is not null)
             {

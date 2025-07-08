@@ -5,6 +5,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -61,23 +62,23 @@ internal sealed class SendNotificationToCaseOwnerWhenAllActionsCancelled
         if (item.Actions.Any(action => action.Status.Equals(ActionStatus.Open)))
             return;
 
-        StaffId assigneeId = item.Type switch
+        EmployeeId assigneeId = item.Type switch
         {
             not null when item.Type.Equals(CaseType.Attendance) => _configuration.WorkFlow.AttendanceReviewer,
             not null when item.Type.Equals(CaseType.Compliance) => _configuration.WorkFlow.ComplianceReviewer,
             not null when item.Type.Equals(CaseType.Training) => _configuration.WorkFlow.TrainingReviewer,
-            _ => StaffId.Empty
+            _ => EmployeeId.Empty
         };
 
-        StaffMember assignee = assigneeId != StaffId.Empty 
-            ? await _staffRepository.GetById(assigneeId, cancellationToken)
+        StaffMember assignee = assigneeId != EmployeeId.Empty 
+            ? await _staffRepository.GetByEmployeeId(assigneeId, cancellationToken)
             : null;
 
         if (assignee is null)
         {
             _logger
                 .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFound(assigneeId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(assigneeId), true)
                 .Warning("Could not send notification to Case Assignee for new Status");
 
             return;

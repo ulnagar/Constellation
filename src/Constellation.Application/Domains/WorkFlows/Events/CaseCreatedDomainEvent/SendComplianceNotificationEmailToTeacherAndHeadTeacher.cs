@@ -10,6 +10,7 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -155,17 +156,17 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (age >= 17)
         {
             // Add DP to recipients
-            List<StaffId> deputies = _configuration.Contacts.DeputyPrincipalIds[detail.Grade];
+            List<EmployeeId> deputies = _configuration.Contacts.DeputyPrincipalIds[detail.Grade];
 
-            foreach (StaffId deputyId in deputies)
+            foreach (EmployeeId deputyId in deputies)
             {
-                StaffMember deputy = await _staffRepository.GetById(deputyId, cancellationToken);
+                StaffMember deputy = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
 
                 if (deputy is null)
                 {
                     _logger
                         .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                        .ForContext(nameof(Error), StaffMemberErrors.NotFound(deputyId), true)
+                        .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(deputyId), true)
                         .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
                     return;
@@ -193,15 +194,15 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (age >= 22)
         {
             // Add P to recipients
-            StaffId principalId = _configuration.Contacts.PrincipalId;
+            EmployeeId principalId = _configuration.Contacts.PrincipalId;
             
-            StaffMember principal = await _staffRepository.GetById(principalId, cancellationToken);
+            StaffMember principal = await _staffRepository.GetByEmployeeId(principalId, cancellationToken);
 
             if (principal is null)
             {
                 _logger
                     .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(principalId), true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(principalId), true)
                     .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
 
                 return;

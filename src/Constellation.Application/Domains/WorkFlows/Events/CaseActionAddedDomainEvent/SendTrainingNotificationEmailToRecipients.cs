@@ -7,8 +7,8 @@ using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
-using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -116,15 +116,15 @@ internal sealed class SendTrainingNotificationEmailToRecipients
 
         recipients.Add(teacher.Value);
 
-        StaffId reviewerId = _configuration.WorkFlow.TrainingReviewer;
+        EmployeeId reviewerId = _configuration.WorkFlow.TrainingReviewer;
 
-        StaffMember reviewer = await _staffRepository.GetById(reviewerId, cancellationToken);
+        StaffMember reviewer = await _staffRepository.GetByEmployeeId(reviewerId, cancellationToken);
 
         if (reviewer is null)
         {
             _logger
                 .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFound(reviewerId), true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(reviewerId), true)
                 .Warning("Could not send notification to recipients for Training Case update");
 
             return;
@@ -208,15 +208,15 @@ internal sealed class SendTrainingNotificationEmailToRecipients
                 }
             }
 
-            StaffId principalId = _configuration.Contacts.PrincipalId;
+            EmployeeId principalId = _configuration.Contacts.PrincipalId;
 
-            StaffMember principal = await _staffRepository.GetById(principalId, cancellationToken);
+            StaffMember principal = await _staffRepository.GetByEmployeeId(principalId, cancellationToken);
 
             if (principal is null)
             {
                 _logger
                     .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFound(principalId), true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(principalId), true)
                     .Warning("Could not send notification to recipients for Training Case update");
 
                 return;

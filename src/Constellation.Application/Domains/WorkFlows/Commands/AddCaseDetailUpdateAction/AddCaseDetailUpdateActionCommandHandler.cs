@@ -46,10 +46,10 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
             return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
-        StaffMember teacher = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember teacher = await _staffRepository.GetByEmployeeId(request.StaffId, cancellationToken);
 
         if (teacher is null)
-            return Result.Failure(StaffMemberErrors.NotFound(request.StaffId));
+            return Result.Failure(StaffMemberErrors.NotFoundByEmployeeId(request.StaffId));
 
         Result<CaseDetailUpdateAction> action = CaseDetailUpdateAction.Create(null, item.Id, teacher, request.Details);
 

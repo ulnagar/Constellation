@@ -2,7 +2,7 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
-using Core.Models.StaffMembers.Identifiers;
+using Core.Models.StaffMembers.ValueObjects;
 using System.Collections.Generic;
 
 public sealed class AppConfiguration
@@ -58,13 +58,13 @@ public sealed class AppConfiguration
 
     public class ContactsConfiguration
     {
-        public List<StaffId> CounsellorIds { get; set; }
-        public List<StaffId> CareersAdvisorIds { get; set; }
-        public List<StaffId> LibrarianIds { get; set; }
-        public Dictionary<Grade, List<StaffId>> LearningSupportIds { get; set; }
-        public Dictionary<Grade, List<StaffId>> DeputyPrincipalIds { get; set; }
-        public StaffId PrincipalId { get; set; }
-        public StaffId InstructionalLeader { get; set; }
+        public List<EmployeeId> CounsellorIds { get; set; }
+        public List<EmployeeId> CareersAdvisorIds { get; set; }
+        public List<EmployeeId> LibrarianIds { get; set; }
+        public Dictionary<Grade, List<EmployeeId>> LearningSupportIds { get; set; }
+        public Dictionary<Grade, List<EmployeeId>> DeputyPrincipalIds { get; set; }
+        public EmployeeId PrincipalId { get; set; }
+        public EmployeeId InstructionalLeader { get; set; }
     }
 
     public class AttachmentsConfiguration
@@ -82,8 +82,8 @@ public sealed class AppConfiguration
 
     public class WorkFlowConfiguration
     {
-        public StaffId AttendanceReviewer { get; set; }
-        public StaffId ComplianceReviewer { get; set; }
-        public StaffId TrainingReviewer { get; set; }
+        public EmployeeId AttendanceReviewer { get; set; }
+        public EmployeeId ComplianceReviewer { get; set; }
+        public EmployeeId TrainingReviewer { get; set; }
     }
 }
