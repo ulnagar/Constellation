@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Domains.ClassCovers.Queries.GetCoversSummaryByDateAndOffering;
+using Application.Domains.Covers.Queries.GetCoversSummaryByDateAndOffering;
 using Application.Domains.Faculties.Queries.GetFacultyManagers;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Configuration;
@@ -172,7 +172,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
                     covered = true;
                     coveredBy = cover.TeacherName;
-                    coverType = cover.CoverType;
+                    coverType = cover.CoverType.Name;
                 }
             }
 

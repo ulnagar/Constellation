@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
 using Application.Common.PresentationModels;
-using Application.Domains.ClassCovers.Commands.CancelCover;
-using Application.Domains.ClassCovers.Models;
-using Application.Domains.ClassCovers.Queries.GetAllCoversForCalendarYear;
-using Application.Domains.ClassCovers.Queries.GetAllCurrentAndFutureCovers;
-using Application.Domains.ClassCovers.Queries.GetFutureCovers;
+using Application.Domains.Covers.Commands.CancelCover;
+using Application.Domains.Covers.Models;
+using Application.Domains.Covers.Queries.GetAllCoversForCalendarYear;
+using Application.Domains.Covers.Queries.GetAllCurrentAndFutureCovers;
+using Application.Domains.Covers.Queries.GetFutureCovers;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Covers.Identifiers;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
@@ -52,7 +52,7 @@ public class IndexModel : BasePageModel
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
     
     public async Task<IActionResult> OnGetCancel(
-        ClassCoverId id, 
+        CoverId id, 
         CancellationToken cancellationToken)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCovers);

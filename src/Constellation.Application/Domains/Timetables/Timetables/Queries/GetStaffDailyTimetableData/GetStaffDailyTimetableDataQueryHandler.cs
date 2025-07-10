@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Timetables.Timetables.Queries.GetStaffDailyTimetableData;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Clock;
-using Core.Abstractions.Repositories;
 using Core.Abstractions.Services;
 using Core.Models.Covers;
 using Core.Models.Offerings;
@@ -25,7 +25,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
 : IQueryHandler<GetStaffDailyTimetableDataQuery, List<StaffDailyTimetableResponse>>
 {
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IClassCoverRepository _coverRepository;
+    private readonly ICoverRepository _coverRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
@@ -33,7 +33,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
 
     public GetStaffDailyTimetableDataQueryHandler(
         IOfferingRepository offeringRepository,
-        IClassCoverRepository coverRepository,
+        ICoverRepository coverRepository,
         IPeriodRepository periodRepository,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
@@ -92,9 +92,9 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
             }
         }
 
-        List<ClassCover> covers = await _coverRepository.GetCurrentForStaff(request.StaffId, cancellationToken);
+        List<Cover> covers = await _coverRepository.GetCurrentForStaff(request.StaffId, cancellationToken);
 
-        foreach (ClassCover cover in covers)
+        foreach (Cover cover in covers)
         {
             Offering offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
 

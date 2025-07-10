@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Auth;
 using Application.Models.Identity;
+using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
@@ -10,6 +11,7 @@ using Core.Extensions;
 using Core.Models;
 using Core.Models.Casuals;
 using Core.Models.Covers;
+using Core.Models.Covers.Enums;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Faculties;
@@ -47,7 +49,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IClassCoverRepository _coverRepository;
+    private readonly ICoverRepository _coverRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IFacultyRepository _facultyRepository;
@@ -63,7 +65,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
-        IClassCoverRepository coverRepository,
+        ICoverRepository coverRepository,
         IEnrolmentRepository enrolmentRepository,
         ICasualRepository casualRepository,
         IFacultyRepository facultyRepository,
@@ -107,7 +109,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
         List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
         List<Offering> offerings = await _offeringRepository.GetAllActive(cancellationToken);
-        List<ClassCover> covers = await _coverRepository.GetAllCurrent(cancellationToken);
+        List<Cover> covers = await _coverRepository.GetAllCurrent(cancellationToken);
         List<Casual> casuals = await _casualRepository.GetAll(cancellationToken);
         IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
 
@@ -258,7 +260,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
     private async Task<List<TeamWithMembership.Member>> ProcessClassTeam(
         Team team,
         List<Casual> casuals,
-        List<ClassCover> covers,
+        List<Cover> covers,
         List<Offering> offerings, 
         List<Student> students, 
         List<StaffMember> staff, 
@@ -328,7 +330,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             }
 
             // Covering Teachers
-            List<ClassCover> matchingCovers = covers.Where(cover => cover.OfferingId == offering.Id).ToList();
+            List<Cover> matchingCovers = covers.Where(cover => cover.OfferingId == offering.Id).ToList();
 
             if (matchingCovers.Count > 0)
             {

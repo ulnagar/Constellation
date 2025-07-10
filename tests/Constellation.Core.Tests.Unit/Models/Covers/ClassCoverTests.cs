@@ -1,10 +1,9 @@
-﻿using Constellation.Core.DomainEvents;
-using Constellation.Core.Models.Covers;
-using Constellation.Core.Models.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+﻿namespace Constellation.Core.Tests.Unit.Models.Covers;
 
-namespace Constellation.Core.Tests.Unit.Models.Covers;
+using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Covers.Events;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Core.Models.Covers.Enums;
 
 public class ClassCoverTests
 {
@@ -13,11 +12,10 @@ public class ClassCoverTests
     {
         // Arrange
         var sut = ClassCover.Create(
-            new ClassCoverId(Guid.NewGuid()),
             OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
-            ValueObjects.CoverTeacherType.Staff,
+            CoverTeacherType.Staff,
             "1");
 
         sut.ClearDomainEvents();
@@ -38,11 +36,10 @@ public class ClassCoverTests
     {        
         // Arrange
         var sut = ClassCover.Create(
-            new ClassCoverId(Guid.NewGuid()),
             OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
-            ValueObjects.CoverTeacherType.Staff,
+            CoverTeacherType.Staff,
             "1");
 
         sut.ClearDomainEvents();
@@ -63,11 +60,10 @@ public class ClassCoverTests
     {
         // Arrange
         var sut = ClassCover.Create(
-            new ClassCoverId(Guid.NewGuid()),
             OfferingId.FromValue(Guid.NewGuid()),
             DateOnly.FromDateTime(DateTime.Today),
             DateOnly.FromDateTime(DateTime.Today.AddMonths(1)),
-            ValueObjects.CoverTeacherType.Staff,
+            CoverTeacherType.Staff,
             "1");
 
         sut.ClearDomainEvents();

@@ -760,7 +760,7 @@ public sealed class Service : IEmailService
     }
 
     public async Task SendNewCoverEmail(
-        ClassCover cover,
+        Cover cover,
         Offering offering,
         EmailRecipient coveringTeacher,
         List<EmailRecipient> primaryRecipients,
@@ -819,7 +819,7 @@ public sealed class Service : IEmailService
     }
 
     public async Task SendUpdatedCoverEmail(
-        ClassCover cover,
+        Cover cover,
         Offering offering,
         EmailRecipient coveringTeacher,
         List<EmailRecipient> primaryRecipients,
@@ -877,7 +877,7 @@ public sealed class Service : IEmailService
     }
 
     public async Task SendCancelledCoverEmail(
-        ClassCover cover,
+        Cover cover,
         Offering offering,
         EmailRecipient coveringTeacher,
         List<EmailRecipient> primaryRecipients,
