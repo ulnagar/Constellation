@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -60,9 +61,13 @@ public class CreateModel : BasePageModel
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
     public List<Guid> CoveredClasses { get; set; } = new();
+    [BindProperty]
+    [ModelBinder(typeof(BaseFromNameBinder))]
+    public CoverType CoverType { get; set; } = CoverType.ClassCover;
 
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
+    public IEnumerable<CoverType> CoverTypeList = CoverType.GetOptions;
 
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
@@ -87,7 +92,7 @@ public class CreateModel : BasePageModel
             EndDate,
             teacherType,
             teacher.Id,
-            CoverType.ClassCover);
+            CoverType);
 
         _logger
             .ForContext(nameof(BulkCreateCoversCommand), command, true)

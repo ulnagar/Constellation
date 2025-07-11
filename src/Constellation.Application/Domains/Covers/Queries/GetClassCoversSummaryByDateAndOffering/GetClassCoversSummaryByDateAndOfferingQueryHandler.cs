@@ -1,11 +1,11 @@
-﻿namespace Constellation.Application.Domains.Covers.Queries.GetCoversSummaryByDateAndOffering;
+﻿namespace Constellation.Application.Domains.Covers.Queries.GetClassCoversSummaryByDateAndOffering;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
+using Core.Models.Covers.Repositories;
 using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -17,14 +17,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class GetCoversSummaryByDateAndOfferingQueryHandler
-    : IQueryHandler<GetCoversSummaryByDateAndOfferingQuery, List<CoverSummaryByDateAndOfferingResponse>>
+internal sealed class GetClassCoversSummaryByDateAndOfferingQueryHandler
+    : IQueryHandler<GetClassCoversSummaryByDateAndOfferingQuery, List<ClassCoverSummaryByDateAndOfferingResponse>>
 {
     private readonly ICoverRepository _coverRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IStaffRepository _staffRepository;
 
-    public GetCoversSummaryByDateAndOfferingQueryHandler(
+    public GetClassCoversSummaryByDateAndOfferingQueryHandler(
         ICoverRepository coverRepository,
         ICasualRepository casualRepository,
         IStaffRepository staffRepository)
@@ -34,9 +34,9 @@ internal sealed class GetCoversSummaryByDateAndOfferingQueryHandler
         _staffRepository = staffRepository;
     }
 
-    public async Task<Result<List<CoverSummaryByDateAndOfferingResponse>>> Handle(GetCoversSummaryByDateAndOfferingQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<ClassCoverSummaryByDateAndOfferingResponse>>> Handle(GetClassCoversSummaryByDateAndOfferingQuery request, CancellationToken cancellationToken)
     {
-        List<CoverSummaryByDateAndOfferingResponse> returnData = new();
+        List<ClassCoverSummaryByDateAndOfferingResponse> returnData = new();
 
         List<Cover> covers = await _coverRepository
             .GetAllForDateAndOfferingId(
@@ -78,7 +78,7 @@ internal sealed class GetCoversSummaryByDateAndOfferingQueryHandler
                     teacherName = teacher.Name.DisplayName;
             }
 
-            CoverSummaryByDateAndOfferingResponse entry = new(cover.CreatedAt, teacherName, CoverType.ClassCover, cover.TeacherType);
+            ClassCoverSummaryByDateAndOfferingResponse entry = new(cover.CreatedAt, teacherName, cover.TeacherType);
 
             returnData.Add(entry);
         }

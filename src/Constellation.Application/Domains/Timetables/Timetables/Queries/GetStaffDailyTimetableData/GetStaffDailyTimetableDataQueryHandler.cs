@@ -96,6 +96,9 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
 
         foreach (Cover cover in covers)
         {
+            if (cover is AccessCover)
+                continue;
+
             Offering offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
 
             if (offering is null)

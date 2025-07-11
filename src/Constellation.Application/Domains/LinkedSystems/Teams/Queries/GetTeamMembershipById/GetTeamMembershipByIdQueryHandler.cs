@@ -209,7 +209,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Covering Teachers
-                List<string> coveringTeachers = await _coverRepository.GetCurrentCoveringTeachersForOffering(offering.Id, cancellationToken);
+                List<string> coveringTeachers = await _coverRepository.GetCurrentTeacherEmailsForAccessProvisioning(offering.Id, cancellationToken);
 
                 foreach (string teacher in coveringTeachers)
                 {

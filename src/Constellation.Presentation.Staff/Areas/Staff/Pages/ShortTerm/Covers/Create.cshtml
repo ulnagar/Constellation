@@ -12,6 +12,21 @@
 <form asp-page-handler="Create" method="post">
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+        <div class="form-group row">
+            <label asp-for="CoverType" class="col-md-2">Cover Type</label>
+            <div class="col-md-5">
+                <div class="row">
+                    @foreach (var type in Model.CoverTypeList)
+                    {
+                        <div class="col-6">
+                            <input type="radio" asp-for="CoverType" id="CoverType-@type.Value" value="@type"/> @type
+                        </div>
+                    }
+                </div>
+                <span asp-validation-for="CoverType" class="text-danger"></span>
+            </div>
+        </div>
 
         <div class="form-group row">
             <label asp-for="CoveringTeacherId" class="col-md-2">Covering Teacher</label>

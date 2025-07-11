@@ -80,7 +80,7 @@ internal sealed class CoverRepository : ICoverRepository
             .Where(cover => cover.Id == CoverId)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<List<string>> GetCurrentCoveringTeachersForOffering(
+    public async Task<List<string>> GetCurrentTeacherEmailsForAccessProvisioning(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
     {

@@ -19,7 +19,7 @@ public interface ICoverRepository
     Task<List<Cover>> GetAllForCurrentCalendarYear(CancellationToken cancellationToken = default);
     Task<Cover> GetById(CoverId CoverId, CancellationToken cancellationToken = default);
 
-    Task<List<string>> GetCurrentCoveringTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<string>> GetCurrentTeacherEmailsForAccessProvisioning(OfferingId offeringId, CancellationToken cancellationToken = default);
     
     Task<List<Cover>> GetAllWithCasualId(CasualId casualId, CancellationToken cancellationToken = default);
     Task<List<Cover>> GetAllForDateAndOfferingId(DateOnly coverDate, OfferingId OfferingId, CancellationToken cancellationToken = default);
