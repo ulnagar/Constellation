@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Domains.ClassCovers.Queries.GetCoversSummaryByDateAndOffering;
+using Application.Domains.Covers.Queries.GetClassCoversSummaryByDateAndOffering;
 using Application.Domains.Faculties.Queries.GetFacultyManagers;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Configuration;
@@ -164,15 +164,15 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                         .ToDictionary(member => member.EmailAddress.Email, member => member.Name.DisplayName);
                 }
 
-                Result<List<CoverSummaryByDateAndOfferingResponse>> coversRequest = await _mediator.Send(new GetCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
+                Result<List<ClassCoverSummaryByDateAndOfferingResponse>> coversRequest = await _mediator.Send(new GetClassCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
 
                 if (coversRequest.IsSuccess && coversRequest.Value.Count > 0)
                 {
-                    CoverSummaryByDateAndOfferingResponse cover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
+                    ClassCoverSummaryByDateAndOfferingResponse classCover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
 
                     covered = true;
-                    coveredBy = cover.TeacherName;
-                    coverType = cover.CoverType;
+                    coveredBy = classCover.TeacherName;
+                    coverType = classCover.CoverType.Name;
                 }
             }
 

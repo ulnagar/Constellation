@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Auth;
 using Application.Models.Identity;
+using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
@@ -45,7 +46,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly IFacultyRepository _facultyRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IClassCoverRepository _coverRepository;
+    private readonly ICoverRepository _coverRepository;
     private readonly TeamsGatewayConfiguration _teamsConfiguration;
     private readonly AppConfiguration _configuration;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
@@ -65,7 +66,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IDateTimeProvider dateTime,
         UserManager<AppUser> userManager,
         ILogger logger,
-        IClassCoverRepository coverRepository,
+        ICoverRepository coverRepository,
         IOptions<AppConfiguration> configuration,
         IOptions<TeamsGatewayConfiguration> teamsConfiguration)
     {
@@ -208,7 +209,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Covering Teachers
-                List<string> coveringTeachers = await _coverRepository.GetCurrentCoveringTeachersForOffering(offering.Id, cancellationToken);
+                List<string> coveringTeachers = await _coverRepository.GetCurrentTeacherEmailsForAccessProvisioning(offering.Id, cancellationToken);
 
                 foreach (string teacher in coveringTeachers)
                 {

@@ -1,16 +1,18 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.LissServer;
 
 using Application.Domains.Casuals.Commands.CreateCasual;
-using Application.Domains.ClassCovers.Commands.CreateCover;
+using Application.Domains.Covers.Commands.CreateCover;
 using Application.Domains.Edval.Repositories;
 using Application.Interfaces.Gateways.LissServerGateway;
 using Application.Interfaces.Gateways.LissServerGateway.Models;
 using Application.Interfaces.Repositories;
+using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models.Casuals;
 using Core.Models.Covers;
+using Core.Models.Covers.Enums;
 using Core.Models.Edval;
 using Core.Models.Edval.Events;
 using Core.Models.Offerings;
@@ -30,7 +32,7 @@ internal sealed class LissServerGateway : ILissServerGateway
     private readonly ICasualRepository _casualRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
-    private readonly IClassCoverRepository _coverRepository;
+    private readonly ICoverRepository _coverRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly ISender _mediator;
     private readonly IUnitOfWork _unitOfWork;
@@ -41,7 +43,7 @@ internal sealed class LissServerGateway : ILissServerGateway
         ICasualRepository casualRepository,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
-        IClassCoverRepository coverRepository,
+        ICoverRepository coverRepository,
         IDateTimeProvider dateTime,
         ISender mediator,
         IUnitOfWork unitOfWork,
@@ -393,7 +395,9 @@ internal sealed class LissServerGateway : ILissServerGateway
                     _ => null
                 };
 
-                List<ClassCover> existingCovers = await _coverRepository.GetAllForDateAndOfferingId(_dateTime.Today, offering.Id, cancellationToken);
+                List<ClassCover> existingCovers = (await _coverRepository.GetAllForDateAndOfferingId(_dateTime.Today, offering.Id, cancellationToken))
+                    .OfType<ClassCover>()
+                    .ToList();
 
                 if (existingCovers.Count == 0 || existingCovers.All(entry => entry.TeacherId != teacherId))
                 {
@@ -402,7 +406,8 @@ internal sealed class LissServerGateway : ILissServerGateway
                         _dateTime.Today,
                         _dateTime.Today,
                         teacherType,
-                        teacherId);
+                        teacherId,
+                        CoverType.ClassCover);
 
                     await _mediator.Send(command, cancellationToken);
                 }

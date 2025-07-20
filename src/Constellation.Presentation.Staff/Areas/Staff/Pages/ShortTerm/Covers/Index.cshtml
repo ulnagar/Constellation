@@ -46,7 +46,7 @@
 <table class="table-striped table-hover data-table">
     <thead>
         <tr>
-            <th colspan="7">
+            <th colspan="8">
                 Legend:
                 <span class="legend">
                     <span class="glyphicon glyphicon-ok"></span> Current Cover
@@ -61,6 +61,7 @@
         </tr>
         <tr>
             <th></th>
+            <th>Type</th>
             <th>Name</th>
             <th>School</th>
             <th>Class</th>
@@ -88,9 +89,10 @@
 
             <tr>
                 <td><span class="glyphicon glyphicon-@glyph"></span></td>
+                <td>@item.CoverType</td>
                 <td>@item.TeacherName</td>
-                <td>@Html.DisplayFor(model => item.TeacherSchool)</td>
-                <td>@Html.DisplayFor(model => item.OfferingName)</td>
+                <td>@item.TeacherSchool</td>
+                <td>@item.OfferingName</td>
                 <td>@Html.DisplayFor(model => item.StartDate, "DateOnly")</td>
                 <td>@Html.DisplayFor(model => item.EndDate, "DateOnly")</td>
                 <td>

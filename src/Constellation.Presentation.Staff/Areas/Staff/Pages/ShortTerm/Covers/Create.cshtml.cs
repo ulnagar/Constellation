@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
 using Application.Domains.Casuals.Queries.GetCasualsForSelectionList;
-using Application.Domains.ClassCovers.Commands.BulkCreateCovers;
+using Application.Domains.Covers.Commands.BulkCreateCovers;
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
 using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
@@ -9,16 +9,17 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.ValueObjects;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
 using Core.Abstractions.Services;
 using Core.Models.Covers;
+using Core.Models.Covers.Enums;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -60,9 +61,16 @@ public class CreateModel : BasePageModel
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     [BindProperty]
     public List<Guid> CoveredClasses { get; set; } = new();
+    [BindProperty]
+    [ModelBinder(typeof(BaseFromNameBinder))]
+    public CoverType CoverType { get; set; } = CoverType.ClassCover;
+
+    [BindProperty]
+    public string Note { get; set; } = string.Empty;
 
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
+    public IEnumerable<CoverType> CoverTypeList = CoverType.GetOptions;
 
     public async Task OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
@@ -86,13 +94,15 @@ public class CreateModel : BasePageModel
             StartDate,
             EndDate,
             teacherType,
-            teacher.Id);
+            teacher.Id,
+            CoverType,
+            Note);
 
         _logger
             .ForContext(nameof(BulkCreateCoversCommand), command, true)
             .Information("Requested to create Class Covers by user {User}", _currentUserService.UserName);
 
-        Result<List<ClassCover>> result = await _mediator.Send(command, cancellationToken);
+        Result<List<Cover>> result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {

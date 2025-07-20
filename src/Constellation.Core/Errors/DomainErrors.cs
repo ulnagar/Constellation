@@ -3,6 +3,7 @@
 namespace Constellation.Core.Errors;
 
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Covers.Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
@@ -83,17 +84,7 @@ public static class DomainErrors
                 $"A Casual with the Id {id.Value} could not be found");
         }
     }
-
-    public static class ClassCovers
-    {
-        public static class Cover
-        {
-            public static readonly Func<ClassCoverId, Error> NotFound = id => new Error(
-                "ClassCovers.Cover.NotFound",
-                $"A Class Cover with the Id {id.Value} could not be found");
-        }
-    }
-
+    
     public static class Documents
     {
         public static class AwardCertificate

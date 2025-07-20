@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.ShortTerm.Covers;
 
-using Application.Domains.ClassCovers.Commands.UpdateCover;
-using Application.Domains.ClassCovers.Queries.GetCoverWithDetails;
+using Application.Domains.Covers.Commands.UpdateCover;
+using Application.Domains.Covers.Queries.GetCoverWithDetails;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Covers.Identifiers;
 using Core.Abstractions.Services;
 using Core.Models.Covers;
 using Core.Shared;
@@ -12,7 +12,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
@@ -44,7 +43,7 @@ public class UpdateModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "New Class Cover";
     
     [BindProperty(SupportsGet = true)]
-    public ClassCoverId Id { get; set; } = ClassCoverId.Empty;
+    public CoverId Id { get; set; } = CoverId.Empty;
     public string OfferingName { get; set; }
     [BindProperty]
     [DataType(DataType.Date)]
@@ -67,7 +66,7 @@ public class UpdateModel : BasePageModel
             .ForContext(nameof(UpdateCoverCommand), command, true)
             .Information("Requested to update Class Cover with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-        Result<ClassCover> result = await _mediator.Send(command, cancellationToken);
+        Result<Cover> result = await _mediator.Send(command, cancellationToken);
 
         if (result.IsFailure)
         {

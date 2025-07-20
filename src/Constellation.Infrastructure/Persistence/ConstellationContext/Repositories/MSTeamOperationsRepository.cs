@@ -3,7 +3,7 @@
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Covers.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -105,7 +105,7 @@ public sealed class MSTeamOperationsRepository : IMSTeamOperationsRepository
     }
 
     public async Task<List<MSTeamOperation>> GetByCoverId(
-        ClassCoverId coverId, 
+        CoverId coverId, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<MSTeamOperation>()

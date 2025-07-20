@@ -1212,10 +1212,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Casuals_Casuals", (string)null);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Covers.ClassCover", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Covers.Cover", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CoverType")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1257,7 +1262,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("OfferingId");
 
-                    b.ToTable("Covers_ClassCovers", (string)null);
+                    b.ToTable("Covers", "Covers");
+
+                    b.HasDiscriminator<string>("CoverType").HasValue("Cover");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Device", b =>
@@ -4021,6 +4030,23 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("Universal Achiever");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Covers.AccessCover", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Covers.Cover");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("AccessCover");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Covers.ClassCover", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Covers.Cover");
+
+                    b.HasDiscriminator().HasValue("ClassCover");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.ContactAddedMSTeamOperation", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
@@ -4850,7 +4876,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Covers.ClassCover", b =>
+            modelBuilder.Entity("Constellation.Core.Models.Covers.Cover", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
                         .WithMany()
