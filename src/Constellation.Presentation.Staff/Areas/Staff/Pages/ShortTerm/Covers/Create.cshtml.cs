@@ -65,6 +65,9 @@ public class CreateModel : BasePageModel
     [ModelBinder(typeof(BaseFromNameBinder))]
     public CoverType CoverType { get; set; } = CoverType.ClassCover;
 
+    [BindProperty]
+    public string Note { get; set; } = string.Empty;
+
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
     public IEnumerable<CoverType> CoverTypeList = CoverType.GetOptions;
@@ -92,7 +95,8 @@ public class CreateModel : BasePageModel
             EndDate,
             teacherType,
             teacher.Id,
-            CoverType);
+            CoverType,
+            Note);
 
         _logger
             .ForContext(nameof(BulkCreateCoversCommand), command, true)
