@@ -100,17 +100,21 @@ internal sealed class CoverRepository : ICoverRepository
         {
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
+                CasualId casualId = CasualId.FromValue(Guid.Parse(cover.TeacherId));
+
                 returnData.AddRange(await _context
                     .Set<Casual>()
-                    .Where(casual => casual.Id.ToString() == cover.TeacherId)
+                    .Where(casual => casual.Id == casualId)
                     .Select(casual => casual.EmailAddress.Email)
                     .ToListAsync(cancellationToken));
             }
             else
             {
+                StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
+
                 returnData.AddRange(await _context
                     .Set<StaffMember>()
-                    .Where(staff => staff.Id.ToString() == cover.TeacherId)
+                    .Where(staff => staff.Id == staffId)
                     .Select(staff => staff.EmailAddress.Email)
                     .ToListAsync(cancellationToken));
             }
