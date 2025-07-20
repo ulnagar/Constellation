@@ -67,7 +67,7 @@ internal sealed class EnrolMultipleStudentsInOfferingCommandHandler
                 continue;
             }
 
-            Enrolment enrolment = Enrolment.Create(studentId, offering.Id);
+            Enrolment enrolment = OfferingEnrolment.Create(studentId, offering.Id);
 
             _enrolmentRepository.Insert(enrolment);
         }

@@ -8,6 +8,8 @@ using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Serilog;
 using System;
@@ -20,17 +22,20 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
     : IQueryHandler<GetCurrentStudentsWithCurrentOfferingsQuery, List<StudentWithOfferingsResponse>>
 {
     private readonly IStudentRepository _studentRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ILogger _logger;
 
     public GetCurrentStudentsWithCurrentOfferingsQueryHandler(
         IStudentRepository studentRepository,
+        ITutorialRepository tutorialRepository,
         IEnrolmentRepository enrolmentRepository,
         IOfferingRepository offeringRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
+        _tutorialRepository = tutorialRepository;
         _enrolmentRepository = enrolmentRepository;
         _offeringRepository = offeringRepository;
         _logger = logger;
@@ -44,23 +49,48 @@ internal sealed class GetCurrentStudentsWithCurrentOfferingsQueryHandler
 
         List<Offering> offerings = await _offeringRepository.GetAll(cancellationToken);
 
+        List<Tutorial> tutorials = await _tutorialRepository.GetAllActive(cancellationToken);
+
         foreach (Student student in students)
         {
-            List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
+            List<StudentWithOfferingsResponse.EnrolmentResponse> studentOfferings = new();
 
             List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Enrolment enrolment in enrolments)
             {
-                Offering offering = offerings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
+                switch (enrolment)
+                {
+                    case OfferingEnrolment offeringEnrolment:
+                        {
+                            Offering offering = offerings.FirstOrDefault(offering => offering.Id == offeringEnrolment.OfferingId);
 
-                if (offering is null)
-                    continue;
+                            if (offering is null)
+                                continue;
 
-                studentOfferings.Add(new(
-                    offering.Id,
-                    offering.Name,
-                    offering.IsCurrent));
+                            studentOfferings.Add(new StudentWithOfferingsResponse.OfferingEnrolmentResponse(
+                                offering.Id,
+                                offering.Name,
+                                offering.IsCurrent));
+
+                            break;
+                        }
+
+                    case TutorialEnrolment tutorialEnrolment:
+                        {
+                            Tutorial tutorial = tutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialEnrolment.TutorialId);
+
+                            if (tutorial is null)
+                                continue;
+
+                            studentOfferings.Add(new StudentWithOfferingsResponse.TutorialEnrolmentResponse(
+                                tutorial.Id,
+                                tutorial.Name,
+                                tutorial.IsCurrent));
+
+                            break;
+                        }
+                }
             }
 
             SchoolEnrolment schoolEnrolment = student.CurrentEnrolment;

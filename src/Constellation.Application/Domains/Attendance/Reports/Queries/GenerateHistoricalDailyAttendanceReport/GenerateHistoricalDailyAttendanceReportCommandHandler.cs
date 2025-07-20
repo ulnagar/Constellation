@@ -119,7 +119,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
             List<Enrolment> enrolments = await _enrolmentRepository.GetHistoricalForStudent(student.Id, startDate, endDate, cancellationToken);
 
             // Get offerings from enrolments
-            List<Offering> offerings = await _offeringRepository.GetListFromIds(enrolments.Select(enrolment => enrolment.OfferingId).ToList(), cancellationToken);
+            List<Offering> offerings = await _offeringRepository.GetListFromIds(enrolments.OfType<OfferingEnrolment>().Select(enrolment => enrolment.OfferingId).ToList(), cancellationToken);
 
             offerings = offerings
             .Where(offering => offering.Name.Value[2] != 'T')
