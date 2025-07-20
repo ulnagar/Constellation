@@ -100,7 +100,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(caseDetail.StudentId, cancellationToken);
 
-        foreach (Enrolment enrolment in enrolments)
+        foreach (OfferingEnrolment enrolment in enrolments.OfType<OfferingEnrolment>())
         {
             Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 

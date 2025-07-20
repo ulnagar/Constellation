@@ -133,16 +133,21 @@
         <div class="card">
             <div class="card-header" id="tutorialsHeading">
                 <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#tutorials" role="button">
-                    Group Tutorials
+                    Tutorials
                 </h4>
             </div>
 
-            <div id="tutorials" class="collapse @(module == "GroupTutorials" ? "show" : "")" data-parent="#accordion">
+            <div id="tutorials" class="collapse @(module == "Tutorials" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Subject_GroupTutorials_Tutorials ? "active" : "")" asp-page="/Subject/GroupTutorials/Tutorials/Index" asp-area="Staff">
-                                List
+                            <a class="nav-link @(Model == ActivePage.Subject_Tutorials_Tutorials ? "active" : "")" asp-page="/Subject/Tutorials/Index" asp-area="Staff">
+                                Tutorials
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Tutorials_GroupTutorials ? "active" : "")" asp-page="/Subject/Tutorials/GroupTutorials/Index" asp-area="Staff">
+                                Group Tutorials
                             </a>
                         </li>
                     </ul>

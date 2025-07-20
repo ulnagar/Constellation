@@ -4,6 +4,7 @@ using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Tutorials.Identifiers;
 using Core.ValueObjects;
 using Students.Queries.GetCurrentStudentsWithCurrentOfferings;
 using System.Collections.Generic;
@@ -30,12 +31,23 @@ public sealed record SchoolDetailsResponse(
         StaffId StaffId,
         Name Name,
         Dictionary<string, string> Faculties,
-        List<OfferingResponse> Offerings);
+        List<EnrolmentResponse> Offerings);
 
-    public sealed record OfferingResponse(
-        OfferingId Id,
+    public abstract record EnrolmentResponse(
         string Name,
         bool Current);
+
+    public sealed record OfferingEnrolmentResponse(
+        OfferingId OfferingId,
+        string Name,
+        bool Current) 
+        : EnrolmentResponse(Name, Current);
+
+    public sealed record TutorialEnrolmentResponse(
+        TutorialId TutorialId,
+        string Name,
+        bool Current)
+        : EnrolmentResponse(Name, Current);
 
     public sealed record SchoolContact(
         SchoolContactId ContactId,

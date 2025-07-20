@@ -3,7 +3,6 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Extensions;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Families;
@@ -74,7 +73,7 @@ internal sealed class CreateInterviewsImportQueryHandler
 
             foreach (Family family in families)
             {
-                foreach (Enrolment enrolment in validEnrolments)
+                foreach (OfferingEnrolment enrolment in validEnrolments.OfType<OfferingEnrolment>())
                 {
                     Offering offering = offerings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
 

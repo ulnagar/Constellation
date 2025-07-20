@@ -2,10 +2,11 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
 using Application.Domains.AssetManagement.Assets.Queries.GetDevicesAllocatedToStudent;
+using Application.Domains.Enrolments.Commands.UnenrolStudentFromOffering;
+using Application.Domains.Enrolments.Commands.UnenrolStudentFromTutorial;
 using Application.Domains.Families.Queries.GetFamilyContactsForStudent;
 using Application.Domains.Students.Queries.GetStudentById;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceSummaryForStudent;
-using Constellation.Application.Domains.Enrolments.Commands.UnenrolStudent;
 using Constellation.Application.Domains.Enrolments.Commands.UnenrolStudentFromAllOfferings;
 using Constellation.Application.Domains.Enrolments.Queries.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Domains.Families.Models;
@@ -26,6 +27,7 @@ using Core.Models.Offerings.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
+using Core.Models.Tutorials.Identifiers;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -221,7 +223,7 @@ public class DetailsModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task OnGetUnenrol(
+    public async Task OnGetUnenrolOffering(
         OfferingId offeringId, 
         CancellationToken cancellationToken)
     {
@@ -238,19 +240,56 @@ public class DetailsModel : BasePageModel
             return;
         }
 
-        UnenrolStudentCommand command = new(Id, offeringId);
+        UnenrolStudentFromOfferingCommand fromOfferingCommand = new(Id, offeringId);
 
         _logger
-            .ForContext(nameof(UnenrolStudentCommand), command, true)
+            .ForContext(nameof(UnenrolStudentFromOfferingCommand), fromOfferingCommand, true)
             .Information("Requested to unenrol Student from Offering by user {User}", _currentUserService.UserName);
 
-        Result result = await _mediator.Send(command, cancellationToken);
+        Result result = await _mediator.Send(fromOfferingCommand, cancellationToken);
 
         if (result.IsFailure)
         {
             _logger
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to unenrol Student from Offering by user {User}", _currentUserService.UserName);
+
+            GenerateError(result.Error);
+        }
+
+        await PreparePage(cancellationToken);
+    }
+
+    public async Task OnGetUnenrolTutorial(
+        TutorialId tutorialId,
+        CancellationToken cancellationToken)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+
+        if (!authorised.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(Error), DomainErrors.Permissions.Unauthorised, true)
+                .Warning("Failed to unenrol Student from Tutorial by user {User}", _currentUserService.UserName);
+
+            GenerateError(DomainErrors.Permissions.Unauthorised);
+            await PreparePage(cancellationToken);
+            return;
+        }
+
+        UnenrolStudentFromTutorialCommand fromTutorialCommand = new(Id, tutorialId);
+
+        _logger
+            .ForContext(nameof(UnenrolStudentFromTutorialCommand), fromTutorialCommand, true)
+            .Information("Requested to unenrol Student from Tutorial by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(fromTutorialCommand, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to unenrol Student from Tutorial by user {User}", _currentUserService.UserName);
 
             GenerateError(result.Error);
         }
@@ -276,7 +315,7 @@ public class DetailsModel : BasePageModel
         UnenrolStudentFromAllOfferingsCommand command = new(Id);
 
         _logger
-            .ForContext(nameof(UnenrolStudentCommand), command, true)
+            .ForContext(nameof(UnenrolStudentFromOfferingCommand), command, true)
             .Information("Requested to bulk unenrol Student from Offerings by user {User}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command, cancellationToken);

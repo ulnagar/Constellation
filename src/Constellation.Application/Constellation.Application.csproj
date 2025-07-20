@@ -30,6 +30,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
+	  <Folder Include="Domains\Tutorials\Commands\" />
 	</ItemGroup>
 
 </Project>

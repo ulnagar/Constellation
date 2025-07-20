@@ -17,6 +17,8 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
@@ -31,6 +33,7 @@ using System.Threading.Tasks;
 internal sealed class GetSchoolDetailsQueryHandler
 : IQueryHandler<GetSchoolDetailsQuery, SchoolDetailsResponse>
 {
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
@@ -41,6 +44,7 @@ internal sealed class GetSchoolDetailsQueryHandler
     private readonly ILogger _logger;
 
     public GetSchoolDetailsQueryHandler(
+        ITutorialRepository tutorialRepository,
         ISchoolRepository schoolRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
@@ -50,6 +54,7 @@ internal sealed class GetSchoolDetailsQueryHandler
         IEnrolmentRepository enrolmentRepository,
         ILogger logger)
     {
+        _tutorialRepository = tutorialRepository;
         _schoolRepository = schoolRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
@@ -80,21 +85,43 @@ internal sealed class GetSchoolDetailsQueryHandler
 
         foreach (Student student in students)
         {
-            List<StudentWithOfferingsResponse.OfferingResponse> studentOfferings = new();
+            List<StudentWithOfferingsResponse.EnrolmentResponse> studentOfferings = new();
 
             List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
             foreach (Enrolment enrolment in enrolments)
             {
-                Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
+                switch (enrolment)
+                {
+                    case OfferingEnrolment offeringEnrolment:
+                        {
+                            Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
-                if (offering is null)
-                    continue;
+                            if (offering is null)
+                                continue;
 
-                studentOfferings.Add(new(
-                    offering.Id,
-                    offering.Name,
-                    offering.IsCurrent));
+                            studentOfferings.Add(new StudentWithOfferingsResponse.OfferingEnrolmentResponse(
+                                offering.Id,
+                                offering.Name,
+                                offering.IsCurrent));
+
+                            break;
+                        }
+                    case TutorialEnrolment tutorialEnrolment:
+                        {
+                            Tutorial tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
+
+                            if (tutorial is null)
+                                continue;
+
+                            studentOfferings.Add(new StudentWithOfferingsResponse.TutorialEnrolmentResponse(
+                                tutorial.Id,
+                                tutorial.Name,
+                                tutorial.IsCurrent));
+
+                            break;
+                        }
+                }
             }
 
             SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
@@ -132,23 +159,35 @@ internal sealed class GetSchoolDetailsQueryHandler
         }
 
         List<StaffMember> teachers = await _staffRepository.GetActiveFromSchool(school.Code, cancellationToken);
-        List<Faculty> faculties = await _facultyRepository.GetAll(cancellationToken);
         List<SchoolDetailsResponse.SchoolStaff> staffResponse = new();
 
         foreach (StaffMember teacher in teachers)
         {
             List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(teacher.Id, cancellationToken);
 
-            List<SchoolDetailsResponse.OfferingResponse> teacherOfferings = offerings
-                .Where(offering => 
-                    offering.Teachers.Any(entry => 
-                        entry.StaffId == teacher.Id && 
+            List<SchoolDetailsResponse.EnrolmentResponse> teacherOfferings = [];
+
+            teacherOfferings.AddRange(offerings
+                .Where(offering =>
+                    offering.Teachers.Any(entry =>
+                        entry.StaffId == teacher.Id &&
                         entry.Type == AssignmentType.ClassroomTeacher))
-                .Select(offering => new SchoolDetailsResponse.OfferingResponse(
+                .Select(offering => new SchoolDetailsResponse.OfferingEnrolmentResponse(
                     offering.Id,
                     offering.Name,
-                    offering.IsCurrent))
-                .ToList();
+                    offering.IsCurrent)));
+
+            List<Tutorial> tutorials = await _tutorialRepository.GetActiveForTeacher(teacher.Id, cancellationToken);
+
+            teacherOfferings.AddRange(tutorials
+                .Where(tutorial =>
+                    tutorial.Sessions.Any(entry =>
+                        !entry.IsDeleted &&
+                        entry.StaffId == teacher.Id))
+                .Select(tutorial => new SchoolDetailsResponse.TutorialEnrolmentResponse(
+                    tutorial.Id,
+                    tutorial.Name,
+                    tutorial.IsCurrent)));
 
             List<Faculty> teacherFaculties = await _facultyRepository.GetCurrentForStaffMember(teacher.Id, cancellationToken);
             Dictionary<string, string> teacherFacultyList = teacherFaculties.ToDictionary(key => key.Name, value => value.Colour);

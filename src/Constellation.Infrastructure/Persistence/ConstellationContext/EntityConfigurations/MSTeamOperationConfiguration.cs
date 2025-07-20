@@ -5,9 +5,12 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students;
 using Core.Models.Faculties.Identifiers;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.Students.Identifiers;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,7 +27,34 @@ public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOpera
             .HasValue<TeacherEmployedMSTeamOperation>("TeacherEmployed")
             .HasValue<ContactAddedMSTeamOperation>("ContactAdded")
             .HasValue<TeacherAssignmentMSTeamOperation>("TeacherAssigned")
-            .HasValue<StudentOfferingMSTeamOperation>("StudentOffering");
+            .HasValue<StudentOfferingMSTeamOperation>("StudentOffering")
+            .HasValue<StudentTutorialMSTeamOperation>(nameof(StudentTutorialMSTeamOperation));
+    }
+}
+
+public class StudentTutorialMSTeamOperationConfiguration : IEntityTypeConfiguration<StudentTutorialMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<StudentTutorialMSTeamOperation> builder)
+    {
+        builder
+            .HasOne<Student>()
+            .WithMany()
+            .HasForeignKey(o => o.StudentId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(o => o.StudentId)
+            .HasColumnName(nameof(StudentId))
+            .HasConversion(
+                id => id.Value,
+                value => StudentId.FromValue(value));
+
+        builder
+            .Property(o => o.TutorialId)
+            .HasColumnName(nameof(TutorialId))
+            .HasConversion(
+                id => id.Value,
+                value => TutorialId.FromValue(value));
     }
 }
 
@@ -91,10 +121,18 @@ public class GroupTutorialCreatedMSTeamOperationConfiguration : IEntityTypeConfi
 {
     public void Configure(EntityTypeBuilder<GroupTutorialCreatedMSTeamOperation> builder)
     {
-        builder.HasOne(operation => operation.GroupTutorial)
+        builder
+            .HasOne(operation => operation.GroupTutorial)
             .WithMany()
             .HasForeignKey(operation => operation.TutorialId)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(operation => operation.TutorialId)
+            .HasColumnName(nameof(GroupTutorialId))
+            .HasConversion(
+                id => id.Value,
+                value => GroupTutorialId.FromValue(value));
     }
 }
 

@@ -9,7 +9,6 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Absences;
 using Core.Models.Enrolments;
-using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
 using Core.ValueObjects;
@@ -83,6 +82,7 @@ public class StudentRepository : IStudentRepository
     {
         List<StudentId> studentIds = await _context
             .Set<Enrolment>()
+            .OfType<OfferingEnrolment>()
             .Where(enrolment => 
                 enrolment.OfferingId == offeringId &&
                 !enrolment.IsDeleted)
@@ -110,6 +110,7 @@ public class StudentRepository : IStudentRepository
 
         List<StudentId> studentIds = await _context
             .Set<Enrolment>()
+            .OfType<OfferingEnrolment>()
             .Where(enrolment =>
                 offeringIds.Contains(enrolment.OfferingId) &&
                 !enrolment.IsDeleted)
@@ -138,8 +139,9 @@ public class StudentRepository : IStudentRepository
             .Select(offering => offering.Id)
             .ToList();
 
-        List<Enrolment> enrolments = await _context
+        List<OfferingEnrolment> enrolments = await _context
             .Set<Enrolment>()
+            .OfType<OfferingEnrolment>()
             .Where(enrolment =>
                 offeringIds.Contains(enrolment.OfferingId) &&
                 !enrolment.IsDeleted)
@@ -158,11 +160,11 @@ public class StudentRepository : IStudentRepository
 
         foreach (Student student in students)
         {
-            List<Enrolment> studentEnrolments = enrolments
+            List<OfferingEnrolment> studentEnrolments = enrolments
                 .Where(entry => entry.StudentId == student.Id)
                 .ToList();
 
-            foreach (Enrolment enrolment in studentEnrolments)
+            foreach (OfferingEnrolment enrolment in studentEnrolments)
             {
                 Offering offering = offerings
                     .FirstOrDefault(entry => entry.Id == enrolment.OfferingId);
@@ -232,6 +234,7 @@ public class StudentRepository : IStudentRepository
 
             List<StudentId> studentIds = await _context
                 .Set<Enrolment>()
+                .OfType<OfferingEnrolment>()
                 .Where(enrolment =>
                     currentOfferingIds.Contains(enrolment.OfferingId) &&
                     !enrolment.IsDeleted)
@@ -421,6 +424,7 @@ public class StudentRepository : IStudentRepository
     {
         List<StudentId> offeringStudentIds = await _context
             .Set<Enrolment>()
+            .OfType<OfferingEnrolment>()
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
                 filterClasses.Contains(enrolment.OfferingId))
