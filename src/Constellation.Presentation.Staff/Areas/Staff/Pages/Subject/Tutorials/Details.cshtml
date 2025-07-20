@@ -1,0 +1,225 @@
+﻿@page "{id}"
+@using Constellation.Core.Extensions
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.DetailsModel
+
+@{
+}
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSubjects);
+}
+
+<h2>Tutorial Details</h2>
+
+<div class="page-menu">
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Subject/Tutorials/Upsert" asp-area="Staff" asp-route-id="@Model.Tutorial.Id" class="btn btn-warning">Edit</a>
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div>
+    <dl class="row">
+        <dt class="col-md-2">
+            <label asp-for="Tutorial.Name">Tutorial</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Tutorial.Name</span>
+        </dd>
+
+        <dt class="col-md-2">
+            <label asp-for="Tutorial.StartDate">Active During</label>
+        </dt>
+        <dd class="col-md-10">
+            <span>@Model.Tutorial.StartDate.ToShortDateString() - @Model.Tutorial.EndDate.ToShortDateString()</span>
+        </dd>
+    </dl>
+</div>
+
+<hr />
+
+<div>
+    <ul class="nav nav-pills" data-tabs="tabs">
+        <li class="nav-item">
+            <a class="nav-link active" href="#students" data-toggle="tab" role="tab">
+                Active students
+                @if (Model.Tutorial.Students.Any())
+                {
+                    <span class="badge">@Model.Tutorial.Students.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab">
+                Active periods
+                @if (Model.Tutorial.Sessions.Any())
+                {
+                    <span class="badge">@Model.Tutorial.Sessions.Count()</span>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#resources" data-toggle="tab" role="tab">
+                Resources
+                @if (Model.Tutorial.Resources.Any())
+                {
+                    <span class="badge">@Model.Tutorial.Resources.Count()</span>
+                }
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="students" class="tab-pane active">
+            <h3>Active Students</h3>
+
+            @if (canEditTest.Succeeded)
+            {
+                <button data-toggle="modal" data-target="#addStudentModal" class="btn btn-success btn-sm">Enrol Student</button>
+            }
+
+            <table class="table-striped table-hover data-table-sort-1">
+                <thead>
+                <tr>
+                    <th>SRN</th>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>School</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Tutorial.Students)
+                {
+                    <tr>
+                        <td>@item.StudentReferenceNumber</td>
+                        <td data-order="@item.Name.SortOrder"><gender gender="@item.Gender" /> @item.Name.DisplayName</td>
+                        <td data-order="@item.Grade?.AsNumber()">
+                            @if (!item.CurrentEnrolment)
+                            {
+                                <span class="font-weight-light font-italic"><grade grade="@item.Grade" /></span>
+                            }
+                            else
+                            {
+                                <grade grade="@item.Grade" />
+                            }
+                        </td>
+                        <td>
+                            @if (!item.CurrentEnrolment)
+                            {
+                                <span class="font-weight-light font-italic">@item.SchoolName</span>
+                            }
+                            else
+                            {
+                                @item.SchoolName
+                            }
+                        </td>
+                        <td>
+                            @if (canEditTest.Succeeded)
+                            {
+                                <button data-student-id="@item.StudentId" data-student-name="@item.Name.DisplayName" data-offering-name="@Model.Tutorial.Name" class="btn btn-sm btn-danger btn-show-hover unenrol-student-button">Remove</button>
+                            }
+                        </td>
+                        <td>
+                            <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@item.StudentId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="resources" class="tab-pane">
+            <h3>Teams</h3>
+
+            @if (canEditTest.Succeeded)
+            {
+                <a asp-page="/Subject/Tutorials/Resource" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success btn-sm">Add a Resource</a>
+            }
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Tutorial.Resources)
+                {
+                    <tr>
+                        <td>
+                            @if (string.IsNullOrWhiteSpace(item.Url))
+                            {
+                                @item.Name
+                            }
+                            else
+                            {
+                                <a href="@item.Url" target="_blank">@item.Name</a>
+                            }
+                        </td>
+                        <td>
+                            @if (canEditTest.Succeeded)
+                            {
+                                <button data-resource-name="@item.Name" data-tutorial-name="@Model.Tutorial.Name" data-resource-id="@item.ResourceId.Value" class="btn btn-sm btn-danger btn-show-hover remove-resource-button">Remove</button>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="sessions" class="tab-pane">
+            <h3>Active Sessions</h3>
+
+            @if (canEditTest.Succeeded)
+            {
+                <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-success btn-sm">Assign a new session</button>
+                <button data-offering-name="@Model.Tutorial.Name" class="btn btn-sm btn-danger remove-all-sessions-button">Remove All Sessions</button>
+            }
+
+            <table class="table-striped table-hover data-table">
+                <thead>
+                <tr>
+                    <th>Period</th>
+                    <th>Teacher</th>
+                    <th>Duration</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Tutorial.Sessions.OrderBy(entry => entry.PeriodSortName))
+                {
+                    <tr>
+                        <td data-order="@item.PeriodSortName">@item.PeriodName</td>
+                        <td>@item.Teacher.Name.DisplayName</td>
+                        <td>@item.Duration</td>
+                        <td>
+                            @if (canEditTest.Succeeded)
+                            {
+                                <button data-session-period="@item.PeriodName" data-tutorial-name="@Model.Tutorial.Name" data-session-id="@item.SessionId.Value" class="btn btn-sm btn-danger btn-show-hover remove-session-button">Remove</button>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th colspan="2" class="text-right">Total Minutes per Cycle:</th>
+                    <th>@Model.Tutorial.Duration</th>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<vc:enrol-student-in-tutorial id="@Model.Id" />

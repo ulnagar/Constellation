@@ -1,0 +1,94 @@
+﻿@page
+@using Constellation.Application.Domains.Tutorials.Queries.GetAllTutorials
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.IndexModel
+
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+}
+
+<h2>Tutorials</h2>
+
+<div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var active_style = all_style;
+        var inactive_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case GetAllTutorialsQuery.FilterEnum.All:
+                all_style = "btn-primary";
+                break;
+            case GetAllTutorialsQuery.FilterEnum.Active:
+                active_style = "btn-primary";
+                break;
+            case GetAllTutorialsQuery.FilterEnum.Inactive:
+                inactive_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.All" class="btn @all_style">All</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Active" class="btn @active_style">Active</a>
+        <a asp-page="Index" asp-route-filter="@GetAllTutorialsQuery.FilterEnum.Inactive" class="btn @inactive_style">Inactive</a>
+    </div>
+
+    @if (canEditTest.Succeeded)
+    {
+        <a asp-page="/Subject/Tutorials/Upsert" asp-area="Staff" class="btn btn-warning">Create New</a>
+    }
+</div>
+
+<hr />
+
+<table class="table-striped table-hover data-table">
+    <thead>
+        <tr>
+            <th colspan="5">
+                Legend:
+                <span class="legend">
+                    <span class="glyphicon glyphicon-ok"></span> Current Tutorial
+                </span>
+                <span class="legend">
+                    <span class="glyphicon glyphicon-remove"></span> Past or Cancelled Tutorial
+                </span>
+            </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Name</th>
+            <th>Students</th>
+            <th>Teachers</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.Tutorials)
+    {
+        var glyph = item.IsCurrent ? "ok" : "remove";
+
+        <tr>
+            <td>
+                <span class="glyphicon glyphicon-@glyph"></span>
+            </td>
+            <td>@item.Name</td>
+            <td>
+                @foreach (var student in item.Students)
+                {
+                    <span class="badge badge-secondary">@student</span>
+                }
+            </td>
+            <td>
+                @foreach (var teacher in item.Teachers)
+                {
+                    <span class="badge badge-secondary">@teacher</span>
+                }
+            </td>
+            <td>
+                <a asp-page="/Subject/Tutorials/Details" asp-area="Staff" asp-route-id="@item.TutorialId" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+            </td>
+        </tr>
+    }
+</table>

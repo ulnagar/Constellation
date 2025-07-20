@@ -3,11 +3,14 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Enrolments.Errors;
 using Constellation.Core.Models.Enrolments.Events;
+using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.SciencePracs;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Enums;
+using Core.Models.Enrolments;
 using Core.Models.Students.Errors;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -20,6 +23,7 @@ using System.Threading.Tasks;
 internal sealed class AddToLessonRolls
     : IDomainEventHandler<EnrolmentCreatedDomainEvent>
 {
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly ILessonRepository _lessonRepository;
     private readonly IDateTimeProvider _dateTime;
@@ -27,12 +31,14 @@ internal sealed class AddToLessonRolls
     private readonly ILogger _logger;
 
     public AddToLessonRolls(
+        IEnrolmentRepository enrolmentRepository,
         IStudentRepository studentRepository,
         ILessonRepository lessonRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
+        _enrolmentRepository = enrolmentRepository;
         _studentRepository = studentRepository;
         _lessonRepository = lessonRepository;
         _dateTime = dateTime;
@@ -42,21 +48,38 @@ internal sealed class AddToLessonRolls
 
     public async Task Handle(EnrolmentCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
 
-        if (student is null)
+        if (enrolment is null)
         {
             _logger
                 .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId), true)
+                .ForContext(nameof(Error), EnrolmentErrors.NotFound(notification.EnrolmentId), true)
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        SchoolEnrolment enrolment = student.CurrentEnrolment;
+        if (enrolment is not OfferingEnrolment)
+            return;
 
-        if (enrolment is null)
+        OfferingEnrolment offeringEnrolment = enrolment as OfferingEnrolment;
+
+        Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(enrolment.StudentId), true)
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        SchoolEnrolment schoolEnrolment = student.CurrentEnrolment;
+
+        if (schoolEnrolment is null)
         {
             _logger
                 .ForContext(nameof(EnrolmentCreatedDomainEvent), notification, true)
@@ -66,7 +89,7 @@ internal sealed class AddToLessonRolls
             return;
         }
 
-        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForOffering(notification.OfferingId);
+        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForOffering(offeringEnrolment.OfferingId, cancellationToken);
 
         lessons = lessons
             .Where(lesson =>
@@ -76,7 +99,7 @@ internal sealed class AddToLessonRolls
         List<SciencePracRoll> rolls = lessons
             .SelectMany(lesson =>
                 lesson.Rolls.Where(roll =>
-                    roll.SchoolCode == enrolment.SchoolCode))
+                    roll.SchoolCode == schoolEnrolment.SchoolCode))
             .ToList();
 
         foreach (SciencePracRoll roll in rolls)
@@ -93,14 +116,14 @@ internal sealed class AddToLessonRolls
         List<SciencePracLesson> newRollsRequired = lessons
             .Where(lesson =>
                 lesson.Rolls.All(roll =>
-                    roll.SchoolCode != enrolment.SchoolCode))
+                    roll.SchoolCode != schoolEnrolment.SchoolCode))
             .ToList();
 
         foreach (SciencePracLesson lesson in newRollsRequired)
         {
             SciencePracRoll roll = new(
                 lesson.Id,
-                enrolment.SchoolCode);
+                schoolEnrolment.SchoolCode);
 
             roll.AddStudent(student.Id);
 

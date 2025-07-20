@@ -4,13 +4,16 @@ using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Enrolments;
+using Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Tutorials.Identifiers;
 
 public interface IEnrolmentRepository
 {
+    Task<Enrolment> GetById(EnrolmentId enrolmentId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrent(CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<int> GetCurrentCountByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
@@ -18,5 +21,6 @@ public interface IEnrolmentRepository
     Task<int> GetCurrentCountByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetHistoricalForStudent(StudentId studentId, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
+    Task<List<Enrolment>> GetCurrentByTutorialId(TutorialId tutorialId, CancellationToken cancellationToken = default);
     void Insert(Enrolment enrolment);
 }

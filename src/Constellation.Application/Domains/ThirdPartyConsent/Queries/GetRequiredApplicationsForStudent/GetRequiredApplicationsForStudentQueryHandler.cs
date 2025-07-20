@@ -67,7 +67,7 @@ internal sealed class GetRequiredApplicationsForStudentQueryHandler
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(request.StudentId, cancellationToken);
 
-        List<OfferingId> offeringIds = enrolments.Select(enrolment => enrolment.OfferingId).ToList();
+        List<OfferingId> offeringIds = enrolments.OfType<OfferingEnrolment>().Select(enrolment => enrolment.OfferingId).ToList();
 
         foreach (OfferingId offeringId in offeringIds)
         {

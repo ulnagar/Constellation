@@ -165,6 +165,7 @@ public class OfferingRepository : IOfferingRepository
                 enrolment.CreatedAt < absenceDate &&
                 // enrolment is either still current (not deleted) OR was deleted after the absence date
                 (!enrolment.IsDeleted || enrolment.DeletedAt.Date > absenceDate))
+            .OfType<OfferingEnrolment>()
             .Select(enrolment => enrolment.OfferingId)
             .ToListAsync(cancellationToken);
 
@@ -205,6 +206,7 @@ public class OfferingRepository : IOfferingRepository
             .Set<Enrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
                 !enrolment.IsDeleted)
+            .OfType<OfferingEnrolment>()
             .Select(enrolment => enrolment.OfferingId)
             .Distinct()
             .ToListAsync(cancellationToken);
