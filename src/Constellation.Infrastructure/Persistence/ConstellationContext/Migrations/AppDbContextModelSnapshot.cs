@@ -1596,6 +1596,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EnrolmentType")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -1605,19 +1610,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("OfferingId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OfferingId");
-
                     b.HasIndex("StudentId");
 
                     b.ToTable("Enrolments", (string)null);
+
+                    b.HasDiscriminator<string>("EnrolmentType").HasValue("Enrolment");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Faculties.Faculty", b =>
@@ -3451,6 +3455,123 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Assignees", "Training");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Tutorials.TeamsResource", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TutorialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TutorialId");
+
+                    b.ToTable("Teams", "Tutorials");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Tutorials.Tutorial", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tutorials", "Tutorials");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Tutorials.TutorialSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Day")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("StaffId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<Guid>("TutorialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Week")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("TutorialId");
+
+                    b.ToTable("Sessions", "Tutorials");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.Action", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4045,6 +4166,30 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasDiscriminator().HasValue("ClassCover");
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Enrolments.OfferingEnrolment", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Enrolments.Enrolment");
+
+                    b.Property<Guid>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("OfferingId");
+
+                    b.HasDiscriminator().HasValue("OfferingEnrolment");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Enrolments.TutorialEnrolment", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.Enrolments.Enrolment");
+
+                    b.Property<Guid>("TutorialId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("TutorialId");
+
+                    b.HasDiscriminator().HasValue("TutorialEnrolment");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.ContactAddedMSTeamOperation", b =>
                 {
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
@@ -4070,7 +4215,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("TutorialId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("GroupTutorialId");
 
                     b.HasIndex("TutorialId");
 
@@ -4116,6 +4262,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
 
                     b.Property<Guid>("StudentId")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("StudentId");
 
@@ -4127,6 +4274,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasDatabaseName("IX_MSTeamOperations_StudentId1");
 
                     b.HasDiscriminator().HasValue("StudentOffering");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.StudentTutorialMSTeamOperation", b =>
+                {
+                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
+
+                    b.Property<Guid>("StudentId")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("StudentId");
+
+                    b.Property<Guid>("TutorialId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("TutorialId");
+
+                    b.HasIndex("StudentId")
+                        .HasDatabaseName("IX_MSTeamOperations_StudentId2");
+
+                    b.HasDiscriminator().HasValue("StudentTutorialMSTeamOperation");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TeacherAssignmentMSTeamOperation", b =>
@@ -4905,12 +5071,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
                 {
-                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
-                        .WithMany()
-                        .HasForeignKey("OfferingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
                         .WithMany()
                         .HasForeignKey("StudentId")
@@ -5299,6 +5459,30 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Tutorials.TeamsResource", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Tutorials.Tutorial", null)
+                        .WithMany("Teams")
+                        .HasForeignKey("TutorialId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Tutorials.TutorialSession", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.StaffMembers.StaffMember", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Constellation.Core.Models.Tutorials.Tutorial", null)
+                        .WithMany("Sessions")
+                        .HasForeignKey("TutorialId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.Action", b =>
                 {
                     b.HasOne("Constellation.Core.Models.StaffMembers.StaffMember", null)
@@ -5387,6 +5571,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Enrolments.OfferingEnrolment", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Offerings.Offering", null)
+                        .WithMany()
+                        .HasForeignKey("OfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Enrolments.TutorialEnrolment", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Tutorials.Tutorial", null)
+                        .WithMany()
+                        .HasForeignKey("TutorialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.ContactAddedMSTeamOperation", b =>
                 {
                     b.HasOne("Constellation.Core.Models.SchoolContacts.SchoolContact", "Contact")
@@ -5439,6 +5641,16 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_MSTeamOperations_Students_StudentId1");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.StudentTutorialMSTeamOperation", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Students.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_MSTeamOperations_Students_StudentId2");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.TeacherAssignmentMSTeamOperation", b =>
@@ -5723,6 +5935,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Assignees");
 
                     b.Navigation("Completions");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Tutorials.Tutorial", b =>
+                {
+                    b.Navigation("Sessions");
+
+                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.Action", b =>

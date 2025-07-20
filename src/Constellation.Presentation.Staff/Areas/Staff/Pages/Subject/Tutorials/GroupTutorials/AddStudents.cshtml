@@ -1,0 +1,127 @@
+﻿@page "{id:guid}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.GroupTutorials.AddStudentsModel
+
+@using Constellation.Core.Enums
+@using Constellation.Core.Extensions
+
+<h2>Enrol Students</h2>
+
+<div class="page-menu">
+    <a asp-page="/Subject/Tutorials/GroupTutorials/Details" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-danger btn-pull-right">Go back</a>
+</div>
+
+<hr />
+
+<h4>Select students to be enrolled in @Model.TutorialName</h4>
+
+@foreach (var grade in Enum.GetValues<Grade>())
+{
+    @if (grade != Grade.SpecialProgram)
+    {
+        <a asp-route-grade="@grade" class="btn @(Model.Grade == grade ? "btn-success" : "btn-info")">@grade.AsName()</a>
+    }
+}
+
+<form method="post">
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Existing @Model.Grade.AsName() Enrolments:</label>
+            <div>
+                @foreach (var entry in Model.ExistingEnrolments)
+                {
+                    var student = Model.Students.FirstOrDefault(student => student.StudentId == entry.StudentId);
+
+                    if (student is not null)
+                    {
+                        <button type="button" class="btn btn-outline-success student-button">@student.Name.DisplayName</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr />
+            
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Selected Students:</label>
+            <div id="SelectedStudentsList">
+                @foreach (var entry in Model.SelectedStudentIds)
+                {
+                    var student = Model.Students.FirstOrDefault(student => student.StudentId == entry);
+
+                    if (student is not null)
+                    {
+                        <button type="button" id="studentSelect-@student.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent('@student.StudentId')">@student.Name.DisplayName</button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    
+    <hr />
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<div class="row">
+    @{
+        var partitionedList = Model.Students.OrderBy(student => student.Name.SortOrder).Partition(Model.Students.Count / 3);
+
+        foreach (var list in partitionedList)
+        {
+            <div class="col-4 button-list">
+                @foreach (var entry in list)
+                {
+                    if (Model.ExistingEnrolments.Any(enrol => enrol.StudentId == entry.StudentId))
+                    {
+                        <button type="button" class="btn btn-outline-success student-button">@entry.Name.DisplayName</button>
+                    }
+                    else
+                    {
+                        <button type="button" id="studentSelect-@entry.StudentId" class="btn btn-outline-info student-button" onClick="toggleStudent('@entry.StudentId')">@entry.Name.DisplayName</button>
+                    }
+                }
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function toggleStudent(studentId) {
+            var selectDiv = $('#studentSelect-' + studentId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-studentSelect-' + studentId).remove();
+                $('#i-studentSelect-' + studentId).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#studentSelect-' + studentId).clone().prop('id', 'pd-studentSelect-' + studentId);
+                pageDisplayDiv.appendTo('#SelectedStudentsList');
+
+                var input = $('<input>').attr('id', 'i-studentSelect-' + studentId)
+                    .attr('name', 'SelectedStudentIds')
+                    .attr('type', "hidden");
+                input.val(studentId);
+                var classInputDiv = $('#SelectedStudentsList');
+                classInputDiv.append(input);
+            }
+        }
+    </script>
+}

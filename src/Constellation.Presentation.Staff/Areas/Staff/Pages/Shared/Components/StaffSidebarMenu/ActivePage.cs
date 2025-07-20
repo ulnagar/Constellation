@@ -60,7 +60,8 @@ internal static class ActivePage
     public const string Subject_SciencePracs_Lessons = "Subject.SciencePracs.Lessons";
     public const string Subject_SciencePracs_Teachers = "Subject.SciencePracs.Teachers";
     public const string Subject_SciencePracs_Reports = "Subject.SciencePracs.Reports";
-    public const string Subject_GroupTutorials_Tutorials = "Subject.GroupTutorials.Tutorials";
+    public const string Subject_Tutorials_Tutorials = "Subject.Tutorials.Tutorials";
+    public const string Subject_Tutorials_GroupTutorials = "Subject.Tutorials.GroupTutorials";
 
     public const string Subject_Periods_Periods = "Subject.Periods.Periods";
     public const string Subject_Periods_Timetables = "Subject.Periods.Timetables";

@@ -3,8 +3,10 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Enrolments.Errors;
 using Constellation.Core.Models.Enrolments.Events;
 using Constellation.Core.Models.SciencePracs;
+using Constellation.Core.Shared;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings.Identifiers;
@@ -37,7 +39,22 @@ internal sealed class RemoveFromLessonRolls
 
     public async Task Handle(EnrolmentDeletedDomainEvent notification, CancellationToken cancellationToken)
     {
-        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(notification.StudentId, cancellationToken);
+        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+
+        if (enrolment is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
+                .ForContext(nameof(Error), EnrolmentErrors.NotFound(notification.EnrolmentId), true)
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        if (enrolment is not OfferingEnrolment offeringEnrolment)
+            return;
+
+        List<SciencePracLesson> lessons = await _lessonRepository.GetAllForStudent(offeringEnrolment.StudentId, cancellationToken);
 
         if (!lessons.Any())
             return;
@@ -45,7 +62,7 @@ internal sealed class RemoveFromLessonRolls
         lessons = lessons
             .Where(lesson =>
                 lesson.Offerings.Any(record =>
-                    record.OfferingId == notification.OfferingId))
+                    record.OfferingId == offeringEnrolment.OfferingId))
             .ToList();
 
         if (!lessons.Any())
@@ -53,8 +70,9 @@ internal sealed class RemoveFromLessonRolls
 
         // Ensure student isn't also enrolled in another current class that is covered by these lessons
         // (e.g. student is marked withdrawn from 07SCIP1 but enrolled in 07SCIP2)
-        List<Enrolment> currentEnrolments = await _enrolmentRepository.GetCurrentByStudentId(notification.StudentId, cancellationToken);
+        List<Enrolment> currentEnrolments = await _enrolmentRepository.GetCurrentByStudentId(offeringEnrolment.StudentId, cancellationToken);
         List<OfferingId> currentEnrolmentOfferingIds = currentEnrolments
+            .OfType<OfferingEnrolment>()
             .Select(enrolment => enrolment.OfferingId)
             .ToList();
 
@@ -67,7 +85,7 @@ internal sealed class RemoveFromLessonRolls
             .SelectMany(lesson =>
                 lesson.Rolls.Where(roll =>
                     roll.Attendance.Any(attendance =>
-                        attendance.StudentId == notification.StudentId) &&
+                        attendance.StudentId == offeringEnrolment.StudentId) &&
                     roll.Status == LessonStatus.Active))
             .ToList();
 
@@ -81,7 +99,7 @@ internal sealed class RemoveFromLessonRolls
             }
 
             // Remove the student from the roll
-            SciencePracAttendance attendance = roll.RemoveStudent(notification.StudentId);
+            SciencePracAttendance attendance = roll.RemoveStudent(offeringEnrolment.StudentId);
 
             if (attendance is not null)
             {

@@ -2,11 +2,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Enrolments.Identifiers;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Students.Identifiers;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 public class EnrolmentRepository : IEnrolmentRepository
@@ -22,6 +25,13 @@ public class EnrolmentRepository : IEnrolmentRepository
         _dateTime = dateTime;
     }
 
+    public async Task<Enrolment> GetById(
+        EnrolmentId enrolmentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Enrolment>()
+            .FirstOrDefaultAsync(enrol => enrol.Id == enrolmentId, cancellationToken);
+
     public async Task<List<Enrolment>> GetCurrent(
         CancellationToken cancellationToken = default)
     {
@@ -32,11 +42,19 @@ public class EnrolmentRepository : IEnrolmentRepository
                 offering.EndDate >= _dateTime.Today)
             .Select(offering => offering.Id);
 
+        IQueryable<TutorialId> currentTutorials = _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today)
+            .Select(tutorial => tutorial.Id);
+
         return await _context
             .Set<Enrolment>()
             .Where(enrol =>
                 !enrol.IsDeleted &&
-                currentOfferings.Contains(enrol.OfferingId))
+                (currentOfferings.Contains((enrol as OfferingEnrolment).OfferingId)) ||
+                currentTutorials.Contains((enrol as TutorialEnrolment).TutorialId))
             .ToListAsync(cancellationToken);
     }
 
@@ -51,12 +69,20 @@ public class EnrolmentRepository : IEnrolmentRepository
                 offering.EndDate >= _dateTime.Today)
             .Select(offering => offering.Id);
 
+        IQueryable<TutorialId> currentTutorials = _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today)
+            .Select(tutorial => tutorial.Id);
+
         return await _context
             .Set<Enrolment>()
             .Where(enrol =>
                 enrol.StudentId == studentId &&
                 !enrol.IsDeleted &&
-                currentOfferings.Contains(enrol.OfferingId))
+                (currentOfferings.Contains((enrol as OfferingEnrolment).OfferingId)) ||
+                currentTutorials.Contains((enrol as TutorialEnrolment).TutorialId))
             .ToListAsync(cancellationToken);
     }
 
@@ -71,12 +97,20 @@ public class EnrolmentRepository : IEnrolmentRepository
                 offering.EndDate >= _dateTime.Today)
             .Select(offering => offering.Id);
 
+        IQueryable<TutorialId> currentTutorials = _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today)
+            .Select(tutorial => tutorial.Id);
+
         return await _context
             .Set<Enrolment>()
             .Where(enrol =>
                 enrol.StudentId == studentId &&
                 !enrol.IsDeleted &&
-                currentOfferings.Contains(enrol.OfferingId))
+                (currentOfferings.Contains((enrol as OfferingEnrolment).OfferingId)) ||
+                currentTutorials.Contains((enrol as TutorialEnrolment).TutorialId))
             .CountAsync(cancellationToken);
     }
 
@@ -85,7 +119,7 @@ public class EnrolmentRepository : IEnrolmentRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Enrolment>()
-            .Where(enrol => enrol.OfferingId == offeringId && !enrol.IsDeleted)
+            .Where(enrol => (enrol as OfferingEnrolment).OfferingId == offeringId && !enrol.IsDeleted)
             .ToListAsync(cancellationToken);
 
     public async Task<int> GetCurrentCountByCourseId(
@@ -105,7 +139,7 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Enrolment>()
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
-                offeringIds.Contains(enrolment.OfferingId))
+                offeringIds.Contains((enrolment as OfferingEnrolment).OfferingId))
             .CountAsync(cancellationToken);
     }
 
@@ -126,7 +160,7 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Enrolment>()
             .Where(enrolment =>
                 !enrolment.IsDeleted &&
-                offeringIds.Contains(enrolment.OfferingId))
+                offeringIds.Contains((enrolment as OfferingEnrolment).OfferingId))
             .ToListAsync(cancellationToken);
     }
 
@@ -148,7 +182,14 @@ public class EnrolmentRepository : IEnrolmentRepository
             .ToListAsync(cancellationToken);
     }
 
-
+    public async Task<List<Enrolment>> GetCurrentByTutorialId(
+        TutorialId tutorialId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Enrolment>()
+            .Where(enrol => (enrol as TutorialEnrolment).TutorialId == tutorialId && !enrol.IsDeleted)
+            .ToListAsync(cancellationToken);
+    
     public void Insert(Enrolment enrolment) =>
         _context.Set<Enrolment>().Add(enrolment);
 }

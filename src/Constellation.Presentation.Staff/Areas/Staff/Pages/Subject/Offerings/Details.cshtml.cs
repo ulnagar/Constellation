@@ -3,11 +3,11 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Offerings;
 using Application.Common.PresentationModels;
 using Application.Domains.Assignments.Models;
 using Application.Domains.Assignments.Queries.GetRubricAssignmentsFromCourse;
+using Application.Domains.Enrolments.Commands.EnrolStudentInOffering;
+using Application.Domains.Enrolments.Commands.UnenrolStudentFromOffering;
 using Application.Domains.LinkedSystems.Canvas.Commands.ExportCanvasAssignmentComments;
 using Application.Domains.LinkedSystems.Canvas.Commands.ExportCanvasRubricResults;
 using Application.DTOs;
-using Constellation.Application.Domains.Enrolments.Commands.EnrolStudent;
-using Constellation.Application.Domains.Enrolments.Commands.UnenrolStudent;
 using Constellation.Application.Domains.Offerings.Commands.AddSessionToOffering;
 using Constellation.Application.Domains.Offerings.Commands.AddTeacherToOffering;
 using Constellation.Application.Domains.Offerings.Commands.RemoveAllSessions;
@@ -132,13 +132,13 @@ public class DetailsModel : BasePageModel
     public async Task<IActionResult> OnGetUnenrolStudent(
         StudentId studentId)
     {
-        UnenrolStudentCommand command = new(studentId, Id);
+        UnenrolStudentFromOfferingCommand fromOfferingCommand = new(studentId, Id);
 
         _logger
-            .ForContext(nameof(UnenrolStudentCommand), command, true)
+            .ForContext(nameof(UnenrolStudentFromOfferingCommand), fromOfferingCommand, true)
             .Information("Requested to remove Student from Offering by user {User}", _currentUserService.UserName);
 
-        Result request = await _sender.Send(command);
+        Result request = await _sender.Send(fromOfferingCommand);
 
         if (request.IsFailure)
         {
@@ -285,13 +285,13 @@ public class DetailsModel : BasePageModel
     public async Task<IActionResult> OnPostEnrolStudent(
         EnrolStudentInOfferingSelection viewModel)
     {
-        EnrolStudentCommand command = new(viewModel.StudentId, Id);
+        EnrolStudentInOfferingCommand inOfferingCommand = new(viewModel.StudentId, Id);
 
         _logger
-            .ForContext(nameof(EnrolStudentCommand), command, true)
+            .ForContext(nameof(EnrolStudentInOfferingCommand), inOfferingCommand, true)
             .Information("Requested to add Student to Offering by user {User}", _currentUserService.UserName);
 
-        Result request = await _sender.Send(command);
+        Result request = await _sender.Send(inOfferingCommand);
 
         if (request.IsFailure)
         {

@@ -3,7 +3,9 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
+using Constellation.Core.Models.Enrolments.Errors;
 using Constellation.Core.Models.Enrolments.Events;
+using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Repositories;
@@ -13,6 +15,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Canvas.Models;
+using Core.Models.Enrolments;
 using Core.Models.Operations.Enums;
 using Core.Models.Students.Errors;
 using Serilog;
@@ -24,6 +27,7 @@ using System.Threading.Tasks;
 internal class RemoveFromCanvas
     : IDomainEventHandler<EnrolmentDeletedDomainEvent>
 {
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICanvasOperationsRepository _operationRepository;
@@ -32,6 +36,7 @@ internal class RemoveFromCanvas
     private readonly ILogger _logger;
 
     public RemoveFromCanvas(
+        IEnrolmentRepository enrolmentRepository,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
         ICanvasOperationsRepository operationRepository,
@@ -39,6 +44,7 @@ internal class RemoveFromCanvas
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
+        _enrolmentRepository = enrolmentRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
         _operationRepository = operationRepository;
@@ -49,25 +55,42 @@ internal class RemoveFromCanvas
 
     public async Task Handle(EnrolmentDeletedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
 
-        if (student is null)
+        if (enrolment is null)
         {
             _logger
                 .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StudentErrors.NotFound(notification.StudentId))
+                .ForContext(nameof(Error), EnrolmentErrors.NotFound(notification.EnrolmentId), true)
                 .Error("Failed to complete the event handler");
 
             return;
         }
 
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(enrolment.StudentId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        if (enrolment is not OfferingEnrolment)
+            return;
+
+        OfferingEnrolment offeringEnrolment = enrolment as OfferingEnrolment;
+
+        Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
         if (offering is null)
         {
             _logger
                 .ForContext(nameof(EnrolmentDeletedDomainEvent), notification, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFound(notification.OfferingId))
+                .ForContext(nameof(Error), OfferingErrors.NotFound(offeringEnrolment.OfferingId))
                 .Error("Failed to complete the event handler");
 
             return;
@@ -78,7 +101,7 @@ internal class RemoveFromCanvas
             .Select(resource => resource as CanvasCourseResource)
             .ToList();
 
-        List<Offering> offerings = await _offeringRepository.GetByStudentId(notification.StudentId, cancellationToken);
+        List<Offering> offerings = await _offeringRepository.GetByStudentId(enrolment.StudentId, cancellationToken);
         List<CanvasCourseCode?> activeCourseIds = offerings
             .SelectMany(offering => offering.Resources)
             .Where(resource => resource.Type == ResourceType.CanvasCourse)

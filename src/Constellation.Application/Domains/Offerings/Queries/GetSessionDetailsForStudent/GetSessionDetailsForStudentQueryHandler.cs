@@ -4,7 +4,6 @@ using Abstractions.Messaging;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Core.Errors;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Offerings;
@@ -12,6 +11,8 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Repositories;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ using System.Threading.Tasks;
 internal sealed class GetSessionDetailsForStudentQueryHandler
     : IQueryHandler<GetSessionDetailsForStudentQuery, List<StudentSessionDetailsResponse>>
 {
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
@@ -29,12 +31,14 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
     private readonly ILogger _logger;
 
     public GetSessionDetailsForStudentQueryHandler(
+        ITutorialRepository tutorialRepository,
         IEnrolmentRepository enrolmentRepository,
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
         IPeriodRepository periodRepository,
         ILogger logger)
     {
+        _tutorialRepository = tutorialRepository;
         _enrolmentRepository = enrolmentRepository;
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
@@ -57,41 +61,80 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
 
         foreach (Enrolment enrolment in enrolments)
         {
-            Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
-
-            if (offering is null)
+            switch (enrolment)
             {
-                _logger.Warning("Could not find Offering with Id {id}", enrolment.OfferingId);
+                case OfferingEnrolment offeringEnrolment:
+                    {
+                        Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
-                continue;
-            }
+                        if (offering is null)
+                        {
+                            _logger.Warning("Could not find Offering with Id {id}", offeringEnrolment.OfferingId);
 
-            List<TeacherAssignment> assignments = offering
-                .Teachers
-                .Where(assignment => 
-                    assignment.Type == AssignmentType.ClassroomTeacher && 
-                    !assignment.IsDeleted)
-                .ToList();
+                            continue;
+                        }
 
-            List<StaffMember> teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
-            
-            foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
-            {
-                Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+                        List<TeacherAssignment> assignments = offering
+                            .Teachers
+                            .Where(assignment =>
+                                assignment.Type == AssignmentType.ClassroomTeacher &&
+                                !assignment.IsDeleted)
+                            .ToList();
 
-                if (period is null)
-                {
-                    _logger.Warning("Could not find Period with Id {id}", session.PeriodId);
-                    
-                    continue;
-                }
+                        List<StaffMember> teachers = await _staffRepository.GetListFromIds(assignments.Select(assignment => assignment.StaffId).ToList(), cancellationToken);
 
-                sessionList.Add(new(
-                    period.SortOrder,
-                    period.ToString(),
-                    offering.Name,
-                    teachers?.Select(teacher => teacher.Name.DisplayName).ToList(),
-                    period.Duration));
+                        foreach (Session session in offering.Sessions.Where(session => !session.IsDeleted))
+                        {
+                            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+
+                            if (period is null)
+                            {
+                                _logger.Warning("Could not find Period with Id {id}", session.PeriodId);
+
+                                continue;
+                            }
+
+                            sessionList.Add(new(
+                                period.SortOrder,
+                                period.ToString(),
+                                offering.Name,
+                                teachers?.Select(teacher => teacher.Name.DisplayName).ToList(),
+                                period.Duration));
+                        }
+
+                        break;
+                    }
+
+                case TutorialEnrolment tutorialEnrolment:
+                    {
+                        Tutorial tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
+
+                        if (tutorial is null)
+                        {
+                            _logger.Warning("Could not find Tutorial with Id {id}", tutorialEnrolment.TutorialId);
+
+                            continue;
+                        }
+
+                        List<TutorialSession> sessions = tutorial
+                            .Sessions
+                            .Where(session => !session.IsDeleted)
+                            .ToList();
+
+                        List<StaffMember> teachers = await _staffRepository.GetListFromIds(sessions.Select(session => session.StaffId).ToList(), cancellationToken);
+
+                        foreach (TutorialSession session in sessions)
+                        {
+                            sessionList.Add(new(
+                                session.SortOrder,
+                                session.ToString(),
+                                tutorial.Name,
+                                teachers.Where(teacher => teacher.Id == session.StaffId).Select(teacher => teacher.Name.DisplayName).ToList(),
+                                session.Duration));
+                        }
+
+                        break;
+                    }
             }
         }
 
