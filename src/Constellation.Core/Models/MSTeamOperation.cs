@@ -14,6 +14,7 @@ using StaffMembers;
 using StaffMembers.Identifiers;
 using Students;
 using System;
+using Tutorials.Identifiers;
 
 public abstract class MSTeamOperation
 {
@@ -41,6 +42,12 @@ public abstract class MSTeamOperation
         // Has it been marked Deleted or Completed?
         return DateScheduled <= DateTime.Today && !(IsDeleted || IsCompleted);
     }
+}
+
+public class StudentTutorialMSTeamOperation : MSTeamOperation
+{
+    public TutorialId TutorialId { get; set; }
+    public StudentId StudentId { get; set; }
 }
 
 public abstract class OfferingMSTeamOperation : MSTeamOperation

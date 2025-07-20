@@ -86,7 +86,7 @@ internal sealed class CreateTransactionCommandHandler
 
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
-        List<OfferingId> offeringIds = enrolments.Select(enrolment => enrolment.OfferingId).ToList();
+        List<OfferingId> offeringIds = enrolments.OfType<OfferingEnrolment>().Select(enrolment => enrolment.OfferingId).ToList();
 
         List<CourseId> courseIds = new();
 

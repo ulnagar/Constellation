@@ -11,6 +11,8 @@ using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Repositories;
@@ -26,6 +28,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
     private readonly IEdvalRepository _edvalRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -34,6 +37,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
         IOfferingRepository offeringRepository,
         IStudentRepository studentRepository,
         IEnrolmentRepository enrolmentRepository,
+        ITutorialRepository tutorialRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -41,6 +45,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
         _edvalRepository = edvalRepository;
         _offeringRepository = offeringRepository;
         _enrolmentRepository = enrolmentRepository;
+        _tutorialRepository = tutorialRepository;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<EdvalClassMembershipsUpdatedIntegrationEvent>();
@@ -49,6 +54,7 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
     {
         List<Student> existingStudents = await _studentRepository.GetCurrentStudents(cancellationToken);
         List<Offering> existingOfferings = await _offeringRepository.GetAllActive(cancellationToken);
+        List<Tutorial> existingTutorials = await _tutorialRepository.GetAllActive(cancellationToken);
         List<Enrolment> existingEnrolments = await _enrolmentRepository.GetCurrent(cancellationToken);
 
         List<EdvalClassMembership> edvalClassMemberships = await _edvalRepository.GetClassMemberships(cancellationToken);
@@ -92,8 +98,9 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
             }
 
             Offering offering = existingOfferings.FirstOrDefault(offering => offering.Name.Value == membership.OfferingName);
+            Tutorial tutorial = existingTutorials.FirstOrDefault(tutorial => tutorial.Name.Value == membership.OfferingName);
 
-            if (offering is null)
+            if (offering is null && tutorial is null)
             {
                 _logger
                     .ForContext(nameof(EdvalClassMembership), membership, true)
@@ -101,8 +108,20 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
 
                 continue;
             }
+
+            bool offeringEnrolments = existingEnrolments
+                .OfType<OfferingEnrolment>()
+                .All(enrolment =>
+                    enrolment.StudentId != student.Id && 
+                    enrolment.OfferingId != offering?.Id);
+
+            bool tutorialEnrolments = existingEnrolments
+                .OfType<TutorialEnrolment>()
+                .All(enrolment =>
+                    enrolment.StudentId != student.Id &&
+                    enrolment.TutorialId != tutorial?.Id);
             
-            if (existingEnrolments.All(enrolment => enrolment.StudentId != student.Id && enrolment.OfferingId != offering.Id))
+            if (!offeringEnrolments && !tutorialEnrolments)
             {
                 // Additional class enrolment in Edval
                 _edvalRepository.Insert(new Difference(
@@ -131,26 +150,58 @@ internal sealed class CalculateDifferences : IIntegrationEventHandler<EdvalClass
                 continue;
             }
 
-            Offering offering = existingOfferings.FirstOrDefault(offering => offering.Id == enrolment.OfferingId);
-
-            if (offering is null)
+            if (enrolment is OfferingEnrolment offeringEnrolment)
             {
-                _logger
-                    .ForContext(nameof(Enrolment), enrolment, true)
-                    .Warning("Unable to find matching offering by Id");
+                Offering offering = existingOfferings.FirstOrDefault(offering => offering.Id == offeringEnrolment.OfferingId);
+
+                if (offering is null)
+                {
+                    _logger
+                        .ForContext(nameof(Enrolment), enrolment, true)
+                        .Warning("Unable to find matching offering by Id");
+
+                    continue;
+                }
+
+                if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Number && entry.OfferingName != offering.Name.Value))
+                {
+                    // Additional class enrolment in Constellation
+                    _edvalRepository.Insert(new Difference(
+                        EdvalDifferenceType.EdvalClassMembership,
+                        EdvalDifferenceSystem.ConstellationDifference,
+                        enrolment.Id.ToString(),
+                        $"{student.Name} is not enrolled in {offering.Name} in Edval",
+                        ignored));
+                }
 
                 continue;
             }
 
-            if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Number && entry.OfferingName != offering.Name.Value))
+            if (enrolment is TutorialEnrolment tutorialEnrolment)
             {
-                // Additional class enrolment in Constellation
-                _edvalRepository.Insert(new Difference(
-                    EdvalDifferenceType.EdvalClassMembership,
-                    EdvalDifferenceSystem.ConstellationDifference, 
-                    enrolment.Id.ToString(),
-                    $"{student.Name} is not enrolled in {offering.Name} in Edval",
-                    ignored));
+                Tutorial tutorial = existingTutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialEnrolment.TutorialId);
+
+                if (tutorial is null)
+                {
+                    _logger
+                        .ForContext(nameof(Enrolment), enrolment, true)
+                        .Warning("Unable to find matching tutorial by Id");
+
+                    continue;
+                }
+
+                if (edvalClassMemberships.All(entry => entry.StudentId != student.StudentReferenceNumber.Number && entry.OfferingName != tutorial.Name.Value))
+                {
+                    // Additional class enrolment in Constellation
+                    _edvalRepository.Insert(new Difference(
+                        EdvalDifferenceType.EdvalClassMembership,
+                        EdvalDifferenceSystem.ConstellationDifference,
+                        enrolment.Id.ToString(),
+                        $"{student.Name} is not enrolled in {tutorial.Name} in Edval",
+                        ignored));
+                }
+
+                continue;
             }
         }
 

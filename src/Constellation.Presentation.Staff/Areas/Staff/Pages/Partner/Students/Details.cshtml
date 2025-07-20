@@ -1,6 +1,7 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.DetailsModel
 
+@using Constellation.Application.Domains.Enrolments.Queries.GetStudentEnrolmentsWithDetails
 @using Constellation.Core.Abstractions.Clock
 @using Constellation.Core.Extensions
 @using Constellation.Core.Models.Families
@@ -257,8 +258,8 @@
                 @foreach (var item in Model.Enrolments)
                 {
                     <tr>
-                        <td>@item.OfferingName</td>
-                        <td>@item.CourseName</td>
+                        <td>@item.Name</td>
+                        <td>@item.Course</td>
                         <td>
                             @foreach (var teacher in item.Teachers)
                             {
@@ -268,7 +269,15 @@
                         <td>
                             @if (authorised.Succeeded)
                             {
-                                <a asp-page-handler="Unenrol" asp-route-offeringId="@item.OfferingId.Value" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                if (item is StudentOfferingEnrolmentResponse offeringEnrolment)
+                                {
+                                    <a asp-page-handler="UnenrolOffering" asp-route-offeringId="@offeringEnrolment.OfferingId" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
+
+                                if (item is StudentTutorialEnrolmentResponse tutorialEnrolment)
+                                {
+                                    <a asp-page-handler="UnenrolTutorial" asp-route-tutorialId="@tutorialEnrolment.TutorialId" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                                }
                             }
                         </td>
                     </tr>

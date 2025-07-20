@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Presentation.Students.Areas.Students.Pages;
 
+using Application.Domains.Offerings.Queries.GetCurrentOfferingsAndTutorialsForStudent;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForStudent;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Presentation.Shared.Helpers.Logging;
@@ -35,7 +35,7 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.Dashboard;
 
-    public List<OfferingDetailResponse> Offerings { get; set; } = new();
+    public List<DetailResponse> Offerings { get; set; } = new();
 
     public async Task OnGet()
     {
@@ -56,7 +56,7 @@ public class IndexModel : BasePageModel
 
         StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
         
-        Result<List<OfferingDetailResponse>> request = await _mediator.Send(new GetCurrentOfferingsForStudentQuery(studentId));
+        Result<List<DetailResponse>> request = await _mediator.Send(new GetCurrentOfferingsAndTutorialsForStudentQuery(studentId));
 
         if (request.IsFailure)
         {

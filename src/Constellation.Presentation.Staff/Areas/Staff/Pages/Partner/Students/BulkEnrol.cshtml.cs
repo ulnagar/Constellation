@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Enrolments.Commands.EnrolStudentInOffering;
 using Application.Domains.Students.Queries.GetStudentById;
-using Constellation.Application.Domains.Enrolments.Commands.EnrolStudent;
 using Constellation.Application.Domains.Enrolments.Queries.GetStudentEnrolmentsWithDetails;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForBulkEnrol;
 using Constellation.Application.Domains.Students.Models;
@@ -97,7 +97,7 @@ public class BulkEnrolModel : BasePageModel
             return;
         }
 
-        foreach (StudentEnrolmentResponse enrolment in enrolmentRequest.Value)
+        foreach (StudentOfferingEnrolmentResponse enrolment in enrolmentRequest.Value.OfType<StudentOfferingEnrolmentResponse>())
         {
             BulkEnrolOfferingResponse? offeringEntry = Offerings.FirstOrDefault(entry => entry.OfferingId == enrolment.OfferingId);
 
@@ -114,13 +114,13 @@ public class BulkEnrolModel : BasePageModel
         {
             OfferingId offeringId = OfferingId.FromValue(offeringGuid);
 
-            EnrolStudentCommand command = new(Id, offeringId);
+            EnrolStudentInOfferingCommand inOfferingCommand = new(Id, offeringId);
 
             _logger
-                .ForContext(nameof(EnrolStudentCommand), command, true)
+                .ForContext(nameof(EnrolStudentInOfferingCommand), inOfferingCommand, true)
                 .Information("Requested to enrol Student into Offering by user {User}", _currentUserService.UserName);
 
-            Result response = await _mediator.Send(command);
+            Result response = await _mediator.Send(inOfferingCommand);
 
             if (response.IsFailure)
             {

@@ -65,6 +65,7 @@ internal sealed class UpdateOutstandingLessonRolls
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(student.Id, cancellationToken);
 
         List<OfferingId> offeringIds = enrolments
+            .OfType<OfferingEnrolment>()
             .Select(enrolments => enrolments.OfferingId)
             .Distinct()
             .ToList();
