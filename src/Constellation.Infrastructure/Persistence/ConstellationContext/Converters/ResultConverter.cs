@@ -1,10 +1,8 @@
 ﻿#nullable enable
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Converters;
 
-using Core.Primitives;
 using Core.Shared;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Linq.Expressions;
 
 internal sealed class ResultConverter : ValueConverter<Result, string?>
 {
