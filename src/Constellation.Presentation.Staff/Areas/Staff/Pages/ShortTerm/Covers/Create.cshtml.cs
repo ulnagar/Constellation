@@ -66,7 +66,7 @@ public class CreateModel : BasePageModel
     public CoverType CoverType { get; set; } = CoverType.ClassCover;
 
     [BindProperty]
-    public string Note { get; set; } = string.Empty;
+    public string Note { get; set; } = "Sample Note";
 
     public List<CoveringTeacherRecord> CoveringTeacherSelectionList { get; set; } = new();
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
