@@ -67,7 +67,7 @@
         <div class="form-group row note-row d-none">
             <label asp-for="Note" class="col-md-2">Note</label>
             <div class="col-md-5">
-                <textarea asp-for="Note" class="form-control"></textarea>
+                <textarea asp-for="Note" class="form-control">Sample Note</textarea>
                 <span asp-validation-for="Note" class="text-danger"></span>
             </div>
         </div>
@@ -168,10 +168,12 @@
         function toggleNote(coverType) {
             if (coverType === '@CoverType.ClassCover.Value' && !($('.note-row').hasClass('d-none'))) {
                 $('.note-row').addClass('d-none');
+                $('.note-row textarea').val('Sample Note');
             }
 
             if (coverType === '@CoverType.AccessCover.Value' && $('.note-row').hasClass('d-none')) {
                 $('.note-row').removeClass('d-none');
+                $('.note-row textarea').val('');
             }
         }
     </script>
