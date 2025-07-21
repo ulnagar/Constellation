@@ -40,7 +40,7 @@ internal class AssignmentService : IAssignmentService
     public async Task<Result> UploadSubmissionToCanvas(
         CanvasAssignment assignment,
         CanvasAssignmentSubmission submission,
-        CanvasCourseCode canvasCourseId,
+        List<CanvasCourseCode> canvasCourseId,
         CancellationToken cancellationToken = default)
     {
         Result<AttachmentResponse> fileRequest = await _attachmentService.GetAttachmentFile(
@@ -68,9 +68,17 @@ internal class AssignmentService : IAssignmentService
             return Result.Failure<AttachmentResponse>(StudentErrors.NotFound(submission.StudentId));
         }
 
+        Result result = Result.Failure(Error.NullValue);
+
         // Upload file to Canvas
         // Include error checking/retry on failure
-        Result result = await _canvasGateway.UploadAssignmentSubmission(canvasCourseId, assignment.CanvasId, student.StudentReferenceNumber.Number, fileRequest.Value, cancellationToken);
+        foreach (var courseId in canvasCourseId)
+        {
+            if (result.IsSuccess)
+                continue;
+
+            result = await _canvasGateway.UploadAssignmentSubmission(courseId, assignment.CanvasId, student.StudentReferenceNumber.Number, fileRequest.Value, cancellationToken);
+        }
 
         if (result.IsFailure)
         {

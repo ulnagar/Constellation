@@ -121,10 +121,8 @@ internal sealed class UploadSubmissionToCanvas
 
             return;
         }
-
-        CanvasCourseCode canvasCourseId = resources.First();
-
-        Result uploadAttempt = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
+        
+        Result uploadAttempt = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, resources, cancellationToken);
 
         if (uploadAttempt.IsSuccess)
         {

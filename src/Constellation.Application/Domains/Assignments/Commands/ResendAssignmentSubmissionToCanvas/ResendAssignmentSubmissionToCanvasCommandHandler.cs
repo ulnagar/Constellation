@@ -85,9 +85,7 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
 
             return Result.Failure(ResourceErrors.NoneOfTypeFound(ResourceType.CanvasCourse));
         }
-
-        CanvasCourseCode canvasCourseId = resources.First();
-
+        
         CanvasAssignmentSubmission submission = assignment.Submissions.FirstOrDefault(submission => submission.Id == request.SubmissionId);
 
         if (submission is null)
@@ -100,7 +98,7 @@ internal sealed class ResendAssignmentSubmissionToCanvasCommandHandler
             return Result.Failure(SubmissionErrors.NotFound(request.SubmissionId));
         }
 
-        Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
+        Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, resources, cancellationToken);
 
         if (result.IsFailure)
         {

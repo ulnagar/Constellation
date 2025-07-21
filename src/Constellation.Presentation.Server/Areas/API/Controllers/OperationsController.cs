@@ -324,11 +324,16 @@ public class OperationsController : ControllerBase
 
         foreach (TeacherEmployedMSTeamOperation operation in operations.EmploymentOperations)
         {
+            StaffMember staffMember = await _staffRepository.GetById(operation.StaffId);
+
+            if (staffMember is null)
+                continue;
+
             TeamsOperation teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = operation.Staff.EmailAddress.Email,
+                UserEmail = staffMember.EmailAddress.Email,
                 AdditionalInformation = "All"
             };
 

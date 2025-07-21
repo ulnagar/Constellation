@@ -75,16 +75,14 @@ internal sealed class AssignmentSubmissionJob : IAssignmentSubmissionJob
                 return;
             }
 
-            CanvasCourseCode canvasCourseId = resources.First();
-
             List<CanvasAssignmentSubmission> validSubmissions = assignment
                 .Submissions
                 .Where(submission => !submission.Uploaded)
                 .ToList();
 
-            foreach (CanvasAssignmentSubmission submission in validSubmissions)
+            foreach (var submission in validSubmissions)
             {
-                Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, canvasCourseId, cancellationToken);
+                Result result = await _assignmentService.UploadSubmissionToCanvas(assignment, submission, resources, cancellationToken);
 
                 if (result.IsFailure)
                 {
