@@ -47,6 +47,8 @@
             }
         </div>
     </div>
+    
+    <button type="button" class="btn btn-secondary toggle-vis" data-column="2">Toggle Edval Code</button>
 
     @if (canManageStaff.Succeeded)
     {
@@ -63,6 +65,7 @@
     <tr>
         <th>Staff Id</th>
         <th>Name</th>
+        <th>Edval Code</th>
         <th>Faculty</th>
         <th>School</th>
         <th></th>
@@ -74,6 +77,7 @@
         <tr>
             <td>@item.EmployeeId</td>
             <td data-order="@item.Name.SortOrder" data-search="@item.Name.FirstName @item.Name.DisplayName">@item.Name.DisplayName</td>
+            <td>@item.EdvalCode</td>
             <td>
                 @foreach (var entry in item.Faculties)
                 {
@@ -93,11 +97,21 @@
 {
     <script>
         $(document).ready(function (){
-            $('.staff-data-table').DataTable({
+            const table = $('.staff-data-table').DataTable({
                 "order": [
                     [1, 'asc']
                 ]
             });
+
+            table.column(2).visible(false);
+
+            $('button.toggle-vis').on('click', function() {
+                console.log($(this));
+                var columnIdx = $(this).data('column');
+                var column = table.column(columnIdx);
+                column.visible(!column.visible());
+            })
         });
+
     </script>
 }

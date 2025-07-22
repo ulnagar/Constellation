@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffList;
 
 using Abstractions.Messaging;
+using Core.Enums;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
@@ -60,12 +61,16 @@ internal sealed class GetStaffListQueryHandler
                 ? schools.FirstOrDefault(school => school.Code == member.CurrentAssignment.SchoolCode)
                 : null;
 
+            string edvalCode = member.SystemLinks.FirstOrDefault(entry => entry.System == SystemType.Edval)?.Value ??
+                               string.Empty;
+
             response.Add(new(
                 member.Id,
                 member.EmployeeId,
                 member.Name,
                 memberFaculties,
                 school?.Name,
+                edvalCode,
                 member.IsDeleted));
         }
 
