@@ -149,7 +149,7 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Casuals = casualsRequest.Value.OrderBy(casual => casual.LastName).ToList();
+        Casuals = casualsRequest.Value.OrderBy(casual => casual.Name.SortOrder).ToList();
     }
 
     public enum FilterDto

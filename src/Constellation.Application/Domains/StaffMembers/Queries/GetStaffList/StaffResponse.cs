@@ -12,4 +12,5 @@ public sealed record StaffResponse(
     Name Name,
     List<FacultyResponse> Faculties,
     string School,
+    string EdvalCode,
     bool IsDeleted);

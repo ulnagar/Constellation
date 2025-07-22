@@ -48,10 +48,10 @@ internal sealed class GetActiveCasualsQueryHandler
 
             var entry = new CasualsListResponse(
                 casual.Id,
-                casual.Name.FirstName,
-                casual.Name.LastName,
+                casual.Name,
                 schoolName,
                 casual.EmailAddress.Email,
+                casual.EdvalTeacherId,
                 !casual.IsDeleted);
 
             returnData.Add(entry);
