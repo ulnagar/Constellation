@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Tutorials.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Tutorials;
@@ -79,6 +80,21 @@ internal sealed class TutorialRepository : ITutorialRepository
                     !session.IsDeleted &&
                     session.StaffId == staffId))
             .ToListAsync(cancellationToken);
+
+    public async Task<bool> DoesTutorialAlreadyExist(
+        TutorialName name,
+        DateOnly startDate,
+        DateOnly endDate,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Tutorial>()
+            .AnyAsync(tutorial =>
+                !tutorial.IsDeleted &&
+                tutorial.Name == name &&
+                ((tutorial.StartDate <= endDate && tutorial.StartDate >= startDate) || // DB Tutorial starts during new tutorial
+                (tutorial.EndDate <= endDate && tutorial.EndDate >= startDate) || //DB Tutorial ends during new tutorial
+                (tutorial.StartDate <= startDate && tutorial.EndDate >= endDate)), // DB Tutorial starts before and ends after new tutorial
+                cancellationToken);
 
     public void Insert(Tutorial tutorial) =>
         _context.Set<Tutorial>().Add(tutorial);

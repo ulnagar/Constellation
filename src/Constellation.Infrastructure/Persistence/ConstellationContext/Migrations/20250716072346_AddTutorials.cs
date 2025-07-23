@@ -45,7 +45,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 defaultValue: "");
 
             migrationBuilder.Sql(@"
-                UPDATE [dto].[Enrolments]
+                UPDATE [dbo].[Enrolments]
                 SET EnrolmentType = 'OfferingEnrolment'
                 WHERE 1 = 1;");
 
