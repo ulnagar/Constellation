@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.Tutorials;
 
+using Abstractions.Clock;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Timetables.Enums;
 using Errors;
@@ -15,6 +16,18 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
 {
     private List<TeamsResource> _teams = [];
     private List<TutorialSession> _sessions = [];
+
+    private Tutorial(
+        TutorialName name,
+        DateOnly startDate,
+        DateOnly endDate)
+    {
+        Id = new();
+
+        Name = name;
+        StartDate = startDate;
+        EndDate = endDate;
+    }
 
     public TutorialId Id { get; private set; }
     public TutorialName Name { get; private set; }
@@ -45,6 +58,43 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
             return true;
 
         return false;
+    }
+
+    public static Result<Tutorial> Create(
+        TutorialName name,
+        DateOnly startDate,
+        DateOnly endDate,
+        IDateTimeProvider dateTime)
+    {
+        if (endDate < startDate)
+            return Result.Failure<Tutorial>(TutorialErrors.Validation.StartDateAfterEndDate);
+
+        if (endDate < dateTime.Today)
+            return Result.Failure<Tutorial>(TutorialErrors.Validation.EndDateInPast);
+
+        return new Tutorial(
+            name,
+            startDate,
+            endDate);
+    }
+
+    public Result Update(
+        TutorialName name,
+        DateOnly startDate,
+        DateOnly endDate,
+        IDateTimeProvider dateTime)
+    {
+        if (endDate < startDate)
+            return Result.Failure<Tutorial>(TutorialErrors.Validation.StartDateAfterEndDate);
+
+        if (endDate < dateTime.Today)
+            return Result.Failure<Tutorial>(TutorialErrors.Validation.EndDateInPast);
+
+        Name = name;
+        StartDate = startDate;
+        EndDate = endDate;
+
+        return Result.Success();
     }
 
     public void Delete() => IsDeleted = true;

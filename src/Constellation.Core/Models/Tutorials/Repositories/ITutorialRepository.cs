@@ -2,9 +2,11 @@
 
 using Identifiers;
 using StaffMembers.Identifiers;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ValueObjects;
 
 public interface ITutorialRepository
 {
@@ -14,5 +16,6 @@ public interface ITutorialRepository
     Task<List<Tutorial>> GetInactive(CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetActiveForTeacher(StaffId staffId, CancellationToken cancellationToken = default);
 
+    Task<bool> DoesTutorialAlreadyExist(TutorialName name, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
     void Insert(Tutorial tutorial);
 }

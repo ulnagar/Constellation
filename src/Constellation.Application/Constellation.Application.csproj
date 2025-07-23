@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
-    <AssemblyVersion>1.18.25203.0</AssemblyVersion>
+    <AssemblyVersion>1.18.25204.4</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +30,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
-	  <Folder Include="Domains\Tutorials\Commands\" />
 	</ItemGroup>
 
 </Project>
