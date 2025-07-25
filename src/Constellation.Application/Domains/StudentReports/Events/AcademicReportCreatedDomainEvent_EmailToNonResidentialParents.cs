@@ -79,7 +79,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
             .Where(family => 
                 family.Students.Any(student => 
                     student.StudentId == reportEntry.StudentId && 
-                    student.IsResidentialFamily))
+                    !student.IsResidentialFamily))
             .SelectMany(family => family.Parents)
             .ToList();
 

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Configuration;
 
-using Core.Models.StaffMembers.Identifiers;
+using Core.Models.StaffMembers.ValueObjects;
 using System.Collections.Generic;
 
 public sealed class CanvasGatewayConfiguration
@@ -13,7 +13,7 @@ public sealed class CanvasGatewayConfiguration
     public bool UseGroups { get; set; }
     public bool UseSections { get; set; }
 
-    public List<StaffId> CourseAdmins { get; set; } = [];
+    public List<EmployeeId> CourseAdmins { get; set; } = [];
 
     public bool IsConfigured()
     {

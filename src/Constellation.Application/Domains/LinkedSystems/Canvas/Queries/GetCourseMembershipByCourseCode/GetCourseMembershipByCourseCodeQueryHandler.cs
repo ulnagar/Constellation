@@ -9,6 +9,7 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
@@ -100,9 +101,9 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
         }
 
         // Add defined CourseAdmins
-        foreach (StaffId staffId in _configuration.CourseAdmins)
+        foreach (EmployeeId staffId in _configuration.CourseAdmins)
         {
-            StaffMember admin = await _staffRepository.GetById(staffId, cancellationToken);
+            StaffMember admin = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (admin is null)
             {
