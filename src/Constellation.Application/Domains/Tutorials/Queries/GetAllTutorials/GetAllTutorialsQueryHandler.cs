@@ -76,6 +76,7 @@ internal sealed class GetAllTutorialsQueryHandler
             TutorialSummaryResponse entry = new(
                 tutorial.Id,
                 tutorial.Name,
+                tutorial.EndDate.Year.ToString(),
                 teachers.Select(teacher => teacher.Name.DisplayName).ToList(),
                 activeStudents.Select(student => student.Name.DisplayName).ToList(),
                 tutorial.Sessions.Where(session => !session.IsDeleted).Select(session => session.Duration).Sum(),

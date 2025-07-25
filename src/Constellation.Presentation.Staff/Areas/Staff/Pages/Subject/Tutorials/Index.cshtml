@@ -44,26 +44,27 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table-striped table-hover tutorials-table">
     <thead>
-        <tr>
-            <th colspan="5">
-                Legend:
-                <span class="legend">
-                    <span class="glyphicon glyphicon-ok"></span> Current Tutorial
-                </span>
-                <span class="legend">
-                    <span class="glyphicon glyphicon-remove"></span> Past or Cancelled Tutorial
-                </span>
-            </th>
-        </tr>
-        <tr>
-            <th></th>
-            <th>Name</th>
-            <th>Students</th>
-            <th>Teachers</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th colspan="6">
+            Legend:
+            <span class="legend">
+                <span class="glyphicon glyphicon-ok"></span> Current Tutorial
+            </span>
+            <span class="legend">
+                <span class="glyphicon glyphicon-remove"></span> Past or Cancelled Tutorial
+            </span>
+        </th>
+    </tr>
+    <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Year</th>
+        <th>Students</th>
+        <th>Teachers</th>
+        <th></th>
+    </tr>
     </thead>
     @foreach (var item in Model.Tutorials)
     {
@@ -74,6 +75,7 @@
                 <span class="glyphicon glyphicon-@glyph"></span>
             </td>
             <td>@item.Name</td>
+            <td>@item.Year</td>
             <td>
                 @foreach (var student in item.Students)
                 {
@@ -92,3 +94,16 @@
         </tr>
     }
 </table>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $('.tutorials-table').DataTable({
+                "order": [
+                    [2, 'asc'],
+                    [1, 'asc']
+                ]
+            });
+        })
+    </script>
+}

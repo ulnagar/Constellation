@@ -141,7 +141,7 @@
 
             @if (canEditTest.Succeeded)
             {
-                <a asp-page="/Subject/Tutorials/Resource" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success btn-sm">Add a Resource</a>
+                <button type="button" data-toggle="modal" data-target="#addTeamModal" class="btn btn-success btn-sm">Add a Team</button>
             }
 
             <table class="table-striped table-hover data-table">
@@ -222,4 +222,60 @@
     </div>
 </div>
 
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
 <vc:enrol-student-in-tutorial id="@Model.Id" />
+<vc:add-session-to-tutorial id="@Model.Id" />
+<vc:add-team-to-tutorial id="@Model.Id" />
+
+@section Scripts
+{
+
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $('.remove-session-button').click(function (event) {
+            var sessionPeriod = $(this).data("sessionPeriod");
+            var tutorialName = $(this).data("offeringName");
+            var sessionId = $(this).data("sessionId");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveSession",
+                type: "POST",
+                data: {
+                    sessionPeriod: sessionPeriod,
+                    tutorialName: tutorialName,
+                    sessionId: sessionId,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.remove-all-sessions-button').click(function (event) {
+            var tutorialName = $(this).data("tutorialName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxRemoveAllSessions",
+                type: "POST",
+                data: {
+                    tutorialName: tutorialName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}

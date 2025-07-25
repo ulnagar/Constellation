@@ -83,6 +83,9 @@ internal sealed class GetTutorialDetailsQueryHandler
 
         foreach (var session in tutorial.Sessions)
         {
+            if (session.IsDeleted)
+                continue;
+
             StaffMember teacher = teachers.FirstOrDefault(teacher => teacher.Id == session.StaffId);
 
             duration += session.Duration;

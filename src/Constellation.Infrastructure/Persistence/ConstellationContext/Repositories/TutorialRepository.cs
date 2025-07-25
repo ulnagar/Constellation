@@ -60,9 +60,9 @@ internal sealed class TutorialRepository : ITutorialRepository
         return await _context
             .Set<Tutorial>()
             .Where(tutorial =>
-                tutorial.IsDeleted &&
-                (tutorial.StartDate >= _dateTime.FirstDayOfYear ||
-                 tutorial.Sessions.Count == 0 ||
+                !tutorial.IsDeleted &&
+                tutorial.StartDate >= _dateTime.FirstDayOfYear &&
+                 (tutorial.Sessions.Count == 0 ||
                  tutorial.Sessions.All(session => session.IsDeleted)))
             .ToListAsync(cancellationToken);
     }
