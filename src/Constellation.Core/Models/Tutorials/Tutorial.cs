@@ -107,6 +107,7 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
         StaffId staffId)
     {
         if (_sessions.Any(session =>
+                !session.IsDeleted &&
                 session.Week.Equals(week) &&
                 session.Day.Equals(day) &&
                 session.StartTime <= endTime &&

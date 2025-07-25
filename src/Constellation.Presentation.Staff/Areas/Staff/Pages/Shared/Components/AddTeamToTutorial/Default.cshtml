@@ -1,0 +1,27 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddTeamToTutorial.AddTeamToTutorialSelection
+
+<div class="modal fade" tabindex="-1" id="addTeamModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page="/Subject/Tutorials/Details" asp-area="Staff" asp-route-id="@Model.TutorialId" asp-page-handler="AddTeam">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Team to Tutorial</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Team</span>
+                            <select asp-for="TeamId" asp-items="@(new SelectList(Model.Teams, "Key", "Value"))" class="combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

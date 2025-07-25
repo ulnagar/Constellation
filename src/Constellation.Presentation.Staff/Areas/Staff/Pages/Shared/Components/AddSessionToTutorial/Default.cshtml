@@ -1,0 +1,60 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.AddSessionToTutorial.AddSessionToTutorialSelection
+
+<div class="modal fade" id="addSession">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-page="/Subject/Tutorials/Details" asp-area="Staff" asp-route-id="@Model.TutorialId" asp-page-handler="AddSession">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Session to Tutorial</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <div asp-validation-summary="All"></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Week</span>
+                            <select asp-for="Week" asp-items="@(new SelectList(Model.Weeks, "Key", "Value"))" class="form-control">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Day</span>
+                            <select asp-for="Day" asp-items="@(new SelectList(Model.Days, "Key", "Value"))" class="form-control">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Start</span>
+                            <input asp-for="StartTime" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">End</span>
+                            <input asp-for="EndTime" class="form-control"/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Teacher</span>
+                            <select asp-for="StaffId" asp-items="@(new SelectList(Model.Staff, "Key", "Value"))" class="combo" style="width:100%" data-val-required="You must select a teacher">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel" />
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
