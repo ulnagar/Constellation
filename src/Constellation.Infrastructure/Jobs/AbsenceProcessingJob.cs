@@ -16,7 +16,6 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.ValueObjects;
 using Constellation.Core.Primitives;
 using Core.Extensions;
-using Core.Models.Students.Enums;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Repositories;

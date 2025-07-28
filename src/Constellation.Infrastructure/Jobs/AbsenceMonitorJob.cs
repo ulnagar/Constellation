@@ -12,11 +12,9 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Primitives;
 using Core.Abstractions.Repositories;
-using Core.Enums;
 using Core.Models.Absences;
 using Core.Models.Identifiers;
 using Core.Models.Students;
-using Core.Models.Students.Enums;
 
 internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {

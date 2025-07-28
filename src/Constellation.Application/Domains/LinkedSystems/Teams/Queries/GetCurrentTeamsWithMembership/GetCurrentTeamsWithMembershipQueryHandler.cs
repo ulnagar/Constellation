@@ -9,6 +9,7 @@ using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Extensions;
 using Core.Models;
+using Core.Models.Assets.Enums;
 using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
@@ -28,6 +29,9 @@ using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
+using Core.Models.Subjects.Identifiers;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Configuration;
@@ -49,6 +53,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ICoverRepository _coverRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ICasualRepository _casualRepository;
@@ -65,6 +70,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ICoverRepository coverRepository,
         IEnrolmentRepository enrolmentRepository,
         ICasualRepository casualRepository,
@@ -80,6 +86,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _coverRepository = coverRepository;
         _enrolmentRepository = enrolmentRepository;
         _casualRepository = casualRepository;
@@ -109,6 +116,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
         List<StaffMember> staff = await _staffRepository.GetAllActive(cancellationToken);
         List<Offering> offerings = await _offeringRepository.GetAllActive(cancellationToken);
+        List<Tutorial> tutorials = await _tutorialRepository.GetAllActive(cancellationToken);
         List<Cover> covers = await _coverRepository.GetAllCurrent(cancellationToken);
         List<Casual> casuals = await _casualRepository.GetAll(cancellationToken);
         IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
@@ -126,6 +134,10 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 AddUnique(members, await ProcessClassTeam(team, casuals, covers, offerings, students, staff, additionalRecipients, cancellationToken));
 
             // Tutorial Teams
+            if (team.Description.Split(';').Contains("TUTORIAL"))
+                AddUnique(members, await ProcessTutorialTeam(team, tutorials, students, staff, cancellationToken));
+
+            // Group Tutorial Teams
             if (team.Description.Split(';').Contains("GTUT"))
                 AddUnique(members, await ProcessGroupTutorialTeam(team, students, staff, cancellationToken));
 
@@ -431,6 +443,217 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                     _logger
                         .ForContext(nameof(Offering.Name), offering.Name, true)
                         .Error("Failed to convert Offering Name into Grade");
+
+                    continue;
+                }
+
+                // Deputy Principals
+                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId> deputyIds);
+
+                if (deputyPrincipals is not false)
+                {
+
+                    foreach (var deputyId in deputyIds)
+                    {
+                        StaffMember deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == deputyId);
+
+                        if (deputyPrincipal is null) continue;
+
+                        TeamWithMembership.Member deputyEntry = new(
+                            deputyPrincipal.EmailAddress.Email,
+                            TeamsMembershipLevel.Owner.Value,
+                            []);
+
+                        if (members.All(value => value.EmailAddress != deputyEntry.EmailAddress))
+                            members.Add(deputyEntry);
+                    }
+                }
+
+                // Learning and Support Teachers
+                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId> lastStaffIds);
+
+                if (learningSupport is not false)
+                {
+                    foreach (EmployeeId staffId in lastStaffIds)
+                    {
+                        StaffMember learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
+
+                        if (learningSupportTeacher is null) continue;
+
+                        TeamWithMembership.Member lastEntry = new(
+                            learningSupportTeacher.EmailAddress.Email,
+                            TeamsMembershipLevel.Owner.Value,
+                            []);
+
+                        if (members.All(value => value.EmailAddress != lastEntry.EmailAddress))
+                            members.Add(lastEntry);
+                    }
+                }
+            }
+        }
+
+        return members;
+    }
+
+    private async Task<List<TeamWithMembership.Member>> ProcessTutorialTeam(
+    Team team,
+    List<Tutorial> tutorials,
+    List<Student> students,
+    List<StaffMember> staff,
+    CancellationToken cancellationToken = default)
+    {
+        List<TeamWithMembership.Member> members = [];
+
+        // Tutorial Team which should have a tutorial
+        List<Tutorial> matchingTutorials = tutorials
+            .Where(offering => offering.Teams
+                .Any(resource => resource.TeamId == team.Id))
+            .ToList();
+
+        if (matchingTutorials.Count == 0)
+        {
+            //error
+            _logger.Warning("Could not identify any Tutorial with active Resource for Team {id}", team.Id);
+
+            return members;
+        }
+
+        foreach (Tutorial tutorial in matchingTutorials)
+        {
+            // Enrolled Students
+            List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByTutorialId(tutorial.Id, cancellationToken);
+
+            List<Student> matchingStudents = students
+                .Where(student =>
+                    enrolments
+                        .Select(enrolment => enrolment.StudentId)
+                        .Contains(student.Id))
+                .ToList();
+
+            // Student other offerings
+            List<Offering> offerings = [];
+
+            foreach (Student student in matchingStudents)
+            {
+                if (student.EmailAddress == EmailAddress.None)
+                    continue;
+
+                TeamWithMembership.Member entry = new(
+                    student.EmailAddress.Email,
+                    TeamsMembershipLevel.Member.Value,
+                    []);
+
+                if (members.All(value => value.EmailAddress != entry.EmailAddress))
+                    members.Add(entry);
+
+                List<Offering> studentOfferings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
+
+                foreach (var offering in studentOfferings)
+                {
+                    if (offerings.Contains(offering))
+                        continue;
+
+                    offerings.Add(offering);
+                }
+            }
+
+            // Tutorial Teachers
+            List<StaffMember> teachers = staff.Where(staffMember =>
+                    tutorial.Sessions.Any(session =>
+                        !session.IsDeleted &&
+                        session.StaffId == staffMember.Id))
+                .ToList();
+
+            foreach (StaffMember teacher in teachers)
+            {
+                TeamWithMembership.Member entry = new(
+                    teacher.EmailAddress.Email,
+                    TeamsMembershipLevel.Owner.Value,
+                    []);
+
+                if (members.All(value => value.EmailAddress != entry.EmailAddress))
+                    members.Add(entry);
+            }
+
+            // Class Teachers
+            List<StaffId> staffIds = offerings
+                .SelectMany(offering => offering.Teachers)
+                .Where(teacher => 
+                    !teacher.IsDeleted && 
+                    teacher.Type == AssignmentType.ClassroomTeacher)
+                .Select(entry => entry.StaffId)
+                .Distinct()
+                .ToList();
+
+            List<StaffMember> offeringTeachers = staff.Where(staffMember =>
+                    staffIds.Contains(staffMember.Id))
+                .ToList();
+
+            foreach (StaffMember teacher in offeringTeachers)
+            {
+                TeamWithMembership.Member entry = new(
+                    teacher.EmailAddress.Email,
+                    TeamsMembershipLevel.Owner.Value,
+                    []);
+
+                if (members.All(value => value.EmailAddress != entry.EmailAddress))
+                    members.Add(entry);
+            }
+
+            // Head Teachers
+            List<CourseId> courseIds = offerings
+                .Select(offering => offering.CourseId)
+                .Distinct()
+                .ToList();
+
+            foreach (CourseId courseId in courseIds)
+            {
+                Faculty faculty = await _facultyRepository.GetByCourseId(courseId, cancellationToken);
+
+                if (faculty is null)
+                {
+                    //error
+                    _logger.Warning("Could not identify Faculty from Course Id {courseId}.", courseId);
+
+                    continue;
+                }
+
+                List<StaffMember> headTeachers = staff.Where(staffMember =>
+                        faculty.Members
+                            .Where(facultyMember =>
+                                !facultyMember.IsDeleted &&
+                                facultyMember.Role == FacultyMembershipRole.Manager)
+                            .Select(facultyMember => facultyMember.StaffId)
+                            .Contains(staffMember.Id))
+                    .ToList();
+
+                foreach (StaffMember teacher in headTeachers)
+                {
+                    TeamWithMembership.Member entry = new(
+                        teacher.EmailAddress.Email,
+                        TeamsMembershipLevel.Owner.Value,
+                        []);
+
+                    if (members.All(value => value.EmailAddress != entry.EmailAddress))
+                        members.Add(entry);
+                }
+            }
+            
+            if (_teamConfiguration is not null)
+            {
+                Grade grade;
+
+                try
+                {
+                    string stringGrade = tutorial.Name.Value[..2];
+                    int intGrade = Convert.ToInt32(stringGrade);
+                    grade = (Grade)intGrade;
+                }
+                catch (Exception e)
+                {
+                    _logger
+                        .ForContext(nameof(Tutorial.Name), tutorial.Name, true)
+                        .Error("Failed to convert Tutorial Name into Grade");
 
                     continue;
                 }
