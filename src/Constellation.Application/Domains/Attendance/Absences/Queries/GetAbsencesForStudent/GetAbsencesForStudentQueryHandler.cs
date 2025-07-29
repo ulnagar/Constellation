@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;

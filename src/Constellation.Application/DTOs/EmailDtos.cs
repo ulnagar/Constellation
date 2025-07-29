@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.DTOs;
 
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Absences;
+﻿namespace Constellation.Core.Models.Absences.Enums;
 
 using Common;
 

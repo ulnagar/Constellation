@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Absences;
+﻿namespace Constellation.Core.Models.Absences.Enums;
 
 using Common;
 using System;
@@ -21,7 +21,7 @@ public class AbsenceReason : StringEnumeration<AbsenceReason>, IEquatable<Absenc
     public AbsenceReason(string value)
         : base(value, value) { }
 
-    public int CompareTo(AbsenceReason? obj)
+    public int CompareTo(AbsenceReason obj)
     {
         if (obj is not null)
             return string.Compare(Value, obj.Value, StringComparison.Ordinal);
@@ -31,10 +31,10 @@ public class AbsenceReason : StringEnumeration<AbsenceReason>, IEquatable<Absenc
 
     public override string ToString() => Value;
 
-    public static implicit operator string(AbsenceReason? reason) =>
+    public static implicit operator string(AbsenceReason reason) =>
         reason is null ? string.Empty : reason.Value;
 
-    public bool Equals(AbsenceReason? other)
+    public bool Equals(AbsenceReason other)
     {
         if (other is null)
             return false;
@@ -42,7 +42,7 @@ public class AbsenceReason : StringEnumeration<AbsenceReason>, IEquatable<Absenc
         return Value == other.Value;
     }
 
-    public override bool Equals(object? obj)
+    public override bool Equals(object obj)
     {
         if (ReferenceEquals(this, obj)) return true;
         if (obj?.GetType() != GetType()) return false;
@@ -51,7 +51,7 @@ public class AbsenceReason : StringEnumeration<AbsenceReason>, IEquatable<Absenc
 
     public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
 
-    public static bool operator ==(AbsenceReason? obj1, AbsenceReason? obj2)
+    public static bool operator ==(AbsenceReason obj1, AbsenceReason obj2)
     {
         if (ReferenceEquals(obj1, obj2))
             return true;
@@ -70,12 +70,12 @@ public class AbsenceReason : StringEnumeration<AbsenceReason>, IEquatable<Absenc
 
 public class AbsenceReasonConverter : TypeConverter
 {
-    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
     {
         return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
     }
 
-    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
     {
         if (value is string stringValue)
             return AbsenceReason.FromValue(stringValue);

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesForExport;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.ValueObjects;
 using System;
 

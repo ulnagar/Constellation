@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Absences.Identifiers;
 using ConstellationContext;
 using Core.Abstractions.Clock;
 using Core.Models.Absences;

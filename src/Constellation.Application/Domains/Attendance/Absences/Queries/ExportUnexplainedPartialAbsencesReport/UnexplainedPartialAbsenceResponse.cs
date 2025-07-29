@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexplainedPartialAbsencesReport;
 
+using Constellation.Core.Models.Absences.Identifiers;
 using Core.Enums;
 using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;

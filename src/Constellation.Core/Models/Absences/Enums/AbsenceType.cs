@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Absences;
+﻿namespace Constellation.Core.Models.Absences.Enums;
 
 using Common;
 using System;
@@ -13,20 +13,20 @@ public class AbsenceType : StringEnumeration<AbsenceType>, IEquatable<AbsenceTyp
 
     public override string ToString() => Name;
 
-    public static implicit operator string(AbsenceType? value) =>
+    public static implicit operator string(AbsenceType value) =>
         value is null ? string.Empty : value.Name;
 
-    public override bool Equals(object? obj)
+    public override bool Equals(object obj)
     {
         if (ReferenceEquals(this, obj)) return true;
         if (obj?.GetType() != GetType()) return false;
         
-        AbsenceType? other = obj as AbsenceType;
+        AbsenceType other = obj as AbsenceType;
 
         return Value == other?.Value && Name == other.Name;
     }
 
-    public bool Equals(AbsenceType? other)
+    public bool Equals(AbsenceType other)
     {
         if (other is null) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -37,7 +37,7 @@ public class AbsenceType : StringEnumeration<AbsenceType>, IEquatable<AbsenceTyp
 
     public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCultureIgnoreCase) ^ Name.GetHashCode(StringComparison.InvariantCultureIgnoreCase);
 
-    public static bool operator ==(AbsenceType? obj1, AbsenceType? obj2)
+    public static bool operator ==(AbsenceType obj1, AbsenceType obj2)
     {
         if (ReferenceEquals(obj1, obj2))
             return true;

@@ -2,6 +2,7 @@
 
 using Absences;
 using Constellation.Core.Errors;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Identifiers;
 using Errors;
 using Identifiers;

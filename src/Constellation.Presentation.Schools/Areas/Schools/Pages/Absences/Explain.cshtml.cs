@@ -4,7 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.Attendance.Absences.Commands.CreateAbsenceResponseFromSchool;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDetailsForSchool;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;

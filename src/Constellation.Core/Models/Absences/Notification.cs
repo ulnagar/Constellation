@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
-using Identifiers;
+using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Absences.Identifiers;
 using System;
 
 public class Notification

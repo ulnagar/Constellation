@@ -3,6 +3,7 @@
 namespace Constellation.Core.Errors;
 
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;

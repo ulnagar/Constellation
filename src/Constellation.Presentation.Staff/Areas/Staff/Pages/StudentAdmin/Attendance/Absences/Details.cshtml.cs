@@ -6,7 +6,7 @@ using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceDe
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Errors;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;

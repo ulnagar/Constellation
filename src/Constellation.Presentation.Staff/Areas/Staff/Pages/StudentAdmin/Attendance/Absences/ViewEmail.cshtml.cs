@@ -3,7 +3,7 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attend
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceNotificationDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

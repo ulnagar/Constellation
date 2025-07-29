@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Identifiers;
+﻿namespace Constellation.Core.Models.Absences.Identifiers;
 
 using Constellation.Core.Primitives;
 using System;

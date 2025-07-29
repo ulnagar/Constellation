@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceSummaryForStudent;
 
-using Constellation.Core.Models.Absences;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Absences.Identifiers;
 using System;
 
 public sealed record StudentAbsenceSummaryResponse(

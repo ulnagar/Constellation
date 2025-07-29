@@ -11,7 +11,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;

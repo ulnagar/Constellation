@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 

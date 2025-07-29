@@ -4,7 +4,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Students.Queries.GetStudentsWithAbsenceSettings;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using MediatR;

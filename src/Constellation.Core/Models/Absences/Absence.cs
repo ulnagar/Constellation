@@ -1,9 +1,10 @@
 ﻿namespace Constellation.Core.Models.Absences;
 
+using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using DomainEvents;
-using Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -131,11 +132,11 @@ public class Absence : AggregateRoot
         Response response = Response.Create(Id, DateTime.Now, type, from, explanation);
 
         if (response.VerificationStatus == ResponseVerificationStatus.Pending)
-            RaiseDomainEvent(new PendingVerificationResponseCreatedDomainEvent(new DomainEventId(), response.Id, Id));
+            RaiseDomainEvent(new PendingVerificationResponseCreatedDomainEvent(new(), response.Id, Id));
 
         if (response.VerificationStatus == ResponseVerificationStatus.NotRequired)
         {
-            RaiseDomainEvent(new AbsenceResponseReceivedDomainEvent(new DomainEventId(), response.Id, Id));
+            RaiseDomainEvent(new AbsenceResponseReceivedDomainEvent(new(), response.Id, Id));
 
             Explained = true;
         }
@@ -189,7 +190,7 @@ public class Absence : AggregateRoot
             response.VerificationStatus == ResponseVerificationStatus.Rejected)
         {
             RaiseDomainEvent(new AbsenceResponseConfirmedDomainEvent(
-                new DomainEventId(),
+                new(),
                 responseId,
                 Id));
 

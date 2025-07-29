@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Configuration;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Core.Models.StaffMembers.ValueObjects;
 using System.Collections.Generic;
 

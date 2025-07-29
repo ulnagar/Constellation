@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;

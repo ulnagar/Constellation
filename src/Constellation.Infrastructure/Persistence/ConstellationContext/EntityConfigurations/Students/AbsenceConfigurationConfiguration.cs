@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Students;
 
-using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Students;
 using Microsoft.EntityFrameworkCore;

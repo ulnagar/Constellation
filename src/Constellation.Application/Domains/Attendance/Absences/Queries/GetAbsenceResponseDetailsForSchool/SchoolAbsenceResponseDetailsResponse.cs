@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsenceResponseDetailsForSchool;
 
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Absences.Identifiers;
 using System;
 
 public sealed record SchoolAbsenceResponseDetailsResponse(

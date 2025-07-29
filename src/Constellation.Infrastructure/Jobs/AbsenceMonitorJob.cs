@@ -9,6 +9,8 @@ using Application.Domains.Attendance.Absences.Commands.SendMissedWorkEmailToStud
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Primitives;
 using Core.Abstractions.Repositories;

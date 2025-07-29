@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Abstractions.Repositories;
 
+using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Students;
 using Models.Absences;
 using Models.Identifiers;

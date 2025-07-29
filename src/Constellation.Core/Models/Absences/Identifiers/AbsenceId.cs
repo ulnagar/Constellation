@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Identifiers;
+﻿namespace Constellation.Core.Models.Absences.Identifiers;
 
 using Constellation.Core.Primitives;
 using System;
@@ -6,8 +6,8 @@ using System;
 public sealed record AbsenceId(Guid Value)
     : IStronglyTypedId
 {
-    public static AbsenceId FromValue(Guid Value) =>
-        new(Value);
+    public static AbsenceId FromValue(Guid value) =>
+        new(value);
 
     public AbsenceId()
         : this(Guid.NewGuid()) { }
