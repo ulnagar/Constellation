@@ -4,11 +4,16 @@ using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
 using Core.Models.Students.Identifiers;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Serilog;
 using System;
@@ -23,17 +28,20 @@ internal sealed class GetAbsencesForExportQueryHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ILogger _logger;
 
     public GetAbsencesForExportQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _logger = logger.ForContext<GetAbsencesForExportQuery>();
     }
 
@@ -75,11 +83,40 @@ internal sealed class GetAbsencesForExportQueryHandler
 
             if (request.Filter.Grade.HasValue && enrolment.Grade != (Grade)request.Filter.Grade)
                 continue;
-            
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
 
-            if (offering is null) 
-                continue;
+            string activityName = string.Empty;
+
+            if (absence.Source == AbsenceSource.Offering)
+            {
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is null)
+                {
+                    _logger.Warning("Could not find offering with Id {id}", offeringId);
+
+                    continue;
+                }
+
+                activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is null)
+                {
+                    _logger.Warning("Could not find tutorial with Id {id}", tutorialId);
+
+                    continue;
+                }
+
+                activityName = tutorial.Name;
+            }
 
             AbsenceExportResponse entry = new(
                 student.Name,
@@ -91,7 +128,7 @@ internal sealed class GetAbsencesForExportQueryHandler
                 absence.PeriodName,
                 absence.AbsenceLength,
                 absence.AbsenceTimeframe,
-                offering.Name,
+                activityName,
                 absence.Notifications.Count,
                 absence.Responses.Count);
 

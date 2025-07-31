@@ -6,9 +6,14 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Errors;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Errors;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Identifiers;
@@ -26,6 +31,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
     private readonly IFamilyRepository _familyRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceDetailsForParentQueryHandler(
@@ -33,12 +39,14 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
         IFamilyRepository familyRepository,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _familyRepository = familyRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _logger = logger.ForContext<GetAbsenceDetailsForParentQuery>();
     }
 
@@ -80,13 +88,38 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             return Result.Failure<ParentAbsenceDetailsResponse>(SchoolEnrolmentErrors.NotFound);
         }
 
-        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        string activityName = string.Empty;
 
-        if (offering is null)
+        if (absence.Source == AbsenceSource.Offering)
         {
-            _logger.Information("Could not find offering with Id {id} while retrieving absence {@absence}", absence.OfferingId, absence);
+            OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            return Result.Failure<ParentAbsenceDetailsResponse>(OfferingErrors.NotFound(absence.OfferingId));
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+            if (offering is null)
+            {
+                _logger.Information("Could not find offering with Id {id} while retrieving absence {@absence}", offeringId, absence);
+
+                return Result.Failure<ParentAbsenceDetailsResponse>(OfferingErrors.NotFound(offeringId));
+            }
+
+            activityName = offering.Name;
+        }
+
+        if (absence.Source == AbsenceSource.Tutorial)
+        {
+            TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+            if (tutorial is null)
+            {
+                _logger.Warning("Could not find tutorial with Id {id}", tutorialId);
+
+                return Result.Failure<ParentAbsenceDetailsResponse>(TutorialErrors.NotFound(tutorialId));
+            }
+
+            activityName = tutorial.Name;
         }
 
         Response response = absence.GetExplainedResponse();
@@ -102,7 +135,7 @@ internal sealed class GetAbsenceDetailsForParentQueryHandler
             absence.AbsenceLength,
             absence.AbsenceTimeframe,
             absence.AbsenceReason.Value,
-            offering.Name,
+            activityName,
             response?.Explanation,
             response?.VerificationStatus,
             response is null ? null : response.VerificationStatus == ResponseVerificationStatus.NotRequired ? response.From : response.Verifier,

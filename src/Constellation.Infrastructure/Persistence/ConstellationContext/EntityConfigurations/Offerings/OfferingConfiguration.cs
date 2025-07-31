@@ -43,11 +43,6 @@ public class OfferingConfiguration : IEntityTypeConfiguration<Offering>
             .AutoInclude();
 
         builder
-            .HasMany<Absence>()
-            .WithOne()
-            .HasForeignKey(absence => absence.OfferingId);
-
-        builder
             .HasMany(offering => offering.Resources)
             .WithOne(resource => resource.Offering)
             .HasForeignKey(resource => resource.OfferingId);

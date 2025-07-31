@@ -15,8 +15,9 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Primitives;
 using Core.Abstractions.Repositories;
 using Core.Models.Absences;
-using Core.Models.Identifiers;
+using Core.Models.Offerings.Identifiers;
 using Core.Models.Students;
+using Core.Models.Students.ValueObjects;
 
 internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {
@@ -64,6 +65,9 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
             foreach (Student student in students)
             {
+                if (student.StudentReferenceNumber != StudentReferenceNumber.FromValue("446481304"))
+                    continue;
+
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
@@ -145,11 +149,16 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                         absence.AbsenceReason == AbsenceReason.Suspended)
                         continue;
 
+                    if (absence.Source == AbsenceSource.Tutorial)
+                        continue;
+
+                    OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
                     //Send missed work generic email
                    await _mediator.Send(new SendMissedWorkEmailToStudentCommand(
                        jobId,
                        student.Id,
-                       absence.OfferingId,
+                       offeringId,
                        absence.Date),
                        cancellationToken);
                 }

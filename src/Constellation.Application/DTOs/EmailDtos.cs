@@ -33,7 +33,7 @@ public partial class EmailDtos
             public AbsenceType AbsenceType { get; set; }
             public string AbsenceTimeframe { get; set; }
 
-            public AbsenceDto(Absence absence, Response response, Offering offering)
+            public AbsenceDto(Absence absence, Response response, string activityName)
             {
                 ReportedBy = "UNKNOWN SOURCE";
 
@@ -53,19 +53,19 @@ public partial class EmailDtos
 
                 AbsenceDate = absence.Date.ToDateTime(TimeOnly.MinValue);
                 PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})";
-                ClassName = offering.Name;
+                ClassName = activityName;
                 Explanation = response.Explanation;
                 AbsenceType = absence.Type;
                 AbsenceTimeframe = absence.AbsenceTimeframe;
             }
 
-            public AbsenceDto(Absence absence, Offering offering, string email, string explanation)
+            public AbsenceDto(Absence absence, string activityName, string email, string explanation)
             {
                 ReportedBy = $"Reported by Parent ({email})";
 
                 AbsenceDate = absence.Date.ToDateTime(TimeOnly.MinValue);
                 PeriodName = $"{absence.PeriodName} ({absence.PeriodTimeframe})";
-                ClassName = offering.Name;
+                ClassName = activityName;
                 Explanation = explanation;
                 AbsenceType = absence.Type;
                 AbsenceTimeframe = absence.AbsenceTimeframe;

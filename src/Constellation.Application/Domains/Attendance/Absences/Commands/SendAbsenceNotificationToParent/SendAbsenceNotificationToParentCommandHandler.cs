@@ -18,6 +18,12 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
+using Core.Models.Offerings.Errors;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Errors;
+using Core.Models.Tutorials.Identifiers;
+using Core.Models.Tutorials.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -32,6 +38,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ISMSService _smsService;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
@@ -42,6 +49,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ISMSService smsService,
         IEmailService emailService,
         IDateTimeProvider dateTime,
@@ -51,6 +59,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _smsService = smsService;
         _emailService = emailService;
         _dateTime = dateTime;
@@ -96,17 +105,46 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
         foreach (Absence absence in absences)
         {
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            string activityName = string.Empty;
 
-            if (offering is null)
-                continue;
+            if (absence.Source == AbsenceSource.Offering)
+            {
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is null)
+                {
+                    _logger.Warning("Could not find offering with Id {id}", offeringId);
+
+                    continue;
+                }
+
+                activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is null)
+                {
+                    _logger.Warning("Could not find tutorial with Id {id}", tutorialId);
+
+                    continue;
+                }
+
+                activityName = tutorial.Name;
+            }
 
             absenceEntries.Add(new(
                 absence.Id,
                 absence.Date,
                 absence.PeriodName,
                 absence.PeriodTimeframe,
-                offering.Name,
+                activityName,
                 absence.AbsenceTimeframe,
                 absence.AbsenceLength));
         }

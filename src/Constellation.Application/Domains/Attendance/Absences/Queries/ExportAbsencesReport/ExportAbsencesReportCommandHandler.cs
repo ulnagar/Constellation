@@ -1,6 +1,4 @@
 ﻿#nullable enable
-using Constellation;
-
 namespace Constellation.Application.Domains.Attendance.Absences.Queries.ExportAbsencesReport;
 
 using Abstractions.Messaging;
@@ -13,9 +11,13 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
+using Core.Models.Absences.Enums;
+using Core.Models.Offerings.Identifiers;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Identifiers;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using DTOs;
-using GetAbsencesWithFilterForReport;
 using Helpers;
 using Interfaces.Repositories;
 using Interfaces.Services;
@@ -31,6 +33,7 @@ internal sealed class ExportAbsencesReportCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IExcelService _excelService;
 
@@ -38,12 +41,14 @@ internal sealed class ExportAbsencesReportCommandHandler
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ISchoolRepository schoolRepository,
         IExcelService excelService)
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _schoolRepository = schoolRepository;
         _excelService = excelService;
     }
@@ -86,9 +91,31 @@ internal sealed class ExportAbsencesReportCommandHandler
             if (enrolment is null)
                 continue;
 
-            Offering? offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            string activityName = string.Empty;
 
-            string offeringName = offering?.Name ?? string.Empty;
+            if (absence.Source == AbsenceSource.Offering)
+            {
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is null)
+                    continue;
+
+                activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is null)
+                    continue;
+
+                activityName = tutorial.Name;
+            }
 
             School? school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
@@ -98,7 +125,7 @@ internal sealed class ExportAbsencesReportCommandHandler
                 student.Name,
                 schoolName,
                 enrolment.Grade,
-                offeringName,
+                activityName,
                 absence.Id,
                 absence.Explained,
                 absence.Date,

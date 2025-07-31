@@ -17,9 +17,13 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
+using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students.Errors;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Identifiers;
+using Core.Models.Tutorials.Repositories;
 using MediatR;
 using Serilog;
 using System.Collections.Generic;
@@ -34,6 +38,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     private readonly IStudentRepository _studentRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
@@ -44,6 +49,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         IStudentRepository studentRepository,
         ISchoolContactRepository contactRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
         IDateTimeProvider dateTime,
@@ -53,6 +59,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         _studentRepository = studentRepository;
         _contactRepository = contactRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _schoolRepository = schoolRepository;
         _emailService = emailService;
         _dateTime = dateTime;
@@ -138,25 +145,50 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        string activityName = string.Empty;
 
-        if (offering is null)
+        if (absence.Source == AbsenceSource.Offering)
         {
-            _logger.Warning("Could not locate course offering with Id {id}", absence.OfferingId);
+            OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            return;
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+            if (offering is null)
+            {
+                _logger.Warning("Could not find offering with Id {id}", offeringId);
+
+                return;
+            }
+
+            activityName = offering.Name;
+        }
+
+        if (absence.Source == AbsenceSource.Tutorial)
+        {
+            TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+            if (tutorial is null)
+            {
+                _logger.Warning("Could not find tutorial with Id {id}", tutorialId);
+
+                return;
+            }
+
+            activityName = tutorial.Name;
         }
 
         AbsenceExplanation explanation = new(
             absence.Date, 
             absence.PeriodName, 
             absence.PeriodTimeframe, 
-            offering.Name, 
+            activityName, 
             absence.AbsenceTimeframe, 
             response.Explanation);
 
         EmailDtos.SentEmail message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
-            new List<AbsenceExplanation> { explanation },
+            [ explanation ],
             student,
             recipients,
             cancellationToken);

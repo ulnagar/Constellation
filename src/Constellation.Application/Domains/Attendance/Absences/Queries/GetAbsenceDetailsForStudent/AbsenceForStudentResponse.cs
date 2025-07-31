@@ -2,7 +2,6 @@
 
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.ValueObjects;
 using Core.Models.Students.Identifiers;
 using System;
@@ -11,7 +10,6 @@ public sealed record AbsenceForStudentResponse(
     AbsenceId AbsenceId,
     Name Student,
     StudentId StudentId,
-    OfferingId OfferingId,
     string OfferingName,
     DateOnly AbsenceDate,
     AbsenceType AbsenceType,

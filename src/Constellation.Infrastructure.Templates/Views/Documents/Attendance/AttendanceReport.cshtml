@@ -182,7 +182,7 @@
                                 var periodAbsences = Model.Absences
                                     .Where(a => 
                                         a.Date == entry.Date && 
-                                        a.OfferingId == group.OfferingId)
+                                        a.SourceId == group.SourceId)
                                     .ToList();
                                 
                                 <tr>

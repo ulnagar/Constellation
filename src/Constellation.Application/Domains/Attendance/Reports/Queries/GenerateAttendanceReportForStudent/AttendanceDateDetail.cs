@@ -7,12 +7,12 @@ using System.Collections.Generic;
 public sealed record AttendanceDateDetail(
     DateOnly Date,
     int DayNumber,
-    List<AttendanceDateDetail.SessionWithOffering> Sessions)
+    List<AttendanceDateDetail.SessionWithSource> Sessions)
 {
-    public sealed record SessionWithOffering(
+    public sealed record SessionWithSource(
         string PeriodName,
         string PeriodTimeframe,
         string OfferingName,
         string CourseName,
-        OfferingId OfferingId);
+        Guid SourceId);
 }

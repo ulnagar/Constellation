@@ -3,10 +3,10 @@
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
+using Constellation.Core.Models.Tutorials.Identifiers;
 using ConstellationContext;
 using Core.Abstractions.Clock;
 using Core.Models.Absences;
-using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -102,8 +102,25 @@ public class AbsenceRepository : IAbsenceRepository
             .CountAsync(absence =>
                 absence.StudentId == studentId &&
                 absence.Date == absenceDate &&
-                absence.OfferingId == offeringId &&
+                absence.Source == AbsenceSource.Offering &&
+                absence.SourceId == offeringId.Value &&
                 absence.AbsenceTimeframe == absenceTimeframe,
+                cancellationToken);
+
+    public async Task<int> GetCountForStudentDateAndTutorial(
+        StudentId studentId, 
+        DateOnly absenceDate, 
+        TutorialId tutorialId, 
+        string absenceTimeframe, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .CountAsync(absence =>
+                    absence.StudentId == studentId &&
+                    absence.Date == absenceDate &&
+                    absence.Source == AbsenceSource.Tutorial &&
+                    absence.SourceId == tutorialId.Value &&
+                    absence.AbsenceTimeframe == absenceTimeframe,
                 cancellationToken);
 
     public async Task<List<Absence>> GetAllForStudentDateAndOffering(
@@ -119,7 +136,26 @@ public class AbsenceRepository : IAbsenceRepository
             .Where(absence =>
                 absence.StudentId == studentId &&
                 absence.Date == absenceDate &&
-                absence.OfferingId == offeringId &&
+                absence.Source == AbsenceSource.Offering &&
+                absence.SourceId == offeringId.Value &&
+                absence.AbsenceTimeframe == absenceTimeframe)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Absence>> GetAllForStudentDateAndTutorial(
+        StudentId studentId,
+        DateOnly absenceDate,
+        TutorialId tutorialId,
+        string absenceTimeframe,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Absence>()
+            .Include(absence => absence.Responses)
+            .Include(absence => absence.Notifications)
+            .Where(absence =>
+                absence.StudentId == studentId &&
+                absence.Date == absenceDate &&
+                absence.Source == AbsenceSource.Tutorial &&
+                absence.SourceId == tutorialId.Value &&
                 absence.AbsenceTimeframe == absenceTimeframe)
             .ToListAsync(cancellationToken);
 

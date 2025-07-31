@@ -9,13 +9,17 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -30,16 +34,19 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
     private readonly List<Offering> _cachedOfferings = new();
+    private readonly List<Tutorial> _cachedTutorials = new();
 
     public SendAbsenceDigestToParentCommandHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IFamilyRepository familyRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IEmailService emailService,
         IDateTimeProvider dateTime,
         ILogger logger)
@@ -48,6 +55,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
         _absenceRepository = absenceRepository;
         _familyRepository = familyRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _emailService = emailService;
         _dateTime = dateTime;
         _logger = logger.ForContext<SendAbsenceDigestToParentCommand>();
@@ -152,16 +160,44 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
 
         foreach (Absence absence in absences)
         {
-            Offering offering = _cachedOfferings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
+            string activityName = string.Empty;
 
-            if (offering is null)
+            if (absence.Source == AbsenceSource.Offering)
             {
-                offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
-                
-                if (offering is null)
-                    continue;
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                _cachedOfferings.Add(offering);
+                Offering offering = _cachedOfferings.FirstOrDefault(offering => offering.Id == offeringId);
+
+                if (offering is null)
+                {
+                    offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                    if (offering is null)
+                        continue;
+
+                    _cachedOfferings.Add(offering);
+                }
+
+                activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = _cachedTutorials.FirstOrDefault(tutorial => tutorialId == tutorialId);
+
+                if (tutorial is null)
+                {
+                    tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                    if (tutorial is null)
+                        continue;
+
+                    _cachedTutorials.Add(tutorial);
+                }
+
+                activityName = tutorial.Name;
             }
             
             response.Add(new(
@@ -169,7 +205,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
                 absence.Date,
                 absence.PeriodName,
                 absence.PeriodTimeframe,
-                offering.Name,
+                activityName,
                 absence.AbsenceTimeframe,
                 absence.AbsenceLength));
         }

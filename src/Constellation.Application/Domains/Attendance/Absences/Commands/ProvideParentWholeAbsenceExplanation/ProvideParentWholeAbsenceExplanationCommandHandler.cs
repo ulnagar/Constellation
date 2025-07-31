@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.ProvideParentWholeAbsenceExplanation;
 
 using Constellation.Application.Abstractions.Messaging;
+using Constellation.Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -10,11 +11,16 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Errors;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -28,6 +34,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFamilyRepository _familyRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
@@ -36,6 +43,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
         ILogger logger,
         IFamilyRepository familyRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IStudentRepository studentRepository,
         IEmailService emailService,
         IUnitOfWork unitOfWork,
@@ -44,6 +52,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
         _logger = logger.ForContext<ProvideParentWholeAbsenceExplanationCommand>();
         _familyRepository = familyRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _studentRepository = studentRepository;
         _emailService = emailService;
         _unitOfWork = unitOfWork;
@@ -90,16 +99,41 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
         else
         {
             // Email office with explanation for manual entry
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            string activityName = string.Empty;
 
-            if (offering is null)
+            if (absence.Source == AbsenceSource.Offering)
             {
-                _logger
-                    .ForContext(nameof(ProvideParentWholeAbsenceExplanationCommand), request, true)
-                    .ForContext(nameof(Error), OfferingErrors.NotFound(absence.OfferingId), true)
-                    .Information("Could not find offering with Id {offering_id} when processing request {@request}", absence.OfferingId, request);
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                return Result.Failure(OfferingErrors.NotFound(absence.OfferingId));
+                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is null)
+                {
+                    _logger
+                        .ForContext(nameof(ProvideParentWholeAbsenceExplanationCommand), request, true)
+                        .ForContext(nameof(Error), OfferingErrors.NotFound(offeringId), true)
+                        .Information("Could not find offering with Id {offering_id} when processing request {@request}", offeringId, request);
+
+                    return Result.Failure(OfferingErrors.NotFound(offeringId));
+                }
+
+                activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is null)
+                {
+                    _logger.Warning("Could not find tutorial with Id {id}", tutorialId);
+
+                    return Result.Failure<AbsenceEntry>(TutorialErrors.NotFound(tutorialId));
+                }
+
+                activityName = tutorial.Name;
             }
 
             Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
@@ -117,7 +151,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
             EmailDtos.AbsenceResponseEmail notificationEmail = new();
 
             notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, offering, request.ParentEmail, request.Comment));
+            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, activityName, request.ParentEmail, request.Comment));
             notificationEmail.StudentName = student.Name.DisplayName;
 
             await _emailService.SendNonResidentialParentAbsenceReasonToSchoolAdmin(notificationEmail);

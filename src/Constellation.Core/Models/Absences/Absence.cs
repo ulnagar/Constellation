@@ -10,6 +10,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tutorials.Identifiers;
 
 public class Absence : AggregateRoot
 {
@@ -17,10 +18,10 @@ public class Absence : AggregateRoot
     private readonly List<Response> _responses = new();
 
     private Absence(
-        AbsenceId id,
         AbsenceType type,
         StudentId studentId,
-        OfferingId offeringId,
+        AbsenceSource source,
+        Guid sourceId,
         DateOnly date,
         string periodName,
         string periodTimeframe,
@@ -28,10 +29,11 @@ public class Absence : AggregateRoot
         TimeOnly startTime,
         TimeOnly endTime)
     {
-        Id = id;
+        Id = new();
         Type = type;
         StudentId = studentId;
-        OfferingId = offeringId;
+        Source = source;
+        SourceId = sourceId;
         Date = date;
         PeriodName = periodName;
         PeriodTimeframe = periodTimeframe;
@@ -47,7 +49,8 @@ public class Absence : AggregateRoot
     public AbsenceType Type { get; private set; }
 
     public StudentId StudentId { get; private set; }
-    public OfferingId OfferingId { get; private set; }
+    public AbsenceSource Source { get; private set; }
+    public Guid SourceId { get; private set; }
 
     public DateOnly Date { get; private set; }
     public string PeriodName { get; private set; }
@@ -59,8 +62,8 @@ public class Absence : AggregateRoot
     public TimeOnly StartTime { get; private set; }
     public TimeOnly EndTime { get; private set; }
 
-    public IReadOnlyList<Notification> Notifications => _notifications;
-    public IReadOnlyList<Response> Responses => _responses;
+    public IReadOnlyList<Notification> Notifications => _notifications.AsReadOnly();
+    public IReadOnlyList<Response> Responses => _responses.AsReadOnly();
 
     public bool Explained { get; private set; }
     public DateTime FirstSeen { get; private set; }
@@ -78,10 +81,40 @@ public class Absence : AggregateRoot
         TimeOnly endTime)
     {
         Absence absence = new(
-            new AbsenceId(),
             type,
             studentId,
-            offeringId,
+            AbsenceSource.Offering, 
+            offeringId.Value,
+            date,
+            periodName,
+            periodTimeframe,
+            absenceReason,
+            startTime,
+            endTime)
+        {
+            FirstSeen = DateTime.Now,
+            LastSeen = DateTime.Now
+        };
+
+        return absence;
+    }
+
+    public static Absence Create(
+        AbsenceType type,
+        StudentId studentId,
+        TutorialId tutorialId,
+        DateOnly date,
+        string periodName,
+        string periodTimeframe,
+        AbsenceReason absenceReason,
+        TimeOnly startTime,
+        TimeOnly endTime)
+    {
+        Absence absence = new(
+            type,
+            studentId,
+            AbsenceSource.Tutorial,
+            tutorialId.Value,
             date,
             periodName,
             periodTimeframe,

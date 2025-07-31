@@ -1,12 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForStudent;
 
 using Constellation.Core.Models.Absences.Enums;
-using Constellation.Core.Models.Offerings.Identifiers;
 using System;
 
 public sealed record AttendanceAbsenceDetail(
     DateOnly Date,
-    OfferingId OfferingId,
+    Guid SourceId,
     TimeOnly StartTime,
     AbsenceType Type,
     string AbsenceTimeframe,

@@ -1,15 +1,18 @@
 ﻿#nullable enable
-using Constellation;
-
 namespace Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
+using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,15 +25,18 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
 
     public GetAbsencesWithFilterForReportQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
-        IOfferingRepository offeringRepository)
+        IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository)
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
     }
 
     public async Task<Result<List<FilteredAbsenceResponse>>> Handle(GetAbsencesWithFilterForReportQuery request, CancellationToken cancellationToken)
@@ -73,15 +79,33 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
             if (enrolment is null)
                 continue;
 
-            Offering? offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            string activityName = string.Empty;
 
-            string offeringName = offering?.Name;
+            if (absence.Source == AbsenceSource.Offering)
+            {
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is not null)
+                    activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is not null)
+                    activityName = tutorial.Name;
+            }
 
             result.Add(new(
                 student.Name,
                 enrolment.SchoolName,
                 enrolment.Grade,
-                offeringName,
+                activityName,
                 absence.Id,
                 absence.Explained,
                 absence.Date,

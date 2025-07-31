@@ -7,12 +7,14 @@ using Constellation.Core.Models.StaffMembers;
 using Constellation.Core.Models.StaffMembers.ValueObjects;
 using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Tutorials.Identifiers;
 using Core.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.Tutorials;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,6 +77,25 @@ public class StaffRepository : IStaffRepository
             .SelectMany(offering => offering.Teachers)
             .Where(assignment => !assignment.IsDeleted)
             .Select(assignment => assignment.StaffId)
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<StaffMember>()
+            .Where(staff => staffIds.Contains(staff.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<StaffMember>> GetCurrentTeachersForTutorial(
+        TutorialId tutorialId,
+        CancellationToken cancellationToken = default)
+    {
+        List<StaffId> staffIds = await _context
+            .Set<Tutorial>()
+            .Where(tutorial => tutorial.Id == tutorialId)
+            .SelectMany(tutorial => tutorial.Sessions)
+            .Where(session => !session.IsDeleted)
+            .Select(session => session.StaffId)
+            .Distinct()
             .ToListAsync(cancellationToken);
 
         return await _context

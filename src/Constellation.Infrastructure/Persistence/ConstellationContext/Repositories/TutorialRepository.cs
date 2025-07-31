@@ -1,5 +1,11 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Constellation.Core.Models.Enrolments;
+using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Core.Models.Timetables;
+using Constellation.Core.Models.Timetables.Enums;
+using Constellation.Core.Models.Timetables.Identifiers;
 using Constellation.Core.Models.Tutorials.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models.StaffMembers.Identifiers;
@@ -80,6 +86,44 @@ internal sealed class TutorialRepository : ITutorialRepository
                     !session.IsDeleted &&
                     session.StaffId == staffId))
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Tutorial>> GetCurrentEnrolmentsFromStudentForDate(
+    StudentId studentId,
+    DateOnly absenceDate,
+    PeriodWeek week,
+    PeriodDay day,
+    CancellationToken cancellationToken = default)
+    {
+        List<TutorialId> tutorialIds = await _context
+            .Set<Enrolment>()
+            .Where(enrolment => enrolment.StudentId == studentId &&
+                // enrolment was created before the absence date
+                enrolment.CreatedAt < absenceDate.ToDateTime(TimeOnly.MinValue) &&
+                // enrolment is either still current (not deleted) OR was deleted after the absence date
+                (!enrolment.IsDeleted || enrolment.DeletedAt.Date > absenceDate.ToDateTime(TimeOnly.MinValue)))
+            .OfType<TutorialEnrolment>()
+            .Select(enrolment => enrolment.TutorialId)
+            .ToListAsync(cancellationToken);
+
+        List<Tutorial> tutorials = await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorialIds.Contains(tutorial.Id) &&
+                // offering ends after the absence date
+                tutorial.EndDate > absenceDate &&
+                tutorial.Sessions.Any(session =>
+                    // session was created before the absence date
+                    session.CreatedAt < absenceDate.ToDateTime(TimeOnly.MinValue) &&
+                    // session is either still current (not deleted) OR was deleted after the absence date
+                    (!session.IsDeleted || session.DeletedAt.Date > absenceDate.ToDateTime(TimeOnly.MinValue)) &&
+                    // session is for the same day as the absence
+                    session.Day == day && 
+                    session.Week == week))
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return tutorials;
+    }
 
     public async Task<bool> DoesTutorialAlreadyExist(
         TutorialName name,

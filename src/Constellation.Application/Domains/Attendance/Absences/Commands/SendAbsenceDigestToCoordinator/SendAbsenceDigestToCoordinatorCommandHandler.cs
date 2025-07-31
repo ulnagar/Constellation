@@ -11,6 +11,7 @@ using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Enums;
@@ -18,6 +19,9 @@ using Constellation.Core.Models.SchoolContacts.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
@@ -35,17 +39,20 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ISchoolRepository _schoolRepository;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
     private readonly List<Offering> _cachedOfferings = new();
+    private readonly List<Tutorial> _cachedTutorials = new();
 
     public SendAbsenceDigestToCoordinatorCommandHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         ISchoolContactRepository schoolContactRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ISchoolRepository schoolRepository,
         IEmailService emailService,
         IDateTimeProvider dateTime,
@@ -55,6 +62,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         _absenceRepository = absenceRepository;
         _schoolContactRepository = schoolContactRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _schoolRepository = schoolRepository;
         _emailService = emailService;
         _dateTime = dateTime;
@@ -178,24 +186,53 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
 
         foreach (Absence absence in absences)
         {
-            Offering offering = _cachedOfferings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
+            string activityName = string.Empty;
 
-            if (offering is null)
+            if (absence.Source == AbsenceSource.Offering)
             {
-                offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering offering = _cachedOfferings.FirstOrDefault(offering => offering.Id == offeringId);
 
                 if (offering is null)
-                    continue;
+                {
+                    offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
-                _cachedOfferings.Add(offering);
+                    if (offering is null)
+                        continue;
+
+                    _cachedOfferings.Add(offering);
+                }
+
+                activityName = offering.Name;
             }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+                
+                Tutorial tutorial = _cachedTutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialId);
+
+                if (tutorial is null)
+                {
+                    tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                    if (tutorial is null)
+                        continue;
+
+                    _cachedTutorials.Add(tutorial);
+                }
+                
+                activityName = tutorial.Name;
+            }
+
 
             response.Add(new(
                 absence.Id,
                 absence.Date,
                 absence.PeriodName,
                 absence.PeriodTimeframe,
-                offering.Name,
+                activityName,
                 absence.AbsenceTimeframe,
                 absence.AbsenceLength));
         }

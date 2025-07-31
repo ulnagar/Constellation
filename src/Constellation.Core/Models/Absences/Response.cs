@@ -7,14 +7,13 @@ using System;
 public class Response
 {
     private Response(
-        AbsenceResponseId id,
         AbsenceId absenceId,
         DateTime receivedAt,
         ResponseType type,
         string from,
         string explanation)
     {
-        Id = id;
+        Id = new();
         AbsenceId = absenceId;
         ReceivedAt = receivedAt;
         Type = type;
@@ -46,8 +45,7 @@ public class Response
         string from,
         string explanation)
     {
-        var response = new Response(
-            new AbsenceResponseId(),
+        Response response = new(
             absenceId,
             receivedAt,
             type,

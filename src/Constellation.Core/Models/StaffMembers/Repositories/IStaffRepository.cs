@@ -7,6 +7,7 @@ using Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Tutorials.Identifiers;
 using ValueObjects;
 
 public interface IStaffRepository
@@ -17,6 +18,7 @@ public interface IStaffRepository
     Task<StaffMember?> GetByEdvalCode(string edvalCode, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetListFromIds(List<StaffId> staffIds, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetCurrentTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
+    Task<List<StaffMember>> GetCurrentTeachersForTutorial(TutorialId tutorialId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetPrimaryTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetFacultyHeadTeachers(FacultyId facultyId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetFacultyHeadTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);

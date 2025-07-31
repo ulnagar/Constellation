@@ -3,10 +3,8 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Extensions;
 using Constellation.Application.Interfaces.Gateways;
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
@@ -19,6 +17,8 @@ using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Repositories;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using DTOs;
 using System;
 using System.Collections.Generic;
@@ -34,6 +34,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly IExportService _exportService;
@@ -43,6 +44,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ICourseRepository courseRepository,
         IPeriodRepository periodRepository,
         IExportService exportService,
@@ -51,6 +53,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _courseRepository = courseRepository;
         _periodRepository = periodRepository;
         _exportService = exportService;
@@ -102,7 +105,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
             AttendanceAbsenceDetail entry = new(
                 absence.Date,
-                absence.OfferingId,
+                absence.SourceId,
                 absence.StartTime,
                 absence.Type,
                 absence.AbsenceTimeframe,
@@ -125,7 +128,8 @@ public class GenerateAttendanceReportForStudentQueryHandler
             PeriodDay day = PeriodDay.FromDayNumber(date.GetDayNumber());
 
             List<Offering> offerings = await _offeringRepository.GetCurrentEnrolmentsFromStudentForDate(student.Id, date, week, day, cancellationToken);
-            List<AttendanceDateDetail.SessionWithOffering> sessionDetails = new();
+            List<Tutorial> tutorials = await _tutorialRepository.GetCurrentEnrolmentsFromStudentForDate(student.Id, date, week, day, cancellationToken);
+            List<AttendanceDateDetail.SessionWithSource> sessionDetails = new();
 
             foreach (Offering offering in offerings)
             {
@@ -142,7 +146,7 @@ public class GenerateAttendanceReportForStudentQueryHandler
                         $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         offering.Name,
                         course.Name,
-                        offering.Id));
+                        offering.Id.Value));
                 }
                 else
                 {
@@ -151,7 +155,28 @@ public class GenerateAttendanceReportForStudentQueryHandler
                         $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         offering.Name,
                         course.Name,
-                        offering.Id));
+                        offering.Id.Value));
+                }
+            }
+
+            foreach (Tutorial tutorial in tutorials)
+            {
+                List<TutorialSession> tutorialSessions = tutorial.Sessions
+                    .Where(session =>
+                        session.CreatedAt < date.ToDateTime(TimeOnly.MinValue) &&
+                        (!session.IsDeleted || session.DeletedAt.Date > date.ToDateTime(TimeOnly.MinValue)) &&
+                        session.Day == day &&
+                        session.Week == week)
+                    .ToList();
+
+                foreach (TutorialSession session in tutorialSessions)
+                {
+                    sessionDetails.Add(new(
+                        string.Empty,
+                        $"{session.StartTime.As12HourTime()} - {session.EndTime.As12HourTime()}",
+                        tutorial.Name,
+                        "Tutorial",
+                        tutorial.Id.Value));
                 }
             }
 
@@ -168,7 +193,8 @@ public class GenerateAttendanceReportForStudentQueryHandler
             startDate,
             excludedDates,
             absenceDetails,
-            attendanceDates);
+            attendanceDates,
+            cancellationToken);
 
         var fileName = $"{student.Name.LastName}, {student.Name.FirstName} - {request.StartDate:yyyy-MM-dd} - Attendance Report.pdf";
 

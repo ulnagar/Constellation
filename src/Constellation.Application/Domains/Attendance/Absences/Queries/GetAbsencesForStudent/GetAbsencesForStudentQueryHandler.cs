@@ -4,7 +4,11 @@ using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Students;
@@ -22,17 +26,20 @@ internal sealed class GetAbsencesForStudentQueryHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ILogger _logger;
 
     public GetAbsencesForStudentQueryHandler(
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _logger = logger
             .ForContext<GetAbsencesForStudentQuery>();
     }
@@ -67,7 +74,27 @@ internal sealed class GetAbsencesForStudentQueryHandler
 
         foreach (Absence absence in absences)
         {
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            string activityName = string.Empty;
+
+            if (absence.Source == AbsenceSource.Offering)
+            {
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is not null)
+                    activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is not null)
+                    activityName = tutorial.Name;
+            }
 
             Response response = absence.GetExplainedResponse();
 
@@ -103,7 +130,7 @@ internal sealed class GetAbsencesForStudentQueryHandler
                 absence.AbsenceLength,
                 absence.AbsenceTimeframe,
                 absence.AbsenceReason.Value,
-                offering?.Name,
+                activityName,
                 response?.Explanation,
                 response?.VerificationStatus,
                 absence.Explained,

@@ -3,8 +3,6 @@
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -42,15 +40,14 @@ public class AbsenceConfiguration : IEntityTypeConfiguration<Absence>
             .HasForeignKey(absence => absence.StudentId);
 
         builder
-            .Property(absence => absence.OfferingId)
-            .HasConversion(
-                id => id.Value,
-                value => OfferingId.FromValue(value));
+            .Property(absence => absence.SourceId)
+            .IsRequired();
 
         builder
-            .HasOne<Offering>()
-            .WithMany()
-            .HasForeignKey(absence => absence.OfferingId);
+            .Property(absence => absence.Source)
+            .HasConversion(
+                source => source.Value,
+                value => AbsenceSource.FromValue(value));
 
         builder
             .HasMany(absence => absence.Notifications)

@@ -3,9 +3,13 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Models.Absences;
 using Core.Models.Offerings;
 using Core.Models.Students.Errors;
@@ -28,6 +32,7 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
@@ -35,12 +40,14 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
         IAbsenceRepository absenceRepository, 
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IExcelService excelService,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _excelService = excelService;
         _logger = logger.ForContext<ExportUnexplainedPartialAbsencesReportCommand>();
     }
@@ -76,9 +83,31 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
             
             foreach (Absence absence in absenceGroup)
             {
-                Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+                string activityName = string.Empty;
 
-                string offeringName = offering?.Name;
+                if (absence.Source == AbsenceSource.Offering)
+                {
+                    OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                    Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                    if (offering is null)
+                        continue;
+
+                    activityName = offering.Name;
+                }
+
+                if (absence.Source == AbsenceSource.Tutorial)
+                {
+                    TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                    Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                    if (tutorial is null)
+                        continue;
+
+                    activityName = tutorial.Name;
+                }
 
                 Response response = absence.Responses.FirstOrDefault(response => response.Type.Equals(ResponseType.Student));
 
@@ -90,7 +119,7 @@ internal sealed class ExportUnexplainedPartialAbsencesReportCommandHandler
                     enrolment.Grade,
                     enrolment.SchoolName,
                     absence.Date,
-                    offeringName,
+                    activityName,
                     absence.AbsenceLength,
                     absence.AbsenceTimeframe,
                     response is null ? "Pending Response" : "Pending Verification",

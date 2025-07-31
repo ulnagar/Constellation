@@ -10,10 +10,14 @@ using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
@@ -29,6 +33,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
@@ -37,6 +42,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         IStudentRepository studentRepository,
         IAbsenceRepository absenceRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IEmailService emailService,
         IDateTimeProvider dateTime,
         ILogger logger)
@@ -44,6 +50,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         _studentRepository = studentRepository;
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _emailService = emailService;
         _dateTime = dateTime;
         _logger = logger.ForContext<SendAbsenceNotificationToStudentCommand>();
@@ -91,17 +98,46 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 
         foreach (Absence absence in absences)
         {
-            Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+            string activityName = string.Empty;
 
-            if (offering is null)
-                continue;
+            if (absence.Source == AbsenceSource.Offering)
+            {
+                OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+                if (offering is null)
+                {
+                    _logger.Warning("Could not find offering with Id {id}", offeringId);
+
+                    continue;
+                }
+
+                activityName = offering.Name;
+            }
+
+            if (absence.Source == AbsenceSource.Tutorial)
+            {
+                TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+                if (tutorial is null)
+                {
+                    _logger.Warning("Could not find tutorial with Id {id}", tutorialId);
+
+                    continue;
+                }
+
+                activityName = tutorial.Name;
+            }
 
             absenceEntries.Add(new(
                 absence.Id,
                 absence.Date,
                 absence.PeriodName,
                 absence.PeriodTimeframe,
-                offering.Name,
+                activityName,
                 absence.AbsenceTimeframe,
                 absence.AbsenceLength));
         }

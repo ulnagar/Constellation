@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Core.Abstractions.Repositories;
 
 using Constellation.Core.Models.Absences.Identifiers;
-using Constellation.Core.Models.Students;
 using Models.Absences;
-using Models.Identifiers;
 using Models.Offerings.Identifiers;
 using Models.Students.Identifiers;
+using Models.Tutorials.Identifiers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -19,7 +18,9 @@ public interface IAbsenceRepository
     Task<List<Absence>> GetWholeAbsencesForScanDate(DateOnly scanDate, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetUnexplainedPartialAbsences(CancellationToken cancellationToken = default);
     Task<int> GetCountForStudentDateAndOffering(StudentId studentId, DateOnly absenceDate, OfferingId offeringId, string absenceTimeframe, CancellationToken cancellationToken = default);
+    Task<int> GetCountForStudentDateAndTutorial(StudentId studentId, DateOnly absenceDate, TutorialId tutorialId, string absenceTimeframe, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetAllForStudentDateAndOffering(StudentId studentId, DateOnly absenceDate, OfferingId offeringId, string absenceTimeframe, CancellationToken cancellationToken = default);
+    Task<List<Absence>> GetAllForStudentDateAndTutorial(StudentId studentId, DateOnly absenceDate, TutorialId tutorialId, string absenceTimeframe, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetUnexplainedWholeAbsencesForStudentWithDelay(StudentId studentId, int ageInWeeks, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetUnexplainedPartialAbsencesForStudentWithDelay(StudentId studentId, int ageInWeeks, CancellationToken cancellationToken = default);
     Task<List<Absence>> GetUnverifiedPartialAbsencesForStudentWithDelay(StudentId studentId, int ageInWeeks, CancellationToken cancellationToken = default);

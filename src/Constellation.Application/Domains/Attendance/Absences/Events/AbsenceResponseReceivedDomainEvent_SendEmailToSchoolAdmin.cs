@@ -9,9 +9,13 @@ using Constellation.Core.DomainEvents;
 using Constellation.Core.Models.Absences;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Offerings;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Serilog;
@@ -25,6 +29,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 {
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IEmailService _emailService;
@@ -34,6 +39,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
     public AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin(
         IAbsenceRepository absenceRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IEmailService emailService,
@@ -42,6 +48,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
     {
         _absenceRepository = absenceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _emailService = emailService;
@@ -76,13 +83,45 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        string activityName = string.Empty;
+        List<StaffMember> teachers = [];
 
-        if (offering is null)
+        if (absence.Source == AbsenceSource.Offering)
         {
-            _logger.Warning("{action}: Could not find offering with Id {offering_id} when working on absence with Id {absence_id} in database", nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), absence.OfferingId, notification.AbsenceId);
+            OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            return;
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+            if (offering is null)
+            {
+                _logger
+                    .ForContext(nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), notification, true)
+                    .Warning("Could not find offering with Id {offering_id} when working on absence with Id {absence_id} in database", offeringId, notification.AbsenceId);
+
+                return;
+            }
+
+            activityName = offering.Name;
+            teachers.AddRange(await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken));
+        }
+
+        if (absence.Source == AbsenceSource.Tutorial)
+        {
+            TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+            if (tutorial is null)
+            {
+                _logger
+                    .ForContext(nameof(AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin), notification, true)
+                    .Warning("Could not find tutorial with Id {tutorial_id} when working on absence with Id {absence_id} in database", tutorialId, notification.AbsenceId);
+
+                return;
+            }
+
+            activityName = tutorial.Name;
+            teachers.AddRange(await _staffRepository.GetCurrentTeachersForTutorial(tutorialId, cancellationToken));
         }
 
         Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
@@ -94,13 +133,11 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        List<StaffMember> teachers = await _staffRepository.GetPrimaryTeachersForOffering(offering.Id, cancellationToken);
-
         EmailDtos.AbsenceResponseEmail notificationEmail = new();
 
         notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
         notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress.Email));
-        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, offering));
+        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
         notificationEmail.StudentName = student.Name.DisplayName;
 
         await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);

@@ -2,8 +2,13 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
+using Constellation.Core.Models.Absences.Enums;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Errors;
 using Core.Models.Absences;
 using Core.Models.Offerings;
@@ -21,17 +26,20 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ILogger _logger;
 
     public GetAbsenceDetailsForSchoolQueryHandler(
         IAbsenceRepository absenceRepository,
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         ILogger logger)
     {
         _absenceRepository = absenceRepository;
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _logger = logger.ForContext<GetAbsenceDetailsForSchoolQuery>();
     }
 
@@ -55,11 +63,31 @@ internal sealed class GetAbsenceDetailsForSchoolQueryHandler
             return Result.Failure<SchoolAbsenceDetailsResponse>(StudentErrors.NotFound(absence.StudentId));
         }
 
-        Offering offering = await _offeringRepository.GetById(absence.OfferingId, cancellationToken);
+        string activityName = string.Empty;
 
+        if (absence.Source == AbsenceSource.Offering)
+        {
+            OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+            if (offering is not null)
+                activityName = offering.Name;
+        }
+
+        if (absence.Source == AbsenceSource.Tutorial)
+        {
+            TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+            if (tutorial is not null)
+                activityName = tutorial.Name;
+        }
+        
         SchoolAbsenceDetailsResponse entry = new(
             student.Name,
-            offering?.Name,
+            activityName,
             absence.Id,
             absence.Date.ToDateTime(TimeOnly.MinValue),
             absence.PeriodName,

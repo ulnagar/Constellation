@@ -3,7 +3,11 @@
 using Abstractions.Messaging;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Attendance;
+using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
+using Constellation.Core.Models.Tutorials;
+using Constellation.Core.Models.Tutorials.Identifiers;
+using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Absences;
 using Core.Models.Attendance.Repositories;
@@ -27,6 +31,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
     private readonly IAbsenceRepository _absenceRepository;
     private readonly IAttendanceRepository _attendanceRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IExcelService _excelService;
     private readonly ILogger _logger;
 
@@ -35,6 +40,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         IAbsenceRepository absenceRepository,
         IAttendanceRepository attendanceRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IExcelService excelService,
         ILogger logger)
     {
@@ -42,6 +48,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         _absenceRepository = absenceRepository;
         _attendanceRepository = attendanceRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _excelService = excelService;
         _logger = logger;
     }
@@ -52,7 +59,6 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         List<AbsenceRecord> absenceRecords = new();
 
         List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
-        List<Offering> offerings = await _offeringRepository.GetAllActive(cancellationToken);
 
         List<AttendanceValue> values = await _attendanceRepository.GetForReportWithTitle(request.PeriodLabel, cancellationToken);
 
@@ -98,7 +104,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
             foreach (Absence absence in absences)
             {
-                AbsenceRecord absenceRecord = CreateAbsenceRecord(absence, offerings, 1);
+                AbsenceRecord absenceRecord = await CreateAbsenceRecord(absence, 1, cancellationToken);
                 if (absenceRecord is not null)
                     absenceRecords.Add(absenceRecord);
             }
@@ -114,7 +120,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
 
             foreach (Absence absence in absences)
             {
-                AbsenceRecord absenceRecord = CreateAbsenceRecord(absence, offerings, 2);
+                AbsenceRecord absenceRecord = await CreateAbsenceRecord(absence, 2, cancellationToken);
                 if (absenceRecord is not null)
                     absenceRecords.Add(absenceRecord);
             }
@@ -125,12 +131,32 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
         return result;
     }
 
-    private static AbsenceRecord CreateAbsenceRecord(Absence absence, List<Offering> offerings, int severity)
+    private async Task<AbsenceRecord> CreateAbsenceRecord(Absence absence, int severity, CancellationToken cancellationToken = default)
     {
         if (absence.Type.Equals(AbsenceType.Partial) && absence.AbsenceReason.Equals(AbsenceReason.SharedEnrolment))
             return null;
 
-        Offering offering = offerings.FirstOrDefault(offering => offering.Id == absence.OfferingId);
+        string activityName = string.Empty;
+
+        if (absence.Source == AbsenceSource.Offering)
+        {
+            OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
+
+            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+
+            if (offering is not null)
+                activityName = offering.Name;
+        }
+
+        if (absence.Source == AbsenceSource.Tutorial)
+        {
+            TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
+
+            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+            if (tutorial is not null)
+                 activityName = tutorial.Name;
+        }
 
         string reason = absence.Type.Equals(AbsenceType.Partial)
             ? $"{absence.AbsenceReason} ({absence.Type.Value} - {absence.AbsenceLength} min)"
@@ -140,7 +166,7 @@ internal sealed class GenerateAttendanceReportForPeriodQueryHandler
             absence.StudentId,
             reason,
             absence.Date,
-            offering?.Name.ToString(),
+            activityName,
             severity);
 
         return absenceRecord;

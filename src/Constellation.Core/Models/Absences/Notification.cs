@@ -7,13 +7,12 @@ using System;
 public class Notification
 {
     private Notification(
-        AbsenceNotificationId id,
         AbsenceId absenceId,
         NotificationType type,
         string message,
         string recipients)
     {
-        Id = id;
+        Id = new();
         AbsenceId = absenceId;
         Type = type;
         Message = message;
@@ -37,8 +36,7 @@ public class Notification
         string message,
         string recipients)
     {
-        var notification = new Notification(
-            new AbsenceNotificationId(),
+        Notification notification = new(
             absenceId,
             type,
             message,
