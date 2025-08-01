@@ -89,12 +89,12 @@ internal sealed class SendAbsenceDigestToStudentCommandHandler
         if (!partialAbsenceEntries.Any())
             return Result.Success();
 
-        EmailDtos.SentEmail sentMessage = await _emailService.SendStudentAbsenceDigest(partialAbsenceEntries, student, recipients, cancellationToken);
+        Result<EmailDtos.SentEmail> sentMessage = await _emailService.SendStudentAbsenceDigest(partialAbsenceEntries, student, recipients, cancellationToken);
 
-        if (sentMessage is null)
-            return Result.Failure(new("Gateway.Email", "Failed to send email"));
+        if (sentMessage.IsFailure)
+            return sentMessage;
 
-        UpdateAbsenceWithNotification(request.JobId, digestPartialAbsences, sentMessage, recipients, student);
+        UpdateAbsenceWithNotification(request.JobId, digestPartialAbsences, sentMessage.Value, recipients, student);
 
         return Result.Success();
     }
