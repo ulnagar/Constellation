@@ -178,16 +178,17 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
         if (recipients.Count > 0)
         {
             MemoryStream stream = new(file.FileData);
+            using Attachment attachment = new(stream, file.FileName);
 
-            bool success = await _emailService.SendParentAttendanceReportEmail(
+            Result result = await _emailService.SendParentAttendanceReportEmail(
                 student.Name.DisplayName, 
                 dateToReport, 
                 dateToReport.AddDays(12), 
-                recipients, 
-                new() { new(stream, file.FileName) }, 
+                recipients,
+                [ attachment ], 
                 cancellationToken);
 
-            if (success)
+            if (result.IsSuccess)
             {
                 foreach (EmailRecipient recipient in recipients)
                     _logger.Information("{id}: Message sent via Email to {parent} ({email}) with attachment: {filename}", JobId, recipient.Name, recipient.Email, file.FileName);
@@ -229,14 +230,14 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
 
         if (recipients.Count > 0)
         {
-            bool success = await _emailService.SendSchoolAttendanceReportEmail(
+            Result result = await _emailService.SendSchoolAttendanceReportEmail(
                dateToReport,
                dateToReport.AddDays(12),
                recipients,
                attachmentList,
                cancellationToken);
 
-            if (success)
+            if (result.IsSuccess)
             {
                 foreach (EmailRecipient recipient in recipients)
                     _logger.Information("{id}: Message sent via Email to {contact} ({email}) with Attendance Reports for {school}", JobId, recipient.Name, recipient.Email, schoolCode);

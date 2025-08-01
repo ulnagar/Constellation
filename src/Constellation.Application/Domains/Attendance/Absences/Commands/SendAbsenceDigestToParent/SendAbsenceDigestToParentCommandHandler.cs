@@ -102,12 +102,12 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
                 if (!wholeAbsenceEntries.Any() && !partialAbsenceEntries.Any())
                     return Result.Success();
 
-                EmailDtos.SentEmail sentMessage = await _emailService.SendParentAbsenceDigest(family.FamilyTitle, wholeAbsenceEntries, partialAbsenceEntries, student, recipients, cancellationToken);
+                Result<EmailDtos.SentEmail> sentMessage = await _emailService.SendParentAbsenceDigest(family.FamilyTitle, wholeAbsenceEntries, partialAbsenceEntries, student, recipients, cancellationToken);
 
-                if (sentMessage is null)
-                    return Result.Failure(new("Gateway.Email", "Failed to send email"));
+                if (sentMessage.IsFailure)
+                    return sentMessage;
 
-                UpdateAbsenceWithNotification(request.JobId, digestWholeAbsences.Concat(digestPartialAbsences).ToList(), sentMessage, recipients, student);
+                UpdateAbsenceWithNotification(request.JobId, digestWholeAbsences.Concat(digestPartialAbsences).ToList(), sentMessage.Value, recipients, student);
             }
             else
             {

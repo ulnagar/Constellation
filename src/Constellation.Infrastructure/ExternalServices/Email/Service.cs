@@ -2,6 +2,7 @@
 
 using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Application.Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
+using Application.Domains.Compliance.Assessments.Models;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
 using Application.Helpers;
@@ -32,6 +33,7 @@ using System;
 using System.Net.Mail;
 using System.Threading;
 using Templates.Views.Emails.Absences;
+using Templates.Views.Emails.AssessmentProvisions;
 using Templates.Views.Emails.Assignments;
 using Templates.Views.Emails.AttendancePlans;
 using Templates.Views.Emails.Auth;
@@ -249,7 +251,7 @@ public sealed class Service : IEmailService
         await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
     }
 
-    public async Task<bool> SendParentAttendanceReportEmail(
+    public async Task<Result> SendParentAttendanceReportEmail(
         string studentName, 
         DateOnly startDate, 
         DateOnly endDate, 
@@ -270,19 +272,16 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAttendanceReportEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
-            return true;
-        else
-            return false;
+        return message;
     }
 
-    public async Task<bool> SendSchoolAttendanceReportEmail(
+    public async Task<Result> SendSchoolAttendanceReportEmail(
         DateOnly startDate,
         DateOnly endDate,
         List<EmailRecipient> recipients,
@@ -301,19 +300,16 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/SchoolAttendanceReportEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
-
-        if (message != null)
-            return true;
-        else
-            return false;
+        
+        return message;
     }
 
-    public async Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(
+    public async Task<Result<EmailDtos.SentEmail>> SendParentWholeAbsenceAlert(
         string familyName,
         List<AbsenceEntry> absences, 
         Student student,
@@ -333,26 +329,26 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
+        if (message.IsFailure)
         {
-            return new EmailDtos.SentEmail
-            {
-                message = body,
-                id = message.MessageId,
-                recipients = message.To.ToString()
-            };
+            return Result.Failure<EmailDtos.SentEmail>(message.Error);
         }
-        else
-            return null;
+
+        return new EmailDtos.SentEmail
+        {
+            message = body,
+            id = message.Value.MessageId,
+            recipients = message.Value.To.ToString()
+        };
     }
 
-    public async Task<EmailDtos.SentEmail> SendParentAbsenceDigest(
+    public async Task<Result<EmailDtos.SentEmail>> SendParentAbsenceDigest(
         string familyName,
         List<AbsenceEntry> wholeAbsences, 
         List<AbsenceEntry> partialAbsences,
@@ -374,26 +370,24 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceDigestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
-        {
-            return new()
-            {
-                message = body,
-                id = message.MessageId,
-                recipients = message.To.ToString()
-            };
-        }
+        if (message.IsFailure)
+            return Result.Failure<EmailDtos.SentEmail>(message.Error);
 
-        return null;
+        return new EmailDtos.SentEmail()
+        {
+            message = body,
+            id = message.Value.MessageId,
+            recipients = message.Value.To.ToString()
+        };
     }
 
-    public async Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(
+    public async Task<Result<EmailDtos.SentEmail>> SendStudentPartialAbsenceExplanationRequest(
         List<AbsenceEntry> absences, 
         Student student,
         List<EmailRecipient> recipients,
@@ -412,26 +406,24 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
+        if (message.IsFailure)
+            return Result.Failure<EmailDtos.SentEmail>(message.Error);
+
+        return new EmailDtos.SentEmail()
         {
-            return new EmailDtos.SentEmail
-            {
-                message = body,
-                id = message.MessageId,
-                recipients = message.To.ToString()
-            };
-        }
-        else
-            return null;
+            message = body,
+            id = message.Value.MessageId,
+            recipients = message.Value.To.ToString()
+        };
     }
 
-    public async Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(
+    public async Task<Result<EmailDtos.SentEmail>> SendCoordinatorPartialAbsenceVerificationRequest(
         List<AbsenceExplanation> absences,
         Student student, 
         List<EmailRecipient> recipients,
@@ -452,26 +444,24 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
+        if (message.IsFailure)
+            return Result.Failure<EmailDtos.SentEmail>(message.Error);
+
+        return new EmailDtos.SentEmail()
         {
-            return new EmailDtos.SentEmail
-            {
-                message = body,
-                id = message.MessageId,
-                recipients = message.To.ToString()
-            };
-        }
-        else
-            return null;
+            message = body,
+            id = message.Value.MessageId,
+            recipients = message.Value.To.ToString()
+        };
     }
 
-    public async Task<EmailDtos.SentEmail> SendCoordinatorAbsenceDigest(
+    public async Task<Result<EmailDtos.SentEmail>> SendCoordinatorAbsenceDigest(
         List<AbsenceEntry> wholeAbsences, 
         List<AbsenceEntry> partialAbsences, 
         Student student,
@@ -496,26 +486,24 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
-        {
-            return new()
-            {
-                message = body,
-                id = message.MessageId,
-                recipients = message.To.ToString()
-            };
-        }
+        if (message.IsFailure)
+            return Result.Failure<EmailDtos.SentEmail>(message.Error);
 
-        return null;
+        return new EmailDtos.SentEmail()
+        {
+            message = body,
+            id = message.Value.MessageId,
+            recipients = message.Value.To.ToString()
+        };
     }
 
-    public async Task<EmailDtos.SentEmail> SendStudentAbsenceDigest(
+    public async Task<Result<EmailDtos.SentEmail>> SendStudentAbsenceDigest(
         List<AbsenceEntry> absences,
         Student student,
         List<EmailRecipient> recipients,
@@ -537,23 +525,21 @@ public sealed class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceDigestEmail.cshtml", viewModel);
 
-        MimeMessage message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
         //message.WriteTo(messageStream);
 
-        if (message != null)
-        {
-            return new()
-            {
-                message = body,
-                id = message.MessageId,
-                recipients = message.To.ToString()
-            };
-        }
+        if (message.IsFailure)
+            return Result.Failure<EmailDtos.SentEmail>(message.Error);
 
-        return null;
+        return new EmailDtos.SentEmail()
+        {
+            message = body,
+            id = message.Value.MessageId,
+            recipients = message.Value.To.ToString()
+        };
     }
 
     public async Task SendMissedWorkEmail(
@@ -1220,7 +1206,7 @@ public sealed class Service : IEmailService
         }
     }
 
-    public async Task<bool> SendAssignmentUploadReceipt(
+    public async Task<Result> SendAssignmentUploadReceipt(
         CanvasAssignment assignment,
         CanvasAssignmentSubmission submission,
         Course course,
@@ -1253,14 +1239,12 @@ public sealed class Service : IEmailService
                 .ForContext(nameof(Error), recipient.Error, true)
                 .Warning("Failed to send Assignment Upload Receipt");
 
-            return false;
+            return Result.Failure(recipient.Error);
         }
 
         recipients.Add(recipient.Value);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
-
-        return true;
+        return await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
     }
 
     public async Task SendWelcomeEmailToCoordinator(
@@ -1431,4 +1415,46 @@ public sealed class Service : IEmailService
         List<Attachment> attachments,
         CancellationToken cancellationToken = default) =>
         await _emailSender.Send([], [], recipients, sender.Email, subject, body, attachments, cancellationToken);
+
+    public async Task<Result> SendAssessmentProvisionEmailToFamilies(
+        List<EmailRecipient> recipients,
+        List<EmailRecipient> ccRecipients,
+        StudentProvisions provisions,
+        CancellationToken cancellationToken = default)
+    {
+        AssessmentProvisionNotificationForFamiliesEmailViewModel viewModel = new()
+        {
+            Title = $"Upcoming Examinations – School-Based Adjustments",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            Student = provisions
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(AssessmentProvisionNotificationForFamiliesEmailViewModel.ViewLocation, viewModel);
+
+        return await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+    }
+
+    public async Task<Result> SendAssessmentProvisionEmailToSchools(
+        List<EmailRecipient> recipients,
+        List<EmailRecipient> ccRecipients,
+        Name contact,
+        List<StudentProvisions> students,
+        CancellationToken cancellationToken = default)
+    {
+        AssessmentProvisionNotificationForSchoolsEmailViewModel viewModel = new()
+        {
+            Title = $"upcoming Examinations – School-Based Adjustments for Your Students",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            Contact = contact,
+            Students = students
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(AssessmentProvisionNotificationForSchoolsEmailViewModel.ViewLocation, viewModel);
+
+        return await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+    }
 }

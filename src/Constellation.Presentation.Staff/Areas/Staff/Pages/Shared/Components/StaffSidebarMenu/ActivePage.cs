@@ -40,6 +40,7 @@ internal static class ActivePage
     public const string StudentAdmin_Reports_External = "StudentAdmin.Reports.External";
 
     public const string SchoolAdmin_Awards_Nominations = "SchoolAdmin.Awards.Nominations";
+    public const string SchoolAdmin_Compliance_AssessmentProvisions = "SchoolAdmin.Compliance.AssessmentProvisions";
     public const string SchoolAdmin_Compliance_Attendance = "SchoolAdmin.Compliance.Attendance";
     public const string SchoolAdmin_Compliance_AttendanceReports = "SchoolAdmin.Compliance.Reports";
     public const string SchoolAdmin_Compliance_MasterFile = "SchoolAdmin.Compliance.MasterFile";

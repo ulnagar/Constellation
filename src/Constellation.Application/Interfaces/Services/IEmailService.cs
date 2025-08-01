@@ -14,9 +14,11 @@ using Core.Models.StaffMembers;
 using Core.Models.Subjects;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.WorkFlow;
+using Core.Shared;
 using Core.ValueObjects;
 using Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
+using Domains.Compliance.Assessments.Models;
 using DTOs;
 using DTOs.EmailRequests;
 using System;
@@ -38,12 +40,12 @@ public interface IEmailService
 
     // Absence Emails
     Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
-    Task<EmailDtos.SentEmail> SendCoordinatorPartialAbsenceVerificationRequest(List<AbsenceExplanation> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
-    Task<EmailDtos.SentEmail> SendStudentAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
-    Task<EmailDtos.SentEmail> SendCoordinatorAbsenceDigest(List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, School school, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
-    Task<EmailDtos.SentEmail> SendParentWholeAbsenceAlert(string familyName, List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
-    Task<EmailDtos.SentEmail> SendParentAbsenceDigest(string familyName, List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
-    Task<EmailDtos.SentEmail> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<Result<EmailDtos.SentEmail>> SendCoordinatorPartialAbsenceVerificationRequest(List<AbsenceExplanation> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<Result<EmailDtos.SentEmail>> SendStudentAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<Result<EmailDtos.SentEmail>> SendCoordinatorAbsenceDigest(List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, School school, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
+    Task<Result<EmailDtos.SentEmail>> SendParentWholeAbsenceAlert(string familyName, List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
+    Task<Result<EmailDtos.SentEmail>> SendParentAbsenceDigest(string familyName, List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
+    Task<Result<EmailDtos.SentEmail>> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
     Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
 
 
@@ -57,12 +59,12 @@ public interface IEmailService
     Task SendMissedWorkEmail(Student student, string subjectName, string className, DateOnly absenceDate, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
 
     // Assignment Emails
-    Task<bool> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, SchoolContact contact, CancellationToken cancellationToken = default);
+    Task<Result> SendAssignmentUploadReceipt(CanvasAssignment assignment, CanvasAssignmentSubmission submission, Course course, Student student, SchoolContact contact, CancellationToken cancellationToken = default);
 
 
     // Attendance Emails
-    Task<bool> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
-    Task<bool> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<Result> SendParentAttendanceReportEmail(string studentName, DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
+    Task<Result> SendSchoolAttendanceReportEmail(DateOnly startDate, DateOnly endDate, List<EmailRecipient> recipients, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
 
     // RollMarking Emails
@@ -116,4 +118,8 @@ public interface IEmailService
 
     // Scheduled Reports Emails
     Task ForwardCompletedScheduledReport(EmailRecipient recipient, Attachment attachment, CancellationToken cancellationToken = default);
+
+    // Assessment Provisions Emails
+    Task<Result> SendAssessmentProvisionEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, List<StudentProvisions> adjustments, CancellationToken cancellationToken = default);
+    Task<Result> SendAssessmentProvisionEmailToFamilies(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, StudentProvisions provisions, CancellationToken cancellationToken = default);
 }

@@ -2,6 +2,7 @@
 
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Core.ValueObjects;
+using Core.Shared;
 using Extensions;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
@@ -17,9 +18,11 @@ public class Gateway : IEmailGateway
     private readonly EmailGatewayConfiguration _configuration;
     private readonly ILogger _logger;
 
-    private readonly bool _logOnly = true;
+    private readonly bool _logOnly;
 
-    public Gateway(IOptions<EmailGatewayConfiguration> configuration, ILogger logger)
+    public Gateway(
+        IOptions<EmailGatewayConfiguration> configuration, 
+        ILogger logger)
     {
         _logger = logger.ForContext<IEmailGateway>();
 
@@ -33,7 +36,7 @@ public class Gateway : IEmailGateway
         }
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         EmailRecipient fromRecipient,
         string subject,
@@ -52,7 +55,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         string fromAddress,
         string subject,
@@ -71,7 +74,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         string fromAddress,
         string subject,
@@ -91,7 +94,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
         string fromAddress,
@@ -111,7 +114,27 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        EmailRecipient fromAddress,
+        string subject,
+        string body,
+        CancellationToken cancellationToken = default)
+    {
+        return SendAll(
+            toRecipients,
+            ccRecipients,
+            null,
+            fromAddress,
+            subject,
+            body,
+            null,
+            null,
+            cancellationToken);
+    }
+
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
         string fromAddress,
@@ -132,7 +155,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
         string fromAddress,
@@ -154,7 +177,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
         List<EmailRecipient> bccRecipients,
@@ -175,7 +198,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
         List<EmailRecipient> bccRecipients,
@@ -197,7 +220,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         List<EmailRecipient> toRecipients,
         EmailRecipient fromRecipient,
         string subject,
@@ -217,7 +240,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         string fromAddress,
         string subject,
@@ -235,7 +258,7 @@ public class Gateway : IEmailGateway
             null,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         string fromAddress,
         string subject,
@@ -254,7 +277,7 @@ public class Gateway : IEmailGateway
             null,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         string fromAddress,
@@ -273,7 +296,7 @@ public class Gateway : IEmailGateway
             null,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         string fromAddress,
@@ -293,7 +316,7 @@ public class Gateway : IEmailGateway
             null,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         IDictionary<string, string> bccAddresses,
@@ -313,7 +336,7 @@ public class Gateway : IEmailGateway
             null,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         IDictionary<string, string> bccAddresses,
@@ -334,7 +357,7 @@ public class Gateway : IEmailGateway
             null,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         string fromAddress,
         string subject,
@@ -353,7 +376,7 @@ public class Gateway : IEmailGateway
             calendarInfo,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         string fromAddress,
         string subject,
@@ -373,7 +396,7 @@ public class Gateway : IEmailGateway
             calendarInfo,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         string fromAddress,
@@ -393,7 +416,7 @@ public class Gateway : IEmailGateway
             calendarInfo,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         string fromAddress,
@@ -414,7 +437,7 @@ public class Gateway : IEmailGateway
             calendarInfo,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         IDictionary<string, string> bccAddresses,
@@ -435,7 +458,7 @@ public class Gateway : IEmailGateway
             calendarInfo,
             cancellationToken);
     }
-    public Task<MimeMessage> Send(
+    public Task<Result<MimeMessage>> Send(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         IDictionary<string, string> bccAddresses,
@@ -458,7 +481,7 @@ public class Gateway : IEmailGateway
             cancellationToken);
     }
 
-    private async Task<MimeMessage> SendCalendarInvite(
+    private async Task<Result<MimeMessage>> SendCalendarInvite(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         IDictionary<string, string> bccAddresses,
@@ -473,12 +496,11 @@ public class Gateway : IEmailGateway
 
         _logger.Information("Sending email {id}", id);
 
-        MailMessage message = new();
-
-        if (fromAddress == null)
-            message.From = new MailAddress("auroracoll-h.school@det.nsw.edu.au", "Aurora College");
-        else
-            message.From = new MailAddress(fromAddress, "Aurora College");
+        MailMessage message = new() { 
+            From = fromAddress == null 
+                ? new ("auroracoll-h.school@det.nsw.edu.au", "Aurora College") 
+                : new(fromAddress, "Aurora College")
+        };
 
         foreach (KeyValuePair<string, string> recipient in toAddresses)
         {
@@ -513,15 +535,15 @@ public class Gateway : IEmailGateway
         string method = "";
         foreach (string line in calendarInfo.Split(Environment.NewLine))
         {
-            if (line.StartsWith("METHOD", StringComparison.InvariantCultureIgnoreCase))
-            {
-                string[] details = line.Split(':');
-                method = details[1];
-            }
+            if (!line.StartsWith("METHOD", StringComparison.InvariantCultureIgnoreCase))
+                continue;
+
+            string[] details = line.Split(':');
+            method = details[1];
         }
 
-        contentType.Parameters.Add("method", method);
-        contentType.Parameters.Add("name", "Meeting.ics");
+        contentType.Parameters?.Add("method", method);
+        contentType.Parameters?.Add("name", "Meeting.ics");
         AlternateView ical = AlternateView.CreateAlternateViewFromString(calendarInfo, contentType);
         message.AlternateViews.Add(ical);
         message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
@@ -542,13 +564,18 @@ public class Gateway : IEmailGateway
         {
             _logger.Information("{id}: Sending...", id);
 
-            await Send(message, cancellationToken);
+            Result result = await Send(id, message, cancellationToken);
+
+            if (result.IsFailure)
+                return Result.Failure<MimeMessage>(result.Error);
         }
-        
+
+        message.Dispose();
+
         return new MimeMessage();
     }
 
-    private async Task<MimeMessage> SendAll(
+    private async Task<Result<MimeMessage>> SendAll(
         List<EmailRecipient> toRecipients,
         List<EmailRecipient> ccRecipients,
         List<EmailRecipient> bccRecipients,
@@ -654,13 +681,16 @@ public class Gateway : IEmailGateway
         else
         {
             _logger.Information("{id}: Sending...", id);
-            await PushToServer(message, cancellationToken);
+            Result result = await PushToServer(id, message, cancellationToken);
+
+            if (result.IsFailure)
+                return Result.Failure<MimeMessage>(result.Error);
         }
 
         return message;
     }
 
-    private async Task<MimeMessage> SendAll(
+    private async Task<Result<MimeMessage>> SendAll(
     List<EmailRecipient> toRecipients,
     List<EmailRecipient> ccRecipients,
     List<EmailRecipient> bccRecipients,
@@ -764,13 +794,16 @@ public class Gateway : IEmailGateway
         else
         {
             _logger.Information("{id}: Sending...", id);
-            await PushToServer(message, cancellationToken);
+            Result result = await PushToServer(id, message, cancellationToken);
+
+            if (result.IsFailure)
+                return Result.Failure<MimeMessage>(result.Error);
         }
 
         return message;
     }
 
-    private async Task<MimeMessage> SendAll(
+    private async Task<Result<MimeMessage>> SendAll(
         IDictionary<string, string> toAddresses,
         IDictionary<string, string> ccAddresses,
         IDictionary<string, string> bccAddresses,
@@ -877,45 +910,64 @@ public class Gateway : IEmailGateway
         else
         {
             _logger.Information("{id}: Sending...", id);
-            await PushToServer(message, cancellationToken);
+            Result result = await PushToServer(id, message, cancellationToken);
+
+            if (result.IsFailure)
+                return Result.Failure<MimeMessage>(result.Error);
         }
 
         return message;
     }
 
-    private async Task Send(MailMessage message, CancellationToken cancellationToken = default)
+    private async Task<Result> Send(Guid messageId, MailMessage message, CancellationToken cancellationToken = default)
     {
         MimeMessage mailKitMessage = (MimeMessage)message;
 
-        await PushToServer(mailKitMessage, cancellationToken);
+        return await PushToServer(messageId, mailKitMessage, cancellationToken);
     }
 
-    private async Task PushToServer(MimeMessage message, CancellationToken cancellationToken = default)
+    private async Task<Result> PushToServer(Guid messageId, MimeMessage message, CancellationToken cancellationToken = default)
     {
         if (_logOnly)
-            return;
-
+            return Result.Success();
+        
         using SmtpClient client = new();
-        client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
-        await client.ConnectAsync(
-            _configuration.Server,
-            _configuration.Port,
-            SecureSocketOptions.StartTlsWhenAvailable,
-            cancellationToken);
-
-        if (!string.IsNullOrWhiteSpace(_configuration.Username))
-            await client.AuthenticateAsync(
-                _configuration.Username,
-                _configuration.Password,
+        
+        try
+        {
+            client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+            
+            await client.ConnectAsync(
+                _configuration.Server,
+                _configuration.Port,
+                SecureSocketOptions.StartTlsWhenAvailable,
                 cancellationToken);
 
-        string response = await client.SendAsync(message, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(_configuration.Username))
+                await client.AuthenticateAsync(
+                    _configuration.Username,
+                    _configuration.Password,
+                    cancellationToken);
 
-        _logger
-            //.ForContext(nameof(MimeMessage), message.GetTextBody(TextFormat.Plain), true)
-            .Information("Email send response: {response}", response);
+            string response = await client.SendAsync(message, cancellationToken);
 
-        await client.DisconnectAsync(false, cancellationToken);
+            _logger
+                //.ForContext(nameof(MimeMessage), message.GetTextBody(TextFormat.Plain), true)
+                .Information("{id}: Email send response: {response}", messageId, response);
+        }
+        catch (Exception e)
+        {
+            _logger
+                .ForContext(nameof(Exception), e, true)
+                .Error("{id}: Email send failed: {response}", messageId, e.Message);
+
+            return Result.Failure(new("Gateway.Email.Failure", e.Message));
+        }
+        finally
+        {
+            await client.DisconnectAsync(false, cancellationToken);
+        }
+
+        return Result.Success();
     }
 }
