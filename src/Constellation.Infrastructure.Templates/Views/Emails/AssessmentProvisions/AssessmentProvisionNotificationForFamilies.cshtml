@@ -1,0 +1,21 @@
+﻿@using Constellation.Infrastructure.Templates.Views.Emails.AssessmentProvisions
+@model AssessmentProvisionNotificationForFamiliesEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.Student.Student,</p>
+<p>This email is to advise you of the approved school-based adjustments available to you for the upcoming exams. These adjustments are designed to ensure equitable access to the examination and to support you in demonstrating your knowledge and skills under the best possible conditions.</p>
+<p>While these adjustments are not mandatory, you are strongly encouraged to make use of them to optimise your success in the examination.</p>
+<p>Your approved school-based adjustments are as follows:</p>
+
+@Html.Raw(Model.Student.FormatAdjustments())
+
+<p>Your Aurora College Coordinator (ACC) will also be advised of these adjustments. Please liaise with them to ensure that all necessary arrangements are in place.</p>
+<p>If you have any questions, concerns, or require further support, please do not hesitate to contact Aurora College.</p>

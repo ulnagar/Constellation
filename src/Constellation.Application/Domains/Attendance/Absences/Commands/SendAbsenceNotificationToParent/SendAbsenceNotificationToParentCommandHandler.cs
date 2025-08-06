@@ -207,16 +207,25 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
                         if (recipients.Any())
                         {
-                            EmailDtos.SentEmail message =
-                                await _emailService.SendParentWholeAbsenceAlert(family.FamilyTitle, group.ToList(), student, recipients,
-                                    cancellationToken);
+                            Result<EmailDtos.SentEmail> message = await _emailService.SendParentWholeAbsenceAlert(
+                                family.FamilyTitle, 
+                                group.ToList(), 
+                                student, 
+                                recipients,
+                                cancellationToken);
+
+                            if (message.IsFailure)
+                            {
+                                _logger.Error("{id}: Email Sending Failed! No further fallback possible!", request.JobId);
+                                continue;
+                            }
 
                             foreach (AbsenceEntry entry in group)
                             {
                                 string emails = string.Join(", ", recipients.Select(entry => entry.Email));
                                 Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                                absence.AddNotification(NotificationType.Email, message.message, emails, message.id,
+                                absence.AddNotification(NotificationType.Email, message.Value.message, emails, message.Value.id,
                                     _dateTime.Now);
 
                                 foreach (EmailRecipient recipient in recipients)
@@ -253,16 +262,25 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 }
                 else if (recipients.Any())
                 {
-                    EmailDtos.SentEmail message =
-                        await _emailService.SendParentWholeAbsenceAlert(family.FamilyTitle, group.ToList(), student, recipients,
-                            cancellationToken);
+                    Result<EmailDtos.SentEmail> message = await _emailService.SendParentWholeAbsenceAlert(
+                        family.FamilyTitle, 
+                        group.ToList(), 
+                        student, 
+                        recipients,
+                        cancellationToken);
+
+                    if (message.IsFailure)
+                    {
+                        _logger.Error("{id}: Email Sending Failed! No further fallback possible!", request.JobId);
+                        continue;
+                    }
 
                     foreach (AbsenceEntry entry in group)
                     {
                         string emails = string.Join(", ", recipients.Select(entry => entry.Email));
                         Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                        absence.AddNotification(NotificationType.Email, message.message, emails, message.id,
+                        absence.AddNotification(NotificationType.Email, message.Value.message, emails, message.Value.id,
                             _dateTime.Now);
 
                         foreach (EmailRecipient recipient in recipients)

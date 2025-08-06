@@ -142,16 +142,14 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
                 absence.AbsenceLength));
         }
 
-        EmailDtos.SentEmail sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
+        Result<EmailDtos.SentEmail> sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
 
-        if (sentEmail is null)
-        {
-            return Result.Failure(new("Gateway.Email", "Failed to send email"));
-        }
+        if (sentEmail.IsFailure)
+            return sentEmail;
 
         foreach (Absence absence in absences)
         {
-            absence.AddNotification(NotificationType.Email, sentEmail.message, student.EmailAddress.Email, sentEmail.id, _dateTime.Now);
+            absence.AddNotification(NotificationType.Email, sentEmail.Value.message, student.EmailAddress.Email, sentEmail.Value.id, _dateTime.Now);
 
             foreach (EmailRecipient recipient in recipients)
                 _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", request.JobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());

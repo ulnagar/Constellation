@@ -187,22 +187,30 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             absence.AbsenceTimeframe, 
             response.Explanation);
 
-        EmailDtos.SentEmail message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
+        Result<EmailDtos.SentEmail> message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
             [ explanation ],
             student,
             recipients,
             cancellationToken);
 
-        if (message == null)
+        if (message.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AbsenceId), absence.Id)
+                .ForContext(nameof(AbsenceResponseId), response.Id)
+                .ForContext(nameof(AbsenceExplanation), explanation, true)
+                .Error("Failed to send email notification to ACC for partial absence response");
+
             return;
+        }
 
         string emails = string.Join(", ", recipients.Select(entry => entry.Email));
 
         absence.AddNotification(
             NotificationType.Email,
-            message.message,
+            message.Value.message,
             emails,
-            message.id,
+            message.Value.id,
             _dateTime.Now);
 
         foreach (EmailRecipient recipient in recipients)

@@ -1,0 +1,170 @@
+﻿@page
+@using Constellation.Application.Domains.Compliance.Assessments.Models
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.AssessmentProvisions.IndexModel
+@{
+}
+
+<h2>Assessment Provisions</h2>
+
+<div class="accordion" id="page-accordion">
+    <div class="card">
+        <div class="card-header" id="upload">
+            <h4 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#uploadContent">Step 1: Upload Excel File</button>
+            </h4>
+        </div>
+
+        <div id="uploadContent" class="collapse @(Model.Provisions.Any() ? "" : "show")">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div class="form-group row">
+                            <label class="col-md-2">Zip File</label>
+                            <div class="col-md-8">
+                                <div class="custom-file">
+                                    <input id="file" type="file" name="file" class="custom-file-input" />
+                                    <label class="custom-file-label">Choose file</label>
+                                </div>
+                                <div class="font-italic">
+                                    Only accepts ZIP files.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <input type="submit" value="Upload" class="btn btn-primary btn-block btn-lg show-loader" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" id="match">
+            <h4 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#matchContent">Step 2: Confirm Provisions</button>
+            </h4>
+        </div>
+
+        <div id="matchContent" class="collapse @(Model.Provisions.Any() ? "show" : "")">
+            <div class="card-body">
+
+                <button class="btn btn-success bulk-delete-button">Clear All</button>
+
+                <hr />
+
+                <table class="table table-striped custom-data-table">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class / Exam</th>
+                        <th>Provisions</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var student in Model.Provisions)
+                    {
+                        var studentEmail =
+                            student.StudentEmail == StudentProvisions.EmailStatus.Pending ? "pending"
+                            : student.StudentEmail == StudentProvisions.EmailStatus.Error ? "error"
+                            : student.StudentEmail == StudentProvisions.EmailStatus.Sent ? "success"
+                            : string.Empty;
+
+                        var schoolEmail =
+                            student.SchoolEmail == StudentProvisions.EmailStatus.Pending ? "pending"
+                            : student.SchoolEmail == StudentProvisions.EmailStatus.Error ? "error"
+                            : student.SchoolEmail == StudentProvisions.EmailStatus.Sent ? "success"
+                            : string.Empty;
+
+                        foreach (var offering in student.OfferingProvisions)
+                        {
+                            <tr>
+                                <td>@student.Student</td>
+                                <td>@offering.Name - @offering.CourseName<br />
+                                    @offering.ExamName</td>
+                                <td>
+                                    <ul>
+                                        @foreach (var provision in offering.Provisions)
+                                        {
+                                            <li>@provision</li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td data-search="@studentEmail @schoolEmail" class="icon">
+                                    <i class="fal fa-child @studentEmail" title="Student/Family"></i>
+                                    <i class="fal fa-school @schoolEmail" title="Partner School"></i>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" id="email">
+            <h4 class="mb-0">
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#emailContent">Step 3: Send Emails</button>
+            </h4>
+        </div>
+
+        <div id="emailContent" class="collapse @(Model.Provisions.Any() ? "show" : "")">
+            <div class="card-body">
+                <a asp-page-handler="QueueEmails" class="btn btn-primary btn-block btn-lg show-loader">Send Emails</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div class="modal fade" tabindex="-1" id="page-modal">
+    <div class="modal-dialog">
+        <div id="modal-content" class="modal-content">
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        $(".custom-file-input").on("change", function () {
+            var fileName = $(this).val().split("\\").pop();
+            $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+        });
+
+        $('.bulk-delete-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxBulkDelete",
+                type: "POST",
+                data: {
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.custom-data-table')
+            .DataTable({
+                "order": [],
+                "rowGroup": {
+                    "dataSrc": 0
+                },
+                "columnDefs": [
+                    { "visible": false, "targets": 0 }
+                ]
+            });
+    </script>
+}

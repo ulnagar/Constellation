@@ -139,16 +139,18 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             if (!wholeAbsenceEntries.Any() && !partialAbsenceEntries.Any())
                 return Result.Success();
 
-            EmailDtos.SentEmail sentMessage = await _emailService.SendCoordinatorAbsenceDigest(wholeAbsenceEntries, partialAbsenceEntries, student, school, recipients, cancellationToken);
+            Result<EmailDtos.SentEmail> sentMessage = await _emailService.SendCoordinatorAbsenceDigest(wholeAbsenceEntries, partialAbsenceEntries, student, school, recipients, cancellationToken);
 
-            if (sentMessage is null)
+            if (sentMessage.IsFailure)
             {
-                _logger.Warning("{jobId}: Email failed to send: {@message}", request.JobId, sentMessage);
+                _logger
+                    .ForContext(nameof(Error), sentMessage.Error, true)
+                    .Warning("{jobId}: Email failed to send: {@message}", request.JobId, sentMessage);
 
-                return Result.Failure(new("MailSender", "Unknown Error"));
+                return sentMessage;
             }
 
-            UpdateAbsenceWithNotification(request.JobId, digestWholeAbsences.Concat(digestPartialAbsences).ToList(), sentMessage, recipients, student);
+            UpdateAbsenceWithNotification(request.JobId, digestWholeAbsences.Concat(digestPartialAbsences).ToList(), sentMessage.Value, recipients, student);
         }
 
         return Result.Success();
