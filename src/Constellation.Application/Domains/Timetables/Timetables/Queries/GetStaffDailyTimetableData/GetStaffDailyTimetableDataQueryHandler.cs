@@ -12,6 +12,8 @@ using Core.Models.Timetables;
 using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Extensions;
 using Serilog;
@@ -27,6 +29,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICoverRepository _coverRepository;
     private readonly IPeriodRepository _periodRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
@@ -35,6 +38,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
         IOfferingRepository offeringRepository,
         ICoverRepository coverRepository,
         IPeriodRepository periodRepository,
+        ITutorialRepository tutorialRepository,
         ICurrentUserService currentUserService,
         IDateTimeProvider dateTime,
         ILogger logger)
@@ -42,6 +46,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
         _offeringRepository = offeringRepository;
         _coverRepository = coverRepository;
         _periodRepository = periodRepository;
+        _tutorialRepository = tutorialRepository;
         _currentUserService = currentUserService;
         _dateTime = dateTime;
         _logger = logger
@@ -53,6 +58,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
         List<StaffDailyTimetableResponse> response = [];
 
         List<Offering> offerings = await _offeringRepository.GetActiveForTeacher(request.StaffId, cancellationToken);
+        List<Tutorial> tutorials = await _tutorialRepository.GetActiveForTeacher(request.StaffId, cancellationToken);
 
         DateOnly today = _dateTime.Today;
         int dayNumber = today.GetDayNumber();
@@ -80,7 +86,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
             {
                 Period period = periods.FirstOrDefault(period => period.Id == session.PeriodId);
                 
-                response.Add(new(
+                response.Add(new OfferingTimetableResponse(
                     $"{(period.Timetable.Prefix == '\0' ? string.Empty : period.Timetable.Prefix)}{period.PeriodCode}",
                     TimeOnly.FromTimeSpan(period.StartTime),
                     TimeOnly.FromTimeSpan(period.EndTime),
@@ -90,6 +96,30 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
                     teamResource?.Url ?? string.Empty,
                     false));
             }
+        }
+
+        foreach (Tutorial tutorial in tutorials)
+        {
+            TutorialSession session = tutorial.Sessions
+                .FirstOrDefault(session =>
+                    !session.IsDeleted &&
+                    session.Week == week &&
+                    session.Day == day);
+
+            if (session is null)
+                continue;
+
+            TeamsResource resource = tutorial.Teams.FirstOrDefault();
+
+            response.Add(new TutorialTimetableResponse(
+                "Tut",
+                TimeOnly.FromTimeSpan(session.StartTime),
+                TimeOnly.FromTimeSpan(session.EndTime),
+                tutorial.Id,
+                tutorial.Name,
+                resource?.Name ?? string.Empty,
+                resource?.Url ?? string.Empty,
+                false));
         }
 
         List<Cover> covers = await _coverRepository.GetCurrentForStaff(request.StaffId, cancellationToken);
@@ -120,7 +150,7 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
             {
                 Period period = periods.FirstOrDefault(period => period.Id == session.PeriodId);
 
-                response.Add(new(
+                response.Add(new OfferingTimetableResponse(
                     $"{(period.Timetable.Prefix == '\0' ? string.Empty : period.Timetable.Prefix)}{period.PeriodCode}",
                     TimeOnly.FromTimeSpan(period.StartTime),
                     TimeOnly.FromTimeSpan(period.EndTime),

@@ -55,8 +55,8 @@
 
                 @foreach (var period in Model.Periods.OrderBy(period => period.StartTime))
                 {
-                    <div class="mx-2 my-3">
-                        <div class="w-100 font-weight-bold">@period.OfferingName @(period.IsCover ? "(Cover)" : "")</div>
+                    <div class="px-1 my-1 py-2 border rounded bg-white">
+                        <div class="w-100 font-weight-bold">@period.ActivityName @(period.IsCover ? "(Cover)" : "")</div>
                         <div class="w-100">@period.PeriodName : @period.StartTime - @period.EndTime</div>
                         
                         @if (!string.IsNullOrWhiteSpace(period.TeamName) && !string.IsNullOrWhiteSpace(period.TeamLink))
