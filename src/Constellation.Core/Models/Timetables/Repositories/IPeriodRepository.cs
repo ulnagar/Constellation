@@ -21,6 +21,7 @@ public interface IPeriodRepository
     Task<List<Period>> GetListFromIds(List<PeriodId> periodIds, CancellationToken cancellationToken = default);
     Task<List<Period>> GetCurrent(CancellationToken cancellationToken = default);
     Task<List<Period>> GetByWeekAndDay(PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
+    Task<Period> GetByPeriodCode(string code, CancellationToken cancellationToken = default);
 
     void Insert(Period period);
 }

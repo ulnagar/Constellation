@@ -25,6 +25,23 @@ public class PeriodRepository : IPeriodRepository
             .Set<Period>()
             .SingleOrDefaultAsync(period => period.Id == id, cancellationToken);
 
+    public async Task<Period> GetByPeriodCode(
+        string code,
+        CancellationToken cancellationToken = default)
+    {
+        char timetablePrefix = code.Length > 1 ? code.First() : '\0';
+        char periodCode = code.Last();
+
+        Timetable timetable = Timetable.FromPrefix(timetablePrefix);
+
+        return await _context
+            .Set<Period>()
+            .Where(period =>
+                period.Timetable == timetable &&
+                period.PeriodCode == periodCode)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<List<Period>> GetForOfferingOnDay(    
         OfferingId offeringId,
         DateTime absenceDate,

@@ -17,7 +17,6 @@ using Core.Abstractions.Repositories;
 using Core.Models.Absences;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Students;
-using Core.Models.Students.ValueObjects;
 
 internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 {
@@ -65,9 +64,6 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
             foreach (Student student in students)
             {
-                if (student.StudentReferenceNumber != StudentReferenceNumber.FromValue("446481304"))
-                    continue;
-
                 if (cancellationToken.IsCancellationRequested)
                     return;
 
@@ -77,7 +73,6 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
                 // and without any new absences, their details will not be saved
                 // unless we do it here
                 // This must be done early, otherwise the digests will not reflect these changes
-                await _unitOfWork.CompleteAsync(cancellationToken);
 
                 if (absences.Count != 0)
                 {
@@ -86,17 +81,15 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
                     foreach (Absence absence in absences)
                         _absenceRepository.Insert(absence);
+                }
 
-                    await _unitOfWork.CompleteAsync(cancellationToken);
-
-                    SystemLink sentralId = student.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
-
-                    if (sentralId is null)
-                        continue;
-
+                await _unitOfWork.CompleteAsync(cancellationToken);
+                
+                if (absences.Count != 0)
+                {
                     if (cancellationToken.IsCancellationRequested)
                         return;
-
+                    
                     List<AbsenceId> partialAbsenceIds = absences
                         .Where(absence => 
                             absence.Type == AbsenceType.Partial &&

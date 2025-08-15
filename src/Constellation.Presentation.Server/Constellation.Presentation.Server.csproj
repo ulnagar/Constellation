@@ -5,7 +5,7 @@
     <Configurations>Debug;Release</Configurations>
 	<ImplicitUsings>enable</ImplicitUsings>
 	<Nullable>disable</Nullable>
-	<AssemblyVersion>1.18.25218.1</AssemblyVersion>
+	<AssemblyVersion>1.18.25227.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
