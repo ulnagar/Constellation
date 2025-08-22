@@ -37,6 +37,8 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.ReinstateStudent;
 using Shared.Components.TransferStudent;
+using Shared.PartialViews.BulkUnenrolStudentConfirmationModal;
+using Shared.PartialViews.WithdrawStudentConfirmationModal;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -147,6 +149,13 @@ public class DetailsModel : BasePageModel
         RecordLifecycle = lifecycleRequest.IsSuccess ? lifecycleRequest.Value : new(string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue, string.Empty, DateTime.MinValue);
 
         return true;
+    }
+
+    public IActionResult OnPostAjaxWithdraw(string studentName)
+    {
+        WithdrawStudentConfirmationModalViewModel viewModel = new(studentName);
+
+        return Partial(viewModel.ViewName, viewModel);
     }
 
     public async Task OnGetWithdraw(CancellationToken cancellationToken)
@@ -295,6 +304,13 @@ public class DetailsModel : BasePageModel
         }
 
         await PreparePage(cancellationToken);
+    }
+
+    public IActionResult OnPostAjaxBulkUnenrol(string studentName)
+    {
+        BulkUnenrolStudentConfirmationModalViewModel viewModel = new(studentName);
+
+        return Partial(viewModel.ViewName, viewModel);
     }
 
     public async Task OnGetBulkUnenrol(CancellationToken cancellationToken)

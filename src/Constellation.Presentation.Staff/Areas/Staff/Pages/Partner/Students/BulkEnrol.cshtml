@@ -1,13 +1,14 @@
 ﻿@page "{id}"
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.BulkEnrolModel
+
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 }
 
 <h2>Enrol in Multiple Classes</h2>
 
 <div class="page-menu">
-    <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-danger btn-pull-right show-loader">Go Back</a>
 </div>
 
 <hr />

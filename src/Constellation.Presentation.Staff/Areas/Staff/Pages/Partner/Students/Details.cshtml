@@ -11,6 +11,7 @@
 @inject IDateTimeProvider dateTime;
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
     var authorised = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 }
 
@@ -23,17 +24,17 @@
 
         @if (Model.Student.IsDeleted)
         {
-            <button data-toggle="modal" data-target="#reinstateStudentModal" class="btn btn-danger">Re-enrol</button>
+            <button data-bs-toggle="modal" data-bs-target="#reinstateStudentModal" class="btn btn-danger">Re-enrol</button>
         }
         else
         {
-            <a asp-page-handler="Withdraw" class="btn btn-danger">Withdraw</a>
+            <button data-student-name="@Model.Student.Name.DisplayName" class="btn btn-danger withdraw-button">Withdraw</button>
         }
 
-        <button class="btn btn-secondary" data-toggle="modal" data-target="#lifecycleDetailsModal">View Extended Details</button>
+        <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#lifecycleDetailsModal">View Extended Details</button>
     }
 
-    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right show-loader">Go Back</a>
 </div>
 
 <hr />
@@ -89,97 +90,71 @@
 <hr />
 
 <div>
-    <ul class="nav nav-pills">
-        <li class="nav-item">
-            <a class="nav-link" href="#schoolHistory" data-toggle="tab" role="tab">
-                School History
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#family" data-toggle="tab" role="tab">
-                Family
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="#studentClasses" data-toggle="tab" role="tab">
-                Enrolled classes
-                @if (Model.Enrolments.Any())
-                {
-                    <span class="badge">@Model.Enrolments.Count()</span>
-                }
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab" id="sessions-tab-button">
-                Active sessions
-                @if (Model.Sessions.Any())
-                {
-                    <span class="badge">...</span>
-                }
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#studentDevices" data-toggle="tab" role="tab">
-                Assigned devices
-                @if (Model.Equipment.Any())
-                {
-                    <span class="badge">@Model.Equipment.Count()</span>
-                }
-
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#studentAbsences" data-toggle="tab" role="tab">
-                Absences
-                @if (Model.Absences.Any())
-                {
-                    <span class="badge">...</span>
-                }
-
-            </a>
-        </li>
-    </ul>
+    <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-success bg-gradient local-nav">
+        <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
+            <ul class="nav navbar-nav flex-grow-1 me-auto ms-3 mb-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="#schoolHistory" data-bs-toggle="tab" role="tab">School History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#family" data-bs-toggle="tab" role="tab">Family</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#studentClasses" data-bs-toggle="tab" role="tab">Enrolled classes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#sessions" data-bs-toggle="tab" role="tab" id="sessions-tab-button">Active sessions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#studentDevices" data-bs-toggle="tab" role="tab">Assigned devices</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#studentAbsences" data-bs-toggle="tab" role="tab">Absences</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
     <div class="tab-content">
         <div id="schoolHistory" class="tab-pane">
             <h3>School History</h3>
-            
+
             @if (authorised.Succeeded)
             {
-                <button data-toggle="modal" data-target="#transfer-student-modal" class="btn btn-warning">Transfer</button>
+                <button data-bs-toggle="modal" data-bs-target="#transfer-student-modal" class="btn btn-warning">Transfer</button>
             }
 
             <table class="table table-striped table-hover school-data-table">
                 <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>School</th>
-                        <th>Grade</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>Year</th>
+                    <th>School</th>
+                    <th>Grade</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var entry in Model.SchoolEnrolments)
-                    {
-                        var isCurrent = !entry.IsDeleted && entry.StartDate <= dateTime.Today && (!entry.EndDate.HasValue || entry.EndDate.Value >= dateTime.Today);
-                        var isFuture = !entry.IsDeleted && entry.StartDate > dateTime.Today;
+                @foreach (var entry in Model.SchoolEnrolments)
+                {
+                    var isCurrent = !entry.IsDeleted && entry.StartDate <= dateTime.Today && (!entry.EndDate.HasValue || entry.EndDate.Value >= dateTime.Today);
+                    var isFuture = !entry.IsDeleted && entry.StartDate > dateTime.Today;
 
-                        <tr class="@(isCurrent ? "current" : "") @(isFuture ? "future" : "")">
-                            <td>@entry.Year</td>
-                            <td>@entry.SchoolName</td>
-                            <td data-order="@entry.Grade.AsNumber()">@entry.Grade.AsName()</td>
-                            <td data-order="@entry.StartDate.ToString("yyyy-MM-dd")">@entry.StartDate.ToString("d")</td>
-                            <td data-order="@(entry.EndDate.HasValue ? entry.EndDate.Value.ToString("yyyy-MM-dd") : DateOnly.MaxValue.ToString("yyyy-MM-dd"))">@entry.EndDate?.ToString("d")</td>
-                            <td>
-                                @if (entry is { IsDeleted: false, EndDate: null } && authorised.Succeeded)
-                                {
-                                    <a asp-page-handler="RemoveSchoolEnrolment" asp-route-enrolmentId="@entry.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
-                                }
-                            </td>
-                        </tr>
-                    }
+                    <tr class="@(isCurrent ? "current" : "") @(isFuture ? "future" : "")">
+                        <td>@entry.Year</td>
+                        <td>@entry.SchoolName</td>
+                        <td data-order="@entry.Grade.AsNumber()">@entry.Grade.AsName()</td>
+                        <td data-order="@entry.StartDate.ToString("yyyy-MM-dd")">@entry.StartDate.ToString("d")</td>
+                        <td data-order="@(entry.EndDate.HasValue ? entry.EndDate.Value.ToString("yyyy-MM-dd") : DateOnly.MaxValue.ToString("yyyy-MM-dd"))">@entry.EndDate?.ToString("d")</td>
+                        <td>
+                            @if (entry is { IsDeleted: false, EndDate: null } && authorised.Succeeded)
+                            {
+                                <a asp-page-handler="RemoveSchoolEnrolment" asp-route-enrolmentId="@entry.Id" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                            }
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -187,7 +162,7 @@
         <div id="family" class="tab-pane">
             <h3>Family Contacts</h3>
 
-            <table class="table table-striped table-hover data-table">
+            <table class="table table-striped table-hover family-data-table">
                 <thead>
                 <tr>
                     <th></th>
@@ -242,10 +217,10 @@
             @if (authorised.Succeeded)
             {
                 <a asp-page="/Partner/Students/BulkEnrol" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">Bulk Enrol</a>
-                <a asp-page-handler="BulkUnenrol" class="btn btn-warning">Bulk Unenrol</a>
+                <button data-student-name="@Model.Student.Name.DisplayName" class="btn btn-warning bulk-unenrol-button">Bulk Unenrol</button>
             }
 
-            <table class="table-striped table-hover data-table">
+            <table class="table table-striped table-hover enrolments-data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -263,7 +238,7 @@
                         <td>
                             @foreach (var teacher in item.Teachers)
                             {
-                                <span class="badge">@teacher</span>
+                                <span class="badge bg-secondary">@teacher</span>
                             }
                         </td>
                         <td>
@@ -288,10 +263,10 @@
 
         <div id="sessions" class="tab-pane">
             <h3>Current Sessions</h3>
-            
+
             <a asp-page="/Partner/Students/Timetable" asp-area="Staff" asp-route-id="@Model.Student.StudentId" class="btn btn-warning">View Timetable</a>
-            
-            <table class="table-striped table-hover data-table">
+
+            <table class="table table-striped table-hover session-data-table">
                 <thead>
                 <tr>
                     <th>Period</th>
@@ -309,7 +284,7 @@
                         <td>
                             @foreach (var teacher in item.Teachers)
                             {
-                                <span class="badge">@teacher</span>
+                                <span class="badge bg-secondary">@teacher</span>
                             }
                         </td>
                         <td>@item.Duration</td>
@@ -328,7 +303,7 @@
         <div id="studentDevices" class="tab-pane">
             <h3>Device history</h3>
 
-            <table class="table-striped table-hover device-data-table">
+            <table class="table table-striped table-hover device-data-table">
                 <thead>
                 <tr>
                     <th>Asset Number</th>
@@ -367,7 +342,7 @@
         <div id="studentAbsences" class="tab-pane">
             <h3>Absences</h3>
 
-            <table class="table-striped table-hover absence-data-table">
+            <table class="table table-striped table-hover absence-data-table">
                 <thead>
                 <tr>
                     <th>Explained</th>
@@ -394,7 +369,7 @@
                         </td>
                         <td>@item.AbsenceType</td>
                         <td data-order="@item.AbsenceDate.ToString("yyyy-MM-dd")">@item.AbsenceDate.ToShortDateString()</td>
-                        <td data-order="@item.Timeframe">@item.Timeframe (@item.PeriodName)</td>
+                        <td data-order="@item.Timeframe" class="text-nowrap">@item.Timeframe (@item.PeriodName)</td>
                         <td>@item.OfferingName</td>
                         <td>
                             <a asp-page="/SchoolAdmin/Absences/Details" asp-area="Staff" asp-route-Id="@item.AbsenceId" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
@@ -406,6 +381,8 @@
         </div>
     </div>
 </div>
+
+@Html.AntiForgeryToken();
 
 <vc:lifecycle-details view-model="@Model.RecordLifecycle" />
 <vc:reinstate-student student-id="@Model.Id" />
@@ -419,6 +396,24 @@
                     [2, 'asc'],
                     [3, 'asc']
                 ] 
+            });
+
+            $('.enrolments-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+
+            $('.session-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+
+            $('.family-data-table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
             });
 
             $('.school-data-table').DataTable({
@@ -435,5 +430,39 @@
                 ]
             });
         })
+
+        $('.bulk-unenrol-button').click(function (event) {
+            var studentName = $(this).data("studentName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxBulkUnenrol",
+                type: "POST",
+                data: {
+                    studentName: studentName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('.withdraw-button').click(function (event) {
+            var studentName = $(this).data("studentName");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxWithdraw",
+                type: "POST",
+                data: {
+                    studentName: studentName,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
     </script>
 }

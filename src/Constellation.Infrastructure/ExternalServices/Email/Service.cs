@@ -1445,7 +1445,7 @@ public sealed class Service : IEmailService
     {
         AssessmentProvisionNotificationForSchoolsEmailViewModel viewModel = new()
         {
-            Title = $"upcoming Examinations – School-Based Adjustments for Your Students",
+            Title = $"Upcoming Examinations – School-Based Adjustments for Your Students",
             SenderName = "Aurora College",
             SenderTitle = "",
             Preheader = "",

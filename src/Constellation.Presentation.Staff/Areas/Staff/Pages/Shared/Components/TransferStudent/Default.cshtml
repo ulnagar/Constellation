@@ -1,7 +1,6 @@
 ﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TransferStudent.TransferStudentSelection
 
 @using Constellation.Core.Enums
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 <form asp-page-handler="TransferStudent" method="post">
     <div class="modal fade" tabindex="-1" id="transfer-student-modal">
@@ -11,7 +10,7 @@
                     <h5 class="modal-title">Transfer Student</h5>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group row">
+                    <div class="mb-3 row">
                         <label asp-for="SchoolCode" class="col-md-3">Partner School</label>
                         <div class="col-md-9">
                             <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="combo" data-select2-id="Transfer-SchoolCode">
@@ -20,7 +19,7 @@
                         </div>
                     </div>
                 
-                    <div class="form-group row">
+                    <div class="mb-3 row">
                         <label asp-for="Grade" class="col-md-3">Grade</label>
                         <div class="col-md-9">
                             <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="combo" data-select2-id="Transfer-Grade">
@@ -29,7 +28,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-group row">
+                    <div class="mb-3 row">
                         <label asp-for="StartDate" class="col-md-3">Start Date</label>
                         <div class="col-md-9">
                             <input asp-for="StartDate" class="form-control" />

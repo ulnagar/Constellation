@@ -6,11 +6,11 @@
     var module = segments[1];
 }
 
-<nav id="accordion" class="d-md-block bg-light sidebar">
+<nav id="accordion" class="d-none d-md-block bg-light sidebar">
     <div class="sidebar-sticky pt-3">
         <div class="card">
             <div class="card-header" id="contactsHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#contacts" role="button">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#contacts" role="button">
                     Contacts
                 </h4>
             </div>
@@ -19,7 +19,7 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Contacts_List ? "active" : "")" asp-page="/Partner/Contacts/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Contacts_List ? "active" : "")" asp-page="/Partner/Contacts/Index" asp-area="Staff">
                                 List
                             </a>
                         </li>
@@ -30,7 +30,7 @@
 
         <div class="card">
             <div class="card-header" id="schoolsHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#schools" role="button">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#schools" role="button">
                     Schools
                 </h4>
             </div>
@@ -39,17 +39,17 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Schools_Schools ? "active" : "")" asp-page="/Partner/Schools/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Schools_Schools ? "active" : "")" asp-page="/Partner/Schools/Index" asp-area="Staff">
                                 Schools
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Schools_Contacts ? "active" : "")" asp-page="/Partner/Schools/Contacts/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Schools_Contacts ? "active" : "")" asp-page="/Partner/Schools/Contacts/Index" asp-area="Staff">
                                 Contacts
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Schools_ContactReports ? "active" : "")" asp-page="/Partner/Schools/Contacts/Reports" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Schools_ContactReports ? "active" : "")" asp-page="/Partner/Schools/Contacts/Reports" asp-area="Staff">
                                 Reports
                             </a>
                         </li>
@@ -60,7 +60,7 @@
 
         <div class="card">
             <div class="card-header" id="staffHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#staff" role="button">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#staff" role="button">
                     Staff
                 </h4>
             </div>
@@ -69,12 +69,12 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Staff_Staff ? "active" : "")" asp-page="/Partner/Staff/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Staff_Staff ? "active" : "")" asp-page="/Partner/Staff/Index" asp-area="Staff">
                                 Staff
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Staff_Faculties ? "active" : "")" asp-page="/Partner/Staff/Faculties/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Staff_Faculties ? "active" : "")" asp-page="/Partner/Staff/Faculties/Index" asp-area="Staff">
                                 Faculties
                             </a>
                         </li>
@@ -85,7 +85,7 @@
 
         <div class="card">
             <div class="card-header" id="studentHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-toggle="collapse" data-target="#students" role="button">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#students" role="button">
                     Students
                 </h4>
             </div>
@@ -94,17 +94,17 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Students_Students ? "active" : "")" asp-page="/Partner/Students/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Students_Students ? "active" : "")" asp-page="/Partner/Students/Index" asp-area="Staff">
                                 Students
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Students_Families ? "active" : "")" asp-page="/Partner/Students/Families/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Students_Families ? "active" : "")" asp-page="/Partner/Students/Families/Index" asp-area="Staff">
                                 Families
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Model == ActivePage.Partner_Students_Reports ? "active" : "")" asp-page="/Partner/Students/Reports/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model == ActivePage.Partner_Students_Reports ? "active" : "")" asp-page="/Partner/Students/Reports/Index" asp-area="Staff">
                                 Reports
                             </a>
                         </li>
@@ -113,5 +113,49 @@
             </div>
         </div>
 
+    </div>
+</nav>
+
+<nav class="navbar navbar-expand-md navbar-toggleable-sm d-md-none bg-light">
+    <div class="mx-2">
+        <h4 class="navbar-brand px-2">Partners</h4>
+    </div>
+    <div class="me-2">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-navbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse justify-content-between" id="sidebar-navbar">
+        <ul class="navbar-nav me-auto ms-3 mb-2">
+            <li class="nav-item dropdown">
+                <a class="nav-link" asp-page="/Partner/Contacts/Index" asp-area="Staff">Contacts</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button">Schools</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-page="/Partner/Schools/Index" asp-area="Staff">Schools</a></li>
+                    <li><a class="dropdown-item" asp-page="/Partner/Schools/Contacts/Index" asp-area="Staff">Contacts</a></li>
+                    <li><a class="dropdown-item" asp-page="/Partner/Schools/Contacts/Reports" asp-area="Staff">Reports</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button">Staff</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-page="/Partner/Staff/Index" asp-area="Staff">Staff</a></li>
+                    <li><a class="dropdown-item" asp-page="/Partner/Staff/Faculties/Index" asp-area="Staff">Faculties</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button">Students</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-page="/Partner/Students/Index" asp-area="Staff">Students</a></li>
+                    <li><a class="dropdown-item" asp-page="/Partner/Students/Families/Index" asp-area="Staff">Families</a></li>
+                    <li><a class="dropdown-item" asp-page="/Partner/Students/Reports/Index" asp-area="Staff">Reports</a></li>
+                </ul>
+            </li>
+        </ul>
     </div>
 </nav>

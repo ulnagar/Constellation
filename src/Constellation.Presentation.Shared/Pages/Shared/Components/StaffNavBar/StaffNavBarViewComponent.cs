@@ -21,14 +21,16 @@ public sealed class StaffNavBarViewComponent : ViewComponent
         _authService = authService;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync()
+    public async Task<IViewComponentResult> InvokeAsync(bool bootstrap5 = false)
     {
+        var viewName = bootstrap5 ? "Default.bs5" : "Default";
+
         StaffNavBarViewModel viewModel = new();
 
         string username = User.Identity?.Name;
 
         if (username is null)
-            return View("Default", viewModel);
+            return View(viewName, viewModel);
 
         AuthorizationResult parentPortal = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.IsParent);
         AuthorizationResult schoolPortal = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.IsSchoolContact);
@@ -40,11 +42,11 @@ public sealed class StaffNavBarViewComponent : ViewComponent
             await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(StaffId.Empty, username));
 
         if (query.IsFailure)
-            return View("Default", viewModel);
+            return View(viewName, viewModel);
 
         foreach (TeacherOfferingResponse entry in query.Value)
             viewModel.Classes.Add(entry.OfferingName, entry.OfferingId);
 
-        return View("Default", viewModel);
+        return View(viewName, viewModel);
     }
 }

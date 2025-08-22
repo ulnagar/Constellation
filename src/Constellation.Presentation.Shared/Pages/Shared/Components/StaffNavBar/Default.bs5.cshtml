@@ -1,0 +1,134 @@
+﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.StaffNavBar.StaffNavBarViewModel
+
+@{
+    var loggedIn = User.Identity!.IsAuthenticated;
+    var isAdmin = User.IsInRole(AuthRoles.Admin);
+}
+
+<nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-dark box-shadow fixed-top">
+    <div class="px-2">
+        <a class="navbar-brand" asp-page="/Index" asp-area=""><img src="~/logo.svg" class="nav-bar-logo d-inline-block align-middle" />Constellation</a>
+    </div>
+    <div class="me-2">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#page-navbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between" id="page-navbar">
+        <ul class="navbar-nav flex-grow-1 me-auto ms-3 mb-2">
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Partners <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Contacts/Index">Contacts</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Index">Schools</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Contacts/Index">School Contacts</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Staff/Index">Staff</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Staff/Faculties/Index">Faculties</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Index">Students</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Families/Index">Families</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Subjects <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Courses/Index">Courses</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Offerings/Index">Classes</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Assignments/Index">Assignments</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Periods/Index">Periods</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Periods/Timetables/Index">Timetables</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/SciencePracs/Lessons/Index">Science Pracs</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Tutorials/Index">Tutorials</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Tutorials/GroupTutorials/Index">Group Tutorials</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Class Covers <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/ShortTerm/Casuals/Index">Casuals</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/ShortTerm/Covers/Index">Covers</a></li>
+                </ul>
+            </li>
+            
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Student Admin <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/StudentAdmin/Attendance/Absences/Index">Attendance</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/StudentAdmin/Awards/Index">Awards</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/StudentAdmin/Consent/Applications/Index">Third Party Consent</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/StudentAdmin/Reports/Academic/Index">Reports</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">School Admin <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/SchoolAdmin/Awards/Nominations/Index">Awards</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/SchoolAdmin/Compliance/Attendance/Index">Compliance</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/SchoolAdmin/Training/Completion/Index">Mandatory Training</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/SchoolAdmin/WorkFlows/Index">WorkFlows</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Equipment <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Equipment/Assets/Index">Assets</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Equipment/Stocktake/Index">Stocktake</a></li>
+                </ul>
+            </li>
+            
+            @if (Model.CanAccessSchoolPortal || Model.CanAccessParentPortal || isAdmin)
+            {
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Portals <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        @if (isAdmin)
+                        {
+                            <li><a class="dropdown-item" asp-area="Admin" asp-page="/Auth/Users/Index">Admin Portal</a></li>
+                        }
+                        @if (Model.CanAccessSchoolPortal)
+                        {
+                            <li><a class="dropdown-item" asp-area="Schools" asp-page="/Dashboard">Schools Portal</a></li>
+                        }
+                        @if (Model.CanAccessParentPortal)
+                        {
+                            <li><a class="dropdown-item" asp-area="Parents" asp-page="/Dashboard">Parents Portal</a></li>
+                        }
+                    </ul>
+                </li>
+            }
+        </ul>
+
+        <ul class="navbar-nav navbar-right">
+            @if (Model.Classes.Count > 0)
+            {
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">My Classes <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        @foreach (var entry in Model.Classes.OrderBy(x => x.Key))
+                        {
+                            <li><a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a></li>
+                        }
+                    </ul>
+                </li>
+            }
+
+            @if (loggedIn)
+            {
+                <a class="btn btn-warning mx-4" asp-area="" asp-page="/Auth/Logout">Log Out</a>
+            }
+            else
+            {
+                <a class="btn btn-success" asp-area="" asp-page="/Auth/Login">Log In</a>
+            }
+        </ul>
+    </div>
+</nav>

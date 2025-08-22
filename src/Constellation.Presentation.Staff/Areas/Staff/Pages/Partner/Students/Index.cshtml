@@ -3,12 +3,12 @@
 
 @using Constellation.Application.Domains.Students.Queries.GetFilteredStudents
 @using Constellation.Core.Extensions
-@using Constellation.Presentation.Shared.Helpers.TagHelpers
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authService
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+
     var canEditStudents = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 }
 
@@ -50,7 +50,7 @@
 
 <hr />
 
-<table class="table-striped table-hover">
+<table class="table table-striped table-hover">
     <thead>
     <tr>
         <th></th>
@@ -73,11 +73,11 @@
 
                 @if (item.EnrolmentCount > 0)
                 {
-                    <span class="badge badge-info">@item.EnrolmentCount</span>
+                    <span class="badge rounded-pill bg-info text-dark">@item.EnrolmentCount</span>
                 }
             </td>
             <td>@item.StudentReferenceNumber</td>
-            <td data-order="@item.StudentName.SortOrder" data-search="@item.StudentName.FirstName @item.StudentName.DisplayName"><gender gender="@item.Gender" /> @item.StudentName.DisplayName</td>
+            <td data-order="@item.StudentName.SortOrder" data-search="@item.StudentName.FirstName @item.StudentName.DisplayName"><gender-fa gender="@item.Gender" /> @item.StudentName.DisplayName</td>
             <td data-order="@item.Grade?.AsNumber()">
                 @if (!item.CurrentEnrolment)
                 {

@@ -1,0 +1,4 @@
+.px-2:has(.navbar-brand) {
+    width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+}

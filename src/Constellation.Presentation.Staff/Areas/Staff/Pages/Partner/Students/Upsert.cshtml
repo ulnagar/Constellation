@@ -3,9 +3,9 @@
 
 @using Constellation.Core.Enums
 @using Constellation.Core.Models.Students.Identifiers
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 }
 
 <h2>@(Model.Id == StudentId.Empty ? "New Student" : "Edit Student")</h2>
@@ -20,7 +20,7 @@
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="StudentReferenceNumber" class="col-md-2">SRN</label>
             <div class="col-md-3">
                 <input asp-for="StudentReferenceNumber" class="form-control" />
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="FirstName" class="col-md-2">First Name</label>
             <div class="col-md-3">
                 <input asp-for="FirstName" class="form-control" />
@@ -36,7 +36,7 @@
             </div>
         </div>
         
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="PreferredName" class="col-md-2">Preferred First Name</label>
             <div class="col-md-3">
                 <input asp-for="PreferredName" class="form-control" />
@@ -44,7 +44,7 @@
             </div>
         </div>
         
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="LastName" class="col-md-2">Last Name</label>
             <div class="col-md-3">
                 <input asp-for="LastName" class="form-control" />
@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="EmailAddress" class="col-md-2">DoE Email Address</label>
             <div class="col-md-3">
                 <input asp-for="EmailAddress" class="form-control" />
@@ -60,10 +60,10 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="Gender" class="col-md-2"></label>
             <div class="col-md-3">
-                <select asp-for="Gender" asp-items="Model.GenderList" class="form-control">
+                <select asp-for="Gender" asp-items="Model.GenderList" class="form-select">
                     <option value="">-- Select --</option>
                 </select>
                 <span asp-validation-for="Gender" class="text-danger"></span>
@@ -72,17 +72,17 @@
 
         @if (Model.Id == StudentId.Empty)
         {
-            <div class="form-group row">
+            <div class="mb-3 row">
                 <label asp-for="Grade" class="col-md-2">Grade</label>
                 <div class="col-md-3">
-                    <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-control">
+                    <select asp-for="Grade" asp-items="@Html.GetEnumSelectList<Grade>()" class="form-select">
                         <option value="">-- Select --</option>
                     </select>
                     <span asp-validation-for="Grade" class="text-danger"></span>
                 </div>
             </div>
 
-            <div class="form-group row">
+            <div class="mb-3 row">
                 <label asp-for="SchoolCode" class="col-md-2">School</label>
                 <div class="col-md-3">
                     <select asp-for="SchoolCode" asp-items="Model.SchoolList" class="form-control combo">
@@ -93,15 +93,15 @@
             </div>
         }
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-3">
+        <div class="mb-3">
+            <div class="col-md-offset-2 col-md-3 d-grid">
                 @if (Model.Id == StudentId.Empty)
                 {
-                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+                    <input asp-page-handler="Create" type="submit" value="Save" class="btn btn-primary btn-lg" />
                 }
                 else
                 {
-                    <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-block btn-lg"/>
+                    <input asp-page-handler="Update" type="submit" value="Save" class="btn btn-primary btn-lg"/>
                 }
             </div>
         </div>

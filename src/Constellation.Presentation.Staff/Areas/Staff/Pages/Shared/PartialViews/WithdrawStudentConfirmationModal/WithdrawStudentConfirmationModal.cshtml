@@ -1,0 +1,16 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.WithdrawStudentConfirmationModal.WithdrawStudentConfirmationModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Withdraw Student</h5>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Are you sure you wish to mark @Model.Student withdrawn?</span>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <a asp-page-handler="Withdraw" class="btn btn-danger show-loader">Withdraw</a>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+</div>

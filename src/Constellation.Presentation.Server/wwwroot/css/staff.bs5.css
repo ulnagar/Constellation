@@ -1,0 +1,522 @@
+﻿:root {
+    --sidebar-width: 240px;
+}
+
+body {
+    overflow: hidden;
+}
+
+
+.fixed-top {
+    position: sticky;
+}
+
+.local-nav {
+    border-radius: 25px;
+}
+
+.local-nav .nav-item {
+    padding-right: 1rem !important;
+    padding-left: 1rem !important;
+}
+
+.local-nav .nav-link.active {
+    font-weight: bold;
+}
+
+/* Legacy styles */
+table.dataTable tbody tr.dtrg-group {
+    background-color: lightgray; 
+}
+
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+#accordion .card {
+    border: none;
+}
+
+#accordion .card-header {
+    padding: 0;
+}
+
+#accordion .card-body {
+    background-color: rgba(0,0,0,.03);
+    padding: 0;
+}
+
+/*.sidebar-layout .sidebar-heading {
+    text-align: center;
+}*/
+
+/* .sidebar-sticky is in a view component 
+    and does not get allocated the css 
+    isolation tag, so this cannot be defined 
+    in the layout page css code */
+.sidebar-layout .sidebar-sticky {
+    position: sticky;
+    top: 0;
+    /*height: calc(100vh - 122px);*/
+    height: calc(100vh - 62px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.sidebar-layout .sidebar .nav-item {
+    /*font-size: 0.9rem;*/
+    /*padding-bottom: 0.5rem;*/
+    margin: 5px 0px;
+    padding: 2px 0px;
+}
+
+.sidebar-layout .sidebar .nav-item:has(a.active) {
+    background-color: #ebeced;
+    border: 3px solid #e5e6e7;
+    border-radius: 10px;
+    margin: 2px 0px;
+}
+
+.sidebar-layout .sidebar .nav-item:hover,
+.sidebar-layout .sidebar .nav-item:has(a.active):hover {
+    background-color: #f0f1f2;
+    border: 3px solid #e0e1e2;
+    border-radius: 10px;
+    margin: 2px -3px;
+}
+
+.sidebar-layout .sidebar a.nav-link {
+    color: #232323;
+    border-radius: 4px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+}
+
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+.footer {
+  /*position: absolute;*/
+  bottom: 0;
+  background-color: slategrey;
+  color: ghostwhite;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;  /*Vertically center the text there */
+}
+
+/* Shim for Bootstrap 3 => 4 upgrade */
+label {
+    font-weight: bold;
+}
+
+.btn-pull-right {
+    float: right;
+}
+
+.btn-pull-right-solo {
+    margin-right: 0;
+    margin-left: auto;
+    display: block;
+}
+
+.btn-show-hover {
+    visibility: hidden;
+}
+
+tr:hover .btn-show-hover {
+    visibility: visible;
+}
+
+.glyph-color-blue {
+    color: #3a87ad;
+}
+
+.glyph-color-pink {
+    color: #da70d6;
+}
+
+.glyph-color-green {
+    color: green;
+}
+
+.glyph-color-red {
+    color: firebrick;
+}
+
+.glyph-color-orange {
+    color: orange;
+}
+
+.nav-bar-logo {
+    height: 35px;
+    width: 35px;
+}
+
+.mw-45 {
+    min-width: 45%;
+}
+
+.lesson-modal .heading {
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    font-size: large;
+    padding-bottom: 10px;
+}
+
+.lesson-modal .modal-header {
+    font-weight: bold;
+    font-size: larger;
+}
+
+.lesson-modal .subheading {
+    color: grey;
+    font-size: small;
+}
+
+.tab-pane h3 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.tab-pane > .btn {
+    margin-bottom: 0.5em;
+}
+
+.Timetable-Teaching {
+    background-color: lightgreen;
+}
+
+.Timetable-Break {
+    background-color: lightpink;
+}
+
+.Timetable-Offline {
+    background-color: lightgrey;
+}
+
+.Timetable-Period {
+    display: block;
+    overflow: hidden;
+    border-bottom: 1px solid black;
+    padding: 5px;
+    text-align: center;
+}
+
+    .Timetable-Period:first-child {
+        border-top: 1px solid black;
+    }
+
+
+    .Timetable-Period:last-child {
+        border-bottom: none;
+    }
+
+.Timetable-Period .subheading {
+    color: grey;
+    font-size: small;
+}
+
+.Timetable-Day {
+    width: 160px;
+    float: left;
+    border: 1px solid black;
+    border-right: none;
+    text-align: center;
+}
+
+    .Timetable-Day:last-child {
+        width: 160px;
+        float: left;
+        border: 1px solid black;
+    }
+
+.Timetable-Week {
+    clear: left;
+    margin-top: 50px;
+    overflow: auto;
+}
+
+.blockLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+    .blockLink:hover {
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+    }
+
+.pt_Selected {
+    font-weight: bold;
+    color: red;
+}
+
+    .pt_Selected:hover {
+        text-decoration: none;
+        color: red;
+    }
+
+.pt_Selected_Elsewhere {
+    font-weight: bold;
+    color: slateblue;
+}
+
+    .pt_Selected_Elsewhere:hover {
+        text-decoration: none;
+        color: slateblue;
+    }
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+tr.group,
+tr.group:hover {
+    background-color: #ddd !important;
+}
+
+/* Stocktake Styles */
+tr.cancelled-True {
+    text-decoration: line-through;
+}
+
+/* Mandatory Training Status Icons */
+img.training.status-icon {
+    width: 35px;
+    height: 35px;
+}
+
+img.training.status-icon.blink {
+    animation: blink-animation 1s steps(5, start) infinite;
+}
+
+@keyframes blink-animation {
+    to {
+        visibility: hidden;
+    }
+}
+
+/* Page-Menu to allow right align back button */
+.page-menu {
+    overflow: auto;
+}
+
+.page-menu:has(button.dropdown-toggle) {
+    overflow: visible;
+}
+
+/* Change Checkbox input into css toggle switch */
+
+input.checkbox-toggle {
+    position: relative;
+    height: 30px;
+    width: 60px;
+    -webkit-appearance: none;
+    background: red;
+    outline: none;
+    border-radius: 15px;
+}
+
+input.checkbox-toggle:checked {
+    background: green;
+}
+
+input.checkbox-toggle:before {
+    cursor: pointer;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    transform: scale(0.85);
+    border-radius: 50%;
+    background: white;
+    transition: .5s;
+}
+
+input.checkbox-toggle:checked:before {
+    left: 30px;
+}
+
+
+/* Prevent page footer from covering content */
+
+main {
+    /* min-height: 100vh; */
+}
+
+/* Custom sort data table styles */
+table.grouped-data-table {
+    width: 100% !important;
+}
+
+table.grouped-data-table th {
+    width: unset !important;
+}
+
+/* Custom badge colouring */
+.Primary-A {
+    background-color: #e83e8c;
+    color: #fff;
+}
+
+.Primary-B {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.Primary-C {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.Secondary-G {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.Secondary-P {
+    background-color: #e83e8c;
+    color: #fff;
+}
+
+.Senior-1 {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.Senior-2 {
+    background-color: #6f42c1;
+    color: #fff;
+}
+
+.Senior-3 {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.Senior-4 {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.Senior-5 {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.Senior-6 {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+a.Primary-A:hover, a.Primary-A:focus,
+a.Primary-B:hover, a.Primary-B:focus,
+a.Primary-C:hover, a.Primary-C:focus,
+a.Secondary-G:hover, a.Secondary-G:focus,
+a.Secondary-P:hover, a.Secondary-P:focus,
+a.Senior-1:hover, a.Senior-1:focus,
+a.Senior-2:hover, a.Senior-2:focus,
+a.Senior-3:hover, a.Senior-3:focus,
+a.Senior-4:hover, a.Senior-4:focus,
+a.Senior-6:hover, a.Senior-6:focus {
+    color: #fff;
+    background-color: #1d2124;
+}
+
+a.Primary-A:focus, a.Primary-A.focus,
+a.Primary-B:focus, a.Primary-B.focus,
+a.Primary-C:focus, a.Primary-C.focus,
+a.Secondary-G:focus, a.Secondary-G.focus,
+a.Secondary-P:focus, a.Secondary-P.focus,
+a.Senior-1:focus, a.Senior-1.focus,
+a.Senior-2:focus, a.Senior-2.focus,
+a.Senior-3:focus, a.Senior-3.focus,
+a.Senior-4:focus, a.Senior-4.focus,
+a.Senior-6:focus, a.Senior-6.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
+}
+
+a.Senior-5:hover, a.Senior-5:focus {
+    color: #212529;
+    background-color: #dae0e5;
+}
+
+a.Senior-5:focus, a.Senior-5.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(248, 249, 250, 0.5);
+}
+
+/* Consent Upsert Dynamic Select2 Style */
+.input-group .select2-container--bootstrap .select2-selection--single {
+    width: 100%;
+}
+
+/* Custom modal width */
+.modal-dialog.wide {
+    max-width: 750px;
+}
+
+/* Highlight Select2 fields with validation issues */
+.is-invalid ~ .select2 .select2-selection {
+    border: 1px solid red;
+}
