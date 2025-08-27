@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
+using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class UpdateModel : BasePageModel

@@ -55,7 +55,7 @@ public class DashboardModel : BasePageModel
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
 
-    public List<StocktakeSightingResponse> Sightings { get; set; }
+    public List<StocktakeSightingResponse> Sightings { get; set; } = [];
 
     public async Task<IActionResult> OnGet()
     {
