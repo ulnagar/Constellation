@@ -155,7 +155,8 @@
                 <div class="form-group row">
                     <label class="col-md-3">Condition</label>
                     <div class="col-md-7">
-                        <textarea asp-for="Comment" rows="5" cols="100" class="form-control" id="Comment"></textarea>
+                        <textarea asp-for="Comment" rows="5" cols="100" class="form-control" id="Comment"> </textarea>
+                        <span asp-validation-for="Comment" class="text-danger"></span>
                     </div>
                 </div>
             </div>
@@ -270,7 +271,7 @@
             $('#LocationTypeOther').hide();
 
             // Reset all Location options to blank
-            $('#LocationCode').val('');
+            $('#LocationCode').val(' ');
             $('#School_LocationCode').val('');
             $('#LocationName').val('');
             $('#LocationHelpText').html('');
