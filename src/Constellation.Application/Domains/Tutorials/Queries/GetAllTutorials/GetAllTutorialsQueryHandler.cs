@@ -9,6 +9,9 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Timetables.Repositories;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Repositories;
 using Core.Shared;
@@ -24,17 +27,20 @@ internal sealed class GetAllTutorialsQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly IPeriodRepository _periodRepository;
 
     public GetAllTutorialsQueryHandler(
         ITutorialRepository tutorialRepository,
         IStaffRepository staffRepository,
         IEnrolmentRepository enrolmentRepository,
-        IStudentRepository studentRepository)
+        IStudentRepository studentRepository,
+        IPeriodRepository periodRepository)
     {
         _tutorialRepository = tutorialRepository;
         _staffRepository = staffRepository;
         _enrolmentRepository = enrolmentRepository;
         _studentRepository = studentRepository;
+        _periodRepository = periodRepository;
     }
 
     public async Task<Result<List<TutorialSummaryResponse>>> Handle(GetAllTutorialsQuery request, CancellationToken cancellationToken)
@@ -73,13 +79,21 @@ internal sealed class GetAllTutorialsQueryHandler
 
             List<Student> activeStudents = students.Where(student => studentIds.Contains(student.Id)).ToList();
 
+            List<PeriodId> periodIds = tutorial.Sessions
+                .Where(session => !session.IsDeleted)
+                .Select(session => session.PeriodId)
+                .Distinct()
+                .ToList();
+
+            List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
+
             TutorialSummaryResponse entry = new(
                 tutorial.Id,
                 tutorial.Name,
                 tutorial.EndDate.Year.ToString(),
                 teachers.Select(teacher => teacher.Name.DisplayName).ToList(),
                 activeStudents.Select(student => student.Name.DisplayName).ToList(),
-                tutorial.Sessions.Where(session => !session.IsDeleted).Select(session => session.Duration).Sum(),
+                periods.Select(period => period.Duration).Sum(),
                 tutorial.IsCurrent);
 
             response.Add(entry);

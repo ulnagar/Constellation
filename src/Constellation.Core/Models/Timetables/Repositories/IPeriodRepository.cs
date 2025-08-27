@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Tutorials.Identifiers;
 
 public interface IPeriodRepository
 {
@@ -15,6 +16,7 @@ public interface IPeriodRepository
     Task<List<Period>> GetByDayAndOfferingId(int day, OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Period>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Period>> GetAllFromTimetable(List<Timetable> timetables, CancellationToken cancellationToken = default);
+    Task<List<Period>> GetForTutorialOnDay(TutorialId tutorialId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateTime absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Period>> GetForOfferingOnDay(OfferingId offeringId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<Period> GetById(PeriodId id, CancellationToken cancellationToken = default);

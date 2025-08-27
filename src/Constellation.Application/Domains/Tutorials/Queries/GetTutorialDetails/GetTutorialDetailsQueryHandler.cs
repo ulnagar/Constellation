@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Queries.GetTutorialDetails;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Timetables;
+using Constellation.Core.Models.Timetables.Repositories;
 using Core.Abstractions.Services;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
@@ -27,6 +29,7 @@ internal sealed class GetTutorialDetailsQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
@@ -35,6 +38,7 @@ internal sealed class GetTutorialDetailsQueryHandler
         IStaffRepository staffRepository,
         IStudentRepository studentRepository,
         IEnrolmentRepository enrolmentRepository,
+        IPeriodRepository periodRepository,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
@@ -42,6 +46,7 @@ internal sealed class GetTutorialDetailsQueryHandler
         _staffRepository = staffRepository;
         _studentRepository = studentRepository;
         _enrolmentRepository = enrolmentRepository;
+        _periodRepository = periodRepository;
         _currentUserService = currentUserService;
         _logger = logger
             .ForContext<GetTutorialDetailsQuery>();
@@ -65,6 +70,7 @@ internal sealed class GetTutorialDetailsQueryHandler
             .Sessions
             .Where(session => !session.IsDeleted)
             .Select(session => session.StaffId)
+            .Distinct()
             .ToList();
 
         List<StaffMember> teachers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
@@ -88,17 +94,26 @@ internal sealed class GetTutorialDetailsQueryHandler
 
             StaffMember teacher = teachers.FirstOrDefault(teacher => teacher.Id == session.StaffId);
 
-            duration += session.Duration;
+            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+
+            if (period is null)
+            {
+                _logger.Warning("Could not find Period with Id {id}", session.PeriodId);
+
+                continue;
+            }
+
+            duration += period.Duration;
 
             sessions.Add(new(
                 session.Id,
                 session.ToString(),
-                session.SortOrder,
-                session.Week,
-                session.Day,
-                session.StartTime,
-                session.EndTime,
-                session.Duration,
+                period.SortOrder,
+                period.Week,
+                period.Day,
+                period.StartTime,
+                period.EndTime,
+                period.Duration,
                 new(
                     teacher.Id,
                     teacher.EmployeeId,

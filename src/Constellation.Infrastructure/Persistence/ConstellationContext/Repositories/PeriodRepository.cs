@@ -2,11 +2,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Reposito
 
 using Constellation.Core.Models.Timetables.Enums;
 using Constellation.Core.Models.Timetables.ValueObjects;
+using Constellation.Core.Models.Tutorials.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
+using Core.Models.Tutorials;
 using Microsoft.EntityFrameworkCore;
 
 public class PeriodRepository : IPeriodRepository
@@ -40,6 +42,32 @@ public class PeriodRepository : IPeriodRepository
                 period.Timetable == timetable &&
                 period.PeriodCode == periodCode)
             .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<List<Period>> GetForTutorialOnDay(
+        TutorialId tutorialId,
+        DateOnly absenceDate,
+        PeriodWeek week,
+        PeriodDay day,
+        CancellationToken cancellationToken = default)
+    {
+        List<TutorialSession> sessions = await _context
+            .Set<TutorialSession>()
+            .Where(session =>
+                session.TutorialId == tutorialId &&
+                // session was created before the absence date
+                session.CreatedAt < absenceDate.ToDateTime(TimeOnly.MinValue) &&
+                // session is still current (not deleted) OR session was deleted after absence date
+                (!session.IsDeleted || session.DeletedAt.Date > absenceDate.ToDateTime(TimeOnly.MinValue)))
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<Period>()
+            .Where(period =>
+                period.Week == week &&
+                period.Day == day &&
+                sessions.Select(session => session.PeriodId).Contains(period.Id))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<List<Period>> GetForOfferingOnDay(    

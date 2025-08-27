@@ -12,6 +12,7 @@ using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Subjects;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables;
@@ -161,19 +162,24 @@ public class GenerateAttendanceReportForStudentQueryHandler
 
             foreach (Tutorial tutorial in tutorials)
             {
-                List<TutorialSession> tutorialSessions = tutorial.Sessions
-                    .Where(session =>
-                        session.CreatedAt < date.ToDateTime(TimeOnly.MinValue) &&
-                        (!session.IsDeleted || session.DeletedAt.Date > date.ToDateTime(TimeOnly.MinValue)) &&
-                        session.Day == day &&
-                        session.Week == week)
-                    .ToList();
+                List<Period> periods = await _periodRepository.GetForTutorialOnDay(tutorial.Id, date, week, day, cancellationToken);
+                Period firstPeriod = periods.First(period => period.StartTime == periods.Min(p => p.StartTime));
+                Period lastPeriod = periods.First(period => period.EndTime == periods.Max(p => p.EndTime));
 
-                foreach (TutorialSession session in tutorialSessions)
+                if (periods.Count() == 1)
                 {
                     sessionDetails.Add(new(
-                        string.Empty,
-                        $"{session.StartTime.As12HourTime()} - {session.EndTime.As12HourTime()}",
+                        periods.First().Name,
+                        $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
+                        tutorial.Name,
+                        "Tutorial",
+                        tutorial.Id.Value));
+                }
+                else
+                {
+                    sessionDetails.Add(new(
+                        $"{firstPeriod.Name} - {lastPeriod.Name}",
+                        $"{firstPeriod.StartTime.As12HourTime()} - {lastPeriod.EndTime.As12HourTime()}",
                         tutorial.Name,
                         "Tutorial",
                         tutorial.Id.Value));

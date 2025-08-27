@@ -2,15 +2,11 @@
 
 using Abstractions.Messaging;
 using Core.Models.StaffMembers.Identifiers;
-using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials.Identifiers;
-using System;
 
 public sealed record AddSessionToTutorialCommand(
     TutorialId Id,
-    PeriodWeek Week,
-    PeriodDay Day,
-    TimeSpan StartTime,
-    TimeSpan EndTime,
+    PeriodId PeriodId,
     StaffId StaffId)
     : ICommand;

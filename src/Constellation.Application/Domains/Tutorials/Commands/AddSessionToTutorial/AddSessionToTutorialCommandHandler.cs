@@ -43,10 +43,7 @@ internal sealed class AddSessionToTutorialCommandHandler
         }
 
         Result result = tutorial.AddSession(
-            request.Week,
-            request.Day,
-            request.StartTime,
-            request.EndTime,
+            request.PeriodId,
             request.StaffId);
 
         if (result.IsFailure)

@@ -125,12 +125,21 @@ internal sealed class GetSessionDetailsForStudentQueryHandler
 
                         foreach (TutorialSession session in sessions)
                         {
+                            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+
+                            if (period is null)
+                            {
+                                _logger.Warning("Could not find Period with Id {id}", session.PeriodId);
+
+                                continue;
+                            }
+
                             sessionList.Add(new(
-                                session.SortOrder,
-                                session.ToString(),
+                                period.SortOrder,
+                                period.ToString(),
                                 tutorial.Name,
-                                teachers.Where(teacher => teacher.Id == session.StaffId).Select(teacher => teacher.Name.DisplayName).ToList(),
-                                session.Duration));
+                                teachers?.Select(teacher => teacher.Name.DisplayName).ToList(),
+                                period.Duration));
                         }
 
                         break;

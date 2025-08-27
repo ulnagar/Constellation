@@ -100,26 +100,31 @@ internal sealed class GetStaffDailyTimetableDataQueryHandler
 
         foreach (Tutorial tutorial in tutorials)
         {
-            TutorialSession session = tutorial.Sessions
-                .FirstOrDefault(session =>
-                    !session.IsDeleted &&
-                    session.Week == week &&
-                    session.Day == day);
+            List<TutorialSession> sessions = tutorial.Sessions
+                .Where(session =>
+                    periodIds.Contains(session.PeriodId) &&
+                    !session.IsDeleted)
+                .ToList();
 
-            if (session is null)
+            if (sessions.Count == 0)
                 continue;
 
             TeamsResource resource = tutorial.Teams.FirstOrDefault();
 
-            response.Add(new TutorialTimetableResponse(
-                "Tut",
-                TimeOnly.FromTimeSpan(session.StartTime),
-                TimeOnly.FromTimeSpan(session.EndTime),
-                tutorial.Id,
-                tutorial.Name,
-                resource?.Name ?? string.Empty,
-                resource?.Url ?? string.Empty,
-                false));
+            foreach (TutorialSession session in sessions)
+            {
+                Period period = periods.FirstOrDefault(period => period.Id == session.PeriodId);
+
+                response.Add(new TutorialTimetableResponse(
+                    $"{(period.Timetable.Prefix == '\0' ? string.Empty : period.Timetable.Prefix)}{period.PeriodCode}",
+                    TimeOnly.FromTimeSpan(period.StartTime),
+                    TimeOnly.FromTimeSpan(period.EndTime),
+                    tutorial.Id,
+                    tutorial.Name,
+                    resource?.Name ?? string.Empty,
+                    resource?.Url ?? string.Empty,
+                    false));
+            }
         }
 
         List<Cover> covers = await _coverRepository.GetCurrentForStaff(request.StaffId, cancellationToken);

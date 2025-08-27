@@ -2,7 +2,6 @@
 
 using Abstractions.Clock;
 using Constellation.Core.Models.StaffMembers.Identifiers;
-using Constellation.Core.Models.Timetables.Enums;
 using Errors;
 using Identifiers;
 using Primitives;
@@ -10,6 +9,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Timetables.Identifiers;
 using ValueObjects;
 
 public sealed class Tutorial : AggregateRoot, IAuditableEntity
@@ -100,25 +100,16 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
     public void Delete() => IsDeleted = true;
 
     public Result AddSession(
-        PeriodWeek week,
-        PeriodDay day,
-        TimeSpan startTime,
-        TimeSpan endTime,
+        PeriodId periodId,
         StaffId staffId)
     {
-        if (_sessions.Any(session =>
-                !session.IsDeleted &&
-                session.Week.Equals(week) &&
-                session.Day.Equals(day) &&
-                session.StartTime <= endTime &&
-                session.EndTime >= startTime))
+        if (_sessions.Any(session => 
+                session.PeriodId == periodId && 
+                !session.IsDeleted))
             return Result.Failure(TutorialSessionErrors.AlreadyExists);
 
         _sessions.Add(new TutorialSession(
-            week,
-            day,
-            startTime,
-            endTime,
+            periodId,
             staffId));
 
         return Result.Success();

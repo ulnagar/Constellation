@@ -2,7 +2,8 @@
 
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
-using Core.Models.Timetables.Enums;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -22,19 +23,7 @@ internal sealed class TutorialSessionConfiguration : IEntityTypeConfiguration<Tu
             .HasConversion(
                 id => id.Value,
                 value => TutorialSessionId.FromValue(value));
-
-        builder
-            .Property(session => session.Week)
-            .HasConversion(
-                week => week.Value,
-                value => PeriodWeek.FromValue(value));
-
-        builder
-            .Property(session => session.Day)
-            .HasConversion(
-                day => day.Value,
-                value => PeriodDay.FromValue(value));
-
+        
         builder
             .HasOne<StaffMember>()
             .WithMany()
@@ -46,5 +35,17 @@ internal sealed class TutorialSessionConfiguration : IEntityTypeConfiguration<Tu
             .HasConversion(
                 id => id.Value,
                 value => StaffId.FromValue(value));
+
+        builder
+            .HasOne<Period>()
+            .WithMany()
+            .HasForeignKey(session => session.PeriodId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(session => session.PeriodId)
+            .HasConversion(
+                id => id.Value,
+                value => PeriodId.FromValue(value));
     }
 }
