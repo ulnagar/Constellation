@@ -6,7 +6,6 @@ body {
     overflow: hidden;
 }
 
-
 .fixed-top {
     position: sticky;
 }
@@ -22,6 +21,10 @@ body {
 
 .local-nav .nav-link.active {
     font-weight: bold;
+}
+
+.form-check-input-lg {
+    transform: scale(1.25);
 }
 
 /* Legacy styles */
@@ -438,6 +441,14 @@ table.grouped-data-table th {
     color: #fff;
 }
 
+.Alternate-V {
+    background-color: #37c6f0;
+}
+
+.Alternate-Y {
+    background-color: #f6e282;
+}
+
 .Senior-1 {
     background-color: #007bff;
     color: #fff;
@@ -473,6 +484,8 @@ a.Primary-B:hover, a.Primary-B:focus,
 a.Primary-C:hover, a.Primary-C:focus,
 a.Secondary-G:hover, a.Secondary-G:focus,
 a.Secondary-P:hover, a.Secondary-P:focus,
+a.Alternate-V:hover, a.Alternate-V:focus,
+a.Alternate-Y:hover, a.Alternate-Y:focus,
 a.Senior-1:hover, a.Senior-1:focus,
 a.Senior-2:hover, a.Senior-2:focus,
 a.Senior-3:hover, a.Senior-3:focus,
@@ -487,6 +500,8 @@ a.Primary-B:focus, a.Primary-B.focus,
 a.Primary-C:focus, a.Primary-C.focus,
 a.Secondary-G:focus, a.Secondary-G.focus,
 a.Secondary-P:focus, a.Secondary-P.focus,
+a.Alternate-V:hover, a.Alternate-V:focus,
+a.Alternate-Y:hover, a.Alternate-Y:focus,
 a.Senior-1:focus, a.Senior-1.focus,
 a.Senior-2:focus, a.Senior-2.focus,
 a.Senior-3:focus, a.Senior-3.focus,

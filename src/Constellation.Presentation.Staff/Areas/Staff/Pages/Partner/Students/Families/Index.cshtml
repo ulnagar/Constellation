@@ -5,6 +5,8 @@
 @inject IAuthorizationService authorizationService
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+
     var canEditStudents = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
 }
 
@@ -13,7 +15,7 @@
 <div class="page-menu">
     @if (canEditStudents.Succeeded)
     {
-        <a asp-page="/Partner/Students/Families/AddFamily" asp-area="Staff" class="btn btn-success">Add Family</a>
+        <a asp-page="/Partner/Students/Families/AddFamily" asp-area="Staff" class="btn btn-success show-loader">Add Family</a>
     }
 </div>
 
@@ -70,7 +72,7 @@
             </td>
             <td>
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                    <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
                     <div class="dropdown-menu">
                         <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@entry.FamilyId" class="dropdown-item">Details</a>
                         @if (canEditStudents.Succeeded && !entry.IsResidentialContact)
@@ -107,6 +109,12 @@
 @section scripts
 {
     <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order":[]
+            });
+        });
+
         $('.delete-parent-menu').click(function (event) {
             var familyId = $(this).data("familyId");
             var parentId = $(this).data("parentId");

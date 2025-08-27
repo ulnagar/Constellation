@@ -1,7 +1,11 @@
 ﻿@page
-@using Constellation.Core.Extensions
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.WithoutSentralIdModel
+
+@using Constellation.Core.Extensions
+
+@{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+}
 
 <h2>Students without Sentral Id</h2>
 
@@ -56,3 +60,13 @@
     }
     </tbody>
 </table>
+                
+@section Scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order":[]
+        }));
+    </script>
+}

@@ -1,6 +1,8 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.FTEBreakdownModel
+
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 }
 
 <h2>FTE Value by Grade</h2>
@@ -11,7 +13,7 @@
 
 <hr />
 
-<table class="table-striped table-hover data-table">
+<table class="table table-striped table-hover data-table">
     <thead>
     <tr>
         <th rowspan="2">Grade</th>
@@ -54,3 +56,14 @@
     </tr>
     </tfoot>
 </table>
+
+            
+@section Scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order":[]
+        }));
+    </script>
+    }

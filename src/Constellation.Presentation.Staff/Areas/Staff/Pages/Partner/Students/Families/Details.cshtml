@@ -6,7 +6,10 @@
 @using Constellation.Core.ValueObjects;
 @using Constellation.Core.Extensions
 
+
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+
     var isAuthorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
     var isNotResidential = !Model.Family?.IsResidential ?? false;
 
@@ -18,9 +21,9 @@
 <div class="page-menu">
     @if (canEdit)
     {
-        <a asp-page="/Partner/Students/Families/EditFamily" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success">Edit</a>
-        <button data-toggle="modal" data-target="#addStudentModal" class="btn btn-success">Add Student</button>
-        <a asp-page="/Partner/Students/Families/AddParent" asp-area="Staff" asp-route-familyId="@Model.Id" class="btn btn-success">Add Parent</a>
+        <a asp-page="/Partner/Students/Families/EditFamily" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-success show-loader">Edit</a>
+        <button data-bs-toggle="modal" data-bs-target="#addStudentModal" class="btn btn-success">Add Student</button>
+        <a asp-page="/Partner/Students/Families/AddParent" asp-area="Staff" asp-route-familyId="@Model.Id" class="btn btn-success show-loader">Add Parent</a>
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -123,13 +126,6 @@
         </div>
     </div>
 }
-
-<div class="modal fade" tabindex="-1" id="page-modal">
-    <div class="modal-dialog">
-        <div id="modal-content" class="modal-content">
-        </div>
-    </div>
-</div>
 
 <vc:family-add-student family-id="@Model.Id"></vc:family-add-student>
 

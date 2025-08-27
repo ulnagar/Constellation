@@ -2,9 +2,9 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Reports.InterviewsModel
 
 @using Constellation.Core.Enums
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 }
 
 <h2>Export PTO Interview File</h2>
@@ -19,11 +19,11 @@
     <div class="form-horizontal">
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label class="col-md-4 offset-1">Filter by Grade</label>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="Grades" class="col-md-2">All Grades</label>
             <div class="col-md-3">
                 <select id="allGrades" multiple="multiple" name="allGrades" class="form-control">
@@ -36,13 +36,13 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="offset-2 col-md-3">
                 <btn class="btn btn-sm btn-secondary" onClick="addGrade()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeGrade()">Remove</btn>
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="Grades" class="col-md-2">Selected Grades</label>
             <div class="col-md-3">
                 <select id="selectedGrades" multiple="multiple" name="selectedGrades" class="form-control"></select>
@@ -50,11 +50,11 @@
             <div id="grade_inputs"></div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label class="col-md-4 offset-1">Filter by Class</label>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="ClassList" class="col-md-2">All Classes</label>
             <div class="col-md-3">
                 <select id="allClasses" multiple="multiple" name="allClasses" class="form-control">
@@ -67,13 +67,13 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <div class="offset-2 col-md-3">
                 <btn class="btn btn-sm btn-secondary" onClick="addClass()">Add</btn> <btn class="btn btn-sm btn-secondary" onClick="removeClass()">Remove</btn>
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="mb-3 row">
             <label asp-for="ClassList" class="col-md-2">Selected Classes</label>
             <div class="col-md-3">
                 <select id="selectedClasses" multiple="multiple" name="selectedClasses" class="form-control"></select>
@@ -81,21 +81,21 @@
             <div id="class_inputs"></div>
         </div>
 
-        <div class="form-group row">
-            <label asp-for="PerFamily" class="col-md-3">Single login per family</label>
-            <div class="col-md-2">
-                <input asp-for="PerFamily" class="form-control" />
+        <div class="mb-3 row">
+            <label asp-for="PerFamily" class="col-md-2">Single login per family</label>
+            <div class="col-md-2 form-check">
+                <input asp-for="PerFamily" type="checkbox" class="form-check-input form-check-input-lg" />
             </div>
         </div>
 
-        <div class="form-group row">
-            <label asp-for="ResidentialFamilyOnly" class="col-md-3">Only include residential families?</label>
-            <div class="col-md-2">
-                <input asp-for="ResidentialFamilyOnly" class="form-control" />
+        <div class="mb-3 row">
+            <label asp-for="ResidentialFamilyOnly" class="col-md-2">Only include residential families?</label>
+            <div class="col-md-2 form-check">
+                <input asp-for="ResidentialFamilyOnly" type="checkbox" class="form-check-input form-check-input-lg" />
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <div class="col-md-offset-2 col-md-3">
                 <input type="submit" value="Export" class="btn btn-primary btn-block btn-lg" />
             </div>
