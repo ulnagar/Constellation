@@ -18,12 +18,11 @@
 {
     <h4>@group.Key?.AsName()</h4>
 
-    <div class="flex-row">
+    <div class="d-flex flex-row flex-wrap">
         @foreach (var student in group)
         {
             <div class="card m-3 float-start">
                 <vc:student-photo student-id="@student.StudentId" />
-                <img class="card-img-top" src="">
                 <div class="card-body">
                     <h5 class="card-title">@student.Name.PreferredName @student.Name.LastName</h5>
                     <p class="card-text">Grade: @student.Grade</p>
