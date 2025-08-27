@@ -1,6 +1,7 @@
 ﻿@page "{id}"
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Stocktake.Sighting.IndexModel
 @{
+    var search = Model.Asset is null;
 }
 
 <div class="jumbotron">
@@ -11,7 +12,14 @@
     <form method="post">
         <div class="row">
             <div class="col-4">
-                <input asp-for="AssetNumber" class="form-control" placeholder="Asset Number" />
+                @if (Model.Asset is null)
+                {
+                    <input asp-for="AssetNumber" class="form-control" placeholder="Asset Number" autofocus="autofocus" />
+                }
+                else
+                {
+                    <input asp-for="AssetNumber" class="form-control" placeholder="Asset Number" />
+                }
             </div>
             <div class="col-1 align-middle text-center">
                 <span class="align-middle">OR</span>
@@ -142,7 +150,7 @@
             </div>
             <hr class="my-4">
             <p>If not, please enter a description of the device's condition below</p>
-            <textarea name="comment" rows="5" cols="100" class="form-control"></textarea>
+            <textarea name="comment" rows="5" cols="100" class="form-control" autofocus="autofocus"></textarea>
             <input type="hidden" name="assetId" value="@Model.Asset.AssetId" />
             
             
