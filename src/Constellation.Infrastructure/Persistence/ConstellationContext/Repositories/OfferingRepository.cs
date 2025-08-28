@@ -85,6 +85,7 @@ public class OfferingRepository : IOfferingRepository
                     teacher.Type == AssignmentType.ClassroomTeacher &&
                     teacher.StaffId == staffId &&
                     !teacher.IsDeleted) &&
+                offering.Sessions.Any(session => !session.IsDeleted) &&
                 offering.StartDate <= _dateTime.Today &&
                 offering.EndDate >= _dateTime.Today)
             .ToListAsync(cancellationToken);
