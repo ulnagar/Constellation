@@ -37,8 +37,10 @@ internal sealed class GetStaffIntegratedTimetableDataQueryHandler
         foreach (Period period in periods.Where(period => !period.IsDeleted))
         {
             List<Offering> matchingOfferings = offerings
-                .Where(offering => offering.Sessions
-                    .Any(session => session.PeriodId == period.Id))
+                .Where(offering => 
+                    offering.Sessions.Any(session => 
+                        session.PeriodId == period.Id &&
+                        !session.IsDeleted))
                 .ToList();
 
             if (matchingOfferings.Count == 0)
