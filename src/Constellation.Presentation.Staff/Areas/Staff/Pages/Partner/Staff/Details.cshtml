@@ -6,6 +6,8 @@
 @inject IDateTimeProvider dateTime
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+
     var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
 }
 
@@ -18,7 +20,7 @@
 
         @if (Model.StaffMember.IsDeleted)
         {
-            <button data-toggle="modal" data-target="#reinstateStaffMemberModal" class="btn btn-danger">Reinstate</button>
+            <button data-bs-toggle="modal" data-bs-target="#reinstateStaffMemberModal" class="btn btn-danger">Reinstate</button>
         }
         else
         {
@@ -26,7 +28,7 @@
         }
     }
     
-    <button class="btn btn-secondary" data-toggle="modal" data-target="#lifecycleDetailsModal">View Extended Details</button>
+    <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#lifecycleDetailsModal">View Extended Details</button>
     
     <a asp-page="/Subject/Periods/Timetables/Staff" asp-area="Staff" asp-route-id="@Model.StaffMember.StaffId" class="btn btn-secondary">View Timetable</a>
 
@@ -77,43 +79,27 @@
 <hr />
 
 <div>
-    <ul class="nav nav-pills">
-        <li class="nav-item">
-            <a class="nav-link" href="#schoolHistory" data-toggle="tab" role="tab">
-                School History
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="#faculties" data-toggle="tab" role="tab">Faculties</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#classes" data-toggle="tab" role="tab">
-                Active classes
-                @if (Model.StaffMember.Offerings.Any())
-                {
-                    <span class="badge">@Model.StaffMember.Offerings.Count()</span>
-                }
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#sessions" data-toggle="tab" role="tab">
-                Active periods
-                @if (Model.StaffMember.Sessions.Any())
-                {
-                    <span class="badge">@Model.StaffMember.Sessions.Count()</span>
-                }
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#schoolStaff" data-toggle="tab" role="tab">
-                School contacts
-                @if (Model.StaffMember.Contacts.Any())
-                {
-                    <span class="badge">@Model.StaffMember.Contacts.Count()</span>
-                }
-            </a>
-        </li>
-    </ul>
+    <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-success bg-gradient local-nav">
+        <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
+            <ul class="nav navbar-nav flex-grow-1 me-auto ms-3 mb-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="#schoolHistory" data-bs-toggle="tab" role="tab">School History</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#faculties" data-bs-toggle="tab" role="tab">Faculties</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#classes" data-bs-toggle="tab" role="tab">Active classes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#sessions" data-bs-toggle="tab" role="tab" id="sessions-tab-button">Active sessions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#schoolStaff" data-bs-toggle="tab" role="tab">School contacts</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
     <div class="tab-content">
         <div id="schoolHistory" class="tab-pane">
@@ -121,36 +107,36 @@
 
             @if (authorised.Succeeded)
             {
-                <button data-toggle="modal" data-target="#transfer-student-modal" class="btn btn-warning">Transfer</button>
+                <button data-bs-toggle="modal" data-bs-target="#transfer-student-modal" class="btn btn-warning">Transfer</button>
             }
 
             <table class="table table-striped table-hover school-data-table">
                 <thead>
-                    <tr>
-                        <th>School</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th></th>
-                    </tr>
+                <tr>
+                    <th>School</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th></th>
+                </tr>
                 </thead>
                 <tbody>
-                    @foreach (var entry in Model.StaffMember.SchoolAssignments)
-                    {
-                        var isCurrent = !entry.IsDeleted && entry.StartDate <= dateTime.Today && (!entry.EndDate.HasValue || entry.EndDate.Value >= dateTime.Today);
-                        var isFuture = !entry.IsDeleted && entry.StartDate > dateTime.Today;
+                @foreach (var entry in Model.StaffMember.SchoolAssignments)
+                {
+                    var isCurrent = !entry.IsDeleted && entry.StartDate <= dateTime.Today && (!entry.EndDate.HasValue || entry.EndDate.Value >= dateTime.Today);
+                    var isFuture = !entry.IsDeleted && entry.StartDate > dateTime.Today;
 
-                        <tr class="@(isCurrent ? "current" : "") @(isFuture ? "future" : "")">
-                            <td>@entry.SchoolName</td>
-                            <td data-order="@entry.StartDate.ToString("yyyy-MM-dd")">@entry.StartDate.ToString("d")</td>
-                            <td data-order="@(entry.EndDate.HasValue ? entry.EndDate.Value.ToString("yyyy-MM-dd") : DateOnly.MaxValue.ToString("yyyy-MM-dd"))">@entry.EndDate?.ToString("d")</td>
-                            <td>
-                                @if (entry is { IsDeleted: false, EndDate: null } && authorised.Succeeded)
-                                {
-                                    <a asp-page-handler="RemoveSchoolAssignment" asp-route-assignmentId="@entry.AssignmentId" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
-                                }
-                            </td>
-                        </tr>
-                    }
+                    <tr class="@(isCurrent ? "current" : "") @(isFuture ? "future" : "")">
+                        <td>@entry.SchoolName</td>
+                        <td data-order="@entry.StartDate.ToString("yyyy-MM-dd")">@entry.StartDate.ToString("d")</td>
+                        <td data-order="@(entry.EndDate.HasValue ? entry.EndDate.Value.ToString("yyyy-MM-dd") : DateOnly.MaxValue.ToString("yyyy-MM-dd"))">@entry.EndDate?.ToString("d")</td>
+                        <td>
+                            @if (entry is { IsDeleted: false, EndDate: null } && authorised.Succeeded)
+                            {
+                                <a asp-page-handler="RemoveSchoolAssignment" asp-route-assignmentId="@entry.AssignmentId" class="btn btn-sm btn-danger btn-show-hover">Remove</a>
+                            }
+                        </td>
+                    </tr>
+                }
                 </tbody>
             </table>
         </div>
@@ -158,9 +144,9 @@
         <div id="faculties" class="tab-pane active">
             <h3>Faculty Membership</h3>
 
-            <button class="btn btn-warning" data-target="#addMembership" data-toggle="modal">Add Faculty Membership</button>
+            <button class="btn btn-warning" data-bs-target="#addMembership" data-bs-toggle="modal">Add Faculty Membership</button>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table table-striped table-hover data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -186,7 +172,7 @@
         <div id="schoolStaff" class="tab-pane">
             <h3>Partner School Staff</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table table-striped table-hover data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -212,7 +198,7 @@
         <div id="sessions" class="tab-pane">
             <h3>Scheduled Periods</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table table-striped table-hover data-table">
                 <thead>
                 <tr>
                     <th>Period</th>
@@ -236,7 +222,7 @@
         <div id="classes" class="tab-pane">
             <h3>Classes</h3>
 
-            <table class="table-striped table-hover data-table">
+            <table class="table table-striped table-hover data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -264,7 +250,6 @@
 </div>
 
 <vc:teacher-add-faculty staff-id="@Model.StaffMember.StaffId"></vc:teacher-add-faculty>
-
 
 <div class="modal" id="lifecycleDetailsModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">

@@ -70,7 +70,7 @@ internal sealed class GetStaffDetailsQueryHandler
             return Result.Failure<StaffDetailsResponse>(StaffMemberErrors.NotFound(request.StaffId));
         }
 
-        School school = staffMember.CurrentAssignment is null
+        School school = staffMember.CurrentAssignment is not null
             ? await _schoolRepository.GetById(staffMember.CurrentAssignment.SchoolCode, cancellationToken)
             : null;
 
