@@ -18,7 +18,7 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[Authorize(Policy = AuthPolicies.CanEditSubjects)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

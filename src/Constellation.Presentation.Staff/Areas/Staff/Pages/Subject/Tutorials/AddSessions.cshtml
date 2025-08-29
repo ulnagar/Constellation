@@ -1,0 +1,144 @@
+﻿@page "{Id:guid}"
+
+@using Constellation.Application.Domains.StaffMembers.Models
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.AddSessionsModel
+
+<h2>Add Multiple Sessions</h2>
+<form method="post">
+    <div class="page-menu">
+        <input type="submit" value="Save" class="btn btn-primary" />
+
+        <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+    </div>
+
+    <hr />
+    
+    <div class="row">
+        <div class="form-group col">
+            <span class="control-label">Teacher</span>
+            <select asp-for="StaffId" asp-items="@(new SelectList(Model.StaffMembers, nameof(StaffSelectionListResponse.StaffId), nameof(StaffSelectionListResponse.DisplayName)))" class="combo" style="width:100%" data-val-required="You must select a teacher">
+                <option value="">-- Select --</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <h4>Select periods for the tutorial @Model.OfferingName</h4>
+    </div>
+
+    <div id="period_inputs"></div>
+</form>
+
+<div>
+    <div class="nav nav-pills timetable-selector" data-tabs="tabs">
+        @{
+            // var timetables = Model.ValidPeriods
+            //     .OrderBy(period => period.Timetable)
+            //     .ThenBy(period => period.Day)
+            //     .GroupBy(period => period.Timetable);
+
+            var timetables = Model.ValidPeriods.OrderBy(p => p.Timetable).GroupBy(p => p.Timetable);
+
+            bool firstTab = true;
+
+            foreach (var timetable in timetables)
+            {
+                var code = timetable.Key.Code;
+
+                <a class="nav-link @(firstTab ? "active" : "")" href="#@(code)" data-toggle="tab" role="tab">@timetable.Key.DisplayName</a>
+                firstTab = false;
+            }
+        }
+    </div>
+
+    <div class="tab-content">
+        @{
+            firstTab = true;
+            foreach (var block in timetables)
+            {
+                var code = block.Key.Code;
+
+                <div id="@(code)" class="tab-pane @(firstTab ? "active" : "")">
+                    @{
+                        var weeks = block.OrderBy(p => p.Week.Value).GroupBy(p => p.Week);
+
+                        foreach (var week in weeks)
+                        {
+                            var days = week.OrderBy(p => p.Day.Value).GroupBy(p => p.Day);
+
+                            <div class="Timetable-Week">
+                                @foreach (var day in days)
+                                {
+                                    var periods = day.OrderBy(p => p.StartTime);
+
+                                    <div class="Timetable-Day">
+                                        @week.Key.Name @day.Key.Name
+
+                                        @foreach (var period in periods)
+                                        {
+                                            var length = period.EndTime.Subtract(period.StartTime).Minutes;
+                                            length += period.EndTime.Subtract(period.StartTime).Hours * 60;
+
+                                            if (Model.ExistingSessions.Any(session => session.PeriodId == period.PeriodId))
+                                            {
+                                                <div class="blockLink pt_Selected_Elsewhere">
+                                                    <div class="Timetable-Period Timetable-@period.Type.Name" style="height: @(length)px;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                        @period.Name
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="blockLink" id="period_table_@period.PeriodId" onClick="toggleSelect('@period.PeriodId')" data-selected="false">
+                                                    <div class="Timetable-Period Timetable-@period.Type.Name" style="height: @(length)px;" title="@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                                        @period.Name
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+
+                firstTab = false;
+            }
+        }
+    </div>
+</div>
+
+@section scripts
+    {
+    <script>
+        function toggleSelect(periodId) {
+            var period_table = $('#period_table_' + periodId);
+            var selected = period_table[0].dataset.selected;
+
+            if (selected === "true") {
+                removePeriodFromSession(periodId);
+                period_table.removeClass("pt_Selected");
+                period_table.attr('data-selected', 'false');
+            } else {
+                addPeriodToSession(periodId);
+                period_table.addClass("pt_Selected");
+                period_table.attr('data-selected', 'true');
+            }
+        }
+
+        function addPeriodToSession(periodId) {
+            var input = $('<input>').attr('id', periodId + "_input")
+                .attr('name', "Periods")
+                .attr('type', "hidden");
+            input.val(periodId);
+            var periodInputDiv = $('div#period_inputs')[0];
+            periodInputDiv.append(input[0]);
+        }
+
+        function removePeriodFromSession(periodId) {
+            var input = $('#' + periodId + '_input');
+            input.remove();
+        }
+    </script>
+}

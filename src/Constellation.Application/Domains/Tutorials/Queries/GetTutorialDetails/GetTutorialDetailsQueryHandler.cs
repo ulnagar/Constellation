@@ -107,7 +107,7 @@ internal sealed class GetTutorialDetailsQueryHandler
 
             sessions.Add(new(
                 session.Id,
-                session.ToString(),
+                period.ToString(),
                 period.SortOrder,
                 period.Week,
                 period.Day,

@@ -2,11 +2,13 @@
 
 using Constellation.Application.Domains.StaffMembers.Models;
 using Constellation.Application.Domains.StaffMembers.Queries.GetStaffForSelectionList;
+using Constellation.Application.Domains.Timetables.Periods.Queries.GetAllPeriods;
 using Constellation.Core.Shared;
 using Core.Models.Timetables.Enums;
 using Core.Models.Tutorials.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,15 +37,12 @@ public class AddSessionToTutorialViewComponent : ViewComponent
             viewModel.Staff.Add(staff.StaffId, staff.Name.DisplayName);
         }
 
-        foreach (PeriodWeek week in PeriodWeek.GetOptions)
-        {
-            viewModel.Weeks.Add(week.Value, week.Name);
-        }
+        Result<List<PeriodResponse>> periods = await _mediator.Send(new GetAllPeriodsQuery());
 
-        foreach (PeriodDay day in PeriodDay.GetOptions)
-        {
-            viewModel.Days.Add(day.Value, day.Name);
-        }
+        if (periods.IsFailure)
+            return View(viewModel);
+
+        viewModel.Periods = new SelectList(periods.Value.OrderBy(period => period.SortOrder), nameof(PeriodResponse.PeriodId), nameof(PeriodResponse.Name), null, nameof(PeriodResponse.Group));
 
         return View(viewModel);
     }

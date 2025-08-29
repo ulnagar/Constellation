@@ -108,10 +108,7 @@ public class DetailsModel : BasePageModel
     {
         AddSessionToTutorialCommand command = new(
             Id,
-            viewModel.Week,
-            viewModel.Day,
-            viewModel.StartTime,
-            viewModel.EndTime,
+            viewModel.PeriodId,
             viewModel.StaffId);
 
         _logger

@@ -6,7 +6,7 @@ using System.Linq;
 
 public static class PeriodExtensions
 {
-    public static IEnumerable<IEnumerable<Period>> GroupConsecutive(this IEnumerable<Period> src)
+    public static IEnumerable<List<Period>> GroupConsecutive(this IEnumerable<Period> src)
     {
         var more = false;
 

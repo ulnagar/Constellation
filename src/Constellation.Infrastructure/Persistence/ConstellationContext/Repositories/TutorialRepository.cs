@@ -94,6 +94,14 @@ internal sealed class TutorialRepository : ITutorialRepository
     PeriodDay day,
     CancellationToken cancellationToken = default)
     {
+        List<PeriodId> periodIds = await _context
+            .Set<Period>()
+            .Where(period =>
+                period.Week == week &&
+                period.Day == day)
+            .Select(period => period.Id)
+            .ToListAsync(cancellationToken);
+
         List<TutorialId> tutorialIds = await _context
             .Set<Enrolment>()
             .Where(enrolment => enrolment.StudentId == studentId &&
@@ -117,8 +125,7 @@ internal sealed class TutorialRepository : ITutorialRepository
                     // session is either still current (not deleted) OR was deleted after the absence date
                     (!session.IsDeleted || session.DeletedAt.Date > absenceDate.ToDateTime(TimeOnly.MinValue)) &&
                     // session is for the same day as the absence
-                    session.Day == day && 
-                    session.Week == week))
+                    periodIds.Contains(session.PeriodId)))
             .Distinct()
             .ToListAsync(cancellationToken);
 

@@ -15,30 +15,10 @@
                     </div>
                     <div class="row">
                         <div class="form-group col">
-                            <span class="control-label">Week</span>
-                            <select asp-for="Week" asp-items="@(new SelectList(Model.Weeks, "Key", "Value"))" class="form-control">
+                            <span class="control-label">Period</span>
+                            <select asp-for="PeriodId" asp-items="@Model.Periods" class="form-control">
                                 <option value="">-- Select --</option>
                             </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">Day</span>
-                            <select asp-for="Day" asp-items="@(new SelectList(Model.Days, "Key", "Value"))" class="form-control">
-                                <option value="">-- Select --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">Start</span>
-                            <input asp-for="StartTime" class="form-control"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">End</span>
-                            <input asp-for="EndTime" class="form-control"/>
                         </div>
                     </div>
                     <div class="row">

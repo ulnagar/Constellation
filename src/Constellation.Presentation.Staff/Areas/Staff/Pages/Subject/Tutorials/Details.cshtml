@@ -183,6 +183,7 @@
             @if (canEditTest.Succeeded)
             {
                 <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-success btn-sm">Assign a new session</button>
+                <a asp-page="/Subject/Tutorials/AddSessions" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
                 <button data-offering-name="@Model.Tutorial.Name" class="btn btn-sm btn-danger remove-all-sessions-button">Remove All Sessions</button>
             }
 

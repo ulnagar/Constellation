@@ -34,7 +34,8 @@ internal sealed class GetAllPeriodsQueryHandler
             response.Add(new(
                 period.Id,
                 period.Name,
-                period.GroupName()));
+                period.GroupName(),
+                period.SortOrder));
         }
 
         return response;
