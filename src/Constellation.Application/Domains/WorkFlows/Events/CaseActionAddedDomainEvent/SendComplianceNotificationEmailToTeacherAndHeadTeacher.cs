@@ -6,7 +6,6 @@ using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
-using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
@@ -245,6 +244,6 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
 
         string incidentLink = $"{_sentralConfiguration.ServerUrl}/wellbeing/incidents/view?id={detail.IncidentId}";
 
-        await _emailService.SendComplianceWorkFlowNotificationEmail(recipients, item.Id, detail, age, incidentLink, cancellationToken);
+        await _emailService.SendComplianceWorkFlowNotificationEmail(recipients, item.Id, assignee.Name, detail, age, incidentLink, cancellationToken);
     }
 }

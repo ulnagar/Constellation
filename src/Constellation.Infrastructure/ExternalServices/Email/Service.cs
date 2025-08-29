@@ -1336,6 +1336,7 @@ public sealed class Service : IEmailService
     public async Task SendComplianceWorkFlowNotificationEmail(
         List<EmailRecipient> recipients,
         CaseId caseId,
+        Name assignee,
         ComplianceCaseDetail detail,
         int incidentAge,
         string incidentLink,
@@ -1347,6 +1348,7 @@ public sealed class Service : IEmailService
             SenderName = "Aurora College",
             SenderTitle = "",
             Preheader = "",
+            Assignee = assignee.DisplayName,
             StudentName = detail.Name,
             StudentGrade = detail.Grade.AsName(),
             StudentSchool = detail.SchoolName,

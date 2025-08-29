@@ -1,6 +1,7 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows.IndexModel
 
+@using Constellation.Core.Models.WorkFlow.Enums
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows
 
 @{
@@ -18,32 +19,32 @@
 
         switch (Model.Filter)
         {
-            case IndexModel.FilterEnum.All:
+            case CaseStatusFilter.All:
                 all_style = "btn-primary";
                 break;
-            case IndexModel.FilterEnum.Open:
+            case CaseStatusFilter.Open:
                 open_style = "btn-primary";
                 break;
-            case IndexModel.FilterEnum.Overdue:
+            case CaseStatusFilter.Overdue:
                 overdue_style = "btn-primary";
                 break;
-            case IndexModel.FilterEnum.Closed:
+            case CaseStatusFilter.Closed:
                 closed_style = "btn-primary";
                 break;
-            case IndexModel.FilterEnum.ForMe:
+            case CaseStatusFilter.Mine:
                 forMe_style = "btn-primary";
                 break;
         }
     }
 
     <div class="btn-group">
-        <a asp-route-filter="@IndexModel.FilterEnum.All" class="btn @all_style">All</a>
-        <a asp-route-filter="@IndexModel.FilterEnum.Open" class="btn @open_style">Open</a>
-        <a asp-route-filter="@IndexModel.FilterEnum.Overdue" class="btn @overdue_style">Overdue</a>
-        <a asp-route-filter="@IndexModel.FilterEnum.Closed" class="btn @closed_style">Closed</a>
+        <a asp-route-filter="@CaseStatusFilter.All" class="btn @all_style">All</a>
+        <a asp-route-filter="@CaseStatusFilter.Open" class="btn @open_style">Open</a>
+        <a asp-route-filter="@CaseStatusFilter.Overdue" class="btn @overdue_style">Overdue</a>
+        <a asp-route-filter="@CaseStatusFilter.Closed" class="btn @closed_style">Closed</a>
         @if (Model.IsAdmin)
         {
-            <a asp-route-filter="@IndexModel.FilterEnum.ForMe" class="btn @forMe_style">For Me</a>
+            <a asp-route-filter="@CaseStatusFilter.Mine" class="btn @forMe_style">For Me</a>
         }
     </div>
 </div>

@@ -6,6 +6,8 @@ public sealed class ComplianceWorkFlowNotificationEmailViewModel : EmailLayoutBa
 {
     public const string ViewLocation = "/Views/Emails/WorkFlow/ComplianceWorkFlowNotificationEmail.cshtml";
 
+    public string Assignee { get; set; }
+
     public string StudentName { get; set; }
     public string StudentGrade { get; set; }
     public string StudentSchool { get; set; }

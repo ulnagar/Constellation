@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
-    <AssemblyVersion>1.18.25241.1</AssemblyVersion>
+    <AssemblyVersion>1.18.25241.4</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +31,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
+	  <Folder Include="Domains\WorkFlows\Enums\" />
 	</ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Queries.GetCaseSummaryList;
 
 using Abstractions.Messaging;
+using Core.Abstractions.Clock;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -24,31 +25,31 @@ internal sealed class GetCaseSummaryListQueryHandler
     private readonly ICaseRepository _caseRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IStaffRepository _staffRepository;
+    private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public GetCaseSummaryListQueryHandler(
         ICaseRepository caseRepository,
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
+        IDateTimeProvider dateTime,
         ILogger logger)
     {
         _caseRepository = caseRepository;
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
+        _dateTime = dateTime;
         _logger = logger.ForContext<GetCaseSummaryListQuery>();
     }
 
     public async Task<Result<List<CaseSummaryResponse>>> Handle(GetCaseSummaryListQuery request, CancellationToken cancellationToken)
     {
-        List<CaseSummaryResponse> responses = new();
+        List<CaseSummaryResponse> responses = [];
 
-        List<Case> items = await _caseRepository.GetAll(cancellationToken);
-
+        List<Case> items = await _caseRepository.GetFilteredCases(request.CurrentUserId, request.Filter, _dateTime, cancellationToken);
+        
         foreach (Case item in items)
         {
-            if (!request.IsAdmin && item.Actions.All(action => action.AssignedToId != request.CurrentUserId))
-                continue;
-
             StudentId studentId = StudentId.Empty;
             string description = string.Empty;
 
