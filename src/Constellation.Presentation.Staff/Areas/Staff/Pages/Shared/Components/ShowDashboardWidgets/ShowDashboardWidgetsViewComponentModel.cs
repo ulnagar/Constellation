@@ -22,4 +22,7 @@ public sealed class ShowDashboardWidgetsViewComponentModel
     public int ProcessingAttendancePlans { get; set; }
 
     public int EdvalDifferences { get; set; }
+
+    public bool ShowStocktakeWidget { get; set; } = false;
+    public double StocktakePercentage { get; set; }
 }

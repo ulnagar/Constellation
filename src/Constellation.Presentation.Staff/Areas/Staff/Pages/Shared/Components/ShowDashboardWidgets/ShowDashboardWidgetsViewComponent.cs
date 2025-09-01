@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets;
 
+using Application.Domains.AssetManagement.Stocktake.Queries.CountStocktakeItemsOutstanding;
 using Application.Domains.Attendance.Plans.Queries.CountAttendancePlansWithStatus;
 using Application.Domains.Edval.Queries.CountEdvalDifferences;
 using Application.Domains.Students.Queries.CountStudentsWithAbsenceScanDisabled;
@@ -109,6 +110,14 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
 
             if (sentralIdRequest.IsSuccess)
                 viewModel.StudentsWithoutSentralId = sentralIdRequest.Value;
+
+            Result<double> stocktakeRequest = await _mediator.Send(new CountStocktakeItemsOutstandingQuery(), cancellationToken);
+
+            if (stocktakeRequest.IsSuccess)
+            {
+                viewModel.ShowStocktakeWidget = true;
+                viewModel.StocktakePercentage = stocktakeRequest.Value;
+            }
         }
 
         return View(viewModel);
