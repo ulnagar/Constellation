@@ -13,6 +13,20 @@
     </div>
 </div>
 
+@if (Model.ShowStocktakeWidget)
+{
+    <div class="col mb-4 sortable" data-id="card-stocktake-percentage">
+        <div class="card h-100 @(Model.StocktakePercentage > 0 ? "text-white bg-warning" : "text-white bg-success")">
+            <div class="card-header">Stocktake</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.StocktakePercentage.ToString("F")%</h3>
+                <p class="card-text">devices remaining to be sighted</p>
+                <a asp-page="/Equipment/Stocktake/" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
+
 @if (Model.ShowSentralIdWidgets)
 {
     <div class="col mb-4 sortable" data-id="card-student-sentralid">
