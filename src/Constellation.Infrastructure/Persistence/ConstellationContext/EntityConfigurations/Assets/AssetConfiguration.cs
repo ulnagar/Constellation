@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Assets;
 
+using Converters;
 using Core.Models.Assets;
 using Core.Models.Assets.Enums;
 using Core.Models.Assets.Identifiers;
@@ -24,9 +25,7 @@ internal sealed class AssetConfiguration : IEntityTypeConfiguration<Asset>
 
         builder
             .Property(asset => asset.AssetNumber)
-            .HasConversion(
-                number => number.ToString(),
-                value => AssetNumber.FromValue(value));
+            .HasConversion<AssetNumberConverter>();
 
         builder
             .Property(asset => asset.Status)
