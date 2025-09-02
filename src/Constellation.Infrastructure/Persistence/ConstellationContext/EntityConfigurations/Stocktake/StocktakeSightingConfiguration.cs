@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Models.Stocktake;
+using Converters;
 using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -30,9 +31,7 @@ public class StocktakeSightingConfiguration : IEntityTypeConfiguration<Stocktake
 
         builder
             .Property(sighting => sighting.AssetNumber)
-            .HasConversion(
-                number => number.ToString(),
-                value => AssetNumber.FromValue(value));
+            .HasConversion<AssetNumberConverter>();
 
         builder
             .Property(sighting => sighting.LocationCategory)
