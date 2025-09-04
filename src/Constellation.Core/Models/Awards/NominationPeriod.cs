@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Enums;
+using Core.Enums;
 using Errors;
 using Identifiers;
 using Shared;
@@ -10,8 +10,9 @@ using System.Linq;
 
 public sealed class NominationPeriod
 {
-    private List<Nomination> _nominations = new();
-    private List<NominationPeriodGrade> _grades = new();
+    private readonly List<Nomination> _nominations = [];
+    private readonly List<NominationPeriodGrade> _grades = [];
+    private readonly List<NominationNotification> _notifications = [];
 
     private NominationPeriod() { }
 
@@ -34,6 +35,7 @@ public sealed class NominationPeriod
     public IReadOnlyList<NominationPeriodGrade> IncludedGrades => _grades;
     public DateOnly LockoutDate { get; private set; }
     public IReadOnlyList<Nomination> Nominations => _nominations;
+    public IReadOnlyList<NominationNotification> Notifications => _notifications.AsReadOnly();
 
     public static Result<NominationPeriod> Create(
         string name,

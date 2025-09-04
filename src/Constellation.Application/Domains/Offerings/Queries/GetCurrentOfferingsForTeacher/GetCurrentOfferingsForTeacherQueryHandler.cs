@@ -59,6 +59,7 @@ public class GetCurrentOfferingsForTeacherQueryHandler
                     response.Add(new(
                         offering.Id,
                         offering.Name,
+                        offering.EndDate.ToString("yyyy"),
                         course.Name,
                         assignment.Type));
                 }
@@ -94,6 +95,7 @@ public class GetCurrentOfferingsForTeacherQueryHandler
                     response.Add(new(
                         offering.Id,
                         offering.Name,
+                        offering.EndDate.ToString("yyyy"),
                         course.Name,
                         assignment.Type));
                 }

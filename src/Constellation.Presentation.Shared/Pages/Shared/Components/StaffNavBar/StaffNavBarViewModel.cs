@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.StaffNavBar;
 
-using Core.Models.Offerings.Identifiers;
+using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 
 public sealed class StaffNavBarViewModel
 {
-    public Dictionary<string, OfferingId> Classes { get; set; } = new();
+    public List<TeacherOfferingResponse> Classes { get; set; } = new();
 
     public bool CanAccessParentPortal { get; set; }
     public bool CanAccessSchoolPortal { get; set; }

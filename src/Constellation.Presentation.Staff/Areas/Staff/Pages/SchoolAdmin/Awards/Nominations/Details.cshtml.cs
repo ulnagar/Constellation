@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations;
 
 using Application.Common.PresentationModels;
-using Constellation.Application.Awards.DeleteAwardNomination;
+using Application.Domains.MeritAwards.Nominations.Commands.DeleteAwardNomination;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.ExportAwardNominations;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;

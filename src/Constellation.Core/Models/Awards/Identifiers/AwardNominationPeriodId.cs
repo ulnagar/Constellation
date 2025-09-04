@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Identifiers;
+﻿namespace Constellation.Core.Models.Awards.Identifiers;
 
 using Constellation.Core.Primitives;
 using System;

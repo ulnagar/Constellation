@@ -2,7 +2,7 @@
 
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

@@ -2,7 +2,7 @@
 
 using Constellation.Core.Models.Students.Identifiers;
 using Events;
-using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using StaffMembers.Identifiers;
 using System;
