@@ -26,7 +26,7 @@ public sealed class NominationNotification
     public string Subject { get; private set; }
     public string Body { get; private set; }
 
-    private static NominationNotification Create(
+    public static NominationNotification Create(
         AwardNominationPeriodId periodId,
         AwardNotificationType type,
         List<AwardNominationId> nominations,

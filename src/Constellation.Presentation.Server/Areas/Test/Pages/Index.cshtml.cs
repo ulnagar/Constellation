@@ -1,8 +1,11 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Domains.MeritAwards.Nominations.Commands.SendParentNotifications;
+using Application.Domains.MeritAwards.Nominations.Commands.SendSchoolNotifications;
 using Application.Models.Auth;
 using BaseModels;
 using Core.Abstractions.Services;
+using Core.Models.Awards.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
@@ -24,6 +27,9 @@ public class IndexModel : BasePageModel
         _logger = logger;
     }
 
-    public async Task OnGet() { }
+    public async Task OnGet()
+    {
+
+    }
 
 }

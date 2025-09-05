@@ -45,6 +45,13 @@ internal sealed class AwardNominationRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<NominationNotification> GetNotificationById(
+        NominationNotificationId notificationId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<NominationNotification>()
+            .FirstOrDefaultAsync(notification => notification.Id == notificationId, cancellationToken);
+
     public void Insert(
         NominationPeriod period) =>
         _context.Set<NominationPeriod>().Add(period);

@@ -37,6 +37,7 @@ using Templates.Views.Emails.AssessmentProvisions;
 using Templates.Views.Emails.Assignments;
 using Templates.Views.Emails.AttendancePlans;
 using Templates.Views.Emails.Auth;
+using Templates.Views.Emails.AwardNominations;
 using Templates.Views.Emails.Awards;
 using Templates.Views.Emails.Contacts;
 using Templates.Views.Emails.Covers;
@@ -1456,5 +1457,69 @@ public sealed class Service : IEmailService
         string body = await _razorService.RenderViewToStringAsync(AssessmentProvisionNotificationForSchoolsEmailViewModel.ViewLocation, viewModel);
 
         return await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+    }
+
+    public async Task<Result<string>> SendAwardNominationNotificationEmailToSchools(
+        List<EmailRecipient> recipients,
+        List<EmailRecipient> ccRecipients,
+        Name contact,
+        string school,
+        DateOnly deliveryDate,
+        Dictionary<Name, List<Nomination>> students,
+        CancellationToken cancellationToken = default)
+    {
+        SchoolNotificationEmailViewModel viewModel = new()
+        {
+            Title = $"Student Awards - {school}",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            Contact = contact,
+            School = school,
+            DeliveryDate = deliveryDate,
+            Students = students
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(SchoolNotificationEmailViewModel.ViewLocation, viewModel);
+
+        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+
+        if (emailSendOperation.IsFailure)
+            return Result.Failure<string>(emailSendOperation.Error);
+
+        return body;
+    }
+
+    public async Task<Result<string>> SendAwardNominationNotificationEmailToParents(
+        List<EmailRecipient> recipients,
+        List<EmailRecipient> ccRecipients,
+        Name parent,
+        Name student,
+        string school,
+        DateOnly deliveryDate,
+        List<Nomination> awards,
+        CancellationToken cancellationToken = default)
+    {
+        ParentNotificationEmailViewModel viewModel = new()
+        {
+            Title = $"Student Awards - {student.DisplayName}",
+            SenderName = "Aurora College",
+            SenderTitle = "",
+            Preheader = "",
+            Parent = parent,
+            Student = student,
+            School = school,
+            DeliveryDate = deliveryDate,
+            Awards = awards
+        };
+
+        string body = await _razorService.RenderViewToStringAsync(ParentNotificationEmailViewModel.ViewLocation, viewModel);
+
+        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+
+        if (emailSendOperation.IsFailure)
+            return Result.Failure<string>(emailSendOperation.Error);
+
+        return body;
     }
 }

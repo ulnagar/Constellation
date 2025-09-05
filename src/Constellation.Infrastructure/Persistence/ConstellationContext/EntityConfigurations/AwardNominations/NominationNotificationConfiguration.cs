@@ -35,11 +35,15 @@ internal sealed class NominationNotificationConfiguration : IEntityTypeConfigura
 
         builder
             .Property(notification => notification.ToAddresses)
-            .HasConversion(new JsonColumnConverter<List<EmailRecipient>>());
+            .HasConversion(new JsonColumnConverter<IReadOnlyList<EmailRecipient>>());
 
         builder
             .Property(notification => notification.CcAddresses)
-            .HasConversion(new JsonColumnConverter<List<EmailRecipient>>());
+            .HasConversion(new JsonColumnConverter<IReadOnlyList<EmailRecipient>>());
+
+        builder
+            .Property(notification => notification.Nominations)
+            .HasConversion(new JsonColumnConverter<IReadOnlyList<AwardNominationId>>());
 
         builder
             .HasOne<NominationPeriod>()

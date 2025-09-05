@@ -21,7 +21,7 @@
             <div class="card-body">
                 <h3 class="card-title card-title-large">@Model.StocktakePercentage.ToString("F")%</h3>
                 <p class="card-text">devices remaining to be sighted</p>
-                <a asp-page="/Equipment/Stocktake/" asp-area="Staff" class="stretched-link"></a>
+                <a asp-page="/Equipment/Stocktake/Details" asp-area="Staff" asp-route-id="@Model.StocktakeEventId" class="stretched-link"></a>
             </div>
         </div>
     </div>

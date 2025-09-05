@@ -17,5 +17,7 @@ public sealed record NominationPeriodDetailResponse(
         Name Student,
         AwardType AwardType,
         string Description,
-        string NominatedBy);
+        string NominatedBy,
+        NominationNotificationId ParentEmailId,
+        NominationNotificationId SchoolEmailId);
 }

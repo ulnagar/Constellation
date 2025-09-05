@@ -13,6 +13,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Stocktake.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -111,12 +112,13 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
             if (sentralIdRequest.IsSuccess)
                 viewModel.StudentsWithoutSentralId = sentralIdRequest.Value;
 
-            Result<double> stocktakeRequest = await _mediator.Send(new CountStocktakeItemsOutstandingQuery(), cancellationToken);
+            Result<(StocktakeEventId EventId, double Percentage)> stocktakeRequest = await _mediator.Send(new CountStocktakeItemsOutstandingQuery(), cancellationToken);
 
             if (stocktakeRequest.IsSuccess)
             {
                 viewModel.ShowStocktakeWidget = true;
-                viewModel.StocktakePercentage = stocktakeRequest.Value;
+                viewModel.StocktakePercentage = stocktakeRequest.Value.Percentage;
+                viewModel.StocktakeEventId = stocktakeRequest.Value.EventId;
             }
         }
 

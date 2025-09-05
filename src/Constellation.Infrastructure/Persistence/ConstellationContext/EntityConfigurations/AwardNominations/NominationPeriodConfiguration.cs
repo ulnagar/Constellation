@@ -42,6 +42,12 @@ internal sealed class NominationPeriodConfiguration
             .AutoInclude();
 
         builder
+            .HasMany(period => period.Notifications)
+            .WithOne()
+            .HasForeignKey(notification => notification.PeriodId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder
             .Navigation(period => period.Notifications)
             .AutoInclude();
     }

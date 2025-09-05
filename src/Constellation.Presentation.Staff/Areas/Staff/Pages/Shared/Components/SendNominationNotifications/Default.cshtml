@@ -1,0 +1,26 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.SendNominationNotifications.SendNominationNotificationsSelection
+
+<div class="modal fade" tabindex="-1" id="sendNotifications">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Notification Emails</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Delivery Date</span>
+                            <input asp-for="DeliveryDate" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" asp-page-handler="SendParentNotifications" value="Send Parent" class="btn btn-primary show-loader" />
+                    <input type="submit" asp-page-handler="SendSchoolNotifications" value="Send School" class="btn btn-primary show-loader" />
+                    <input type="button" class="btn btn-secondary" data-dismiss="modal" value="Cancel" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

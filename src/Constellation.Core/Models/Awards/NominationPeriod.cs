@@ -57,6 +57,8 @@ public sealed class NominationPeriod
         return Result.Success();
     }
 
+    public void AddNotification(NominationNotification notification) => _notifications.Add(notification);
+
     public void UpdateName(string name) => Name = name;
     public void UpdateLockoutDate(DateOnly date) => LockoutDate = date;
     private void AddGrade(Grade grade) => _grades.Add(new(Id, grade));

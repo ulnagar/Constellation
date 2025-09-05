@@ -2,6 +2,8 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.
 
 using Application.Common.PresentationModels;
 using Application.Domains.MeritAwards.Nominations.Commands.DeleteAwardNomination;
+using Application.Domains.MeritAwards.Nominations.Commands.SendParentNotifications;
+using Application.Domains.MeritAwards.Nominations.Commands.SendSchoolNotifications;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.ExportAwardNominations;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 using Constellation.Application.DTOs;
@@ -19,6 +21,7 @@ using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.ExportAwardNominations;
+using Shared.Components.SendNominationNotifications;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
@@ -107,6 +110,60 @@ public class DetailsModel : BasePageModel
 
             await PreparePage(cancellationToken);
 
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSendParentNotifications(
+        SendNominationNotificationsSelection viewModel,
+        CancellationToken cancellationToken = default)
+    {
+        SendParentNotificationsCommand command = new(PeriodId, viewModel.DeliveryDate);
+
+        _logger
+            .ForContext(nameof(SendParentNotificationsCommand), command, true)
+            .Information("Requested to send Parent Award Nomination Notifications by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command, cancellationToken);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to send Parent Award Nomination Notifications by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(request.Error);
+
+            await PreparePage(cancellationToken);
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSendSchoolNotifications(
+        SendNominationNotificationsSelection viewModel,
+        CancellationToken cancellationToken = default)
+    {
+        SendSchoolNotificationsCommand command = new(PeriodId, viewModel.DeliveryDate);
+
+        _logger
+            .ForContext(nameof(SendSchoolNotificationsCommand), command, true)
+            .Information("Requested to send School Award Nomination Notifications by user {User}", _currentUserService.UserName);
+
+        Result request = await _mediator.Send(command, cancellationToken);
+
+        if (request.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), request.Error, true)
+                .Warning("Failed to send School Award Nomination Notifications by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(request.Error);
+
+            await PreparePage(cancellationToken);
             return Page();
         }
 
