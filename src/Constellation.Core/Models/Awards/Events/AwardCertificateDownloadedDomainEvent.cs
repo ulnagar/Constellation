@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Core.Models.Awards.Events;
 
 using DomainEvents;
-using Identifiers;
+using Models.Identifiers;
 
 public sealed record AwardCertificateDownloadedDomainEvent(
     DomainEventId Id,

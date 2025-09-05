@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.AwardNominations;
 
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Offerings.Identifiers;

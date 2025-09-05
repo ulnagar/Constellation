@@ -44,8 +44,7 @@ public sealed class StaffNavBarViewComponent : ViewComponent
         if (query.IsFailure)
             return View(viewName, viewModel);
 
-        foreach (TeacherOfferingResponse entry in query.Value)
-            viewModel.Classes.Add(entry.OfferingName, entry.OfferingId);
+        viewModel.Classes = query.Value;
 
         return View(viewName, viewModel);
     }

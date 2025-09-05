@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Core.Models.Awards.Errors;
 
-using Enums;
+using Constellation.Core.Models.Awards.Identifiers;
+using Core.Enums;
 using Extensions;
-using Identifiers;
 using Shared;
 using System;
 using ValueObjects;

@@ -1,7 +1,7 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.AwardNominations;
 
 using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +12,7 @@ internal sealed class NominationConfiguration
 {
     public void Configure(EntityTypeBuilder<Nomination> builder)
     {
-        builder.ToTable("Awards_Nominations");
+        builder.ToTable("Nominations", "AwardNominations");
 
         builder
             .HasKey(nomination => nomination.Id);

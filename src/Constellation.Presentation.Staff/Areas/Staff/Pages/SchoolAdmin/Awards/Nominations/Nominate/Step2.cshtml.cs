@@ -5,6 +5,7 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;

@@ -89,7 +89,9 @@ public class SchoolContactRepository : ISchoolContactRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
-            .Where(contact => contact.Assignments.Any(role => 
+            .Where(contact => 
+                !contact.IsDeleted &&
+                contact.Assignments.Any(role => 
                 !role.IsDeleted && 
                 role.SchoolCode == schoolCode))
             .ToListAsync(cancellationToken);

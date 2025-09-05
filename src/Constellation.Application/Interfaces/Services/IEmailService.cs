@@ -33,6 +33,8 @@ public interface IEmailService
 {
     // Awards Emails
     Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, Attachment certificate, StudentAward award, Student? student, StaffMember? teacher, CancellationToken cancellationToken = default);
+    Task<Result<string>> SendAwardNominationNotificationEmailToParents(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name parent, Name student, string school, DateOnly deliveryDate, List<Nomination> awards, CancellationToken cancellationToken = default);
+    Task<Result<string>> SendAwardNominationNotificationEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, string school, DateOnly deliveryDate, Dictionary<Name, List<Nomination>> students, CancellationToken cancellationToken = default);
 
     // Lesson Emails
     Task SendLessonMissedEmail(LessonMissedNotificationEmail notification);

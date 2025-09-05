@@ -6,16 +6,14 @@ using Constellation.Application.Domains.MeritAwards.Nominations.Commands.UpdateN
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanAddAwards)]

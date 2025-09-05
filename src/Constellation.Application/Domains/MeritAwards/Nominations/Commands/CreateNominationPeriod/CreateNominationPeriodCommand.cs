@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Enums;
+using Constellation.Core.Models.Awards.Identifiers;
 using Core.Models.Identifiers;
 using System;
 using System.Collections.Generic;

@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Awards.Identifiers;
 using Core.Models.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
