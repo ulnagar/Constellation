@@ -1,12 +1,11 @@
-﻿namespace Constellation.Application.Awards.DeleteAwardNomination;
+﻿namespace Constellation.Application.Domains.MeritAwards.Nominations.Commands.DeleteAwardNomination;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
 using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Awards.Errors;
 using Constellation.Core.Shared;
-using Core.Models.Awards.Errors;
 using Serilog;
 using System.Linq;
 using System.Threading;

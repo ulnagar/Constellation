@@ -6,7 +6,9 @@ using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Errors;
+using Core.Models.Awards.Enums;
 using Core.Models.Awards.Errors;
+using Core.Models.Awards.Identifiers;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;
@@ -60,12 +62,24 @@ internal sealed class GetNominationPeriodRequestHandler
                 continue;
             }
 
+            var schoolEmail = period.Notifications
+                .FirstOrDefault(entry =>
+                    entry.Nominations.Contains(nomination.Id) &&
+                    entry.Type.Equals(AwardNotificationType.PartnerSchool));
+
+            var parentEmail = period.Notifications
+                .FirstOrDefault(entry => 
+                    entry.Nominations.Contains(nomination.Id) && 
+                    entry.Type.Equals(AwardNotificationType.Parent));
+
             NominationPeriodDetailResponse.NominationResponse entry = new(
                 nomination.Id,
                 student.Name,
                 nomination.AwardType,
                 nomination.GetDescription(),
-                nomination.CreatedBy);
+                nomination.CreatedBy,
+                parentEmail?.Id ?? NominationNotificationId.Empty, 
+                schoolEmail?.Id ?? NominationNotificationId.Empty);
 
             nominations.Add(entry);
         }

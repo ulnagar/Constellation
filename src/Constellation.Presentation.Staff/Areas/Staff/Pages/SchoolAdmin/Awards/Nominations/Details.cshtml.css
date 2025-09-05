@@ -1,0 +1,22 @@
+.fal {
+    border-radius: 0.2rem;
+    padding: 0.3rem;
+    font-size: 2rem;
+    width: 3rem;
+}
+
+.fa-child:before {
+    margin-left: 15%
+}
+
+.fal.success {
+    color: darkgreen;
+}
+
+.fal.pending {
+    color: dimgray;
+}
+
+td.icon {
+    vertical-align: middle;
+}

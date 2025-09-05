@@ -1074,11 +1074,50 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("Awards_Nominations", (string)null);
+                    b.ToTable("Nominations", "AwardNominations");
 
                     b.HasDiscriminator<string>("AwardType");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Awards.NominationNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CcAddresses")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FromAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nominations")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PeriodId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ToAddresses")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PeriodId");
+
+                    b.ToTable("Notifications", "AwardNominations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Awards.NominationPeriod", b =>
@@ -1094,7 +1133,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("Awards_NominationPeriods", (string)null);
+                    b.ToTable("Periods", "AwardNominations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Awards.NominationPeriodGrade", b =>
@@ -1107,7 +1146,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("PeriodId", "Grade");
 
-                    b.ToTable("Awards_NominationPeriods_Grades", (string)null);
+                    b.ToTable("PeriodGrades", "AwardNominations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Awards.StudentAward", b =>
@@ -4842,6 +4881,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Awards.NominationNotification", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.Awards.NominationPeriod", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("PeriodId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Awards.NominationPeriodGrade", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Awards.NominationPeriod", null)
@@ -5615,6 +5663,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("IncludedGrades");
 
                     b.Navigation("Nominations");
+
+                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Device", b =>

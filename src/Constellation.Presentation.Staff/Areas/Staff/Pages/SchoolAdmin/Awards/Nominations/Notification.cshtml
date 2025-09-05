@@ -1,0 +1,60 @@
+﻿@page "{id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.NotificationModel
+
+@{
+    Layout = null;
+}
+
+<style>
+    table.headers {
+        margin-left: 4rem;
+        font-family: monospace;
+        font-size: large;
+    }
+
+    table.headers td {
+        padding-right: 1rem;
+        padding-top: 1rem;
+    }
+
+    table.headers td:first-child {
+        font-weight: bold;
+    }
+</style>
+
+<table class="headers">
+    <tr>
+        <td>From:</td>
+        <td>@Model.Notification.FromAddress.Name &lt;@Model.Notification.FromAddress.Email&gt;</td>
+    </tr>
+    <tr>
+        <td>Sent:</td>
+        <td>@Model.Notification.SentAt.ToString("dddd d MMM yyyy h:mm tt")</td>
+    </tr>
+    <tr>
+        <td>To:</td>
+        <td>
+            @foreach (var recipient in Model.Notification.ToAddresses)
+            {
+                <span>@recipient.Name &lt;@recipient.Email&gt;; </span>
+            }
+        </td>
+    </tr>
+    <tr>
+        <td>CC:</td>
+        <td>
+            @foreach (var recipient in Model.Notification.CcAddresses)
+            {
+                <span>@recipient.Name &lt;@recipient.Email&gt;; </span>
+            }
+        </td>
+    </tr>
+    <tr>
+        <td>Subject:</td>
+        <td>@Model.Notification.Subject</td>
+    </tr>
+</table>
+
+<hr />
+
+@Html.Raw(Model.Notification.Body)

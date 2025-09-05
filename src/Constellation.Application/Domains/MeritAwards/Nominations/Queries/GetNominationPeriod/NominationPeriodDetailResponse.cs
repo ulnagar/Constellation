@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 
 using Constellation.Core.Enums;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -17,5 +17,7 @@ public sealed record NominationPeriodDetailResponse(
         Name Student,
         AwardType AwardType,
         string Description,
-        string NominatedBy);
+        string NominatedBy,
+        NominationNotificationId ParentEmailId,
+        NominationNotificationId SchoolEmailId);
 }

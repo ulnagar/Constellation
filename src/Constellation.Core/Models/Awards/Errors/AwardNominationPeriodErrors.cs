@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Awards.Errors;
 
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Shared;
 using System;
 

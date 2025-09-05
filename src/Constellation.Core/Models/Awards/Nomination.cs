@@ -1,16 +1,15 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
-using Enums;
+using Core.Enums;
 using Errors;
 using Extensions;
-using Identifiers;
 using Primitives;
 using Shared;
 using System;
-using System.Linq;
 using ValueObjects;
 
 public abstract class Nomination : IFullyAuditableEntity
@@ -19,6 +18,8 @@ public abstract class Nomination : IFullyAuditableEntity
     public AwardNominationPeriodId PeriodId { get; protected set; }
     public StudentId StudentId { get; protected set; }
     public AwardType AwardType { get; protected set; }
+
+    public abstract int SortOrder { get; }
 
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -75,6 +76,8 @@ public sealed class FirstInSubjectNomination : Nomination
             courseName);
     }
 
+    public override int SortOrder => 1;
+
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public Grade Grade { get; private set; }
@@ -130,6 +133,8 @@ public sealed class FirstInSubjectMathematicsNomination : Nomination
             courseName);
     }
 
+    public override int SortOrder => 2;
+
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public Grade Grade { get; private set; }
@@ -184,6 +189,8 @@ public sealed class FirstInSubjectScienceTechnologyNomination : Nomination
             grade,
             courseName);
     }
+
+    public override int SortOrder => 3;
 
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
@@ -245,6 +252,8 @@ public sealed class AcademicExcellenceNomination : Nomination
             className);
     }
 
+    public override int SortOrder => 4;
+
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public OfferingId OfferingId { get; private set; }
@@ -302,6 +311,8 @@ public sealed class AcademicExcellenceMathematicsNomination : Nomination
             offeringId,
             className);
     }
+
+    public override int SortOrder => 5;
 
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
@@ -361,6 +372,8 @@ public sealed class AcademicExcellenceScienceTechnologyNomination : Nomination
             className);
     }
 
+    public override int SortOrder => 6;
+
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public OfferingId OfferingId { get; private set; }
@@ -419,6 +432,8 @@ public sealed class AcademicAchievementNomination : Nomination
             className);
     }
 
+    public override int SortOrder => 7;
+
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public OfferingId OfferingId { get; private set; }
@@ -475,6 +490,8 @@ public sealed class AcademicAchievementMathematicsNomination : Nomination
             offeringId,
             className);
     }
+
+    public override int SortOrder => 8;
 
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
@@ -533,6 +550,8 @@ public sealed class AcademicAchievementScienceTechnologyNomination : Nomination
             className);
     }
 
+    public override int SortOrder => 9;
+
     public CourseId CourseId { get; private set; }
     public string CourseName { get; private set; }
     public OfferingId OfferingId { get; private set; }
@@ -573,6 +592,8 @@ public sealed class PrincipalsAwardNomination : Nomination
             studentId);
     }
 
+    public override int SortOrder => 10;
+
     public override string ToString() => $"{AwardType.ToString()}";
 
     public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Principals Award";
@@ -603,6 +624,8 @@ public sealed class GalaxyMedalNomination : Nomination
             studentId);
     }
 
+    public override int SortOrder => 11;
+
     public override string ToString() => $"{AwardType.ToString()}";
 
     public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Galaxy Medal";
@@ -632,6 +655,8 @@ public sealed class UniversalAchieverNomination : Nomination
             periodId,
             studentId);
     }
+    
+    public override int SortOrder => 12;
 
     public override string ToString() => $"{AwardType.ToString()}";
     public override string GetDescription(bool showGrade = true, bool showClass = true) => $"Universal Achiever Award";

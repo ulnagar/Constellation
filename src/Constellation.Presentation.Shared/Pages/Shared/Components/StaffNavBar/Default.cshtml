@@ -111,9 +111,23 @@
                     <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">My Classes <span class="caret"></span></a>
                         <div class="dropdown-menu">
-                            @foreach (var entry in Model.Classes.OrderBy(x => x.Key))
-                            {
-                                <a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Offerings/Details" asp-route-id="@entry.Value.Value">@entry.Key</a>
+                            @{
+                                var groups = Model.Classes.GroupBy(x => x.Year);
+
+                                for (int i = 0; i < groups.Count(); i++)
+                                {
+                                    var entries = groups.Skip(i).First();
+
+                                    foreach (var entry in entries.OrderBy(x => x.OfferingName))
+                                    {
+                                        <a class="dropdown-item" asp-area="Staff" asp-page="/Subject/Offerings/Details" asp-route-id="@entry.OfferingId">@entry.OfferingName (@entry.Year)</a>
+                                    }
+
+                                    if (i != groups.Count() - 1)
+                                    {
+                                        <div class="dropdown-divider"></div>
+                                    }
+                                }
                             }
                         </div>
                     </li>

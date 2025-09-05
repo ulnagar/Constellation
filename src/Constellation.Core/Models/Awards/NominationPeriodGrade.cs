@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Awards;
 
-using Enums;
+using Core.Enums;
 using Identifiers;
 
 public sealed record NominationPeriodGrade(

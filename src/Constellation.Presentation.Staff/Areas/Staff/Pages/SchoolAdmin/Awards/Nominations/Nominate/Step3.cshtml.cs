@@ -6,6 +6,7 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNominationPeriod;
 using Constellation.Application.Domains.Offerings.Queries.GetFilteredOfferingsForSelectionList;
+using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.Abstractions.Services;
 using Core.Models.Identifiers;

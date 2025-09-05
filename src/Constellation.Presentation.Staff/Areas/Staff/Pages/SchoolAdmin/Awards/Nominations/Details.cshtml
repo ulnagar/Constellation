@@ -2,6 +2,7 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.Nominations.DetailsModel
 
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Awards.Identifiers
 
 @inject IAuthorizationService authService;
 
@@ -22,6 +23,7 @@
     {
         <a asp-page="/SchoolAdmin/Awards/Nominations/Upsert" asp-area="Staff" asp-route-id="@Model.PeriodId" class="btn btn-primary">Edit</a>
         <button data-toggle="modal" data-target="#export-award-modal" class="btn btn-warning">Export Nominations</button>
+        <button data-toggle="modal" data-target="#sendNotifications" class="btn btn-warning">Send Notifications</button>
     }
 
     <a asp-page="/SchoolAdmin/Awards/Nominations/Index" asp-area="Staff" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -65,15 +67,42 @@
         <th>Student</th>
         <th>Nominated By</th>
         <th></th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
     @foreach (var entry in Model.Period.Nominations)
     {
+        var parentEmail = entry.ParentEmailId == NominationNotificationId.Empty ? "pending" : "success";
+        var schoolEmail = entry.SchoolEmailId == NominationNotificationId.Empty ? "pending" : "success";
+
         <tr>
             <td>@entry.AwardType.Value<br />@entry.Description</td>
             <td>@entry.Student.DisplayName</td>
             <td>@entry.NominatedBy</td>
+            <td data-search="@parentEmail @schoolEmail" class="icon">
+                @if (parentEmail == "success")
+                {
+                    <a asp-page="/SchoolAdmin/Awards/Nominations/Notification" asp-area="Staff" asp-route-id="@entry.ParentEmailId" target="_blank" class="text-decoration-none">
+                        <i class="fal fa-child @parentEmail" title="Family"></i>
+                    </a>
+                }
+                else
+                {
+                    <i class="fal fa-child @parentEmail" title="Family"></i>
+                }
+                
+                @if (schoolEmail == "success")
+                {
+                    <a asp-page="/SchoolAdmin/Awards/Nominations/Notification" asp-area="Staff" asp-route-id="@entry.ParentEmailId" target="_blank" class="text-decoration-none">
+                        <i class="fal fa-school @schoolEmail" title="Partner School"></i>
+                    </a>
+                }
+                else
+                {
+                    <i class="fal fa-school @schoolEmail" title="Partner School"></i>
+                }
+            </td>
             <td>
                 @if (canManageTest.Succeeded)
                 {
@@ -86,6 +115,7 @@
 </table>
 
 <vc:export-award-nominations />
+<vc:send-nomination-notifications />
 
 @section scripts {
     <script>

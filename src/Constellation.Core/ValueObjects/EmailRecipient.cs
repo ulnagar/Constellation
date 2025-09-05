@@ -36,8 +36,8 @@ public sealed class EmailRecipient : ValueObject
     public static Result<EmailRecipient> Create(Name name, EmailAddress email) =>
         new EmailRecipient(name.DisplayName, email.Email);
 
-    public string Name { get; }
-    public string Email { get; }
+    public string Name { get; private set; }
+    public string Email { get; private set; }
 
     public override IEnumerable<object> GetAtomicValues()
     {

@@ -2,7 +2,7 @@
 
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -44,6 +44,13 @@ internal sealed class AwardNominationRepository
             .Where(period => period.LockoutDate >= currentDate)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<NominationNotification> GetNotificationById(
+        NominationNotificationId notificationId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<NominationNotification>()
+            .FirstOrDefaultAsync(notification => notification.Id == notificationId, cancellationToken);
 
     public void Insert(
         NominationPeriod period) =>

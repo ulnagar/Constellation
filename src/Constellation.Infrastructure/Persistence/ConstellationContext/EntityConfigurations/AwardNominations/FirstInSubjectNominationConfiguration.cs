@@ -1,14 +1,14 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.AwardNominations;
 
-using Core.Models.Awards;
-using Core.Models.Subjects.Identifiers;
+using Constellation.Core.Models.Awards;
+using Constellation.Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal sealed class FirstInSubjectScienceTechnologyNominationConfiguration :
-    IEntityTypeConfiguration<FirstInSubjectScienceTechnologyNomination>
+internal sealed class FirstInSubjectNominationConfiguration :
+    IEntityTypeConfiguration<FirstInSubjectNomination>
 {
-    public void Configure(EntityTypeBuilder<FirstInSubjectScienceTechnologyNomination> builder)
+    public void Configure(EntityTypeBuilder<FirstInSubjectNomination> builder)
     {
         builder
             .Property(nomination => nomination.CourseId)

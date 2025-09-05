@@ -1,0 +1,59 @@
+@model Constellation.Infrastructure.Templates.Views.Emails.AwardNominations.SchoolNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.Contact.DisplayName</p>
+<p>Following is important information regarding Aurora College awards for student(s) co-enrolled at @Model.School</p>
+<p>Certificates and/or medals will be sent from this office on @Model.DeliveryDate.ToString("dddd d MMMM yyyy"). You can expect a package (addressed to your current Aurora College Coordinator) to arrive in your school shortly thereafter.</p>
+<p>We would greatly appreciate you passing on this information to the staff member(s) organising your Year 12 Graduation Assembly. We hope these awards will be included with other awards being presented to students at your school.</p>
+<p>Details of the award winner(s) follow:</p>
+
+@foreach (var student in Model.Students.OrderBy(entry => entry.Key.SortOrder))
+{
+    <h3>@student.Key.DisplayName</h3>
+    <ul>
+        @{
+            var awardTypes = student.Value.OrderBy(nomination => nomination.SortOrder).GroupBy(nomination => nomination.SortOrder);
+
+            foreach (var awardType in awardTypes)
+            {
+                if (awardType.Key < 10)
+                {
+                    foreach (var award in awardType)
+                    {
+                        <li>@award.GetDescription()</li>
+                    }
+                }
+                else
+                {
+                    if (awardType.Count() > 1)
+                    {
+                        <li>@awardType.Count() x @awardType.First().GetDescription()</li>
+                    }
+                    else
+                    {
+                        <li>@awardType.First().GetDescription()</li>
+                    }
+                }
+            }
+        }
+    </ul>
+}
+
+<p>For your information, Aurora College awards are presented for the following reasons:</p>
+<ul>
+    <li>First in Course Award – the student has achieved first place in the subject in his/her cohort</li>
+    <li>Academic Excellence Award – the student has achieved first place in the subject in his/her class</li>
+    <li>Academic Achievement Award – the student has shown sustained application and effort in the subject</li>
+    <li>Galaxy Medal – the student has shown ongoing commitment to achieving academic excellence in all subjects</li>
+    <li>Universal Achiever – the highest accolade in the Aurora College Merit system, this award is presented to students who have shown sustained diligence and outstanding commitment to their studies.</li>
+</ul>
+
+<p>If you have any questions regarding the awards, please contact our front office on 1300 287 629.</p>

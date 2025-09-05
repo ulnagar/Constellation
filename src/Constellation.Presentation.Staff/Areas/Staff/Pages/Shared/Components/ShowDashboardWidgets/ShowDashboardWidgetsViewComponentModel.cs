@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ShowDashboardWidgets;
 
+using Core.Models.Stocktake.Identifiers;
+
 public sealed class ShowDashboardWidgetsViewComponentModel
 {
     public bool ShowTrainingWidgets { get; set; }
@@ -25,4 +27,5 @@ public sealed class ShowDashboardWidgetsViewComponentModel
 
     public bool ShowStocktakeWidget { get; set; } = false;
     public double StocktakePercentage { get; set; }
+    public StocktakeEventId StocktakeEventId { get; set; }
 }

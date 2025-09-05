@@ -6,5 +6,6 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 public sealed record TeacherOfferingResponse(
     OfferingId OfferingId,
     OfferingName OfferingName,
+    string Year,
     string CourseName,
     AssignmentType AssignmentType);

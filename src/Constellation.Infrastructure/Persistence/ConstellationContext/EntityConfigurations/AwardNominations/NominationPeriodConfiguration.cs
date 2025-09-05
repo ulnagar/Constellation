@@ -1,7 +1,7 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.AwardNominations;
 
 using Constellation.Core.Models.Awards;
-using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.Awards.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +10,7 @@ internal sealed class NominationPeriodConfiguration
 {
     public void Configure(EntityTypeBuilder<NominationPeriod> builder)
     {
-        builder.ToTable("Awards_NominationPeriods");
+        builder.ToTable("Periods", "AwardNominations");
 
         builder
             .HasKey(period => period.Id);
@@ -39,6 +39,16 @@ internal sealed class NominationPeriodConfiguration
 
         builder
             .Navigation(period => period.IncludedGrades)
+            .AutoInclude();
+
+        builder
+            .HasMany(period => period.Notifications)
+            .WithOne()
+            .HasForeignKey(notification => notification.PeriodId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Navigation(period => period.Notifications)
             .AutoInclude();
     }
 }

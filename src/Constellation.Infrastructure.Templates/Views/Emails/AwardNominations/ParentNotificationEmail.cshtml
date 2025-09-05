@@ -1,0 +1,56 @@
+@using Constellation.Infrastructure.Templates.Views.Emails.AwardNominations
+@model ParentNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>Dear @Model.Parent.DisplayName</p>
+
+<p>We very pleased to inform you that your child, @Model.Student.PreferredName has earned the following 2025 Aurora College Annual Award(s):</p>
+
+<ul>
+    @{
+        var awardTypes = Model.Awards.OrderBy(nomination => nomination.SortOrder).GroupBy(nomination => nomination.SortOrder);
+        
+        foreach (var awardType in awardTypes)
+        {
+            if (awardType.Key < 10)
+            {
+                foreach (var award in awardType)
+                {
+                    <li>@award.GetDescription()</li>
+                }
+            }
+            else
+            {
+                if (awardType.Count() > 1)
+                {
+                    <li>@awardType.Count() x @awardType.First().GetDescription()</li>
+                }
+                else
+                {
+                    <li>@awardType.First().GetDescription()</li>
+                }
+            }
+        }
+    }
+</ul>
+
+<p>For your information, Aurora College awards are presented for the following reasons:</p>
+<ul>
+    <li>First in Course Award – the student has achieved first place in the subject in his/her cohort</li>
+    <li>Academic Excellence Award – the student has achieved first place in the subject in his/her class</li>
+    <li>Academic Achievement Award – the student has shown sustained application and effort in the subject</li>
+    <li>Galaxy Medal – the student has shown ongoing commitment to achieving academic excellence in all subjects</li>
+    <li>Universal Achiever – the highest accolade in the Aurora College Merit system, this award is presented to students who have shown sustained diligence and outstanding commitment to their studies.</li>
+</ul>
+
+<p>Emails containing this award information were sent to the Principal and Aurora College Coordinator at @Model.School informing them of the good news. Certificate(s) and/or medal(s) will be sent from Aurora College by courier on @Model.DeliveryDate.ToString("dddd d MMMM yyyy") and should arrive at @Model.School shortly thereafter. We have asked that the award(s) be presented to at the school’s Year 12 Graduation Assembly or another suitable occasion.</p>
+<p>Please pass on our congratulations to @Model.Student.PreferredName, on behalf of the entire Aurora College community.</p>
+<p>If you have any questions regarding the awards, please contact the office on 1300 287 629</p>

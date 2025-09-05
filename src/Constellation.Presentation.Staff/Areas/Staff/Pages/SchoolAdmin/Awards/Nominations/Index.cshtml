@@ -20,28 +20,51 @@
 
 <hr />
 
-<table class="table table-striped table-hover data-table">
+<table class="table table-striped table-hover custom-data-table">
     <thead>
-        <tr>
-            <th>Name</th>
-            <th>Active To</th>
-            <th>Included Grades</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Year</th>
+        <th>Name</th>
+        <th>Active To</th>
+        <th>Included Grades</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var row in Model.Periods)
-        {
-            <tr>
-                <td>@row.Name</td>
-                <td>@row.LockoutDate</td>
-                <td>
-                    @String.Join(", ", row.IncludedGrades.Select(grade => grade.AsName()).ToList())
-                </td>
-                <td>
-                    <a asp-page="/SchoolAdmin/Awards/Nominations/Details" asp-area="Staff" asp-route-periodId="@row.PeriodId" class="btn btn-sm btn-show-hover btn-secondary">More Info...</a>
-                </td>
-            </tr>
-        }
+    @foreach (var row in Model.Periods)
+    {
+        <tr>
+            <td>@row.LockoutDate.ToString("yyyy")</td>
+            <td>@row.Name</td>
+            <td data-order="@row.LockoutDate.ToString("yyyy-MM-dd")">@row.LockoutDate</td>
+            <td>
+                @String.Join(", ", row.IncludedGrades.Select(grade => grade.AsName()).ToList())
+            </td>
+            <td>
+                <a asp-page="/SchoolAdmin/Awards/Nominations/Details" asp-area="Staff" asp-route-periodId="@row.PeriodId" class="btn btn-sm btn-show-hover btn-secondary">More Info...</a>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+@section Scripts
+{
+    <script>
+
+        $(document).ready(function () {
+            $('.custom-data-table').DataTable({
+                "order": [
+                    [0, 'desc'],
+                    [2, 'desc']
+                ],
+                "rowGroup": {
+                    "dataSrc": 0
+                },
+                "columnDefs": [
+                    { "visible": false, "targets": 0 }
+                ]
+            });
+        });
+    </script>
+}

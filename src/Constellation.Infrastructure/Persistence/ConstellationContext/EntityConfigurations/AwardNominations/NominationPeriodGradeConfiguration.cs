@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Awards;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.AwardNominations;
 
 using Constellation.Core.Models.Awards;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +8,7 @@ internal sealed class NominationPeriodGradeConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<NominationPeriodGrade> builder)
     {
-        builder.ToTable("Awards_NominationPeriods_Grades");
+        builder.ToTable("PeriodGrades","AwardNominations");
 
         builder
             .HasKey(grade => new { grade.PeriodId, grade.Grade });
