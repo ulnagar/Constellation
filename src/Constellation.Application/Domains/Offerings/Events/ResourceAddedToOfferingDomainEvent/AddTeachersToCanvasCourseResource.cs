@@ -83,7 +83,7 @@ internal sealed class AddTeachersToCanvasCourseResource
         foreach (StaffMember staffMember in staffMembers)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                staffMember.Id.ToString(),
+                staffMember.EmployeeId.Number,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,

@@ -11,6 +11,9 @@ using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Models.Operations;
 using Constellation.Core.Shared;
 using Core.Models.Operations.Enums;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
+using Core.Models.StaffMembers.Repositories;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +25,7 @@ internal sealed class AddTeacherToCanvasCourse
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICanvasOperationsRepository _operationsRepository;
+    private readonly IStaffRepository _staffRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
@@ -29,12 +33,14 @@ internal sealed class AddTeacherToCanvasCourse
     public AddTeacherToCanvasCourse(
         IOfferingRepository offeringRepository,
         ICanvasOperationsRepository operationsRepository,
+        IStaffRepository staffRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _offeringRepository = offeringRepository;
         _operationsRepository = operationsRepository;
+        _staffRepository = staffRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<TeacherAddedToOfferingDomainEvent>();
@@ -66,6 +72,18 @@ internal sealed class AddTeacherToCanvasCourse
             return;
         }
 
+        StaffMember staffMember = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+
+        if (staffMember is null)
+        {
+            _logger
+                .ForContext(nameof(TeacherAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(assignment.StaffId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+        
         List<CanvasCourseResource> resources = offering.Resources
             .OfType<CanvasCourseResource>()
             .ToList();
@@ -73,7 +91,7 @@ internal sealed class AddTeacherToCanvasCourse
         foreach (CanvasCourseResource resource in resources)
         {
             ModifyEnrolmentCanvasOperation operation = new(
-                assignment.StaffId.ToString(),
+                staffMember.EmployeeId.Number,
                 resource.CourseId,
                 resource.SectionId,
                 CanvasAction.Add,
