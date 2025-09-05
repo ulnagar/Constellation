@@ -94,7 +94,7 @@
                 
                 @if (schoolEmail == "success")
                 {
-                    <a asp-page="/SchoolAdmin/Awards/Nominations/Notification" asp-area="Staff" asp-route-id="@entry.ParentEmailId" target="_blank" class="text-decoration-none">
+                    <a asp-page="/SchoolAdmin/Awards/Nominations/Notification" asp-area="Staff" asp-route-id="@entry.SchoolEmailId" target="_blank" class="text-decoration-none">
                         <i class="fal fa-school @schoolEmail" title="Partner School"></i>
                     </a>
                 }
