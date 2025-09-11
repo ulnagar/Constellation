@@ -13,6 +13,7 @@ public class SentralGatewayConfiguration
 
     public string ApiKey { get; set; }
     public string ApiTenant { get; set; }
+    public string ApiUrl { get; set; }
 
     public ContactPreferenceOptions ContactPreference { get; set; }
     public SentralXPathLocations XPaths { get; set; }
