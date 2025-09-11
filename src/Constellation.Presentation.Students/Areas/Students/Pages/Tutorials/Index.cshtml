@@ -1,0 +1,47 @@
+﻿@page
+@using Constellation.Core.Models.Tutorials.Enums
+@model Constellation.Presentation.Students.Areas.Students.Pages.Tutorials.IndexModel
+
+<h2>Tutorial and Study Support</h2>
+
+<div class="d-flex flex-row mt-3 mb-3 page-menu">
+</div>
+
+<hr />
+
+<div class="row mt-3">
+    @foreach (var tutorial in Model.Tutorials.OrderBy(t => t.SortDate))
+    {
+        <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
+            <span class="row d-flex align-items-center">
+                <div class="col">
+                    <div class="h4">@tutorial.Type - @tutorial.Status</div>
+                    @if (tutorial.Status == TutorialStatus.Active || tutorial.Status == TutorialStatus.Expired)
+                    {
+                        <span class="fst-italic d-block">From @tutorial.Start to @tutorial.End</span>
+                    }
+
+                    @if (tutorial.Status == TutorialStatus.Active)
+                    {
+                        @if (tutorial.Teachers.Count == 1)
+                        {
+                            <span class="fst-italic d-block">Teacher @tutorial.Teachers.First().DisplayName</span>
+                        }
+                        else
+                        {
+                            var teachers = String.Join(", ", tutorial.Teachers.Select(t => t.DisplayName).ToList());
+
+                            <span class="fst-italic d-block">Teachers @teachers</span>
+                        }
+
+                        <span class="d-block">Sessions</span>
+                        @foreach (var session in tutorial.Sessions)
+                        {
+                            <span class="d-block">@session.ToString()</span>
+                        }
+                    }
+                </div>
+            </span>
+        </div>
+    }
+</div>

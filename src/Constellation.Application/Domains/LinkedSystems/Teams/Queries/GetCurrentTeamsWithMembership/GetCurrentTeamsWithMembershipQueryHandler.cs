@@ -109,6 +109,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
             .Where(team =>
                 team.Description.Split(';').Contains("CLASS") ||
                 team.Description.Split(';').Contains("GTUT") ||
+                team.Description.Split(';').Contains("TUTORIAL") ||
                 team.Description.Split(';').Contains("STUDENTS"))
             .OrderBy(team => team.Name)
             .ToList();

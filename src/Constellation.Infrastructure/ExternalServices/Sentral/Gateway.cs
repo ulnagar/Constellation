@@ -69,6 +69,7 @@ public class Gateway : ISentralGateway
     }
 
     #region API Operations
+    #nullable enable
 
     private enum JsonSection
     {
@@ -82,8 +83,8 @@ public class Gateway : ISentralGateway
     private async Task<Dictionary<JsonSection, List<JsonElement>>> GetApiJsonResponse(Uri path, CancellationToken cancellationToken = default)
     {
         Dictionary<JsonSection, List<JsonElement>> completeResponse = new();
-        completeResponse.Add(JsonSection.Data, new());
-        completeResponse.Add(JsonSection.Includes, new());
+        completeResponse.Add(JsonSection.Data, []);
+        completeResponse.Add(JsonSection.Includes, []);
 
         bool nextPageExists = true;
 
@@ -155,6 +156,7 @@ public class Gateway : ISentralGateway
         return completeResponse;
     }
 
+    
     private async Task<byte[]> GetApiImageResponse(Uri path, CancellationToken cancellationToken = default)
     {
         HttpResponseMessage response = await _apiClient.GetAsync(path, cancellationToken);
@@ -167,21 +169,25 @@ public class Gateway : ISentralGateway
         return await response.Content.ReadAsByteArrayAsync(cancellationToken);
     }
 
+    
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default)
     {
         Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/core-student?includeInactive=0");
 
         Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
-        List<FamilyDetailsDto> familyDetails = new();
+        List<FamilyDetailsDto> familyDetails = [];
 
         foreach (JsonElement entry in studentResponse[JsonSection.Data])
         {
-            string sentralId = entry.ExtractString("id");
+            string? sentralId = entry.ExtractString("id");
+
+            if (sentralId is null)
+                continue;
 
             FamilyDetailsDto response = await GetParentContactEntryFromApi(sentralId, cancellationToken);
 
-            FamilyDetailsDto existingEntry = familyDetails.FirstOrDefault(dto => dto.FamilyId == response.FamilyId);
+            FamilyDetailsDto? existingEntry = familyDetails.FirstOrDefault(dto => dto.FamilyId == response.FamilyId);
 
             if (existingEntry is not null)
             {
@@ -196,15 +202,15 @@ public class Gateway : ISentralGateway
         return familyDetails;
     }
 
+    
     public async Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default)
     {
         Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
 
         Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
-        List<CoreStudent> students = new();
-        List<CoreStudentRelationship> people = new();
-        List<CoreStudentPersonRelation> relationships = new();
+        List<CoreStudent> students = [];
+        List<CoreStudentRelationship> people = [];
         CoreFamily family = new();
 
         foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
@@ -229,7 +235,7 @@ public class Gateway : ISentralGateway
                     {
                         foreach (JsonElement entry in section.Value)
                         {
-                            string type = entry.ExtractString("type");
+                            string type = entry.ExtractString("type") ?? string.Empty;
 
                             switch (type)
                             {
@@ -240,15 +246,6 @@ public class Gateway : ISentralGateway
                                             continue;
 
                                         people.Add(relationship.Value);
-                                        break;
-                                    }
-                                case "coreStudentPersonRelation":
-                                    {
-                                        Result<CoreStudentPersonRelation> relationship = CoreStudentPersonRelation.ConvertFromJson(entry);
-                                        if (relationship.IsFailure)
-                                            continue;
-
-                                        relationships.Add(relationship.Value);
                                         break;
                                     }
                             }
@@ -267,6 +264,7 @@ public class Gateway : ISentralGateway
         path = new($"{_settings.ServerUrl}/restapi/v1/core/core-family/{familyId}");
 
         Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetApiJsonResponse(path, cancellationToken);
+        bool foundFamily = false;
 
         foreach (JsonElement entry in familyResponse.Where(entry => entry.Key == JsonSection.Data).SelectMany(entry => entry.Value))
         {
@@ -276,9 +274,10 @@ public class Gateway : ISentralGateway
                 continue;
 
             family = familyResult.Value;
+            foundFamily = true;
         }
 
-        if (family is null)
+        if (!foundFamily)
             return new FamilyDetailsDto();
 
         FamilyDetailsDto familyDetails = new()
@@ -330,6 +329,60 @@ public class Gateway : ISentralGateway
         return imageResponse;
     }
 
+    public async Task<List<ValidAttendenceReportDate>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/date");
+
+        Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<CoreDate> dates = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in studentResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<CoreDate> date = CoreDate.ConvertFromJson(entry);
+
+                            if (date.IsFailure)
+                                continue;
+
+                            dates.Add(date.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        List<ValidAttendenceReportDate> response = [];
+
+        for (int i = 1; i < 5; i++)
+        {
+            List<IGrouping<int, CoreDate>> groupedDates = dates
+                .Where(entry =>
+                    entry.Code != "W" &&
+                    entry.Term == i.ToString(CultureInfo.InvariantCulture))
+                .GroupBy(entry => int.Parse(entry.Week, CultureInfo.InvariantCulture))
+                .ToList();
+
+            foreach (IGrouping<int, CoreDate> group in groupedDates)
+            {
+                response.Add(new(
+                    $"Term {i}",
+                    group.MinBy(entry => entry.Date)!.Date.ToDateTime(TimeOnly.MinValue),
+                    group.MaxBy(entry => entry.Date)!.Date.ToDateTime(TimeOnly.MinValue),
+                    $"Term {i} Week {group.Key}"));
+            }
+        }
+
+        return response;
+    }
+
+    #nullable disable
     #endregion
 
     private async Task Login(CancellationToken cancellationToken)
@@ -342,12 +395,12 @@ public class Gateway : ISentralGateway
             NoCache = true
         };
 
-        List<KeyValuePair<string, string>> formData = new()
-        {
+        List<KeyValuePair<string, string>> formData =
+        [
             new KeyValuePair<string, string>("username", _settings.Username),
             new KeyValuePair<string, string>("password", _settings.Password),
             new KeyValuePair<string, string>("action", "login")
-        };
+        ];
 
         FormUrlEncodedContent formDataEncoded = new(formData);
 
@@ -675,7 +728,7 @@ public class Gateway : ISentralGateway
         HtmlNode reportTable = null;
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history", default);
 
-        List<SentralReportDto> dataList = new();
+        List<SentralReportDto> dataList = [];
 
         if (page == null)
             return dataList;
@@ -753,11 +806,11 @@ public class Gateway : ISentralGateway
             return null;
         }
 
-        List<KeyValuePair<string, string>> formData = new()
-        {
+        List<KeyValuePair<string, string>> formData =
+        [
             new KeyValuePair<string, string>("file_id", reportId),
             new KeyValuePair<string, string>("action", "download_file")
-        };
+        ];
         
         byte[] response = await GetByteArrayByPost($"{_settings.ServerUrl}/profiles/students/{sentralStudentId}/academic-history?type=sreport&page=printed_report", formData, default);
 
@@ -857,17 +910,17 @@ public class Gateway : ISentralGateway
         {
             _logger.Information("GetAbsenceDataAsync: sentralStudentId={sentralStudentId}", sentralStudentId);
 
-            return new List<SentralPeriodAbsenceDto>();
+            return [];
         }
 
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendancepxp/administration/student?id={sentralStudentId}", default);
 
         if (page == null)
-            return new List<SentralPeriodAbsenceDto>();
+            return [];
 
         HtmlNode absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.AbsenceTable);
 
-        List<SentralPeriodAbsenceDto> absences = new();
+        List<SentralPeriodAbsenceDto> absences = [];
 
         if (absenceTable != null)
         {
@@ -981,7 +1034,7 @@ public class Gateway : ISentralGateway
             return new List<SentralPeriodAbsenceDto>();
         }
         
-        List<SentralPeriodAbsenceDto> absences = new();
+        List<SentralPeriodAbsenceDto> absences = [];
         
         for (int term = 1; term < 5; term++)
         {
@@ -1104,8 +1157,8 @@ public class Gateway : ISentralGateway
 
         Uri filePath = new Uri($"{_settings.ServerUrl}/attendance/reports/absences");
 
-        List<KeyValuePair<string, string>> formData = new()
-        {
+        List<KeyValuePair<string, string>> formData =
+        [
             new KeyValuePair<string, string>("length", "year"),
             new KeyValuePair<string, string>("year", _dateTime.CurrentYearAsString),
             new KeyValuePair<string, string>("absence_display", "code"),
@@ -1131,7 +1184,7 @@ public class Gateway : ISentralGateway
             new KeyValuePair<string, string>("years[]", "11"),
             new KeyValuePair<string, string>("years[]", "12"),
             new KeyValuePair<string, string>("action", "export")
-        };
+        ];
 
         Stream completePage = await GetStreamByPost(filePath, formData, cancellationToken);
 
@@ -1229,7 +1282,7 @@ public class Gateway : ISentralGateway
         List<SentralPeriodAbsenceDto> term3 = await GetPartialAbsenceDataForTerm(sentralStudentId, 3);
         List<SentralPeriodAbsenceDto> term4 = await GetPartialAbsenceDataForTerm(sentralStudentId, 4);
 
-        List<SentralPeriodAbsenceDto> returnData = new();
+        List<SentralPeriodAbsenceDto> returnData = [];
         returnData.AddRange(term1);
         returnData.AddRange(term2);
         returnData.AddRange(term3);
@@ -1244,17 +1297,17 @@ public class Gateway : ISentralGateway
         {
             _logger.Information("GetPartialAbsenceDataForTerm: sentralStudentId={sentralStudentId}, term={term}", sentralStudentId, term);
 
-            return new List<SentralPeriodAbsenceDto>();
+            return [];
         }
 
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/attendance/administration/student/{sentralStudentId}?term={term}", default);
 
         if (page == null)
-            return new List<SentralPeriodAbsenceDto>();
+            return [];
 
         HtmlNode absenceTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.PartialAbsenceTable);
 
-        List<SentralPeriodAbsenceDto> detectedAbsences = new();
+        List<SentralPeriodAbsenceDto> detectedAbsences = [];
 
         if (absenceTable != null)
         {
@@ -1379,7 +1432,7 @@ public class Gateway : ISentralGateway
 
         HtmlNodeCollection pxpRolls = page.DocumentNode.SelectNodes(@"//*[contains(@class, 'pxp-roll')]");
 
-        List<DateOnly> enrolledDates = new();
+        List<DateOnly> enrolledDates = [];
 
         foreach (HtmlNode term in pxpRolls)
         {
@@ -1428,17 +1481,17 @@ public class Gateway : ISentralGateway
         {
             _logger.Information("GetExcludedDatesFromCalendar: year={year}", year);
 
-            return new List<DateOnly>();
+            return [];
         }
 
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/month", default);
 
         if (page == null)
-            return new List<DateOnly>();
+            return [];
 
         HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.CalendarTable);
 
-        List<DateOnly> nonSchoolDays = new();
+        List<DateOnly> nonSchoolDays = [];
 
         if (calendarTable == null) return nonSchoolDays.OrderBy(a => a).ToList();
         
@@ -1632,10 +1685,10 @@ public class Gateway : ISentralGateway
         {
             _logger.Information("GetValidAttendanceReportDatesFromCalendar: year={year}", year);
 
-            return new List<ValidAttendenceReportDate>();
+            return [];
         }
 
-        List<ValidAttendenceReportDate> validDates = new();
+        List<ValidAttendenceReportDate> validDates = [];
 
         HtmlDocument page = await GetPageByGet($"{_settings.ServerUrl}/admin/settings/school/calendar/{year}/term", default);
 
@@ -1779,7 +1832,7 @@ public class Gateway : ISentralGateway
             }
             else
             {
-                data.Add(familyId, new List<string>() { studentReferenceNumber });
+                data.Add(familyId, [studentReferenceNumber]);
             }
         }
 
@@ -2001,7 +2054,7 @@ public class Gateway : ISentralGateway
             return new List<FamilyDetailsDto>();
         }
 
-        List<FamilyDetailsDto> data = new();
+        List<FamilyDetailsDto> data = [];
         
         Stream completePage = await GetStreamByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=complete&inputs[class]=&inputs[roll_class]=&inputs[schyear]=&format=xls&headings=1&action=Download", default);
         Stream emailPage = await GetStreamByGet($"{_settings.ServerUrl}/enquiry/export/view_export?name=email&inputs[only_eldest]=no&inputs[addresses]=all&format=xls&headings=1&action=Download", default);
@@ -2125,10 +2178,8 @@ public class Gateway : ISentralGateway
             return new HtmlDocument();
         }
         
-        List<KeyValuePair<string, string>> payload = new()
-        {
-            new KeyValuePair<string, string>("action", "exportStudentAwards")
-        };
+        List<KeyValuePair<string, string>> payload =
+            [new KeyValuePair<string, string>("action", "exportStudentAwards")];
 
         HtmlDocument report = await GetPageByPost(new($"{_settings.ServerUrl}/wellbeing/awards/export"), payload, cancellationToken);
 
@@ -2187,22 +2238,22 @@ public class Gateway : ISentralGateway
 
         // Use the Issue Id to generate the certificate
 
-        List<KeyValuePair<string, string>> formData = new()
-        {
+        List<KeyValuePair<string, string>> formData =
+        [
             new KeyValuePair<string, string>("selected_issues[]", issue),
             new KeyValuePair<string, string>("letter_template_id", "31"),
             new KeyValuePair<string, string>("letter_type", "incident"),
             new KeyValuePair<string, string>("id[]", incidentId),
             new KeyValuePair<string, string>("do_action", "print"),
             new KeyValuePair<string, string>("issue_id", "")
-        };
+        ];
 
         byte[] response = await GetByteArrayByPost($"{_settings.ServerUrl}/wellbeing/letters/print?format=pdf", formData, default);
 
         if (response is null)
         {
             _logger.Warning("Did not successfully generate the certificate: {@formData}", formData);
-            return Array.Empty<byte>();
+            return [];
         }
 
         string code = System.Text.Encoding.Default.GetString(response);
@@ -2235,7 +2286,7 @@ public class Gateway : ISentralGateway
         if (document is null)
         {
             _logger.Warning("Did not successfully download certificate: {@formData} ({code})", formData, code);
-            return Array.Empty<byte>();
+            return [];
         }
 
         return document;
@@ -2260,16 +2311,15 @@ public class Gateway : ISentralGateway
             return response;
         }
 
-        List<KeyValuePair<string, string>> payload = new()
-        {
-            // length=year
+        List<KeyValuePair<string, string>> payload =
+        [
             new("length", "period"),
             // year=2023
             new("year", year),
             // start_date=2023-01-01
-            new ("start_date", _dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")),
+            new("start_date", _dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")),
             // end_date=2023-11-03
-            new ("end_date", endDate.ToString("yyyy-MM-dd")),
+            new("end_date", endDate.ToString("yyyy-MM-dd")),
             // limit_sign=equal
             new("limit_sign", "equal"),
             // limit_percent=100
@@ -2308,21 +2358,20 @@ public class Gateway : ISentralGateway
             new("years[]", "12"),
             // action=export
             new("action", "export")
-        };
+        ];
 
         response.YearToDateDayCalculationDocument = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload, default);
 
         Stream perMinuteYearToDateCalculationFile = await GetStreamByGet($"{_settings.ServerUrl}/attendancepxp/period/administration/percentage_attendance_report?length=period&year={year}&start_date={_dateTime.FirstDayOfYear.ToString("yyyy-MM-dd")}&end_date={endDate.ToString("yyyy-MM-dd")}&attendance_source=attendance&enrolled_students=true&group=years&years%5B%5D=5&years%5B%5D=6&years%5B%5D=7&years%5B%5D=8&years%5B%5D=9&years%5B%5D=10&years%5B%5D=11&years%5B%5D=12&action=export", default);
         response.YearToDateMinuteCalculationDocument = perMinuteYearToDateCalculationFile.IsExcelFile() ? perMinuteYearToDateCalculationFile : null;
 
-        payload = new()
-        {
-            // length=week
+        payload =
+        [
             new("length", "week"),
             // term=3
-            new ("term", term.Value),
+            new("term", term.Value),
             // week=1
-            new ("week", week.Value),
+            new("week", week.Value),
             // year=2023
             new("year", year),
             // limit_sign=equal
@@ -2363,7 +2412,7 @@ public class Gateway : ISentralGateway
             new("years[]", "12"),
             // action=export
             new("action", "export")
-        };
+        ];
 
         response.WeekDayCalculationDocument = await GetPageByPost(new($"{_settings.ServerUrl}/attendance/reports/percentage"), payload, default);
 

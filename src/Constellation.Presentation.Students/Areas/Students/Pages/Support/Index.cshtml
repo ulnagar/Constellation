@@ -8,6 +8,21 @@
 <div class="d-flex flex-column justify-content-around">
     <div class="accordion" id="accordion">
         <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-tutorial">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-tutorial" aria-expanded="false" aria-controls="accordion-item-tutorial">
+                    <span>Tutorial & Study Support</span>
+                    <span class="fst-italic ms-3 btn-show-hover">Click or tap to expand</span>
+                </button>
+            </h2>
+            <div id="accordion-item-tutorial" class="accordion-collapse collapse" aria-labelledby="accordion-header-tutorial" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <div>If you are struggling with a subject, or need assistance in setting up a study schedule or environment, we can help.</div>
+                    
+                    <div>Fill out this form to <a asp-page="Tutorials/Request" asp-area="Students">request tutorial support</a></div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item">
             <h2 class="accordion-header" id="accordion-header-wellbeing">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-wellbeing" aria-expanded="false" aria-controls="accordion-item-wellbeing">
                     <span>Wellbeing & Learning Support</span>

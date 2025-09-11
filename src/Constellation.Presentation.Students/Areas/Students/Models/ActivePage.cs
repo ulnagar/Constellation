@@ -16,4 +16,6 @@ public static class ActivePage
     public const string Timetables = "Timetables";
 
     public const string Contacts = "Contacts";
+
+    public const string Tutorials = "Tutorials";
 }

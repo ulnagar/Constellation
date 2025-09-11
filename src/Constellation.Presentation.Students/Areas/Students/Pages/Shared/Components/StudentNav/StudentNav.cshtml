@@ -22,6 +22,11 @@
             </a>
         </div>
         <div class="nav-item px-3">
+            <a class="nav-link @(Model == ActivePage.Tutorials ? "active" : "")" asp-page="/Tutorials/Index" asp-area="Students">
+                <i class="fas fa-hands-helping" aria-hidden="true"></i> Timetable
+            </a>
+        </div>
+        <div class="nav-item px-3">
             <a class="nav-link @(Model == ActivePage.Attendance ? "active" : "")" asp-page="/Attendance/Index" asp-area="Students">
                 <i class="fas fa-calendar-day" aria-hidden="true"></i> Attendance
             </a>
