@@ -169,7 +169,7 @@ public class Gateway : ISentralGateway
 
     public async Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReportFromApi(ILogger logger, CancellationToken cancellationToken = default)
     {
-        Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/core-student?includeInactive=0");
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/core/core-student?includeInactive=0");
 
         Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
@@ -198,7 +198,7 @@ public class Gateway : ISentralGateway
 
     public async Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default)
     {
-        Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/core/core-student/{sentralStudentId}?include=studentRelationships,contacts");
 
         Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
@@ -323,7 +323,7 @@ public class Gateway : ISentralGateway
 
     public async Task<byte[]> GetSentralStudentPhotoFromApi(string sentralStudentId, CancellationToken cancellationToken = default)
     {
-        Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/core-student/{sentralStudentId}/photo");
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/core/core-student/{sentralStudentId}/photo");
 
         byte[] imageResponse = await GetApiImageResponse(path, cancellationToken);
 
