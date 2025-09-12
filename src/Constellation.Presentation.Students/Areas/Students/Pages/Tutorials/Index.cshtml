@@ -5,6 +5,7 @@
 <h2>Tutorial and Study Support</h2>
 
 <div class="d-flex flex-row mt-3 mb-3 page-menu">
+    <a asp-page="/Tutorials/Request" asp-area="Students" class="btn btn-primary">New Request</a>
 </div>
 
 <hr />
@@ -16,13 +17,10 @@
             <span class="row d-flex align-items-center">
                 <div class="col">
                     <div class="h4">@tutorial.Type - @tutorial.Status</div>
-                    @if (tutorial.Status == RequestStatus.Active || tutorial.Status == RequestStatus.Expired)
+                    @if (tutorial.Status == RequestStatus.Approved)
                     {
                         <span class="fst-italic d-block">From @tutorial.Start to @tutorial.End</span>
-                    }
-
-                    @if (tutorial.Status == RequestStatus.Active)
-                    {
+     
                         @if (tutorial.Teachers.Count == 1)
                         {
                             <span class="fst-italic d-block">Teacher @tutorial.Teachers.First().DisplayName</span>

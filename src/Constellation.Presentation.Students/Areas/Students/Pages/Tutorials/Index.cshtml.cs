@@ -1,16 +1,19 @@
 namespace Constellation.Presentation.Students.Areas.Students.Pages.Tutorials;
 
+using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Core.Models.Timetables;
 using Core.Models.Tutorials.Enums;
 using Core.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
+[Authorize(Policy = AuthPolicies.IsStudent)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

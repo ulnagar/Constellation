@@ -6,6 +6,7 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Core.Enums;
 using Core.ValueObjects;
 using Enums;
+using Events;
 using Identifiers;
 using Primitives;
 using Shared;
@@ -20,6 +21,8 @@ using Timetables.Identifiers;
 public sealed class Request : AggregateRoot, IAuditableEntity
 {
     private readonly List<PeriodId> _periodIds = [];
+
+    private Request() { }
 
     private Request(
         StudentId studentId,
@@ -71,7 +74,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         string subject,
         List<Period> periods)
     {
-        return new Request(
+        Request request = new(
             student.Id,
             student.Name,
             student.CurrentEnrolment?.Grade ?? Core.Enums.Grade.SpecialProgram,
@@ -79,6 +82,10 @@ public sealed class Request : AggregateRoot, IAuditableEntity
             type,
             subject,
             periods.Select(period => period.Id).ToList());
+
+        request.RaiseDomainEvent(new TutorialRequestCreatedDomainEvent(new(), request.Id));
+
+        return request;
     }
 
     public Result Review(
@@ -97,6 +104,12 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         AddNotes(note);
         ReviewedBy = reviewer;
         ReviewedAt = dateTime.Now;
+
+        if (newStatus == RequestStatus.Approved)
+            RaiseDomainEvent(new TutorialRequestApprovedDomainEvent(new(), Id));
+
+        if (newStatus == RequestStatus.Rejected)
+            RaiseDomainEvent(new TutorialRequestRejectedDomainEvent(new(), Id));
 
         return Result.Success();
     }
