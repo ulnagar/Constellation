@@ -16,12 +16,12 @@
             <span class="row d-flex align-items-center">
                 <div class="col">
                     <div class="h4">@tutorial.Type - @tutorial.Status</div>
-                    @if (tutorial.Status == TutorialStatus.Active || tutorial.Status == TutorialStatus.Expired)
+                    @if (tutorial.Status == RequestStatus.Active || tutorial.Status == RequestStatus.Expired)
                     {
                         <span class="fst-italic d-block">From @tutorial.Start to @tutorial.End</span>
                     }
 
-                    @if (tutorial.Status == TutorialStatus.Active)
+                    @if (tutorial.Status == RequestStatus.Active)
                     {
                         @if (tutorial.Teachers.Count == 1)
                         {

@@ -44,7 +44,7 @@ public class IndexModel : BasePageModel
     {
         public DateOnly SortDate { get; set; }
         public TutorialType Type { get; set; }
-        public TutorialStatus Status { get; set; }
+        public RequestStatus Status { get; set; }
         public string Start { get; set; } = "Term 4, Week 1";
         public string End { get; set; } = "Term 4, Week 10";
 

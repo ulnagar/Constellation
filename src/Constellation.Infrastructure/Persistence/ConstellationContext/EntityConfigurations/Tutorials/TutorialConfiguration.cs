@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Tutorials;
 
+using Core.Models.Timetables;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.ValueObjects;
