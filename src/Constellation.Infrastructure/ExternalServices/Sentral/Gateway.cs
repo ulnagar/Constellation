@@ -264,7 +264,7 @@ public class Gateway : ISentralGateway
         if (string.IsNullOrWhiteSpace(familyId))
             return new FamilyDetailsDto();
 
-        path = new($"{_settings.ServerUrl}/restapi/v1/core/core-family/{familyId}");
+        path = new($"{_settings.ApiUrl}/restapi/v1/core/core-family/{familyId}");
 
         Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetApiJsonResponse(path, cancellationToken);
 
