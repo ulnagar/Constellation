@@ -261,7 +261,7 @@ public class Gateway : ISentralGateway
         if (string.IsNullOrWhiteSpace(familyId))
             return new FamilyDetailsDto();
 
-        path = new($"{_settings.ServerUrl}/restapi/v1/core/core-family/{familyId}");
+        path = new($"{_settings.ApiUrl}/restapi/v1/core/core-family/{familyId}");
 
         Dictionary<JsonSection, List<JsonElement>> familyResponse = await GetApiJsonResponse(path, cancellationToken);
         bool foundFamily = false;
@@ -331,7 +331,7 @@ public class Gateway : ISentralGateway
 
     public async Task<List<ValidAttendenceReportDate>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default)
     {
-        Uri path = new($"{_settings.ServerUrl}/restapi/v1/core/date");
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/core/date");
 
         Dictionary<JsonSection, List<JsonElement>> studentResponse = await GetApiJsonResponse(path, cancellationToken);
 
