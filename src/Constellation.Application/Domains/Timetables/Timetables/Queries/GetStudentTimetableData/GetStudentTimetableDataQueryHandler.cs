@@ -137,6 +137,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
 
             TimetableDataDto.TimetableData entry = new()
             {
+                PeriodId = period.Id,
                 Timetable = period.Timetable,
                 Week = period.Week,
                 Day = period.Day,

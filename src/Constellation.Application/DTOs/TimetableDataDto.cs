@@ -2,6 +2,7 @@
 
 using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Enums;
+using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ public abstract class TimetableDataDto
 
     public class TimetableData
     {
+        public PeriodId PeriodId { get; set; }
         public Timetable Timetable { get; set; }
         public PeriodWeek Week { get; set; }
         public PeriodDay Day { get; set; }

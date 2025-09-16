@@ -31,7 +31,8 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         string school,
         TutorialType type,
         string subject,
-        List<PeriodId> periodIds)
+        List<PeriodId> periodIds,
+        string justification)
     {
         Id = new();
 
@@ -42,6 +43,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         Type = type;
         Subject = subject;
         _periodIds.AddRange(periodIds);
+        Justification = justification;
 
         Status = RequestStatus.Requested;
     }
@@ -54,6 +56,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     public TutorialType Type { get; private set; }
     public string Subject { get; private set; }
     public IReadOnlyList<PeriodId> PeriodIds => _periodIds.AsReadOnly();
+    public string Justification { get; private set; }
     public RequestStatus Status { get; private set; }
     public string Notes { get; private set; } = string.Empty;
     public string ReviewedBy { get; private set; } = string.Empty;
@@ -72,7 +75,8 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         Student student,
         TutorialType type,
         string subject,
-        List<Period> periods)
+        List<Period> periods,
+        string justification)
     {
         Request request = new(
             student.Id,
@@ -81,7 +85,8 @@ public sealed class Request : AggregateRoot, IAuditableEntity
             student.CurrentEnrolment?.SchoolName ?? string.Empty,
             type,
             subject,
-            periods.Select(period => period.Id).ToList());
+            periods.Select(period => period.Id).ToList(),
+            justification);
 
         request.RaiseDomainEvent(new TutorialRequestCreatedDomainEvent(new(), request.Id));
 

@@ -1,50 +1,388 @@
 ﻿@page
+@using Constellation.Core.Models.Subjects.Identifiers
 @using Constellation.Core.Models.Tutorials.Enums
 @model Constellation.Presentation.Students.Areas.Students.Pages.Tutorials.RequestModel
 
-<div class="d-grid gap-2 d-block d-sm-block d-md-block d-lg-none d-xl-none d-xxl-none my-1">
-    <a asp-page="/Attendance/Index" asp-area="Students" class="btn btn-primary">Go Back</a>
+<div class="d-grid gap-2 d-sm-grid d-md-grid d-lg-none d-xl-none d-xxl-none my-1">
+    <a asp-page="/Tutorials/Index" asp-area="Students" class="btn btn-primary">Go Back</a>
 </div>
 
 <div class="d-none d-lg-block d-xl-block d-xxl-block my-1">
-    <a asp-page="/Attendance/Index" asp-area="Students" class="btn btn-primary">Go Back</a>
+    <a asp-page="/Tutorials/Index" asp-area="Students" class="btn btn-primary">Go Back</a>
 </div>
 
-<h2>Tutorial and Study Support</h2>
+<h2 class="mb-3">Tutorial and Study Support Request</h2>
 
-<div class="d-sm-flex flex-column flex-lg-row border-bottom mt-1">
-    <div class="mb-2 col-md-2">
+<div class="d-sm-flex flex-column mt-1">
+    <div class="mb-2">
         <strong>Tutorial Type</strong>
     </div>
-    <div class="mb-2 col-md-10">
-        <span></span>
+
+    <div class="d-flex flex-column flex-lg-row justify-content-around mt-3">
+        <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 col col-lg-5 text-center unselected" id="subject-box">
+            <div>Subject Support</div>
+        </div>
+
+        <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 col col-lg-5 text-center unselected" id="study-box">
+            <div>Study Support</div>
+        </div>
     </div>
 </div>
 
-<div class="d-flex flex-column flex-lg-row justify-content-around mt-3">
-    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.Type == TutorialType.Subject ? "selected" : "unselected")">
-        <a href="#" class="stretched-link" onclick="selectType('subject')"></a>
-        <div>Subject Support</div>
-    </div>
+<div id="course-select" class="d-none">
+    <div class="d-sm-flex flex-column mt-1">
+        <div class="mb-2">
+            <strong>Subject</strong>
+        </div>
 
-    <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 text-center @(Model.Type == TutorialType.Study ? "selected" : "unselected")">
-        <a href="#" class="stretched-link" onclick="selectType('study')"></a>
-        <div>Study Support</div>
+        <ul class="list-group mb-2" id="course-selector">
+            @foreach (var course in Model.Courses)
+            {
+                <button class="list-group-item list-group-item-action course-select-button" data-course-id="@course.Id">
+                    @course.DisplayName
+                </button>
+            }
+        </ul>
+        
+        @foreach (var course in Model.Courses)
+        {
+            <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative cursor-pointer border border-2 rounded-3 d-none course-details" id="course-@course.Id">
+                <span class="row d-flex align-items-center">
+                    <div class="col-lg">
+                        <div><strong>@course.DisplayName</strong></div>
+                    </div>
+                </span>
+            </div>
+        }
+
     </div>
 </div>
 
-    
+    <div class="d-sm-flex flex-column mt-1">
+        <div class="mb-2">
+            <strong>Available Periods</strong>
+        </div>
+        
+        <div class="mb-2" id="selected-periods"></div>
 
-    
+        @{
+            var weeks = Model.Periods.Timetables.Select(data => data.Week).Distinct().OrderBy(week => week.Value).ToList();
+            var days = Model.Periods.Timetables.Select(data => data.Day).Distinct().OrderBy(day => day.Value).ToList();
+        }
 
+        <ul class="list-group mb-2" id="week-selector">
+            @foreach (var week in weeks)
+            {
+                <button class="list-group-item list-group-item-action week-select-button" data-week="@week.Value">
+                    @week.Name
+                </button>
+            }
+        </ul>
+        
+        @foreach (var week in weeks)
+        {
+            <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3 d-none" id="week-@week.Value">
+                <span class="row d-flex align-items-center">
+                    <div class="col-lg">
+                        <div><strong>@week.Name</strong></div>
+                        @if (weeks.Count > 1)
+                        {
+                            <span class="fst-italic">Click or tap to change</span>
+
+                            <div class="d-block">
+                                <a href="#" class="stretched-link" onclick="weekReset()"></a>
+                            </div>
+                        }
+                    </div>
+                </span>
+            </div>
+        }
+        
+        <ul class="list-group mb-2" id="day-selector">
+            @foreach (var day in days)
+            {
+                <button class="list-group-item list-group-item-action day-select-button" data-day="@day.Value">
+                    @day.Name
+                </button>
+            }
+        </ul>
+        
+        @foreach (var day in days)
+        {
+            <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3 d-none" id="day-@day.Value">
+                <span class="row d-flex align-items-center">
+                    <div class="col-lg">
+                        <div><strong>@day.Name</strong></div>
+                        @if (days.Count > 1)
+                        {
+                            <span class="fst-italic">Click or tap to change</span>
+
+                            <div class="d-block">
+                                <a href="#" class="stretched-link" onclick="dayReset()"></a>
+                            </div>
+                        }
+                    </div>
+                </span>
+            </div>
+        }
+        
+        @foreach (var week in weeks)
+        {
+            @foreach (var day in days)
+            {
+                var periods = Model.Periods.Timetables.Where(data => data.Week == week && data.Day == day).OrderBy(data => data.StartTime).ToList();
+                
+                <ul class="list-group mb-2 d-none period-list" id="period-list-@week.Value-@day.Value">
+                    @foreach (var period in periods)
+                    {
+                        if (string.IsNullOrWhiteSpace(period.ClassName))
+                        {
+                            <button class="list-group-item list-group-item-action period-select-button" data-period="@period.PeriodId">
+                                @period.Name
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="list-group-item list-group-item-action list-group-item-secondary fst-italic" data-period="@period.PeriodId">
+                                @period.Name (@period.ClassName)
+                            </button>
+                        }
+                    }
+                    
+                </ul>
+            }
+        }
+    </div>
+
+    <form method="post">
+        <div class="d-none">
+            <div id="form-selected-periods"></div>
+            <div id="form-selected-type">
+                <input type="hidden" name="Type" value="@TutorialType.Unknown" />
+            </div>
+            <div id="form-selected-course">
+                <input type="hidden" name="CourseId" value="@CourseId.Empty" />
+            </div>
+        </div>
+
+        <div class="d-sm-flex flex-column mt-1">
+            <div class="mb-2">
+                <strong>Request Description</strong>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column justify-content-around mt-3">
+            <div class="mb-2">
+                <textarea asp-for="Comment" rows="5" cols="100" class="form-control"></textarea>
+                <span asp-validation-for="Comment" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <div class="d-grid gap-2 d-sm-grid d-md-grid d-lg-none d-xl-none d-xxl-none mt-1">
+                <button class="btn btn-success btn-lg" disabled type="submit" onclick="showLoader()">Submit</button>
+            </div>
+
+            <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
+                <button class="btn btn-success btn-lg" disabled type="submit" onclick="showLoader()">Submit</button>
+            </div>
+        </div>
+    </form>
+
+<div class="d-none">
+    @foreach (var period in Model.Periods.Timetables)
+    {
+        <button class="btn btn-success period-remove-button" id="t-period-@period.PeriodId" data-period="@period.PeriodId">@period.Week.Name - @period.Day.Name - @period.Name</button>
+    }
+</div>
     
 @section Scripts 
 {
     <script>
-        $(document).ready(function() {
-            function selectType(type) {
+        function checkForm() {
+            var valid = true;
+            
+            var type = $('#form-selected-type input');
+            var course = $('#form-selected-course input');
+            var periods = $('#form-selected-periods *');
+            var comment = $('input[name="Comment"]');
 
+            if (type.val() == 'Subject Support' && course.val() == '@CourseId.Empty'){
+                valid = false;
+            }
+
+            if (periods.length == 0){
+                valid = false;
+            }
+
+            if (comment.val().length < 10){
+                valid = false;
+            }
+
+            if (valid == false){
+                $('button[type="submit"]')
+                    .prop('disabled', true);
+            }
+            else {
+                $('button[type="submit"]')
+                    .prop('disabled', false);
+            }
+        }
+
+        $('#study-box').on('click', function(e){
+            $(this)
+                .removeClass('unselected')
+                .addClass('selected');
+
+            $('#subject-box')
+                .removeClass('selected')
+                .addClass('unselected');
+                
+            $('#course-select').addClass('d-none');
+            $('#course-selector').removeClass('d-none');
+            $('.course-details').addClass('d-none');
+            $('#form-selected-course input').val('@CourseId.Empty');
+            $('#form-selected-type input').val('Study Support');
+        });
+
+        $('#subject-box').on('click', function(e){           
+            $(this)
+                .removeClass('unselected')
+                .addClass('selected');
+
+            $('#study-box')
+                .removeClass('selected')
+                .addClass('unselected');
+
+            $('#course-select').removeClass('d-none');
+                
+            $('#form-selected-type input').val('Subject Support');
+        });
+
+        $('.course-select-button').on('click', function(e){
+            var courseId = $(this).data('courseId');
+
+            $('.course-details').addClass('d-none');
+
+            $('#form-selected-course input').val(courseId);
+            $('#course-selector').addClass('d-none');
+            $('#course-' + courseId).removeClass('d-none');
+        });
+
+        $('.course-details').on('click', function(e){
+            $('.course-details').addClass('d-none');
+
+            $('#form-selected-course input').val('@CourseId.Empty');
+            $('#course-selector').removeClass('d-none');
+        });
+
+
+        let week = '';
+        let day = '';
+
+        $('.week-select-button').on('click', function(e){
+            var weekValue = $(this).data('week');
+            week = weekValue;
+
+            $('#week-selector')
+                .removeClass('d-block')
+                .addClass('d-none');
+            $('#week-'+week).removeClass('d-none').addClass('d-block');
+
+            updatePeriods();
+        });
+
+        function weekReset(){
+            $('#week-selector')
+                .addClass('d-block')
+                .removeClass('d-none');
+
+            $('#week-'+week)
+                .addClass('d-none')
+                .removeClass('d-block');
+
+            week = '';
+            updatePeriods();
+        }
+
+        $('.day-select-button').on('click', function(e){
+            var dayValue = $(this).data('day');
+            day = dayValue;
+
+            $('#day-selector')
+                .removeClass('d-block')
+                .addClass('d-none');
+            $('#day-'+day).removeClass('d-none').addClass('d-block');
+
+            updatePeriods();
+        });
+
+        function dayReset(){
+            $('#day-selector')
+                .addClass('d-block')
+                .removeClass('d-none');
+
+            $('#day-'+day)
+                .addClass('d-none')
+                .removeClass('d-block');
+
+            day = '';
+            updatePeriods();
+        }
+
+        function updatePeriods() {
+            $('.period-list')
+                .removeClass('d-block')
+                .addClass('d-none');
+
+            if (week != '' && day != '') {
+                $('#period-list-' + week + '-' + day)
+                    .addClass('d-block')
+                    .removeClass('d-none');
+            }
+        }
+
+        $('.period-select-button').on('click', function(e){
+            var periodId = $(this).data('period');
+
+            var existingButton = $('#s-period-' + periodId).length;
+            if (existingButton < 1) {
+                $(this)
+                    .addClass('fst-italic')
+                    .addClass('list-group-item-secondary');
+                var selectedButton = $('#t-period-'+periodId).clone()
+                    .prop('id', 's-period-' + periodId);
+                selectedButton.appendTo('#selected-periods');
+
+                var input = $('<input>').attr('id', 'f-period-' + periodId)
+                    .attr('name', 'PeriodIds')
+                    .attr('type', "hidden");
+                input.val(periodId);
+                var formDiv = $('#form-selected-periods');
+                formDiv.append(input);
+                
+                weekReset();
+                dayReset();
+                checkForm();
             }
         });
+
+        $('#selected-periods').on('click', '.period-remove-button', function(e){
+            var periodId = $(this).data('period');
+
+            $('#s-period-' + periodId).remove();
+            
+            $('.period-select-button[data-period="' + periodId +'"]')
+                .removeClass('fst-italic')
+                .removeClass('list-group-item-secondary');
+                
+            $('#f-period-' + periodId).remove();
+
+            checkForm();
+        });
+
+        $('input[name="Comment"]').on('change', function(e) {
+            checkForm();
+        })
     </script>
 }
