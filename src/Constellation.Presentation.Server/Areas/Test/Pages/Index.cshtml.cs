@@ -35,6 +35,7 @@ public class IndexModel : BasePageModel
 
         var thisWeek = result.FirstOrDefault(entry => entry.Description == "Term 3 Week 8");
 
+
         var index = result.IndexOf(thisWeek);
         index = index + 10;
 

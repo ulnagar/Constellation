@@ -14,8 +14,8 @@ using ValueObjects;
 
 public sealed class Tutorial : AggregateRoot, IAuditableEntity
 {
-    private List<TeamsResource> _teams = [];
-    private List<TutorialSession> _sessions = [];
+    private readonly List<TeamsResource> _teams = [];
+    private readonly List<TutorialSession> _sessions = [];
 
     private Tutorial(
         TutorialName name,

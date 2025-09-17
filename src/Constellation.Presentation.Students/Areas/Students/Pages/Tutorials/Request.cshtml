@@ -17,6 +17,10 @@
     <div class="mb-2">
         <strong>Tutorial Type</strong>
     </div>
+    
+    <div class="mb-2">
+        <span>Do you require support for a particular subject you study with Aurora College, or with general study skills?</span>
+    </div>
 
     <div class="d-flex flex-column flex-lg-row justify-content-around mt-3">
         <div class="position-relative cursor-pointer border border-secondary rounded p-3 mb-3 h-100 col col-lg-5 text-center unselected" id="subject-box">
@@ -34,6 +38,10 @@
         <div class="mb-2">
             <strong>Subject</strong>
         </div>
+        
+        <div class="mb-2">
+            <span>Select which subject you would like support with.</span>
+        </div>
 
         <ul class="list-group mb-2" id="course-selector">
             @foreach (var course in Model.Courses)
@@ -50,6 +58,7 @@
                 <span class="row d-flex align-items-center">
                     <div class="col-lg">
                         <div><strong>@course.DisplayName</strong></div>
+                        <span class="fst-italic">Click or tap to change</span>
                     </div>
                 </span>
             </div>
@@ -58,11 +67,17 @@
     </div>
 </div>
 
+<div class="period-selector">
+    <hr />
     <div class="d-sm-flex flex-column mt-1">
         <div class="mb-2">
             <strong>Available Periods</strong>
         </div>
         
+        <div class="mb-2">
+            <span>Select all periods from the Aurora College timetable where you are available to complete the tutorial sessions. Do not select any periods where you have a lesson for either Aurora College or your Partner School.</span>
+        </div>
+
         <div class="mb-2" id="selected-periods"></div>
 
         @{
@@ -78,7 +93,7 @@
                 </button>
             }
         </ul>
-        
+
         @foreach (var week in weeks)
         {
             <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3 d-none" id="week-@week.Value">
@@ -97,7 +112,7 @@
                 </span>
             </div>
         }
-        
+
         <ul class="list-group mb-2" id="day-selector">
             @foreach (var day in days)
             {
@@ -106,7 +121,7 @@
                 </button>
             }
         </ul>
-        
+
         @foreach (var day in days)
         {
             <div class="w-auto p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3 d-none" id="day-@day.Value">
@@ -125,20 +140,20 @@
                 </span>
             </div>
         }
-        
+
         @foreach (var week in weeks)
         {
             @foreach (var day in days)
             {
                 var periods = Model.Periods.Timetables.Where(data => data.Week == week && data.Day == day).OrderBy(data => data.StartTime).ToList();
-                
+
                 <ul class="list-group mb-2 d-none period-list" id="period-list-@week.Value-@day.Value">
                     @foreach (var period in periods)
                     {
                         if (string.IsNullOrWhiteSpace(period.ClassName))
                         {
                             <button class="list-group-item list-group-item-action period-select-button" data-period="@period.PeriodId">
-                                @period.Name
+                                @period.Name (@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime())
                             </button>
                         }
                         else
@@ -148,27 +163,33 @@
                             </button>
                         }
                     }
-                    
+
                 </ul>
             }
         }
     </div>
+</div>
 
-    <form method="post">
-        <div class="d-none">
-            <div id="form-selected-periods"></div>
-            <div id="form-selected-type">
-                <input type="hidden" name="Type" value="@TutorialType.Unknown" />
-            </div>
-            <div id="form-selected-course">
-                <input type="hidden" name="CourseId" value="@CourseId.Empty" />
-            </div>
+<hr />
+
+<form method="post">
+    <div class="d-none">
+        <div id="form-selected-periods"></div>
+        <div id="form-selected-type">
+            <input type="hidden" name="Type" value="@TutorialType.Unknown" />
         </div>
+        <div id="form-selected-course">
+            <input type="hidden" name="CourseId" value="@CourseId.Empty" />
+        </div>
+    </div>
 
-        <div class="d-sm-flex flex-column mt-1">
-            <div class="mb-2">
-                <strong>Request Description</strong>
-            </div>
+    <div class="d-sm-flex flex-column mt-1">
+        <div class="mb-2">
+            <strong>Request Description</strong>
+        </div>
+        
+        <div class="mb-2">
+            <span>Enter details about why you require support, including any specific topics you would like to cover during the tutorial sessions.</span>
         </div>
 
         <div class="d-flex flex-column justify-content-around mt-3">
@@ -177,17 +198,18 @@
                 <span asp-validation-for="Comment" class="text-danger"></span>
             </div>
         </div>
+    </div>
 
-        <div class="mt-2">
-            <div class="d-grid gap-2 d-sm-grid d-md-grid d-lg-none d-xl-none d-xxl-none mt-1">
-                <button class="btn btn-success btn-lg" disabled type="submit" onclick="showLoader()">Submit</button>
-            </div>
-
-            <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
-                <button class="btn btn-success btn-lg" disabled type="submit" onclick="showLoader()">Submit</button>
-            </div>
+    <div class="mt-2">
+        <div class="d-grid gap-2 d-sm-grid d-md-grid d-lg-none d-xl-none d-xxl-none mt-1">
+            <button class="btn btn-success btn-lg" disabled type="submit" onclick="showLoader()">Submit</button>
         </div>
-    </form>
+
+        <div class="d-none d-lg-block d-xl-block d-xxl-block mt-1">
+            <button class="btn btn-success btn-lg" disabled type="submit" onclick="showLoader()">Submit</button>
+        </div>
+    </div>
+</form>
 
 <div class="d-none">
     @foreach (var period in Model.Periods.Timetables)
@@ -205,7 +227,7 @@
             var type = $('#form-selected-type input');
             var course = $('#form-selected-course input');
             var periods = $('#form-selected-periods *');
-            var comment = $('input[name="Comment"]');
+            var comment = $('textarea[name="Comment"]');
 
             if (type.val() == 'Subject Support' && course.val() == '@CourseId.Empty'){
                 valid = false;
@@ -215,7 +237,7 @@
                 valid = false;
             }
 
-            if (comment.val().length < 10){
+            if (comment.val().length < 9){
                 valid = false;
             }
 
@@ -243,6 +265,8 @@
             $('.course-details').addClass('d-none');
             $('#form-selected-course input').val('@CourseId.Empty');
             $('#form-selected-type input').val('Study Support');
+
+            checkForm();
         });
 
         $('#subject-box').on('click', function(e){           
@@ -257,6 +281,8 @@
             $('#course-select').removeClass('d-none');
                 
             $('#form-selected-type input').val('Subject Support');
+
+            checkForm();
         });
 
         $('.course-select-button').on('click', function(e){
@@ -267,6 +293,8 @@
             $('#form-selected-course input').val(courseId);
             $('#course-selector').addClass('d-none');
             $('#course-' + courseId).removeClass('d-none');
+
+            checkForm();
         });
 
         $('.course-details').on('click', function(e){
@@ -274,6 +302,8 @@
 
             $('#form-selected-course input').val('@CourseId.Empty');
             $('#course-selector').removeClass('d-none');
+
+            checkForm();
         });
 
 
@@ -340,6 +370,8 @@
                     .addClass('d-block')
                     .removeClass('d-none');
             }
+
+            checkForm();
         }
 
         $('.period-select-button').on('click', function(e){
@@ -381,7 +413,7 @@
             checkForm();
         });
 
-        $('input[name="Comment"]').on('change', function(e) {
+        $('textarea[name="Comment"]').on('keydown', function(e) {
             checkForm();
         })
     </script>

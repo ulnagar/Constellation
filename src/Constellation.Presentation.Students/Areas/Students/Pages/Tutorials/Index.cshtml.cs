@@ -1,9 +1,15 @@
 namespace Constellation.Presentation.Students.Areas.Students.Pages.Tutorials;
 
+using Application.Domains.Tutorials.Queries.GetTutorialRequestsForStudent;
+using Application.Domains.Tutorials.Queries.GetTutorialsForStudent;
+using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Models.Timetables;
 using Core.Models.Tutorials.Enums;
+using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -37,21 +43,43 @@ public class IndexModel : BasePageModel
 
     [ViewData] public string ActivePage => Models.ActivePage.Tutorials;
 
+    public List<TutorialRequestResponse> Requests { get; set; } = [];
     public List<TutorialResponse> Tutorials { get; set; } = [];
 
     public async Task OnGet()
     {
-    }
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
 
-    public class TutorialResponse
-    {
-        public DateOnly SortDate { get; set; }
-        public TutorialType Type { get; set; }
-        public RequestStatus Status { get; set; }
-        public string Start { get; set; } = "Term 4, Week 1";
-        public string End { get; set; } = "Term 4, Week 10";
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
+        {
+            _logger
+                .ForContext(nameof(Error), StudentErrors.InvalidId, true)
+                .Warning("Failed to retrieve tutorial request data by user {user}", _currentUserService.UserName);
 
-        public List<Name> Teachers { get; set; }
-        public List<Period> Sessions { get; set; }
+            ModalContent = ErrorDisplay.Create(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Tutorials/Index", values: new { area = "Students" }));
+
+            return;
+        }
+
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
+
+        Result<List<TutorialRequestResponse>> tutorialRequests = await _mediator.Send(new GetTutorialRequestsForStudentQuery(studentId));
+
+        if (tutorialRequests.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), tutorialRequests.Error, true)
+                .Warning("Failed to retrieve tutorial request data by user {user}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                tutorialRequests.Error,
+                _linkGenerator.GetPathByPage("/Tutorials/Index", values: new { area = "Students" }));
+
+            return;
+        }
+
+        Requests = tutorialRequests.Value;
     }
 }

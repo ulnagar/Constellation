@@ -10,36 +10,145 @@
 
 <hr />
 
-<div class="row mt-3">
-    @foreach (var tutorial in Model.Tutorials.OrderBy(t => t.SortDate))
-    {
-        <div class="p-2 ms-1 me-1 mb-2 position-relative border border-2 rounded-3">
-            <span class="row d-flex align-items-center">
-                <div class="col">
-                    <div class="h4">@tutorial.Type - @tutorial.Status</div>
-                    @if (tutorial.Status == RequestStatus.Approved)
-                    {
-                        <span class="fst-italic d-block">From @tutorial.Start to @tutorial.End</span>
-     
-                        @if (tutorial.Teachers.Count == 1)
-                        {
-                            <span class="fst-italic d-block">Teacher @tutorial.Teachers.First().DisplayName</span>
-                        }
-                        else
-                        {
-                            var teachers = String.Join(", ", tutorial.Teachers.Select(t => t.DisplayName).ToList());
+<div class="d-sm-flex flex-column mt-1">
+    
+    <div class="accordion" id="accordion">
 
-                            <span class="fst-italic d-block">Teachers @teachers</span>
-                        }
-
-                        <span class="d-block">Sessions</span>
-                        @foreach (var session in tutorial.Sessions)
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-requests">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-requests" aria-expanded="false" aria-controls="accordion-item-request">
+                    <h5 class="position-relative p-1">
+                        Requests
+                        @if (Model.Requests.Count > 0)
                         {
-                            <span class="d-block">@session.ToString()</span>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">@Model.Requests.Count</span>
                         }
-                    }
+                    </h5>
+                </button>
+            </h2>
+            <div id="accordion-item-requests" class="accordion-collapse" aria-labelledby="accordion-header-requests" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                    <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-4 mb-3">
+                        @foreach (var request in Model.Requests)
+                        {
+                            var cardStyle = request.Status switch
+                            {
+                                _ when request.Status == RequestStatus.Approved => "text-white bg-success",
+                                _ when request.Status == RequestStatus.Rejected => "text-white bg-danger",
+                                _ when request.Status == RequestStatus.Requested => "text-dark bg-light"
+                            };
+
+                            <div class="col">
+                                <div class="card m-3 float-start h-100 @cardStyle">
+                                    <h4 class="card-header">@request.Type - @request.Status</h4>
+                                    <div class="card-body">
+                                        <h5 class="card-subtitle mb-3">Request Details</h5>
+
+                                        <dl class="mb-2">
+                                            @if (request.Type == TutorialType.Subject)
+                                            {
+                                                <dt>Course</dt>
+                                                <dd>@request.Course</dd>
+                                            }
+
+                                            <dt>Periods</dt>
+                                            <dd>
+                                                @foreach (var period in request.Periods.OrderBy(period => period.SortOrder))
+                                                {
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item">
+                                                            @period.ToString()
+                                                        </li>
+                                                    </ul>
+                                                }
+                                            </dd>
+                                        </dl>
+
+                                        @if (request.Status != RequestStatus.Requested)
+                                        {
+                                            <hr/>
+                                            <h5 class="card-subtitle mb-3">Review Details</h5>
+
+                                            <dl>
+                                                <dt>Reviewed By</dt>
+                                                <dd>@request.ReviewedBy</dd>
+
+                                                <dt>Reviewed At</dt>
+                                                <dd>@request.ReviewedAt.ToShortDateString()</dd>
+
+                                                <dt>Comment</dt>
+                                                <dd>@request.Notes</dd>
+                                            </dl>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </span>
+            </div>
         </div>
-    }
+        
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="accordion-header-tutorials">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-item-tutorials" aria-expanded="false" aria-controls="accordion-item-tutorials">
+                    <h5 class="position-relative p-1">
+                        Tutorials
+                        @if (Model.Tutorials.Count > 0)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">@Model.Tutorials.Count</span>
+                        }
+                    </h5>
+                </button>
+            </h2>
+            <div id="accordion-item-tutorials" class="accordion-collapse collapse" aria-labelledby="accordion-header-tutorials" data-bs-parent="#accordion">
+                <div class="accordion-body">
+                
+                    <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-4">
+                        @foreach (var tutorial in Model.Tutorials.OrderBy(entry => entry.Start))
+                        {
+                            <div class="col">
+                                <div class="card m-3 float-start h-100">
+                                    <h4 class="card-header">@tutorial.Name</h4>
+                                    <div class="card-body">
+                                        <dl class="mb-2">
+                                            <dt>Start</dt>
+                                            <dd>@tutorial.Start</dd>
+                                            
+                                            <dt>End</dt>
+                                            <dd>@tutorial.End</dd>
+
+                                            <dt>Teachers</dt>
+                                            <dd>
+                                                @foreach (var teacher in tutorial.Teachers.OrderBy(entry => entry.SortOrder))
+                                                {
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item">
+                                                            @teacher.DisplayName
+                                                        </li>
+                                                    </ul>
+                                                }
+                                            </dd>
+
+                                            <dt>Periods</dt>
+                                            <dd>
+                                                @foreach (var period in tutorial.Periods.OrderBy(period => period.SortOrder))
+                                                {
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item">
+                                                            @period.ToString()
+                                                        </li>
+                                                    </ul>
+                                                }
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -13,3 +13,7 @@
     cursor: pointer;
     user-select: none;
 }
+
+.period-remove-button {
+    margin: 2.5px;
+}

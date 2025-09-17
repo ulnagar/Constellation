@@ -2,6 +2,7 @@ namespace Constellation.Presentation.Students.Areas.Students.Pages.Tutorials;
 
 using Application.Domains.Courses.Queries.GetCoursesForStudent;
 using Application.Domains.Timetables.Timetables.Queries.GetStudentTimetableData;
+using Application.Domains.Tutorials.Commands.AddTutorialRequest;
 using Application.DTOs;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
@@ -118,6 +119,50 @@ public class RequestModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        return RedirectToPage();
+        string studentIdClaimValue = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StudentId)?.Value ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(studentIdClaimValue))
+        {
+            _logger
+                .ForContext(nameof(Error), StudentErrors.InvalidId, true)
+                .Warning("Failed to retrieve course data by user {user}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                StudentErrors.InvalidId,
+                _linkGenerator.GetPathByPage("/Tutorials/Request", values: new { area = "Students" }));
+
+            return Page();
+        }
+
+        StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
+
+        AddTutorialRequestCommand command = new(
+            studentId,
+            Type,
+            CourseId,
+            PeriodIds,
+            Comment);
+
+        _logger
+            .ForContext(nameof(AddTutorialRequestCommand), command, true)
+            .Information("Requested to enter Tutorial Request by user {user}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AddTutorialRequestCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Information("Failed to enter Tutorial Request by user {user}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Tutorials/Request", values: new { area = "Students" }));
+
+            return Page();
+        }
+
+        return RedirectToPage("/Tutorials/Index", new { area = "Students" });
     }
 }

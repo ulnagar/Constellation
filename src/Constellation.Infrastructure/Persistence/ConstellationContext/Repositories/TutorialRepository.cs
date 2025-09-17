@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Models.Enrolments;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Timetables;
 using Constellation.Core.Models.Timetables.Enums;
@@ -10,6 +9,7 @@ using Constellation.Core.Models.Tutorials.ValueObjects;
 using Core.Abstractions.Clock;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Tutorials;
+using Core.Models.Tutorials.Enums;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +87,24 @@ internal sealed class TutorialRepository : ITutorialRepository
                     session.StaffId == staffId))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Tutorial>> GetAllForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<TutorialId> tutorialIds = _context
+            .Set<Enrolment>()
+            .OfType<TutorialEnrolment>()
+            .Where(enrolment => enrolment.StudentId == studentId)
+            .Select(enrolment => enrolment.TutorialId);
+
+        return await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorial.StartDate.Year == _dateTime.CurrentYear &&
+                tutorialIds.Contains(tutorial.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Tutorial>> GetCurrentEnrolmentsFromStudentForDate(
     StudentId studentId,
     DateOnly absenceDate,
@@ -149,4 +167,49 @@ internal sealed class TutorialRepository : ITutorialRepository
 
     public void Insert(Tutorial tutorial) =>
         _context.Set<Tutorial>().Add(tutorial);
+
+    public async Task<Request> GetRequestById(
+        RequestId requestId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .FirstOrDefaultAsync(request => request.Id == requestId, cancellationToken);
+
+    public async Task<List<Request>> GetAllRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => request.CreatedAt.Year == _dateTime.CurrentYear)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Request>> GetPendingRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => 
+                request.Status == RequestStatus.Requested &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Request>> GetApprovedRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => 
+                request.Status == RequestStatus.Approved &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Request>> GetRequestsForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request =>
+                request.StudentId == studentId &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .ToListAsync(cancellationToken);
+
+    public void Insert(Request request) =>
+        _context.Set<Request>().Add(request);
 }

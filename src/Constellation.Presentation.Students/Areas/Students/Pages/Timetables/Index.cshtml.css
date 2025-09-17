@@ -45,7 +45,7 @@
     }
 
     .Timetable-Day-Period.Active {
-        background-color: darkseagreen;
+        background-color: darkseagreen !important;
         font-weight: bold;
     }
 
