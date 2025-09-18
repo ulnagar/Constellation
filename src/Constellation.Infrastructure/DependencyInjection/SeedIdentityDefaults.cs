@@ -18,6 +18,9 @@ public static class IdentityDefaults
                 AuthPermissions.StudentAdmin.Reports.Manage
             });
 
+        await CreateRoleWithPermission(roleManager, AuthRoles.TutorialManager,
+            new[] { AuthPermissions.TutorialsEdit });
+
         await CreateRoleWithPermission(roleManager, AuthRoles.Admin, 
             new[] { 
                 AuthPermissions.SchoolAdmin.Awards.Add,
@@ -62,7 +65,8 @@ public static class IdentityDefaults
                 AuthPermissions.SubjectsDetailsView,
                 AuthPermissions.SubjectsEdit,
                 AuthPermissions.SubjectsView,
-                AuthPermissions.UtilityAdmin });
+                AuthPermissions.UtilityAdmin,
+                AuthPermissions.TutorialsEdit });
 
         await CreateRoleWithPermission(roleManager, AuthRoles.Editor,
             new[] {
@@ -101,7 +105,8 @@ public static class IdentityDefaults
                 AuthPermissions.StocktakeView,
                 AuthPermissions.SubjectsDetailsView,
                 AuthPermissions.SubjectsEdit,
-                AuthPermissions.SubjectsView});
+                AuthPermissions.SubjectsView,
+                AuthPermissions.TutorialsEdit });
 
         await CreateRoleWithPermission(roleManager, AuthRoles.StaffMember,
             new[] {

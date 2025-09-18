@@ -75,4 +75,5 @@ public static class AuthPermissions
 
     public const string GroupTutorialsView = "GroupTutorials.View";
     public const string GroupTutorialsEdit = "GroupTutorials.Edit";
+    public const string TutorialsEdit = "Tutorials.Edit";
 }

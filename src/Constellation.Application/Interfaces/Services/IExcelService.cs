@@ -5,9 +5,9 @@ using Constellation.Application.Domains.Attendance.Absences.Queries.ExportUnexpl
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesWithFilterForReport;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateAttendanceReportForPeriod;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GenerateCustomReportForPeriod;
-using Constellation.Application.Domains.GroupTutorials.Queries.GenerateTutorialAttendanceReport;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.ExportAwardNominations;
 using Constellation.Application.Domains.Students.Commands.ImportStudentsFromFile;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GenerateTutorialAttendanceReport;
 using Constellation.Core.Models.Students;
 using Constellation.Infrastructure.Jobs;
 using Core.Models.Assets;

@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.EnrolStudentInTutorial;
 
 using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
-using Constellation.Application.Domains.Tutorials.Queries.GetTutorialDetails;
+using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialDetails;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Shared;

@@ -146,6 +146,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.Subject_Tutorials_Requests ? "active" : "")" asp-page="/Subject/Tutorials/Requests/Index" asp-area="Staff">
+                                Tutorial Requests
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.Subject_Tutorials_GroupTutorials ? "active" : "")" asp-page="/Subject/Tutorials/GroupTutorials/Index" asp-area="Staff">
                                 Group Tutorials
                             </a>

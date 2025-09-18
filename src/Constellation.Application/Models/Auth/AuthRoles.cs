@@ -18,6 +18,7 @@ public static class AuthRoles
     public const string AwardsManager = "Awards Manager";
     public const string ComplianceManager = "Compliance Manager";
     public const string ExecStaffMember = "Exec Staff Member";
+    public const string TutorialManager = "Tutorials Manager";
     
     // School Portal roles
     public const string SchoolContact = "Lessons User";

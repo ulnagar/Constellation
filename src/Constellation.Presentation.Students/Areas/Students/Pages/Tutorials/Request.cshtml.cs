@@ -2,7 +2,7 @@ namespace Constellation.Presentation.Students.Areas.Students.Pages.Tutorials;
 
 using Application.Domains.Courses.Queries.GetCoursesForStudent;
 using Application.Domains.Timetables.Timetables.Queries.GetStudentTimetableData;
-using Application.Domains.Tutorials.Commands.AddTutorialRequest;
+using Application.Domains.Tutorials.Requests.Commands.CreateTutorialRequest;
 using Application.DTOs;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
@@ -136,7 +136,7 @@ public class RequestModel : BasePageModel
 
         StudentId studentId = StudentId.FromValue(new(studentIdClaimValue));
 
-        AddTutorialRequestCommand command = new(
+        CreateTutorialRequestCommand command = new(
             studentId,
             Type,
             CourseId,
@@ -144,7 +144,7 @@ public class RequestModel : BasePageModel
             Comment);
 
         _logger
-            .ForContext(nameof(AddTutorialRequestCommand), command, true)
+            .ForContext(nameof(CreateTutorialRequestCommand), command, true)
             .Information("Requested to enter Tutorial Request by user {user}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);
@@ -152,7 +152,7 @@ public class RequestModel : BasePageModel
         if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(AddTutorialRequestCommand), command, true)
+                .ForContext(nameof(CreateTutorialRequestCommand), command, true)
                 .ForContext(nameof(Error), result.Error, true)
                 .Information("Failed to enter Tutorial Request by user {user}", _currentUserService.UserName);
 

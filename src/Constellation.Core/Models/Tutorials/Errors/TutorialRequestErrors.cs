@@ -1,9 +1,15 @@
 ﻿namespace Constellation.Core.Models.Tutorials.Errors;
 
+using Identifiers;
 using Shared;
+using System;
 
 public sealed class TutorialRequestErrors
 {
+    public static Func<RequestId, Error> NotFound = id => new(
+        "Tutorial.Request.NotFound",
+        $"Could not find a Tutorial Request with the Id {id}");
+
     public static Error AlreadyReviewed = new(
         "Tutorial.Request.AlreadyReviewed",
         "The Tutorial Request has already been reviewed");

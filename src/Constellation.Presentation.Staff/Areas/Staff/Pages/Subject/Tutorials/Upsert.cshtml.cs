@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials;
 
 using Application.Common.PresentationModels;
-using Application.Domains.Tutorials.Commands.CreateTutorial;
-using Application.Domains.Tutorials.Commands.UpdateTutorial;
-using Application.Domains.Tutorials.Queries.GetTutorialForEdit;
 using Application.Models.Auth;
+using Constellation.Application.Domains.Tutorials.Tutorials.Commands.CreateTutorial;
+using Constellation.Application.Domains.Tutorials.Tutorials.Commands.UpdateTutorial;
+using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialForEdit;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Tutorials.Identifiers;

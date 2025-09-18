@@ -1,8 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials;
 
-using Application.Domains.Tutorials.Queries.GetAllTutorials;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetAllTutorials;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using MediatR;

@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials;
 
 using Application.Domains.Enrolments.Commands.EnrolStudentInTutorial;
-using Application.Domains.Tutorials.Commands.AddSessionToTutorial;
-using Application.Domains.Tutorials.Commands.AddTeamToTutorial;
-using Application.Domains.Tutorials.Commands.RemoveAllSessionsFromTutorial;
-using Application.Domains.Tutorials.Commands.RemoveSessionFromTutorial;
-using Application.Domains.Tutorials.Queries.GetTutorialDetails;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Tutorials.Tutorials.Commands.AddSessionToTutorial;
+using Constellation.Application.Domains.Tutorials.Tutorials.Commands.AddTeamToTutorial;
+using Constellation.Application.Domains.Tutorials.Tutorials.Commands.RemoveAllSessionsFromTutorial;
+using Constellation.Application.Domains.Tutorials.Tutorials.Commands.RemoveSessionFromTutorial;
+using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialDetails;
 using Constellation.Core.Abstractions.Services;
 using Core.Abstractions.Clock;
 using Core.Models.Tutorials.Identifiers;

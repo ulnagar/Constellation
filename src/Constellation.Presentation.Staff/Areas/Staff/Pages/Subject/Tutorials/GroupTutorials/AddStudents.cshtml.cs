@@ -1,12 +1,12 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.GroupTutorials;
 
+using Application.Domains.Tutorials.GroupTutorials.Queries.GetCurrentStudentsInGroupTutorial;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.GroupTutorials.Commands.AddMultipleStudentsToTutorial;
-using Constellation.Application.Domains.GroupTutorials.Queries.GetCurrentStudentsInGroupTutorial;
-using Constellation.Application.Domains.GroupTutorials.Queries.GetTutorialById;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsFromGrade;
 using Constellation.Application.Domains.Students.Queries.GetStudentsFromOfferingGrade;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.AddMultipleStudentsToTutorial;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GetTutorialById;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Enums;

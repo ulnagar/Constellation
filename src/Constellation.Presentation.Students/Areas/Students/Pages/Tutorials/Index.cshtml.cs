@@ -1,16 +1,13 @@
 namespace Constellation.Presentation.Students.Areas.Students.Pages.Tutorials;
 
-using Application.Domains.Tutorials.Queries.GetTutorialRequestsForStudent;
-using Application.Domains.Tutorials.Queries.GetTutorialsForStudent;
 using Constellation.Application.Common.PresentationModels;
+using Constellation.Application.Domains.Tutorials.Requests.Queries.GetTutorialRequestsForStudent;
+using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialsForStudent;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
-using Core.Models.Timetables;
-using Core.Models.Tutorials.Enums;
 using Core.Shared;
-using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

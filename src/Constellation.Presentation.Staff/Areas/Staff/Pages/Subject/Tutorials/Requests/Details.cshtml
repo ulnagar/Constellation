@@ -1,0 +1,139 @@
+﻿@page "{id}"
+@using Constellation.Core.Extensions
+@using Constellation.Core.Models.Tutorials.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.Requests.DetailsModel
+
+@inject IAuthorizationService authService
+
+@{
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageTutorials);
+}
+
+<h2>Tutorial Request Details</h2>
+
+<div class="page-menu">
+    @if (canManageTest.Succeeded)
+    {
+        <button class="btn btn-success">Approve</button>
+        <button class="btn btn-danger">Reject</button>
+    }
+    
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Student Details</h3>
+        <dl>
+            <dt>
+                <label asp-for="Request.Student"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Student.DisplayName</span>
+            </dd>
+
+            <dt>
+                <label asp-for="Request.Grade"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Grade.AsName()</span>
+            </dd>
+
+            <dt>
+                <label asp-for="Request.School"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.School</span>
+            </dd>
+        </dl>
+    </div>
+    
+    <div class="col-md-4">
+        <h3>Support Requested</h3>
+        <dl>
+            <dt>
+                <label asp-for="Request.Type"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Type</span>
+            </dd>
+
+            @if (Model.Request.Type == TutorialType.Subject)
+            {
+                <dt>
+                    <label asp-for="Request.Subject"></label>
+                </dt>
+                <dd>
+                    <span>@Model.Request.Subject</span>
+                </dd>
+            }
+
+            <dt>
+                <label asp-for="Request.CreatedAt">Submitted At</label>
+            </dt>
+            <dd>
+                <span>@Model.Request.CreatedAt.ToLongDateString()</span>
+            </dd>
+
+            <dt>
+                <label asp-for="Request.Justification">Student Comment</label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Justification</span>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <h3>Available Periods</h3>
+        <dl>
+            @foreach (var period in Model.Request.Periods.OrderBy(period => period.SortOrder))
+            {
+                <dt>@period.ToString()</dt>
+                <dd>@period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()</dd>
+            }
+        </dl>
+    </div>
+    
+    <div class="col-md-4">
+        <h3>Outcome</h3>
+        <dl>
+            <dt>
+                <label asp-for="Request.Status"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Status</span>
+            </dd>
+
+            <dt>
+                <label asp-for="Request.ReviewedBy">Reviewer</label>
+            </dt>
+            <dd>
+                <span>@Model.Request.ReviewedBy</span>
+            </dd>
+
+            <dt>
+                <label asp-for="Request.ReviewedAt"></label>
+            </dt>
+            <dd>
+                <span>
+                    @if (Model.Request.ReviewedAt > DateTime.MinValue)
+                    {
+                        @Model.Request.ReviewedAt.ToLongDateString()
+                    }
+                </span>
+            </dd>
+
+            <dt>
+                <label asp-for="Request.Notes"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Notes</span>
+            </dd>
+        </dl>
+    </div>
+</div>

@@ -1,13 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.GroupTutorials;
 
+using Application.Domains.Tutorials.GroupTutorials.Queries.GenerateTutorialAttendanceReport;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.GroupTutorials.Commands.AddStudentToTutorial;
-using Constellation.Application.Domains.GroupTutorials.Commands.AddTeacherToTutorial;
-using Constellation.Application.Domains.GroupTutorials.Commands.CreateRoll;
-using Constellation.Application.Domains.GroupTutorials.Commands.RemoveStudentFromTutorial;
-using Constellation.Application.Domains.GroupTutorials.Commands.RemoveTeacherFromTutorial;
-using Constellation.Application.Domains.GroupTutorials.Queries.GenerateTutorialAttendanceReport;
-using Constellation.Application.Domains.GroupTutorials.Queries.GetTutorialWithDetailsById;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.AddStudentToTutorial;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.AddTeacherToTutorial;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.CreateRoll;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.RemoveStudentFromTutorial;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Commands.RemoveTeacherFromTutorial;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GetTutorialWithDetailsById;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;

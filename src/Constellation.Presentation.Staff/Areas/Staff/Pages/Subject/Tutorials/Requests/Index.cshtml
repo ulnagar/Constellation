@@ -1,0 +1,55 @@
+﻿@page
+@using Constellation.Core.Models.Tutorials.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.Requests.IndexModel
+@{
+}
+
+<h2>Tutorial Requests</h2>
+
+<div class="page-menu">
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover requests-table">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.Requests)
+    {
+        <tr>
+            <td data-order="@item.Student.SortOrder" data-search="@item.Student.DisplayName @item.Student.FirstName">@item.Student.DisplayName</td>
+            <td>
+                @item.Type
+                @if (item.Type == TutorialType.Subject)
+                {
+                    <br />
+                    <span class="text-muted">@item.Subject</span>
+                }
+            </td>
+            <td>@item.Status</td>
+            <td data-order="@item.ActionDate.ToString("yyyy-MM-dd")" data-search="@item.ActionDate.ToLongDateString()">@item.ActionDate.ToString("dd/MM/yyyy")</td>
+            <td>
+                <a asp-page="/Subject/Tutorials/Requests/Details" asp-area="Staff" asp-route-id="@item.RequestId" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+            </td>
+        </tr>
+    }
+</table>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('.requests-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+        });
+    </script>
+}

@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.GroupTutorials;
 
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Domains.GroupTutorials.Queries.GetAllTutorials;
+using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GetAllTutorials;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
