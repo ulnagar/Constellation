@@ -19,6 +19,11 @@ public sealed record TutorialRequestDetailsResponse(
     string Justification,
     DateTime CreatedAt,
     RequestStatus Status,
-    string ReviewedBy,
-    DateTime ReviewedAt,
-    string Notes);
+    IReadOnlyList<TutorialRequestDetailsResponse.RequestNoteResponse> Notes)
+{
+    public sealed record RequestNoteResponse(
+        RequestNoteId NoteId,
+        string Message,
+        string SubmittedBy,
+        DateTime SubmittedAt);
+}

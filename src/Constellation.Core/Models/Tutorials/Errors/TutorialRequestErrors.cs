@@ -17,4 +17,8 @@ public sealed class TutorialRequestErrors
     public static Error MustIncludeNote = new(
         "Tutorial.Request.MustIncludeNote",
         "A review of a Tutorial Request must include a note");
+
+    public static Error InvalidStatus = new(
+        "Tutorial.Request.InvalidStatus",
+        "Cannot update Request Status due to invalid process path");
 }

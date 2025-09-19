@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Tutorials;
 
+using Constellation.Core.Models.WorkFlow.Identifiers;
 using Converters;
 using Core.Models.Students;
 using Core.Models.Timetables.Identifiers;
@@ -68,5 +69,15 @@ internal sealed class RequestConfiguration : IEntityTypeConfiguration<Request>
         builder
             .Property(request => request.PeriodIds)
             .HasConversion(new JsonColumnConverter<IReadOnlyList<PeriodId>>());
+
+        builder
+            .HasMany(request => request.Notes)
+            .WithOne()
+            .HasForeignKey(note => note.RequestId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Navigation(request => request.Notes)
+            .AutoInclude();
     }
 }

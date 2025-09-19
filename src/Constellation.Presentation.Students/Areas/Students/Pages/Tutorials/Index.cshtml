@@ -63,23 +63,6 @@
                                                 }
                                             </dd>
                                         </dl>
-
-                                        @if (request.Status != RequestStatus.Requested)
-                                        {
-                                            <hr/>
-                                            <h5 class="card-subtitle mb-3">Review Details</h5>
-
-                                            <dl>
-                                                <dt>Reviewed By</dt>
-                                                <dd>@request.ReviewedBy</dd>
-
-                                                <dt>Reviewed At</dt>
-                                                <dd>@request.ReviewedAt.ToShortDateString()</dd>
-
-                                                <dt>Comment</dt>
-                                                <dd>@request.Notes</dd>
-                                            </dl>
-                                        }
                                     </div>
                                 </div>
                             </div>

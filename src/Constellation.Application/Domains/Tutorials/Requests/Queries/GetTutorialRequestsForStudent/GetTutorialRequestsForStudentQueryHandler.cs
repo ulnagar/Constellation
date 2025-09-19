@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Requests.Queries.GetTutorialRequestsForStudent;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.Tutorials.Requests.Queries.GetTutorialRequestById;
 using Core.Errors;
 using Core.Models.Students.Repositories;
 using Core.Models.Timetables;
@@ -42,6 +43,17 @@ internal sealed class GetTutorialRequestsForStudentQueryHandler
         {
             List<Period> periods = await _periodRepository.GetListFromIds(tutorialRequest.PeriodIds.ToList(), cancellationToken);
 
+            List<TutorialRequestResponse.RequestNoteResponse> notes = [];
+
+            foreach (var note in tutorialRequest.Notes)
+            {
+                notes.Add(new(
+                    note.Id,
+                    note.Message,
+                    note.SubmittedBy,
+                    note.SubmittedAt));
+            }
+
             TutorialRequestResponse response = new(
                 tutorialRequest.Id,
                 tutorialRequest.StudentId,
@@ -53,9 +65,7 @@ internal sealed class GetTutorialRequestsForStudentQueryHandler
                 periods,
                 tutorialRequest.Justification,
                 tutorialRequest.Status,
-                tutorialRequest.ReviewedBy,
-                tutorialRequest.ReviewedAt,
-                tutorialRequest.Notes);
+                notes.AsReadOnly());
 
             responses.Add(response);
         }

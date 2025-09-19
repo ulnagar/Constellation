@@ -1,0 +1,29 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ReviewTutorialRequest.ReviewTutorialRequestSelection
+
+<form method="post">
+    <div class="modal fade" tabindex="-1" id="review-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Review Tutorial Request</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-12">Comment</label>
+                        <div class="col-12">
+                            <textarea asp-for="Comment" class="form-control"></textarea>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <span class="text-danger">Selecting this option will send a notification to all relevant contacts that includes the Comment text above. Please ensure that no sensitive content is included in the Comment box.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" asp-page-handler="Approve" class="btn btn-success">Approve</button>
+                    <button type="submit" asp-page-handler="Reject" class="btn btn-danger">Reject</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

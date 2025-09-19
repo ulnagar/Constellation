@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.Requests;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Tutorials.Requests.Commands.ApproveTutorialRequest;
+using Application.Domains.Tutorials.Requests.Commands.RejectTutorialRequest;
 using Application.Domains.Tutorials.Requests.Queries.GetTutorialRequestById;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -12,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
+using Shared.Components.ReviewTutorialRequest;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -66,13 +69,63 @@ public class DetailsModel : BasePageModel
         Request = request.Value;
     }
 
-    public async Task OnGetApprove()
+    public async Task<IActionResult> OnPostApprove(
+        ReviewTutorialRequestSelection viewModel)
     {
+        ApproveTutorialRequestCommand command = new(
+            Id,
+            viewModel.Comment);
 
+        _logger
+            .ForContext(nameof(ApproveTutorialRequestCommand), command, true)
+            .Information("Requested to approve Tutorial Request by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(ApproveTutorialRequestCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to approve Tutorial Request by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Tutorials/Requests/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+        
+        return RedirectToPage();
     }
 
-    public async Task OnGetReject()
+    public async Task<IActionResult> OnPostReject(
+        ReviewTutorialRequestSelection viewModel)
     {
+        RejectTutorialRequestCommand command = new(
+            Id,
+            viewModel.Comment);
 
+        _logger
+            .ForContext(nameof(RejectTutorialRequestCommand), command, true)
+            .Information("Requested to reject Tutorial Request by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(RejectTutorialRequestCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to reject Tutorial Request by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Tutorials/Requests/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

@@ -156,4 +156,45 @@ public abstract class StringEnumeration<TEnum> : IEquatable<StringEnumeration<TE
 
         return fieldsForType.ToDictionary(x => x.Value);
     }
+
+    public IEnumerable<object> GetAtomicValues()
+    {
+        yield return Value;
+    }
+
+    private bool ValuesAreEqual(StringEnumeration<TEnum> other)
+    {
+        return GetAtomicValues()
+            .SequenceEqual(other.GetAtomicValues());
+    }
+
+    protected static bool EqualOperator(StringEnumeration<TEnum>? left, StringEnumeration<TEnum>? right)
+    {
+        if (left is null ^ right is null)
+            return false;
+
+        if (left is null & right is null)
+            return true;
+
+        if (left is null || right is null)
+            return false;
+
+        return left.ValuesAreEqual(right);
+    }
+
+    protected static bool NotEqualOperator(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return !(EqualOperator(left, right));
+    }
+
+    public static bool operator ==(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return EqualOperator(left, right);
+    }
+
+    public static bool operator !=(StringEnumeration<TEnum> left, StringEnumeration<TEnum> right)
+    {
+        return NotEqualOperator(left, right);
+    }
+
 }

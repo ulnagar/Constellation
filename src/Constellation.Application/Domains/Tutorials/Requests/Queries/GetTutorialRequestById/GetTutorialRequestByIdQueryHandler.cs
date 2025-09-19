@@ -46,6 +46,17 @@ internal sealed class GetTutorialRequestByIdQueryHandler
 
         List<Period> periods = await _periodRepository.GetListFromIds(tutorialRequest.PeriodIds.ToList(), cancellationToken);
 
+        List<TutorialRequestDetailsResponse.RequestNoteResponse> notes = [];
+
+        foreach (var note in tutorialRequest.Notes)
+        {
+            notes.Add(new(
+                note.Id,
+                note.Message,
+                note.SubmittedBy,
+                note.SubmittedAt));
+        }
+
         return new TutorialRequestDetailsResponse(
             tutorialRequest.Id,
             tutorialRequest.Student,
@@ -57,8 +68,6 @@ internal sealed class GetTutorialRequestByIdQueryHandler
             tutorialRequest.Justification,
             tutorialRequest.CreatedAt,
             tutorialRequest.Status,
-            tutorialRequest.ReviewedBy,
-            tutorialRequest.ReviewedAt,
-            tutorialRequest.Notes);
+            notes.AsReadOnly());
     }
 }

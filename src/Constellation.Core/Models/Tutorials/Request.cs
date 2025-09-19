@@ -21,6 +21,7 @@ using Timetables.Identifiers;
 public sealed class Request : AggregateRoot, IAuditableEntity
 {
     private readonly List<PeriodId> _periodIds = [];
+    private readonly List<RequestNote> _notes = [];
 
     private Request() { }
 
@@ -58,9 +59,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     public IReadOnlyList<PeriodId> PeriodIds => _periodIds.AsReadOnly();
     public string Justification { get; private set; }
     public RequestStatus Status { get; private set; }
-    public string Notes { get; private set; } = string.Empty;
-    public string ReviewedBy { get; private set; } = string.Empty;
-    public DateTime ReviewedAt { get; private set; }
+    public IReadOnlyList<RequestNote> Notes => _notes.AsReadOnly();
 
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
@@ -95,20 +94,22 @@ public sealed class Request : AggregateRoot, IAuditableEntity
 
     public Result Review(
         RequestStatus newStatus,
-        string note,
+        string message,
         string reviewer,
         IDateTimeProvider dateTime)
     {
-        if (Status != RequestStatus.Requested)
-            return Result.Failure(TutorialRequestErrors.AlreadyReviewed);
+        if (newStatus == RequestStatus.Requested || 
+            newStatus == RequestStatus.Approved && Status != RequestStatus.Requested || 
+            newStatus == RequestStatus.Scheduled && Status != RequestStatus.Approved)
+            return Result.Failure(TutorialRequestErrors.InvalidStatus);
 
-        if (string.IsNullOrWhiteSpace(note))
+        if (string.IsNullOrWhiteSpace(message))
             return Result.Failure(TutorialRequestErrors.MustIncludeNote);
 
         Status = newStatus;
-        AddNotes(note);
-        ReviewedBy = reviewer;
-        ReviewedAt = dateTime.Now;
+
+        RequestNote note = RequestNote.Create(Id, message, reviewer, dateTime.Now);
+        _notes.Add(note);
 
         if (newStatus == RequestStatus.Approved)
             RaiseDomainEvent(new TutorialRequestApprovedDomainEvent(new(), Id));
@@ -120,6 +121,4 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     }
 
     public void Delete() => IsDeleted = true;
-
-    public void AddNotes(string notes) => Notes = notes;
 }

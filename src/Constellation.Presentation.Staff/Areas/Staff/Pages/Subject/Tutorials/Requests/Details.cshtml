@@ -14,8 +14,7 @@
 <div class="page-menu">
     @if (canManageTest.Succeeded)
     {
-        <button class="btn btn-success">Approve</button>
-        <button class="btn btn-danger">Reject</button>
+        <button type="button" data-toggle="modal" data-target="#review-modal" class="btn btn-success">Review</button>
     }
     
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -53,6 +52,12 @@
     <div class="col-md-4">
         <h3>Support Requested</h3>
         <dl>
+            <dt>
+                <label asp-for="Request.Status"></label>
+            </dt>
+            <dd>
+                <span>@Model.Request.Status</span>
+            </dd>
             <dt>
                 <label asp-for="Request.Type"></label>
             </dt>
@@ -98,42 +103,33 @@
             }
         </dl>
     </div>
-    
-    <div class="col-md-4">
-        <h3>Outcome</h3>
-        <dl>
-            <dt>
-                <label asp-for="Request.Status"></label>
-            </dt>
-            <dd>
-                <span>@Model.Request.Status</span>
-            </dd>
-
-            <dt>
-                <label asp-for="Request.ReviewedBy">Reviewer</label>
-            </dt>
-            <dd>
-                <span>@Model.Request.ReviewedBy</span>
-            </dd>
-
-            <dt>
-                <label asp-for="Request.ReviewedAt"></label>
-            </dt>
-            <dd>
-                <span>
-                    @if (Model.Request.ReviewedAt > DateTime.MinValue)
-                    {
-                        @Model.Request.ReviewedAt.ToLongDateString()
-                    }
-                </span>
-            </dd>
-
-            <dt>
-                <label asp-for="Request.Notes"></label>
-            </dt>
-            <dd>
-                <span>@Model.Request.Notes</span>
-            </dd>
-        </dl>
-    </div>
 </div>
+
+<hr />
+
+<table class="table table-striped table-hover comment-table">
+    <thead>
+        <tr>
+            <th>Submitted</th>
+            <th>Author</th>
+            <th>Note</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        @foreach (var note in Model.Request.Notes)
+        {
+            <tr>
+                <td data-order="@note.SubmittedAt.ToString("yyyy-MM-dd H:mm")">@note.SubmittedAt.ToShortDateString()</td>
+                <td>@note.SubmittedBy</td>
+                <td>@note.Message</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<vc:review-tutorial-request />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
