@@ -1,0 +1,61 @@
+@using Constellation.Core.Models.StaffMembers.Identifiers
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ScheduleTutorialRequest.ScheduleTutorialRequestSelection
+
+<form method="post">
+    <div class="modal fade" tabindex="-1" id="schedule-modal">
+        <div class="modal-dialog wide">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Tutorial Request</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-12">Periods</label>
+                        <div class="col-12 mt-1">
+                            <span class="text-danger">Select the teacher for each period that will be scheduled for this tutorial. If no period lists a teacher, the request will be rejected.</span>
+                        </div>
+                        <table class="table mt-1">
+                            <thead>
+                                <tr>
+                                    <th class="w-50">Period</th>
+                                    <th class ="w-50">Teacher</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var i = 0; i < Model.Periods.Count; i++)
+                                {
+                                    <tr>
+                                        <td>@Model.Periods[i].PeriodName</td>
+                                        <td>
+                                            <select asp-for="Periods[i].StaffId" class="combo">
+                                                <option value="@StaffId.Empty"> -- None -- </option>
+                                                @foreach (var staffMember in Model.StaffMembers.OrderBy(entry => entry.Name.SortOrder))
+                                                {
+                                                    <option value="@staffMember.StaffId">@staffMember.Name.DisplayName</option>
+                                                }
+                                            </select>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-12">Comment</label>
+                        <div class="col-12">
+                            <textarea asp-for="Comment" class="form-control"></textarea>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <span class="text-danger">Comments may be included in emails sent to contacts. Please ensure that no sensitive content is included in the Comment box.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" asp-page-handler="Schedule" class="btn btn-success">Schedule</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

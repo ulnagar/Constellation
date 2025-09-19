@@ -14,7 +14,15 @@
 <div class="page-menu">
     @if (canManageTest.Succeeded)
     {
-        <button type="button" data-toggle="modal" data-target="#review-modal" class="btn btn-success">Review</button>
+        if (Model.Request.Status == RequestStatus.Requested)
+        {
+            <button type="button" data-toggle="modal" data-target="#review-modal" class="btn btn-success">Review</button>
+        }
+
+        if (Model.Request.Status == RequestStatus.Approved)
+        {
+            <button type="button" data-toggle="modal" data-target="#schedule-modal" class="btn btn-success">Schedule</button>
+        }
     }
     
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -129,6 +137,7 @@
 </table>
 
 <vc:review-tutorial-request />
+<vc:schedule-tutorial-request request-id="@Model.Id" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

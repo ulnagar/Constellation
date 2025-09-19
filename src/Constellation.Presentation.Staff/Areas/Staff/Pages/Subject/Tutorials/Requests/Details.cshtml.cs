@@ -3,9 +3,13 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.R
 using Application.Common.PresentationModels;
 using Application.Domains.Tutorials.Requests.Commands.ApproveTutorialRequest;
 using Application.Domains.Tutorials.Requests.Commands.RejectTutorialRequest;
+using Application.Domains.Tutorials.Requests.Commands.ScheduleTutorialRequest;
 using Application.Domains.Tutorials.Requests.Queries.GetTutorialRequestById;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
+using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Timetables.Identifiers;
+using Core.Models.Tutorials.Errors;
 using Core.Models.Tutorials.Identifiers;
 using Core.Shared;
 using MediatR;
@@ -15,6 +19,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.ReviewTutorialRequest;
+using Shared.Components.ScheduleTutorialRequest;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
@@ -118,6 +123,73 @@ public class DetailsModel : BasePageModel
                 .ForContext(nameof(RejectTutorialRequestCommand), command, true)
                 .ForContext(nameof(Error), result.Error, true)
                 .Warning("Failed to reject Tutorial Request by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Tutorials/Requests/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostSchedule(
+        ScheduleTutorialRequestSelection viewModel)
+    {
+        List<(PeriodId PeriodId, StaffId StaffId)> periods = [];
+
+        foreach (var period in viewModel.Periods.Where(period => period.StaffId != StaffId.Empty))
+        {
+            periods.Add(new (period.PeriodId, period.StaffId));
+        }
+
+        if (periods.Count == 0)
+        {
+            RejectTutorialRequestCommand rejectCommand = new(
+                Id,
+                viewModel.Comment);
+
+            _logger
+                .ForContext(nameof(RejectTutorialRequestCommand), rejectCommand, true)
+                .Information("Requested to reject Tutorial Request by user {User}", _currentUserService.UserName);
+
+            Result rejectResult = await _mediator.Send(rejectCommand);
+
+            if (rejectResult.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(RejectTutorialRequestCommand), rejectCommand, true)
+                    .ForContext(nameof(Error), rejectResult.Error, true)
+                    .Warning("Failed to reject Tutorial Request by user {User}", _currentUserService.UserName);
+
+                ModalContent = ErrorDisplay.Create(
+                    rejectResult.Error,
+                    _linkGenerator.GetPathByPage("/Subject/Tutorials/Requests/Details", values: new { area = "Staff", Id }));
+
+                return Page();
+            }
+
+            return RedirectToPage();
+        }
+        
+        ScheduleTutorialRequestCommand scheduleCommand = new(
+            Id,
+            periods,
+            viewModel.Comment);
+
+        _logger
+            .ForContext(nameof(ScheduleTutorialRequestSelection), scheduleCommand, true)
+            .Information("Requested to schedule Tutorial Request by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(scheduleCommand);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(ScheduleTutorialRequestSelection), scheduleCommand, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to schedule Tutorial Request by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(
                 result.Error,
