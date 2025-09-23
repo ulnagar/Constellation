@@ -21,4 +21,8 @@ public sealed class TutorialRequestErrors
     public static Error InvalidStatus = new(
         "Tutorial.Request.InvalidStatus",
         "Cannot update Request Status due to invalid process path");
+
+    public static Error InvalidStartDate = new(
+        "Tutorial.Request.InvalidStartDate",
+        "A Start Date must be provided when scheduling a Tutorial Request");
 }

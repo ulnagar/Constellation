@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923042150_UpdateGroupTutorialMSTeamOperationToIncludeTeamDescription")]
+    partial class UpdateGroupTutorialMSTeamOperationToIncludeTeamDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4433,7 +4436,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("StudentId");
 
                     b.Property<Guid>("TutorialId")
-                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("TutorialId");
 
@@ -4482,31 +4484,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("StaffId1");
 
                     b.HasDiscriminator().HasValue("TeacherEmployed");
-                });
-
-            modelBuilder.Entity("Constellation.Core.Models.TutorialCreatedMSTeamOperation", b =>
-                {
-                    b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
-
-                    b.Property<string>("TeamDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TeamName")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TutorialId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("TutorialId");
-
-                    b.ToTable("MSTeamOperations", t =>
-                        {
-                            t.Property("TeamDescription")
-                                .HasColumnName("TutorialCreatedMSTeamOperation_TeamDescription");
-                        });
-
-                    b.HasDiscriminator().HasValue("TutorialCreatedMSTeamOperation");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Offerings.CanvasCourseResource", b =>

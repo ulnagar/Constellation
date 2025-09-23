@@ -165,6 +165,26 @@ internal sealed class TutorialRepository : ITutorialRepository
                 (tutorial.StartDate <= startDate && tutorial.EndDate >= endDate)), // DB Tutorial starts before and ends after new tutorial
                 cancellationToken);
 
+    public async Task<int> GetNextTutorialNameSequence(
+        TutorialName name,
+        CancellationToken cancellationToken)
+    {
+        List<TutorialName> existing = await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorial.StartDate > _dateTime.FirstDayOfYear &&
+                ((string)tutorial.Name).Contains(name.Value))
+            .Select(tutorial => tutorial.Name)
+            .ToListAsync(cancellationToken);
+
+        if (existing.Count == 0)
+            return 0;
+
+        string existingSequence = existing.Last().Value.Last().ToString();
+
+        return Convert.ToInt32(existingSequence);
+    }
+
     public void Insert(Tutorial tutorial) =>
         _context.Set<Tutorial>().Add(tutorial);
 

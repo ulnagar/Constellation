@@ -37,4 +37,7 @@ public sealed class TutorialName : ValueObject, IComparable
 
     public static implicit operator string(TutorialName offeringName) =>
         offeringName is null ? string.Empty : offeringName.ToString();
+
+    //public static explicit operator string(TutorialName offeringName) =>
+    //    offeringName is null ? string.Empty : offeringName.ToString();
 }

@@ -28,7 +28,8 @@ public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOpera
             .HasValue<ContactAddedMSTeamOperation>("ContactAdded")
             .HasValue<TeacherAssignmentMSTeamOperation>("TeacherAssigned")
             .HasValue<StudentOfferingMSTeamOperation>("StudentOffering")
-            .HasValue<StudentTutorialMSTeamOperation>(nameof(StudentTutorialMSTeamOperation));
+            .HasValue<StudentTutorialMSTeamOperation>(nameof(StudentTutorialMSTeamOperation))
+            .HasValue<TutorialCreatedMSTeamOperation>(nameof(TutorialCreatedMSTeamOperation));
     }
 }
 
@@ -135,6 +136,20 @@ public class GroupTutorialCreatedMSTeamOperationConfiguration : IEntityTypeConfi
                 value => GroupTutorialId.FromValue(value));
     }
 }
+
+public class TutorialCreatedMSTeamOperationConfiguration : IEntityTypeConfiguration<TutorialCreatedMSTeamOperation>
+{
+    public void Configure(EntityTypeBuilder<TutorialCreatedMSTeamOperation> builder)
+    {
+        builder
+            .Property(operation => operation.TutorialId)
+            .HasColumnName(nameof(TutorialId))
+            .HasConversion(
+                id => id.Value,
+                value => TutorialId.FromValue(value));
+    }
+}
+
 
 public class OfferingMSTeamOperationConfiguration : IEntityTypeConfiguration<OfferingMSTeamOperation>
 {

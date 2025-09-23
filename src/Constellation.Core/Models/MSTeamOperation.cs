@@ -14,6 +14,7 @@ using StaffMembers;
 using StaffMembers.Identifiers;
 using Students;
 using System;
+using Tutorials;
 using Tutorials.Identifiers;
 
 public abstract class MSTeamOperation
@@ -106,6 +107,13 @@ public class GroupTutorialCreatedMSTeamOperation : EventMSTeamOperation
 {
     public GroupTutorialId TutorialId { get; set; }
     public GroupTutorial GroupTutorial { get; set; }
+    public string TeamDescription { get; set; }
+}
+
+public class TutorialCreatedMSTeamOperation : EventMSTeamOperation
+{
+    public TutorialId TutorialId { get; set; }
+    public string TeamDescription { get; set; }
 }
 
 public sealed class TeacherAssignmentMSTeamOperation : EventMSTeamOperation

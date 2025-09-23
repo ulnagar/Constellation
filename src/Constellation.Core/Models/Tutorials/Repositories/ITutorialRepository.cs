@@ -21,6 +21,7 @@ public interface ITutorialRepository
     Task<List<Tutorial>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
 
     Task<bool> DoesTutorialAlreadyExist(TutorialName name, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
+    Task<int> GetNextTutorialNameSequence(TutorialName name, CancellationToken cancellationToken);
     void Insert(Tutorial tutorial);
 
     Task<Request> GetRequestById(RequestId requestId, CancellationToken cancellationToken = default);

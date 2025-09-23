@@ -280,7 +280,10 @@ public class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.GroupTutorial.EndDate:yyyy} - {operation.GroupTutorial.Name}",
-                Action = "Group"
+                Action = "Group",
+                AdditionalInformation = string.IsNullOrWhiteSpace(operation.TeamDescription) 
+                    ? $"AC - {operation.GroupTutorial.EndDate:yyyy} - {operation.GroupTutorial.Name}"
+                    : operation.TeamDescription
             };
 
             returnData.Add(teamOperation);

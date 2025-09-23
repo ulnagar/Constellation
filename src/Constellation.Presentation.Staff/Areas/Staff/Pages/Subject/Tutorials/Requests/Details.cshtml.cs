@@ -9,8 +9,10 @@ using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Identifiers;
+using Core.Models.Tutorials.Enums;
 using Core.Models.Tutorials.Errors;
 using Core.Models.Tutorials.Identifiers;
+using Core.Models.Tutorials.ValueObjects;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +53,7 @@ public class DetailsModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     public RequestId Id { get; set; } = RequestId.Empty;
-
+    
     public TutorialRequestDetailsResponse Request { get; set; }
 
     public async Task OnGet()
@@ -144,7 +146,7 @@ public class DetailsModel : BasePageModel
             periods.Add(new (period.PeriodId, period.StaffId));
         }
 
-        if (periods.Count == 0)
+        if (periods.Count == 0 || viewModel.StartWeek is null || viewModel.StartWeek.Value == DateTime.MinValue)
         {
             RejectTutorialRequestCommand rejectCommand = new(
                 Id,
@@ -175,7 +177,9 @@ public class DetailsModel : BasePageModel
         
         ScheduleTutorialRequestCommand scheduleCommand = new(
             Id,
+            viewModel.Name,
             periods,
+            DateOnly.FromDateTime(viewModel.StartWeek.Value),
             viewModel.Comment);
 
         _logger
