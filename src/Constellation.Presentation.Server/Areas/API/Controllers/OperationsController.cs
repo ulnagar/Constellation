@@ -8,6 +8,8 @@ using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models;
 using Core.Models.Casuals;
+using Core.Models.Operations;
+using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
@@ -15,10 +17,10 @@ using Core.Models.Students.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 
-[Route("api/v1/Operations")]
 [ApiController]
 public class OperationsController : ControllerBase
 {
+    private readonly ITeamOperationRepository _teamOperationRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
     private readonly ITeamRepository _teamRepository;
     private readonly IStudentRepository _studentRepository;
@@ -27,6 +29,7 @@ public class OperationsController : ControllerBase
     private readonly IUnitOfWork _unitOfWork;
 
     public OperationsController(
+        ITeamOperationRepository teamOperationRepository,
         IMSTeamOperationsRepository operationsRepository,
         ITeamRepository teamRepository,
         IStudentRepository studentRepository,
@@ -34,6 +37,7 @@ public class OperationsController : ControllerBase
         ICasualRepository casualRepository,
         IUnitOfWork unitOfWork)
     {
+        _teamOperationRepository = teamOperationRepository;
         _operationsRepository = operationsRepository;
         _teamRepository = teamRepository;
         _studentRepository = studentRepository;
@@ -42,8 +46,10 @@ public class OperationsController : ControllerBase
         _unitOfWork = unitOfWork;
     }
 
+    #region v1 Operations
+
     // GET api/Operations/Due
-    [Route("Due")]
+    [Route("api/v1/Operations/Due")]
     public async Task<IEnumerable<TeamsOperation>> GetDue()
     {
         MSTeamOperationsList operations = await _operationsRepository.ToProcess();
@@ -53,7 +59,7 @@ public class OperationsController : ControllerBase
 
 
     // GET api/Operations/Overdue
-    [Route("Overdue")]
+    [Route("api/v1/Operations/Overdue")]
     public async Task<IEnumerable<TeamsOperation>> GetOverdue()
     {
         MSTeamOperationsList operations = await _operationsRepository.OverdueToProcess();
@@ -274,7 +280,20 @@ public class OperationsController : ControllerBase
             returnData.Add(teamOperation);
         }
 
-        foreach (GroupTutorialCreatedMSTeamOperation operation in operations.TutorialOperations)
+        foreach (TutorialCreatedMSTeamOperation operation in operations.TutorialOperations)
+        {
+            TeamsOperation teamOperation = new()
+            {
+                Id = operation.Id,
+                TeamName = operation.TeamName,
+                Action = "Group",
+                AdditionalInformation = operation.TeamDescription
+            };
+
+            returnData.Add(teamOperation);
+        }
+
+        foreach (GroupTutorialCreatedMSTeamOperation operation in operations.GroupTutorialOperations)
         {
             TeamsOperation teamOperation = new()
             {
@@ -405,7 +424,7 @@ public class OperationsController : ControllerBase
     }
 
     // POST api/Operations/Complete
-    [Route("Complete/{id}")]
+    [Route("api/v1/Operations/Complete/{id}")]
     [HttpPost]
     public async Task Complete(int id)
     {
@@ -439,4 +458,57 @@ public class OperationsController : ControllerBase
 
         return null;
     }
+
+    #endregion
+
+    #region v2 Operations
+    [Route("api/v2/Operations/Due")]
+    public async Task<IEnumerable<TeamsOperation>> GetDueV2(
+        CancellationToken cancellationToken = default)
+    {
+        List<TeamOperation> operations = await _teamOperationRepository.GetDue(cancellationToken);
+
+        List<TeamsOperation> response = [];
+
+        foreach (var operation in operations)
+        {
+            TeamsOperation dto = operation switch
+            {
+                CreateTeamTeamOperation createTeam => new TeamsOperation()
+                {
+                    Id = createTeam.Id,
+                    TeamName = createTeam.Name,
+                    Action = "Group",
+                    AdditionalInformation = createTeam.Description
+                },
+                CreateTeamChannelTeamOperation createChannel => new TeamsOperation()
+                {
+
+                },
+                ModifyTeamMembershipTeamOperation modifyMembership => new TeamsOperation()
+                {
+
+                },
+                ModifyTeamChannelMembershipTeamOperation modifyChannelMembership => new TeamsOperation()
+                {
+
+                },
+                ArchiveTeamTeamOperation archiveTeam => new TeamsOperation()
+                {
+
+                },
+                ArchiveTeamChannelTeamOperation archiveChannel => new TeamsOperation()
+                {
+
+                },
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            response.Add(dto);
+        }
+
+        return response;
+    }
+
+    #endregion
 }

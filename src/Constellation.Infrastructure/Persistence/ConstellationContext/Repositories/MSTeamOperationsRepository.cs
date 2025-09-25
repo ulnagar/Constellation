@@ -43,13 +43,16 @@ public sealed class MSTeamOperationsRepository : IMSTeamOperationsRepository
             ContactOperations = await _context.MSTeamOperations.OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
                 .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync(),
-            TutorialOperations = await _context.MSTeamOperations.OfType<GroupTutorialCreatedMSTeamOperation>().Include(op => op.GroupTutorial)
+            GroupTutorialOperations = await _context.MSTeamOperations.OfType<GroupTutorialCreatedMSTeamOperation>().Include(op => op.GroupTutorial)
                 .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync(),
             AssignmentOperations = await _context.MSTeamOperations.OfType<TeacherAssignmentMSTeamOperation>()
                 .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync(),
             StudentOfferingOperations = await _context.MSTeamOperations.OfType<StudentOfferingMSTeamOperation>()
+                .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
+                .ToListAsync(),
+            TutorialOperations = await _context.MSTeamOperations.OfType<TutorialCreatedMSTeamOperation>()
                 .Where(o => o.DateScheduled.Date == dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync()
         };
@@ -84,13 +87,16 @@ public sealed class MSTeamOperationsRepository : IMSTeamOperationsRepository
             ContactOperations = await _context.MSTeamOperations.OfType<ContactAddedMSTeamOperation>().Include(op => op.Contact)
                 .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync(),
-            TutorialOperations = await _context.MSTeamOperations.OfType<GroupTutorialCreatedMSTeamOperation>().Include(op => op.GroupTutorial)
+            GroupTutorialOperations = await _context.MSTeamOperations.OfType<GroupTutorialCreatedMSTeamOperation>().Include(op => op.GroupTutorial)
                 .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync(),
             AssignmentOperations = await _context.MSTeamOperations.OfType<TeacherAssignmentMSTeamOperation>()
                 .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync(),
             StudentOfferingOperations = await _context.MSTeamOperations.OfType<StudentOfferingMSTeamOperation>()
+                .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
+                .ToListAsync(),
+            TutorialOperations = await _context.MSTeamOperations.OfType<TutorialCreatedMSTeamOperation>()
                 .Where(o => o.DateScheduled < dateToday && o.IsCompleted == false && o.IsDeleted == false)
                 .ToListAsync()
         };

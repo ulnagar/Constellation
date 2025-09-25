@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Operations;
 
 using Constellation.Core.Models.Operations;
 using Core.Models.Canvas.Models;
@@ -6,7 +6,7 @@ using Core.Models.Operations.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class CanvasOperationConfiguration : IEntityTypeConfiguration<CanvasOperation>
+internal sealed class CanvasOperationConfiguration : IEntityTypeConfiguration<CanvasOperation>
 {
     public void Configure(EntityTypeBuilder<CanvasOperation> builder)
     {
@@ -20,7 +20,7 @@ public class CanvasOperationConfiguration : IEntityTypeConfiguration<CanvasOpera
     }
 }
 
-public class CreateUserCanvasOperationConfiguration : IEntityTypeConfiguration<CreateUserCanvasOperation>
+internal sealed class CreateUserCanvasOperationConfiguration : IEntityTypeConfiguration<CreateUserCanvasOperation>
 {
     public void Configure(EntityTypeBuilder<CreateUserCanvasOperation> builder)
     {
@@ -30,7 +30,7 @@ public class CreateUserCanvasOperationConfiguration : IEntityTypeConfiguration<C
     }
 }
 
-public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfiguration<ModifyEnrolmentCanvasOperation>
+internal sealed class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfiguration<ModifyEnrolmentCanvasOperation>
 {
     public void Configure(EntityTypeBuilder<ModifyEnrolmentCanvasOperation> builder)
     {
@@ -60,7 +60,7 @@ public class ModifyEnrolmentCanvasOperationConfiguration : IEntityTypeConfigurat
     }
 }
 
-public class UpdateUserEmailCanvasOperationConfiguration : IEntityTypeConfiguration<UpdateUserEmailCanvasOperation>
+internal sealed class UpdateUserEmailCanvasOperationConfiguration : IEntityTypeConfiguration<UpdateUserEmailCanvasOperation>
 {
     public void Configure(EntityTypeBuilder<UpdateUserEmailCanvasOperation> builder)
     {
