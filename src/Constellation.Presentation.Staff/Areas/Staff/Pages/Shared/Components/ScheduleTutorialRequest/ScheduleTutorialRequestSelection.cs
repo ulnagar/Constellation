@@ -6,6 +6,7 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Helpers.ModelBinders;
 using System.Collections.Generic;
 
 public sealed class ScheduleTutorialRequestSelection
@@ -15,6 +16,7 @@ public sealed class ScheduleTutorialRequestSelection
     public string Comment { get; set; }
     public DateTime? StartWeek { get; set; }
 
+    [ModelBinder(typeof(FromValueBinder))]
     public TutorialName Name { get; set; }
 
     public List<StaffSelectionListResponse> StaffMembers = [];

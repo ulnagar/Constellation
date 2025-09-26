@@ -656,7 +656,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         SentralPeriodAbsenceDto absence, 
         List<Period> periodGroup)
     {
-        if (absence.Date <= DateOnly.Parse("2025-08-29", new DateTimeFormatInfo()))
+        //TODO: 2026: Remove the old grid prefix handling when all historical absences are gone
+        if (absence.Date <= DateOnly.Parse("2025-10-01", new DateTimeFormatInfo()))
         {
             Period period = (absence.Period.Contains('S', StringComparison.InvariantCultureIgnoreCase))
                 ? periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period.Remove(0, 1), StringComparison.InvariantCultureIgnoreCase))

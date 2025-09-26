@@ -5,11 +5,13 @@ using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAtten
 using Constellation.Application.Helpers;
 using Constellation.Core.Enums;
 using Constellation.Core.Models;
+using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Tutorials.Enums;
 using Constellation.Core.Models.Tutorials.Errors;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Extensions;
+using Core.Models.Enrolments;
 using Core.Models.Operations;
 using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers.Identifiers;
@@ -35,6 +37,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ISentralGateway _gateway;
     private readonly IDateTimeProvider _dateTime;
@@ -45,6 +48,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
         IStudentRepository studentRepository,
         ITutorialRepository tutorialRepository,
         IMSTeamOperationsRepository operationsRepository,
+        IEnrolmentRepository enrolmentRepository,
         ICurrentUserService currentUserService,
         ISentralGateway gateway,
         IDateTimeProvider dateTime,
@@ -54,6 +58,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
         _studentRepository = studentRepository;
         _tutorialRepository = tutorialRepository;
         _operationsRepository = operationsRepository;
+        _enrolmentRepository = enrolmentRepository;
         _currentUserService = currentUserService;
         _gateway = gateway;
         _dateTime = dateTime;
@@ -113,6 +118,8 @@ internal sealed class ScheduleTutorialRequestCommandHandler
             ? weekDescriptors.Last()
             : weekDescriptors[endWeekIndex];
 
+        // Create tutorial
+
         Result<Tutorial> tutorial = Tutorial.Create(
             request.Name,
             request.StartDate,
@@ -131,8 +138,18 @@ internal sealed class ScheduleTutorialRequestCommandHandler
 
         _tutorialRepository.Insert(tutorial.Value);
 
+        // Add sessions to new tutorial
+
         foreach ((PeriodId PeriodId, StaffId StaffId) session in request.Periods)
             tutorial.Value.AddSession(session.PeriodId, session.StaffId);
+
+        // Enrol student in new tutorial
+
+        Enrolment enrolment = TutorialEnrolment.Create(student.Id, tutorial.Value.Id);
+
+        _enrolmentRepository.Insert(enrolment);
+
+        // Schedule creation of Team for tutorial
 
         TutorialCreatedMSTeamOperation operation = new()
         {

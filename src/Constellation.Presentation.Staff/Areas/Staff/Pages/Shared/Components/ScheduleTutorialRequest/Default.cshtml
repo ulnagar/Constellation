@@ -8,7 +8,6 @@
             <div class="modal-content">
                 <div class="modal-header">
 	                <h5 class="modal-title">Schedule Tutorial Request - @Model.Name</h5>
-					<input asp-for="Name" type="hidden" />
                 </div>
                 <div class="modal-body">
 	                <div class="form-group row">
@@ -47,8 +46,9 @@
 	                <div class="form-group row">
 		                <label class="col-12">Start Week</label>
 		                <div class="col-12">
+			                <input type="hidden" asp-for="Name" />
 			                <select asp-for="StartWeek" asp-items="new SelectList(Model.ValidStartDates, nameof(ValidAttendenceReportDate.StartDate), nameof(ValidAttendenceReportDate.Description), null, nameof(ValidAttendenceReportDate.TermGroup))" class="combo">
-								<option value=""> -- None -- </option>
+				                <option value=""> -- None -- </option>
 			                </select>
 		                </div>
 		                <div class="col-12 mt-3">
