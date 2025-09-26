@@ -2,6 +2,7 @@
 
 using Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public interface ITeamsGateway
 {
@@ -10,7 +11,7 @@ public interface ITeamsGateway
     List<TeamMember> GetTeamMembers(string groupId);
     List<TeamChannel> GetChannels(string groupId);
     List<TeamMember> GetChannelMembers(string groupId, string channelName);
-    void AddTeam(string teamName, string teamDescription, bool isClassTeam);
+    Task<Team> AddTeam(string teamName, string teamDescription, bool isClassTeam);
     void ArchiveTeam(string groupId);
     void RemoveTeam(string groupId);
     void AddTeamMember(string groupId, string userEmail);

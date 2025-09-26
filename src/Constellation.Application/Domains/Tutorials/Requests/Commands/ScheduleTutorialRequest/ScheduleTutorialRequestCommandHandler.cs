@@ -10,6 +10,8 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Extensions;
+using Core.Models.Operations;
+using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -138,7 +140,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
             TeamName = MicrosoftTeamsHelper.FormatTeamName(tutorial.Value.Name),
             Action = MSTeamOperationAction.Add,
             TutorialId = tutorial.Value.Id,
-            TeamDescription = $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};"
+            TeamDescription = $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorial.Value.Name};"
         };
 
         _operationsRepository.Insert(operation);

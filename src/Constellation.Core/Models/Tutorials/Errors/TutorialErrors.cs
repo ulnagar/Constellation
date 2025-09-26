@@ -3,12 +3,17 @@
 using Identifiers;
 using Shared;
 using System;
+using ValueObjects;
 
 public sealed class TutorialErrors
 {
     public static readonly Func<TutorialId, Error> NotFound = id => new(
         "Tutorial.NotFound",
         $"Could not find Tutorial with Id {id}");
+
+    public static readonly Func<TutorialName, Error> NotFoundByName = name => new(
+        "Tutorial.NotFoundByName",
+        $"Could not find Tutorial with Name {name}");
 
     public static Error TeamAlreadyExists = new(
         "Tutorial.Team.AlreadyExists",

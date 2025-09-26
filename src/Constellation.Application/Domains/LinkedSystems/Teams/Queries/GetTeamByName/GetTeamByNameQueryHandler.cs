@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Teams.Queries.GetTeamByName;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models;

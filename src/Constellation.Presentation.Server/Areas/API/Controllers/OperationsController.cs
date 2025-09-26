@@ -4,6 +4,7 @@ using Application.Domains.LinkedSystems.Teams.Models;
 using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Models;

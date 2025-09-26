@@ -37,6 +37,17 @@ internal sealed class TutorialRepository : ITutorialRepository
             .FirstOrDefaultAsync(tutorial => tutorial.Id == tutorialId,
                 cancellationToken);
 
+    public async Task<Tutorial> GetByNameAndYear(
+        int year,
+        TutorialName name,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                tutorial.StartDate.Year == year &&
+                ((string)tutorial.Name).Contains(name.Value))
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<Tutorial>> GetAll(
         CancellationToken cancellationToken = default)
     {

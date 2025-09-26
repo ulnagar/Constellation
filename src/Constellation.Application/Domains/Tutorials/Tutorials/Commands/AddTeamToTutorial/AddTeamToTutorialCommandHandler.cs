@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Tutorials.Commands.AddTeamToTutorial;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.LinkedSystems;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
 using Core.Abstractions.Repositories;

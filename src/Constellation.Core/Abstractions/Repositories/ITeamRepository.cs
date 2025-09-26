@@ -2,7 +2,7 @@
 
 namespace Constellation.Core.Abstractions.Repositories;
 
-using Constellation.Core.Models;
+using Constellation.Core.Models.LinkedSystems;
 using System;
 using System.Collections.Generic;
 using System.Threading;

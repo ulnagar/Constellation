@@ -5,6 +5,7 @@ using Application.Models.Auth;
 using Application.Models.Identity;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.Faculties.ValueObjects;
+using Constellation.Core.Models.LinkedSystems;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Repositories;

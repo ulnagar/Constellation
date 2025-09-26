@@ -194,7 +194,36 @@ public class Gateway : ITeamsGateway
         }
     }
 
-    public void AddTeam(string teamName, string teamDescription, bool isClassTeam) { }
+    public async Task<Team> AddTeam(string teamName, string teamDescription, bool isClassTeam)
+    {
+        using PowerShell ps = PowerShell.Create(_runspace);
+
+        ps.Streams.Error.DataAdded += ErrorEventHandler;
+
+        try
+        {
+            ps.AddCommand("Add-Team")
+                .AddParameter("DisplayName", teamName)
+                .AddParameter("Description", teamDescription);
+
+            if (isClassTeam)
+                ps.AddParameter("Template", "EDU_Class");
+
+            PSDataCollection<PSObject> result = await ps.InvokeAsync();
+
+            return ConvertObjects<Team>(result).First();
+        }
+        catch (Exception e)
+        {
+            _logger
+                .ForContext("TeamName", teamName)
+                .ForContext("TeamDescription", teamDescription)
+                .ForContext("IsClassTeam", isClassTeam)
+                .ForContext(nameof(Exception), e, true)
+                .Error("Teams Gateway Error: AddTeam");
+            throw;
+        }
+    }
 
     public void ArchiveTeam(string groupId) { }
 

@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations;
 
-using Constellation.Core.Models;
+using Constellation.Core.Models.LinkedSystems;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

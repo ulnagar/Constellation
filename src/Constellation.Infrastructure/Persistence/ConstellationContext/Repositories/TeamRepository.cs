@@ -2,7 +2,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Models;
+using Constellation.Core.Models.LinkedSystems;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class TeamRepository : ITeamRepository

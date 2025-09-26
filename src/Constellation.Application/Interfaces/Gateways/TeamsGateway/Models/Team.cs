@@ -77,6 +77,6 @@ public sealed class Team
     [JsonProperty("ShowInTeamsSearchAndSuggestions")]
     public bool ShowInTeamsSearchAndSuggestions { get; internal set; }
 
-    [JsonProperty("Visbility")]
+    [JsonProperty("Visibility")]
     public string Visibility { get; internal set; } = string.Empty;
 }
