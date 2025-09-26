@@ -19,6 +19,7 @@ public interface ITutorialRepository
     Task<List<Tutorial>> GetActiveForTeacher(StaffId staffId, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetAllForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
+    Task<List<Tutorial>> GetWithLinkedTeam(Guid teamId, CancellationToken cancellationToken = default);
     Task<Tutorial> GetByNameAndYear(int year, TutorialName name, CancellationToken cancellationToken = default);
 
     Task<bool> DoesTutorialAlreadyExist(TutorialName name, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);

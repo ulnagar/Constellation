@@ -327,17 +327,11 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             }
         }
 
-        if (team.Description.Split(';').Contains("TUTORIAL"))
+        if (team.Description.Split(';').Contains("TUT"))
         {
-            List<Tutorial> tutorials = await _tutorialRepository.GetAllActive(cancellationToken);
+            List<Tutorial> tutorials = await _tutorialRepository.GetWithLinkedTeam(team.Id, cancellationToken);
 
-            // Tutorial Team which should have a tutorial
-            List<Tutorial> matchingTutorials = tutorials
-                .Where(offering => offering.Teams
-                    .Any(resource => resource.TeamId == team.Id))
-                .ToList();
-
-            if (matchingTutorials.Count == 0)
+            if (tutorials.Count == 0)
             {
                 //error
                 _logger.Warning("Could not identify any Tutorial with active Resource for Team {id}", team.Id);
@@ -345,7 +339,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 return Result.Failure<List<TeamMembershipResponse>>(new Error("Tutorial.Team.NoMatch", "Could not find a matching Team for the Tutorial"));
             }
 
-            foreach (Tutorial tutorial in matchingTutorials)
+            foreach (Tutorial tutorial in tutorials)
             {
                 // Enrolled Students
                 List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByTutorialId(tutorial.Id, cancellationToken);

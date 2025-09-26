@@ -37,6 +37,19 @@ internal sealed class TutorialRepository : ITutorialRepository
             .FirstOrDefaultAsync(tutorial => tutorial.Id == tutorialId,
                 cancellationToken);
 
+    public async Task<List<Tutorial>> GetWithLinkedTeam(
+        Guid teamId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                !tutorial.IsDeleted &&
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today &&
+                tutorial.Sessions.Any(session => !session.IsDeleted) &&
+                tutorial.Teams.Any(team => team.TeamId == teamId))
+            .ToListAsync(cancellationToken);
+
     public async Task<Tutorial> GetByNameAndYear(
         int year,
         TutorialName name,
