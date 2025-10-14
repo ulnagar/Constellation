@@ -1,11 +1,19 @@
 ﻿$(function () {
     // Activate any comboboxes
-    $(".combo").select2({ theme: 'bootstrap-5' });
+    $(".combo").each(function () {
+        $(this).select2({
+            theme: 'bootstrap-5',
+            dropdownParent: $(this).parent()
+        });
+    });
 
     // Activate any comboboxes with free-text entry
-    $(".combo-with-tag").select2({
-        theme: 'bootstrap-5',
-        tags: true
+    $(".combo-with-tag").each(function () {
+        $(this).select2({
+            theme: 'bootstrap-5',
+            tags: true,
+            dropdownParent: $(this).parent()
+        });
     });
 
     $(document).on('click', '.show-loader', function () {
