@@ -41,7 +41,7 @@ internal sealed class RemoveClassEnrolments
     {
         _logger.Information("Attempting to unenroll student {studentId} from classes due to withdrawal", notification.StudentId);
 
-        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(notification.StudentId, cancellationToken);
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentAndFutureByStudentId(notification.StudentId, cancellationToken);
 
         foreach (Enrolment enrolment in enrolments)
         {

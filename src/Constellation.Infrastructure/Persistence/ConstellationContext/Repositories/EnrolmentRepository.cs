@@ -89,6 +89,34 @@ public class EnrolmentRepository : IEnrolmentRepository
                 (enrol is TutorialEnrolment t && currentTutorials.Contains(t.TutorialId)))
             .ToList();
     }
+    
+    public async Task<List<Enrolment>> GetCurrentAndFutureByStudentId(
+        StudentId studentId, 
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<OfferingId> currentOfferings = _context
+            .Set<Offering>()
+            .Where(offering => offering.StartDate <= _dateTime.Today)
+            .Select(offering => offering.Id);
+
+        IQueryable<TutorialId> currentTutorials = _context
+            .Set<Tutorial>()
+            .Where(tutorial => tutorial.StartDate <= _dateTime.Today)
+            .Select(tutorial => tutorial.Id);
+
+        List<Enrolment> enrolments = await _context
+            .Set<Enrolment>()
+            .Where(enrol =>
+                enrol.StudentId == studentId &&
+                !enrol.IsDeleted)
+            .ToListAsync(cancellationToken);
+
+        return enrolments
+            .Where(enrol =>
+                (enrol is OfferingEnrolment e && currentOfferings.Contains(e.OfferingId)) ||
+                (enrol is TutorialEnrolment t && currentTutorials.Contains(t.TutorialId)))
+            .ToList();
+    }
 
     public async Task<int> GetCurrentCountByStudentId(
         StudentId studentId,
