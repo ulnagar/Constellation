@@ -18,11 +18,19 @@
 /* Sticky Sidebar for pages */
 
 .sidebar-layout main {
-    /*max-height: calc(100vh - 125px);*/
     max-height: calc(100vh - 62px - 1rem);
     overflow: auto;
     position: relative;
     width: 100%;
+}
+
+@media (max-width: 1200px) {
+    .sidebar-layout main {
+        max-height: calc(100vh - 125px);
+        overflow: auto;
+        position: relative;
+        width: 100%;
+    }
 }
 
 .spinner-overlay {

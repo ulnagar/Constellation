@@ -79,27 +79,30 @@
 <hr />
 
 <div>
-    <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-success bg-gradient local-nav">
-        <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
-            <ul class="nav navbar-nav flex-grow-1 me-auto ms-3 mb-2">
-                <li class="nav-item">
-                    <a class="nav-link" href="#schoolHistory" data-bs-toggle="tab" role="tab">School History</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#faculties" data-bs-toggle="tab" role="tab">Faculties</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#classes" data-bs-toggle="tab" role="tab">Active classes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#sessions" data-bs-toggle="tab" role="tab" id="sessions-tab-button">Active sessions</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#schoolStaff" data-bs-toggle="tab" role="tab">School contacts</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+	<nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-success bg-gradient local-nav">
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#page-subform">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="navbar-collapse collapse d-xl-inline-flex justify-content-between" id="page-subform">
+			<ul class="nav navbar-nav flex-grow-1 me-auto ms-3 mb-2">
+				<li class="nav-item">
+					<a class="nav-link" href="#schoolHistory" data-bs-toggle="tab" role="tab">School History</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link active" href="#faculties" data-bs-toggle="tab" role="tab">Faculties</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#classes" data-bs-toggle="tab" role="tab">Active classes</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#sessions" data-bs-toggle="tab" role="tab" id="sessions-tab-button">Active sessions</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#schoolStaff" data-bs-toggle="tab" role="tab">School contacts</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
 
     <div class="tab-content">
         <div id="schoolHistory" class="tab-pane">
@@ -146,7 +149,7 @@
 
             <button class="btn btn-warning" data-bs-target="#addMembership" data-bs-toggle="modal">Add Faculty Membership</button>
 
-            <table class="table table-striped table-hover data-table">
+            <table class="table table-striped table-hover faculty-data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -172,7 +175,7 @@
         <div id="schoolStaff" class="tab-pane">
             <h3>Partner School Staff</h3>
 
-            <table class="table table-striped table-hover data-table">
+            <table class="table table-striped table-hover contact-data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -198,7 +201,7 @@
         <div id="sessions" class="tab-pane">
             <h3>Scheduled Periods</h3>
 
-            <table class="table table-striped table-hover data-table">
+            <table class="table table-striped table-hover session-data-table">
                 <thead>
                 <tr>
                     <th>Period</th>
@@ -222,7 +225,7 @@
         <div id="classes" class="tab-pane">
             <h3>Classes</h3>
 
-            <table class="table table-striped table-hover data-table">
+            <table class="table table-striped table-hover class-data-table">
                 <thead>
                 <tr>
                     <th>Name</th>
@@ -315,3 +318,41 @@
 </div>
 
 <vc:reinstate-staff-member />
+
+@section scripts
+{
+	<script>
+        $(document).ready(function (){
+            $('.school-data-table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+
+            $('.faculty-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+
+            $('.class-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+
+            $('.session-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+
+            $('.contact-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+        });
+
+    </script>
+}
