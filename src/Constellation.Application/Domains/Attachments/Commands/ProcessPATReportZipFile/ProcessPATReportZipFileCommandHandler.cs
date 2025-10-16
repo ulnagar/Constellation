@@ -74,7 +74,7 @@ internal sealed class ProcessPATReportZipFileCommandHandler
             ReportType reportType = GetReportTypeFromFileName(entry.Name);
             tempReport.UpdateReportType(reportType);
 
-            DateOnly issuedDate = GetIssuedDateFromFileName(entry.Name);
+            DateOnly issuedDate = GetIssuedDateFromFileName(entry.Name, _logger);
             tempReport.UpdateIssuedDate(issuedDate);
 
             Attachment tempFile = Attachment.CreateTempFileAttachment(entry.Name, MediaTypeNames.Application.Pdf, tempReport.Id.ToString(), _dateTime.Now);
@@ -137,7 +137,7 @@ internal sealed class ProcessPATReportZipFileCommandHandler
                 : ReportType.Unknown;
     }
 
-    private static DateOnly GetIssuedDateFromFileName(string fileName)
+    private static DateOnly GetIssuedDateFromFileName(string fileName, ILogger logger)
     {
         string[] splitName = fileName.Split('-');
 
@@ -146,8 +146,10 @@ internal sealed class ProcessPATReportZipFileCommandHandler
         if (!dateFragment.All(char.IsAsciiDigit))
             return DateOnly.MinValue;
 
-        int month = Convert.ToInt32(dateFragment[3..4]);
+        int month = Convert.ToInt32(dateFragment[2..4]);
         int year = Convert.ToInt32(dateFragment[4..]);
+
+        logger.Information("Month: {month}, Year: {year}", month, year);
 
         return new(year, month, 1);
     }
