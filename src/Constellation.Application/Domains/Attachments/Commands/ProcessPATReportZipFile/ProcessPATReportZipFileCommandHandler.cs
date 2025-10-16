@@ -146,9 +146,9 @@ internal sealed class ProcessPATReportZipFileCommandHandler
         if (!dateFragment.All(char.IsAsciiDigit))
             return DateOnly.MinValue;
 
-        int month = Convert.ToInt32(dateFragment[3..4]);
+        int month = Convert.ToInt32(dateFragment[2..4]);
         int year = Convert.ToInt32(dateFragment[4..]);
-
+        
         return new(year, month, 1);
     }
 }
