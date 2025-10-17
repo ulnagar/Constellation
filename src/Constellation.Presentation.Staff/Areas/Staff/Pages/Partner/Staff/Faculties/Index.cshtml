@@ -5,13 +5,15 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+
     var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditFaculties);
     var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanViewFacultyDetails);
 }
 
 <h2>Faculties</h2>
 
-<div>
+<div class="page-menu">
     @if (canEditTest.Succeeded)
     {
         <a asp-page="/Partner/Staff/Faculties/Upsert" asp-area="Staff" class="btn btn-warning">Create New</a>
@@ -20,31 +22,31 @@
 
 <hr />
 
-<table class="table-striped table-hover faculty-data-table">
+<table class="table table-striped table-hover faculty-data-table">
     <thead>
-    <tr>
-        <th></th>
-        <th>Name</th>
-        <th>Badge</th>
-        <th># Members</th>
-        <th></th>
-    </tr>
-    </thead>
-    @foreach (var item in Model.Faculties)
-    {
         <tr>
-            <td></td>
-            <td>@item.Name</td>
-            <td><Faculty-Label faculty="item" /></td>
-            <td>@item.MemberCount</td>
-            <td>
-                @if (canViewDetailsTest.Succeeded)
-                {
-                    <a asp-page="/Partner/Staff/Faculties/Details" asp-page="Staff" asp-route-facultyId="@item.FacultyId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
-                }
-            </td>
+            <th>Name</th>
+            <th>Badge</th>
+            <th># Members</th>
+            <th></th>
         </tr>
-    }
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Faculties)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td><Faculty-Label faculty="item" /></td>
+                <td>@item.MemberCount</td>
+                <td>
+                    @if (canViewDetailsTest.Succeeded)
+                    {
+                        <a asp-page="/Partner/Staff/Faculties/Details" asp-page="Staff" asp-route-facultyId="@item.FacultyId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @section scripts

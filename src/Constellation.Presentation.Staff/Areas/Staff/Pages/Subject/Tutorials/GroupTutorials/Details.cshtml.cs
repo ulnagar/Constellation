@@ -176,7 +176,7 @@ public class DetailsModel : BasePageModel
 
         RemoveTeacherFromTutorialModalViewModel viewModel = new()
         {
-            Id = teacherRecord.Id, 
+            TeacherId = teacherRecord.Id, 
             Name = teacherRecord.Name
         };
 
@@ -188,7 +188,7 @@ public class DetailsModel : BasePageModel
     {
         DateOnly? effectiveDate = (!viewModel.Immediate) ? DateOnly.FromDateTime(viewModel.EffectiveOn) : null;
 
-        RemoveTeacherFromTutorialCommand command = new(Id, viewModel.Id, effectiveDate);
+        RemoveTeacherFromTutorialCommand command = new(Id, viewModel.TeacherId, effectiveDate);
 
         _logger
             .ForContext(nameof(RemoveTeacherFromTutorialCommand), command, true)
