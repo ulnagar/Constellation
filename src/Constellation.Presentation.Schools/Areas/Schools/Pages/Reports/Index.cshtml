@@ -1,4 +1,5 @@
 ﻿@page
+@using Constellation.Application.Domains.StudentReports.Queries.GetCombinedReportListForSchool
 @using Constellation.Core.Extensions
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.Reports.IndexModel
 @{
@@ -14,6 +15,7 @@
                 <thead>
                 <tr>
                     <th>Year</th>
+                    <th>Type</th>
                     <th>Report</th>
                     <th>Action</th>
                 </tr>
@@ -32,18 +34,36 @@
                             var first = group.First();
 
                             <tr class="group">
-                                    <td colspan="6">@first.DisplayName @first.Grade.AsName()</td>
+                                <td colspan="6">@first.DisplayName - @first.Grade.AsName()</td>
                             </tr>
 
-                            @foreach (var item in group)
+                            var byYear = group.OrderBy(entry => entry.Year).GroupBy(entry => entry.Year);
+
+                            @foreach (var year in byYear)
                             {
-                                <tr>
-                                    <td>@item.Year</td>
-                                    <td>@item.ReportingPeriod</td>
-                                    <td>
-                                        <a asp-page-handler="Download" asp-route-reportId="@item.ReportId" class="btn btn-info btn-show-hover">Download</a>
-                                    </td>
-                                </tr>
+                                foreach (var entry in year.OfType<SchoolAcademicReportResponse>().OrderBy(report => Convert.ToInt32(report.PublishId)))
+                                {
+                                    <tr>
+                                        <td>@entry.Year</td>
+                                        <td>Academic Report</td>
+                                        <td>@entry.ReportingPeriod</td>
+                                        <td>
+                                            <a asp-page-handler="Download" asp-route-reportId="@entry.Id" class="btn btn-info btn-show-hover">Download</a>
+                                        </td>
+                                    </tr>
+                                }
+
+                                foreach (var entry in year.OfType<SchoolExternalReportResponse>().OrderBy(report => report.IssuedDate))
+                                {
+                                    <tr>
+                                        <td>@entry.Year</td>
+                                        <td>External Report</td>
+                                        <td>@entry.Type - @entry.IssuedDate.ToString("MMM yyyy")</td>
+                                        <td>
+                                            <a asp-page-handler="DownloadExternal" asp-route-reportId="@entry.Id" class="btn btn-info btn-show-hover">Download</a>
+                                        </td>
+                                    </tr>
+                                }
                             }
                         }
                     }
