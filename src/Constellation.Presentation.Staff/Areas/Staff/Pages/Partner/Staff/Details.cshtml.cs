@@ -6,10 +6,12 @@ using Application.Domains.StaffMembers.Commands.ReinstateStaffMember;
 using Application.Domains.StaffMembers.Commands.RemoveSchoolAssignment;
 using Application.Domains.StaffMembers.Commands.RemoveStaffFromFaculty;
 using Application.Domains.StaffMembers.Commands.ResignStaffMember;
+using Application.Domains.StaffMembers.Commands.TransferStaffMember;
 using Application.Domains.StaffMembers.Queries.GetLifecycleDetailsForStaffMember;
 using Application.Domains.StaffMembers.Queries.GetStaffDetails;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Students.Commands.RemoveSchoolEnrolment;
+using Constellation.Application.Domains.Students.Commands.TransferStudent;
 using Constellation.Application.Domains.Students.Queries.GetLifecycleDetailsForStudent;
 using Constellation.Core.Models.Enrolments.Identifiers;
 using Core.Abstractions.Services;
@@ -26,6 +28,7 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.ReinstateStaffMember;
 using Shared.Components.TeacherAddFaculty;
+using Shared.Components.TransferStaffMember;
 using System.Threading;
 
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
@@ -172,6 +175,44 @@ public class DetailsModel : BasePageModel
                 .Warning("Failed to remove School Assignment by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(result.Error);
+            await PreparePage();
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostTransferStaffMember(TransferStaffMemberSelection viewModel, CancellationToken cancellationToken)
+    {
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+
+        if (!authorised.Succeeded)
+        {
+            ModalContent = ErrorDisplay.Create(DomainErrors.Auth.NotAuthorised);
+
+            await PreparePage();
+            return Page();
+        }
+        
+        TransferStaffMemberCommand command = new(
+            Id,
+            viewModel.SchoolCode,
+            viewModel.StartDate);
+
+        _logger
+            .ForContext(nameof(TransferStaffMemberCommand), command, true)
+            .Information("Requested to transfer Staff Member to new School by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command, cancellationToken);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to transfer Staff Member to new School by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(result.Error);
+            
             await PreparePage();
             return Page();
         }

@@ -1,0 +1,34 @@
+﻿@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TransferStaffMember.TransferStaffMemberSelection
+
+<form asp-page-handler="TransferStaffMember" method="post">
+    <div class="modal fade" tabindex="-1" id="transfer-staff-member-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transfer Staff Member</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label asp-for="SchoolCode" class="col-md-3">Partner School</label>
+                        <div class="col-md-9">
+                            <select asp-for="SchoolCode" asp-items="@Model.SchoolList" class="combo" data-select2-id="Transfer-SchoolCode">
+                                <option value=""> -- Select Partner School -- </option>
+                            </select>
+                        </div>
+                    </div>
+                
+                    <div class="mb-3 row">
+                        <label asp-for="StartDate" class="col-md-3">Start Date</label>
+                        <div class="col-md-9">
+                            <input asp-for="StartDate" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Transfer Staff Member</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

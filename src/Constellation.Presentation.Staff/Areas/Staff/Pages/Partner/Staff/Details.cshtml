@@ -110,7 +110,7 @@
 
             @if (authorised.Succeeded)
             {
-                <button data-bs-toggle="modal" data-bs-target="#transfer-student-modal" class="btn btn-warning">Transfer</button>
+                <button data-bs-toggle="modal" data-bs-target="#transfer-staff-member-modal" class="btn btn-warning">Transfer</button>
             }
 
             <table class="table table-striped table-hover school-data-table">
@@ -253,71 +253,9 @@
 </div>
 
 <vc:teacher-add-faculty staff-id="@Model.StaffMember.StaffId"></vc:teacher-add-faculty>
-
-<div class="modal" id="lifecycleDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Lifecycle Details</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <dl class="row">
-                        <dt class="col-md-4">
-                            <label asp-for="RecordLifecycle.CreatedBy">Created By</label>
-                        </dt>
-                        <dd class="col-md-8">
-                            <span>@Model.RecordLifecycle.CreatedBy</span>
-                        </dd>
-
-                        <dt class="col-md-4">
-                            <label asp-for="RecordLifecycle.CreatedAt">Created At</label>
-                        </dt>
-                        <dd class="col-md-8">
-                            <span>@Model.RecordLifecycle.CreatedAt.ToString("f")</span>
-                        </dd>
-
-                        <dt class="col-md-4">
-                            <label asp-for="RecordLifecycle.ModifiedBy">Modified By</label>
-                        </dt>
-                        <dd class="col-md-8">
-                            <span>@Model.RecordLifecycle.ModifiedBy</span>
-                        </dd>
-
-                        <dt class="col-md-4">
-                            <label asp-for="RecordLifecycle.ModifiedAt">Modified On</label>
-                        </dt>
-                        <dd class="col-md-8">
-                            <span>@(Model.RecordLifecycle.ModifiedAt == DateTime.MinValue ? null : Model.RecordLifecycle.ModifiedAt.ToString("f"))</span>
-                        </dd>
-
-                        <dt class="col-md-4">
-                            <label asp-for="RecordLifecycle.DeletedBy">Deleted By</label>
-                        </dt>
-                        <dd class="col-md-8">
-                            <span>@Model.RecordLifecycle.DeletedBy</span>
-                        </dd>
-
-                        <dt class="col-md-4">
-                            <label asp-for="RecordLifecycle.DeletedAt">Deleted At</label>
-                        </dt>
-                        <dd class="col-md-8">
-                            <span>@Model.RecordLifecycle.DeletedAt?.ToString("f")</span>
-                        </dd>
-                    </dl>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
+<vc:lifecycle-details view-model="@Model.RecordLifecycle" />
 <vc:reinstate-staff-member />
+<vc:transfer-staff-member staff-id="@Model.StaffMember.StaffId" />
 
 @section scripts
 {
@@ -325,7 +263,7 @@
         $(document).ready(function (){
             $('.school-data-table').DataTable({
                 "order": [
-                    [1, 'asc']
+                    [1, 'desc']
                 ]
             });
 
