@@ -378,6 +378,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             if (cancellationToken.IsCancellationRequested)
                                 return returnAbsences;
 
+                            if (newAbsence.AbsenceReason is null)
+                                continue;
+
                             OfferingId offeringId = OfferingId.FromValue(newAbsence.SourceId);
 
                             // Check database for all matching absences already known
@@ -652,7 +655,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return returnAbsences;
     }
 
-    private static void CalculatePxPAbsenceTimes(
+    private static Result CalculatePxPAbsenceTimes(
         SentralPeriodAbsenceDto absence, 
         List<Period> periodGroup)
     {
@@ -664,7 +667,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 : periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period, StringComparison.InvariantCultureIgnoreCase));
 
             if (period is null)
-                return;
+                return Result.Failure(Error.NullValue);
 
             TimeSpan absenceLength = new(0, absence.MinutesAbsent, 0);
 
@@ -690,7 +693,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 : periodGroup.FirstOrDefault(pg => pg.SentralPeriodName() == absence.Period);
 
             if (period is null)
-                return;
+                return Result.Failure(Error.NullValue);
 
             TimeSpan absenceLength = new(0, absence.MinutesAbsent, 0);
 
@@ -708,7 +711,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
                     break;
             }
-        }    
+        }
+
+        return Result.Success();
     }
 
     private static void CalculateWebAttendAbsencePeriod(
@@ -816,7 +821,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     .ToList();
 
                 if (nextBestGuessWebAttendAbsences.Count == 1)
-                    return webAttendAbsences.First();
+                    return nextBestGuessWebAttendAbsences.First();
             }
 
             if (bestGuessWebAttendAbsences.Count > 1)
@@ -936,7 +941,10 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         CancellationToken cancellationToken)
     {
         // Can we figure out when the (PxP) absence starts and ends?
-        CalculatePxPAbsenceTimes(absence, periodGroup);
+        Result result = CalculatePxPAbsenceTimes(absence, periodGroup);
+
+        if (result.IsFailure)
+            return null;
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
         SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, cancellationToken);
@@ -952,6 +960,16 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             AbsenceType.Partial,
             AbsenceReason.FromValue(absence.Reason),
             periodGroup);
+
+        if (absenceRecord.AbsenceLength != absence.MinutesAbsent)
+        {
+            _logger
+                .ForContext(nameof(SentralPeriodAbsenceDto), absence, true)
+                .ForContext(nameof(Absence), absenceRecord, true)
+                .Warning("{id}: Student {student} ({grade}): Found absence length mis-match for {Type} absence on {Date} - {PeriodName}", JobId, _student.Name.DisplayName, _student.CurrentEnrolment?.Grade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
+
+            return null;
+        }
 
         // If this absence was explained using an Accepted Partial Absence Reason, then the absence should be created as explained
         if (_configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
@@ -1019,7 +1037,10 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         CancellationToken cancellationToken)
     {
         // Can we figure out when the (PxP) absence starts and ends?
-        CalculatePxPAbsenceTimes(absence, periodGroup);
+        Result result = CalculatePxPAbsenceTimes(absence, periodGroup);
+
+        if (result.IsFailure)
+            return null;
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
         SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, cancellationToken);
