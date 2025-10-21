@@ -319,7 +319,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                                 absencesToProcess,
                                 attendanceAbsences,
                                 enrolledOffering.Id,
-                                periodGroup.ToList(),
+                                coursePeriods,
                                 cancellationToken);
 
                             if (absenceRecord is not null)
@@ -344,7 +344,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             if (cancellationToken.IsCancellationRequested)
                                 return returnAbsences;
 
-                            Absence absenceRecord = await ProcessPartialAbsence(absence, attendanceAbsences, enrolledOffering.Id, periodGroup.ToList(), cancellationToken);
+                            Absence absenceRecord = await ProcessPartialAbsence(absence, attendanceAbsences, enrolledOffering.Id, coursePeriods, cancellationToken);
 
                             if (absenceRecord is not null)
                                 detectedAbsences.Add(absenceRecord);
