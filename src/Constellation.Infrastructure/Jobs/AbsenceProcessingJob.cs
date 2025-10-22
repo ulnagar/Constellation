@@ -751,6 +751,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
     private async Task<SentralPeriodAbsenceDto> SelectBestWebAttendEntryForPartialAbsence(
         SentralPeriodAbsenceDto absence, 
         List<SentralPeriodAbsenceDto> webAttendAbsences,
+        List<Period> periodGroup,
         CancellationToken cancellationToken)
     {
         // Excluded absences (either dates that are not valid, or length below thresholds):
@@ -768,8 +769,16 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         if (_excludedDates.Contains(absence.Date))
             return null;
 
+        TimeSpan periodGroupStart = periodGroup.OrderBy(period => period.StartTime).First().StartTime;
+        TimeSpan periodGroupEnd = periodGroup.OrderBy(period => period.StartTime).Last().EndTime;
+
+        IEnumerable<SentralPeriodAbsenceDto> filteredWebAttendAbsences = webAttendAbsences
+            .Where(aa => aa.WholeDay ||
+                    (aa.StartTime >= TimeOnly.FromTimeSpan(periodGroupStart) && 
+                     aa.EndTime <= TimeOnly.FromTimeSpan(periodGroupEnd)));
+
         // Check for a whole day WebAttendance Absence entry first
-        List<SentralPeriodAbsenceDto> wholeDayAttendanceAbsence = webAttendAbsences
+        List<SentralPeriodAbsenceDto> wholeDayAttendanceAbsence = filteredWebAttendAbsences
             .Where(aa => aa.Date == absence.Date && aa.WholeDay)
             .ToList();
 
@@ -778,7 +787,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
         if (absence.StartTime != TimeOnly.MinValue)
         {
-            List<SentralPeriodAbsenceDto> exactAttendanceAbsences = webAttendAbsences
+            List<SentralPeriodAbsenceDto> exactAttendanceAbsences = filteredWebAttendAbsences
                 .Where(aa =>
                     aa.Date == absence.Date &&
                     aa.StartTime == absence.StartTime &&
@@ -788,7 +797,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             if (exactAttendanceAbsences.Count > 0)
                 return exactAttendanceAbsences.First();
 
-            List<SentralPeriodAbsenceDto> approxAttendanceAbsences = webAttendAbsences
+            List<SentralPeriodAbsenceDto> approxAttendanceAbsences = filteredWebAttendAbsences
                 .Where(aa =>
                     aa.Date == absence.Date &&
                     aa.StartTime <= absence.StartTime &&
@@ -802,7 +811,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         // This is a timed partial?
         if (absence.PartialType == "Timed")
         {
-            List<SentralPeriodAbsenceDto> bestGuessWebAttendAbsences = webAttendAbsences
+            List<SentralPeriodAbsenceDto> bestGuessWebAttendAbsences = filteredWebAttendAbsences
                 .Where(aa =>
                     aa.Date == absence.Date &&
                     aa.Reason == absence.Reason &&
@@ -814,7 +823,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
             if (bestGuessWebAttendAbsences.Count == 0)
             {
-                List<SentralPeriodAbsenceDto> nextBestGuessWebAttendAbsences = webAttendAbsences
+                List<SentralPeriodAbsenceDto> nextBestGuessWebAttendAbsences = filteredWebAttendAbsences
                     .Where(aa =>
                         aa.Date == absence.Date &&
                         aa.MinutesAbsent == absence.MinutesAbsent)
@@ -947,10 +956,25 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return null;
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
-        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, cancellationToken);
+        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, periodGroup, cancellationToken);
         
         if (attendanceAbsence is null)
             return null;
+
+        TimeSpan periodGroupStart = periodGroup.OrderBy(period => period.StartTime).First().StartTime;
+        TimeSpan periodGroupEnd = periodGroup.OrderBy(period => period.StartTime).Last().EndTime;
+
+        if (!attendanceAbsence.WholeDay &&
+            (attendanceAbsence.StartTime >= TimeOnly.FromTimeSpan(periodGroupEnd) ||
+            attendanceAbsence.EndTime <= TimeOnly.FromTimeSpan(periodGroupStart)))
+        {
+            _logger
+                .ForContext(nameof(SentralPeriodAbsenceDto), absence, true)
+                .ForContext(nameof(SentralPeriodAbsenceDto), attendanceAbsence, true)
+                .Warning("{id}: Student {student} ({grade}): Found attendance absence outside of period group for {Type} absence on {Date} - {PeriodName}", JobId, _student.Name.DisplayName, _student.CurrentEnrolment?.Grade.AsName(), absence.Type, absence.Date.ToShortDateString(), string.Join(", ", periodGroup.Select(p => p.Name)));
+
+            return null;
+        }
 
         // Create an object to save this data to the database.
         Absence absenceRecord = CreateAbsence(
@@ -1043,7 +1067,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return null;
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
-        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, cancellationToken);
+        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, periodGroup, cancellationToken);
 
         if (attendanceAbsence is null)
             return null;
@@ -1463,14 +1487,29 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 startTime = absencesToProcess.First().StartTime;
                 endTime = absencesToProcess.First().EndTime;
             }
+            else if (absencesToProcess.First().Type == "Whole")
+            { 
+                startTime = absencesToProcess.First().StartTime;
+                endTime = absencesToProcess.First().EndTime;
+            }
             else
             {
+                absencesToProcess = absencesToProcess.OrderBy(absence => absence.StartTime).ToList();
+
                 // This Attendance entry correlates to the partial.
                 if (startTime != attendanceAbsence.StartTime || endTime != attendanceAbsence.EndTime)
                 {
                     // TIMES DO NOT MATCH!
                     startTime = (attendanceAbsence.StartTime > startTime) ? attendanceAbsence.StartTime : startTime;
                     endTime = (attendanceAbsence.EndTime < endTime) ? attendanceAbsence.EndTime : endTime;
+                }
+
+                if (absencesToProcess.First().PartialType != "Timed" &&
+                    (startTime != absencesToProcess.First().StartTime || endTime != absencesToProcess.Last().EndTime))
+                {
+                    // TIMES DO NOT MATCH!
+                    startTime = (absencesToProcess.First().StartTime > startTime) ? absencesToProcess.First().StartTime : startTime;
+                    endTime = (absencesToProcess.Last().EndTime < endTime) ? absencesToProcess.Last().EndTime : endTime;
                 }
             }
         }

@@ -85,9 +85,6 @@ internal sealed class AbsenceMonitorJob : IAbsenceMonitorJob
 
                 await _unitOfWork.CompleteAsync(cancellationToken);
 
-                //TODO: Remove this check when testing is complete
-                continue;
-
                 if (absences.Count != 0)
                 {
                     if (cancellationToken.IsCancellationRequested)
