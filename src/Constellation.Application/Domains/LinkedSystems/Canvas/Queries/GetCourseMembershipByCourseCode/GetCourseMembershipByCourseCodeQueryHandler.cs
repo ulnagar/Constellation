@@ -52,7 +52,7 @@ internal sealed class GetCourseMembershipByCourseCodeQueryHandler
             return Result.Failure<List<CanvasCourseMembership>>(OfferingErrors.NotFoundForResource(request.CourseCode.ToString()));
         }
 
-        foreach (Offering offering in offerings)
+        foreach (Offering offering in offerings.OrderBy(entry => entry.Name))
         {
             CanvasCourseResource resource = offering.Resources
                 .OfType<CanvasCourseResource>()
