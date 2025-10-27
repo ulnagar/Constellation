@@ -22,10 +22,14 @@ public sealed class CreateTeamTeamOperation : TeamOperation
 
     public CreateTeamTeamOperation(
         string name,
-        string description)
+        string description,
+        DateTime? scheduled = null)
     {
         Name = name;
         Description = description;
+
+        if (scheduled.HasValue)
+            ScheduledFor = scheduled.Value;
     }
 
     public string Name { get; private set; } = string.Empty;

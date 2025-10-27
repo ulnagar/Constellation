@@ -3,8 +3,6 @@
 using Abstractions.Messaging;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
 using Constellation.Application.Helpers;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.Tutorials.Enums;
 using Constellation.Core.Models.Tutorials.Errors;
@@ -37,6 +35,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ITeamOperationRepository _teamOperationRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly ISentralGateway _gateway;
@@ -48,6 +47,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
         IStudentRepository studentRepository,
         ITutorialRepository tutorialRepository,
         IMSTeamOperationsRepository operationsRepository,
+        ITeamOperationRepository teamOperationRepository,
         IEnrolmentRepository enrolmentRepository,
         ICurrentUserService currentUserService,
         ISentralGateway gateway,
@@ -58,6 +58,7 @@ internal sealed class ScheduleTutorialRequestCommandHandler
         _studentRepository = studentRepository;
         _tutorialRepository = tutorialRepository;
         _operationsRepository = operationsRepository;
+        _teamOperationRepository = teamOperationRepository;
         _enrolmentRepository = enrolmentRepository;
         _currentUserService = currentUserService;
         _gateway = gateway;
@@ -151,16 +152,11 @@ internal sealed class ScheduleTutorialRequestCommandHandler
 
         // Schedule creation of Team for tutorial
 
-        TutorialCreatedMSTeamOperation operation = new()
-        {
-            DateScheduled = DateTime.Now,
-            TeamName = MicrosoftTeamsHelper.FormatTeamName(tutorial.Value.Name),
-            Action = MSTeamOperationAction.Add,
-            TutorialId = tutorial.Value.Id,
-            TeamDescription = $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorial.Value.Name};"
-        };
-
-        _operationsRepository.Insert(operation);
+        CreateTeamTeamOperation operation = new(
+            MicrosoftTeamsHelper.FormatTeamName(tutorial.Value.Name),
+            $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorial.Value.Name};");
+        
+        _teamOperationRepository.Insert(operation);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

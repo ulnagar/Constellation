@@ -17,9 +17,10 @@ using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using System.Threading;
 
 [ApiController]
-public class OperationsController : ControllerBase
+internal sealed class OperationsController : ControllerBase
 {
     private readonly ITeamOperationRepository _teamOperationRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
@@ -51,26 +52,32 @@ public class OperationsController : ControllerBase
 
     // GET api/Operations/Due
     [Route("api/v1/Operations/Due")]
-    public async Task<IEnumerable<TeamsOperation>> GetDue()
+    public async Task<IEnumerable<TeamsOperationDto>> GetDue()
     {
         MSTeamOperationsList operations = await _operationsRepository.ToProcess();
 
-        return await BuildOperations(operations);
+        List<TeamOperation> newOperations = await _teamOperationRepository.GetDue();
+
+        return await BuildOperations(operations, newOperations);
     }
 
 
     // GET api/Operations/Overdue
     [Route("api/v1/Operations/Overdue")]
-    public async Task<IEnumerable<TeamsOperation>> GetOverdue()
+    public async Task<IEnumerable<TeamsOperationDto>> GetOverdue()
     {
         MSTeamOperationsList operations = await _operationsRepository.OverdueToProcess();
 
-        return await BuildOperations(operations);
+        List<TeamOperation> newOperations = await _teamOperationRepository.GetDue();
+
+        return await BuildOperations(operations, newOperations);
     }
 
-    private async Task<ICollection<TeamsOperation>> BuildOperations(MSTeamOperationsList operations)
+    private async Task<ICollection<TeamsOperationDto>> BuildOperations(
+        MSTeamOperationsList operations,
+        List<TeamOperation> newOperations)
     {
-        List<TeamsOperation> returnData = new();
+        List<TeamsOperationDto> returnData = new();
 
         foreach (TeacherAssignmentMSTeamOperation operation in operations.AssignmentOperations)
         {
@@ -79,7 +86,7 @@ public class OperationsController : ControllerBase
             if (staffMember is null)
                 continue;
 
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
@@ -119,7 +126,7 @@ public class OperationsController : ControllerBase
             if (student is null)
                 continue;
 
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
@@ -154,7 +161,7 @@ public class OperationsController : ControllerBase
 
         foreach (StudentMSTeamOperation operation in operations.StudentOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
@@ -189,7 +196,7 @@ public class OperationsController : ControllerBase
 
         foreach (TeacherMSTeamOperation operation in operations.TeacherOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
@@ -227,7 +234,7 @@ public class OperationsController : ControllerBase
         {
             Casual casual = await _casualRepository.GetById(CasualId.FromValue(operation.CasualId));
 
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
@@ -263,7 +270,7 @@ public class OperationsController : ControllerBase
 
         foreach (GroupMSTeamOperation operation in operations.GroupOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.Offering.EndDate:yyyy} - {operation.Offering.Name}",
@@ -283,7 +290,7 @@ public class OperationsController : ControllerBase
 
         foreach (TutorialCreatedMSTeamOperation operation in operations.TutorialOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
@@ -296,7 +303,7 @@ public class OperationsController : ControllerBase
 
         foreach (GroupTutorialCreatedMSTeamOperation operation in operations.GroupTutorialOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = $"AC - {operation.GroupTutorial.EndDate:yyyy} - {operation.GroupTutorial.Name}",
@@ -311,7 +318,7 @@ public class OperationsController : ControllerBase
 
         foreach (StudentEnrolledMSTeamOperation operation in operations.EnrolmentOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
@@ -352,7 +359,7 @@ public class OperationsController : ControllerBase
             if (staffMember is null)
                 continue;
 
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
@@ -388,7 +395,7 @@ public class OperationsController : ControllerBase
 
         foreach (ContactAddedMSTeamOperation operation in operations.ContactOperations)
         {
-            TeamsOperation teamOperation = new()
+            TeamsOperationDto teamOperation = new()
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
@@ -419,6 +426,23 @@ public class OperationsController : ControllerBase
             teamOperation.TeamId = team.Id.ToString();
 
             returnData.Add(teamOperation);
+        }
+        
+        foreach (TeamOperation operation in newOperations)
+        {
+            TeamsOperationDto dto = operation switch
+            {
+                CreateTeamTeamOperation createTeam => new TeamsOperationDto()
+                {
+                    Id = createTeam.Id,
+                    TeamName = createTeam.Name,
+                    Action = "Group",
+                    AdditionalInformation = createTeam.Description
+                },
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            returnData.Add(dto);
         }
 
         return returnData;
@@ -464,41 +488,41 @@ public class OperationsController : ControllerBase
 
     #region v2 Operations
     [Route("api/v2/Operations/Due")]
-    public async Task<IEnumerable<TeamsOperation>> GetDueV2(
+    public async Task<IEnumerable<TeamsOperationDto>> GetDueV2(
         CancellationToken cancellationToken = default)
     {
         List<TeamOperation> operations = await _teamOperationRepository.GetDue(cancellationToken);
 
-        List<TeamsOperation> response = [];
+        List<TeamsOperationDto> response = [];
 
         foreach (var operation in operations)
         {
-            TeamsOperation dto = operation switch
+            TeamsOperationDto dto = operation switch
             {
-                CreateTeamTeamOperation createTeam => new TeamsOperation()
+                CreateTeamTeamOperation createTeam => new TeamsOperationDto()
                 {
                     Id = createTeam.Id,
                     TeamName = createTeam.Name,
                     Action = "Group",
                     AdditionalInformation = createTeam.Description
                 },
-                CreateTeamChannelTeamOperation createChannel => new TeamsOperation()
+                CreateTeamChannelTeamOperation createChannel => new TeamsOperationDto()
                 {
 
                 },
-                ModifyTeamMembershipTeamOperation modifyMembership => new TeamsOperation()
+                ModifyTeamMembershipTeamOperation modifyMembership => new TeamsOperationDto()
                 {
 
                 },
-                ModifyTeamChannelMembershipTeamOperation modifyChannelMembership => new TeamsOperation()
+                ModifyTeamChannelMembershipTeamOperation modifyChannelMembership => new TeamsOperationDto()
                 {
 
                 },
-                ArchiveTeamTeamOperation archiveTeam => new TeamsOperation()
+                ArchiveTeamTeamOperation archiveTeam => new TeamsOperationDto()
                 {
 
                 },
-                ArchiveTeamChannelTeamOperation archiveChannel => new TeamsOperation()
+                ArchiveTeamChannelTeamOperation archiveChannel => new TeamsOperationDto()
                 {
 
                 },

@@ -10,6 +10,7 @@ using Events;
 using Identifiers;
 using Primitives;
 using Shared;
+using StaffMembers.Identifiers;
 using Students;
 using Students.Identifiers;
 using System;
@@ -17,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Timetables;
 using Timetables.Identifiers;
+using ValueObjects;
 
 public sealed class Request : AggregateRoot, IAuditableEntity
 {
@@ -117,8 +119,35 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         if (newStatus == RequestStatus.Rejected)
             RaiseDomainEvent(new TutorialRequestRejectedDomainEvent(new(), Id));
 
+        if (newStatus == RequestStatus.Scheduled)
+            RaiseDomainEvent(new TutorialRequestScheduledDomainEvent(new(), Id));
+
         return Result.Success();
     }
 
     public void Delete() => IsDeleted = true;
+}
+
+public sealed class RequestPlan
+{
+    public RequestPlan(
+        TutorialName name,
+        List<(PeriodId PeriodId, StaffId StaffId)> periods,
+        DateOnly startDate)
+    {
+        Name = name;
+        Periods = periods;
+        StartDate = startDate;
+    }
+
+    public TutorialId TutorialId { get; private set; }
+    public TutorialName Name { get; private set; }
+    public List<(PeriodId PeriodId, StaffId StaffId)> Periods { get; private set; }
+    public DateOnly StartDate { get; private set; }
+
+    public void Update(
+        TutorialId tutorialId)
+    {
+        TutorialId = tutorialId;
+    }
 }
