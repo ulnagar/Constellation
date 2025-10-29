@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Models;
 
-internal sealed class TeamsOperationDto
+public sealed class TeamsOperationDto
 {
     public int Id { get; set; }
     public string Action { get; set; }

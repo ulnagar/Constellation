@@ -18,6 +18,10 @@ public class MSTeamOperationConfiguration : IEntityTypeConfiguration<MSTeamOpera
 {
     public void Configure(EntityTypeBuilder<MSTeamOperation> builder)
     {
+        builder
+            .Property(operation => operation.Id)
+            .UseSequence(AppDbContext.TeamsOperationId);
+
         builder.HasDiscriminator<string>("UserType")
             .HasValue<StudentMSTeamOperation>("Student")
             .HasValue<CasualMSTeamOperation>("Casual")

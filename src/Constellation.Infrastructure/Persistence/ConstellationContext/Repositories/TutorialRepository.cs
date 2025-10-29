@@ -79,7 +79,7 @@ internal sealed class TutorialRepository : ITutorialRepository
             .Set<Tutorial>()
             .Where(tutorial =>
                 !tutorial.IsDeleted &&
-                tutorial.StartDate <= _dateTime.Today &&
+                //tutorial.StartDate <= _dateTime.Today &&
                 tutorial.EndDate >= _dateTime.Today &&
                 tutorial.Sessions.Any(session => !session.IsDeleted))
             .ToListAsync(cancellationToken);

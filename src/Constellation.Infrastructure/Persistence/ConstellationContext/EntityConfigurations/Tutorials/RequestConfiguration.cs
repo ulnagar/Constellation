@@ -2,11 +2,13 @@
 
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Converters;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Enums;
 using Core.Models.Tutorials.Identifiers;
+using Core.Models.Tutorials.ValueObjects;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -79,5 +81,28 @@ internal sealed class RequestConfiguration : IEntityTypeConfiguration<Request>
         builder
             .Navigation(request => request.Notes)
             .AutoInclude();
+
+        builder
+            .OwnsOne(
+                request => request.Plan,
+                ownedBuilder =>
+                {
+                    ownedBuilder
+                        .Property(plan => plan.TutorialId)
+                        .HasConversion(
+                            id => id.Value,
+                            value => TutorialId.FromValue(value));
+
+                    ownedBuilder
+                        .Property(plan => plan.Name)
+                        .HasConversion(
+                            name => name.Value,
+                            value => TutorialName.FromValue(value));
+
+                    ownedBuilder
+                        .Property(plan => plan.Periods)
+                        .HasConversion<JsonColumnConverter<List<(PeriodId PeriodId, StaffId StaffId)>>>();
+                });
+
     }
 }

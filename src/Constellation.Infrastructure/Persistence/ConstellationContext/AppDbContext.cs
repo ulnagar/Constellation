@@ -13,6 +13,8 @@ using System.Reflection;
 
 public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbContext
 {
+    public const string TeamsOperationId = "TeamsOperationId";
+
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     { }
@@ -23,6 +25,10 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbCon
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        builder.HasSequence<int>(TeamsOperationId)
+            .StartsAt(202_500)
+            .IncrementsBy(1);
+
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly(),
             t => t.GetTypeInfo().Namespace.Contains("ConstellationContext")); // Only include the local EntityConfigurations
 

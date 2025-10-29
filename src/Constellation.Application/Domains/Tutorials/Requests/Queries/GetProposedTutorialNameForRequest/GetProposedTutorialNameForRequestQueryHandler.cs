@@ -40,7 +40,7 @@ internal sealed class GetProposedTutorialNameForRequestQueryHandler
             return Result.Failure<TutorialName>(TutorialRequestErrors.NotFound(request.RequestId));
         }
 
-        TutorialName proposedName = TutorialName.FromValue($"{tutorialRequest.Grade.AsNumber()}{tutorialRequest.Student.PreferredName[0]}{tutorialRequest.Student.LastName[0..1]}T");
+        TutorialName proposedName = TutorialName.FromValue($"{tutorialRequest.Grade.AsNumber().PadLeft(2, '0')}{tutorialRequest.Student.PreferredName[0]}{tutorialRequest.Student.LastName[..2]}T".ToUpper());
 
         int sequence = await _tutorialRepository.GetNextTutorialNameSequence(proposedName, cancellationToken);
 

@@ -10,7 +10,6 @@ using Events;
 using Identifiers;
 using Primitives;
 using Shared;
-using StaffMembers.Identifiers;
 using Students;
 using Students.Identifiers;
 using System;
@@ -18,7 +17,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Timetables;
 using Timetables.Identifiers;
-using ValueObjects;
 
 public sealed class Request : AggregateRoot, IAuditableEntity
 {
@@ -62,6 +60,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     public string Justification { get; private set; }
     public RequestStatus Status { get; private set; }
     public IReadOnlyList<RequestNote> Notes => _notes.AsReadOnly();
+    public RequestPlan? Plan { get; private set; }
 
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
@@ -102,7 +101,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     {
         if (newStatus == RequestStatus.Requested || 
             newStatus == RequestStatus.Approved && Status != RequestStatus.Requested || 
-            newStatus == RequestStatus.Scheduled && Status != RequestStatus.Approved)
+            newStatus == RequestStatus.Scheduled)
             return Result.Failure(TutorialRequestErrors.InvalidStatus);
 
         if (string.IsNullOrWhiteSpace(message))
@@ -125,29 +124,29 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         return Result.Success();
     }
 
+    public Result ScheduleRequest(
+        RequestPlan plan,
+        string message,
+        string reviewer,
+        IDateTimeProvider dateTime)
+    {
+        if (Status != RequestStatus.Approved)
+            return Result.Failure(TutorialRequestErrors.InvalidStatus);
+
+        if (string.IsNullOrWhiteSpace(message))
+            return Result.Failure(TutorialRequestErrors.MustIncludeNote);
+
+        Status = RequestStatus.Scheduled;
+
+        RequestNote note = RequestNote.Create(Id, message, reviewer, dateTime.Now);
+        _notes.Add(note);
+
+        RaiseDomainEvent(new TutorialRequestScheduledDomainEvent(new(), Id));
+
+        Plan = plan;
+
+        return Result.Success();
+    }
+
     public void Delete() => IsDeleted = true;
-}
-
-public sealed class RequestPlan
-{
-    public RequestPlan(
-        TutorialName name,
-        List<(PeriodId PeriodId, StaffId StaffId)> periods,
-        DateOnly startDate)
-    {
-        Name = name;
-        Periods = periods;
-        StartDate = startDate;
-    }
-
-    public TutorialId TutorialId { get; private set; }
-    public TutorialName Name { get; private set; }
-    public List<(PeriodId PeriodId, StaffId StaffId)> Periods { get; private set; }
-    public DateOnly StartDate { get; private set; }
-
-    public void Update(
-        TutorialId tutorialId)
-    {
-        TutorialId = tutorialId;
-    }
 }

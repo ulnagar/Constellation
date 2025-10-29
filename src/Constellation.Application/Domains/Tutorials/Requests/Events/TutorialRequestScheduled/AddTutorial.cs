@@ -31,7 +31,6 @@ public sealed class AddTutorial
 {
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IStudentRepository _studentRepository;
-    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly ISentralGateway _sentralGateway;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
@@ -40,7 +39,6 @@ public sealed class AddTutorial
     public AddTutorial(
         ITutorialRepository tutorialRepository,
         IStudentRepository studentRepository,
-        IEnrolmentRepository enrolmentRepository,
         ISentralGateway sentralGateway,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
@@ -48,7 +46,6 @@ public sealed class AddTutorial
     {
         _tutorialRepository = tutorialRepository;
         _studentRepository = studentRepository;
-        _enrolmentRepository = enrolmentRepository;
         _sentralGateway = sentralGateway;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
@@ -62,9 +59,21 @@ public sealed class AddTutorial
         if (tutorialRequest is null)
         {
             _logger
-                .ForContext(nameof(ScheduleTutorialRequestCommand), notification, true)
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), TutorialRequestErrors.NotFound(notification.RequestId), true)
-                .Warning("Failed to schedule Tutorial Request");
+                .Warning("Failed to create Tutorial for Tutorial Request");
+
+            return;
+        }
+
+        if (tutorialRequest.Plan is null)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), TutorialRequestErrors.PlanNotFound(notification.RequestId), true)
+                .Warning("Failed to create Tutorial for Tutorial Request");
+
+            return;
         }
 
         Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
@@ -72,15 +81,17 @@ public sealed class AddTutorial
         if (student is null)
         {
             _logger
-                .ForContext(nameof(ScheduleTutorialRequestCommand), notification, true)
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), StudentErrors.NotFound(tutorialRequest.StudentId), true)
-                .Warning("Failed to schedule Tutorial Request");
+                .Warning("Failed to create Tutorial for Tutorial Request");
+
+            return;
         }
 
         List<ValidAttendenceReportDate> weekDescriptors = await _sentralGateway.GetTermsAndWeeksFromApi(_dateTime.CurrentYearAsString, cancellationToken);
 
         ValidAttendenceReportDate startWeek = weekDescriptors.FirstOrDefault(entry =>
-            entry.StartDate == notification.StartDate.ToDateTime(TimeOnly.MinValue));
+            entry.StartDate == tutorialRequest.Plan.StartDate.ToDateTime(TimeOnly.MinValue));
 
         int index = weekDescriptors.IndexOf(startWeek);
 
@@ -93,28 +104,30 @@ public sealed class AddTutorial
         // Create tutorial
 
         Result<Tutorial> tutorial = Tutorial.Create(
-            notification.Name,
-            notification.StartDate,
+            tutorialRequest.Plan.Name,
+            tutorialRequest.Plan.StartDate,
             DateOnly.FromDateTime(endWeek.EndDate),
             _dateTime);
 
         if (tutorial.IsFailure)
         {
             _logger
-                .ForContext(nameof(ScheduleTutorialRequestCommand), notification, true)
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), tutorial.Error, true)
-                .Warning("Failed to schedule Tutorial Request");
+                .Warning("Failed to create Tutorial for Tutorial Request");
+
+            return;
         }
 
         _tutorialRepository.Insert(tutorial.Value);
 
+        tutorialRequest.Plan.Update(tutorial.Value.Id);
+
         // Add sessions to new tutorial
 
-        foreach ((PeriodId PeriodId, StaffId StaffId) session in notification.Periods)
+        foreach ((PeriodId PeriodId, StaffId StaffId) session in tutorialRequest.Plan.Periods)
             tutorial.Value.AddSession(session.PeriodId, session.StaffId);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
-
-
     }
 }

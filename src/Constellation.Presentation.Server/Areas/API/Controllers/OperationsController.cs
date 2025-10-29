@@ -20,7 +20,7 @@ using Models;
 using System.Threading;
 
 [ApiController]
-internal sealed class OperationsController : ControllerBase
+public sealed class OperationsController : ControllerBase
 {
     private readonly ITeamOperationRepository _teamOperationRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
@@ -51,7 +51,7 @@ internal sealed class OperationsController : ControllerBase
     #region v1 Operations
 
     // GET api/Operations/Due
-    [Route("api/v1/Operations/Due")]
+    [HttpGet("api/v1/operations/due")]
     public async Task<IEnumerable<TeamsOperationDto>> GetDue()
     {
         MSTeamOperationsList operations = await _operationsRepository.ToProcess();
@@ -63,12 +63,12 @@ internal sealed class OperationsController : ControllerBase
 
 
     // GET api/Operations/Overdue
-    [Route("api/v1/Operations/Overdue")]
+    [HttpGet("api/v1/Operations/Overdue")]
     public async Task<IEnumerable<TeamsOperationDto>> GetOverdue()
     {
         MSTeamOperationsList operations = await _operationsRepository.OverdueToProcess();
 
-        List<TeamOperation> newOperations = await _teamOperationRepository.GetDue();
+        List<TeamOperation> newOperations = await _teamOperationRepository.GetOverdue();
 
         return await BuildOperations(operations, newOperations);
     }
@@ -449,8 +449,7 @@ internal sealed class OperationsController : ControllerBase
     }
 
     // POST api/Operations/Complete
-    [Route("api/v1/Operations/Complete/{id}")]
-    [HttpPost]
+    [HttpPost("api/v1/Operations/Complete/{id}")]
     public async Task Complete(int id)
     {
         MSTeamOperation operation = await _operationsRepository.ForMarkingCompleteOrCancelled(id);
@@ -459,6 +458,18 @@ internal sealed class OperationsController : ControllerBase
         {
             operation.Complete();
             await _unitOfWork.CompleteAsync();
+
+            return;
+        }
+
+        TeamOperation newOperation = await _teamOperationRepository.GetById(id);
+
+        if (newOperation != null)
+        {
+            newOperation.Complete();
+            await _unitOfWork.CompleteAsync();
+
+            return;
         }
     }
 
@@ -487,7 +498,7 @@ internal sealed class OperationsController : ControllerBase
     #endregion
 
     #region v2 Operations
-    [Route("api/v2/Operations/Due")]
+    [HttpGet("api/v2/Operations/Due")]
     public async Task<IEnumerable<TeamsOperationDto>> GetDueV2(
         CancellationToken cancellationToken = default)
     {
