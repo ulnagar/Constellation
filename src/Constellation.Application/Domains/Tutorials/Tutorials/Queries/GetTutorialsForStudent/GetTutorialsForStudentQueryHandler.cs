@@ -96,7 +96,8 @@ internal sealed class GetTutorialsForStudentQueryHandler
                 startWeek.Description,
                 endWeek.Description,
                 teachers.Select(entry => entry.Name).ToList(),
-                periods);
+                periods,
+                tutorial.IsCurrent);
 
             responses.Add(response);
         }

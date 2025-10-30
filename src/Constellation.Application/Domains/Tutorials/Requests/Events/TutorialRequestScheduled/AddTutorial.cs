@@ -101,32 +101,49 @@ public sealed class AddTutorial
             ? weekDescriptors.Last()
             : weekDescriptors[endWeekIndex];
 
-        // Create tutorial
+        // Does tutorial already exist?
+        Tutorial tutorial = await _tutorialRepository.GetByNameAndYear(_dateTime.CurrentYear, tutorialRequest.Plan.Name, cancellationToken);
 
-        Result<Tutorial> tutorial = Tutorial.Create(
-            tutorialRequest.Plan.Name,
-            tutorialRequest.Plan.StartDate,
-            DateOnly.FromDateTime(endWeek.EndDate),
-            _dateTime);
-
-        if (tutorial.IsFailure)
+        if (tutorial is not null)
         {
-            _logger
-                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
-                .ForContext(nameof(Error), tutorial.Error, true)
-                .Warning("Failed to create Tutorial for Tutorial Request");
+            if (tutorial.EndDate < tutorialRequest.Plan.StartDate)
+            {
+                tutorial.Update(
+                    tutorial.Name, 
+                    tutorialRequest.Plan.StartDate, 
+                    DateOnly.FromDateTime(endWeek.EndDate), 
+                    _dateTime);
+            }
+        }
+        else
+        {
+            Result<Tutorial> newTutorial = Tutorial.Create(
+                tutorialRequest.Plan.Name,
+                tutorialRequest.Plan.StartDate,
+                DateOnly.FromDateTime(endWeek.EndDate),
+                _dateTime);
 
-            return;
+            if (newTutorial.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                    .ForContext(nameof(Error), newTutorial.Error, true)
+                    .Warning("Failed to create Tutorial for Tutorial Request");
+
+                return;
+            }
+
+            tutorial = newTutorial.Value;
+
+            _tutorialRepository.Insert(tutorial);
         }
 
-        _tutorialRepository.Insert(tutorial.Value);
-
-        tutorialRequest.Plan.Update(tutorial.Value.Id);
+        tutorialRequest.Plan.Update(tutorial.Id);
 
         // Add sessions to new tutorial
 
         foreach ((PeriodId PeriodId, StaffId StaffId) session in tutorialRequest.Plan.Periods)
-            tutorial.Value.AddSession(session.PeriodId, session.StaffId);
+            tutorial.AddSession(session.PeriodId, session.StaffId);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
     }

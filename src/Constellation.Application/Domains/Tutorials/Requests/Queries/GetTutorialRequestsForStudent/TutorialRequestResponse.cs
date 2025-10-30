@@ -20,6 +20,7 @@ public sealed record TutorialRequestResponse(
     List<Period> Periods,
     string Justification,
     RequestStatus Status,
+    DateOnly RequestDate,
     IReadOnlyList<TutorialRequestResponse.RequestNoteResponse> Notes)
 {
     public sealed record RequestNoteResponse(

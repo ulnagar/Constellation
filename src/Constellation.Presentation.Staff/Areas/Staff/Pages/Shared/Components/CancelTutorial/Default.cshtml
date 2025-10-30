@@ -1,0 +1,33 @@
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.CancelTutorial.CancelTutorialSelection
+
+<form method="post" asp-page-handler="Cancel">
+    <div class="modal fade" tabindex="-1" id="cancel-tutorial-modal">
+        <div class="modal-dialog">
+            <div id="modal-content" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Tutorial</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Are you sure you want to cancel this tutorial?</span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col">
+                            <label asp-for="EndDate" class="col-md-3">End Date</label>
+                            <div class="col-md-9">
+                                <input asp-for="EndDate" class="form-control" type="date" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Cancel Tutorial</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

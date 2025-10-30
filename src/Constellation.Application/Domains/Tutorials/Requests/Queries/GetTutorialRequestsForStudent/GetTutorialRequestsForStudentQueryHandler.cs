@@ -10,6 +10,7 @@ using Core.Models.Tutorials;
 using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -65,6 +66,7 @@ internal sealed class GetTutorialRequestsForStudentQueryHandler
                 periods,
                 tutorialRequest.Justification,
                 tutorialRequest.Status,
+                DateOnly.FromDateTime(tutorialRequest.CreatedAt),
                 notes.AsReadOnly());
 
             responses.Add(response);

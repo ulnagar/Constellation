@@ -14,9 +14,10 @@
 <h2>Tutorial Details</h2>
 
 <div class="page-menu">
-    @if (canEditTest.Succeeded)
+    @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
     {
-        <a asp-page="/Subject/Tutorials/Upsert" asp-area="Staff" asp-route-id="@Model.Tutorial.Id" class="btn btn-warning">Edit</a>
+        <button type="button" data-toggle="modal" data-target="#extend-tutorial-modal" class="btn btn-success btn-sm">Extend</button>
+        <button type="button" data-toggle="modal" data-target="#cancel-tutorial-modal" class="btn btn-warning btn-sm">Cancel</button>
     }
 
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
@@ -79,7 +80,7 @@
         <div id="students" class="tab-pane active">
             <h3>Active Students</h3>
 
-            @if (canEditTest.Succeeded)
+            @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
             {
                 <button data-toggle="modal" data-target="#addStudentModal" class="btn btn-success btn-sm">Enrol Student</button>
             }
@@ -122,7 +123,7 @@
                             }
                         </td>
                         <td>
-                            @if (canEditTest.Succeeded)
+                                @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
                             {
                                 <button data-student-id="@item.StudentId" data-student-name="@item.Name.DisplayName" data-offering-name="@Model.Tutorial.Name" class="btn btn-sm btn-danger btn-show-hover unenrol-student-button">Remove</button>
                             }
@@ -139,7 +140,7 @@
         <div id="resources" class="tab-pane">
             <h3>Teams</h3>
 
-            @if (canEditTest.Succeeded)
+            @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
             {
                 <button type="button" data-toggle="modal" data-target="#addTeamModal" class="btn btn-success btn-sm">Add a Team</button>
             }
@@ -166,7 +167,7 @@
                             }
                         </td>
                         <td>
-                            @if (canEditTest.Succeeded)
+                            @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
                             {
                                 <button data-resource-name="@item.Name" data-tutorial-name="@Model.Tutorial.Name" data-resource-id="@item.ResourceId.Value" class="btn btn-sm btn-danger btn-show-hover remove-resource-button">Remove</button>
                             }
@@ -180,7 +181,7 @@
         <div id="sessions" class="tab-pane">
             <h3>Active Sessions</h3>
 
-            @if (canEditTest.Succeeded)
+            @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
             {
                 <button type="button" data-toggle="modal" data-target="#addSession" class="btn btn-success btn-sm">Assign a new session</button>
                 <a asp-page="/Subject/Tutorials/AddSessions" asp-area="Staff" asp-route-id="@Model.Id" class="btn btn-sm btn-success">Bulk Add Sessions</a>
@@ -204,7 +205,7 @@
                         <td>@item.Teacher.Name.DisplayName</td>
                         <td>@item.Duration</td>
                         <td>
-                            @if (canEditTest.Succeeded)
+                            @if (canEditTest.Succeeded && Model.Tutorial.IsCurrent)
                             {
                                 <button data-session-period="@item.PeriodName" data-tutorial-name="@Model.Tutorial.Name" data-session-id="@item.SessionId.Value" class="btn btn-sm btn-danger btn-show-hover remove-session-button">Remove</button>
                             }
@@ -233,6 +234,8 @@
     </div>
 </div>
 
+<vc:cancel-tutorial />
+<vc:extend-tutorial end-date="@Model.Tutorial.EndDate" />
 <vc:enrol-student-in-tutorial id="@Model.Id" />
 <vc:add-session-to-tutorial id="@Model.Id" />
 <vc:add-team-to-tutorial id="@Model.Id" />

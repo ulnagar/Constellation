@@ -33,5 +33,9 @@ public sealed class TutorialErrors
         public static readonly Error EndDateInPast = new(
             "Tutorial.Validation.EndDate",
             "End Date cannot be in the past");
+
+        public static readonly Error EndDateBeforeCurrentEnd = new(
+            "Tutorial.Validation.EndDateBeforeCurrentEnd",
+            "End Date cannot be before the current End Date");
     }
 }
