@@ -12,4 +12,8 @@ public static class TeamErrors
     public static Error NoTutorialName = new(
         "LinkedSystem.Teams.NoTutorialName",
         "Could not find a Tutorial Name in the Team Description");
+
+    public static Func<string, Error> AlreadyExists = name => new(
+        "LinkedSystem.Teams.AlreadyExists",
+        $"A Microsoft Team with the name '{name}' already exists");
 }

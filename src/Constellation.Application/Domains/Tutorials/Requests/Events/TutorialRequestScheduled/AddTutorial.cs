@@ -17,6 +17,7 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
 using Core.Models.Enrolments;
 using Core.Models.Tutorials.Events;
+using Core.Models.Tutorials.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
 using Serilog;
@@ -102,48 +103,43 @@ public sealed class AddTutorial
             : weekDescriptors[endWeekIndex];
 
         // Does tutorial already exist?
-        Tutorial tutorial = await _tutorialRepository.GetByNameAndYear(_dateTime.CurrentYear, tutorialRequest.Plan.Name, cancellationToken);
+        Tutorial existingTutorial = await _tutorialRepository.GetByNameAndYear(_dateTime.CurrentYear, tutorialRequest.Plan.Name, cancellationToken);
 
-        if (tutorial is not null)
+        if (existingTutorial is not null)
         {
-            if (tutorial.EndDate < tutorialRequest.Plan.StartDate)
-            {
-                tutorial.Update(
-                    tutorial.Name, 
-                    tutorialRequest.Plan.StartDate, 
-                    DateOnly.FromDateTime(endWeek.EndDate), 
-                    _dateTime);
-            }
-        }
-        else
-        {
-            Result<Tutorial> newTutorial = Tutorial.Create(
-                tutorialRequest.Plan.Name,
-                tutorialRequest.Plan.StartDate,
-                DateOnly.FromDateTime(endWeek.EndDate),
-                _dateTime);
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(TutorialName), tutorialRequest.Plan.Name)
+                .ForContext(nameof(Error), TutorialErrors.Validation.AlreadyExists, true)
+                .Warning("Failed to create Tutorial for Tutorial Request");
 
-            if (newTutorial.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
-                    .ForContext(nameof(Error), newTutorial.Error, true)
-                    .Warning("Failed to create Tutorial for Tutorial Request");
-
-                return;
-            }
-
-            tutorial = newTutorial.Value;
-
-            _tutorialRepository.Insert(tutorial);
+            return;
         }
 
-        tutorialRequest.Plan.Update(tutorial.Id);
+        Result<Tutorial> tutorial = Tutorial.Create(
+            tutorialRequest.Plan.Name,
+            tutorialRequest.Plan.StartDate,
+            DateOnly.FromDateTime(endWeek.EndDate),
+            _dateTime);
+
+        if (tutorial.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), tutorial.Error, true)
+                .Warning("Failed to create Tutorial for Tutorial Request");
+
+            return;
+        }
+
+        _tutorialRepository.Insert(tutorial.Value);
+
+        tutorialRequest.Plan.Update(tutorial.Value.Id);
 
         // Add sessions to new tutorial
 
         foreach ((PeriodId PeriodId, StaffId StaffId) session in tutorialRequest.Plan.Periods)
-            tutorial.AddSession(session.PeriodId, session.StaffId);
+            tutorial.Value.AddSession(session.PeriodId, session.StaffId);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
     }

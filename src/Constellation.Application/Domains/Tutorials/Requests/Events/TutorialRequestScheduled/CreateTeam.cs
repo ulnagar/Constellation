@@ -13,10 +13,14 @@ using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Abstractions.Clock;
+using Core.Abstractions.Repositories;
 using Core.Extensions;
+using Core.Models.LinkedSystems;
+using Core.Models.LinkedSystems.Errors;
 using Core.Models.Tutorials.Events;
 using Core.Shared;
 using Serilog;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +29,7 @@ internal sealed class CreateTeam
 {
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly ITeamRepository _teamRepository;
     private readonly ITeamOperationRepository _teamOperationRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
@@ -33,6 +38,7 @@ internal sealed class CreateTeam
     public CreateTeam(
         ITutorialRepository tutorialRepository,
         IStudentRepository studentRepository,
+        ITeamRepository teamRepository,
         ITeamOperationRepository teamOperationRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
@@ -40,6 +46,7 @@ internal sealed class CreateTeam
     {
         _tutorialRepository = tutorialRepository;
         _studentRepository = studentRepository;
+        _teamRepository = teamRepository;
         _teamOperationRepository = teamOperationRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
@@ -77,6 +84,20 @@ internal sealed class CreateTeam
             _logger
                 .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), StudentErrors.NotFound(tutorialRequest.StudentId), true)
+                .Warning("Failed to create Team for Tutorial Request");
+
+            return;
+        }
+
+        string teamName = MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name);
+
+        List<Team> existingTeams = await _teamRepository.GetByName(teamName, cancellationToken);
+
+        if (existingTeams.Count > 0)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), TeamErrors.AlreadyExists(teamName), true)
                 .Warning("Failed to create Team for Tutorial Request");
 
             return;
