@@ -63,7 +63,7 @@ internal sealed class SendWelcomeEmail
             return;
         }
 
-        if (_dateTime.Now.Subtract(contact.CreatedAt).TotalDays < 5)
+        if (_dateTime.Now.Subtract(contact.CreatedAt).TotalDays > 5)
             return;
 
         if (role.Role == Position.Coordinator &&
