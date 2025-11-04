@@ -18,6 +18,7 @@ using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Persistence.TrackItContext;
 using Persistence.TrackItContext.Models;
+using System.Diagnostics;
 using System.Globalization;
 
 internal sealed class TrackItSyncJob : ITrackItSyncJob
@@ -69,6 +70,14 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         _tiLocations = await _tiContext.Locations.ToListAsync(cancellationToken);
         _tiDepartments = await _tiContext.Departments.ToListAsync(cancellationToken);
 
+        List<int> includedDepartments = _tiDepartments
+            .Where(dept => 
+                dept.Name == "Students" || 
+                dept.Name == "Partner School" ||
+                dept.Name.Contains("Faculty", StringComparison.InvariantCultureIgnoreCase))
+            .Select(dept => dept.Sequence)
+            .ToList();
+
         foreach (School acosSchool in acosSchools)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -106,6 +115,12 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             customer.Emailid = ConvertEmailToEmailId(emailAddress);
             
             if (customer.Inactive == 1)
+                continue;
+
+            // Ignore any customer who is not in the included departments
+            // This will only process Students and Faculty members
+            if (customer.Dept is null ||
+                !includedDepartments.Contains(customer.Dept.Value))
                 continue;
 
             if (emailAddress.Contains("@det.nsw.edu.au", StringComparison.OrdinalIgnoreCase))
