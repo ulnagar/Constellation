@@ -11,6 +11,7 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
+using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
@@ -89,26 +90,35 @@ internal sealed class CreateTeam
             return;
         }
 
-        string teamName = MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name);
+        Team? existingTeam = await _teamRepository.GetByDescriptionTag(_dateTime.CurrentYear, student.StudentReferenceNumber.Number, cancellationToken);
 
-        List<Team> existingTeams = await _teamRepository.GetByName(teamName, cancellationToken);
-
-        if (existingTeams.Count > 0)
+        if (existingTeam is null)
         {
-            _logger
-                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
-                .ForContext(nameof(Error), TeamErrors.AlreadyExists(teamName), true)
-                .Warning("Failed to create Team for Tutorial Request");
+            string teamName = MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name);
 
-            return;
+            // Schedule creation of Team for tutorial
+            CreateTeamTeamOperation operation = new(
+                MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name),
+                $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorialRequest.Plan.Name};{student.StudentReferenceNumber.Number}");
+
+            _teamOperationRepository.Insert(operation);
         }
+        else
+        {
+            Tutorial tutorial = await _tutorialRepository.GetById(tutorialRequest.Plan.TutorialId, cancellationToken);
 
-        // Schedule creation of Team for tutorial
-        CreateTeamTeamOperation operation = new(
-            MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name),
-            $"8912;TUT;Support;{_dateTime.CurrentYearAsString};{tutorialRequest.Grade.AsName()};{tutorialRequest.Plan.Name};");
+            if (tutorial is null)
+            {
+                _logger
+                    .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                    .ForContext(nameof(Error), TutorialErrors.NotFound(tutorialRequest.Plan.TutorialId), true)
+                    .Warning("Failed to link existing Team with Tutorial");
 
-        _teamOperationRepository.Insert(operation);
+                return;
+            }
+
+            tutorial.AddTeam(existingTeam.Id, existingTeam.Name, existingTeam.Link);
+        }
 
         await _unitOfWork.CompleteAsync(cancellationToken);
     }

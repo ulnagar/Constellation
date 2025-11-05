@@ -71,6 +71,15 @@ internal sealed class TeamRepository : ITeamRepository
             .Select(team => team.Link)
             .FirstOrDefaultAsync(cancellationToken);
 
+    public async Task<Team?> GetByDescriptionTag(
+        int year, 
+        string descriptionTag, 
+        CancellationToken cancellationToken = default) =>
+        await _dbContext
+            .Set<Team>()
+            .Where(team => team.Description.Contains(year.ToString()) && team.Description.Contains(descriptionTag))
+            .FirstOrDefaultAsync(cancellationToken);
+
     public void Insert(Team team) =>
         _dbContext.Set<Team>().Add(team);
 
