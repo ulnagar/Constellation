@@ -1,0 +1,85 @@
+﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestCreated;
+
+using Abstractions.Messaging;
+using Constellation.Core.Models.Students;
+using Constellation.Core.Models.Students.Errors;
+using Constellation.Core.Models.Tutorials.Errors;
+using Constellation.Core.Shared;
+using Core.Abstractions.Repositories;
+using Core.Models.Families;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Enums;
+using Core.Models.SchoolContacts.Repositories;
+using Core.Models.Students.Repositories;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Events;
+using Core.Models.Tutorials.Repositories;
+using Interfaces.Gateways;
+using Interfaces.Services;
+using Serilog;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+internal sealed class SendConfirmationEmail
+: IDomainEventHandler<TutorialRequestCreatedDomainEvent>
+{
+    private readonly ITutorialRepository _tutorialRepository;
+    private readonly IStudentRepository _studentRepository;
+    private readonly IFamilyRepository _familyRepository;
+    private readonly ISchoolContactRepository _contactRepository;
+    private readonly IRazorViewToStringRenderer _razorRenderer;
+    private readonly IEmailGateway _emailGateway;
+    private readonly ILogger _logger;
+
+    public SendConfirmationEmail(
+        ITutorialRepository tutorialRepository,
+        IStudentRepository studentRepository,
+        IFamilyRepository familyRepository,
+        ISchoolContactRepository contactRepository,
+        IRazorViewToStringRenderer razorRenderer,
+        IEmailGateway emailGateway,
+        ILogger logger)
+    {
+        _tutorialRepository = tutorialRepository;
+        _studentRepository = studentRepository;
+        _familyRepository = familyRepository;
+        _contactRepository = contactRepository;
+        _razorRenderer = razorRenderer;
+        _emailGateway = emailGateway;
+        _logger = logger;
+    }
+
+    public async Task Handle(TutorialRequestCreatedDomainEvent notification, CancellationToken cancellationToken)
+    {
+        Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
+
+        if (tutorialRequest is null)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), TutorialRequestErrors.NotFound(notification.RequestId), true)
+                .Warning("Failed to send confirmation email for Tutorial Request");
+
+            return;
+        }
+
+        Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
+
+        if (student is null)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), StudentErrors.NotFound(tutorialRequest.StudentId), true)
+                .Warning("Failed to send confirmation email for Tutorial Request");
+
+            return;
+        }
+
+        List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
+
+        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode, Position.Coordinator, cancellationToken);
+
+        var emailViewModel = new TutorialSupportApprovedEmailViewModel()
+    }
+}
