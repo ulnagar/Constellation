@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Contacts;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Contacts.Interfaces;
 using Application.Domains.Contacts.Models;
 using Application.Domains.Contacts.Queries.ExportContactList;
 using Application.Domains.Contacts.Queries.GetContactList;
@@ -28,6 +29,7 @@ using Serilog;
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
+    private readonly IStudentFlagCacheService _flagCache;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthorizationService _authorizationService;
@@ -35,12 +37,14 @@ public class IndexModel : BasePageModel
 
     public IndexModel(
         ISender mediator,
+        IStudentFlagCacheService flagCache,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         IAuthorizationService authorizationService,
         ILogger logger)
     {
         _mediator = mediator;
+        _flagCache = flagCache;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _authorizationService = authorizationService;
@@ -60,6 +64,8 @@ public class IndexModel : BasePageModel
     public List<ClassRecord> ClassSelectionList { get; set; } = new();
 
     public List<SchoolSelectionListResponse> SchoolsList { get; set; } = new();
+
+    public List<string> Flags { get; set; } = [];
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
@@ -90,6 +96,7 @@ public class IndexModel : BasePageModel
             Filter.Grades,
             Filter.Schools,
             filterCategories,
+            Filter.Flags,
             execMemberTest.Succeeded);
 
         _logger
@@ -177,12 +184,15 @@ public class IndexModel : BasePageModel
         foreach (string entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
+        Flags = await _flagCache.GetFlags();
+
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
         if (offeringIds.Any() ||
             filterCategories.Any() ||
             Filter.Grades.Any() ||
-            Filter.Schools.Any())
+            Filter.Schools.Any() ||
+            Filter.Flags.Any())
         {
             AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
 
@@ -192,6 +202,7 @@ public class IndexModel : BasePageModel
                     Filter.Grades,
                     Filter.Schools,
                     filterCategories,
+                    Filter.Flags,
                     execMemberTest.Succeeded),
                 cancellationToken);
 
@@ -222,10 +233,11 @@ public class IndexModel : BasePageModel
 
     public class FilterDefinition
     {
-        public List<Guid> Offerings { get; set; } = new();
-        public List<Grade> Grades { get; set; } = new();
-        public List<string> Schools { get; set; } = new();
-        public List<string> Categories { get; set; } = new();
+        public List<Guid> Offerings { get; set; } = [];
+        public List<Grade> Grades { get; set; } = [];
+        public List<string> Schools { get; set; } = [];
+        public List<string> Categories { get; set; } = [];
+        public List<string> Flags { get; set; } = [];
 
         public FilterAction Action { get; set; } = FilterAction.Filter;
 

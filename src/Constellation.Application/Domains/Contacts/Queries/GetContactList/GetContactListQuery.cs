@@ -11,5 +11,6 @@ public sealed record GetContactListQuery(
     List<Grade> Grades,
     List<string> SchoolCodes,
     List<ContactCategory> ContactCategories,
+    List<string> Flags,
     bool IncludeRestrictedRoles)
     : IQuery<List<ContactResponse>>;

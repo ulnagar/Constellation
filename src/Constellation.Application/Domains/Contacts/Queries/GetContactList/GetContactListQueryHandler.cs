@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Contacts.Queries.GetContactList;
 
 using Abstractions.Messaging;
+using Application.Interfaces.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models;
 using Core.Models.Faculties;
@@ -17,12 +18,14 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
+using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
+using Core.Models.Tutorials.Enums;
 using Core.Shared;
 using Core.ValueObjects;
-using Interfaces.Repositories;
+using Interfaces;
 using Models;
 using SchoolContacts.Helpers;
 using System.Collections.Generic;
@@ -41,6 +44,7 @@ internal sealed class GetContactListQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ISchoolRepository _schoolRepository;
+    private readonly IStudentFlagCacheService _flagCache;
 
     public GetContactListQueryHandler(
         IStudentRepository studentRepository,
@@ -50,7 +54,8 @@ internal sealed class GetContactListQueryHandler
         IFamilyRepository familyRepository,
         IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository,
-        ISchoolRepository schoolRepository)
+        ISchoolRepository schoolRepository,
+        IStudentFlagCacheService flagCache)
     {
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
@@ -60,6 +65,7 @@ internal sealed class GetContactListQueryHandler
         _staffRepository = staffRepository;
         _contactRepository = contactRepository;
         _schoolRepository = schoolRepository;
+        _flagCache = flagCache;
     }
 
     public async Task<Result<List<ContactResponse>>> Handle(GetContactListQuery request, CancellationToken cancellationToken)
@@ -73,8 +79,24 @@ internal sealed class GetContactListQueryHandler
                 request.SchoolCodes,
                 cancellationToken);
 
-        List<Offering> offerings = await _offeringRepository
-            .GetAll(cancellationToken);
+        if (request.Flags.Any())
+        {
+            List<StudentId> studentIds = [];
+
+            foreach (string flag in request.Flags)
+            {
+                List<StudentId> idsWithFlag = await _flagCache.GetStudentsWithFlag(flag);
+                studentIds.AddRange(idsWithFlag);
+
+                studentIds = studentIds
+                    .Distinct()
+                    .ToList();
+            }
+
+            students = students
+                .Where(student => studentIds.Contains(student.Id))
+                .ToList();
+        }
 
         List<StaffMember> staffMembers = await _staffRepository
             .GetAll(cancellationToken);

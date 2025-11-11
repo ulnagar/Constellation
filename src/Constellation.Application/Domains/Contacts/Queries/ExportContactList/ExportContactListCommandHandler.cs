@@ -1,6 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Contacts.Queries.ExportContactList;
 
 using Abstractions.Messaging;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.Models;
 using Core.Models.Faculties;
@@ -24,8 +27,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using DTOs;
 using Helpers;
-using Interfaces.Repositories;
-using Interfaces.Services;
+using Interfaces;
 using Models;
 using SchoolContacts.Helpers;
 using System.Collections.Generic;
@@ -45,6 +47,7 @@ internal sealed class ExportContactListCommandHandler
     private readonly IFacultyRepository _facultyRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly ISchoolRepository _schoolRepository;
+    private readonly IStudentFlagCacheService _flagCache;
     private readonly IExcelService _excelService;
 
     public ExportContactListCommandHandler(
@@ -56,6 +59,7 @@ internal sealed class ExportContactListCommandHandler
         IFacultyRepository facultyRepository,
         ICourseRepository courseRepository,
         ISchoolRepository schoolRepository,
+        IStudentFlagCacheService flagCache,
         IExcelService excelService)
     {
         _studentRepository = studentRepository;
@@ -66,6 +70,7 @@ internal sealed class ExportContactListCommandHandler
         _facultyRepository = facultyRepository;
         _courseRepository = courseRepository;
         _schoolRepository = schoolRepository;
+        _flagCache = flagCache;
         _excelService = excelService;
     }
 
@@ -80,8 +85,24 @@ internal sealed class ExportContactListCommandHandler
                 request.SchoolCodes,
                 cancellationToken);
 
-        List<Offering> offerings = await _offeringRepository
-            .GetAll(cancellationToken);
+        if (request.Flags.Any())
+        {
+            List<StudentId> studentIds = [];
+
+            foreach (string flag in request.Flags)
+            {
+                List<StudentId> idsWithFlag = await _flagCache.GetStudentsWithFlag(flag);
+                studentIds.AddRange(idsWithFlag);
+
+                studentIds = studentIds
+                    .Distinct()
+                    .ToList();
+            }
+
+            students = students
+                .Where(student => studentIds.Contains(student.Id))
+                .ToList();
+        }
 
         List<StaffMember> staffMembers = await _staffRepository
             .GetAll(cancellationToken);

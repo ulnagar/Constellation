@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Contacts.Queries.GetContactListForStudent;
 
 using Abstractions.Messaging;
+using Application.Interfaces.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models;
@@ -24,7 +25,6 @@ using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Interfaces.Repositories;
 using Models;
 using System.Collections.Generic;
 using System.Linq;

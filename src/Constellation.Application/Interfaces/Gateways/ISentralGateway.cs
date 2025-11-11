@@ -19,6 +19,9 @@ using System.Threading.Tasks;
 public interface ISentralGateway
 {
     Task<string> GetSentralStudentIdAsync(string studentName);
+
+    Task<List<(string SentralId, List<string> Flags)>> GetStudentFlags(
+        CancellationToken cancellationToken = default);
     Task<List<SentralPeriodAbsenceDto>> GetAbsenceDataAsync(string sentralStudentId);
     Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId);
     Task<string> GetSentralStudentIdFromSRN(string srn, string grade);

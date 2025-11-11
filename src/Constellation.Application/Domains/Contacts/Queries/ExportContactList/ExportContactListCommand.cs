@@ -12,5 +12,6 @@ public sealed record ExportContactListCommand(
     List<Grade> Grades,
     List<string> SchoolCodes,
     List<ContactCategory> ContactCateogries,
+    List<string> Flags,
     bool IncludeRestrictedRoles)
     : ICommand<FileDto>;

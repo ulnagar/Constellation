@@ -716,6 +716,60 @@ public class Gateway : ISentralGateway
         return null;
     }
 
+    public async Task<List<(string SentralId, List<string> Flags)>> GetStudentFlags(
+        CancellationToken cancellationToken = default)
+    {
+        if (_logOnly)
+        {
+            _logger.Information("GetStudentFlags");
+
+            return null;
+        }
+
+        List<(string SentralId, List<string> Flags)> studentFlags = new();
+
+        _studentListPage ??= await GetPageByGet($"{_settings.ServerUrl}/profiles/main/search?eduproq=&search=advanced&plan_type=plans", default);
+
+        if (_studentListPage == null)
+            return null;
+
+        HtmlDocument page = _studentListPage;
+
+        HtmlNode studentTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.StudentTable);
+
+        if (studentTable != null)
+        {
+            foreach (HtmlNode row in studentTable.Descendants("tr"))
+            {
+                HtmlNode firstCell = row.ChildNodes.FindFirst("td");
+                string sentralId = string.Empty;
+                List<string> flags = [];
+
+                string href = firstCell.ChildNodes.FindFirst("a").GetAttributeValue("href", "");
+                if (string.IsNullOrWhiteSpace(href))
+                {
+                    // Something went wrong? What now?
+                    throw new NodeAttributeNotFoundException();
+                }
+                else
+                {
+                    sentralId = href.Split('/').ElementAt(^2);
+                }
+
+                IEnumerable<HtmlNode> flagSpans = row.Descendants("td").Last().Descendants("span");
+                
+                foreach (var flagSpan in flagSpans)
+                {
+                    flags.Add(flagSpan.InnerText.Trim());
+                }
+
+                studentFlags.Add(new (sentralId, flags));
+            }
+        }
+
+        return studentFlags;
+    }
+
     public async Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId)
     {
         if (_logOnly)

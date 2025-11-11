@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.Contacts.Queries.GetContactListForParentPortal;
 
 using Abstractions.Messaging;
+using Application.Interfaces.Configuration;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
-using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
@@ -13,7 +13,6 @@ using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
-using Interfaces.Configuration;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
