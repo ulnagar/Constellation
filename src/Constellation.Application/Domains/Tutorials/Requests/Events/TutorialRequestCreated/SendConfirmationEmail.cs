@@ -14,6 +14,7 @@ using Core.Models.Students.Repositories;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Events;
 using Core.Models.Tutorials.Repositories;
+using Core.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Services;
 using Serilog;
@@ -28,8 +29,7 @@ internal sealed class SendConfirmationEmail
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly IRazorViewToStringRenderer _razorRenderer;
-    private readonly IEmailGateway _emailGateway;
+    private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public SendConfirmationEmail(
@@ -37,16 +37,14 @@ internal sealed class SendConfirmationEmail
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         ISchoolContactRepository contactRepository,
-        IRazorViewToStringRenderer razorRenderer,
-        IEmailGateway emailGateway,
+        IEmailService emailService,
         ILogger logger)
     {
         _tutorialRepository = tutorialRepository;
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
-        _razorRenderer = razorRenderer;
-        _emailGateway = emailGateway;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -63,7 +61,9 @@ internal sealed class SendConfirmationEmail
 
             return;
         }
-
+        
+        List<EmailRecipient> recipients = [];
+        
         Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
 
         if (student is null)
@@ -76,10 +76,24 @@ internal sealed class SendConfirmationEmail
             return;
         }
 
+        Result<EmailRecipient> studentRecipient = EmailRecipient.Create(student.Name, student.EmailAddress);
+
+        if (studentRecipient.IsSuccess)
+            recipients.Add(studentRecipient.Value);
+        
         List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
+
+        // Should this only go to Residential parents?
+        foreach (var family in families)
+        {
+            
+        }
 
         List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode, Position.Coordinator, cancellationToken);
 
-        var emailViewModel = new TutorialSupportApprovedEmailViewModel()
+
+
+
+        await _emailService.SendTutorialRequestReceivedEmail()
     }
 }

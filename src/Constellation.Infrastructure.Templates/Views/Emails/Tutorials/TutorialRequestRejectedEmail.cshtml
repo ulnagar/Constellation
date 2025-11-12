@@ -1,0 +1,14 @@
+@using Constellation.Core.Extensions
+@model Constellation.Infrastructure.Templates.Views.Emails.Tutorials.TutorialRequestReceivedEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>A tutorial support request made by @Model.Student.DisplayName (@Model.Grade.AsName() - @Model.School) for @Model.SupportType has been rejected.</p>
+<p>For more information on the reason for the rejection, please contact the school on 1300 287 629.</p>

@@ -2,14 +2,11 @@
 
 using Application.Interfaces.Services;
 using Constellation.Core.Shared;
-using Constellation.Infrastructure.Templates.Views.Emails.AwardNominations;
+using Core.Models.LinkedSystems;
 using Core.Models.Tutorials;
 using Core.ValueObjects;
 using MimeKit;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Tutorials;
 
@@ -79,14 +76,28 @@ public sealed partial class Service : IEmailService
         Request tutorialRequest,
         CancellationToken cancellationToken = default)
     {
-        string body = await _razorService.RenderViewToStringAsync(ParentNotificationEmailViewModel.ViewLocation, viewModel);
+        TutorialRequestApprovedNotificationEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Tutorial Support request scheduling required",
+            Student = tutorialRequest.Student,
+            Grade = tutorialRequest.Grade,
+            School = tutorialRequest.School,
+            Type = tutorialRequest.Type,
+            Subject = tutorialRequest.Subject,
+            RequestId = tutorialRequest.Id
+        };
 
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        string body = await _razorService.RenderViewToStringAsync(TutorialRequestApprovedNotificationEmailViewModel.ViewLocation, viewModel);
+
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
 
         if (emailSendOperation.IsFailure)
-            return Result.Failure<string>(emailSendOperation.Error);
+            return Result.Failure(emailSendOperation.Error);
 
-        return body;
+        return Result.Success();
     }
 
     public async Task<Result> SendTutorialRequestRejectedEmail(
@@ -94,29 +105,60 @@ public sealed partial class Service : IEmailService
         Request tutorialRequest,
         CancellationToken cancellationToken = default)
     {
-        string body = await _razorService.RenderViewToStringAsync(ParentNotificationEmailViewModel.ViewLocation, viewModel);
+        TutorialRequestRejectedEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Tutorial Support request rejected",
+            Student = tutorialRequest.Student,
+            Grade = tutorialRequest.Grade,
+            School = tutorialRequest.School,
+            Type = tutorialRequest.Type,
+            Subject = tutorialRequest.Subject
+        };
 
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        string body = await _razorService.RenderViewToStringAsync(TutorialRequestRejectedEmailViewModel.ViewLocation, viewModel);
+
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
 
         if (emailSendOperation.IsFailure)
-            return Result.Failure<string>(emailSendOperation.Error);
+            return Result.Failure(emailSendOperation.Error);
 
-        return body;
+        return Result.Success();
     }
 
     public async Task<Result> SendTutorialRequestScheduledEmail(
         List<EmailRecipient> recipients,
         Request tutorialRequest,
+        Team tutorialTeam,
+        List<(string Period, string Teacher)> periods,
         CancellationToken cancellationToken = default)
     {
-        string body = await _razorService.RenderViewToStringAsync(ParentNotificationEmailViewModel.ViewLocation, viewModel);
+        TutorialRequestScheduledEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"[Aurora College] Tutorial Support scheduled",
+            Student = tutorialRequest.Student,
+            Grade = tutorialRequest.Grade,
+            School = tutorialRequest.School,
+            Type = tutorialRequest.Type,
+            Subject = tutorialRequest.Subject,
+            StartDate = tutorialRequest.Plan.StartDate,
+            TutorialTeam = tutorialTeam,
+            ScheduledPeriods = periods
+        };
 
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        string body = await _razorService.RenderViewToStringAsync(TutorialRequestScheduledEmailViewModel.ViewLocation, viewModel);
+
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure<string>(emailSendOperation.Error);
 
-        return body;
+        return Result.Success();
     }
 
 }

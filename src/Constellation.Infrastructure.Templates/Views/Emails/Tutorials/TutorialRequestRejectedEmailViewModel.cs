@@ -1,11 +1,19 @@
 ﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Tutorials;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Constellation.Core.Enums;
+using Constellation.Core.Models.Tutorials.Enums;
+using Core.ValueObjects;
+using Shared;
 
-internal class TutorialRequestRejectedEmailViewModel
+public sealed class TutorialRequestRejectedEmailViewModel : EmailLayoutBaseViewModel
 {
+    public const string ViewLocation = "/Views/Emails/Tutorials/TutorialRequestRejectedEmail.cshtml";
+
+    public Name Student { get; set; }
+    public Grade Grade { get; set; }
+    public string School { get; set; }
+
+    public TutorialType Type { get; set; }
+    public string Subject { get; set; }
+    public string SupportType => Type == TutorialType.Study ? Type.ToString() : $"{Type} - {Subject}";
 }
