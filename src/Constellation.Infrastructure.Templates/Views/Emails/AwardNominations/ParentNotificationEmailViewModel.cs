@@ -15,4 +15,5 @@ public sealed class ParentNotificationEmailViewModel : EmailLayoutBaseViewModel
     public string School { get; set; }
     public DateOnly DeliveryDate { get; set; }
     public List<Nomination> Awards { get; set; } = [];
+    public string Year => DeliveryDate.Year.ToString();
 }
