@@ -32,8 +32,6 @@
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
 	  <Folder Include="Domains\Operations\" />
-	  <Folder Include="Domains\Tutorials\Requests\Events\TutorialRequestRejected\" />
-	  <Folder Include="Domains\Tutorials\Requests\Events\TutorialRequestApproved\" />
 	  <Folder Include="Domains\WorkFlows\Enums\" />
 	</ItemGroup>
 

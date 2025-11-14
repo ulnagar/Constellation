@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestCreated;
+﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestRejected;
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
@@ -15,6 +15,7 @@ using Core.Models.Tutorials;
 using Core.Models.Tutorials.Events;
 using Core.Models.Tutorials.Repositories;
 using Core.ValueObjects;
+using Interfaces.Gateways;
 using Interfaces.Services;
 using Serilog;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class SendConfirmationEmail
-: IDomainEventHandler<TutorialRequestCreatedDomainEvent>
+: IDomainEventHandler<TutorialRequestRejectedDomainEvent>
 {
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IStudentRepository _studentRepository;
@@ -48,16 +49,16 @@ internal sealed class SendConfirmationEmail
         _logger = logger;
     }
 
-    public async Task Handle(TutorialRequestCreatedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(TutorialRequestRejectedDomainEvent notification, CancellationToken cancellationToken)
     {
         Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
 
         if (tutorialRequest is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestRejectedDomainEvent), notification, true)
                 .ForContext(nameof(Error), TutorialRequestErrors.NotFound(notification.RequestId), true)
-                .Warning("Failed to send confirmation email for Tutorial Request");
+                .Warning("Failed to send notification of Tutorial Request rejection");
 
             return;
         }
@@ -69,9 +70,9 @@ internal sealed class SendConfirmationEmail
         if (student is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestRejectedDomainEvent), notification, true)
                 .ForContext(nameof(Error), StudentErrors.NotFound(tutorialRequest.StudentId), true)
-                .Warning("Failed to send confirmation email for Tutorial Request");
+                .Warning("Failed to send notification of Tutorial Request rejection");
 
             return;
         }
@@ -124,15 +125,15 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(contactRecipient.Value);
         }
 
-        Result result = await _emailService.SendTutorialRequestReceivedEmail(recipients, tutorialRequest, cancellationToken);
+        Result result = await _emailService.SendTutorialRequestRejectedEmail(recipients, tutorialRequest, cancellationToken);
 
         if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestRejectedDomainEvent), notification, true)
                 .ForContext(nameof(recipients), recipients, true)
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to send confirmation email for Tutorial Request");
+                .Warning("Failed to send notification of Tutorial Request rejection");
         }
     }
 }

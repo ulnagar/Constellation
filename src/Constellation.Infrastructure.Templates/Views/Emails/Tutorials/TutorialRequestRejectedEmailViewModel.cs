@@ -16,4 +16,6 @@ public sealed class TutorialRequestRejectedEmailViewModel : EmailLayoutBaseViewM
     public TutorialType Type { get; set; }
     public string Subject { get; set; }
     public string SupportType => Type == TutorialType.Study ? Type.ToString() : $"{Type} - {Subject}";
+
+    public string Reason { get; set; }
 }

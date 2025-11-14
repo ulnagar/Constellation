@@ -115,7 +115,8 @@ public sealed partial class Service : IEmailService
             Grade = tutorialRequest.Grade,
             School = tutorialRequest.School,
             Type = tutorialRequest.Type,
-            Subject = tutorialRequest.Subject
+            Subject = tutorialRequest.Subject,
+            Reason = tutorialRequest.Notes.OrderBy(entry => entry.SubmittedAt).Last().Message
         };
 
         string body = await _razorService.RenderViewToStringAsync(TutorialRequestRejectedEmailViewModel.ViewLocation, viewModel);
