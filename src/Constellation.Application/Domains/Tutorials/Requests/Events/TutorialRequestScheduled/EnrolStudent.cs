@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestScheduled;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Tutorials.Requests.Commands.ScheduleTutorialRequest;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Tutorials.Errors;

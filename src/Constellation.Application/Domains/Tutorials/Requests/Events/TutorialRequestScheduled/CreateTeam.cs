@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestScheduled;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Tutorials.Requests.Commands.ScheduleTutorialRequest;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Models.Operations;
@@ -11,17 +10,14 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Errors;
-using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Extensions;
 using Core.Models.LinkedSystems;
-using Core.Models.LinkedSystems.Errors;
 using Core.Models.Tutorials.Events;
 using Core.Shared;
 using Serilog;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 

@@ -18,6 +18,7 @@ public sealed class AppConfiguration
     public AttachmentsConfiguration Attachments { get; set; }
     public CoversConfiguration Covers { get; set; }
     public WorkFlowConfiguration WorkFlow { get; set; }
+    public TutorialConfiguration Tutorials { get; set; }
 
 
     public class AbsencesConfiguration
@@ -85,5 +86,11 @@ public sealed class AppConfiguration
         public EmployeeId AttendanceReviewer { get; set; }
         public EmployeeId ComplianceReviewer { get; set; }
         public EmployeeId TrainingReviewer { get; set; }
+    }
+
+    public sealed class TutorialConfiguration
+    {
+        public EmployeeId Approver { get; set; }
+        public EmployeeId Scheduler { get; set; }
     }
 }

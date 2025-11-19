@@ -2,20 +2,16 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates;
-using Constellation.Application.Domains.Tutorials.Requests.Commands.ScheduleTutorialRequest;
-using Constellation.Core.Models.Enrolments.Repositories;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Models.Timetables.Identifiers;
 using Constellation.Core.Models.Tutorials;
-using Constellation.Core.Models.Tutorials.Enums;
 using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
 using Core.Abstractions.Clock;
-using Core.Models.Enrolments;
 using Core.Models.Tutorials.Events;
 using Core.Models.Tutorials.ValueObjects;
 using Interfaces.Gateways;

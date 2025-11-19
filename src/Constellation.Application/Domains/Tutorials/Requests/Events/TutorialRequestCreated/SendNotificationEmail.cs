@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestApproved;
+﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestCreated;
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
@@ -23,7 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class SendNotificationEmail
-: IDomainEventHandler<TutorialRequestApprovedDomainEvent>
+: IDomainEventHandler<TutorialRequestCreatedDomainEvent>
 {
     private readonly AppConfiguration _configuration;
     private readonly ITutorialRepository _tutorialRepository;
@@ -48,16 +48,16 @@ internal sealed class SendNotificationEmail
         _logger = logger;
     }
 
-    public async Task Handle(TutorialRequestApprovedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(TutorialRequestCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
 
         if (tutorialRequest is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestApprovedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestCreatedDomainEvent), notification, true)
                 .ForContext(nameof(Error), TutorialRequestErrors.NotFound(notification.RequestId), true)
-                .Warning("Failed to send notification email for approved Tutorial Request");
+                .Warning("Failed to send notification email for Tutorial Request");
 
             return;
         }
@@ -69,34 +69,34 @@ internal sealed class SendNotificationEmail
         if (student is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestApprovedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestCreatedDomainEvent), notification, true)
                 .ForContext(nameof(Error), StudentErrors.NotFound(tutorialRequest.StudentId), true)
-                .Warning("Failed to send notification email for approved Tutorial Request");
+                .Warning("Failed to send notification email for Tutorial Request");
 
             return;
         }
 
         // Who do we send this to?
-        EmployeeId schedulerEmpId = _configuration.Tutorials.Scheduler ?? EmployeeId.Empty;
+        EmployeeId approverEmpId = _configuration.Tutorials.Approver ?? EmployeeId.Empty;
 
-        if (schedulerEmpId == EmployeeId.Empty)
+        if (approverEmpId == EmployeeId.Empty)
         {
             _logger
-                .ForContext(nameof(TutorialRequestApprovedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestCreatedDomainEvent), notification, true)
                 .ForContext(nameof(Error), StaffMemberErrors.InvalidId, true)
-                .Warning("Failed to send notification email for approved Tutorial Request");
+                .Warning("Failed to send notification email for Tutorial Request");
 
             return;
         }
 
-        StaffMember staffMember = await _staffRepository.GetByEmployeeId(schedulerEmpId, cancellationToken);
+        StaffMember staffMember = await _staffRepository.GetByEmployeeId(approverEmpId, cancellationToken);
 
         if (staffMember is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestApprovedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(schedulerEmpId), true)
-                .Warning("Failed to send notification email for approved Tutorial Request");
+                .ForContext(nameof(TutorialRequestCreatedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(approverEmpId), true)
+                .Warning("Failed to send notification email for Tutorial Request");
 
             return;
         }
@@ -106,24 +106,24 @@ internal sealed class SendNotificationEmail
         if (recipient.IsFailure)
         {
             _logger
-                .ForContext(nameof(TutorialRequestApprovedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestCreatedDomainEvent), notification, true)
                 .ForContext(nameof(Error), recipient.Error, true)
-                .Warning("Failed to send notification email for approved Tutorial Request");
+                .Warning("Failed to send notification email for Tutorial Request");
 
             return;
         }
 
         recipients.Add(recipient.Value);
 
-        Result result = await _emailService.SendTutorialRequestApprovedNotificationEmail(recipients, tutorialRequest, cancellationToken);
+        Result result = await _emailService.SendTutorialRequestReceivedNotificationEmail(recipients, tutorialRequest, cancellationToken);
 
         if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(TutorialRequestApprovedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestCreatedDomainEvent), notification, true)
                 .ForContext(nameof(recipients), recipients, true)
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to send notification email for approved Tutorial Request");
+                .Warning("Failed to send notification email for Tutorial Request");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestRejected;
+﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestScheduled;
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students;
@@ -7,29 +7,39 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
+using Core.Models.LinkedSystems;
+using Core.Models.LinkedSystems.Errors;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Repositories;
+using Core.Models.Timetables;
+using Core.Models.Timetables.Repositories;
 using Core.Models.Tutorials;
 using Core.Models.Tutorials.Events;
+using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
 using Core.ValueObjects;
-using Interfaces.Gateways;
 using Interfaces.Services;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class SendConfirmationEmail
-: IDomainEventHandler<TutorialRequestRejectedDomainEvent>
+: IDomainEventHandler<TutorialRequestScheduledDomainEvent>
 {
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly ITeamRepository _teamRepository;
+    private readonly IStaffRepository _staffRepository;
+    private readonly IPeriodRepository _periodRepository;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
@@ -38,6 +48,9 @@ internal sealed class SendConfirmationEmail
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         ISchoolContactRepository contactRepository,
+        ITeamRepository teamRepository,
+        IStaffRepository staffRepository,
+        IPeriodRepository periodRepository,
         IEmailService emailService,
         ILogger logger)
     {
@@ -45,24 +58,83 @@ internal sealed class SendConfirmationEmail
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
+        _teamRepository = teamRepository;
+        _staffRepository = staffRepository;
+        _periodRepository = periodRepository;
         _emailService = emailService;
         _logger = logger;
     }
 
-    public async Task Handle(TutorialRequestRejectedDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(TutorialRequestScheduledDomainEvent notification, CancellationToken cancellationToken)
     {
         Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
 
         if (tutorialRequest is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestRejectedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), TutorialRequestErrors.NotFound(notification.RequestId), true)
-                .Warning("Failed to send notification of Tutorial Request rejection");
+                .Warning("Failed to send confirmation email for scheduled Tutorial");
 
             return;
         }
-        
+
+        TutorialId tutorialId = tutorialRequest.Plan?.TutorialId ?? TutorialId.Empty;
+
+        if (tutorialId == TutorialId.Empty)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), TutorialRequestErrors.NotFound(notification.RequestId), true)
+                .Warning("Failed to send confirmation email for scheduled Tutorial");
+
+            return;
+        }
+
+        Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+
+        if (tutorial is null)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), TutorialErrors.NotFound(tutorialId), true)
+                .Warning("Failed to send confirmation email for scheduled Tutorial");
+
+            return;
+        }
+
+        Team team = await _teamRepository.GetById(tutorial.Teams.FirstOrDefault()?.TeamId ?? Guid.Empty, cancellationToken);
+
+        if (team is null)
+        {
+            _logger
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
+                .ForContext(nameof(Error), TeamErrors.NotFound(tutorial.Teams.FirstOrDefault()?.TeamId ?? Guid.Empty), true)
+                .Warning("Failed to send confirmation email for scheduled Tutorial");
+
+            return;
+        }
+
+        List<(string Period, string Teacher)> tutorialSchedule = [];
+
+        List<StaffMember> staff = [];
+        List<Period> periods = await _periodRepository.GetAll(cancellationToken);
+
+        foreach (var session in tutorial.Sessions)
+        {
+            StaffMember staffMember = staff.FirstOrDefault(entry => entry.Id == session.StaffId);
+
+            if (staffMember is null)
+            {
+                staffMember = await _staffRepository.GetById(session.StaffId, cancellationToken);
+                staff.Add(staffMember);
+            }
+
+            Period period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
+
+            tutorialSchedule.Add(new (period.ToString(), staffMember.Name.DisplayName));
+        }
+
         List<EmailRecipient> recipients = [];
         
         Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
@@ -70,9 +142,9 @@ internal sealed class SendConfirmationEmail
         if (student is null)
         {
             _logger
-                .ForContext(nameof(TutorialRequestRejectedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), StudentErrors.NotFound(tutorialRequest.StudentId), true)
-                .Warning("Failed to send notification of Tutorial Request rejection");
+                .Warning("Failed to send confirmation email for scheduled Tutorial");
 
             return;
         }
@@ -124,15 +196,15 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(contactRecipient.Value);
         }
 
-        Result result = await _emailService.SendTutorialRequestRejectedEmail(recipients, tutorialRequest, cancellationToken);
+        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, team, tutorialSchedule, cancellationToken);
 
         if (result.IsFailure)
         {
             _logger
-                .ForContext(nameof(TutorialRequestRejectedDomainEvent), notification, true)
+                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(recipients), recipients, true)
                 .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to send notification of Tutorial Request rejection");
+                .Warning("Failed to send confirmation email for scheduled Tutorial");
         }
     }
 }
