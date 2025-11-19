@@ -154,6 +154,8 @@
             });
         });
 
+        let index = 0;
+
         function toggleApp(appId, action) {
             if (action == 'approve'){
                 var appName = $('.btn-outline-success[data-application-id=' + appId + ']').data('appName');
@@ -172,8 +174,11 @@
                     existingInput.prop('value', 'true');
                 }
                 else {
-                    var input = '<input type="hidden" class="form-control" name="consents[' + appId + ']" id="' + appId + '" value="true">';
-                    $('#responses').append(input);
+                    var keyInput = '<input type="hidden" class="form-control" name="consents[' + index + '].Key" id="' + appId + '.Key" value="' + appId + '">';
+                    $('#responses').append(keyInput);
+                    var valueInput = '<input type="hidden" class="form-control" name="consents[' + index + '].Value" id="' + appId + '" value="true">';
+                    $('#responses').append(valueInput);
+                    index++;
                 }
             }
 
@@ -194,8 +199,11 @@
                     existingInput.prop('value', 'false');
                 }
                 else {
-                    var input = '<input type="hidden" class="form-control" name="consents[' + appId + ']" id="' + appId + '" value="false">';
-                    $('#responses').append(input);
+                    var keyInput = '<input type="hidden" class="form-control" name="consents[' + index + '].Key" id="' + appId + '.Key" value="' + appId + '">';
+                    $('#responses').append(keyInput);
+                    var valueInput = '<input type="hidden" class="form-control" name="consents[' + index + '].Value" id="' + appId + '" value="false">';
+                    $('#responses').append(valueInput);
+                    index++;
                 }
             }
         }
