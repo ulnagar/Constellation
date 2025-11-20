@@ -2,14 +2,10 @@
 
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Tutorials.Enums;
-using Core.Models.LinkedSystems;
 using Core.ValueObjects;
 using Shared;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public sealed class TutorialRequestScheduledEmailViewModel : EmailLayoutBaseViewModel
 {
@@ -24,6 +20,6 @@ public sealed class TutorialRequestScheduledEmailViewModel : EmailLayoutBaseView
     public string SupportType => Type == TutorialType.Study ? Type.ToString() : $"{Type} - {Subject}";
 
     public List<(string Period, string Teacher)> ScheduledPeriods { get; set; } = new();
-    public Team TutorialTeam { get; set; }
+    public string TutorialTeam { get; set; }
     public DateOnly StartDate { get; set; }
 }

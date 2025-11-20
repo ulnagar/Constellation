@@ -45,7 +45,8 @@ internal sealed class SendNotificationEmail
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _emailService = emailService;
-        _logger = logger;
+        _logger = logger
+            .ForContext<TutorialRequestCreatedDomainEvent>();
     }
 
     public async Task Handle(TutorialRequestCreatedDomainEvent notification, CancellationToken cancellationToken)

@@ -46,7 +46,8 @@ internal sealed class SendConfirmationEmail
         _familyRepository = familyRepository;
         _contactRepository = contactRepository;
         _emailService = emailService;
-        _logger = logger;
+        _logger = logger
+            .ForContext<TutorialRequestRejectedDomainEvent>();
     }
 
     public async Task Handle(TutorialRequestRejectedDomainEvent notification, CancellationToken cancellationToken)

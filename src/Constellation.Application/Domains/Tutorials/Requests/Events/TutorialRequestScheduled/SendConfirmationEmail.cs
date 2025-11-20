@@ -62,7 +62,8 @@ internal sealed class SendConfirmationEmail
         _staffRepository = staffRepository;
         _periodRepository = periodRepository;
         _emailService = emailService;
-        _logger = logger;
+        _logger = logger
+            .ForContext<TutorialRequestScheduledDomainEvent>();
     }
 
     public async Task Handle(TutorialRequestScheduledDomainEvent notification, CancellationToken cancellationToken)
@@ -98,18 +99,6 @@ internal sealed class SendConfirmationEmail
             _logger
                 .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
                 .ForContext(nameof(Error), TutorialErrors.NotFound(tutorialId), true)
-                .Warning("Failed to send confirmation email for scheduled Tutorial");
-
-            return;
-        }
-
-        Team team = await _teamRepository.GetById(tutorial.Teams.FirstOrDefault()?.TeamId ?? Guid.Empty, cancellationToken);
-
-        if (team is null)
-        {
-            _logger
-                .ForContext(nameof(TutorialRequestScheduledDomainEvent), notification, true)
-                .ForContext(nameof(Error), TeamErrors.NotFound(tutorial.Teams.FirstOrDefault()?.TeamId ?? Guid.Empty), true)
                 .Warning("Failed to send confirmation email for scheduled Tutorial");
 
             return;
@@ -196,7 +185,7 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(contactRecipient.Value);
         }
 
-        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, team, tutorialSchedule, cancellationToken);
+        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, tutorialSchedule, cancellationToken);
 
         if (result.IsFailure)
         {

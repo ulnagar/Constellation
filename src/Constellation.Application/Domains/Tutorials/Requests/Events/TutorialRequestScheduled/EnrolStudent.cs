@@ -37,7 +37,8 @@ internal sealed class EnrolStudent
         _studentRepository = studentRepository;
         _enrolmentRepository = enrolmentRepository;
         _unitOfWork = unitOfWork;
-        _logger = logger;
+        _logger = logger
+            .ForContext<TutorialRequestScheduledDomainEvent>();
     }
 
     public async Task Handle(TutorialRequestScheduledDomainEvent notification, CancellationToken cancellationToken)

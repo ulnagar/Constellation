@@ -11,7 +11,7 @@
 }
 
 <p>The tutorial support request made by @Model.Student.DisplayName (@Model.Grade.AsName() - @Model.School) for @Model.SupportType has been approved.</p>
-<p>Tutorial lessons will occur in the <a href="@Model.TutorialTeam.Link">@Model.TutorialTeam.Name</a> team during the following periods:</p>
+<p>Tutorial lessons will occur in the @Model.TutorialTeam team during the following periods:</p>
 <ul>
     @foreach (var period in Model.ScheduledPeriods)
     {

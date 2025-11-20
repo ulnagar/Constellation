@@ -47,7 +47,8 @@ internal sealed class CreateTeam
         _teamOperationRepository = teamOperationRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _logger = logger;
+        _logger = logger
+            .ForContext<TutorialRequestScheduledDomainEvent>();
     }
 
     public async Task Handle(TutorialRequestScheduledDomainEvent notification, CancellationToken cancellationToken)
@@ -90,8 +91,6 @@ internal sealed class CreateTeam
 
         if (existingTeam is null)
         {
-            string teamName = MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name);
-
             // Schedule creation of Team for tutorial
             CreateTeamTeamOperation operation = new(
                 MicrosoftTeamsHelper.FormatTeamName(tutorialRequest.Plan.Name),
