@@ -1200,20 +1200,47 @@ public class Gateway : ISentralGateway
     public async Task<Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>>> GetAttendanceModuleAbsenceDataForSchool(
         CancellationToken cancellationToken = default)
     {
-        Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> data = new();
+        Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> result = new();
 
         if (_logOnly)
         {
             _logger.Information("GetAttendanceModuleAbsenceDataForSchool");
 
-            return data;
+            return result;
         }
+
+        for (int i = 1; i < 4; i++)
+        {
+            List<SentralPeriodAbsenceDto> data = await GetAttendanceModuleAbsenceDataForTerm(i.ToString(), cancellationToken);
+
+            foreach (var datum in data)
+            {
+                if (result.TryGetValue(datum.StudentReferenceNumber, out List<SentralPeriodAbsenceDto> record))
+                {
+                    record.Add(datum);
+                }
+                else
+                {
+                    result.Add(datum.StudentReferenceNumber, [datum]);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private async Task<List<SentralPeriodAbsenceDto>> GetAttendanceModuleAbsenceDataForTerm(
+        string term,
+        CancellationToken cancellationToken = default)
+    {
+        List<SentralPeriodAbsenceDto> data = [];
 
         Uri filePath = new Uri($"{_settings.ServerUrl}/attendance/reports/absences");
 
         List<KeyValuePair<string, string>> formData =
         [
-            new KeyValuePair<string, string>("length", "year"),
+            new KeyValuePair<string, string>("length", "term"),
+            new KeyValuePair<string, string>("term", term),
             new KeyValuePair<string, string>("year", _dateTime.CurrentYearAsString),
             new KeyValuePair<string, string>("absence_display", "code"),
             new KeyValuePair<string, string>("absence_types", "all"),
@@ -1243,7 +1270,7 @@ public class Gateway : ISentralGateway
         Stream completePage = await GetStreamByPost(filePath, formData, cancellationToken);
 
         if (completePage is null)
-            return data;
+            return [];
 
         using IExcelDataReader completeReader = ExcelReaderFactory.CreateReader(completePage);
         DataSet completeWorksheet = completeReader.AsDataSet();
@@ -1251,7 +1278,7 @@ public class Gateway : ISentralGateway
         foreach (DataRow row in completeWorksheet.Tables[0].Rows)
         {
             string srn = row[0].ToString().FormatField();
-            
+
             if (srn == "Student ID") // This is a header row
                 continue;
 
@@ -1265,6 +1292,7 @@ public class Gateway : ISentralGateway
             }
 
             SentralPeriodAbsenceDto absence = new();
+            absence.StudentReferenceNumber = studentReferenceNumber.Value;
             string stringDate = row[2].ToString().FormatField();
             DateOnly rowDate = DateOnly.ParseExact(stringDate, "yyyy-MM-dd");
             absence.Date = rowDate;
@@ -1284,7 +1312,7 @@ public class Gateway : ISentralGateway
                     _logger
                         .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
                         .ForContext("AbsenceDate", absence.Date)
-                        .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber)
+                        .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber.Value)
                         .Information("Error parsing absence start time to TimeOnly object");
 
                 bool endTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly endTime);
@@ -1294,7 +1322,7 @@ public class Gateway : ISentralGateway
                     _logger
                         .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
                         .ForContext("AbsenceDate", absence.Date)
-                        .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber)
+                        .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber.Value)
                         .Information("Error parsing absence end time to TimeOnly object");
             }
 
@@ -1310,20 +1338,13 @@ public class Gateway : ISentralGateway
                 {
                     string explainerSource = row[13].ToString().FormatField();
                     absence.ExternalExplanation = comment;
-                    absence.ExternalExplanationSource = string.IsNullOrWhiteSpace(explainerSource) 
-                        ? explainer 
+                    absence.ExternalExplanationSource = string.IsNullOrWhiteSpace(explainerSource)
+                        ? explainer
                         : $"{explainer} via {explainerSource}";
                 }
             }
 
-            if (data.TryGetValue(studentReferenceNumber.Value, out List<SentralPeriodAbsenceDto> record))
-            {
-                record.Add(absence);
-            }
-            else
-            {
-                data.Add(studentReferenceNumber.Value, [ absence ]);
-            }
+            data.Add(absence);
         }
 
         return data;

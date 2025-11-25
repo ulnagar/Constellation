@@ -2,6 +2,8 @@
 
 namespace Constellation.Application.DTOs
 {
+    using Core.Models.Students.ValueObjects;
+
     public class SentralPeriodAbsenceDto
     {
         public static string Partial = "Partial";
@@ -21,6 +23,8 @@ namespace Constellation.Application.DTOs
 
         public string ExternalExplanation { get; set; }
         public string ExternalExplanationSource { get; set; }
+
+        public StudentReferenceNumber StudentReferenceNumber { get; set; }
 
         public bool IsValid()
         {
