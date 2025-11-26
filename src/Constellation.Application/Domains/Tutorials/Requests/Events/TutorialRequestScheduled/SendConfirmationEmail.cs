@@ -104,6 +104,8 @@ internal sealed class SendConfirmationEmail
             return;
         }
 
+        string teamName = tutorial.Teams.FirstOrDefault()?.Name ?? tutorialRequest.Plan.Name;
+
         List<(string Period, string Teacher)> tutorialSchedule = [];
 
         List<StaffMember> staff = [];
@@ -185,7 +187,7 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(contactRecipient.Value);
         }
 
-        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, tutorialSchedule, cancellationToken);
+        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, teamName, tutorialSchedule, cancellationToken);
 
         if (result.IsFailure)
         {

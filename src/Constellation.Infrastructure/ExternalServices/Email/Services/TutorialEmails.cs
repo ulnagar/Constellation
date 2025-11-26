@@ -132,6 +132,7 @@ public sealed partial class Service : IEmailService
     public async Task<Result> SendTutorialRequestScheduledEmail(
         List<EmailRecipient> recipients,
         Request tutorialRequest,
+        string teamName,
         List<(string Period, string Teacher)> periods,
         CancellationToken cancellationToken = default)
     {
@@ -147,7 +148,7 @@ public sealed partial class Service : IEmailService
             Type = tutorialRequest.Type,
             Subject = tutorialRequest.Subject,
             StartDate = tutorialRequest.Plan.StartDate,
-            TutorialTeam = tutorialRequest.Plan.Name,
+            TutorialTeam = teamName,
             ScheduledPeriods = periods
         };
 
