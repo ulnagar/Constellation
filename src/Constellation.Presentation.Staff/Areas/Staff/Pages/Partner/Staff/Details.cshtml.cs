@@ -108,7 +108,7 @@ public class DetailsModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnGetReinstate(ReinstateStaffMemberSelection viewModel)
+    public async Task<IActionResult> OnPostReinstate(ReinstateStaffMemberSelection viewModel)
     {
         AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
 
