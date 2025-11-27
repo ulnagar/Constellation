@@ -35,13 +35,13 @@ public sealed class Absence
             bool reasonExists = relationships.TryGetProperty("reason", out JsonElement reason);
             if (reasonExists)
             {
-                absence.AbsenceReasonId = reason.ExtractString("id");
+                absence.AbsenceReasonId = reason.GetProperty("data").ExtractString("id");
             }
 
             bool coreStudentExists = relationships.TryGetProperty("coreStudent", out JsonElement coreStudent);
             if (coreStudentExists)
             {
-                absence.CoreStudentId = coreStudent.ExtractString("id");
+                absence.CoreStudentId = coreStudent.GetProperty("data").ExtractString("id");
             }
         }
 

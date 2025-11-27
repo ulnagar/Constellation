@@ -415,6 +415,40 @@ public class Gateway : ISentralGateway
         return reasons;
     }
 
+    private async Task<List<Absence>> GetAbsencesFromApi(
+        string sentralStudentId,
+        CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/attendance/absence?coreStudentIds={sentralStudentId}&year={_dateTime.CurrentYearAsString}");
+
+        Dictionary<JsonSection, List<JsonElement>> apiResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<Absence> absences = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in apiResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<Absence> absence = Absence.ConvertFromJson(entry);
+
+                            if (absence.IsFailure)
+                                continue;
+
+                            absences.Add(absence.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        return absences;
+    }
+
     private async Task<List<TimetableClass>> GetTimetableClassesFromApi(CancellationToken cancellationToken = default)
     {
         Uri path = new($"{_settings.ApiUrl}/restapi/v1/timetables/timetable-class");
@@ -543,13 +577,15 @@ public class Gateway : ISentralGateway
         return reasons;
     }
 
-    public async Task GetAbsencesFromApi(CancellationToken cancellationToken = default)
+    public async Task GetAbsenceDataFromApi(CancellationToken cancellationToken = default)
     {
         var reasons = await GetAbsenceReasonsFromApi(cancellationToken);
         var classes = await GetTimetableClassesFromApi(cancellationToken);
         var days = await GetTimetableDayFromApi(cancellationToken);
         var periods = await GetTimetablePeriodFromApi(cancellationToken);
         var periodInDay = await GetTimetablePeriodInDayFromApi(cancellationToken);
+
+        var absences = await GetAbsencesFromApi("2000", cancellationToken);
 
         return;
     }

@@ -33,7 +33,7 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        await _sentralGateway.GetAbsencesFromApi();
+        await _sentralGateway.GetAbsenceDataFromApi();
     }
 
 }

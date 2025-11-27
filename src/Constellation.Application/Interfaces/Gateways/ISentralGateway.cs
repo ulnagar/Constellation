@@ -54,5 +54,5 @@ public interface ISentralGateway
     Task<FamilyDetailsDto> GetParentContactEntryFromApi(string sentralStudentId, CancellationToken cancellationToken = default);
     Task<byte[]> GetSentralStudentPhotoFromApi(string sentralStudentId, CancellationToken cancellationToken = default);
     Task<List<ValidAttendenceReportDate>> GetTermsAndWeeksFromApi(string year, CancellationToken cancellationToken = default);
-    Task GetAbsencesFromApi(CancellationToken cancellationToken = default);
+    Task GetAbsenceDataFromApi(CancellationToken cancellationToken = default);
 }
