@@ -20,6 +20,7 @@ using ExcelDataReader;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Options;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Globalization;
 using System.IO;
@@ -380,6 +381,177 @@ public class Gateway : ISentralGateway
         }
 
         return response;
+    }
+
+    private async Task<List<AbsenceReason>> GetAbsenceReasonsFromApi(CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/attendance/absence-reason");
+
+        Dictionary<JsonSection, List<JsonElement>> apiResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<AbsenceReason> reasons = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in apiResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<AbsenceReason> reason = AbsenceReason.ConvertFromJson(entry);
+
+                            if (reason.IsFailure)
+                                continue;
+
+                            reasons.Add(reason.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        return reasons;
+    }
+
+    private async Task<List<TimetableClass>> GetTimetableClassesFromApi(CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/timetables/timetable-class");
+
+        Dictionary<JsonSection, List<JsonElement>> apiResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<TimetableClass> reasons = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in apiResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<TimetableClass> reason = TimetableClass.ConvertFromJson(entry);
+
+                            if (reason.IsFailure)
+                                continue;
+
+                            reasons.Add(reason.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        return reasons;
+    }
+
+    private async Task<List<TimetableDay>> GetTimetableDayFromApi(CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/timetables/timetable-day");
+
+        Dictionary<JsonSection, List<JsonElement>> apiResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<TimetableDay> reasons = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in apiResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<TimetableDay> reason = TimetableDay.ConvertFromJson(entry);
+
+                            if (reason.IsFailure)
+                                continue;
+
+                            reasons.Add(reason.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        return reasons;
+    }
+
+    private async Task<List<TimetablePeriod>> GetTimetablePeriodFromApi(CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/timetables/timetable-period");
+
+        Dictionary<JsonSection, List<JsonElement>> apiResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<TimetablePeriod> reasons = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in apiResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<TimetablePeriod> reason = TimetablePeriod.ConvertFromJson(entry);
+
+                            if (reason.IsFailure)
+                                continue;
+
+                            reasons.Add(reason.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        return reasons;
+    }
+
+    private async Task<List<TimetablePeriodInDay>> GetTimetablePeriodInDayFromApi(CancellationToken cancellationToken = default)
+    {
+        Uri path = new($"{_settings.ApiUrl}/restapi/v1/timetables/timetable-period-in-day");
+
+        Dictionary<JsonSection, List<JsonElement>> apiResponse = await GetApiJsonResponse(path, cancellationToken);
+
+        List<TimetablePeriodInDay> reasons = [];
+
+        foreach (KeyValuePair<JsonSection, List<JsonElement>> section in apiResponse)
+        {
+            switch (section.Key)
+            {
+                case JsonSection.Data:
+                    {
+                        foreach (JsonElement entry in section.Value)
+                        {
+                            Result<TimetablePeriodInDay> reason = TimetablePeriodInDay.ConvertFromJson(entry);
+
+                            if (reason.IsFailure)
+                                continue;
+
+                            reasons.Add(reason.Value);
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        return reasons;
+    }
+
+    public async Task GetAbsencesFromApi(CancellationToken cancellationToken = default)
+    {
+        var reasons = await GetAbsenceReasonsFromApi(cancellationToken);
+        var classes = await GetTimetableClassesFromApi(cancellationToken);
+        var days = await GetTimetableDayFromApi(cancellationToken);
+        var periods = await GetTimetablePeriodFromApi(cancellationToken);
+        var periodInDay = await GetTimetablePeriodInDayFromApi(cancellationToken);
+
+        return;
     }
 
     #nullable disable
