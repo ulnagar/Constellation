@@ -223,7 +223,6 @@ internal sealed class TutorialRepository : ITutorialRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Request>()
-            .Where(request => request.CreatedAt.Year == _dateTime.CurrentYear)
             .ToListAsync(cancellationToken);
 
     public async Task<List<Request>> GetPendingRequests(

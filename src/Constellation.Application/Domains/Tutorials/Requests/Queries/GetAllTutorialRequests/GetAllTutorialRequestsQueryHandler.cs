@@ -29,13 +29,14 @@ internal sealed class GetAllTutorialRequestsQueryHandler
 
         foreach (Request tutorialRequest in requests)
         {
-            DateOnly actionDate = tutorialRequest.Status == RequestStatus.Requested
-                ? DateOnly.FromDateTime(tutorialRequest.CreatedAt)
-                : DateOnly.FromDateTime(tutorialRequest.ModifiedAt);
+            DateTime actionDate = tutorialRequest.Status == RequestStatus.Requested
+                ? tutorialRequest.CreatedAt
+                : tutorialRequest.ModifiedAt;
 
             responses.Add(new(
                 tutorialRequest.Id,
                 tutorialRequest.Student,
+                tutorialRequest.CreatedAt.Year,
                 tutorialRequest.Type,
                 tutorialRequest.Subject,
                 tutorialRequest.Status,
