@@ -134,6 +134,7 @@ public sealed partial class Service : IEmailService
         Request tutorialRequest,
         string teamName,
         List<(string Period, string Teacher)> periods,
+        DateOnly startDate,
         CancellationToken cancellationToken = default)
     {
         TutorialRequestScheduledEmailViewModel viewModel = new()
@@ -147,7 +148,7 @@ public sealed partial class Service : IEmailService
             School = tutorialRequest.School,
             Type = tutorialRequest.Type,
             Subject = tutorialRequest.Subject,
-            StartDate = tutorialRequest.Plan.StartDate,
+            StartDate = startDate,
             TutorialTeam = teamName,
             ScheduledPeriods = periods
         };

@@ -110,8 +110,9 @@ internal sealed class SendConfirmationEmail
 
         List<StaffMember> staff = [];
         List<Period> periods = await _periodRepository.GetAll(cancellationToken);
+        int? firstPeriodDay = null;
 
-        foreach (var session in tutorial.Sessions)
+        foreach (TutorialSession session in tutorial.Sessions)
         {
             StaffMember staffMember = staff.FirstOrDefault(entry => entry.Id == session.StaffId);
 
@@ -123,8 +124,16 @@ internal sealed class SendConfirmationEmail
 
             Period period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
 
-            tutorialSchedule.Add(new (period.ToString(), staffMember.Name.DisplayName));
+            if (firstPeriodDay.HasValue && period.DayNumber > firstPeriodDay.Value)
+                continue;
+            else
+                firstPeriodDay = period.DayNumber;
+
+            tutorialSchedule.Add(new(period.ToString(), staffMember.Name.DisplayName));
         }
+
+        DateOnly firstPeriod = firstPeriodDay.HasValue ? new DateOnly() : tutorial.StartDate;
+
 
         List<EmailRecipient> recipients = [];
         
