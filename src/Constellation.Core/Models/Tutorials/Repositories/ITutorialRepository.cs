@@ -17,6 +17,7 @@ public interface ITutorialRepository
     Task<List<Tutorial>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetInactive(CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetActiveForTeacher(StaffId staffId, CancellationToken cancellationToken = default);
+    Task<List<Tutorial>> GetActiveForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetAllForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetWithLinkedTeam(Guid teamId, CancellationToken cancellationToken = default);

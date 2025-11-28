@@ -111,6 +111,27 @@ internal sealed class TutorialRepository : ITutorialRepository
                     session.StaffId == staffId))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Tutorial>> GetActiveForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<TutorialId> tutorialIds = _context
+            .Set<Enrolment>()
+            .OfType<TutorialEnrolment>()
+            .Where(enrolment => enrolment.StudentId == studentId)
+            .Select(enrolment => enrolment.TutorialId);
+
+        return await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                !tutorial.IsDeleted &&
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today &&
+                tutorial.Sessions.Any(session => !session.IsDeleted) &&
+                tutorialIds.Contains(tutorial.Id))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<List<Tutorial>> GetAllForStudent(
         StudentId studentId,
         CancellationToken cancellationToken = default)

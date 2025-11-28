@@ -5,7 +5,6 @@ using Core.Extensions;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Repositories;
 using Core.Models.Offerings;
-using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
@@ -19,6 +18,8 @@ using Core.Models.Timetables.Errors;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
 using Core.Models.Timetables.ValueObjects;
+using Core.Models.Tutorials;
+using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using DTOs;
 using Serilog;
@@ -33,6 +34,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
 {
     private readonly IStudentRepository _studentRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ITutorialRepository _tutorialRepository;
     private readonly IPeriodRepository _periodRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IAttendancePlanRepository _planRepository;
@@ -41,6 +43,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
     public GetStudentTimetableDataQueryHandler(
         IStudentRepository studentRepository,
         IOfferingRepository offeringRepository,
+        ITutorialRepository tutorialRepository,
         IPeriodRepository periodRepository,
         IStaffRepository staffRepository,
         IAttendancePlanRepository planRepository,
@@ -48,6 +51,7 @@ internal sealed class GetStudentTimetableDataQueryHandler
     {
         _studentRepository = studentRepository;
         _offeringRepository = offeringRepository;
+        _tutorialRepository = tutorialRepository;
         _periodRepository = periodRepository;
         _staffRepository = staffRepository;
         _planRepository = planRepository;
@@ -90,25 +94,32 @@ internal sealed class GetStudentTimetableDataQueryHandler
         response.StudentSchool = enrolment.SchoolName;
         response.HasAttendancePlan = plan is not null;
 
+        List<PeriodId> periodIds = [];
+
         List<Offering> offerings = await _offeringRepository.GetByStudentId(student.Id, cancellationToken);
 
-        if (offerings.Count == 0)
+        if (offerings.Count > 0)
         {
-            _logger
-                .ForContext(nameof(GetStudentTimetableDataQuery), request, true)
-                .ForContext(nameof(Error), OfferingErrors.NotFoundForStudent(student.Id), true)
-                .Warning("Failed to retrieve Timetable data for Student");
-
-            return Result.Failure<StudentTimetableDataDto>(OfferingErrors.NotFoundForStudent(student.Id));
+            periodIds.AddRange(offerings
+                .SelectMany(offering => offering.Sessions)
+                .Where(session => !session.IsDeleted)
+                .Select(session => session.PeriodId)
+                .Distinct()
+                .ToList());
         }
+        
+        List<Tutorial> tutorials = await _tutorialRepository.GetActiveForStudent(student.Id, cancellationToken);
 
-        List<PeriodId> periodIds = offerings
-            .SelectMany(offering => offering.Sessions)
-            .Where(session => !session.IsDeleted)
-            .Select(session => session.PeriodId)
-            .Distinct()
-            .ToList();
-
+        if (tutorials.Count > 0)
+        {
+            periodIds.AddRange(tutorials
+                .SelectMany(tutorial => tutorial.Sessions)
+                .Where(session => !session.IsDeleted)
+                .Select(session => session.PeriodId)
+                .Distinct()
+                .ToList());
+        }
+        
         List<Period> periods = await _periodRepository.GetListFromIds(periodIds, cancellationToken);
 
         if (periods.Count == 0)
@@ -158,26 +169,57 @@ internal sealed class GetStudentTimetableDataQueryHandler
                             !session.IsDeleted &&
                             session.PeriodId == period.Id));
 
-                if (offering is null)
+                Tutorial tutorial = tutorials
+                    .FirstOrDefault(tutorial =>
+                        tutorial.Sessions.Any(session =>
+                            !session.IsDeleted &&
+                            session.PeriodId == period.Id));
+
+                if (offering is null && tutorial is null)
                     continue;
 
-                entry.ClassName = offering.Name;
-
-                List<TeacherAssignment> assignments = offering
-                    .Teachers
-                    .Where(assignment =>
-                        assignment.Type == AssignmentType.ClassroomTeacher &&
-                        !assignment.IsDeleted)
-                    .ToList();
-
-                foreach (TeacherAssignment assignment in assignments)
+                if (tutorial is null)
                 {
-                    StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+                    entry.ClassName = offering.Name;
 
-                    if (teacher is null)
-                        continue;
+                    List<TeacherAssignment> assignments = offering
+                        .Teachers
+                        .Where(assignment =>
+                            assignment.Type == AssignmentType.ClassroomTeacher &&
+                            !assignment.IsDeleted)
+                        .ToList();
 
-                    entry.ClassTeacher = teacher.Name.DisplayName;
+                    foreach (TeacherAssignment assignment in assignments)
+                    {
+                        StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+
+                        if (teacher is null)
+                            continue;
+
+                        entry.ClassTeacher = teacher.Name.DisplayName;
+                    }
+                }
+
+                if (offering is null)
+                {
+                    entry.ClassName = tutorial.Name;
+
+                    List<TutorialSession> tutorialSessions = tutorial
+                        .Sessions
+                        .Where(session =>
+                            !session.IsDeleted &&
+                            session.PeriodId == period.Id)
+                        .ToList();
+
+                    foreach (TutorialSession tutorialSession in tutorialSessions)
+                    {
+                        StaffMember teacher = await _staffRepository.GetById(tutorialSession.StaffId, cancellationToken);
+
+                        if (teacher is null)
+                            continue;
+
+                        entry.ClassTeacher = teacher.Name.DisplayName;
+                    }
                 }
             }
 

@@ -18,4 +18,4 @@ public sealed record StaffIntegratedTimetableResponse(
     TimeSpan StartTime,
     TimeSpan EndTime,
     int Duration,
-    OfferingName OfferingName);
+    string OfferingName);
