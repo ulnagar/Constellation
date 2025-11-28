@@ -51,6 +51,7 @@ public interface IOfferingRepository
     /// <returns></returns>
     Task<List<Offering>> GetByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<Offering?> GetFromYearAndName(int year, string name, CancellationToken cancellationToken = default);
+    Task<Offering?> GetActiveByName(string name, CancellationToken cancellationToken = default);
 
     void Insert(Offering offering);
     void Remove(Resource resource);

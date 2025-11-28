@@ -123,7 +123,7 @@ internal sealed class ImportProvisionsFromFileCommandHandler
 
                 if (offering is null)
                 {
-                    offering = await _offeringRepository.GetFromYearAndName(_dateTime.Today.Year, provision.OfferingName, cancellationToken);
+                    offering = await _offeringRepository.GetActiveByName(provision.OfferingName, cancellationToken);
 
                     if (offering is null)
                         return Result.Failure<List<StudentProvisions>>(OfferingErrors.NotFoundForName(provision.OfferingName));

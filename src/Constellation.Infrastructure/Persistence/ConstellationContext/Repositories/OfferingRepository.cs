@@ -265,8 +265,18 @@ public class OfferingRepository : IOfferingRepository
                 offering.EndDate <= endOfYear, 
                 cancellationToken);
     }
-        
 
+    public async Task<Offering?> GetActiveByName(
+        string name,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering => 
+                offering.Name == name &&
+                offering.StartDate <= _dateTime.Today && 
+                offering.EndDate >= _dateTime.Today)
+            .SingleOrDefaultAsync(cancellationToken);
+    
     public async Task<List<Timetable>> GetTimetableByOfferingId(
         OfferingId offeringId,
         CancellationToken cancellationToken = default)
