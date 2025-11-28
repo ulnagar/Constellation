@@ -29,6 +29,8 @@ public interface ITutorialRepository
 
     Task<Request> GetRequestById(RequestId requestId, CancellationToken cancellationToken = default);
     Task<List<Request>> GetAllRequests(CancellationToken cancellationToken = default);
+    Task<int> CountPendingRequests(CancellationToken cancellationToken = default);
+    Task<int> CountApprovedRequests(CancellationToken cancellationToken = default);
     Task<List<Request>> GetPendingRequests(CancellationToken cancellationToken = default);
     Task<List<Request>> GetApprovedRequests(CancellationToken cancellationToken = default);
     Task<List<Request>> GetRequestsForStudent(StudentId studentId, CancellationToken cancellationToken = default);

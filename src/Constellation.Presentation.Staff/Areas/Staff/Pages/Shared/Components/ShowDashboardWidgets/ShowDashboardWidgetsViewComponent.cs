@@ -8,6 +8,8 @@ using Application.Domains.Students.Queries.CountStudentsWithAwardOverages;
 using Application.Domains.Students.Queries.CountStudentsWithoutSentralId;
 using Application.Domains.Students.Queries.CountStudentsWithPendingAwards;
 using Application.Domains.Training.Queries.CountStaffWithoutModule;
+using Application.Domains.Tutorials.Requests.Queries.CountRequestsPendingApproval;
+using Application.Domains.Tutorials.Requests.Queries.CountRequestsPendingScheduling;
 using Application.Domains.WorkFlows.Queries.CountActiveActionsForUser;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
@@ -15,18 +17,22 @@ using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 public class ShowDashboardWidgetsViewComponent : ViewComponent
 {
+    private readonly IAuthorizationService _authService;
     private readonly ICurrentUserService _currentUserService;
     private readonly ISender _mediator;
 
     public ShowDashboardWidgetsViewComponent(
+        IAuthorizationService authService,
         ICurrentUserService currentUserService,
         ISender mediator)
     {
+        _authService = authService;
         _currentUserService = currentUserService;
         _mediator = mediator;
     }
@@ -34,11 +40,12 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
     public async Task<IViewComponentResult> InvokeAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {
         //TODO: 1.17.1: Update to AuthorizationService checks against AuthPolicies instead of group memberships
-        bool isStaff = User.IsInRole(AuthRoles.StaffMember);
-        bool isAdmin = User.IsInRole(AuthRoles.Admin);
-        bool isTrainingManager = User.IsInRole(AuthRoles.MandatoryTrainingEditor);
-        bool isAbsencesManager = User.IsInRole(AuthRoles.AbsencesEditor);
-        bool isAwardsManager = User.IsInRole(AuthRoles.AwardsManager);
+        var staffTest = await _authService.AuthorizeAsync(user, AuthPolicies.IsStaffMember);
+        var adminTest = await _authService.AuthorizeAsync(user, AuthPolicies.IsSiteAdmin);
+        var trainingTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanEditTrainingModuleContent);
+        var absencesTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanManageAbsences);
+        var awardsTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanManageAwards);
+        var tutorialsTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanManageTutorials);
 
         StaffId staffId = _currentUserService.StaffId;
 
@@ -51,7 +58,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
                 viewModel.ActiveWorkFlowActions = countOfActiveActions.Value;
         }
 
-        if (isTrainingManager || isAdmin)
+        if (trainingTest.Succeeded || adminTest.Succeeded)
         {
             viewModel.ShowTrainingWidgets = true;
 
@@ -60,7 +67,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
                 viewModel.WithoutRole = countOfStaffWithoutRoles.Value;
         }
 
-        if (isAbsencesManager || isAdmin)
+        if (absencesTest.Succeeded || adminTest.Succeeded)
         {
             viewModel.ShowAbsenceWidgets = true;
 
@@ -88,7 +95,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
             }
         }
 
-        if (isAwardsManager || isAdmin)
+        if (awardsTest.Succeeded || adminTest.Succeeded)
         {
             viewModel.ShowAwardsWidgets = true;
 
@@ -103,7 +110,22 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
                 viewModel.AwardAdditions = pending.Value;
         }
 
-        if (isAdmin)
+        if (tutorialsTest.Succeeded || adminTest.Succeeded)
+        {
+            viewModel.ShowTutorialRequestsWidget = true;
+
+            Result<int> requestsForApproval = await _mediator.Send(new CountRequestsPendingApprovalQuery(), cancellationToken);
+
+            if (requestsForApproval.IsSuccess)
+                viewModel.TutorialRequestsPendingApproval = requestsForApproval.Value;
+
+            Result<int> requestsForScheduling = await _mediator.Send(new CountRequestsPendingSchedulingQuery(), cancellationToken);
+
+            if (requestsForScheduling.IsSuccess)
+                viewModel.TutorialRequestsPendingScheduling = requestsForScheduling.Value;
+        }
+
+        if (adminTest.Succeeded)
         {
             viewModel.ShowSentralIdWidgets = true;
 

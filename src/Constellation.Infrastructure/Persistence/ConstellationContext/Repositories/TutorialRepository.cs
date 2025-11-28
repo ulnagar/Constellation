@@ -246,6 +246,24 @@ internal sealed class TutorialRepository : ITutorialRepository
             .Set<Request>()
             .ToListAsync(cancellationToken);
 
+    public async Task<int> CountPendingRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => 
+                request.Status == RequestStatus.Requested &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .CountAsync(cancellationToken);
+
+    public async Task<int> CountApprovedRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => 
+                request.Status == RequestStatus.Approved &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .CountAsync(cancellationToken);
+
     public async Task<List<Request>> GetPendingRequests(
         CancellationToken cancellationToken = default) =>
         await _context

@@ -137,3 +137,28 @@
         </div>
     </div>
 }
+
+@if (Model.ShowTutorialRequestsWidget)
+{
+    <div class="col mb-4 sortable" data-id="card-tutorials-approval">
+        <div class="card h-100 @(Model.TutorialRequestsPendingApproval > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Tutorial Requests</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.TutorialRequestsPendingApproval</h3>
+                <p class="card-text">Tutorial Requests pending approval</p>
+                <a asp-page="/Subject/Tutorials/Requests/Index" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col mb-4 sortable" data-id="card-tutorials-scheduling">
+        <div class="card h-100 @(Model.TutorialRequestsPendingScheduling > 0 ? "text-white bg-danger" : "text-white bg-success")">
+            <div class="card-header">Tutorial Requests</div>
+            <div class="card-body">
+                <h3 class="card-title card-title-large">@Model.TutorialRequestsPendingScheduling</h3>
+                <p class="card-text">Tutorial Requests pending scheduling</p>
+                <a asp-page="/Subject/Tutorials/Requests/Index" asp-area="Staff" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+}
