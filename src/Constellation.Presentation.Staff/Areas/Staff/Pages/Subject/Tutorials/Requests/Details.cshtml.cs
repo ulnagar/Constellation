@@ -107,11 +107,11 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostReject(
-        ReviewTutorialRequestSelection viewModel)
+        string comment)
     {
         RejectTutorialRequestCommand command = new(
             Id,
-            viewModel.Comment);
+            comment);
 
         _logger
             .ForContext(nameof(RejectTutorialRequestCommand), command, true)
