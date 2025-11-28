@@ -109,7 +109,15 @@ public sealed class Request : AggregateRoot, IAuditableEntity
 
         Status = newStatus;
 
-        RequestNote note = RequestNote.Create(Id, message, reviewer, dateTime.Now);
+        RequestNoteAction action = newStatus switch
+        {
+            _ when newStatus == RequestStatus.Approved => RequestNoteAction.Approved,
+            _ when newStatus == RequestStatus.Rejected => RequestNoteAction.Rejected,
+            _ when newStatus == RequestStatus.Scheduled => RequestNoteAction.Scheduled,
+            _ => RequestNoteAction.Note
+        };
+
+        RequestNote note = RequestNote.Create(Id, message, action, reviewer, dateTime.Now);
         _notes.Add(note);
 
         if (newStatus == RequestStatus.Approved)
@@ -137,8 +145,8 @@ public sealed class Request : AggregateRoot, IAuditableEntity
             return Result.Failure(TutorialRequestErrors.MustIncludeNote);
 
         Status = RequestStatus.Scheduled;
-
-        RequestNote note = RequestNote.Create(Id, message, reviewer, dateTime.Now);
+        
+        RequestNote note = RequestNote.Create(Id, message, RequestNoteAction.Scheduled, reviewer, dateTime.Now);
         _notes.Add(note);
 
         RaiseDomainEvent(new TutorialRequestScheduledDomainEvent(new(), Id));
@@ -146,6 +154,15 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         Plan = plan;
 
         return Result.Success();
+    }
+
+    public void AddNote(
+        string message,
+        string username,
+        IDateTimeProvider dateTime)
+    {
+        RequestNote note = RequestNote.Create(Id, message, RequestNoteAction.Note, username, dateTime.Now);
+        _notes.Add(note);
     }
 
     public void Delete() => IsDeleted = true;

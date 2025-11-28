@@ -24,6 +24,7 @@ public sealed record TutorialRequestDetailsResponse(
     public sealed record RequestNoteResponse(
         RequestNoteId NoteId,
         string Message,
+        RequestNoteAction Action,
         string SubmittedBy,
         DateTime SubmittedAt);
 }

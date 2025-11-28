@@ -53,6 +53,7 @@ internal sealed class GetTutorialRequestByIdQueryHandler
             notes.Add(new(
                 note.Id,
                 note.Message,
+                note.Action,
                 note.SubmittedBy,
                 note.SubmittedAt));
         }
