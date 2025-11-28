@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 public static class DateOnlyExtensions
 {
@@ -34,6 +35,38 @@ public static class DateOnlyExtensions
         }
 
         return day;
+    }
+
+    public static DateOnly GetFirstDayFromCycleAfterDate(this DateOnly startDate, List<int> daysOfCycle)
+    {
+        int startDay = startDate.GetDayNumber();
+
+        if (daysOfCycle is null || daysOfCycle.Count == 0)
+            return startDate;
+
+        foreach (int day in daysOfCycle.Order())
+        {
+            if (day < startDay)
+                continue;
+
+            if (day == startDay)
+                return startDate;
+
+            // Must be the next scheduled day after the start date
+            int daysToAdd = day - startDay;
+
+            for (int i = 1; i <= daysToAdd; i++)
+            {
+                if (startDate.AddDays(i).GetDayNumber() == 0)
+                    daysToAdd++;
+            }
+
+            return startDate.AddDays(daysToAdd);
+        }
+
+        // All scheduled days are before the start date, so get the first scheduled day in the next cycle
+        DateOnly nextCycleDate = startDate.VerifyStartOfFortnight().AddDays(14);
+        return nextCycleDate.GetFirstDayFromCycleAfterDate(daysOfCycle);
     }
 
     public static DateOnly VerifyStartOfFortnight(this DateOnly startDate)

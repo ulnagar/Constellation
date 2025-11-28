@@ -22,6 +22,7 @@ using Core.Models.Tutorials.Events;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
 using Core.ValueObjects;
+using Extensions;
 using Interfaces.Services;
 using Serilog;
 using System;
@@ -110,7 +111,7 @@ internal sealed class SendConfirmationEmail
 
         List<StaffMember> staff = [];
         List<Period> periods = await _periodRepository.GetAll(cancellationToken);
-        int? firstPeriodDay = null;
+        List<int> periodDayNumbers = [];
 
         foreach (TutorialSession session in tutorial.Sessions)
         {
@@ -124,17 +125,13 @@ internal sealed class SendConfirmationEmail
 
             Period period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
 
-            if (firstPeriodDay.HasValue && period.DayNumber > firstPeriodDay.Value)
-                continue;
-            else
-                firstPeriodDay = period.DayNumber;
+            periodDayNumbers.Add(period.DayNumber);
 
             tutorialSchedule.Add(new(period.ToString(), staffMember.Name.DisplayName));
         }
 
-        DateOnly firstPeriod = firstPeriodDay.HasValue ? new DateOnly() : tutorial.StartDate;
-
-
+        DateOnly firstLessonDate = tutorial.StartDate.GetFirstDayFromCycleAfterDate(periodDayNumbers);
+        
         List<EmailRecipient> recipients = [];
         
         Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
@@ -196,7 +193,7 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(contactRecipient.Value);
         }
 
-        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, teamName, tutorialSchedule, cancellationToken);
+        Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, teamName, tutorialSchedule, firstLessonDate, cancellationToken);
 
         if (result.IsFailure)
         {
