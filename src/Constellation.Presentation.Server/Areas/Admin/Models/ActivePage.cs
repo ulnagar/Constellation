@@ -6,4 +6,5 @@ public static class ActivePage
     public static string Auth_Roles = "Auth_Roles";
     public static string Rollover = "Rollover";
     public static string Automation = "Automation";
+    public static string Hosting_Newsletters = "Hosting_Newsletters";
 }

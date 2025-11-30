@@ -1,0 +1,49 @@
+﻿@page
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Hosting.NewslettersModel
+@{
+}
+
+<h2>Newsletters</h2>
+
+<div class="page-menu">
+    <a asp-page="/Hosting/Upsert" asp-area="Admin" class="btn btn-primary">New</a>
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Issue</th>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Newsletters)
+        {
+            <tr>
+                <td></td>
+                <td>@item.Issue</td>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-page="/Hosting/Upsert" asp-area="Admin" asp-route-issue="@item.Issue" class="btn btn-sm btn-warning btn-show-hover">Edit</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+        })
+    </script>
+}

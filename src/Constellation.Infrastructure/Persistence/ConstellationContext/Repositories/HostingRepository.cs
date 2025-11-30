@@ -1,0 +1,38 @@
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+
+using Constellation.Core.Models.Hosting;
+using Constellation.Core.Models.Hosting.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.X509;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+internal sealed class HostingRepository : IHostingRepository
+{
+    private readonly AppDbContext _context;
+
+    public HostingRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<List<Newsletter>> GetAllNewsletters(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Newsletter>()
+            .OrderByDescending(newsletter => newsletter.Issue)
+            .ToListAsync(cancellationToken);
+
+    public async Task<Newsletter?> GetNewsletterByIssue(
+        int issue,
+        CancellationToken cancellationToken = default) =>
+        await _context
+        .Set<Newsletter>()
+        .FirstOrDefaultAsync(newsletter => newsletter.Issue == issue, cancellationToken);
+
+    public void Insert(Newsletter newsletter) => _context.Set<Newsletter>().Add(newsletter);
+}
