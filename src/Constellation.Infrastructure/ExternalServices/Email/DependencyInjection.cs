@@ -3,6 +3,7 @@
 using Constellation.Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Infrastructure.ExternalServices.Email;
+using Constellation.Infrastructure.ExternalServices.Email.Services;
 using Microsoft.Extensions.Configuration;
 
 public static class EmailServicesRegistration

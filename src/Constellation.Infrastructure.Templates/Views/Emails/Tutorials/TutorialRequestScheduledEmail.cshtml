@@ -1,0 +1,21 @@
+@using Constellation.Core.Extensions
+@model Constellation.Infrastructure.Templates.Views.Emails.Tutorials.TutorialRequestScheduledEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>The tutorial support request made by @Model.Student.DisplayName (@Model.Grade.AsName() - @Model.School) for @Model.SupportType has been approved.</p>
+<p>Tutorial lessons will occur in the @Model.TutorialTeam team during the following periods:</p>
+<ul>
+    @foreach (var period in Model.ScheduledPeriods)
+    {
+        <li>@period.Period - with @period.Teacher</li>
+    }
+</ul>
+<p>The first lessons will be on @Model.StartDate.ToLongDateString()</p>

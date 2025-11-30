@@ -1,0 +1,45 @@
+@using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAttendanceReportDates
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.ExtendTutorial.ExtendTutorialSelection
+
+<form method="post" asp-page-handler="Extend">
+    <div class="modal fade" tabindex="-1" id="extend-tutorial-modal">
+        <div class="modal-dialog">
+            <div id="modal-content" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Extend Tutorial</h5>
+                </div>
+                <div class="modal-body">
+                    @if (Model.ValidEndDates.Any())
+                    {
+                        <div class="form-group row">
+                            <label class="col-12">End Week</label>
+                            <div class="col-12">
+                                <select asp-for="EndDate" asp-items="new SelectList(Model.ValidEndDates, nameof(ValidAttendenceReportDate.EndDate), nameof(ValidAttendenceReportDate.Description), null, nameof(ValidAttendenceReportDate.TermGroup))" class="combo">
+                                    <option value=""> -- None -- </option>
+                                </select>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <span>The tutorial will be extended to the end of the selected week.</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group row">
+                            <div class="col-12 mt-3">
+                                <span>The tutorial is currently scheduled through the end of the year. It cannot be extended.</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    @if (Model.ValidEndDates.Any())
+                    {
+                        <button type="submit" class="btn btn-danger">Extend Tutorial</button>
+                    }
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.Requests;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Tutorials.Requests.Commands.AddNoteToTutorialRequest;
 using Application.Domains.Tutorials.Requests.Commands.ApproveTutorialRequest;
 using Application.Domains.Tutorials.Requests.Commands.RejectTutorialRequest;
 using Application.Domains.Tutorials.Requests.Commands.ScheduleTutorialRequest;
@@ -9,10 +10,7 @@ using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Identifiers;
-using Core.Models.Tutorials.Enums;
-using Core.Models.Tutorials.Errors;
 using Core.Models.Tutorials.Identifiers;
-using Core.Models.Tutorials.ValueObjects;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
+using Shared.Components.AddTutorialRequestNote;
 using Shared.Components.ReviewTutorialRequest;
 using Shared.Components.ScheduleTutorialRequest;
 
@@ -76,6 +75,36 @@ public class DetailsModel : BasePageModel
         Request = request.Value;
     }
 
+    public async Task<IActionResult> OnPostAddNote(
+        AddTutorialRequestNoteSelection viewModel)
+    {
+        AddNoteToTutorialRequestCommand command = new(
+            Id,
+            viewModel.Note);
+
+        _logger
+            .ForContext(nameof(AddNoteToTutorialRequestCommand), command, true)
+            .Information("Requested to add note to Tutorial Request by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(AddNoteToTutorialRequestCommand), command, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to add note to Tutorial Request by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Subject/Tutorials/Requests/Details", values: new { area = "Staff", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostApprove(
         ReviewTutorialRequestSelection viewModel)
     {
@@ -107,11 +136,11 @@ public class DetailsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostReject(
-        ReviewTutorialRequestSelection viewModel)
+        string comment)
     {
         RejectTutorialRequestCommand command = new(
             Id,
-            viewModel.Comment);
+            comment);
 
         _logger
             .ForContext(nameof(RejectTutorialRequestCommand), command, true)

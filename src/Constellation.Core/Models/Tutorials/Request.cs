@@ -60,6 +60,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     public string Justification { get; private set; }
     public RequestStatus Status { get; private set; }
     public IReadOnlyList<RequestNote> Notes => _notes.AsReadOnly();
+    public RequestPlan? Plan { get; private set; }
 
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
@@ -100,7 +101,7 @@ public sealed class Request : AggregateRoot, IAuditableEntity
     {
         if (newStatus == RequestStatus.Requested || 
             newStatus == RequestStatus.Approved && Status != RequestStatus.Requested || 
-            newStatus == RequestStatus.Scheduled && Status != RequestStatus.Approved)
+            newStatus == RequestStatus.Scheduled)
             return Result.Failure(TutorialRequestErrors.InvalidStatus);
 
         if (string.IsNullOrWhiteSpace(message))
@@ -108,7 +109,15 @@ public sealed class Request : AggregateRoot, IAuditableEntity
 
         Status = newStatus;
 
-        RequestNote note = RequestNote.Create(Id, message, reviewer, dateTime.Now);
+        RequestNoteAction action = newStatus switch
+        {
+            _ when newStatus == RequestStatus.Approved => RequestNoteAction.Approved,
+            _ when newStatus == RequestStatus.Rejected => RequestNoteAction.Rejected,
+            _ when newStatus == RequestStatus.Scheduled => RequestNoteAction.Scheduled,
+            _ => RequestNoteAction.Note
+        };
+
+        RequestNote note = RequestNote.Create(Id, message, action, reviewer, dateTime.Now);
         _notes.Add(note);
 
         if (newStatus == RequestStatus.Approved)
@@ -117,7 +126,43 @@ public sealed class Request : AggregateRoot, IAuditableEntity
         if (newStatus == RequestStatus.Rejected)
             RaiseDomainEvent(new TutorialRequestRejectedDomainEvent(new(), Id));
 
+        if (newStatus == RequestStatus.Scheduled)
+            RaiseDomainEvent(new TutorialRequestScheduledDomainEvent(new(), Id));
+
         return Result.Success();
+    }
+
+    public Result ScheduleRequest(
+        RequestPlan plan,
+        string message,
+        string reviewer,
+        IDateTimeProvider dateTime)
+    {
+        if (Status != RequestStatus.Approved)
+            return Result.Failure(TutorialRequestErrors.InvalidStatus);
+
+        if (string.IsNullOrWhiteSpace(message))
+            return Result.Failure(TutorialRequestErrors.MustIncludeNote);
+
+        Status = RequestStatus.Scheduled;
+        
+        RequestNote note = RequestNote.Create(Id, message, RequestNoteAction.Scheduled, reviewer, dateTime.Now);
+        _notes.Add(note);
+
+        RaiseDomainEvent(new TutorialRequestScheduledDomainEvent(new(), Id));
+
+        Plan = plan;
+
+        return Result.Success();
+    }
+
+    public void AddNote(
+        string message,
+        string username,
+        IDateTimeProvider dateTime)
+    {
+        RequestNote note = RequestNote.Create(Id, message, RequestNoteAction.Note, username, dateTime.Now);
+        _notes.Add(note);
     }
 
     public void Delete() => IsDeleted = true;

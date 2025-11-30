@@ -13,6 +13,10 @@ internal sealed class TeamOperationConfiguration : IEntityTypeConfiguration<Team
         builder.ToTable("Teams", "Operations");
 
         builder
+            .Property(operation => operation.Id)
+            .UseSequence(AppDbContext.TeamsOperationId);
+
+        builder
             .HasDiscriminator<string>("OperationType")
             .HasValue<CreateTeamTeamOperation>(nameof(CreateTeamTeamOperation))
             .HasValue<CreateTeamChannelTeamOperation>(nameof(CreateTeamChannelTeamOperation))

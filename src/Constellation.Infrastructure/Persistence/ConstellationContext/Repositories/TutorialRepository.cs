@@ -79,7 +79,7 @@ internal sealed class TutorialRepository : ITutorialRepository
             .Set<Tutorial>()
             .Where(tutorial =>
                 !tutorial.IsDeleted &&
-                tutorial.StartDate <= _dateTime.Today &&
+                //tutorial.StartDate <= _dateTime.Today &&
                 tutorial.EndDate >= _dateTime.Today &&
                 tutorial.Sessions.Any(session => !session.IsDeleted))
             .ToListAsync(cancellationToken);
@@ -110,6 +110,27 @@ internal sealed class TutorialRepository : ITutorialRepository
                     !session.IsDeleted &&
                     session.StaffId == staffId))
             .ToListAsync(cancellationToken);
+
+    public async Task<List<Tutorial>> GetActiveForStudent(
+        StudentId studentId,
+        CancellationToken cancellationToken = default)
+    {
+        IQueryable<TutorialId> tutorialIds = _context
+            .Set<Enrolment>()
+            .OfType<TutorialEnrolment>()
+            .Where(enrolment => enrolment.StudentId == studentId)
+            .Select(enrolment => enrolment.TutorialId);
+
+        return await _context
+            .Set<Tutorial>()
+            .Where(tutorial =>
+                !tutorial.IsDeleted &&
+                tutorial.StartDate <= _dateTime.Today &&
+                tutorial.EndDate >= _dateTime.Today &&
+                tutorial.Sessions.Any(session => !session.IsDeleted) &&
+                tutorialIds.Contains(tutorial.Id))
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<Tutorial>> GetAllForStudent(
         StudentId studentId,
@@ -223,8 +244,25 @@ internal sealed class TutorialRepository : ITutorialRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Request>()
-            .Where(request => request.CreatedAt.Year == _dateTime.CurrentYear)
             .ToListAsync(cancellationToken);
+
+    public async Task<int> CountPendingRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => 
+                request.Status == RequestStatus.Requested &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .CountAsync(cancellationToken);
+
+    public async Task<int> CountApprovedRequests(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Request>()
+            .Where(request => 
+                request.Status == RequestStatus.Approved &&
+                request.CreatedAt.Year == _dateTime.CurrentYear)
+            .CountAsync(cancellationToken);
 
     public async Task<List<Request>> GetPendingRequests(
         CancellationToken cancellationToken = default) =>

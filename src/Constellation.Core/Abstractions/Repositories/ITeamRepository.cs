@@ -17,6 +17,7 @@ public interface ITeamRepository
     Task<Guid?> GetIdByOffering(string offeringName, string offeringYear, CancellationToken cancellationToken = default);
     Task<string?> GetLinkById(Guid teamId, CancellationToken cancellationToken = default);
     Task<string?> GetLinkByOffering(string offeringName, string offeringYear, CancellationToken cancellationToken = default);
+    Task<Team?> GetByDescriptionTag(int year, string descriptionTag, CancellationToken cancellationToken = default);
     void Insert(Team team);
     void Remove(Team team);
 }

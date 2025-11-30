@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Polly;
 using Serilog;
 using System.Text;
 
@@ -193,7 +194,7 @@ app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Home}/
 
 app.UseSession();
 
-app.Map("/services", hostBuilder => hostBuilder.Run(async context =>
+app.Map("/debug/services", hostBuilder => hostBuilder.Run(async context =>
 {
     StringBuilder sb = new();
     sb.Append("<h1>Registered Services</h1>");

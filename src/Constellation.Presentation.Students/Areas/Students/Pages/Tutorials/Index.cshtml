@@ -34,17 +34,21 @@
                             var cardStyle = request.Status switch
                             {
                                 _ when request.Status == RequestStatus.Approved => "text-white bg-success",
+                                _ when request.Status == RequestStatus.Scheduled => "text-white bg-success",
                                 _ when request.Status == RequestStatus.Rejected => "text-white bg-danger",
                                 _ when request.Status == RequestStatus.Requested => "text-dark bg-light"
                             };
 
                             <div class="col">
-                                <div class="card m-3 float-start h-100 @cardStyle">
-                                    <h4 class="card-header">@request.Type - @request.Status</h4>
+                                <div class="card m-3 float-start h-100 bg-light">
+                                    <h4 class="card-header @cardStyle">@request.Type - @request.Status</h4>
                                     <div class="card-body">
                                         <h5 class="card-subtitle mb-3">Request Details</h5>
 
                                         <dl class="mb-2">
+                                            <dt>Request Date</dt>
+                                            <dd>@request.RequestDate.ToString("d")</dd>
+
                                             @if (request.Type == TutorialType.Subject)
                                             {
                                                 <dt>Course</dt>
@@ -90,9 +94,11 @@
                     <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-3 g-4">
                         @foreach (var tutorial in Model.Tutorials.OrderBy(entry => entry.Start))
                         {
+                            var cardStyle = (tutorial.IsCurrent) ? "text-white bg-success" : "text-dark bg-light";
+
                             <div class="col">
                                 <div class="card m-3 float-start h-100">
-                                    <h4 class="card-header">@tutorial.Name</h4>
+                                    <h4 class="card-header @cardStyle">@tutorial.Name</h4>
                                     <div class="card-body">
                                         <dl class="mb-2">
                                             <dt>Start</dt>

@@ -11,4 +11,5 @@ public sealed record TutorialResponse(
     string Start,
     string End,
     List<Name> Teachers,
-    List<Period> Periods);
+    List<Period> Periods,
+    bool IsCurrent);

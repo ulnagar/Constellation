@@ -23,6 +23,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("TeamsOperationId")
+                .StartsAt(202500L);
+
             modelBuilder.Entity("Constellation.Application.Domains.ScheduledReports.Models.ScheduledReport", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2066,13 +2069,37 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("GroupTutorials_Teachers", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.LinkedSystems.Team", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LinkedSystems_Teams", (string)null);
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.MSTeamOperation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("NEXT VALUE FOR [TeamsOperationId]");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"), "TeamsOperationId");
 
                     b.Property<int>("Action")
                         .HasColumnType("int");
@@ -2289,9 +2316,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("NEXT VALUE FOR [TeamsOperationId]");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"), "TeamsOperationId");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -3134,29 +3162,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("Subjects_Courses", (string)null);
                 });
 
-            modelBuilder.Entity("Constellation.Core.Models.Team", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LinkedSystems_Teams", (string)null);
-                });
-
             modelBuilder.Entity("Constellation.Core.Models.ThirdPartyConsent.Application", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3618,6 +3623,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -5789,6 +5798,35 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.OwnsOne("Constellation.Core.Models.Tutorials.RequestPlan", "Plan", b1 =>
+                        {
+                            b1.Property<Guid>("RequestId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("Periods")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<DateOnly>("StartDate")
+                                .HasColumnType("date");
+
+                            b1.Property<Guid>("TutorialId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.HasKey("RequestId");
+
+                            b1.ToTable("Requests", "Tutorials");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RequestId");
+                        });
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Tutorials.RequestNote", b =>

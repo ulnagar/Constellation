@@ -1,5 +1,6 @@
 ﻿@page
 @using Constellation.Core.Models.Tutorials.Enums
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.Requests
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Tutorials.Requests.IndexModel
 @{
 }
@@ -7,6 +8,42 @@
 <h2>Tutorial Requests</h2>
 
 <div class="page-menu">
+    @{
+        var all_style = "btn-outline-secondary";
+        var pending_style = all_style;
+        var complete_style = all_style;
+
+        switch (Model.Filter)
+        {
+            case IndexModel.FilterDto.All:
+                all_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Pending:
+                pending_style = "btn-primary";
+                break;
+            case IndexModel.FilterDto.Complete:
+                complete_style = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@IndexModel.FilterDto.All" class="btn @all_style">All</a>
+        <a asp-route-filter="@IndexModel.FilterDto.Pending" class="btn @pending_style">Pending</a>
+        <a asp-route-filter="@IndexModel.FilterDto.Complete" class="btn @complete_style">Complete</a>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown">From @Model.Year <span class="caret"></span></button>
+        <div class="dropdown-menu">
+            @{
+                foreach (var year in Model.Years)
+                {
+                    <a asp-route-year="@year" class="dropdown-item">@year</a>
+                }
+            }
+        </div>
+    </div>
 </div>
 
 <hr />
@@ -15,6 +52,7 @@
     <thead>
         <tr>
             <th>Student</th>
+            <th>Year</th>
             <th>Type</th>
             <th>Status</th>
             <th>Date</th>
@@ -25,6 +63,7 @@
     {
         <tr>
             <td data-order="@item.Student.SortOrder" data-search="@item.Student.DisplayName @item.Student.FirstName">@item.Student.DisplayName</td>
+            <td>@item.Year</td>
             <td>
                 @item.Type
                 @if (item.Type == TutorialType.Subject)
@@ -34,7 +73,7 @@
                 }
             </td>
             <td>@item.Status</td>
-            <td data-order="@item.ActionDate.ToString("yyyy-MM-dd")" data-search="@item.ActionDate.ToLongDateString()">@item.ActionDate.ToString("dd/MM/yyyy")</td>
+            <td data-order="@item.ActionDate.ToString("yyyy-MM-dd HH:mm")" data-search="@item.ActionDate.ToLongDateString()">@item.ActionDate.ToString("dd/MM/yyyy")</td>
             <td>
                 <a asp-page="/Subject/Tutorials/Requests/Details" asp-area="Staff" asp-route-id="@item.RequestId" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
             </td>
@@ -47,7 +86,7 @@
         $(document).ready(function () {
             $('.requests-table').DataTable({
                 "order": [
-                    [0, 'asc']
+                    [4, 'desc']
                 ]
             });
         });

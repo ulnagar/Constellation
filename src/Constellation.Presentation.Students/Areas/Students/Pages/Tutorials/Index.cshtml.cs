@@ -77,6 +77,25 @@ public class IndexModel : BasePageModel
             return;
         }
 
-        Requests = tutorialRequests.Value;
+        Requests = tutorialRequests.Value
+            .OrderByDescending(entry => entry.RequestDate)
+            .ToList();
+
+        Result<List<TutorialResponse>> tutorials = await _mediator.Send(new GetTutorialsForStudentQuery(studentId));
+
+        if (tutorials.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), tutorials.Error, true)
+                .Warning("Failed to retrieve tutorial data by user {user}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                tutorialRequests.Error,
+                _linkGenerator.GetPathByPage("/Tutorials/Index", values: new { area = "Students" }));
+
+            return;
+        }
+
+        Tutorials = tutorials.Value;
     }
 }

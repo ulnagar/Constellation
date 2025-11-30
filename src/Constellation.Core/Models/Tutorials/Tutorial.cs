@@ -49,6 +49,9 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
 
     private bool IsTutorialCurrent()
     {
+        if (IsDeleted)
+            return false;
+
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
         if (_sessions.Count == 0 || _sessions.All(session => session.IsDeleted))
@@ -85,13 +88,40 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
         IDateTimeProvider dateTime)
     {
         if (endDate < startDate)
-            return Result.Failure<Tutorial>(TutorialErrors.Validation.StartDateAfterEndDate);
+            return Result.Failure(TutorialErrors.Validation.StartDateAfterEndDate);
 
         if (endDate < dateTime.Today)
-            return Result.Failure<Tutorial>(TutorialErrors.Validation.EndDateInPast);
+            return Result.Failure(TutorialErrors.Validation.EndDateInPast);
 
         Name = name;
         StartDate = startDate;
+        EndDate = endDate;
+
+        return Result.Success();
+    }
+
+    public Result Cancel(
+        DateOnly endDate,
+        IDateTimeProvider dateTime)
+    {
+        if (endDate < dateTime.Today)
+            return Result.Failure(TutorialErrors.Validation.EndDateInPast);
+
+        EndDate = endDate;
+
+        return Result.Success();
+    }
+
+    public Result Extend(
+        DateOnly endDate,
+        IDateTimeProvider dateTime)
+    {
+        if (endDate < dateTime.Today)
+            return Result.Failure(TutorialErrors.Validation.EndDateInPast);
+
+        if (endDate < EndDate)
+            return Result.Failure(TutorialErrors.Validation.EndDateBeforeCurrentEnd);
+
         EndDate = endDate;
 
         return Result.Success();

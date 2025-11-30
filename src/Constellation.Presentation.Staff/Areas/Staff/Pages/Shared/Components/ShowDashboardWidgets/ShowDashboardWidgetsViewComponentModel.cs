@@ -25,6 +25,10 @@ public sealed class ShowDashboardWidgetsViewComponentModel
 
     public int EdvalDifferences { get; set; }
 
+    public bool ShowTutorialRequestsWidget { get; set; }
+    public int TutorialRequestsPendingApproval { get; set; }
+    public int TutorialRequestsPendingScheduling { get; set; }
+
     public bool ShowStocktakeWidget { get; set; } = false;
     public double StocktakePercentage { get; set; }
     public StocktakeEventId StocktakeEventId { get; set; }

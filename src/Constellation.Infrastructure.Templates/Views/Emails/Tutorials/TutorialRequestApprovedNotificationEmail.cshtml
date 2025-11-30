@@ -1,0 +1,14 @@
+@using Constellation.Core.Extensions
+@model Constellation.Infrastructure.Templates.Views.Emails.Tutorials.TutorialRequestApprovedNotificationEmailViewModel
+
+@{
+    Layout = "/Views/Shared/EmailLayout.cshtml";
+
+    ViewData["Preheader"] = Model.Preheader;
+    ViewData["Title"] = Model.Title;
+    ViewData["SenderName"] = Model.SenderName;
+    ViewData["SenderTitle"] = Model.SenderTitle;
+}
+
+<p>A tutorial support request made by @Model.Student.DisplayName (@Model.Grade.AsName() - @Model.School) for @Model.SupportType has been approved</p>
+<p>Please review the request and complete the scheduling step at the following link: <a href="@Model.ApprovalLink">@Model.ApprovalLink</a></p>

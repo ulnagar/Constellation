@@ -8,7 +8,8 @@ using System;
 public sealed record TutorialRequestSummaryResponse(
     RequestId RequestId,
     Name Student,
+    int Year,
     TutorialType Type,
     string Subject,
     RequestStatus Status,
-    DateOnly ActionDate);
+    DateTime ActionDate);
