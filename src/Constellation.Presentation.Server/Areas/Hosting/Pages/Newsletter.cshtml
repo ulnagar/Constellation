@@ -3,4 +3,23 @@
 @{
 }
 
-@Html.Raw(Model.EmbedCode)
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+    }
+
+    iframe {
+        max-height: 100vh;
+    }
+</style>
+
+@if (string.IsNullOrWhiteSpace(Model.EmbedCode))
+{
+    <h1>Oops!</h1>
+    <h3>Sorry, we can't find what you're looking for. Please check the link and try again.</h3>
+}
+else
+{
+    @Html.Raw(Model.EmbedCode)
+}

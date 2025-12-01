@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetNewsletterQueryHandler
-    : IQueryHandler<GetNewsletterQuery, string>
+    : IQueryHandler<GetNewsletterQuery, Newsletter>
 {
     private readonly IHostingRepository _hostingRepository;
     private readonly ILogger _logger;
@@ -24,7 +24,7 @@ internal sealed class GetNewsletterQueryHandler
             .ForContext<GetNewsletterQuery>();
     }
 
-    public async Task<Result<string>> Handle(GetNewsletterQuery request, CancellationToken cancellationToken)
+    public async Task<Result<Newsletter>> Handle(GetNewsletterQuery request, CancellationToken cancellationToken)
     {
         Newsletter newsletter = await _hostingRepository.GetNewsletterByIssue(request.Issue, cancellationToken);
 
@@ -35,9 +35,9 @@ internal sealed class GetNewsletterQueryHandler
                 .ForContext(nameof(Error), NewsletterErrors.NotFound(request.Issue), true)
                 .Warning("Newsletter issue {Issue} not found", request.Issue);
 
-            return Result.Failure<string>(NewsletterErrors.NotFound(request.Issue));
+            return Result.Failure<Newsletter>(NewsletterErrors.NotFound(request.Issue));
         }
 
-        return Result.Success(newsletter.EmbedCode);
+        return Result.Success(newsletter);
     }
 }

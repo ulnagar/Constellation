@@ -9,6 +9,10 @@ public static class NewsletterErrors
         "Hosting.Newsletters.NotFound",
         $"Could not find Newsletter with Issue number {issue}.");
 
+    public static readonly Error InvalidIssueNumber = new(
+        "Hosting.Newsletters.InvalidIssueNumber",
+        "Newsletter Issue number must be provided.");
+
     public static readonly Error MustIncludeName = new(
         "Hosting.Newsletters.MustIncludeName",
         "Newsletter must include a valid Name.");

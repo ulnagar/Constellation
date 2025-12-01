@@ -1,6 +1,7 @@
 namespace Constellation.Presentation.Server.Areas.Hosting.Pages;
 
 using Constellation.Application.Domains.Hosting.Queries.GetNewsletter;
+using Constellation.Core.Models.Hosting;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -25,11 +26,11 @@ public sealed class NewsletterModel : PageModel
 
     public async Task OnGet()
     {
-        Result<string> newsletterResult = await _mediator.Send(new GetNewsletterQuery(Issue));
+        Result<Newsletter> newsletterResult = await _mediator.Send(new GetNewsletterQuery(Issue));
 
         if (newsletterResult.IsSuccess)
         {
-            EmbedCode = newsletterResult.Value;
+            EmbedCode = newsletterResult.Value.EmbedCode;
         }
     }
 }
