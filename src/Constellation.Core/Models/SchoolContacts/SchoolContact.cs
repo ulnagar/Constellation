@@ -19,7 +19,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         string firstName,
         string lastName,
         string emailAddress,
-        string phoneNumber,
+        PhoneNumber phoneNumber,
         bool selfRegistered)
     {
         Id = new();
@@ -35,7 +35,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
     public string FirstName { get; private set; }
     public string LastName { get; private set; }
     public string EmailAddress { get; private set; }
-    public string PhoneNumber { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
     public string CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
     public string ModifiedBy { get; set; }
@@ -51,7 +51,7 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         string firstName,
         string lastName,
         string emailAddress,
-        string phoneNumber,
+        string number,
         bool selfRegistered)
     {
         if (string.IsNullOrWhiteSpace(firstName))
@@ -67,14 +67,18 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         if (email.IsFailure)
             return Result.Failure<SchoolContact>(email.Error);
 
-        if (!string.IsNullOrWhiteSpace(phoneNumber))
+        PhoneNumber phoneNumber = PhoneNumber.Empty;
+
+        if (!string.IsNullOrWhiteSpace(number))
         {
-            if (!int.TryParse(phoneNumber.Trim().Replace(" ", ""), out _))
+            if (!int.TryParse(number.Trim().Replace(" ", ""), out _))
                 return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.PhoneNumberInvalid);
 
-            Result<PhoneNumber> phone = ValueObjects.PhoneNumber.Create(phoneNumber);
+            Result<PhoneNumber> phone = PhoneNumber.Create(number);
             if (phone.IsFailure)
                 return Result.Failure<SchoolContact>(phone.Error);
+
+            phoneNumber = phone.Value;
         }
 
         SchoolContact contact = new(
@@ -169,10 +173,25 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
         string firstName,
         string lastName,
         string emailAddress,
-        string phoneNumber)
+        string number)
     {
         FirstName = firstName;
         LastName = lastName;
+
+        PhoneNumber phoneNumber = PhoneNumber.Empty;
+
+        if (!string.IsNullOrWhiteSpace(number))
+        {
+            if (!int.TryParse(number.Trim().Replace(" ", ""), out _))
+                return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.PhoneNumberInvalid);
+
+            Result<PhoneNumber> phone = PhoneNumber.Create(number);
+            if (phone.IsFailure)
+                return Result.Failure<SchoolContact>(phone.Error);
+
+            phoneNumber = phone.Value;
+        }
+
         PhoneNumber = phoneNumber;
 
         if (!string.IsNullOrWhiteSpace(emailAddress))

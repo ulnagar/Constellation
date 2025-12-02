@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Queries.GetContactsWithRoleFromSchool;
 
 using Abstractions.Messaging;
+using Constellation.Core.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
@@ -45,7 +46,7 @@ internal sealed class GetContactsWithRoleFromSchoolQueryHandler
                     role.Id,
                     contact.FirstName,
                     contact.LastName,
-                    contact.PhoneNumber,
+                    contact.PhoneNumber.ToString(PhoneNumber.Format.None),
                     contact.EmailAddress,
                     role.Role));
             }

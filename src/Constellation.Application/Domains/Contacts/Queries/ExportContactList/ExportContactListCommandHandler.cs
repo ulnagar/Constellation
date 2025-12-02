@@ -171,8 +171,6 @@ internal sealed class ExportContactListCommandHandler
                 if (contactEmail.IsFailure)
                     continue;
 
-                Result<PhoneNumber> contactPhone = PhoneNumber.Create(contact.PhoneNumber);
-
                 foreach (SchoolContactRole role in contact.Assignments)
                 {
                     // If the request should not include restricted roles, ignore restricted roles.
@@ -195,7 +193,7 @@ internal sealed class ExportContactListCommandHandler
                         category,
                         contactName.Value.DisplayName,
                         contactEmail.Value,
-                        contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value,
+                        contact.PhoneNumber,
                         role.Note));
                 }
             }

@@ -61,15 +61,14 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
                 bool directNumber = false;
                 PhoneNumber phone;
 
-                if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
+                if (contact.PhoneNumber == PhoneNumber.Empty)
                 {
                     Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
                     phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
                 }
                 else
                 {
-                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(contact.PhoneNumber);
-                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    phone = contact.PhoneNumber;
                     directNumber = true;
                 }
 

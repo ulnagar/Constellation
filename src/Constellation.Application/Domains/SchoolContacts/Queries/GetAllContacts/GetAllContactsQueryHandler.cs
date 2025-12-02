@@ -106,7 +106,7 @@ internal sealed class GetAllContactsQueryHandler
                 bool directNumber = false;
                 PhoneNumber phone;
 
-                if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
+                if (contact.PhoneNumber == PhoneNumber.Empty)
                 {
                     if (school is null)
                     {
@@ -120,8 +120,7 @@ internal sealed class GetAllContactsQueryHandler
                 }
                 else
                 {
-                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(contact.PhoneNumber);
-                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    phone = contact.PhoneNumber;
                     directNumber = true;
                 }
 

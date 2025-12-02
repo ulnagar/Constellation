@@ -44,6 +44,8 @@ public sealed class PhoneNumber : ValueObject
         return new PhoneNumber(trimmedNumber);
     }
 
+    public static PhoneNumber FromValue(string number) => new(number);
+
     public override string ToString()
     {
         if (this == Empty)
@@ -76,6 +78,12 @@ public sealed class PhoneNumber : ValueObject
         };
 
     private string Number { get; }
+
+    public bool IsMobile => Number[..2] switch
+    {
+        "04" => true,
+        _ => false
+    };
 
     public override IEnumerable<object> GetAtomicValues()
     {

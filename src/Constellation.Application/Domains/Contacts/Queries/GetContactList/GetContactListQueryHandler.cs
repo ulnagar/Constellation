@@ -164,8 +164,6 @@ internal sealed class GetContactListQueryHandler
                 if (contactEmail.IsFailure)
                     continue;
 
-                Result<PhoneNumber> contactPhone = PhoneNumber.Create(contact.PhoneNumber);
-
                 foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
                 {
                     if (role.IsDeleted)
@@ -191,7 +189,7 @@ internal sealed class GetContactListQueryHandler
                         category,
                         contactName.Value.DisplayName,
                         contactEmail.Value,
-                        contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value,
+                        contact.PhoneNumber,
                         role.Note));
                 }
             }

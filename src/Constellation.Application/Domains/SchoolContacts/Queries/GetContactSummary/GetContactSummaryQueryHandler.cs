@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Queries.GetContactSummary;
 
 using Abstractions.Messaging;
+using Constellation.Core.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
@@ -39,6 +40,6 @@ internal sealed class GetContactSummaryQueryHandler
             contact.FirstName,
             contact.LastName,
             contact.EmailAddress,
-            contact.PhoneNumber);
+            contact.PhoneNumber.ToString(PhoneNumber.Format.None));
     }
 }

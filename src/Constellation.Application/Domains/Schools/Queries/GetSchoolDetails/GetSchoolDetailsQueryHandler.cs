@@ -217,26 +217,6 @@ internal sealed class GetSchoolDetailsQueryHandler
                         .Warning("Failed to retrieve School details");
                 }
 
-                PhoneNumber phoneNumber = PhoneNumber.Empty;
-
-                if (!string.IsNullOrWhiteSpace(contact.PhoneNumber))
-                {
-                    Result<PhoneNumber> convertedNumber = PhoneNumber.Create(contact.PhoneNumber);
-
-                    if (convertedNumber.IsFailure)
-                    {
-                        _logger
-                            .ForContext(nameof(Error), convertedNumber.Error, true)
-                            .ForContext(nameof(SchoolContact), contact, true)
-                            .ForContext(nameof(SchoolContactRole), role, true)
-                            .Warning("Failed to retrieve School details");
-                    }
-                    else
-                    {
-                        phoneNumber = convertedNumber.Value;
-                    }
-                }
-
                 EmailAddress emailAddress = EmailAddress.None;
 
                 if (!string.IsNullOrWhiteSpace(contact.EmailAddress))
@@ -263,7 +243,7 @@ internal sealed class GetSchoolDetailsQueryHandler
                     name.Value,
                     role.Role,
                     role.Note,
-                    phoneNumber,
+                    contact.PhoneNumber,
                     emailAddress));
             }
         }

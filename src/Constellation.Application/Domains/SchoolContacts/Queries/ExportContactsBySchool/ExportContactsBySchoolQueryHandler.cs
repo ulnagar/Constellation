@@ -81,18 +81,9 @@ internal sealed class ExportContactsBySchoolQueryHandler
                     continue;
                 }
 
-                Result<PhoneNumber> phone = string.IsNullOrWhiteSpace(contact.PhoneNumber)
-                    ? PhoneNumber.Create(school.PhoneNumber)
-                    : PhoneNumber.Create(contact.PhoneNumber);
-
-                if (phone.IsFailure)
-                {
-                    _logger
-                        .ForContext("Contact.PhoneNumber", contact.PhoneNumber)
-                        .ForContext("School.PhoneNumber", school.PhoneNumber)
-                        .ForContext(nameof(Error), phone.Error, true)
-                        .Warning("Failed to retrieve list of School with active Contacts");
-                }
+                PhoneNumber phone = contact.PhoneNumber == PhoneNumber.Empty
+                    ? PhoneNumber.Create(school.PhoneNumber).Value
+                    : contact.PhoneNumber;
 
                 List<SchoolContactRole> roles = contact.Assignments
                     .Where(assignment =>
@@ -110,7 +101,7 @@ internal sealed class ExportContactsBySchoolQueryHandler
                         role.Id,
                         name.Value,
                         email.Value,
-                        phone.IsFailure ? PhoneNumber.Empty : phone.Value,
+                        phone,
                         role.Role,
                         role.Note));
                 }

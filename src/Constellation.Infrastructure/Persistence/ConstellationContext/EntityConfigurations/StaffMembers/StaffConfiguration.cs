@@ -87,5 +87,11 @@ internal sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffM
         builder
             .Navigation(member => member.SystemLinks)
             .AutoInclude();
+
+        builder
+            .Property(member => member.PhoneNumber)
+            .HasConversion(
+                number => number.ToString(PhoneNumber.Format.None),
+                value => PhoneNumber.FromValue(value));
     }
 }

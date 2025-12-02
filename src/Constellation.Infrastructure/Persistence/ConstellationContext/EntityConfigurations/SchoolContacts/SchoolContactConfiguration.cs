@@ -1,6 +1,7 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.SchoolContacts;
 
 using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.ValueObjects;
 using Core.Models.SchoolContacts.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,7 +23,9 @@ internal sealed class SchoolContactConfiguration : IEntityTypeConfiguration<Scho
 
         builder
             .Property(contact => contact.PhoneNumber)
-            .HasMaxLength(10);
+            .HasConversion(
+                number => number.ToString(PhoneNumber.Format.None),
+                value => PhoneNumber.FromValue(value));
 
         builder
             .HasMany(contact => contact.Assignments)
