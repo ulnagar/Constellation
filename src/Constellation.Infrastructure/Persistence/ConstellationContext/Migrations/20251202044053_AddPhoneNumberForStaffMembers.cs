@@ -22,9 +22,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             migrationBuilder.Sql(@"
                 UPDATE [dbo].[SchoolContacts_Contacts]
-                SET PhoneNumber = '0200000000'
+                SET PhoneNumber = null
                 WHERE 
-                    PhoneNumber is null or 
                     PhoneNumber = '' or
                     LEN(PhoneNumber) < 10;");
             
@@ -34,12 +33,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "Members",
                 type: "nvarchar(max)",
                 nullable: true);
-
-            migrationBuilder.Sql(@"
-                UPDATE [Staff].[Members]
-                SET PhoneNumber = '0200000000'
-                WHERE PhoneNumber is null;");
-
         }
 
         /// <inheritdoc />

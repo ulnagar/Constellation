@@ -1,5 +1,6 @@
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.StaffMembers;
 
+using Converters;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
@@ -90,8 +91,6 @@ internal sealed class StaffMemberConfiguration : IEntityTypeConfiguration<StaffM
 
         builder
             .Property(member => member.PhoneNumber)
-            .HasConversion(
-                number => number.ToString(PhoneNumber.Format.None),
-                value => PhoneNumber.FromValue(value));
+            .HasConversion<PhoneNumberConverter>();
     }
 }
