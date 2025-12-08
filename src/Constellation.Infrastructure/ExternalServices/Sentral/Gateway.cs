@@ -1209,7 +1209,7 @@ public class Gateway : ISentralGateway
             return result;
         }
 
-        for (int i = 1; i < 4; i++)
+        for (int i = 1; i < 5; i++)
         {
             List<SentralPeriodAbsenceDto> data = await GetAttendanceModuleAbsenceDataForTerm(i.ToString(), cancellationToken);
 

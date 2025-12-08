@@ -207,7 +207,7 @@ internal sealed class GetAffirmationQueryHandler
         @"""Your crown has been bought and paid for. Put it on your head and wear it"" - Maya Angelou",
         @"""Everything passes if you learn to hold things lightly"" - Oprah",
         @"""Write it on your heart that every day is the best day in the year"" - Ralph Waldo Emerson",
-        @"""Hold up your head! You were note made for failure, you were made for victory"" - Anne Gilchrist",
+        @"""Hold up your head! You were not made for failure, you were made for victory"" - Anne Gilchrist",
         @"""If you have good thoughts they will shine out of your face like sunbeams and you will always look lovely"" - Roald Dahl",
         @"""There is nothing either good or bad, but thinking makes it so"" - William Shakespeare"
     ];
