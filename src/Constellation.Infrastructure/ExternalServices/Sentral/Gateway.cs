@@ -1289,6 +1289,8 @@ public class Gateway : ISentralGateway
                     .ForContext(nameof(StudentReferenceNumber), srn)
                     .ForContext(nameof(Error), studentReferenceNumber.Error, true)
                     .Information("Error parsing SRN to StudentReferenceNumber object");
+
+                continue;
             }
 
             SentralPeriodAbsenceDto absence = new();
@@ -1309,21 +1311,29 @@ public class Gateway : ISentralGateway
                 if (startTimeSuccess)
                     absence.StartTime = startTime;
                 else
+                {
                     _logger
                         .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
                         .ForContext("AbsenceDate", absence.Date)
                         .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber.Value)
                         .Information("Error parsing absence start time to TimeOnly object");
 
+                    continue;
+                }
+
                 bool endTimeSuccess = TimeOnly.TryParseExact(absence.Timeframe.Split(' ')[2], "h:mmtt", CultureInfo.InvariantCulture, DateTimeStyles.None, out TimeOnly endTime);
                 if (endTimeSuccess)
                     absence.EndTime = endTime;
                 else
+                {
                     _logger
                         .ForContext("DetectedTime", absence.Timeframe.Split(' ')[0])
                         .ForContext("AbsenceDate", absence.Date)
                         .ForContext(nameof(StudentReferenceNumber), studentReferenceNumber.Value)
                         .Information("Error parsing absence end time to TimeOnly object");
+                    
+                    continue;
+                }
             }
 
             string comment = row[11].ToString().FormatField();
