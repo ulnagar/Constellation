@@ -2,9 +2,12 @@
 
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffByEmail;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Domains.Timetables.Timetables.Queries.GetStaffDailyTimetableData;
 using Application.Domains.Training.Queries.GetCountOfExpiringCertificatesForStaffMember;
 using Application.Extensions;
+using Application.Models.Auth;
+using Application.Models.Identity;
 using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.StaffMembers.Repositories;
@@ -15,21 +18,25 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Enums;
 using Core.ValueObjects;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 public class StaffSidebarMenuViewComponent : ViewComponent
 {
+    private readonly IAuthorizationService _authService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IStaffRepository _staffRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly ISender _mediator;
 
     public StaffSidebarMenuViewComponent(
+        IAuthorizationService authService,
         ICurrentUserService currentUserService,
         IStaffRepository staffRepository,
         IDateTimeProvider dateTime,
         ISender mediator)
     {
+        _authService = authService;
         _currentUserService = currentUserService;
         _staffRepository = staffRepository;
         _dateTime = dateTime;
@@ -49,7 +56,8 @@ public class StaffSidebarMenuViewComponent : ViewComponent
         
         return module switch
         {
-            "Dashboard" => View("Dashboard", await GenerateDashboardData()),
+            "Dashboard" => View("Dashboard", await GenerateDashboardData(staffId)),
+            "Admin" => View("/Areas/Staff/Pages/Shared/Components/StaffSidebarMenu/Admin.cshtml", activePage),
             "Equipment" => View("Equipment", activePage),
             "Partner" => View("Partner", activePage),
             "ShortTerm" => View("ShortTerm", activePage),
@@ -60,26 +68,23 @@ public class StaffSidebarMenuViewComponent : ViewComponent
         };
     }
 
-    private async Task<DashboardModel> GenerateDashboardData()
+    private async Task<DashboardModel> GenerateDashboardData(StaffId staffId)
     {
         DashboardModel model = new();
 
-        string? username = User.Identity?.Name;
+        AuthorizationResult emergencyConsole = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.CanUseEmergencyConsole);
+        model.ShowEmergencyConsole = emergencyConsole.Succeeded || User.IsInRole(AuthRoles.Admin);
 
-        if (username is not null)
-        {
-            Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(StaffId.Empty, username));
-
-            if (query.IsSuccess)
-                model.Classes = query.Value.ToDictionary(k => k.OfferingName.Value, k => k.OfferingId);
-        }
-
-        Result<StaffSelectionListResponse> teacherRequest = await _mediator.Send(new GetStaffByEmailQuery(username));
-        if (teacherRequest.IsFailure)
+        if (staffId == StaffId.Empty)
             return model;
+        
+        model.StaffId = staffId;
 
-        model.StaffId = teacherRequest.Value!.StaffId;
+        Result<List<TeacherOfferingResponse>> query = await _mediator.Send(new GetCurrentOfferingsForTeacherQuery(staffId));
 
+        if (query.IsSuccess)
+            model.Classes = query.Value.ToDictionary(k => k.OfferingName.Value, k => k.OfferingId);
+        
         Result<int> trainingExpiringSoonRequest = await _mediator.Send(new GetCountOfExpiringCertificatesForStaffMemberQuery(model.StaffId));
 
         if (trainingExpiringSoonRequest.IsSuccess)

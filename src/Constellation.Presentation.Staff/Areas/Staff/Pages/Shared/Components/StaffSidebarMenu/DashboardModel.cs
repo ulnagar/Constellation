@@ -9,6 +9,7 @@ using System.Collections.Generic;
 public class DashboardModel
 {
     public bool IsAdmin { get; set; }
+    public bool ShowEmergencyConsole { get; set; }
     public StaffId StaffId { get; set; } = StaffId.Empty;
     public int ExpiringTraining { get; set; } = 0;
     public Dictionary<string, OfferingId> Classes { get; set; } = new();

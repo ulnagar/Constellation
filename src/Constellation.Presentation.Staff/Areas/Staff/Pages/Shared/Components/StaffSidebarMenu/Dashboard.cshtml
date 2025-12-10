@@ -6,13 +6,21 @@
         <h4 class="sidebar-heading d-flex justify-content-between align-items-center mb-1 text-muted" data-toggle="collapse" data-target="#links" role="button">
             <span class="w-100">Quick Links</span>
         </h4>
+        @if (Model.ShowEmergencyConsole)
+        {
+            <div class="text-center">
+                <a asp-page="/Emergency/Index" asp-area="Admin" class="btn btn-sm btn-danger my-2">Emergency Console</a>
+            </div>
+        }
         <ul id="links" class="collapse show nav flex-column">
+
             <li class="nav-item">
                 <a class="nav-link" asp-page="/SchoolAdmin/Training/Staff/Index" asp-route-staffId="@Model.StaffId" asp-area="Staff">
-                    Mandatory Training 
+                    Mandatory Training
                     @if (Model.ExpiringTraining > 0)
                     {
-                        <span class="badge badge-danger ml-1">@Model.ExpiringTraining</span><span class="sr-only">training certificates expiring soon</span>
+                        <span class="badge badge-danger ml-1">@Model.ExpiringTraining</span>
+                        <span class="sr-only">training certificates expiring soon</span>
                     }
                 </a>
             </li>

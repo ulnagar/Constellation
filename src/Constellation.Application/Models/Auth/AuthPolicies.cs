@@ -36,6 +36,8 @@ public static class AuthPolicies
     public const string CanEditSchools = "CanEditSchools";
     public const string CanManageReports = "CanManageReports";
     public const string CanManageTutorials = "CanManageTutorials";
+    public const string CanUseEmergencyConsole = "CanUseEmergencyConsole";
+
 
     public const string IsSchoolContact = "IsSchoolContact";
 

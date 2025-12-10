@@ -1,0 +1,19 @@
+﻿@page
+@model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.IndexModel
+@{
+}
+
+Message Type: SMS/Email
+Template: 0..1
+
+Recipient Group(s): 0..n
+Recipient(s): 0..n
+
+Email:
+Subject: string
+Body: formatted string
+Attachment: file
+
+SMS:
+Message: string
+Include character counter with warning for long messages

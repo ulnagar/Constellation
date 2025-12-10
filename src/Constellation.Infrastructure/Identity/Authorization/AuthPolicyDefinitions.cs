@@ -24,6 +24,8 @@ public static class AuthPolicyDefinitions
         options.AddPolicy(AuthPolicies.IsStudent, policy =>
             policy.Requirements.Add(new IsCurrentStudentRequirement()));
 
+        options.AddPolicy(AuthPolicies.CanUseEmergencyConsole, policy =>
+            policy.Requirements.Add(new CanUseEmergencyConsoleRequirement()));
 
         options.AddPolicy(AuthPolicies.CanViewTrainingCompletionRecord, policy =>
             policy.Requirements.Add(new CanViewTrainingCompletionRecordRequirement()));

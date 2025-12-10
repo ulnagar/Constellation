@@ -28,6 +28,11 @@ public static class AuthPermissions
         }
     }
 
+    public static class EmergencyConsole
+    {
+        public const string Manage = "Admin.EmergencyConsole.Manage";
+    }
+
     public const string PartnerView = "Partner.View";
     public const string PartnerDetailsView = "Partner.View.Details";
     public const string PartnerEdit = "Partner.Edit";
