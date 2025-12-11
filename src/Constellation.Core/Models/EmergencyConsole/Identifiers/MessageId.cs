@@ -1,17 +1,17 @@
 ﻿namespace Constellation.Core.Models.EmergencyConsole.Identifiers;
 
-using Constellation.Core.Primitives;
+using Primitives;
 using System;
 
-public sealed record TemplateId(Guid Value)
+public sealed record MessageId(Guid Value)
     : IStronglyTypedId
 {
-    public static readonly TemplateId Empty = new(Guid.Empty);
+    public static readonly MessageId Empty = new(Guid.Empty);
 
-    public static TemplateId FromValue(Guid value) =>
+    public static MessageId FromValue(Guid value) =>
         new(value);
 
-    public TemplateId()
+    public MessageId()
         : this(Guid.NewGuid()) { }
 
     public override string ToString() =>

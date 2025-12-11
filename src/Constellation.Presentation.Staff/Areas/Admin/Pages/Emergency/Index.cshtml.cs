@@ -1,12 +1,20 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
 
+using Application.Common.PresentationModels;
+using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
+using Core.Models.EmergencyConsole;
+using Core.Models.EmergencyConsole.Enums;
+using Core.Models.EmergencyConsole.Identifiers;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class IndexModel : BasePageModel
@@ -36,9 +44,80 @@ public class IndexModel : BasePageModel
     public string PageTitle => "Emergency Console";
 
 
+    [BindProperty]
+    [ModelBinder(typeof(BaseFromValueBinder))]
+    public MessageType Type { get; set; } = MessageType.Email;
+
+    [BindProperty]
+    public List<RecipientGroup> RecipientGroups { get; set; } = [];
+
+    [BindProperty]
+    public string? Recipients { get; set; } = string.Empty;
+
+    [BindProperty]
+    public TemplateId TemplateId { get; set; } = TemplateId.Empty;
+
+    [BindProperty]
+    public string Message { get; set; } = string.Empty;
+
+    public List<MessageTemplate> Templates { get; set; } = [];
+
     public async Task OnGet()
     {
+        await PreparePage();
     }
 
+    private async Task PreparePage()
+    {
+        Result<List<MessageTemplate>> templates = await _mediator.Send(new GetEmergencyConsoleMessageTemplatesQuery());
+
+        if (templates.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(templates.Error);
+
+            return;
+        }
+
+        Templates = templates.Value;
+    }
+
+    public async Task<IActionResult> OnPostSend()
+    {
+        if (RecipientGroups.Count == 0 && string.IsNullOrWhiteSpace(Recipients))
+        {
+            ModelState.AddModelError(nameof(Recipients), "Must include at least one recipient or group");
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        if (string.IsNullOrWhiteSpace(Message))
+        {
+            ModelState.AddModelError(nameof(Message), "Must include a message to send");
+
+            await PreparePage();
+
+            return Page();
+        }
+
+
+
+    }
+
+    public async Task<IActionResult> OnPostLoadTemplate()
+    {
+        await PreparePage();
+
+        var chosenTemplate = Templates.FirstOrDefault(entry => entry.Id == TemplateId);
+
+        if (chosenTemplate is null)
+            return Page();
+
+        Type = chosenTemplate.TemplateType;
+        Message = chosenTemplate.Template;
+
+        return Page();
+    }
     
 }

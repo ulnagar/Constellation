@@ -10,6 +10,11 @@
 <h2>@(Model.Id == TemplateId.Empty ? "New Template" : "Edit Template")</h2>
 
 <div class="page-menu">
+    @if (Model.Id != TemplateId.Empty)
+    {
+        <button class="btn btn-danger delete-button">Delete</button>
+    }
+
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
@@ -64,7 +69,26 @@
     </div>
 </form>
 
+
+
 @section scripts
 {
     <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $('.delete-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDelete",
+                type: "POST",
+                data: {
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
 }

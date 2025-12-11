@@ -2,8 +2,12 @@ namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Templates
 
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Commands.CreateNewEmergencyConsoleMessageTemplate;
+using Application.Domains.EmergencyConsole.Commands.DeleteEmergencyConsoleMessageTemplate;
+using Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
 using Application.Models.Auth;
+using Constellation.Application.Domains.Students.Commands.WithdrawStudent;
+using Constellation.Core.Errors;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
@@ -13,9 +17,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
-using Shared.Helpers.ModelBinders;
 using System.ComponentModel.DataAnnotations;
+using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class UpsertModel : BasePageModel
@@ -86,6 +91,37 @@ public class UpsertModel : BasePageModel
         Type = template.Value.TemplateType;
         Name = template.Value.Name;
         Template = template.Value.Template;
+    }
+
+    public async Task<IActionResult> OnGetDelete()
+    {
+        DeleteEmergencyConsoleMessageTemplateCommand command = new(Id);
+
+        _logger
+            .ForContext(nameof(DeleteEmergencyConsoleMessageTemplateCommand), command, true)
+            .Information("Requested to delete Message Template by user {User}", _currentUserService.UserName);
+
+        Result result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Information("Requested to delete Message Template by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Emergency/Templates/Index", values: new { area = "Admin" }));
+
+            return Page();
+        }
+
+        return RedirectToPage("/Emergency/Templates/Index", new { area = "Admin" });
+    }
+
+    public async Task<IActionResult> OnPostAjaxDelete()
+    {
+        return Partial("ConfirmMessageTemplateDelete");
     }
 
     public async Task<IActionResult> OnPost()

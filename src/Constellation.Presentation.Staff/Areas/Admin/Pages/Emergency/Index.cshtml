@@ -1,6 +1,101 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.IndexModel
+
+@using Constellation.Core.Models.EmergencyConsole
+@using Constellation.Core.Models.EmergencyConsole.Enums
 @{
+}
+
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+        <div class="mb-3 row">
+            <label asp-for="TemplateId" class="col-md-2">Template</label>
+            <div class="col-md-3">
+                <select asp-for="TemplateId" asp-items="new SelectList(Model.Templates, nameof(MessageTemplate.Id), nameof(MessageTemplate.Name), Model.TemplateId)" class="form-select">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 col-offset-1">
+                <input type="submit" asp-page-handler="LoadTemplate" class="btn btn-sm btn-secondary" value="Load" />
+            </div>
+        </div>
+        
+        <div class="mb-1 row">
+            <label class="col-md-2">Recipients</label>
+        </div>
+
+        <div class="mb-1 row">
+            <label asp-for="RecipientGroups" class="col-md-2">Groups</label>
+            <div class="col-md-6">
+                <select asp-for="RecipientGroups" asp-items="new SelectList(RecipientGroup.GetOptions, nameof(RecipientGroup.Value), nameof(RecipientGroup.Name))" class="form-select combo" multiple="multiple">
+                    <option value="">-- Select --</option>
+                </select>
+                <span asp-validation-for="RecipientGroups" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="Recipients" class="col-md-2">Individuals</label>
+            <div class="col-md-6">
+                <input asp-for="Recipients" class="form-control" />
+                <span class="d-block text-danger">Enter email address or mobile numbers separated by a semicolon (;)</span>
+                <span asp-validation-for="Recipients" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="Type" class="col-md-2"></label>
+            <div class="col-md-3">
+                    <div class="btn-group" role="group">
+                        @foreach (var option in MessageType.GetOptions)
+                        {
+                            <input type="radio" class="btn-check" asp-for="Type" value="@option.Value" id="type-@option.Value" />
+                            <label class="btn btn-outline-success" for="type-@option.Value">@option.Name</label>
+                        }
+                    </div>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3 row">
+            <label asp-for="Message" class="col-md-2"></label>
+            <div class="col-md-6">
+                <textarea id="@Html.IdFor(m => m.Message)" name="@Html.NameFor(m => m.Message)" rows="20" cols="150" class="form-control">@Model.Message</textarea>
+                <span class="d-block d-none text-danger message-counter">The message contains <span id="character-count">@Model.Message.Count()</span> characters. Messages sent via SMS will be split into 160 character blocks and sent separately.</span>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <div class="col-md-offset-2 col-md-3 d-grid">
+                <input asp-page-handler="Send" type="submit" value="Send" class="btn btn-primary btn-lg"/>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts
+{
+    <script>
+        $('textarea').on("input", function() {
+          var currentLength = $(this).val().length;
+          $('#character-count').text(currentLength);
+        });
+
+        $('[name="Type"]').on("change", function() {
+            if($('#type-SMS').is(':checked'))
+            {
+                $('.message-counter').removeClass('d-none');
+            }
+            else {
+                $('.message-counter').addClass('d-none');
+            }
+        })
+    </script>
 }
 
 Message Type: SMS/Email
@@ -17,3 +112,4 @@ Attachment: file
 SMS:
 Message: string
 Include character counter with warning for long messages
+

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
+﻿namespace Constellation.Application.Domains.EmergencyConsole.Commands.DeleteEmergencyConsoleMessageTemplate;
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.EmergencyConsole.Errors;
@@ -11,15 +11,15 @@ using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class UpdateEmergencyConsoleMessageTemplateCommandHandler
-: ICommandHandler<UpdateEmergencyConsoleMessageTemplateCommand>
+internal sealed class DeleteEmergencyConsoleMessageTemplateCommandHandler
+: ICommandHandler<DeleteEmergencyConsoleMessageTemplateCommand>
 {
     private readonly IMessageTemplateRepository _templateRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public UpdateEmergencyConsoleMessageTemplateCommandHandler(
+    public DeleteEmergencyConsoleMessageTemplateCommandHandler(
         IMessageTemplateRepository templateRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
@@ -29,34 +29,24 @@ internal sealed class UpdateEmergencyConsoleMessageTemplateCommandHandler
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _logger = logger
-            .ForContext<UpdateEmergencyConsoleMessageTemplateCommand>();
+            .ForContext<DeleteEmergencyConsoleMessageTemplateCommand>();
     }
 
-    public async Task<Result> Handle(UpdateEmergencyConsoleMessageTemplateCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteEmergencyConsoleMessageTemplateCommand request, CancellationToken cancellationToken)
     {
         MessageTemplate? existingTemplate = await _templateRepository.GetById(request.Id, cancellationToken);
 
         if (existingTemplate is null)
         {
             _logger
-                .ForContext(nameof(UpdateEmergencyConsoleMessageTemplateCommand), request, true)
+                .ForContext(nameof(DeleteEmergencyConsoleMessageTemplateCommand), request, true)
                 .ForContext(nameof(Error), MessageTemplateErrors.NotFound(request.Id), true)
-                .Warning("Failed to update Emergency Console Message Template with Id '{Id}' by user {User}", request.Id, _currentUserService.UserName);
+                .Warning("Failed to delete Emergency Console Message Template with Id '{Id}' by user {User}", request.Id, _currentUserService.UserName);
 
             return Result.Failure(MessageTemplateErrors.NotFound(request.Id));
         }
 
-        Result update = existingTemplate.Update(request.Name, request.Template);
-
-        if (update.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(UpdateEmergencyConsoleMessageTemplateCommand), request, true)
-                .ForContext(nameof(Error), update.Error, true)
-                .Warning("Failed to update Emergency Console Message Template with Id '{Id}' by user {User}", request.Id, _currentUserService.UserName);
-
-            return Result.Failure(update.Error);
-        }
+        _templateRepository.Remove(existingTemplate);
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

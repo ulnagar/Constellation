@@ -106,6 +106,7 @@ builder.Services.AddMvc(options =>
         options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
         options.ModelBinderProviders.Insert(0, new PositionEnumBinderProvider());
         options.ModelBinderProviders.Insert(0, new AssetNumberBinderProvider());
+        options.ModelBinderProviders.Insert(0, new RecipientGroupBinderProvider());
     })
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
