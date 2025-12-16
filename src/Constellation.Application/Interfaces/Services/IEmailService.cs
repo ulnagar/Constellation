@@ -81,6 +81,9 @@ public interface IEmailService
     Task SendNewCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
+    // Emergency Console Emails
+    Task<Result<string>> SendEmergencyConsoleEmail(EmailRecipient recipient, string message, CancellationToken cancellationToken = default);
+
     // RollMarking Emails
     Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, Dictionary<string, string> recipients);
     Task SendNoRollMarkingReport(DateOnly reportDate, Dictionary<string, string> recipients);

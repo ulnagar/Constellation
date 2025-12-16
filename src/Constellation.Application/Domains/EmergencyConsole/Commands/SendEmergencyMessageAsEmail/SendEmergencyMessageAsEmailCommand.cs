@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Commands.SendEmergencyMessageAsEmail;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Abstractions.Messaging;
+using Core.Models.EmergencyConsole.Enums;
 
-internal class SendEmergencyMessageAsEmailCommand
-{
-}
+public sealed record SendEmergencyMessageAsEmailCommand(
+    List<RecipientGroup> RecipientGroups,
+    string Recipients,
+    string Message)
+    : ICommand;

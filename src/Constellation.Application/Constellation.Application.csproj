@@ -1,27 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
-    <AssemblyVersion>1.18.25262.2</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="EPPlus" Version="7.5.0" />
-	  <PackageReference Include="FluentValidation" Version="11.9.2" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
-    <PackageReference Include="MediatR" Version="12.3.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
-	<PackageReference Include="MailKit" Version="4.7.1.1" />
-	<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.11" />
-	<PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.11" />
-	<PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="EPPlus" />
+		<PackageReference Include="FluentValidation" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+	    <PackageReference Include="HtmlAgilityPack" />
+	    <PackageReference Include="MediatR" />
+	    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+		<PackageReference Include="MailKit" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Stores" />
+		<PackageReference Include="Serilog.Extensions.Logging" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
@@ -31,6 +29,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
+	  <Folder Include="Domains\EmergencyConsole\Helpers\" />
 	  <Folder Include="Domains\Operations\" />
 	  <Folder Include="Domains\WorkFlows\Enums\" />
 	</ItemGroup>

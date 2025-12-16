@@ -1,6 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
 
 using Application.Common.PresentationModels;
+using Application.Domains.EmergencyConsole.Commands.SendEmergencyMessageAsEmail;
+using Application.Domains.EmergencyConsole.Commands.SendEmergencyMessageAsSMS;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -14,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
-using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class IndexModel : BasePageModel
@@ -101,8 +102,17 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
+        if (Type == MessageType.Email)
+        {
+            var result = await _mediator.Send(new SendEmergencyMessageAsEmailCommand(RecipientGroups, Recipients, Message));
+        }
 
+        if (Type == MessageType.SMS)
+        {
+            var result = await _mediator.Send(new SendEmergencyMessageAsSMSCommand(RecipientGroups, Recipients, Message));
+        }
 
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostLoadTemplate()

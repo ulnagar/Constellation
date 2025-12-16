@@ -8,6 +8,7 @@ using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.AwardNominations;
 using Constellation.Infrastructure.Templates.Views.Emails.Awards;
 using Core.ValueObjects;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -40,7 +41,7 @@ public sealed partial class Service : IEmailService
 
         foreach (EmailRecipient recipient in recipients)
         {
-            await _emailSender.Send([recipient], EmailRecipient.NoReply.Email, viewModel.Title, body, new List<Attachment> { certificate }, cancellationToken);
+            await _emailSender.Send([recipient], EmailRecipient.NoReply.Email, viewModel.Title, body, new List<Attachment> { certificate }, MessagePriority.Normal, cancellationToken);
         }
     }
 
@@ -67,7 +68,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(SchoolNotificationEmailViewModel.ViewLocation, viewModel);
 
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure<string>(emailSendOperation.Error);
@@ -100,7 +101,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ParentNotificationEmailViewModel.ViewLocation, viewModel);
 
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure<string>(emailSendOperation.Error);

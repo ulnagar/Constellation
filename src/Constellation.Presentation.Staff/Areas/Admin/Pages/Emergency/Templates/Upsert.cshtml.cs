@@ -6,8 +6,6 @@ using Application.Domains.EmergencyConsole.Commands.DeleteEmergencyConsoleMessag
 using Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
 using Application.Models.Auth;
-using Constellation.Application.Domains.Students.Commands.WithdrawStudent;
-using Constellation.Core.Errors;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
@@ -20,7 +18,6 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
-using System.Threading;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class UpsertModel : BasePageModel

@@ -1,11 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <AssemblyVersion>1.18.25262.4</AssemblyVersion>
   </PropertyGroup>
 
 	<ItemGroup>
@@ -13,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hangfire" Version="1.8.14" />
+    <PackageReference Include="Hangfire" />
   </ItemGroup>
 
   <ItemGroup>

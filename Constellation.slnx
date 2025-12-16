@@ -1,0 +1,38 @@
+<Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/Application Deployment.txt" />
+    <File Path="docs/Job Timings.txt" />
+    <File Path="docs/Tasks.txt" />
+  </Folder>
+  <Folder Name="/docs/configuration/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Folder Name="/docs/resources/">
+    <File Path="docs/Resources/A04.svg" />
+    <File Path="docs/Resources/logo.svg" />
+  </Folder>
+  <Folder Name="/docs/tools/" />
+  <Folder Name="/docs/tools/snippets/">
+    <File Path="docs/tools/snippets/TestingSetup.snippet" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+    <File Path="src/Directory.Packages.props" />
+    <Project Path="src/Constellation.Application/Constellation.Application.csproj" />
+    <Project Path="src/Constellation.Core/Constellation.Core.csproj" />
+    <Project Path="src/Constellation.Infrastructure.HangfireServer/Constellation.Infrastructure.HangfireServer.csproj" />
+    <Project Path="src/Constellation.Infrastructure.Templates/Constellation.Infrastructure.Templates.csproj" />
+    <Project Path="src/Constellation.Infrastructure/Constellation.Infrastructure.csproj" />
+    <Project Path="src/Constellation.Presentation.Parents/Constellation.Presentation.Parents.csproj" />
+    <Project Path="src/Constellation.Presentation.Schools/Constellation.Presentation.Schools.csproj" />
+    <Project Path="src/Constellation.Presentation.Server/Constellation.Presentation.Server.csproj" />
+    <Project Path="src/Constellation.Presentation.Shared/Constellation.Presentation.Shared.csproj" />
+    <Project Path="src/Constellation.Presentation.Staff/Constellation.Presentation.Staff.csproj" />
+    <Project Path="src/Constellation.Presentation.Students/Constellation.Presentation.Students.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Constellation.Application.Tests.Unit/Constellation.Application.Tests.Unit.csproj" />
+    <Project Path="tests/Constellation.Core.Tests.Unit/Constellation.Core.Tests.Unit.csproj" />
+    <Project Path="tests/Constellation.Infrastructure.Tests.Unit/Constellation.Infrastructure.Tests.Unit.csproj" />
+  </Folder>
+</Solution>

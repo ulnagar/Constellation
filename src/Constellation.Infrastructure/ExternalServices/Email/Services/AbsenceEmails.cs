@@ -1,19 +1,19 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
-using Constellation.Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
-using Constellation.Application.Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
-using Constellation.Application.DTOs;
+using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
+using Application.Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
+using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.Students;
-using Constellation.Core.Shared;
-using Constellation.Infrastructure.Templates.Views.Emails.Absences;
 using Core.Models;
+using Core.Models.Students;
+using Core.Shared;
 using Core.ValueObjects;
 using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Templates.Views.Emails.Absences;
 
 public sealed partial class Service : IEmailService
 {
@@ -125,7 +125,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -166,7 +166,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceDigestEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -202,7 +202,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -240,7 +240,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -282,7 +282,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -321,7 +321,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceDigestEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
@@ -360,6 +360,6 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/MissedWorkEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 }

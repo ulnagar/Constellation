@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.EmergencyConsole;
 
 using Enums;
+using Errors;
 using Identifiers;
 using Shared;
 
@@ -41,17 +42,17 @@ public sealed class SentMessage
     {
         if (string.IsNullOrWhiteSpace(address))
         {
-            return Result.Failure<SentMessage>();
+            return Result.Failure<SentMessage>(SentMessageErrors.AddressBlank);
         }
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            return Result.Failure<SentMessage>();
+            return Result.Failure<SentMessage>(SentMessageErrors.NameBlank);
         }
 
         if (string.IsNullOrWhiteSpace(message))
         {
-            return Result.Failure<SentMessage>();
+            return Result.Failure<SentMessage>(SentMessageErrors.MessageBlank);
         }
 
         return new SentMessage(eventId, type, address, name, message);

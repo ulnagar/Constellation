@@ -5,6 +5,7 @@ using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Core.Models.Offerings;
 using Core.ValueObjects;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -60,13 +61,13 @@ public sealed partial class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, MessagePriority.Normal, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
         }
 
     }
@@ -119,13 +120,13 @@ public sealed partial class Service : IEmailService
 
             string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, MessagePriority.Normal, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
         }
     }
 
@@ -173,13 +174,13 @@ public sealed partial class Service : IEmailService
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
             string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, MessagePriority.Normal, cancellationToken);
         }
         else
         {
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
         }
     }
 }

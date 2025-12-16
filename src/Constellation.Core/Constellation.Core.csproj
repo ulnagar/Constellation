@@ -1,15 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
     <Configurations>Debug;Release</Configurations>
-    <AssemblyVersion>1.18.25262.0</AssemblyVersion>
-	<!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="MediatR.Contracts" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>

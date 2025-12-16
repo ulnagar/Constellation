@@ -8,6 +8,7 @@ using Core.Models.Students;
 using Core.Models.Subjects;
 using Core.Shared;
 using Core.ValueObjects;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ public sealed partial class Service : IEmailService
 
         recipients.Add(recipient.Value);
 
-        return await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        return await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendAssignmentUploadFailedNotification(
@@ -80,6 +81,7 @@ public sealed partial class Service : IEmailService
             EmailRecipient.NoReply,
             "[Aurora College] Canvas Assignment Upload Failure",
             body,
+            MessagePriority.Normal,
             cancellationToken);
     }
 }
