@@ -103,10 +103,12 @@ internal sealed class SendEmailActionConfiguration : IEntityTypeConfiguration<Se
 
                     config
                         .Property(recipient => recipient.Email)
+                        .IsRequired()
                         .HasColumnName(nameof(EmailRecipient.Email));
 
                     config
                         .Property(recipient => recipient.Name)
+
                         .HasColumnName(nameof(EmailRecipient.Name));
                 });
     }

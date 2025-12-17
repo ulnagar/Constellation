@@ -22,5 +22,6 @@ public interface ISchoolContactRepository
     Task<SchoolContact> GetById(SchoolContactId contactId, CancellationToken cancellationToken = default);
     Task<SchoolContact> GetByNameAndSchool(string name, string schoolCode, CancellationToken cancellationToken = default);
     Task<List<SchoolContact>> GetAllByRole(Position selectedRole, CancellationToken cancellationToken = default);
+    Task<List<SchoolContact>> GetActiveByRole(Position selectedRole, CancellationToken cancellationToken = default);
     void Insert(SchoolContact schoolContact);
 }

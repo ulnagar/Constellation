@@ -59,5 +59,9 @@ internal sealed class CasualConfiguration : IEntityTypeConfiguration<Casual>
         builder
             .HasIndex(casual => casual.EmailAddress)
             .IsUnique();
+
+        builder
+            .Property(entry => entry.EdvalTeacherId)
+            .IsRequired(false);
     }
 }

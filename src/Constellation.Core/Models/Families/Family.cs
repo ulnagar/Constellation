@@ -38,12 +38,12 @@ public sealed class Family : AggregateRoot, IAuditableEntity
     public string AddressPostCode { get; private set; } = string.Empty;
     public string FamilyEmail { get; private set; } = string.Empty;
 
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static Family Create(FamilyId id, string familyTitle)

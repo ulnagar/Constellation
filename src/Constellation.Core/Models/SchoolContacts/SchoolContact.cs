@@ -36,12 +36,12 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
     public string LastName { get; private set; }
     public string EmailAddress { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
-    public string CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
     public bool SelfRegistered { get; private set; }
     public string DisplayName => FirstName + " " + LastName;

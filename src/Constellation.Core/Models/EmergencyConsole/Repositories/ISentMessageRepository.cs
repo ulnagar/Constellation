@@ -5,6 +5,6 @@ using Identifiers;
 public interface ISentMessageRepository
 {
     Task<List<SentMessage>> GetAll(CancellationToken cancellationToken = default);
-    Task<List<SentMessage>> GetForMessage(MessageId  messageId, CancellationToken cancellationToken = default);
+    Task<SentMessage?> GetForMessage(EventId eventId, CancellationToken cancellationToken = default);
     void Insert(SentMessage message);
 }

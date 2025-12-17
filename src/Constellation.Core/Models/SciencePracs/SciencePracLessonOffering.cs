@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Core.Models.SciencePracs;
 
-using Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects.Identifiers;
+using Identifiers;
 
 public sealed record SciencePracLessonOffering(
     SciencePracLessonId LessonId,

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
@@ -11,10 +12,14 @@ using Microsoft.EntityFrameworkCore;
 public class SchoolContactRepository : ISchoolContactRepository
 {
     private readonly AppDbContext _context;
+    private readonly IDateTimeProvider _dateTime;
 
-    public SchoolContactRepository(AppDbContext context)
+    public SchoolContactRepository(
+        AppDbContext context,
+        IDateTimeProvider dateTime)
     {
         _context = context;
+        _dateTime = dateTime;
     }
 
     public void Insert(SchoolContact contact) => _context.Set<SchoolContact>().Add(contact);
@@ -147,6 +152,31 @@ public class SchoolContactRepository : ISchoolContactRepository
                     !role.IsDeleted &&
                     role.Role == selectedRole))
             .ToListAsync(cancellationToken);
+
+    public async Task<List<SchoolContact>> GetActiveByRole(
+        Position selectedRole,
+        CancellationToken cancellationToken = default)
+    {
+        List<string> schoolCodes = await _context
+            .Set<Student>()
+            .Where(student => !student.IsDeleted)
+            .SelectMany(student => student.SchoolEnrolments.Where(enrolment =>
+                !enrolment.IsDeleted &&
+                enrolment.StartDate <= _dateTime.Today &&
+                (!enrolment.EndDate.HasValue || enrolment.EndDate >= _dateTime.Today)))
+            .Select(enrolment => enrolment.SchoolCode)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<SchoolContact>()
+            .Where(contact =>
+                contact.Assignments.Any(role =>
+                    !role.IsDeleted &&
+                    role.Role == selectedRole &&
+                    schoolCodes.Contains(role.SchoolCode)))
+            .ToListAsync(cancellationToken);
+    }
 
     public async Task<List<SchoolContact>> GetAllActive(
         CancellationToken cancellationToken = default) =>

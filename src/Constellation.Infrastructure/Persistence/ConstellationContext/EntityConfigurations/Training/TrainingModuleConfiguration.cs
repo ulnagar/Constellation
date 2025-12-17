@@ -39,5 +39,9 @@ internal sealed class TrainingModuleConfiguration : IEntityTypeConfiguration<Tra
         builder
             .Navigation(module => module.Assignees)
             .AutoInclude();
+
+        builder
+            .Property(entry => entry.Url)
+            .IsRequired(false);
     }
 }

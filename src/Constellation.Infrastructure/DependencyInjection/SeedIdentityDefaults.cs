@@ -15,7 +15,8 @@ public static class IdentityDefaults
             new[]
             {
                 AuthPermissions.SchoolAdmin.Awards.Add,
-                AuthPermissions.StudentAdmin.Reports.Manage
+                AuthPermissions.StudentAdmin.Reports.Manage,
+                AuthPermissions.EmergencyConsole.Manage
             });
 
         await CreateRoleWithPermission(roleManager, AuthRoles.TutorialManager,

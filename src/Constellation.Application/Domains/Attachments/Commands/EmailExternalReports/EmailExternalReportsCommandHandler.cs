@@ -19,6 +19,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
+using MimeKit;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -184,7 +185,7 @@ internal sealed class EmailExternalReportsCommandHandler
                 body = body.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy"), StringComparison.CurrentCultureIgnoreCase);
 
                 // Send email with subject and body
-                await _emailGateway.Send([recipient], "auroracoll-h.school@det.nsw.edu.au", subject, body, [emailAttachment], cancellationToken);
+                await _emailGateway.Send([recipient], EmailRecipient.AuroraCollege, subject, body, [emailAttachment], MessagePriority.Normal, cancellationToken);
             }
         }
 

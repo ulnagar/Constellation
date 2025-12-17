@@ -35,5 +35,13 @@ public class SciencePracRollConfiguration : IEntityTypeConfiguration<SciencePrac
         builder
             .Navigation(roll => roll.Attendance)
             .AutoInclude();
+
+        builder
+            .Property(entry => entry.Comment)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.SchoolCode)
+            .IsRequired(false);
     }
 }

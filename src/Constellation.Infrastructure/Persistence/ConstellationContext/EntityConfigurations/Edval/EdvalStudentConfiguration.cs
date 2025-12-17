@@ -12,5 +12,29 @@ internal class EdvalStudentConfiguration : IEntityTypeConfiguration<EdvalStudent
 
         builder
             .HasKey(entity => entity.StudentId);
+
+        builder
+            .Property(entry => entry.PreferredName)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.RollGroup)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.House)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.StudentReference)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.PhoneNumber)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.UniqueId)
+            .IsRequired(false);
     }
 }

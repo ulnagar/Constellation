@@ -26,5 +26,17 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
             .HasConversion(
                 entry => entry.Value,
                 value => NotificationType.FromValue(value));
+
+        builder
+            .Property(entry => entry.OutgoingId)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Recipients)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.DeliveredMessageIds)
+            .IsRequired(false);
     }
 }

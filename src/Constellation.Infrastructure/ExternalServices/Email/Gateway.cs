@@ -41,6 +41,7 @@ public class Gateway : IEmailGateway
         EmailRecipient fromRecipient,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -52,6 +53,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -60,6 +62,7 @@ public class Gateway : IEmailGateway
         string fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -71,6 +74,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -80,6 +84,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -91,6 +96,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -100,6 +106,7 @@ public class Gateway : IEmailGateway
         string fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -111,6 +118,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -120,6 +128,7 @@ public class Gateway : IEmailGateway
         EmailRecipient fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -131,6 +140,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -141,6 +151,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -152,6 +163,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -163,6 +175,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -174,6 +187,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             calendarInfo,
+            priority,
             cancellationToken);
     }
 
@@ -184,6 +198,7 @@ public class Gateway : IEmailGateway
         string fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -195,6 +210,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -206,6 +222,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -217,6 +234,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -226,6 +244,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -237,6 +256,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
 
@@ -245,6 +265,7 @@ public class Gateway : IEmailGateway
         string fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -256,6 +277,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -264,6 +286,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -275,6 +298,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -283,6 +307,7 @@ public class Gateway : IEmailGateway
         string fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -294,6 +319,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -303,6 +329,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -314,6 +341,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -323,6 +351,7 @@ public class Gateway : IEmailGateway
         string fromAddress,
         string subject,
         string body,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -334,6 +363,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             null,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -344,6 +374,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         ICollection<Attachment> attachments,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendAll(
@@ -355,6 +386,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             null,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -363,6 +395,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendCalendarInvite(
@@ -374,6 +407,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             calendarInfo,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -383,6 +417,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendCalendarInvite(
@@ -394,6 +429,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             calendarInfo,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -403,6 +439,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendCalendarInvite(
@@ -414,6 +451,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             calendarInfo,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -424,6 +462,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendCalendarInvite(
@@ -435,6 +474,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             calendarInfo,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -445,6 +485,7 @@ public class Gateway : IEmailGateway
         string subject,
         string body,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendCalendarInvite(
@@ -456,6 +497,7 @@ public class Gateway : IEmailGateway
             body,
             null,
             calendarInfo,
+            priority,
             cancellationToken);
     }
     public Task<Result<MimeMessage>> Send(
@@ -467,6 +509,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         return SendCalendarInvite(
@@ -478,6 +521,7 @@ public class Gateway : IEmailGateway
             body,
             attachments,
             calendarInfo,
+            priority,
             cancellationToken);
     }
 
@@ -490,6 +534,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         Guid id = Guid.NewGuid();
@@ -547,6 +592,7 @@ public class Gateway : IEmailGateway
         AlternateView ical = AlternateView.CreateAlternateViewFromString(calendarInfo, contentType);
         message.AlternateViews.Add(ical);
         message.Headers.Add("Content-class", "urn:content-classes:calendarmessage");
+        message.Priority = priority == MessagePriority.Normal ? MailPriority.Normal : MailPriority.High;
 
         // Attachments
         if (attachments != null)
@@ -584,6 +630,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         Guid id = Guid.NewGuid();
@@ -618,6 +665,7 @@ public class Gateway : IEmailGateway
 
         _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
+        message.Priority = priority;
 
         TextPart textPartBody = new(TextFormat.Html)
         {
@@ -691,15 +739,16 @@ public class Gateway : IEmailGateway
     }
 
     private async Task<Result<MimeMessage>> SendAll(
-    List<EmailRecipient> toRecipients,
-    List<EmailRecipient> ccRecipients,
-    List<EmailRecipient> bccRecipients,
-    EmailRecipient fromAddress,
-    string subject,
-    string body,
-    ICollection<Attachment> attachments,
-    string calendarInfo,
-    CancellationToken cancellationToken = default)
+        List<EmailRecipient> toRecipients,
+        List<EmailRecipient> ccRecipients,
+        List<EmailRecipient> bccRecipients,
+        EmailRecipient fromAddress,
+        string subject,
+        string body,
+        ICollection<Attachment> attachments,
+        string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
+        CancellationToken cancellationToken = default)
     {
         Guid id = Guid.NewGuid();
 
@@ -731,6 +780,7 @@ public class Gateway : IEmailGateway
 
         _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
+        message.Priority = priority;
 
         TextPart textPartBody = new(TextFormat.Html)
         {
@@ -812,6 +862,7 @@ public class Gateway : IEmailGateway
         string body,
         ICollection<Attachment> attachments,
         string calendarInfo,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         var id = Guid.NewGuid();
@@ -847,6 +898,7 @@ public class Gateway : IEmailGateway
 
         _logger.Information("{id}: Setting Subject to \"{subject}\"", id, subject);
         message.Subject = subject;
+        message.Priority = priority;
 
         var textPartBody = new TextPart(TextFormat.Html)
         {

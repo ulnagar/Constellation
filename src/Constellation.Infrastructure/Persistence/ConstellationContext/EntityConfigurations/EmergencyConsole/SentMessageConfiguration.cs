@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.EmergencyConsole;
 
 using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Enums;
 using Core.Models.EmergencyConsole.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -19,18 +18,16 @@ internal sealed class SentMessageConfiguration :IEntityTypeConfiguration<SentMes
             .Property(message => message.Id)
             .HasConversion(
                 id => id.Value,
-                value => MessageId.FromValue(value));
-
-        builder
-            .Property(message => message.EventId)
-            .HasConversion(
-                id => id.Value,
                 value => EventId.FromValue(value));
 
         builder
-            .Property(message => message.Type)
-            .HasConversion(
-                type => type.Value,
-                value => MessageType.FromValue(value));
+            .HasMany(message => message.Statuses)
+            .WithOne()
+            .HasForeignKey(status => status.EventId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(message => message.Statuses)
+            .AutoInclude();
     }
 }

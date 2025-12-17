@@ -44,5 +44,37 @@ public class StocktakeSightingConfiguration : IEntityTypeConfiguration<Stocktake
             .HasConversion(
                 user => user.Value,
                 value => UserType.FromValue(value));
+
+        builder
+            .Property(entry => entry.SerialNumber)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.AssetNumber)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Description)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Comment)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.LocationCode)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.UserCode)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.CancellationComment)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.CancelledBy)
+            .IsRequired(false);
     }
 }

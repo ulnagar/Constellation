@@ -15,5 +15,9 @@ public class DeviceConfiguration : IEntityTypeConfiguration<Device>
         builder.HasMany(d => d.Notes)
             .WithOne(n => n.Device)
             .HasForeignKey(n => n.SerialNumber);
+
+        builder
+            .Property(entry => entry.Description)
+            .IsRequired(false);
     }
 }

@@ -2,7 +2,6 @@
 namespace Constellation.Core.Models.Families;
 
 using Identifiers;
-using System.ComponentModel;
 using ValueObjects;
 
 public sealed class Parent

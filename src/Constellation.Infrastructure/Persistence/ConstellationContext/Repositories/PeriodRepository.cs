@@ -187,5 +187,15 @@ public class PeriodRepository : IPeriodRepository
             .Where(period => periodIds.Contains(period.Id))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<Period>> GetByDayNumber(
+        int dayNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Period>()
+            .Where(period =>
+                !period.IsDeleted &&
+                period.DayNumber == dayNumber)
+            .ToListAsync(cancellationToken);
+
     public void Insert(Period period) => _context.Set<Period>().Add(period);
 }

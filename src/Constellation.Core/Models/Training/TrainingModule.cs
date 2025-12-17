@@ -33,12 +33,12 @@ public sealed class TrainingModule : AggregateRoot, IAuditableEntity
     public string Url { get; private set; }
     public IReadOnlyList<TrainingCompletion> Completions => _completions.AsReadOnly();
     public IReadOnlyList<TrainingModuleAssignee> Assignees => _assignees.AsReadOnly();
-    public string CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
     public static TrainingModule Create(

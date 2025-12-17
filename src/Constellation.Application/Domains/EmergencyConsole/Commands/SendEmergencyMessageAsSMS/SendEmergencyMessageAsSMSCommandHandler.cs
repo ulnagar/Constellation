@@ -18,7 +18,7 @@ internal sealed class SendEmergencyMessageAsSMSCommandHandler
 
     public async Task<Result> Handle(SendEmergencyMessageAsSMSCommand request, CancellationToken cancellationToken)
     {
-        
+        return Result.Success();
     }
 }
  

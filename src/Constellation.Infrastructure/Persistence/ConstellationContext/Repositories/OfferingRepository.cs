@@ -189,6 +189,16 @@ public class OfferingRepository : IOfferingRepository
         return offerings;
     }
 
+    public async Task<List<Offering>> GetFromListOfPeriodIds(
+        List<PeriodId> periodIds,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Offering>()
+            .Where(offering =>
+                offering.Sessions.Any(session => !session.IsDeleted && periodIds.Contains(session.PeriodId)) &&
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today)
+            .ToListAsync(cancellationToken);
 
     // Method is not async as we are passing the task to another method
     public Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(
