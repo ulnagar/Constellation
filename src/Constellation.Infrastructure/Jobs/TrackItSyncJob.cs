@@ -3,7 +3,6 @@ namespace Constellation.Infrastructure.Jobs;
 
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Core.Models.Students.Identifiers;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
@@ -18,7 +17,6 @@ using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Persistence.TrackItContext;
 using Persistence.TrackItContext.Models;
-using System.Diagnostics;
 using System.Globalization;
 
 internal sealed class TrackItSyncJob : ITrackItSyncJob
@@ -136,7 +134,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
                         continue;
                 }
 
-                SchoolContact? contact = acosContacts.FirstOrDefault(contact => contact.EmailAddress.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
+                SchoolContact? contact = acosContacts.FirstOrDefault(contact => contact.EmailAddress.Email.Equals(emailAddress, StringComparison.OrdinalIgnoreCase));
 
                 if (contact is not null)
                 {
@@ -246,7 +244,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}", jobId, acosContact.DisplayName, acosContact.EmailAddress);
 
             string contactEmailId = ConvertEmailToEmailId(acosContact.EmailAddress);
-            string contactPortalId = ConvertEmailToPortalId(acosContact.EmailAddress);
+            string contactPortalId = ConvertEmailToPortalId(acosContact.EmailAddress.Email);
 
             Customer? tiCustomer = tiCustomers.FirstOrDefault(c => c.Client == contactPortalId || c.Emailid == contactEmailId);
 
@@ -369,7 +367,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
         if (checkDepartment?.Name.Contains("Faculty", StringComparison.OrdinalIgnoreCase) ?? false)
             return;
 
-        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress);
+        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
 
         if (string.IsNullOrWhiteSpace(contactPortalId))
             return;
@@ -385,18 +383,18 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
         customer.Emailid = ConvertEmailToEmailId(contact.EmailAddress);
 
-        if (customer.Fname != contact.FirstName)
+        if (customer.Fname != contact.Name.FirstName)
         {
-            customer.Fname = contact.FirstName;
+            customer.Fname = contact.Name.FirstName;
 
-            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: FirstName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.FirstName);
+            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: FirstName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.Name.FirstName);
         }
 
-        if (customer.Name != contact.LastName)
+        if (customer.Name != contact.Name.LastName)
         {
-            customer.Name = contact.LastName;
+            customer.Name = contact.Name.LastName;
 
-            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: LastName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.LastName);
+            _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: LastName updated to {newName}", JobId, contact.DisplayName, contact.EmailAddress, contact.Name.LastName);
         }
 
         Department? department = _tiDepartments.FirstOrDefault(c => c.Name == "Partner School");
@@ -486,7 +484,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
 
     private Customer CreateCustomerFromContact(SchoolContact contact)
     {
-        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress);
+        string? contactPortalId = ConvertEmailToPortalId(contact.EmailAddress.Email);
         
         Customer customer = new()
         {
@@ -494,8 +492,8 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             Emailid = ConvertEmailToEmailId(contact.EmailAddress),
             Group = 2,
             Inactive = 0,
-            Fname = contact.FirstName,
-            Name = contact.LastName
+            Fname = contact.Name.FirstName,
+            Name = contact.Name.LastName
         };
 
         _logger.Information("{id}: Contact: Name {contact} - Email {emailAddress}: Created new record", JobId, contact.DisplayName, contact.EmailAddress);

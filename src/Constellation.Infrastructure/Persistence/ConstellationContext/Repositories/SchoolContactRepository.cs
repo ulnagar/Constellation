@@ -7,6 +7,7 @@ using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.Students;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 public class SchoolContactRepository : ISchoolContactRepository
@@ -54,15 +55,14 @@ public class SchoolContactRepository : ISchoolContactRepository
             .Set<SchoolContact>()
             .SingleOrDefaultAsync(entry => entry.Id == contactId, cancellationToken);
 
-    public async Task<SchoolContact> GetByNameAndSchool(
+    public async Task<SchoolContact?> GetByNameAndSchool(
         string name,
         string schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()
             .Where(entry => 
-                name.Contains(entry.FirstName) && 
-                name.Contains(entry.LastName) &&
+                name == entry.Name && 
                 entry.Assignments.Any(role =>
                     !role.IsDeleted &&
                     role.SchoolCode == schoolCode))
@@ -81,7 +81,7 @@ public class SchoolContactRepository : ISchoolContactRepository
             .ToListAsync(cancellationToken);
 
     public async Task<SchoolContact?> GetWithRolesByEmailAddress(
-        string emailAddress,
+        EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SchoolContact>()

@@ -41,23 +41,68 @@
         <div class="mb-3 row">
             <label asp-for="Recipients" class="col-md-2">Individuals</label>
             <div class="col-md-6">
-                <input asp-for="Recipients" class="form-control" />
-                <span class="d-block text-danger">Enter email address or mobile numbers separated by a semicolon (;)</span>
-                <span asp-validation-for="Recipients" class="text-danger"></span>
+                <h4 class="recipient-list">
+                    <span class="badge text-bg-warning recipient-1 mb-1">
+                        <span class="align-text-top">Ben Hillsley</span>
+                        <span class="ms-2 me-2">
+                            <i class="fas fa-envelope-square large" title="benjamin.hillsley@det.nsw.edu.au"></i>
+                            <i class="fas fa-phone-square-alt large" title="0458040909"></i>
+                        </span>
+                        <button type="button" class="btn-close" aria-label="Close"></button>
+                    </span>
+                    <span class="badge text-bg-warning recipient-2 mb-1">
+                        <span class="align-text-top">Michael Necovski</span>
+                        <span class="ms-2 me-2">
+                            <i class="fas fa-envelope-square large" title="michael.necovski2@det.nsw.edu.au"></i>
+                        </span>
+                        <button type="button" class="btn-close" aria-label="Close"></button>
+                    </span>
+                    <span class="badge text-bg-warning recipient-3 mb-1">
+                        <span class="align-text-top">Christian Necovski</span>
+                        <span class="ms-2 me-2">
+                            <i class="fas fa-envelope-square large" title="christian.necovski@det.nsw.edu.au"></i>
+                        </span>
+                        <button type="button" class="btn-close" aria-label="Close"></button>
+                    </span>
+                </h4>
+                <div class="recipient-inputs">
+                    <div id="recipient-1">
+                        <input type="hidden" name="Recipients.Index" value="1"/>
+                        <input type="hidden" name="Recipients[1].Name.FirstName" value="Ben"/>
+                        <input type="hidden" name="Recipients[1].Name.Lastname" value="Hillsley"/>
+                        <input type="hidden" name="Recipients[1].EmailAddress" value="benjamin.hillsley@det.nsw.edu.au"/>
+                        <input type="hidden" name="Recipients[1].PhoneNumber" value="0458040909"/>
+                    </div>
+                    <div id="recipient-2">
+                        <input type="hidden" name="Recipients.Index" value="2" />
+                        <input type="hidden" name="Recipients[2].Name.FirstName" value="Michael" />
+                        <input type="hidden" name="Recipients[2].Name.Lastname" value="Necovski" />
+                        <input type="hidden" name="Recipients[2].EmailAddress" value="michael.necovski2@det.nsw.edu.au" />
+                    </div>
+                    <div id="recipient-3">
+                        <input type="hidden" name="Recipients.Index" value="3" />
+                        <input type="hidden" name="Recipients[3].Name.FirstName" value="Christian" />
+                        <input type="hidden" name="Recipients[3].Name.Lastname" value="Necovski" />
+                        <input type="hidden" name="Recipients[3].EmailAddress" value="christian.necovski@det.nsw.edu.au" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-offset-md-4">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#ManualRecipientModal" class="btn btn-secondary">Add</button>
             </div>
         </div>
 
         <div class="mb-3 row">
             <label asp-for="Type" class="col-md-2"></label>
             <div class="col-md-3">
-                    <div class="btn-group" role="group">
-                        @foreach (var option in MessageType.GetOptions)
-                        {
-                            <input type="radio" class="btn-check" asp-for="Type" value="@option.Value" id="type-@option.Value" />
-                            <label class="btn btn-outline-success" for="type-@option.Value">@option.Name</label>
-                        }
-                    </div>
-                    <span asp-validation-for="Type" class="text-danger"></span>
+                <div class="btn-group" role="group">
+                    @foreach (var option in MessageType.GetOptions)
+                    {
+                        <input type="radio" class="btn-check" asp-for="Type" value="@option.Value" id="type-@option.Value" />
+                        <label class="btn btn-outline-success" for="type-@option.Value">@option.Name</label>
+                    }
+                </div>
+                <span asp-validation-for="Type" class="text-danger"></span>
             </div>
         </div>
         
@@ -78,6 +123,54 @@
     </div>
 </form>
 
+<div class="modal" id="ManualRecipientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Enter Manual Recipient</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <label class="col-md-12">First Name</label>
+                        <div class="col-md-12">
+                            <input id="ManualRecipientFirstName" type="text" class="form-control" required="required" />
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <label class="col-md-12">Last Name</label>
+                        <div class="col-md-12">
+                            <input id="ManualRecipientLastName" type="text" class="form-control" required="required" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <label class="col-md-12">Email</label>
+                        <div class="col-md-12">
+                            <input id="ManualRecipientEmail" type="email" class="form-control" />
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <label class="col-md-12">Phone Number</label>
+                        <div class="col-md-12">
+                            <input id="ManualRecipientPhone" type="tel" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="addRecipient()">Add</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @section Scripts
 {
     <script>
@@ -94,7 +187,10 @@
             else {
                 $('.message-counter').addClass('d-none');
             }
-        })
+        });
+
+
+
     </script>
 }
 

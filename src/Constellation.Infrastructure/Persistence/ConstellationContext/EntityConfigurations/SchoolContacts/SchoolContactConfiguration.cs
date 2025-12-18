@@ -23,8 +23,34 @@ internal sealed class SchoolContactConfiguration : IEntityTypeConfiguration<Scho
                 value => SchoolContactId.FromValue(value));
 
         builder
+            .ComplexProperty(contact => contact.Name)
+            .IsRequired();
+
+        builder
+            .ComplexProperty(contact => contact.Name)
+            .Property(name => name.FirstName)
+            .HasColumnName(nameof(Name.FirstName))
+            .IsRequired();
+
+        builder
+            .ComplexProperty(student => student.Name)
+            .Property(name => name.PreferredName)
+            .HasColumnName(nameof(Name.PreferredName))
+            .IsRequired(false);
+
+        builder
+            .ComplexProperty(student => student.Name)
+            .Property(name => name.LastName)
+            .HasColumnName(nameof(Name.LastName))
+            .IsRequired();
+
+        builder
             .Property(contact => contact.PhoneNumber)
             .HasConversion<PhoneNumberConverter>();
+
+        builder
+            .Property(contact => contact.EmailAddress)
+            .HasConversion<EmailAddressConverter>();
 
         builder
             .HasMany(contact => contact.Assignments)

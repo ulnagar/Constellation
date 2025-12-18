@@ -195,7 +195,7 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 continue;
 
             // If the csvSchools Principal entry matches an existing entry in the database, check the next school
-            if (principals.Any(entry => entry.EmailAddress == csvSchool.PrincipalEmail))
+            if (principals.Any(entry => entry.EmailAddress.Email == csvSchool.PrincipalEmail))
                 continue;
 
             // Does the email address appear in the SchoolContact list?

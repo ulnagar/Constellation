@@ -112,11 +112,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
 
         foreach (SchoolContact coordinator in coordinators)
         {
-            Result<Name> nameResult = Name.Create(coordinator.FirstName, string.Empty, coordinator.LastName);
-            if (nameResult.IsFailure)
-                continue;
-
-            Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, coordinator.EmailAddress);
+            Result<EmailRecipient> result = EmailRecipient.Create(coordinator.Name, coordinator.EmailAddress);
 
             if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
                 recipients.Add(result.Value);

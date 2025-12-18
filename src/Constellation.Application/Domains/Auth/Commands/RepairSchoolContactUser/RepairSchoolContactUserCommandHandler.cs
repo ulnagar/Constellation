@@ -57,17 +57,17 @@ internal sealed class RepairSchoolContactUserCommandHandler
             return Result.Failure<AppUser>(new Error("Authorisation.AppUser.Deleted", "School Contact has no active roles"));
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress);
+        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
 
         if (user is null)
         {
             // Create a new user
             AppUser newUser = new()
             {
-                UserName = contact.EmailAddress,
-                Email = contact.EmailAddress,
-                FirstName = contact.FirstName,
-                LastName = contact.LastName,
+                UserName = contact.EmailAddress.Email,
+                Email = contact.EmailAddress.Email,
+                FirstName = contact.Name.FirstName,
+                LastName = contact.Name.LastName,
                 IsSchoolContact = true,
                 SchoolContactId = contact.Id
             };

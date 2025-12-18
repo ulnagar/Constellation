@@ -39,26 +39,16 @@ internal sealed class SendEmergencyMessageAsEmailCommandHandler
 
     public async Task<Result> Handle(SendEmergencyMessageAsEmailCommand request, CancellationToken cancellationToken)
     {
-        List<EmailRecipient> recipients = [];
+        List<AlertRecipient> recipients = request.Recipients;
 
         foreach (RecipientGroup group in request.RecipientGroups)
         {
-            List<EmailRecipient> groupRecipients = await _recipientService.GetSelectedEmailRecipientsFromGroup(group, cancellationToken);
+            List<AlertRecipient> groupRecipients = await _recipientService.GetSelectedRecipientsFromGroup(group, cancellationToken);
 
             recipients.AddRange(groupRecipients);
         }
 
-        string[] manualRecipients = request.Recipients.Split(';');
-
-        foreach (string manualRecipient in manualRecipients)
-        {
-            Result<EmailRecipient> recipient = EmailRecipient.Create(manualRecipient, manualRecipient);
-
-            if (recipient.IsSuccess)
-                recipients.Add(recipient.Value);
-        }
-
-        recipients = recipients.DistinctBy(entry => entry.Email).ToList();
+        recipients = recipients.Distinct().ToList();
         
         Result<SentMessage> sentMessage = SentMessage.Create(request.Message);
 
@@ -76,11 +66,18 @@ internal sealed class SendEmergencyMessageAsEmailCommandHandler
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 
-        foreach (EmailRecipient recipient in recipients)
+        foreach (AlertRecipient recipient in recipients)
         {
-            Result<string> email = await _emailService.SendEmergencyConsoleEmail(recipient, request.Message, cancellationToken);
+            if (recipient.HasEmail)
+            {
+                Result<string> email = await _emailService.SendEmergencyConsoleEmail(recipient, request.Message, cancellationToken);
 
-            sentMessage.Value.AddMessage(MessageType.Email, recipient.Email, recipient.Name, email.IsSuccess);
+                sentMessage.Value.AddMessage(MessageType.Email, recipient.EmailAddress.Email, recipient.Name, email.IsSuccess);
+            }
+            else
+            {
+                sentMessage.Value.AddMessage(MessageType.Email, string.Empty, recipient.Name, false);
+            }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
         }

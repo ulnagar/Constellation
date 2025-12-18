@@ -161,16 +161,6 @@ internal sealed class ExportContactListCommandHandler
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<Name> contactName = Name.Create(contact.FirstName, null, contact.LastName);
-
-                if (contactName.IsFailure)
-                    continue;
-
-                Result<EmailAddress> contactEmail = EmailAddress.Create(contact.EmailAddress);
-
-                if (contactEmail.IsFailure)
-                    continue;
-
                 foreach (SchoolContactRole role in contact.Assignments)
                 {
                     // If the request should not include restricted roles, ignore restricted roles.
@@ -191,8 +181,8 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         category,
-                        contactName.Value.DisplayName,
-                        contactEmail.Value,
+                        contact.Name.DisplayName,
+                        contact.EmailAddress,
                         contact.PhoneNumber,
                         role.Note));
                 }

@@ -116,7 +116,7 @@ internal sealed class SendConfirmationEmail
 
         foreach (var contact in contacts)
         {
-            if (recipients.Any(entry => entry.Email == contact.EmailAddress))
+            if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
                 continue;
 
             Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();

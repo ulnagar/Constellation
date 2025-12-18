@@ -177,10 +177,10 @@ internal sealed class SendTrainingNotificationEmailToTeacher
 
                     foreach (SchoolContact sharedPrincipal in sharedSchoolPrincipals)
                     {
-                        if (recipients.Any(entry => entry.Email == sharedPrincipal.EmailAddress))
+                        if (recipients.Any(entry => entry.Email == sharedPrincipal.EmailAddress.Email))
                             continue;
 
-                        Result<EmailRecipient> sharedPrincipalEmail = EmailRecipient.Create(sharedPrincipal.DisplayName, sharedPrincipal.EmailAddress);
+                        Result<EmailRecipient> sharedPrincipalEmail = EmailRecipient.Create(sharedPrincipal.Name, sharedPrincipal.EmailAddress);
                         if (sharedPrincipalEmail.IsFailure)
                         {
                             _logger

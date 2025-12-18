@@ -127,9 +127,9 @@ internal sealed class AuditAllUsersCommandHandler
 
             _logger
                 .ForContext(nameof(SchoolContact), contact, true)
-                .Information("Checking school contact {name}", $"{contact.FirstName} {contact.LastName}");
+                .Information("Checking school contact {name}", contact.Name.DisplayName);
 
-            AppUser? existingUser = users.FirstOrDefault(user => user.Email == contact.EmailAddress);
+            AppUser? existingUser = users.FirstOrDefault(user => user.Email == contact.EmailAddress.Email);
 
             if (existingUser is null)
             {
@@ -213,7 +213,7 @@ internal sealed class AuditAllUsersCommandHandler
             StaffMember? matchingStaff = staff
                 .FirstOrDefault(member => member.EmailAddress.Email == user.Email);
             
-            SchoolContact? contact = contacts.FirstOrDefault(contact => contact.EmailAddress == user.Email);
+            SchoolContact? contact = contacts.FirstOrDefault(contact => contact.EmailAddress.Email == user.Email);
 
             Student? student = students.FirstOrDefault(student => student.EmailAddress.Email == user.Email);
 
@@ -273,9 +273,9 @@ internal sealed class AuditAllUsersCommandHandler
 
     private Task CreateUserFromContact(SchoolContact contact) =>
         CreateUser(
-            contact.EmailAddress,
-            contact.FirstName,
-            contact.LastName,
+            contact.EmailAddress.Email,
+            contact.Name.FirstName,
+            contact.Name.LastName,
             isContact: true,
             contactId: contact.Id.Value);
 
@@ -420,18 +420,18 @@ internal sealed class AuditAllUsersCommandHandler
 
     private async Task CheckContactUserDetails(AppUser user, SchoolContact contact)
     {
-        if (user.FirstName != contact.FirstName)
+        if (user.FirstName != contact.Name.FirstName)
         {
-            _logger.Information("Updating FirstName to {firstName}", contact.FirstName);
+            _logger.Information("Updating FirstName to {firstName}", contact.Name.FirstName);
 
-            user.FirstName = contact.FirstName;
+            user.FirstName = contact.Name.FirstName;
         }
 
-        if (user.LastName != contact.LastName)
+        if (user.LastName != contact.Name.LastName)
         {
-            _logger.Information("Updating LastName to {lastName}", contact.LastName);
+            _logger.Information("Updating LastName to {lastName}", contact.Name.LastName);
 
-            user.LastName = contact.LastName;
+            user.LastName = contact.Name.LastName;
         }
 
         if (user.IsSchoolContact != true)

@@ -48,32 +48,7 @@ internal sealed class GetContactsBySchoolQueryHandler
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-
-                if (name.IsFailure)
-                {
-                    _logger
-                        .ForContext("Contact.FirstName", contact.FirstName)
-                        .ForContext("Contact.LastName", contact.LastName)
-                        .ForContext(nameof(Error), name.Error, true)
-                        .Warning("Failed to retrieve list of School with active Contacts");
-
-                    continue;
-                }
-
-                Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
-
-                if (email.IsFailure)
-                {
-                    _logger
-                        .ForContext("Contact.EmailAddress", contact.EmailAddress)
-                        .ForContext(nameof(Error), email.Error, true)
-                        .Warning("Failed to retrieve list of School with active Contacts");
-
-                    continue;
-                }
-
-                PhoneNumber phone = contact.PhoneNumber == PhoneNumber.Empty
+               PhoneNumber phone = contact.PhoneNumber == PhoneNumber.Empty
                     ? PhoneNumber.Create(school.PhoneNumber).Value
                     : contact.PhoneNumber;
 
@@ -91,8 +66,8 @@ internal sealed class GetContactsBySchoolQueryHandler
                     entries.Add(new(
                         contact.Id,
                         role.Id,
-                        name.Value,
-                        email.Value,
+                        contact.Name,
+                        contact.EmailAddress,
                         phone,
                         role.Role,
                         role.Note));

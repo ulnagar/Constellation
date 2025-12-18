@@ -165,11 +165,9 @@ internal sealed class SendNotificationsForAssessmentProvisionsCommandHandler
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<Name> contactName = contact.GetName();
-
                 Result<EmailRecipient> recipient = contact.GetEmailRecipient();
 
-                if (recipient.IsFailure || contactName.IsFailure)
+                if (recipient.IsFailure)
                 {
                     foreach (var provision in schoolAdjustmentsList)
                     {
@@ -179,7 +177,7 @@ internal sealed class SendNotificationsForAssessmentProvisionsCommandHandler
                     continue;
                 }
 
-                Result schoolEmailResult = await _emailService.SendAssessmentProvisionEmailToSchools([recipient.Value], [], contactName.Value, schoolAdjustmentsList, cancellationToken);
+                Result schoolEmailResult = await _emailService.SendAssessmentProvisionEmailToSchools([recipient.Value], [], contact.Name, schoolAdjustmentsList, cancellationToken);
 
                 foreach (var provision in schoolAdjustmentsList)
                 {

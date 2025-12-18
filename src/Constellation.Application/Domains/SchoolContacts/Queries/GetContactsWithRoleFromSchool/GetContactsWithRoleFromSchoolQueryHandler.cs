@@ -44,10 +44,10 @@ internal sealed class GetContactsWithRoleFromSchoolQueryHandler
                 response.Add(new(
                     contact.Id,
                     role.Id,
-                    contact.FirstName,
-                    contact.LastName,
+                    contact.Name.FirstName,
+                    contact.Name.LastName,
                     contact.PhoneNumber.ToString(PhoneNumber.Format.None),
-                    contact.EmailAddress,
+                    contact.EmailAddress.Email,
                     role.Role));
             }
         }

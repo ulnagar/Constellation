@@ -2,9 +2,10 @@
 
 using Abstractions.Messaging;
 using Core.Models.EmergencyConsole.Enums;
+using Core.ValueObjects;
 
 public sealed record SendEmergencyMessageAsEmailCommand(
     List<RecipientGroup> RecipientGroups,
-    string Recipients,
+    List<AlertRecipient> Recipients,
     string Message)
     : ICommand;

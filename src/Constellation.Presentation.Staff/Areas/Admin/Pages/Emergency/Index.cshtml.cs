@@ -10,6 +10,7 @@ using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
 using Core.Models.EmergencyConsole.Identifiers;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,13 +54,13 @@ public class IndexModel : BasePageModel
     public List<RecipientGroup> RecipientGroups { get; set; } = [];
 
     [BindProperty]
-    public string? Recipients { get; set; } = string.Empty;
+    public List<AlertRecipient> Recipients { get; set; } = [];
 
     [BindProperty]
     public TemplateId TemplateId { get; set; } = TemplateId.Empty;
 
     [BindProperty]
-    public string Message { get; set; } = string.Empty;
+    public string? Message { get; set; } = string.Empty;
 
     public List<MessageTemplate> Templates { get; set; } = [];
 
@@ -79,12 +80,14 @@ public class IndexModel : BasePageModel
             return;
         }
 
+        Message ??= string.Empty;
+
         Templates = templates.Value;
     }
 
     public async Task<IActionResult> OnPostSend()
     {
-        if (RecipientGroups.Count == 0 && string.IsNullOrWhiteSpace(Recipients))
+        if (RecipientGroups.Count == 0 && Recipients.Count == 0)
         {
             ModelState.AddModelError(nameof(Recipients), "Must include at least one recipient or group");
 
@@ -104,12 +107,30 @@ public class IndexModel : BasePageModel
 
         if (Type == MessageType.Email)
         {
-            var result = await _mediator.Send(new SendEmergencyMessageAsEmailCommand(RecipientGroups, Recipients, Message));
+            Result result = await _mediator.Send(new SendEmergencyMessageAsEmailCommand(RecipientGroups, Recipients, Message));
+
+            if (result.IsFailure)
+            {
+                ModalContent = ErrorDisplay.Create(result.Error);
+                
+                await PreparePage();
+
+                return Page();
+            }
         }
 
         if (Type == MessageType.SMS)
         {
-            var result = await _mediator.Send(new SendEmergencyMessageAsSMSCommand(RecipientGroups, Recipients, Message));
+            Result result = await _mediator.Send(new SendEmergencyMessageAsSMSCommand(RecipientGroups, Recipients, Message));
+
+            if (result.IsFailure)
+            {
+                ModalContent = ErrorDisplay.Create(result.Error);
+
+                await PreparePage();
+
+                return Page();
+            }
         }
 
         return RedirectToPage();

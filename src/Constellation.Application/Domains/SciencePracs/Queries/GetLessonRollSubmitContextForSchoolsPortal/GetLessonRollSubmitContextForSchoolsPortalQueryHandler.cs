@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.SciencePracs.Queries.GetLessonRollSubmitContextForSchoolsPortal;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.SciencePracs.Queries.GetLessonRollDetails;
+using Constellation.Application.Domains.SciencePracs.Queries.GetLessonRollDetailsForSchoolsPortal;
 using Core.Abstractions.Repositories;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
@@ -9,6 +11,7 @@ using Core.Models.SciencePracs.Errors;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Serilog;
 using System;
 using System.Linq;
@@ -69,7 +72,28 @@ internal sealed class GetLessonRollSubmitContextForSchoolsPortalQueryHandler
         {
             if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
             {
-                SchoolContact contact = await _contactRepository.GetWithRolesByEmailAddress(roll.SubmittedBy, cancellationToken);
+                SchoolContact? contact = null;
+
+                if (roll.SubmittedBy.Contains('@'))
+                {
+                    Result<EmailAddress> emailAddress = EmailAddress.Create(roll.SubmittedBy);
+
+                    if (emailAddress.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(GetLessonRollSubmitContextForSchoolsPortalQuery), request, true)
+                            .ForContext(nameof(Error), emailAddress.Error, true)
+                            .Warning("Failed to retrieve Lesson Roll details");
+
+                        return Result.Failure<ScienceLessonRollForSubmit>(emailAddress.Error);
+                    }
+
+                    contact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
+                }
+                else
+                {
+                    contact = await _contactRepository.GetByNameAndSchool(roll.SubmittedBy, roll.SchoolCode, cancellationToken);
+                }
 
                 if (contact is not null)
                 {

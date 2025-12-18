@@ -91,7 +91,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
                 oldUser.StaffId = StaffId.Empty;
             }
 
-            SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.OldEmail, cancellationToken);
+            SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(oldEmailAddress, cancellationToken);
 
             if (schoolContact is null)
             {

@@ -37,9 +37,9 @@ internal sealed class GetContactSummaryQueryHandler
 
         return new ContactSummaryResponse(
             contact.Id,
-            contact.FirstName,
-            contact.LastName,
-            contact.EmailAddress,
+            contact.Name.FirstName,
+            contact.Name.LastName,
+            contact.EmailAddress.Email,
             contact.PhoneNumber.ToString(PhoneNumber.Format.None));
     }
 }

@@ -75,7 +75,7 @@ internal sealed class SendWelcomeEmail
             // This is a new ACC without another Coordinator role.
             List<EmailRecipient> recipients = new();
 
-            Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
             if (recipient.IsFailure)
             {
@@ -102,7 +102,7 @@ internal sealed class SendWelcomeEmail
             // This is a new SPT without another SPT role.
             List<EmailRecipient> recipients = new();
 
-            Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
             if (recipient.IsFailure)
             {

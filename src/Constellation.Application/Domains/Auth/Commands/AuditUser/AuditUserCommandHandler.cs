@@ -62,7 +62,7 @@ internal sealed class AuditUserCommandHandler
             user.StaffId = staffMember.Id;
         }
 
-        SchoolContact contact = await _schoolContactRepository.GetWithRolesByEmailAddress(user.Email, cancellationToken);
+        SchoolContact contact = await _schoolContactRepository.GetWithRolesByEmailAddress(emailAddress, cancellationToken);
 
         if (contact is null)
         {

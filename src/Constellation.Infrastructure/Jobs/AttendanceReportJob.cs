@@ -217,11 +217,6 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
 
         foreach (SchoolContact coordinator in coordinators)
         {
-            Result<Name> nameResult = coordinator.GetName();
-
-            if (nameResult.IsFailure)
-                continue;
-
             Result<EmailRecipient> result = coordinator.GetEmailRecipient();
 
             if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))

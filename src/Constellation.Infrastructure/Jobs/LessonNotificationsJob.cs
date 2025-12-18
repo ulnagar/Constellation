@@ -148,7 +148,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
 
             foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.SciencePracticalTeacher && !role.IsDeleted)))
             {
-                Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+                Result<EmailRecipient> result = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
                 if (result.IsSuccess && sptRecipients.All(entry => entry.Email != result.Value.Email))
                     sptRecipients.Add(result.Value);
@@ -159,7 +159,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
 
             foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.Coordinator && !role.IsDeleted)))
             {
-                Result<EmailRecipient> result = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+                Result<EmailRecipient> result = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
                 if (result.IsSuccess && accRecipients.All(entry => entry.Email != result.Value.Email))
                     accRecipients.Add(result.Value);

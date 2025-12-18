@@ -40,7 +40,7 @@ public sealed partial class Service : IEmailService
 
         List<EmailRecipient> recipients = new();
 
-        Result<EmailRecipient> recipient = EmailRecipient.Create(contact.DisplayName, contact.EmailAddress);
+        Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
         if (recipient.IsFailure)
         {

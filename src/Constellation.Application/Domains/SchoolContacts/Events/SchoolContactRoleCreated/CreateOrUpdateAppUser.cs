@@ -44,7 +44,7 @@ internal sealed class CreateOrUpdateAppUser
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress);
+        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
 
         if (user is not null)
         {
@@ -80,10 +80,10 @@ internal sealed class CreateOrUpdateAppUser
 
         user = new()
         {
-            UserName = contact.EmailAddress,
-            Email = contact.EmailAddress,
-            FirstName = contact.FirstName,
-            LastName = contact.LastName,
+            UserName = contact.EmailAddress.Email,
+            Email = contact.EmailAddress.Email,
+            FirstName = contact.Name.FirstName,
+            LastName = contact.Name.LastName,
             IsSchoolContact = true,
             SchoolContactId = contact.Id
         };

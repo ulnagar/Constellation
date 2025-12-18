@@ -63,7 +63,7 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
             existingUser.StaffId = StaffId.Empty;
         }
 
-        SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(notification.EmailAddress, cancellationToken);
+        SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress, cancellationToken);
 
         if (schoolContact is null)
         {

@@ -7,5 +7,5 @@ using ValueObjects;
 
 public interface IEmergencyRecipientService
 {
-    Task<List<EmailRecipient>> GetSelectedEmailRecipientsFromGroup(RecipientGroup group, CancellationToken cancellationToken = default);
+    Task<List<AlertRecipient>> GetSelectedRecipientsFromGroup(RecipientGroup group, CancellationToken cancellationToken = default);
 }

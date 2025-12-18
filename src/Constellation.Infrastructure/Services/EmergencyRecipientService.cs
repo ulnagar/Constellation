@@ -4,7 +4,6 @@ using Application.Extensions;
 using Application.Models.Auth;
 using Application.Models.Identity;
 using Constellation.Core.Models.EmergencyConsole.Enums;
-using Constellation.Core.Models.Students.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Models.EmergencyConsole.Services;
@@ -26,9 +25,7 @@ using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Identity.Client;
 using System.Collections.Generic;
-using System.Net.WebSockets;
 using System.Threading.Tasks;
 
 internal sealed class EmergencyRecipientService : IEmergencyRecipientService
@@ -62,11 +59,11 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
         _periodRepository = periodRepository;
     }
 
-    public async Task<List<EmailRecipient>> GetSelectedEmailRecipientsFromGroup(
+    public async Task<List<AlertRecipient>> GetSelectedRecipientsFromGroup(
         RecipientGroup group,
         CancellationToken cancellationToken = default)
     {
-        List<EmailRecipient> recipients = [];
+        List<AlertRecipient> recipients = [];
 
         if (group == RecipientGroup.AllStaff)
         {
@@ -74,12 +71,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (StaffMember member in staffMembers)
             {
-                Result<EmailRecipient> recipient = member.GetEmailRecipient();
-
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
+                
+                recipients.Add(recipient);
             }
         }
 
@@ -91,12 +85,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (StaffMember member in staffMembers)
             {
-                Result<EmailRecipient> recipient = member.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -124,12 +115,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (StaffMember member in staffMembers)
             {
-                Result<EmailRecipient> recipient = member.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -156,12 +144,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (StaffMember member in staffMembers)
             {
-                Result<EmailRecipient> recipient = member.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -171,12 +156,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (Student student in students)
             {
-                Result<EmailRecipient> recipient = student.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(student.Name, student.EmailAddress);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -207,12 +189,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (Student student in students)
             {
-                Result<EmailRecipient> recipient = student.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(student.Name, student.EmailAddress);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -242,12 +221,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (Student student in students)
             {
-                Result<EmailRecipient> recipient = student.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(student.Name, student.EmailAddress);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -257,12 +233,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<EmailRecipient> recipient = contact.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(contact.Name, contact.EmailAddress, contact.PhoneNumber);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -305,12 +278,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<EmailRecipient> recipient = contact.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(contact.Name, contact.EmailAddress, contact.PhoneNumber);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -352,12 +322,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<EmailRecipient> recipient = contact.GetEmailRecipient();
+                AlertRecipient recipient = AlertRecipient.Create(contact.Name, contact.EmailAddress, contact.PhoneNumber);
 
-                if (recipient.IsFailure)
-                    continue;
-
-                recipients.Add(recipient.Value);
+                recipients.Add(recipient);
             }
         }
 
@@ -370,17 +337,44 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 if (family.Students.Any(entry => !entry.IsResidentialFamily))
                     continue;
 
-                Result<EmailRecipient> recipient = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
+                Result<Name> familyName = Name.Create(
+                    family.FamilyTitle.Split(' ')[0], string.Empty,
+                    string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
+                Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
-                if (recipient.IsSuccess)
-                    recipients.Add(recipient.Value);
+                if (familyName.IsSuccess && familyEmail.IsSuccess)
+                {
+                    AlertRecipient familyRecipient = AlertRecipient.Create(familyName.Value, familyEmail.Value);
+                    recipients.Add(familyRecipient);
+                }
 
                 foreach (Parent parent in family.Parents)
                 {
-                    Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                    Result<Name> name = Name.Create(
+                        family.FamilyTitle.Split(' ')[0], string.Empty,
+                        string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
 
-                    if (recipient.IsSuccess)
-                        recipients.Add(recipient.Value);
+                    if (name.IsFailure)
+                        continue;
+
+                    Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
+                    Result<PhoneNumber> phone = PhoneNumber.Create(parent.MobileNumber);
+
+                    if (email.IsSuccess && phone.IsSuccess)
+                    {
+                        AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value, phone.Value);
+                        recipients.Add(parentRecipient);
+                    }
+                    else if (phone.IsSuccess)
+                    {
+                        AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, phone.Value);
+                        recipients.Add(parentRecipient);
+                    }
+                    else if (email.IsSuccess)
+                    {
+                        AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value);
+                        recipients.Add(parentRecipient);
+                    }
                 }
             }
         }
@@ -419,17 +413,44 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                     if (family.Students.Any(entry => !entry.IsResidentialFamily))
                         continue;
 
-                    Result<EmailRecipient> recipient = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
+                    Result<Name> familyName = Name.Create(
+                        family.FamilyTitle.Split(' ')[0], string.Empty,
+                        string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
+                    Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
-                    if (recipient.IsSuccess)
-                        recipients.Add(recipient.Value);
+                    if (familyName.IsSuccess && familyEmail.IsSuccess)
+                    {
+                        AlertRecipient familyRecipient = AlertRecipient.Create(familyName.Value, familyEmail.Value);
+                        recipients.Add(familyRecipient);
+                    }
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                        Result<Name> name = Name.Create(
+                            family.FamilyTitle.Split(' ')[0], string.Empty,
+                            string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
 
-                        if (recipient.IsSuccess)
-                            recipients.Add(recipient.Value);
+                        if (name.IsFailure)
+                            continue;
+
+                        Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
+                        Result<PhoneNumber> phone = PhoneNumber.Create(parent.MobileNumber);
+
+                        if (email.IsSuccess && phone.IsSuccess)
+                        {
+                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value, phone.Value);
+                            recipients.Add(parentRecipient);
+                        }
+                        else if (phone.IsSuccess)
+                        {
+                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, phone.Value);
+                            recipients.Add(parentRecipient);
+                        }
+                        else if (email.IsSuccess)
+                        {
+                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value);
+                            recipients.Add(parentRecipient);
+                        }
                     }
                 }
             }
@@ -468,23 +489,50 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                     if (family.Students.Any(entry => !entry.IsResidentialFamily))
                         continue;
 
-                    Result<EmailRecipient> recipient = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
+                    Result<Name> familyName = Name.Create(
+                        family.FamilyTitle.Split(' ')[0], string.Empty,
+                        string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
+                    Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
-                    if (recipient.IsSuccess)
-                        recipients.Add(recipient.Value);
+                    if (familyName.IsSuccess && familyEmail.IsSuccess)
+                    {
+                        AlertRecipient familyRecipient = AlertRecipient.Create(familyName.Value, familyEmail.Value);
+                        recipients.Add(familyRecipient);
+                    }
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                        Result<Name> name = Name.Create(
+                            family.FamilyTitle.Split(' ')[0], string.Empty,
+                            string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
 
-                        if (recipient.IsSuccess)
-                            recipients.Add(recipient.Value);
+                        if (name.IsFailure)
+                            continue;
+
+                        Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
+                        Result<PhoneNumber> phone = PhoneNumber.Create(parent.MobileNumber);
+
+                        if (email.IsSuccess && phone.IsSuccess)
+                        {
+                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value, phone.Value);
+                            recipients.Add(parentRecipient);
+                        }
+                        else if (phone.IsSuccess)
+                        {
+                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, phone.Value);
+                            recipients.Add(parentRecipient);
+                        }
+                        else if (email.IsSuccess)
+                        {
+                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value);
+                            recipients.Add(parentRecipient);
+                        }
                     }
                 }
             }
         }
 
-        recipients = recipients.DistinctBy(entry => entry.Email).ToList();
+        recipients = recipients.Distinct().ToList();
 
         return recipients;
     }

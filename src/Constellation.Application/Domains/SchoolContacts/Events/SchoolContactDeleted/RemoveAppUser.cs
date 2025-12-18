@@ -44,7 +44,7 @@ internal sealed class RemoveAppUser
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress);
+        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
 
         if (user is null)
         {

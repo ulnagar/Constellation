@@ -1,9 +1,13 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
 using Application.Models.Identity;
+using Constellation.Application.Domains.SchoolContacts.Commands.CreateContact;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts;
+using Constellation.Core.Models.SchoolContacts.Identifiers;
+using Constellation.Core.Shared;
 using Core.Models.SchoolContacts.Repositories;
+using Core.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -27,7 +31,12 @@ public sealed class HasActiveContactAssignmentToCurrentPartnerSchool : Authoriza
         if (emailClaim is null)
             return;
 
-        SchoolContact? response = await _contactRepository.GetWithRolesByEmailAddress(emailClaim.Value);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(emailClaim.Value);
+
+        if (emailAddress.IsFailure)
+            return;
+
+        SchoolContact? response = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value);
 
         if (response is null)
             return;

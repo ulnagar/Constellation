@@ -9,7 +9,7 @@ using Templates.Views.Emails.Emergency;
 public sealed partial class Service : IEmailService
 {
     public async Task<Result<string>> SendEmergencyConsoleEmail(
-        EmailRecipient recipient,
+        AlertRecipient recipient,
         string message,
         CancellationToken cancellationToken = default)
     {
@@ -24,7 +24,12 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(EmergencyConsoleEmailViewModel.ViewLocation, viewModel);
 
-        Result<MimeMessage> email = await _emailSender.Send([recipient], EmailRecipient.NoReply, $"Emergency Notice", body, MessagePriority.Urgent, cancellationToken);
+        Result<EmailRecipient> emailRecipient = recipient.GetEmailRecipient();
+
+        if (emailRecipient.IsFailure)
+            return Result.Failure<string>(emailRecipient.Error);
+
+        Result<MimeMessage> email = await _emailSender.Send([ emailRecipient.Value ], EmailRecipient.NoReply, $"Emergency Notice", body, MessagePriority.Urgent, cancellationToken);
 
         if (email.IsSuccess)
             return Result.Success(email.Value.MessageId);

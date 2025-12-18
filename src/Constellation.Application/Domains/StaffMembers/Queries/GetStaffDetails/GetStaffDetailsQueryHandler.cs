@@ -169,7 +169,7 @@ internal sealed class GetStaffDetailsQueryHandler
                     schoolContacts.Add(new(
                         contact.Id,
                         contact.DisplayName,
-                        contact.EmailAddress,
+                        contact.EmailAddress.Email,
                         contact.PhoneNumber == PhoneNumber.Empty ? school.PhoneNumber : contact.PhoneNumber.ToString(PhoneNumber.Format.None),
                         assignment.Role,
                         school.Name));

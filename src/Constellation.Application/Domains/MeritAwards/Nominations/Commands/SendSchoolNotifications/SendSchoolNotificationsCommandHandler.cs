@@ -113,16 +113,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
                         role.Role.Equals(Position.Principal) &&
                         role.SchoolCode == schoolGroup.Key))
                 {
-                    Result<EmailAddress> emailAddress = EmailAddress.Create(contact.EmailAddress);
-
-                    Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-
-                    if (emailAddress.IsFailure || name.IsFailure)
-                        continue;
-
-                    principalName ??= name.Value;
-
-                    Result<EmailRecipient> recipient = EmailRecipient.Create(name.Value, emailAddress.Value);
+                    Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
                     if (recipient.IsFailure)
                         continue;
@@ -135,14 +126,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
                         role.Role.Equals(Position.Coordinator) &&
                         role.SchoolCode == schoolGroup.Key))
                 {
-                    Result<EmailAddress> emailAddress = EmailAddress.Create(contact.EmailAddress);
-
-                    Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-
-                    if (emailAddress.IsFailure || name.IsFailure)
-                        continue;
-
-                    Result<EmailRecipient> recipient = EmailRecipient.Create(name.Value, emailAddress.Value);
+                    Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
                     if (recipient.IsFailure)
                         continue;

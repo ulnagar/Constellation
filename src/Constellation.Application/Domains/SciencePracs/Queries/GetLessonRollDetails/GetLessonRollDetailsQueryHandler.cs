@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.SciencePracs.Queries.GetLessonRollDetails;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.SchoolContacts.Commands.CreateContact;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models;
@@ -93,10 +94,29 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         if (!string.IsNullOrWhiteSpace(roll.SubmittedBy))
         {
-            SchoolContact contact = roll.SubmittedBy.Contains('@')
-                ? await _contactRepository.GetWithRolesByEmailAddress(roll.SubmittedBy, cancellationToken)
-                : await _contactRepository.GetByNameAndSchool(roll.SubmittedBy, roll.SchoolCode, cancellationToken);
+            SchoolContact? contact = null;
 
+            if (roll.SubmittedBy.Contains('@'))
+            {
+                Result<EmailAddress> emailAddress = EmailAddress.Create(roll.SubmittedBy);
+
+                if (emailAddress.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(GetLessonRollDetailsQuery), request, true)
+                        .ForContext(nameof(Error), emailAddress.Error, true)
+                        .Warning("Failed to retrieve Lesson Roll details");
+
+                    return Result.Failure<LessonRollDetailsResponse>(emailAddress.Error);
+                }
+
+                contact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
+            }
+            else
+            {
+                contact = await _contactRepository.GetByNameAndSchool(roll.SubmittedBy, roll.SchoolCode, cancellationToken);
+            }
+                
             if (contact is null)
             {
                 Result<Name> contactName = Name.Create(roll.SubmittedBy, string.Empty, "-");
@@ -126,30 +146,10 @@ internal sealed class GetLessonRollDetailsQueryHandler
             }
             else
             {
-                Result<Name> contactName = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-
-                if (contactName.IsFailure)
-                {
-                    _logger
-                        .Warning("Could not create Name from roll submitted by field");
-
-                    return Result.Failure<LessonRollDetailsResponse>(contactName.Error);
-                }
-
-                Result<EmailAddress> contactEmail = EmailAddress.Create(contact.EmailAddress);
-
-                if (contactEmail.IsFailure)
-                {
-                    _logger
-                        .Warning("Could not create EmailAddress from roll submitted by field");
-
-                    return Result.Failure<LessonRollDetailsResponse>(contactEmail.Error);
-                }
-
                 contactDetails = new(
                     contact.Id,
-                    contactName.Value,
-                    contactEmail.Value);
+                    contact.Name,
+                    contact.EmailAddress);
             }
         }
 

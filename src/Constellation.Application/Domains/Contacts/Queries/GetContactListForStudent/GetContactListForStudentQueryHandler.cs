@@ -124,15 +124,6 @@ internal sealed class GetContactListForStudentQueryHandler
 
         foreach (SchoolContact contact in contacts)
         {
-            Result<Name> contactName = Name.Create(contact.FirstName, null, contact.LastName);
-            if (contactName.IsFailure)
-                continue;
-
-            Result<EmailAddress> contactEmail = EmailAddress.Create(contact.EmailAddress);
-
-            if (contactEmail.IsFailure)
-                continue;
-
             foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
             {
                 ContactCategory category = role switch
@@ -149,8 +140,8 @@ internal sealed class GetContactListForStudentQueryHandler
                     enrolment.Grade,
                     enrolment.SchoolName,
                     category,
-                    contactName.Value.DisplayName,
-                    contactEmail.Value,
+                    contact.Name.DisplayName,
+                    contact.EmailAddress,
                     contact.PhoneNumber,
                     role.Note));
             }

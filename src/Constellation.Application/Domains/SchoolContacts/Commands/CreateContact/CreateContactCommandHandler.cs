@@ -5,6 +5,7 @@ using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Threading;
@@ -29,7 +30,19 @@ internal sealed class CreateContactCommandHandler
 
     public async Task<Result<SchoolContactId>> Handle(CreateContactCommand request, CancellationToken cancellationToken)
     {
-        SchoolContact existingContact = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+        if (emailAddress.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateContactCommand), request, true)
+                .ForContext(nameof(Error), emailAddress.Error, true)
+                .Warning("Failed to create new School Contact");
+
+            return Result.Failure<SchoolContactId>(emailAddress.Error);
+        }
+
+        SchoolContact existingContact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
 
         if (existingContact is not null)
         {
