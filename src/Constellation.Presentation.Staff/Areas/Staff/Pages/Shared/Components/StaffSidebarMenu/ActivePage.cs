@@ -8,6 +8,7 @@ internal static class ActivePage
     public const string Staff_Dashboard = "Dashboard..";
     public const string Admin_Emergency_Console = "Admin.Emergency.Console";
     public const string Admin_Emergency_Templates = "Admin.Emergency.Templates";
+    public const string Admin_Emergency_Sent = "Admin.Emergency.Sent";
 
     public const string Equipment_Assets_Assets = "Equipment.Assets.Assets";
     public const string Equipment_Assets_Allocations = "Equipment.Assets.Allocations";

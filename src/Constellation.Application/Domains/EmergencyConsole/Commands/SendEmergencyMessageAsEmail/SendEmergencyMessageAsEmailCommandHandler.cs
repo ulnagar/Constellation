@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Commands.SendEmergencyMessageAsEmail;
 
 using Abstractions.Messaging;
+using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
 using Core.Models.EmergencyConsole.Identifiers;
@@ -20,6 +22,8 @@ internal sealed class SendEmergencyMessageAsEmailCommandHandler
     private readonly IEmailService _emailService;
     private readonly ISentMessageRepository _sentMessageRepository;
     private readonly IEmergencyRecipientService _recipientService;
+    private readonly IDateTimeProvider _dateTime;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -27,12 +31,16 @@ internal sealed class SendEmergencyMessageAsEmailCommandHandler
         IEmailService emailService,
         ISentMessageRepository sentMessageRepository,
         IEmergencyRecipientService recipientService,
+        IDateTimeProvider dateTime,
+        ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _emailService = emailService;
         _sentMessageRepository = sentMessageRepository;
         _recipientService = recipientService;
+        _dateTime = dateTime;
+        _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -50,7 +58,7 @@ internal sealed class SendEmergencyMessageAsEmailCommandHandler
 
         recipients = recipients.Distinct().ToList();
         
-        Result<SentMessage> sentMessage = SentMessage.Create(request.Message);
+        Result<SentMessage> sentMessage = SentMessage.Create(request.Message, _dateTime.Now, _currentUserService.UserName);
 
         if (sentMessage.IsFailure)
         {

@@ -7,30 +7,38 @@ using Shared;
 
 public sealed class SentMessage
 {
-    private List<MessageStatus> _statuses = [];
+    private readonly List<MessageStatus> _statuses = [];
 
     private SentMessage() { }
 
     private SentMessage(
-        string message)
+        string message,
+        DateTime sentAt,
+        string sentBy)
     {
         Id = new();
         Message = message;
+        SentAt = sentAt;
+        SentBy = sentBy;
     }
 
     public EventId Id { get; private set; }
     public string Message { get; private set; }
+    public DateTime SentAt { get; private set; }
+    public string SentBy { get; private set; }
     public IReadOnlyList<MessageStatus> Statuses => _statuses.AsReadOnly();
 
     public static Result<SentMessage> Create(
-        string message)
+        string message,
+        DateTime sentAt,
+        string sentBy)
     {
         if (string.IsNullOrWhiteSpace(message))
         {
             return Result.Failure<SentMessage>(SentMessageErrors.MessageBlank);
         }
 
-        return new SentMessage(message);
+        return new SentMessage(message, sentAt, sentBy);
     }
 
     public void AddMessage(

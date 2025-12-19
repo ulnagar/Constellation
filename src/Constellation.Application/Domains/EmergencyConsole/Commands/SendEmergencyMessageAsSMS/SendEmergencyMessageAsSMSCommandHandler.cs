@@ -8,6 +8,8 @@ using Constellation.Core.Models.EmergencyConsole;
 using Constellation.Core.Models.EmergencyConsole.Enums;
 using Constellation.Core.Models.EmergencyConsole.Repositories;
 using Constellation.Core.Models.EmergencyConsole.Services;
+using Core.Abstractions.Clock;
+using Core.Abstractions.Services;
 using Core.Shared;
 using Core.ValueObjects;
 using Serilog;
@@ -20,6 +22,8 @@ internal sealed class SendEmergencyMessageAsSMSCommandHandler
     private readonly ISentMessageRepository _sentMessageRepository;
     private readonly IEmailService _emailService;
     private readonly IEmergencyRecipientService _recipientService;
+    private readonly IDateTimeProvider _dateTime;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -28,6 +32,8 @@ internal sealed class SendEmergencyMessageAsSMSCommandHandler
         ISentMessageRepository sentMessageRepository,
         IEmailService emailService,
         IEmergencyRecipientService recipientService,
+        IDateTimeProvider dateTime,
+        ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -35,6 +41,8 @@ internal sealed class SendEmergencyMessageAsSMSCommandHandler
         _sentMessageRepository = sentMessageRepository;
         _emailService = emailService;
         _recipientService = recipientService;
+        _dateTime = dateTime;
+        _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<SendEmergencyMessageAsSMSCommand>();
@@ -53,7 +61,7 @@ internal sealed class SendEmergencyMessageAsSMSCommandHandler
 
         recipients = recipients.Distinct().ToList();
 
-        Result<SentMessage> sentMessage = SentMessage.Create(request.Message);
+        Result<SentMessage> sentMessage = SentMessage.Create(request.Message, _dateTime.Now, _currentUserService.UserName);
 
         if (sentMessage.IsFailure)
         {

@@ -23,7 +23,14 @@ internal sealed class SentMessageRepository : ISentMessageRepository
             .Set<SentMessage>()
             .ToListAsync(cancellationToken);
 
-    public async Task<SentMessage?> GetForMessage(
+    public async Task<List<SentMessage>> GetMessageSummaries(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SentMessage>()
+            .IgnoreAutoIncludes()
+            .ToListAsync(cancellationToken);
+
+    public async Task<SentMessage?> GetMessageById(
         EventId eventId,
         CancellationToken cancellationToken = default) =>
         await _context
