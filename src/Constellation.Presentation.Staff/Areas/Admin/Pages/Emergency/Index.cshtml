@@ -3,6 +3,7 @@
 
 @using Constellation.Core.Models.EmergencyConsole
 @using Constellation.Core.Models.EmergencyConsole.Enums
+@using Constellation.Core.ValueObjects
 @{
 }
 
@@ -15,7 +16,7 @@
             <label asp-for="TemplateId" class="col-md-2">Template</label>
             <div class="col-md-3">
                 <select asp-for="TemplateId" asp-items="new SelectList(Model.Templates, nameof(MessageTemplate.Id), nameof(MessageTemplate.Name), Model.TemplateId)" class="form-select">
-                    <option value="">-- Select --</option>
+                    <option value="00000000-0000-0000-0000-000000000000">-- Select --</option>
                 </select>
                 <span asp-validation-for="Type" class="text-danger"></span>
             </div>
@@ -26,6 +27,7 @@
         
         <div class="mb-1 row">
             <label class="col-md-2">Recipients</label>
+            <span asp-validation-for="Recipients" class="text-danger col-md-6 col-offset-md-2"></span>
         </div>
 
         <div class="mb-1 row">
@@ -34,7 +36,6 @@
                 <select asp-for="RecipientGroups" asp-items="new SelectList(RecipientGroup.GetOptions, nameof(RecipientGroup.Value), nameof(RecipientGroup.Name))" class="form-select combo" multiple="multiple">
                     <option value="">-- Select --</option>
                 </select>
-                <span asp-validation-for="RecipientGroups" class="text-danger"></span>
             </div>
         </div>
         
@@ -42,49 +43,41 @@
             <label asp-for="Recipients" class="col-md-2">Individuals</label>
             <div class="col-md-6">
                 <h4 class="recipient-list">
-                    <span class="badge text-bg-warning recipient-1 mb-1">
-                        <span class="align-text-top">Ben Hillsley</span>
-                        <span class="ms-2 me-2">
-                            <i class="fas fa-envelope-square large" title="benjamin.hillsley@det.nsw.edu.au"></i>
-                            <i class="fas fa-phone-square-alt large" title="0458040909"></i>
+                    @foreach (var recipient in Model.Recipients)
+                    {
+                        <span class="badge text-bg-warning mb-1" data-recipient="@Model.Recipients.IndexOf(recipient)">
+                            <span class="align-text-top">@recipient.Name.DisplayName</span>
+                            <span class="ms-2 me-2">
+                                @if (recipient.HasEmail)
+                                {
+                                    <i class="fas fa-envelope-square large" title="@recipient.EmailAddress.Email"></i>
+                                }
+                                @if (recipient.HasPhone)
+                                {
+                                    <i class="fas fa-phone-square-alt large" title="@recipient.PhoneNumber.ToString(PhoneNumber.Format.None)"></i>
+                                }
+                            </span>
+                            <button type="button" class="btn-close" aria-label="Close"></button>
                         </span>
-                        <button type="button" class="btn-close" aria-label="Close"></button>
-                    </span>
-                    <span class="badge text-bg-warning recipient-2 mb-1">
-                        <span class="align-text-top">Michael Necovski</span>
-                        <span class="ms-2 me-2">
-                            <i class="fas fa-envelope-square large" title="michael.necovski2@det.nsw.edu.au"></i>
-                        </span>
-                        <button type="button" class="btn-close" aria-label="Close"></button>
-                    </span>
-                    <span class="badge text-bg-warning recipient-3 mb-1">
-                        <span class="align-text-top">Christian Necovski</span>
-                        <span class="ms-2 me-2">
-                            <i class="fas fa-envelope-square large" title="christian.necovski@det.nsw.edu.au"></i>
-                        </span>
-                        <button type="button" class="btn-close" aria-label="Close"></button>
-                    </span>
+                    }
                 </h4>
                 <div class="recipient-inputs">
-                    <div id="recipient-1">
-                        <input type="hidden" name="Recipients.Index" value="1"/>
-                        <input type="hidden" name="Recipients[1].Name.FirstName" value="Ben"/>
-                        <input type="hidden" name="Recipients[1].Name.Lastname" value="Hillsley"/>
-                        <input type="hidden" name="Recipients[1].EmailAddress" value="benjamin.hillsley@det.nsw.edu.au"/>
-                        <input type="hidden" name="Recipients[1].PhoneNumber" value="0458040909"/>
-                    </div>
-                    <div id="recipient-2">
-                        <input type="hidden" name="Recipients.Index" value="2" />
-                        <input type="hidden" name="Recipients[2].Name.FirstName" value="Michael" />
-                        <input type="hidden" name="Recipients[2].Name.Lastname" value="Necovski" />
-                        <input type="hidden" name="Recipients[2].EmailAddress" value="michael.necovski2@det.nsw.edu.au" />
-                    </div>
-                    <div id="recipient-3">
-                        <input type="hidden" name="Recipients.Index" value="3" />
-                        <input type="hidden" name="Recipients[3].Name.FirstName" value="Christian" />
-                        <input type="hidden" name="Recipients[3].Name.Lastname" value="Necovski" />
-                        <input type="hidden" name="Recipients[3].EmailAddress" value="christian.necovski@det.nsw.edu.au" />
-                    </div>
+                    @foreach (var recipient in Model.Recipients)
+                    {
+                        <div id="recipient-@Model.Recipients.IndexOf(recipient)">
+                            <input type="hidden" name="Recipients.Index" value="@Model.Recipients.IndexOf(recipient)"/>
+                            <input type="hidden" name="Recipients[@Model.Recipients.IndexOf(recipient)].Name.FirstName" value="@recipient.Name.FirstName"/>
+                            <input type="hidden" name="Recipients[@Model.Recipients.IndexOf(recipient)].Name.Lastname" value="@recipient.Name.LastName"/>
+                            @if (recipient.HasEmail)
+                            {
+                                <input type="hidden" name="Recipients[@Model.Recipients.IndexOf(recipient)].EmailAddress" value="@recipient.EmailAddress.Email"/>
+                            }
+                            @if (recipient.HasPhone)
+                            {
+                                <input type="hidden" name="Recipients[@Model.Recipients.IndexOf(recipient)].PhoneNumber" value="@recipient.PhoneNumber.ToString(PhoneNumber.Format.None)"/>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
             <div class="col-md-2 col-offset-md-4">
@@ -123,56 +116,62 @@
     </div>
 </form>
 
-<div class="modal" id="ManualRecipientModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Enter Manual Recipient</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <label class="col-md-12">First Name</label>
-                        <div class="col-md-12">
-                            <input id="ManualRecipientFirstName" type="text" class="form-control" required="required" />
+<form onsubmit="return addRecipient()" asp-page-handler="none">
+    <div class="modal" id="ManualRecipientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Enter Manual Recipient</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <label class="col-md-12">First Name</label>
+                            <div class="col-md-12">
+                                <input id="ManualRecipientFirstName" type="text" class="form-control" required="required" autofocus />
+                                <span class="text-danger">(Required) Enter the first name of the contact</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-2">
-                        <label class="col-md-12">Last Name</label>
-                        <div class="col-md-12">
-                            <input id="ManualRecipientLastName" type="text" class="form-control" required="required" />
+                        
+                        <div class="row mb-2">
+                            <label class="col-md-12">Last Name</label>
+                            <div class="col-md-12">
+                                <input id="ManualRecipientLastName" type="text" class="form-control" required="required" />
+                                <span class="text-danger">(Required) Enter the last name of the contact</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="row mb-2">
-                        <label class="col-md-12">Email</label>
-                        <div class="col-md-12">
-                            <input id="ManualRecipientEmail" type="email" class="form-control" />
+                        <div class="row mb-2">
+                            <label class="col-md-12">Email</label>
+                            <div class="col-md-12">
+                                <input id="ManualRecipientEmail" type="email" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a valid email address</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-2">
-                        <label class="col-md-12">Phone Number</label>
-                        <div class="col-md-12">
-                            <input id="ManualRecipientPhone" type="tel" class="form-control" />
+                        
+                        <div class="row mb-2">
+                            <label class="col-md-12">Phone Number</label>
+                            <div class="col-md-12">
+                                <input id="ManualRecipientPhone" type="tel" pattern="[0-9]{10}" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a ten-digit mobile number with no spaces</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addRecipient()">Add</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Add</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-
+</form>
 
 @section Scripts
 {
+    <partial name="_ValidationScriptsPartial" />
+
     <script>
         $('textarea').on("input", function() {
           var currentLength = $(this).val().length;
@@ -189,23 +188,69 @@
             }
         });
 
+        $('#ManualRecipientModal').on('shown.bs.modal', function () {
+            $('#ManualRecipientFirstName').trigger('focus');
+        });
 
+        $('.recipient-list').on('click', '.btn-close', function() {
+            var badge = $(this).parent();
+            var index = badge.data('recipient');
 
+            badge.remove();
+
+            var inputs = $('#recipient-' + index);
+            inputs.remove();
+        });
+
+        let index = @Model.Recipients.Count;
+
+        function addRecipient() {
+            var modalDialog = $('.modal-dialog');
+            let scopeAttribute = null;
+            $.each(modalDialog[0].attributes, function() {
+                if (this.name.startsWith('b-')){
+                    scopeAttribute = this.name;
+                    return false;
+                }
+            });
+
+            var firstName = $('#ManualRecipientFirstName').val();
+            var lastName = $('#ManualRecipientLastName').val();
+            var email = $('#ManualRecipientEmail').val();
+            var phone = $('#ManualRecipientPhone').val();
+
+            var badge = '<span ' + scopeAttribute + ' class="badge text-bg-warning mb-1 me-1" data-recipient="' + index + '"><span ' + scopeAttribute + ' class="align-text-top">'+ firstName + ' ' + lastName + '</span><span ' + scopeAttribute + ' class="ms-2 me-2">';
+            if (email) {
+                badge = badge + '<i ' + scopeAttribute + ' class="fas fa-envelope-square large" title="' + email + '"></i>';
+            }
+                
+            if (phone){
+                badge = badge + '<i ' + scopeAttribute + ' class="fas fa-phone-square-alt large" title="' + phone + '"></i>';
+            }
+                
+            badge = badge + '</span><button ' + scopeAttribute + ' type="button" class="btn-close" aria-label="Close"></button></span>';
+            $('.recipient-list').append(badge);
+
+            var inputs = '<div ' + scopeAttribute + ' id="recipient-' + index +'"><input ' + scopeAttribute + ' type="hidden" name="Recipients.Index" value="' + index + '"/><input ' + scopeAttribute + ' type="hidden" name="Recipients[' + index + '].Name.FirstName" value="' + firstName + '"/><input ' + scopeAttribute + ' type="hidden" name="Recipients[' + index + '].Name.Lastname" value="' + lastName + '"/>';
+            if (email) {
+                inputs = inputs + '<input ' + scopeAttribute + ' type="hidden" name="Recipients[' + index + '].EmailAddress" value="' + email + '"/>';
+            }
+
+            if (phone) {
+                inputs = inputs + '<input ' + scopeAttribute + ' type="hidden" name="Recipients[' + index + '].PhoneNumber" value="' + phone + '"/></div>';
+            }
+            $('.recipient-inputs').append(inputs);
+
+            index++;
+
+            $('#ManualRecipientFirstName').val('');
+            $('#ManualRecipientLastName').val('');
+            $('#ManualRecipientEmail').val('');
+            $('#ManualRecipientPhone').val('');
+
+            $('#ManualRecipientModal').modal('hide');
+
+            return false;
+        }
     </script>
 }
-
-Message Type: SMS/Email
-Template: 0..1
-
-Recipient Group(s): 0..n
-Recipient(s): 0..n
-
-Email:
-Subject: string
-Body: formatted string
-Attachment: file
-
-SMS:
-Message: string
-Include character counter with warning for long messages
-

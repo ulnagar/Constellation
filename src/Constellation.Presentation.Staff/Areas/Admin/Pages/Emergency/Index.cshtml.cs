@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class IndexModel : BasePageModel
@@ -51,13 +52,13 @@ public class IndexModel : BasePageModel
     public MessageType Type { get; set; } = MessageType.Email;
 
     [BindProperty]
-    public List<RecipientGroup> RecipientGroups { get; set; } = [];
+    public List<RecipientGroup>? RecipientGroups { get; set; } = [];
 
     [BindProperty]
-    public List<AlertRecipient> Recipients { get; set; } = [];
+    public List<AlertRecipient>? Recipients { get; set; } = [];
 
     [BindProperty]
-    public TemplateId TemplateId { get; set; } = TemplateId.Empty;
+    public TemplateId? TemplateId { get; set; } = TemplateId.Empty;
 
     [BindProperty]
     public string? Message { get; set; } = string.Empty;
@@ -88,18 +89,13 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnPostSend()
     {
         if (RecipientGroups.Count == 0 && Recipients.Count == 0)
-        {
             ModelState.AddModelError(nameof(Recipients), "Must include at least one recipient or group");
 
-            await PreparePage();
-
-            return Page();
-        }
-
         if (string.IsNullOrWhiteSpace(Message))
-        {
             ModelState.AddModelError(nameof(Message), "Must include a message to send");
 
+        if (!ModelState.IsValid)
+        {
             await PreparePage();
 
             return Page();
@@ -150,5 +146,4 @@ public class IndexModel : BasePageModel
 
         return Page();
     }
-    
 }
