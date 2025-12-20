@@ -33,6 +33,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 table: "Members",
                 type: "nvarchar(max)",
                 nullable: true);
+
+            migrationBuilder.Sql(@"
+                UPDATE [Staff].[Members]
+                SET PhoneNumber = null
+                WHERE 1=1;");
         }
 
         /// <inheritdoc />

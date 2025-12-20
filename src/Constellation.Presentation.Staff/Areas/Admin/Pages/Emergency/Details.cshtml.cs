@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
 
-using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleSentMessageSummaries;
+using Application.Common.PresentationModels;
+using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleSentMessageDetails;
 using Application.Models.Auth;
-using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.EmergencyConsole.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -13,14 +13,14 @@ using Microsoft.AspNetCore.Routing;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
-public class SentModel : BasePageModel
+public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
-    public SentModel(
+    public DetailsModel(
         ISender mediator,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
@@ -38,19 +38,22 @@ public class SentModel : BasePageModel
     [ViewData]
     public string PageTitle => "Emergency - Sent";
 
-    public List<SentMessageSummary> Messages { get; set; } = [];
+    [BindProperty(SupportsGet = true)]
+    public EventId Id { get; set; } = EventId.Empty;
+
+    public SentMessageDetail Message { get; set; }
 
     public async Task OnGet()
     {
-        Result<List<SentMessageSummary>> request = await _mediator.Send(new GetEmergencyConsoleSentMessageSummariesQuery());
+        Result<SentMessageDetail> message = await _mediator.Send(new GetEmergencyConsoleSentMessageDetailsQuery(Id));
 
-        if (request.IsFailure)
+        if (message.IsFailure)
         {
-            ModalContent = ErrorDisplay.Create(request.Error);
+            ModalContent = ErrorDisplay.Create(message.Error);
 
             return;
         }
 
-        Messages = request.Value;
+        Message = message.Value;
     }
 }

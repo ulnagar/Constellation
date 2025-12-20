@@ -7,6 +7,8 @@ using Constellation.Application.Interfaces.Services;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
+using System.Security.Cryptography;
+using System.Text;
 
 public class Service : ISMSService
 {
@@ -63,10 +65,16 @@ public class Service : ISMSService
         string message,
         CancellationToken cancellationToken = default)
     {
+#if DEBUG
+        var id = GenerateRandomDigits(11);
+
+        return Result.Success(id);
+#endif
+
         SMSMessageToSend messageContent = new()
         {
             origin = "Aurora",
-            destinations = [ recipient.PhoneNumber.ToString(PhoneNumber.Format.None) ],
+            destinations = [recipient.PhoneNumber.ToString(PhoneNumber.Format.None)],
             message = message
         };
 
@@ -76,5 +84,26 @@ public class Service : ISMSService
             return Result.Failure<string>(result.Error);
 
         return Result.Success(result.Value.Messages.First().OutgoingId);
+    }
+
+    private string GenerateRandomDigits(int length)
+    {
+        // Use the secure RandomNumberGenerator
+        var rng = RandomNumberGenerator.Create();
+        var s = new StringBuilder();
+        for (int i = 0; i < length; i++)
+        {
+            // For the first digit, ensure it's not zero (range 1-9 inclusive)
+            if (i == 0)
+            {
+                s.Append(RandomNumberGenerator.GetInt32(1, 10).ToString());
+            }
+            // For subsequent digits, any number 0-9 is fine (range 0-10 exclusive)
+            else
+            {
+                s.Append(RandomNumberGenerator.GetInt32(0, 10).ToString());
+            }
+        }
+        return s.ToString();
     }
 }

@@ -29,7 +29,12 @@ internal sealed class GetEmergencyConsoleSentMessageSummariesQueryHandler
         List<SentMessage> messages = await _sentMessageRepository.GetMessageSummaries(cancellationToken);
 
         foreach (SentMessage message in messages)
-            summaries.Add(new(message.Id, message.Message, message.Statuses.Count));
+            summaries.Add(new(
+                message.Id, 
+                message.Message, 
+                message.SentAt, 
+                message.SentBy, 
+                message.Statuses.Count));
 
         return summaries;
     }

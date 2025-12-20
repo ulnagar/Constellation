@@ -79,7 +79,7 @@ internal sealed class SendEmergencyMessageAsSMSCommandHandler
 
         foreach (AlertRecipient recipient in recipients)
         {
-            if (recipient.HasPhone && recipient.PhoneNumber.IsMobile)
+            if (recipient.HasPhone && recipient.PhoneNumber.IsMobile())
             {
                 Result<string> email = await _smsService.SendEmergencyConsoleSms(recipient, request.Message, cancellationToken);
 

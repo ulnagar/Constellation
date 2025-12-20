@@ -21,6 +21,9 @@ internal sealed class PhoneNumberConverter : ValueConverter<PhoneNumber, string?
         : number.ToString(PhoneNumber.Format.None);
 
     private static PhoneNumber StringToPhoneNumber(string? value) =>
-        value == null ? PhoneNumber.Empty : PhoneNumber.FromValue(value);
+        value == null ? PhoneNumber.Empty 
+        : string.IsNullOrWhiteSpace(value) ? PhoneNumber.Empty
+        : PhoneNumber.FromValue(value);
+
     public override bool ConvertsNulls => true;
 }

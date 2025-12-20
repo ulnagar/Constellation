@@ -4,6 +4,7 @@ using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 public sealed class PhoneNumber : ValueObject
@@ -79,11 +80,17 @@ public sealed class PhoneNumber : ValueObject
 
     private string Number { get; }
 
-    public bool IsMobile => Number[..2] switch
+    public bool IsMobile()
     {
-        "04" => true,
-        _ => false
-    };
+        if (this == Empty)
+            return false;
+
+        return Number[..2] switch
+        {
+            "04" => true,
+            _ => false
+        };
+    }
 
     public override IEnumerable<object> GetAtomicValues()
     {

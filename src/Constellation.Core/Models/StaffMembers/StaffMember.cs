@@ -170,7 +170,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
     public Result AddPhoneNumber(
         PhoneNumber phoneNumber)
     {
-        if (!phoneNumber.IsMobile)
+        if (!phoneNumber.IsMobile())
             return Result.Failure(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
 
         PhoneNumber = phoneNumber;

@@ -27,7 +27,6 @@ internal sealed class SentMessageRepository : ISentMessageRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SentMessage>()
-            .IgnoreAutoIncludes()
             .ToListAsync(cancellationToken);
 
     public async Task<SentMessage?> GetMessageById(

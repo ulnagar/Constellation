@@ -14,8 +14,8 @@ public sealed class AlertRecipient : ValueObject
         PhoneNumber? phoneNumber = null)
     {
         Name = name;
-        EmailAddress = emailAddress;
-        PhoneNumber = phoneNumber;
+        EmailAddress = emailAddress ?? EmailAddress.None;
+        PhoneNumber = phoneNumber ?? PhoneNumber.Empty;
     }
 
     public static AlertRecipient Create(Name name, EmailAddress email) =>
@@ -28,10 +28,10 @@ public sealed class AlertRecipient : ValueObject
         new(name, email, number);
 
     public Name Name { get; private set; }
-    public EmailAddress? EmailAddress { get; private set; }
-    public PhoneNumber? PhoneNumber { get; private set; }
-    public bool HasEmail => EmailAddress is not null && EmailAddress != EmailAddress.None;
-    public bool HasPhone => PhoneNumber is not null && PhoneNumber != PhoneNumber.Empty;
+    public EmailAddress EmailAddress { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
+    public bool HasEmail => EmailAddress != EmailAddress.None;
+    public bool HasPhone => PhoneNumber.IsMobile();
 
     public Result<EmailRecipient> GetEmailRecipient()
     {

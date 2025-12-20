@@ -2,3 +2,65 @@
 @model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.SentModel
 @{
 }
+
+<h2>Sent Emergency Messages</h2>
+
+<div class="page-menu">
+
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Sent At</th>
+            <th>Sent By</th>
+            <th>Message</th>
+            <th># Recipients</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Messages)
+        {
+            <tr>
+                <td data-order="@item.SentAt.ToString("yyyy-MM-dd HH:mm")">
+                    @item.SentAt.ToString("g")
+                </td>
+                <td>
+                    @item.SentBy
+                </td>
+                <td>
+                    @if (item.Message.Length > 20)
+                    {
+                        <span data-toggle="tooltip" data-placement="bottom" title="@item.Message">@item.Message[..20] ...</span>
+                    }
+                    else
+                    {
+                        <span>@item.Message</span>
+                    }
+                </td>
+                <td>
+                    @item.Recipients
+                </td>
+                <td>
+                    <a asp-page="/Emergency/Details" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+        })
+    </script>
+}

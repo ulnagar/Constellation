@@ -5,4 +5,6 @@ using Core.Models.EmergencyConsole.Identifiers;
 public sealed record SentMessageSummary(
     EventId Id,
     string Message,
+    DateTime SentAt,
+    string SentBy,
     int Recipients);

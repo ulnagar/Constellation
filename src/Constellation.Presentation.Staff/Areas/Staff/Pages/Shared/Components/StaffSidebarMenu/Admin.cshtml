@@ -17,6 +17,11 @@
                     Templates
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link @(Model == ActivePage.Admin_Emergency_Sent ? "active" : "")" asp-page="/Emergency/Sent" asp-area="Admin">
+                    Send Log
+                </a>
+            </li>
         </ul>
     </div>
 </nav>
