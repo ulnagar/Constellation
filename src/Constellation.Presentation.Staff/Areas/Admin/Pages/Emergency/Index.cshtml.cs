@@ -1,8 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EmergencyConsole.Commands.SendEmergencyMessageAsEmail;
-using Application.Domains.EmergencyConsole.Commands.SendEmergencyMessageAsSMS;
+using Application.Domains.EmergencyConsole.Commands.SendEmergencyMessage;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
@@ -17,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
-using System.ComponentModel.DataAnnotations;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class IndexModel : BasePageModel
@@ -101,32 +99,15 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        if (Type == MessageType.Email)
+        Result result = await _mediator.Send(new SendEmergencyMessageCommand(RecipientGroups, Recipients, Type, Message));
+
+        if (result.IsFailure)
         {
-            Result result = await _mediator.Send(new SendEmergencyMessageAsEmailCommand(RecipientGroups, Recipients, Message));
+            ModalContent = ErrorDisplay.Create(result.Error);
+            
+            await PreparePage();
 
-            if (result.IsFailure)
-            {
-                ModalContent = ErrorDisplay.Create(result.Error);
-                
-                await PreparePage();
-
-                return Page();
-            }
-        }
-
-        if (Type == MessageType.SMS)
-        {
-            Result result = await _mediator.Send(new SendEmergencyMessageAsSMSCommand(RecipientGroups, Recipients, Message));
-
-            if (result.IsFailure)
-            {
-                ModalContent = ErrorDisplay.Create(result.Error);
-
-                await PreparePage();
-
-                return Page();
-            }
+            return Page();
         }
 
         return RedirectToPage();

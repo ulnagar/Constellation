@@ -54,7 +54,7 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
             _logger
                 .ForContext(nameof(GetConsentStatusByApplicationQuery), request, true)
                 .ForContext(nameof(Error), StudentErrors.NoneFoundFilter, true)
-                .Warning("Failed to retrieve application while building list of Consent Statuses");
+                .Warning("Failed to retrieve application while building list of Consent Recipients");
 
             return Result.Failure<List<ConsentStatusResponse>>(StudentErrors.NoneFoundFilter);
         }

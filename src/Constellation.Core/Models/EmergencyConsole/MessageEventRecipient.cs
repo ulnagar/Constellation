@@ -3,24 +3,22 @@
 using Enums;
 using Identifiers;
 
-public sealed class MessageStatus
+public sealed class MessageEventRecipient
 {
-    private MessageStatus() { }
+    private MessageEventRecipient() { }
 
-    internal MessageStatus(
+    internal MessageEventRecipient(
         EventId eventId,
         MessageType type,
-        string address,
-        string name,
-        bool sent)
+        string name)
     {
         Id = new();
 
         EventId = eventId;
         Type = type;
-        RecipientAddress = address;
+        RecipientAddress = string.Empty;
         RecipientName = name;
-        Sent = sent;
+        Status = MessageStatus.Pending;
     }
 
     public MessageId Id { get; private set; }
@@ -28,5 +26,15 @@ public sealed class MessageStatus
     public MessageType Type { get; private set; }
     public string RecipientAddress { get; private set; }
     public string RecipientName { get; private set; }
-    public bool Sent { get; private set; }
+    public MessageStatus Status { get; private set; }
+
+    public void UpdateRecipient(
+        MessageType type,
+        string address,
+        MessageStatus status)
+    {
+        Type = type;
+        RecipientAddress = address;
+        Status = status;
+    }
 }

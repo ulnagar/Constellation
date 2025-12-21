@@ -6,26 +6,33 @@ using Core.Models.EmergencyConsole.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal sealed class MessageStatusConfiguration : IEntityTypeConfiguration<MessageStatus>
+internal sealed class MessageEventRecipientConfiguration : IEntityTypeConfiguration<MessageEventRecipient>
 {
-    public void Configure(EntityTypeBuilder<MessageStatus> builder)
+    public void Configure(EntityTypeBuilder<MessageEventRecipient> builder)
     {
-        builder.ToTable("MessageStatus", "EmergencyConsole");
+        builder.ToTable("MessageRecipients", "EmergencyConsole");
 
         builder
-            .HasKey(status => status.Id);
+            .HasKey(recipient => recipient.Id);
 
         builder
-            .Property(status => status.Id)
+            .Property(recipient => recipient.Id)
             .HasConversion(
                 id => id.Value,
                 value => MessageId.FromValue(value));
 
         builder
-            .Property(status => status.Type)
+            .Property(recipient => recipient.Type)
             .IsRequired()
             .HasConversion(
                 type => type.Value,
                 value => MessageType.FromValue(value));
+
+        builder
+            .Property(recipient => recipient.Status)
+            .IsRequired()
+            .HasConversion(
+                status => status.Value,
+                value => MessageStatus.FromValue(value));
     }
 }

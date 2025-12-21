@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Domains\EmergencyConsole\Helpers\**" />
+    <EmbeddedResource Remove="Domains\EmergencyConsole\Helpers\**" />
+    <None Remove="Domains\EmergencyConsole\Helpers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 
@@ -29,7 +35,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Domains\Edval\Events\EdvalTimetablesUpdated\" />
-	  <Folder Include="Domains\EmergencyConsole\Helpers\" />
 	  <Folder Include="Domains\Operations\" />
 	  <Folder Include="Domains\WorkFlows\Enums\" />
 	</ItemGroup>

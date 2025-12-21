@@ -1,10 +1,9 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
 
-using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleSentMessageSummaries;
+using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventSummaries;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
-using Constellation.Core.Models.EmergencyConsole.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,11 +37,11 @@ public class SentModel : BasePageModel
     [ViewData]
     public string PageTitle => "Emergency - Sent";
 
-    public List<SentMessageSummary> Messages { get; set; } = [];
+    public List<MessageEventSummary> Messages { get; set; } = [];
 
     public async Task OnGet()
     {
-        Result<List<SentMessageSummary>> request = await _mediator.Send(new GetEmergencyConsoleSentMessageSummariesQuery());
+        Result<List<MessageEventSummary>> request = await _mediator.Send(new GetEmergencyConsoleMessageEventSummariesQuery());
 
         if (request.IsFailure)
         {

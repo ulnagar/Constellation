@@ -1,18 +1,18 @@
-﻿namespace Constellation.Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleSentMessageDetails;
+﻿namespace Constellation.Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventDetails;
 
 using Core.Models.EmergencyConsole.Enums;
 using Core.Models.EmergencyConsole.Identifiers;
 
-public sealed record SentMessageDetail(
+public sealed record MessageEventDetail(
     EventId EventId,
     DateTime SentAt,
     string SentBy,
     string Message,
-    List<SentMessageDetail.RecipientStatus> Recipient)
+    List<MessageEventDetail.RecipientStatus> Recipient)
 {
     public sealed record RecipientStatus(
         MessageType Type,
         string RecipientAddress,
         string RecipientName,
-        bool Sent);
+        MessageStatus Status);
 }

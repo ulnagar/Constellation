@@ -49,7 +49,7 @@ public sealed class IndexModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), templates.Error, true)
-                .Warning("Failed to retrieve Emergency Console Message Templates for user {User}", _currentUserService.UserName);
+                .Warning("Failed to retrieve Emergency Console MessageEvent Templates for user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(templates.Error);
 

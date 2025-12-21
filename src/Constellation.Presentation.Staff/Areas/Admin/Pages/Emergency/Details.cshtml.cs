@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleSentMessageDetails;
+using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventDetails;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Core.Models.EmergencyConsole.Identifiers;
@@ -41,11 +41,11 @@ public class DetailsModel : BasePageModel
     [BindProperty(SupportsGet = true)]
     public EventId Id { get; set; } = EventId.Empty;
 
-    public SentMessageDetail Message { get; set; }
+    public MessageEventDetail MessageEvent { get; set; }
 
     public async Task OnGet()
     {
-        Result<SentMessageDetail> message = await _mediator.Send(new GetEmergencyConsoleSentMessageDetailsQuery(Id));
+        Result<MessageEventDetail> message = await _mediator.Send(new GetEmergencyConsoleMessageEventDetailsQuery(Id));
 
         if (message.IsFailure)
         {
@@ -54,6 +54,6 @@ public class DetailsModel : BasePageModel
             return;
         }
 
-        Message = message.Value;
+        MessageEvent = message.Value;
     }
 }

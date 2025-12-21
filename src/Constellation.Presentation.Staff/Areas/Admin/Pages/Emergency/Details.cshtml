@@ -1,9 +1,10 @@
 ﻿@page "{id}"
+@using Constellation.Core.Models.EmergencyConsole.Enums
 @model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.DetailsModel
 @{
 }
 
-<h2>Message Details</h2>
+<h2>MessageEvent Details</h2>
 
 <div class="page-menu">
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right show-loader">Go Back</a>
@@ -14,24 +15,24 @@
 <div>
     <dl class="row">
         <dt class="col-md-2">
-            <label asp-for="Message.SentAt">Sent</label>
+            <label asp-for="MessageEvent.SentAt">Sent</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Message.SentAt.ToString("f")</span>
+            <span>@Model.MessageEvent.SentAt.ToString("f")</span>
         </dd>
 
         <dt class="col-md-2">
-            <label asp-for="Message.SentBy">Sent By</label>
+            <label asp-for="MessageEvent.SentBy">Sent By</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Message.SentBy</span>
+            <span>@Model.MessageEvent.SentBy</span>
         </dd>
 
         <dt class="col-md-2">
-            <label asp-for="Message">Message</label>
+            <label asp-for="MessageEvent">MessageEvent</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Message.Message</span>
+            <span>@Model.MessageEvent.Message</span>
         </dd>
     </dl>
 </div>
@@ -45,11 +46,11 @@
         <tr>
             <th>Recipient</th>
             <th>Status</th>
-            <th>Message Type</th>
+            <th>MessageEvent Type</th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.Message.Recipient)
+    @foreach (var item in Model.MessageEvent.Recipient)
     {
         <tr>
             <td>
@@ -57,13 +58,21 @@
                 @item.RecipientAddress
             </td>
             <td>
-                @if (item.Sent)
+                @if (item.Status == MessageStatus.Pending)
                 {
-                    <span class="badge bg-info">Yes</span> 
+                    <span class="badge bg-secondary">Pending</span>
                 }
-                else
+                else if (item.Status == MessageStatus.Sent)
                 {
-                    <span class="badge bg-warning">No</span>
+                    <span class="badge bg-primary">Sent</span>
+                }
+                else if (item.Status == MessageStatus.Delivered)
+                {
+                    <span class="badge bg-success">Delivered</span>
+                }
+                else if (item.Status == MessageStatus.Error)
+                {
+                    <span class="badge bg-danger">Error</span>
                 }
             </td>
             <td>

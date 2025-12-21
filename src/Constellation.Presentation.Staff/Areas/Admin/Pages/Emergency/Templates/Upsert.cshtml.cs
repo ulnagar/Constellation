@@ -76,7 +76,7 @@ public class UpsertModel : BasePageModel
             _logger
                 .ForContext(nameof(GetEmergencyConsoleMessageTemplateQuery), query, true)
                 .ForContext(nameof(Error), template.Error, true)
-                .Warning("Failed to retrieve Message Template for edit by user {User}", _currentUserService.UserName);
+                .Warning("Failed to retrieve MessageEvent Template for edit by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(
                 template.Error,
@@ -96,7 +96,7 @@ public class UpsertModel : BasePageModel
 
         _logger
             .ForContext(nameof(DeleteEmergencyConsoleMessageTemplateCommand), command, true)
-            .Information("Requested to delete Message Template by user {User}", _currentUserService.UserName);
+            .Information("Requested to delete MessageEvent Template by user {User}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);
 
@@ -104,7 +104,7 @@ public class UpsertModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), result.Error, true)
-                .Information("Requested to delete Message Template by user {User}", _currentUserService.UserName);
+                .Information("Requested to delete MessageEvent Template by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(
                 result.Error,
@@ -134,7 +134,7 @@ public class UpsertModel : BasePageModel
                 _logger
                     .ForContext(nameof(CreateNewEmergencyConsoleMessageTemplateCommand), command, true)
                     .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to create new Message Template for edit by user {User}", _currentUserService.UserName);
+                    .Warning("Failed to create new MessageEvent Template for edit by user {User}", _currentUserService.UserName);
 
                 ModalContent = ErrorDisplay.Create(result.Error);
 
@@ -154,7 +154,7 @@ public class UpsertModel : BasePageModel
                 _logger
                     .ForContext(nameof(UpdateEmergencyConsoleMessageTemplateCommand), command, true)
                     .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to update Message Template for edit by user {User}", _currentUserService.UserName);
+                    .Warning("Failed to update MessageEvent Template for edit by user {User}", _currentUserService.UserName);
 
                 ModalContent = ErrorDisplay.Create(result.Error);
 

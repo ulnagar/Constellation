@@ -18,6 +18,7 @@
     <PackageReference Include="EPPlus" />
     <PackageReference Include="ExcelDataReader" />
     <PackageReference Include="ExcelDataReader.DataSet" />
+    <PackageReference Include="Hangfire.Core" />
     <PackageReference Include="HtmlAgilityPack" />
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" />

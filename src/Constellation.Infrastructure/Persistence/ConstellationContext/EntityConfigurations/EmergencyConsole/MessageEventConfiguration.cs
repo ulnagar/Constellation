@@ -5,11 +5,11 @@ using Core.Models.EmergencyConsole.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal sealed class SentMessageConfiguration :IEntityTypeConfiguration<SentMessage>
+internal sealed class MessageEventConfiguration :IEntityTypeConfiguration<MessageEvent>
 {
-    public void Configure(EntityTypeBuilder<SentMessage> builder)
+    public void Configure(EntityTypeBuilder<MessageEvent> builder)
     {
-        builder.ToTable("SentMessages", "EmergencyConsole");
+        builder.ToTable("MessageEvents", "EmergencyConsole");
 
         builder
             .HasKey(message => message.Id);
@@ -21,13 +21,13 @@ internal sealed class SentMessageConfiguration :IEntityTypeConfiguration<SentMes
                 value => EventId.FromValue(value));
 
         builder
-            .HasMany(message => message.Statuses)
+            .HasMany(message => message.Recipients)
             .WithOne()
             .HasForeignKey(status => status.EventId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .Navigation(message => message.Statuses)
+            .Navigation(message => message.Recipients)
             .AutoInclude();
     }
 }

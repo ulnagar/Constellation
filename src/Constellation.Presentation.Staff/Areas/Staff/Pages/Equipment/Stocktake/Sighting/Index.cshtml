@@ -39,7 +39,7 @@
     }
     else
     {
-        <div class="alert alert-danger mt-3">Can't find the device? Click <a asp-page="/Equipment/Stocktake/Sighting/Manual" asp-area="Staff" asp-route-id="@Model.Id">here</a> to enter the details manually.</div>
+        <div class="alert alert-danger mt-3">Can't find the device? Click <a asp-page="/Equipment/Stocktake/Sighting/Manual" asp-area="Staff" asp-route-id="@Model.Id">here</a> to enter the eventDetails manually.</div>
     }
 
 </div>
@@ -48,7 +48,7 @@
 {
     <div class="jumbotron" id="device-found">
         <h3 class="display-4">Asset found!</h3>
-        <p class="lead">Is this the correct asset? Please confirm all details</p>
+        <p class="lead">Is this the correct asset? Please confirm all eventDetails</p>
         <hr class="my-4">
         <div class="row">
             <dl class="row col-6">
@@ -76,8 +76,8 @@
     </div>
 
     <div class="jumbotron d-none" id="display-details">
-        <h3 class="display-4">Confirm details</h3>
-        <p class="lead">Are the following details still correct?</p>
+        <h3 class="display-4">Confirm eventDetails</h3>
+        <p class="lead">Are the following eventDetails still correct?</p>
         <hr class="my-4">
         <div class="row">
             <dl class="row col-6">
@@ -169,12 +169,12 @@
         function ShowDetails() {
             $('#device-found').addClass('d-none');
 
-            $('#display-details').removeClass('d-none');
-            $('html, body').scrollTop($('#display-details').offset().top);
+            $('#display-eventDetails').removeClass('d-none');
+            $('html, body').scrollTop($('#display-eventDetails').offset().top);
         }
 
         function ShowCondition() {
-            $('#display-details').addClass('d-none');
+            $('#display-eventDetails').addClass('d-none');
 
             $('#confirm-condition').removeClass('d-none');
             $('html, body').scrollTop($('#confirm-condition').offset().top);

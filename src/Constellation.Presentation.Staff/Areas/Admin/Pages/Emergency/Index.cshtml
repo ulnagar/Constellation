@@ -104,7 +104,7 @@
             <label asp-for="Message" class="col-md-2"></label>
             <div class="col-md-6">
                 <textarea id="@Html.IdFor(m => m.Message)" name="@Html.NameFor(m => m.Message)" rows="20" cols="150" class="form-control">@Model.Message</textarea>
-                <span class="d-block d-none text-danger message-counter">The message contains <span id="character-count">@Model.Message.Count()</span> characters. Messages sent via SMS will be split into 160 character blocks and sent separately.</span>
+                <span class="d-block d-none text-danger message-counter">The message contains <span id="character-count">@Model.Message.Count()</span> characters. MessageEvents sent via SMS will be split into 160 character blocks and sent separately.</span>
                 <span asp-validation-for="Message" class="text-danger"></span>
             </div>
         </div>

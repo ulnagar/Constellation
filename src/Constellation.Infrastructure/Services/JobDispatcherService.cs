@@ -2,19 +2,20 @@
 
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Infrastructure.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
-public class JobDispatcherService<T> : IJobDispatcherService<T>, IScopedService where T : IHangfireJob
+public sealed class JobDispatcherService<T> : IJobDispatcherService<T> where T : IHangfireJob
 {
     private static readonly SemaphoreSlim _semaphore = new(1, 1);
-    private readonly ILogger<T> _logger;
+    private readonly ILogger _logger;
     private readonly T _service;
 
-    public JobDispatcherService(ILogger<T> logger, T service)
+    public JobDispatcherService(
+        T service,
+        ILogger logger)
     {
-        _logger = logger;
         _service = service;
+        _logger = logger
+            .ForContext<T>();
     }
 
     public async Task StartJob(CancellationToken token)
@@ -23,44 +24,75 @@ public class JobDispatcherService<T> : IJobDispatcherService<T>, IScopedService 
 
         if (_semaphore.CurrentCount == 0)
         {
-            _logger.LogInformation("Attempt to start job {job} ({id}) failed due to no free locks", typeof(T).Name, jobId);
+            _logger
+                .ForContext(nameof(IHangfireJob), typeof(T).Name)
+                .ForContext("JobId", jobId)
+                .Information("Attempt to start job failed due to no free locks");
 
             return;
         }
 
-        _logger.LogInformation("Attempt to start job {job} ({id}) waiting for available lock", typeof(T).Name, jobId);
+        _logger
+            .ForContext(nameof(IHangfireJob), typeof(T).Name)
+            .ForContext("JobId", jobId)
+            .Information("Attempt to start job waiting for available lock");
+
         bool solo = await _semaphore.WaitAsync(0, token);
         if (!solo)
         {
-            _logger.LogInformation("Available lock not found for job {job} ({id}) indicating it is already running", typeof(T).Name, jobId);
+            _logger
+                .ForContext(nameof(IHangfireJob), typeof(T).Name)
+                .ForContext("JobId", jobId)
+                .Information("Available lock not found for job indicating it is already running");
+
             return;
         }
 
-        _logger.LogInformation("Available lock found and taken for job {job} ({id})", typeof(T).Name, jobId);
+        _logger
+            .ForContext(nameof(IHangfireJob), typeof(T).Name)
+            .ForContext("JobId", jobId)
+            .Information("Available lock found and taken for job");
 
         if (!token.IsCancellationRequested)
         {
-            _logger.LogInformation("Starting job {job} ({id})", typeof(T).Name, jobId);
+            _logger
+                .ForContext(nameof(IHangfireJob), typeof(T).Name)
+                .ForContext("JobId", jobId)
+                .Information("Starting job");
             try
             {
                 await _service.StartJob(jobId, token);
 
                 if (token.IsCancellationRequested)
                 {
-                    _logger.LogWarning("Job {job} ({id}) cancelled", typeof(T).Name, jobId);
+                    _logger
+                        .ForContext(nameof(IHangfireJob), typeof(T).Name)
+                        .ForContext("JobId", jobId)
+                        .Warning("Job cancelled");
                 }
                 else
                 {
-                    _logger.LogInformation("Job {job} ({id}) finished", typeof(T).Name, jobId);
+                    _logger
+                        .ForContext(nameof(IHangfireJob), typeof(T).Name)
+                        .ForContext("JobId", jobId)
+                        .Information("Job finished");
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Job {job} ({id}) failed with exception {e}", typeof(T).Name, jobId, e.Message);
+                _logger
+                    .ForContext(nameof(IHangfireJob), typeof(T).Name)
+                    .ForContext("JobId", jobId)
+                    .ForContext(nameof(Exception), e, true)
+                    .Error(e, "Job failed with exception");
             }
         }
 
-        _logger.LogInformation("Releasing lock taken for job {job} ({id})", typeof(T).Name, jobId);
+        _logger
+            .ForContext(nameof(IHangfireJob), typeof(T).Name)
+            .ForContext("JobId", jobId)
+            .Information("Releasing lock taken for job");
+
         _semaphore.Release();
     }
 }
