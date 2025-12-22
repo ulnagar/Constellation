@@ -7,6 +7,7 @@ using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Enums;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSchoolContact)]
@@ -52,10 +54,12 @@ public class CreateModel : BasePageModel
     public string LastName { get; set; }
 
     [BindProperty]
-    public string? PhoneNumber { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public PhoneNumber? PhoneNumber { get; set; } = PhoneNumber.Empty;
 
     [BindProperty]
-    public string EmailAddress { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public EmailAddress EmailAddress { get; set; } = EmailAddress.None;
 
     [BindProperty]
     public Position Position { get; set; }
@@ -108,7 +112,7 @@ public class CreateModel : BasePageModel
             FirstName,
             LastName,
             EmailAddress,
-            PhoneNumber,
+            PhoneNumber ?? PhoneNumber.Empty,
             Position,
             SchoolCode,
             string.Empty,

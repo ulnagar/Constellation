@@ -58,7 +58,7 @@ internal sealed class CreateContactCommandHandler
             request.FirstName,
             request.LastName,
             request.EmailAddress,
-            request.PhoneNumber,
+            request.PhoneNumber.ToString(PhoneNumber.Format.None),
             request.SelfRegistered);
 
         if (contact.IsFailure)

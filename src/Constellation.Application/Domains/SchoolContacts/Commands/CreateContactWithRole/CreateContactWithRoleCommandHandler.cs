@@ -37,7 +37,7 @@ internal sealed class CreateContactWithRoleCommandHandler
 
     public async Task<Result> Handle(CreateContactWithRoleCommand request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {
@@ -61,7 +61,7 @@ internal sealed class CreateContactWithRoleCommandHandler
             return Result.Failure(emailAddress.Error);
         }
 
-        SchoolContact existingContact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
+        SchoolContact? existingContact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
 
         if (existingContact is null)
         {
@@ -69,7 +69,7 @@ internal sealed class CreateContactWithRoleCommandHandler
                 request.FirstName,
                 request.LastName,
                 request.EmailAddress,
-                request.PhoneNumber,
+                request.PhoneNumber.ToString(PhoneNumber.Format.None),
                 request.SelfRegistered);
 
             if (contact.IsFailure)

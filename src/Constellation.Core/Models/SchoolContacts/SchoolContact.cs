@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.SchoolContacts;
 
+using Core.Errors;
 using Enums;
 using Errors;
 using Events;
@@ -158,6 +159,15 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
 
         role.Update(note);
 
+        return Result.Success();
+    }
+    public Result AddPhoneNumber(
+        PhoneNumber phoneNumber)
+    {
+        if (!phoneNumber.IsMobile())
+            return Result.Failure(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+
+        PhoneNumber = phoneNumber;
         return Result.Success();
     }
 

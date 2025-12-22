@@ -3,6 +3,7 @@
 using Core.ValueObjects;
 
 public sealed record ContactDetail(
+    Guid Id,
     Name Name,
     string AdditionalDetail,
     ContactDetail.ContactCategory Category,

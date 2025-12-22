@@ -43,8 +43,8 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
     public string FirstName { get; }
     public string PreferredName { get; }
     public string LastName { get; }
-    public string DisplayName => $"{PreferredName} {LastName}";
-    public string SortOrder => $"{LastName}, {PreferredName}";
+    public string DisplayName => string.IsNullOrWhiteSpace(PreferredName) ? $"{FirstName} {LastName}" : $"{PreferredName} {LastName}";
+    public string SortOrder => string.IsNullOrWhiteSpace(PreferredName) ? $"{LastName}, {FirstName}" : $"{LastName}, {PreferredName}";
 
     public override IEnumerable<object> GetAtomicValues()
     {

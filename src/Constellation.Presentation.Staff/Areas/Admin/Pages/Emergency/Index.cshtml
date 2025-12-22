@@ -154,8 +154,8 @@
                         <div class="row mb-2">
                             <label class="col-md-12">Phone Number</label>
                             <div class="col-md-12">
-                                <input id="ManualRecipientPhone" type="tel" pattern="[0-9]{10}" class="form-control" />
-                                <span class="text-danger">(Optional) Enter a ten-digit mobile number with no spaces</span>
+                                <input id="ManualRecipientPhone" type="tel" pattern="^(\s*\d\s*){10}$" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a ten-digit mobile number</span>
                             </div>
                         </div>
                     </div>

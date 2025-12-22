@@ -2,11 +2,12 @@
 
 using Abstractions.Messaging;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.ValueObjects;
 
 public sealed record CreateContactCommand(
     string FirstName,
     string LastName,
-    string EmailAddress,
-    string PhoneNumber,
+    EmailAddress EmailAddress,
+    PhoneNumber PhoneNumber,
     bool SelfRegistered)
     : ICommand<SchoolContactId>;

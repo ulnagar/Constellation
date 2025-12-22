@@ -25,7 +25,7 @@ internal sealed class GetStaffByIdQueryHandler
 
     public async Task<Result<StaffResponse>> Handle(GetStaffByIdQuery request, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(request.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -40,7 +40,8 @@ internal sealed class GetStaffByIdQueryHandler
             staffMember.Name,
             staffMember.Gender,
             staffMember.EmailAddress,
-            staffMember.CurrentAssignment?.SchoolCode,
+            staffMember.PhoneNumber,
+            staffMember.CurrentAssignment?.SchoolCode!,
             staffMember.IsShared);
 
         return response;

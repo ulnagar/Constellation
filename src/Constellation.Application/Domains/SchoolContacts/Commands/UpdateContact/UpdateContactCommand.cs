@@ -2,11 +2,12 @@
 
 using Abstractions.Messaging;
 using Core.Models.SchoolContacts.Identifiers;
+using Core.ValueObjects;
 
 public sealed record UpdateContactCommand(
     SchoolContactId ContactId,
     string FirstName,
     string LastName,
-    string EmailAddress,
-    string PhoneNumber)
+    EmailAddress EmailAddress,
+    PhoneNumber PhoneNumber)
     : ICommand;

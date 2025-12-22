@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Queries.GetContactSummary;
 
 using Abstractions.Messaging;
-using Constellation.Core.ValueObjects;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
@@ -26,7 +25,7 @@ internal sealed class GetContactSummaryQueryHandler
 
     public async Task<Result<ContactSummaryResponse>> Handle(GetContactSummaryQuery request, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
         if (contact is null)
         {
@@ -37,9 +36,8 @@ internal sealed class GetContactSummaryQueryHandler
 
         return new ContactSummaryResponse(
             contact.Id,
-            contact.Name.FirstName,
-            contact.Name.LastName,
-            contact.EmailAddress.Email,
-            contact.PhoneNumber.ToString(PhoneNumber.Format.None));
+            contact.Name,
+            contact.EmailAddress,
+            contact.PhoneNumber);
     }
 }

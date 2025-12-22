@@ -11,5 +11,6 @@ public sealed record StaffResponse(
     Name Name,
     Gender Gender,
     EmailAddress EmailAddress,
+    PhoneNumber PhoneNumber,
     string SchoolCode,
     bool IsShared);

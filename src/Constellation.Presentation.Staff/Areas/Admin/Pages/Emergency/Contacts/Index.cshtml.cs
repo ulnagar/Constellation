@@ -1,14 +1,24 @@
 namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Contacts;
 
+using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Queries.GetContactDetails;
+using Application.Domains.SchoolContacts.Commands.UpdateSchoolContactPhoneNumber;
+using Application.Domains.SchoolContacts.Queries.GetContactSummary;
+using Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
+using Shared.PartialViews.AddPhoneNumberToSchoolContact;
+using Shared.PartialViews.AddPhoneNumberToStaffMember;
 
 [Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
 public class IndexModel : BasePageModel
@@ -49,5 +59,75 @@ public class IndexModel : BasePageModel
         }
 
         Contacts = contacts.Value;
+    }
+
+    public async Task<IActionResult> OnPostAjaxStaffPhoneUpdate(StaffId staffId)
+    {
+        Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(staffId));
+
+        if (staffMember.IsFailure)
+            return Content(string.Empty);
+
+        AddPhoneNumberToStaffMemberViewModel viewModel = new()
+        {
+            StaffId = staffMember.Value.StaffId,
+            PhoneNumber = staffMember.Value.PhoneNumber
+        };
+
+        return Partial("AddPhoneNumberToStaffMember", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostStaffPhoneUpdate(AddPhoneNumberToStaffMemberViewModel viewModel)
+    {
+        if (viewModel.PhoneNumber == PhoneNumber.Empty)
+            return RedirectToPage();
+
+        Result update = await _mediator.Send(new UpdateStaffMemberPhoneNumberCommand(viewModel.StaffId, viewModel.PhoneNumber));
+
+        if (update.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                update.Error,
+                _linkGenerator.GetPathByPage("/Emergency/Contacts/Index", values: new { area = "Admin" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxContactPhoneUpdate(SchoolContactId contactId)
+    {
+        Result<ContactSummaryResponse> contact = await _mediator.Send(new GetContactSummaryQuery(contactId));
+
+        if (contact.IsFailure)
+            return Content(string.Empty);
+
+        AddPhoneNumberToSchoolContactViewModel viewModel = new()
+        {
+            ContactId = contact.Value.ContactId,
+            PhoneNumber = contact.Value.PhoneNumber
+        };
+
+        return Partial("AddPhoneNumberToSchoolContact", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostContactPhoneUpdate(AddPhoneNumberToSchoolContactViewModel viewModel)
+    {
+        if (viewModel.PhoneNumber == PhoneNumber.Empty)
+            return RedirectToPage();
+
+        Result update = await _mediator.Send(new UpdateSchoolContactPhoneNumberCommand(viewModel.ContactId, viewModel.PhoneNumber));
+
+        if (update.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                update.Error,
+                _linkGenerator.GetPathByPage("/Emergency/Contacts/Index", values: new { area = "Admin" }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

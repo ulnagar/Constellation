@@ -8,6 +8,5 @@ public class CreateContactCommandValidator : AbstractValidator<CreateContactComm
     {
         RuleFor(command => command.FirstName).NotEmpty();
         RuleFor(command => command.LastName).NotEmpty();
-        RuleFor(command => command.EmailAddress).NotEmpty().EmailAddress(FluentValidation.Validators.EmailValidationMode.AspNetCoreCompatible);
     }
 }

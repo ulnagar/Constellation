@@ -65,6 +65,7 @@ internal sealed class GetContactDetailsQueryHandler
                 .ToList();
 
             ContactDetail detail = new(
+                member.Id.Value,
                 member.Name,
                 string.Join(", ", faculties),
                 ContactDetail.ContactCategory.Staff,
@@ -85,6 +86,7 @@ internal sealed class GetContactDetailsQueryHandler
                     entry.Role == Position.Coordinator);
 
             ContactDetail detail = new(
+                coordinator.Id.Value,
                 coordinator.Name,
                 assignment?.SchoolName ?? string.Empty,
                 ContactDetail.ContactCategory.Coordinator,
@@ -110,6 +112,7 @@ internal sealed class GetContactDetailsQueryHandler
             foreach (Parent parent in family.Parents)
             {
                 ContactDetail detail = new(
+                    Guid.Empty,
                     parent.Name,
                     string.Join(", ", familyStudents),
                     ContactDetail.ContactCategory.Parent,
@@ -127,6 +130,7 @@ internal sealed class GetContactDetailsQueryHandler
             if (familyName.IsSuccess && familyEmail.IsSuccess)
             {
                 ContactDetail familyDetail = new(
+                    Guid.Empty,
                     familyName.Value,
                     string.Join(", ", familyStudents),
                     ContactDetail.ContactCategory.Parent,

@@ -1,15 +1,15 @@
 ﻿namespace Constellation.Core.ValueObjects;
 
-using Constellation.Core.Errors;
-using Constellation.Core.Primitives;
-using Constellation.Core.Shared;
+using Errors;
 using Newtonsoft.Json;
+using Primitives;
+using Shared;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 public sealed class PhoneNumber : ValueObject
 {
-    public static readonly PhoneNumber Empty = new("0200000000");
+    public static readonly PhoneNumber Empty = new(string.Empty);
 
     private const string _regExFormat = @"^(?:\+?(61))? ?(?:\((?=.*\)))?(0?[2-57-8])\)? ?(\d\d(?:[- ](?=\d{3})|(?!\d\d[- ]?\d[- ]))\d\d[- ]?\d[- ]?\d{3})$";
 
@@ -26,7 +26,7 @@ public sealed class PhoneNumber : ValueObject
             return Result.Failure<PhoneNumber>(DomainErrors.ValueObjects.PhoneNumber.NumberEmpty);
         }
 
-        var trimmedNumber = Regex.Replace(number, "[^0-9]", "");
+        string trimmedNumber = Regex.Replace(number, "[\\s+]", "");
 
         if (trimmedNumber.Length == 8)
         {
@@ -46,7 +46,12 @@ public sealed class PhoneNumber : ValueObject
         return new PhoneNumber(trimmedNumber);
     }
 
-    public static PhoneNumber FromValue(string number) => new(number);
+    public static PhoneNumber FromValue(string number)
+    {
+        string trimmedNumber = Regex.Replace(number, "[\\s+]", "");
+
+        return new(trimmedNumber);
+    }
 
     public override string ToString()
     {

@@ -34,15 +34,22 @@
             <td>@item.PhoneNumber</td>
             <td>@item.EmailAddress</td>
             <td>
-                @if (item.Category != ContactDetail.ContactCategory.Parent)
+                @if (item.Category == ContactDetail.ContactCategory.Staff)
                 {
-                    <button class="btn btn-sm btn-info btn-show-hover">Update Phone</button>
+                    <button class="btn btn-sm btn-info btn-show-hover staff-phone" data-id="@item.Id">Update Phone</button>
+                }
+                
+                @if (item.Category == ContactDetail.ContactCategory.Coordinator)
+                {
+                    <button class="btn btn-sm btn-info btn-show-hover contact-phone" data-id="@item.Id">Update Phone</button>
                 }
             </td>
         </tr>
     }
     </tbody>
 </table>
+
+@Html.AntiForgeryToken()
 
 @section scripts
 {
@@ -53,6 +60,40 @@
                     [1, 'asc']
                 ]
             });
-        })
+        });
+
+        $('.staff-phone').click(function (event) {
+            var id = $(this).data("id");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxStaffPhoneUpdate",
+                type: "POST",
+                data: {
+                    staffId: id,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+                $('.contact-phone').click(function (event) {
+            var id = $(this).data("id");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxContactPhoneUpdate",
+                type: "POST",
+                data: {
+                    contactId: id,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
     </script>
 }
