@@ -28,8 +28,45 @@ internal sealed class QueuedMessageConfiguration : IEntityTypeConfiguration<Queu
                 value => MessageId.FromValue(value));
 
         builder
-            .Property(item => item.AlertRecipient)
-            .IsRequired()
-            .HasConversion<JsonColumnConverter<AlertRecipient>>();
+            .ComplexProperty(item => item.AlertRecipient)
+            .IsRequired();
+
+        builder
+            .ComplexProperty(item => item.AlertRecipient)
+            .ComplexProperty(recipient => recipient.Name)
+            .Property(name => name.FirstName)
+            .HasColumnName(nameof(Name.FirstName))
+            .IsRequired();
+
+        builder
+            .ComplexProperty(item => item.AlertRecipient)
+            .ComplexProperty(recipient => recipient.Name)
+            .Property(name => name.PreferredName)
+            .HasColumnName(nameof(Name.PreferredName))
+            .IsRequired(false);
+
+        builder
+            .ComplexProperty(item => item.AlertRecipient)
+            .ComplexProperty(recipient => recipient.Name)
+            .Property(name => name.LastName)
+            .HasColumnName(nameof(Name.LastName))
+            .IsRequired();
+
+        builder
+            .ComplexProperty(item => item.AlertRecipient)
+            .Property(recipient => recipient.EmailAddress)
+            .HasColumnName(nameof(EmailAddress))
+            .IsRequired(false)
+            .HasConversion(
+                email => email.Email,
+                email => EmailAddress.FromValue(email));
+
+        builder
+            .ComplexProperty(item => item.AlertRecipient)
+            .Property(recipient => recipient.PhoneNumber)
+            .HasColumnName(nameof(PhoneNumber))
+            .IsRequired(false)
+            .HasConversion<PhoneNumberConverter>();
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Extensions;
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.EmergencyConsole;
@@ -65,34 +66,26 @@ internal sealed class EmergencyService : IEmergencyService
                     MessageType.SMS,
                     item.AlertRecipient.PhoneNumber.ToString(PhoneNumber.Format.None),
                     result.IsFailure ? MessageStatus.Error : MessageStatus.Sent);
-
-                _eventRepository.Remove(item);
-                await _unitOfWork.CompleteAsync(cancellationToken);
             }
-            else if (matchingEntry.Type == MessageType.SMS)
+            else if (item.AlertRecipient.HasEmail)
             {
-                Result<string> result = await _emailService.SendEmergencyConsoleEmail(item.AlertRecipient, messageEvent.Message, cancellationToken);
+                Result<string> result = await _emailService.SendEmergencyConsoleEmail(item.AlertRecipient, messageEvent.Message.ToHtml(), cancellationToken);
 
                 matchingEntry.UpdateRecipient(
                     MessageType.Email,
-                    item.AlertRecipient.PhoneNumber.ToString(PhoneNumber.Format.None),
+                    item.AlertRecipient.EmailAddress,
                     result.IsFailure ? MessageStatus.Error : MessageStatus.Sent);
-
-                _eventRepository.Remove(item);
-                await _unitOfWork.CompleteAsync(cancellationToken);
             }
             else
             {
-                Result<string> result = await _emailService.SendEmergencyConsoleEmail(item.AlertRecipient, messageEvent.Message, cancellationToken);
-
                 matchingEntry.UpdateRecipient(
                     MessageType.Email,
-                    item.AlertRecipient.PhoneNumber.ToString(PhoneNumber.Format.None),
-                    result.IsFailure ? MessageStatus.Error : MessageStatus.Sent);
-
-                _eventRepository.Remove(item);
-                await _unitOfWork.CompleteAsync(cancellationToken);
+                    EmailAddress.None,
+                    MessageStatus.Error);
             }
+
+            _eventRepository.Remove(item);
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
     }
 }

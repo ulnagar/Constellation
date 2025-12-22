@@ -3,8 +3,8 @@
 using Constellation.Core.Errors;
 using Constellation.Core.Primitives;
 using Constellation.Core.Shared;
+using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 public sealed class PhoneNumber : ValueObject
@@ -13,6 +13,7 @@ public sealed class PhoneNumber : ValueObject
 
     private const string _regExFormat = @"^(?:\+?(61))? ?(?:\((?=.*\)))?(0?[2-57-8])\)? ?(\d\d(?:[- ](?=\d{3})|(?!\d\d[- ]?\d[- ]))\d\d[- ]?\d[- ]?\d{3})$";
 
+    [JsonConstructor]
     private PhoneNumber(string number)
     {
         Number = number;
@@ -83,6 +84,9 @@ public sealed class PhoneNumber : ValueObject
     public bool IsMobile()
     {
         if (this == Empty)
+            return false;
+
+        if (string.IsNullOrWhiteSpace(Number))
             return false;
 
         return Number[..2] switch

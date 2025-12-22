@@ -4,46 +4,38 @@ using Application.Domains.Contacts.Interfaces;
 using Application.Models.Auth;
 using BaseModels;
 using Core.Abstractions.Services;
-using Core.Models.Students.Identifiers;
+using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.EmergencyConsole.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 [Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class IndexModel : BasePageModel
 {
     private readonly IStudentFlagCacheService _flagCache;
+    private readonly IEmergencyService _emergencyService;
     private readonly IMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
 
     public IndexModel(
-        IStudentFlagCacheService flagCache,
+        IEmergencyService emergencyService,
         IMediator mediator,
         ICurrentUserService currentUserService,
         ILogger logger)
     {
-        _flagCache = flagCache;
+        _emergencyService = emergencyService;
         _mediator = mediator;
         _currentUserService = currentUserService;
         _logger = logger;
     }
 
-    public List<string> Flags = [];
-    public List<StudentId> StudentIds = [];
-
-    [BindProperty(SupportsGet = true)]
-    public string Flag { get; set; } = string.Empty;
-
     public async Task OnGet()
     {
-        Flags = await _flagCache.GetFlags();
+        EventId eventId = EventId.FromValue(new Guid("5e7ddc03-2eae-498d-a4d9-a7002ea239aa"));
 
-        if (!string.IsNullOrWhiteSpace(Flag))
-        {
-            StudentIds = await _flagCache.GetStudentsWithFlag(Flag);
-        }
+        await _emergencyService.SendEmergencyAlerts(eventId);
     }
 
 }

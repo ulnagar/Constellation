@@ -36,6 +36,9 @@ public sealed class EmailAddress : ValueObject
         yield return Email;
     }
 
+    public static implicit operator string(EmailAddress address) =>
+        address.ToString();
+
     public override string ToString() => Email;
 
     /// <summary>
