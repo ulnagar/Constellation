@@ -49,7 +49,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
 
     public async Task Handle(AcademicReportCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        AcademicReport reportEntry = await _reportRepository.GetAcademicReportById(notification.ReportId, cancellationToken);
+        AcademicReport? reportEntry = await _reportRepository.GetAcademicReportById(notification.ReportId, cancellationToken);
 
         if (reportEntry is null)
         {
@@ -71,7 +71,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
         // Get Student family and check for non-residential contacts
         List<Family> families = await _familyRepository.GetFamiliesByStudentId(reportEntry.StudentId, cancellationToken);
 
-        if (families is null || families.Count == 0)
+        if (families.Count == 0)
             return;
 
         // Are there any non-residential families
@@ -91,18 +91,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
         foreach (Parent parent in nonResidentParents)
         {
             // Email the parent a copy of the report
-
-            Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
-
-            if (name.IsFailure)
-                continue;
-
-            Result<EmailAddress> email = EmailAddress.Create(parent.EmailAddress);
-
-            if (email.IsFailure)
-                continue;
-
-            Result<EmailRecipient> recipient = EmailRecipient.Create(name.Value.DisplayName, email.Value.Email);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
             if (recipient.IsFailure)
                 continue;
@@ -110,7 +99,7 @@ internal sealed class AcademicReportCreatedDomainEvent_EmailToNonResidentialPare
             recipients.Add(recipient.Value);
         }
 
-        Student student = await _studentRepository.GetById(reportEntry.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(reportEntry.StudentId, cancellationToken);
 
         FileDto fileDto = new()
         {

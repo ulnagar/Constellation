@@ -154,7 +154,7 @@ internal sealed class EmailExternalReportsCommandHandler
             List<EmailRecipient> recipients = new();
             foreach (Parent parent in studentFamilies.SelectMany(entry => entry.Parents))
             {
-                Result<EmailRecipient> recipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                Result<EmailRecipient> recipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (recipient.IsFailure)
                     continue;

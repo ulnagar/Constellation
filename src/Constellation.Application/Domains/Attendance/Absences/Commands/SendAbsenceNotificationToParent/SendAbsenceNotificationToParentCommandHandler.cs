@@ -163,28 +163,18 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             if (familyEmail.IsSuccess)
                 recipients.Add(familyEmail.Value);
 
-            List<string> numbers = family.Parents
+            List<PhoneNumber> numbers = family.Parents
                 .Select(parent => parent.MobileNumber)
                 .Distinct()
                 .ToList();
 
-            foreach (string number in numbers)
-            {
-                Result<PhoneNumber> result = PhoneNumber.Create(number);
-
-                if (result.IsSuccess)
-                    phoneNumbers.Add(result.Value);
-            }
+            foreach (PhoneNumber number in numbers)
+                phoneNumbers.Add(number);
 
             foreach (Parent parent in family.Parents)
             {
-                Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-                if (nameResult.IsFailure)
-                    continue;
-
                 Result<EmailRecipient> result =
-                    EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+                    EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
                     recipients.Add(result.Value);

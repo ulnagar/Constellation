@@ -210,18 +210,6 @@ internal sealed class GetContactListQueryHandler
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<Name> parentName = Name.Create(parent.FirstName, null, parent.LastName);
-
-                        if (parentName.IsFailure)
-                            continue;
-
-                        Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-
-                        if (parentEmail.IsFailure)
-                            continue;
-
-                        Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
-
                         ContactCategory category = parent.SentralLink switch
                         {
                             Parent.SentralReference.Father => ContactCategory.ResidentialFather,
@@ -235,9 +223,9 @@ internal sealed class GetContactListQueryHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             category,
-                            parentName.Value.DisplayName,
-                            parentEmail.Value,
-                            parentPhone.IsSuccess ? parentPhone.Value : null,
+                            parent.Name.DisplayName,
+                            parent.EmailAddress,
+                            parent.MobileNumber,
                             null));
                     }
                 }
@@ -256,27 +244,15 @@ internal sealed class GetContactListQueryHandler
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<Name> parentName = Name.Create(parent.FirstName, null, parent.LastName);
-
-                        if (parentName.IsFailure)
-                            continue;
-
-                        Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-
-                        if (parentEmail.IsFailure)
-                            continue;
-
-                        Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
-
                         result.Add(new(
                             student.StudentReferenceNumber,
                             student.Name,
                             enrolment.Grade,
                             enrolment.SchoolName,
                             ContactCategory.NonResidentialParent,
-                            parentName.Value.DisplayName,
-                            parentEmail.Value,
-                            parentPhone.IsSuccess ? parentPhone.Value : null,
+                            parent.Name.DisplayName,
+                            parent.EmailAddress,
+                            parent.MobileNumber,
                             null));
                     }
                 }

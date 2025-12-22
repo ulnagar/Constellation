@@ -154,8 +154,8 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
         {
             UserName = parent.EmailAddress,
             Email = parent.EmailAddress,
-            FirstName = parent.FirstName,
-            LastName = parent.LastName,
+            FirstName = parent.Name.FirstName,
+            LastName = parent.Name.LastName,
             IsParent = true
         };
 

@@ -56,7 +56,7 @@ internal sealed class SendParentNotificationsCommandHandler
 
     public async Task<Result> Handle(SendParentNotificationsCommand request, CancellationToken cancellationToken)
     {
-        NominationPeriod period = await _awardRepository.GetById(request.PeriodId, cancellationToken);
+        NominationPeriod? period = await _awardRepository.GetById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {
@@ -78,7 +78,7 @@ internal sealed class SendParentNotificationsCommandHandler
 
         foreach (var studentId in nominationsByStudent)
         {
-            Student student = await _studentRepository.GetById(studentId.Key, cancellationToken);
+            Student? student = await _studentRepository.GetById(studentId.Key, cancellationToken);
 
             if (student is null)
                 continue;
@@ -88,19 +88,8 @@ internal sealed class SendParentNotificationsCommandHandler
             Dictionary<EmailAddress, Name> recipients = new();
 
             foreach (Family family in families)
-            {
                 foreach (Parent parent in family.Parents)
-                {
-                    Result<EmailAddress> emailAddress = EmailAddress.Create(parent.EmailAddress);
-
-                    Result<Name> name = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-                    if (emailAddress.IsFailure || name.IsFailure)
-                        continue;
-
-                    recipients.TryAdd(emailAddress.Value, name.Value);
-                }
-            }
+                    recipients.TryAdd(parent.EmailAddress, parent.Name);
 
             foreach (var recipient in recipients)
             {

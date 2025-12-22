@@ -8,7 +8,6 @@ using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Repositories;
 using Core.Extensions;
 using Core.Models.Families;
-using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
 using Core.Models.Students.ValueObjects;
@@ -131,7 +130,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     .Information("No existing entry for {name} ({code}). Creating new family.", family.AddressName, family.FamilyId);
 
                 // New Family... Add to database
-                entry = Family.Create(new FamilyId(), family.AddressName);
+                entry = Family.Create(family.AddressName);
                 entry.LinkFamilyToSentralDetails(family.FamilyId);
                 entry.UpdateFamilyAddress(
                     family.AddressName,
@@ -149,7 +148,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                     _logger
                         .Information("Adding student {name} to family {family} ({code})", student.Name.DisplayName, family.AddressName, family.FamilyId);
 
-                    entry.AddStudent(student.Id, student.StudentReferenceNumber, true);
+                    entry.AddStudent(student.Id, true);
                 }
 
                 foreach (FamilyDetailsDto.Contact contact in family.Contacts)
@@ -262,7 +261,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         _logger
                             .Information("Adding student {name} to family {family} ({code})", sentralStudent.Name.DisplayName, family.AddressName, family.FamilyId);
 
-                        entry.AddStudent(sentralStudent.Id, sentralStudent.StudentReferenceNumber, true);
+                        entry.AddStudent(sentralStudent.Id, true);
                     }
                 }
                 
@@ -525,22 +524,22 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 .Information("Parent title has changed from {oldEntry} to {newEntry}", existingParent.Title, title);
         }
 
-        if (existingParent.FirstName != firstName)
+        if (existingParent.Name.FirstName != firstName)
         {
             // FirstName has changed
             _logger
-                .Information("Parent first name has changed from {oldEntry} to {newEntry}", existingParent.FirstName, firstName);
+                .Information("Parent first name has changed from {oldEntry} to {newEntry}", existingParent.Name.FirstName, firstName);
         }
 
-        if (existingParent.LastName != lastName)
+        if (existingParent.Name.LastName != lastName)
         {
             // LastName has changed
             _logger
-                .Information("Parent last name has changed from {oldEntry} to {newEntry}", existingParent.LastName, lastName);
+                .Information("Parent last name has changed from {oldEntry} to {newEntry}", existingParent.Name.LastName, lastName);
         }
 
         Result<PhoneNumber> mobileCheck = PhoneNumber.Create(mobile);
-        string mobileNumber = mobileCheck.IsSuccess ? mobileCheck.Value.ToString(PhoneNumber.Format.None) : string.Empty;
+        PhoneNumber mobileNumber = mobileCheck.IsSuccess ? mobileCheck.Value : PhoneNumber.Empty;
 
         if (existingParent.MobileNumber != mobileNumber)
         {

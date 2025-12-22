@@ -350,29 +350,19 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
                 foreach (Parent parent in family.Parents)
                 {
-                    Result<Name> name = Name.Create(
-                        family.FamilyTitle.Split(' ')[0], string.Empty,
-                        string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
-
-                    if (name.IsFailure)
-                        continue;
-
-                    Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
-                    Result<PhoneNumber> phone = PhoneNumber.Create(parent.MobileNumber);
-
-                    if (email.IsSuccess && phone.IsSuccess)
+                    if (parent.EmailAddress != EmailAddress.None && parent.MobileNumber != PhoneNumber.Empty)
                     {
-                        AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value, phone.Value);
+                        AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress, parent.MobileNumber);
                         recipients.Add(parentRecipient);
                     }
-                    else if (phone.IsSuccess)
+                    else if (parent.MobileNumber != PhoneNumber.Empty)
                     {
-                        AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, phone.Value);
+                        AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.MobileNumber);
                         recipients.Add(parentRecipient);
                     }
-                    else if (email.IsSuccess)
+                    else if (parent.EmailAddress != EmailAddress.None)
                     {
-                        AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value);
+                        AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress);
                         recipients.Add(parentRecipient);
                     }
                 }
@@ -426,29 +416,19 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<Name> name = Name.Create(
-                            family.FamilyTitle.Split(' ')[0], string.Empty,
-                            string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
-
-                        if (name.IsFailure)
-                            continue;
-
-                        Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
-                        Result<PhoneNumber> phone = PhoneNumber.Create(parent.MobileNumber);
-
-                        if (email.IsSuccess && phone.IsSuccess)
+                        if (parent.EmailAddress != EmailAddress.None && parent.MobileNumber != PhoneNumber.Empty)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value, phone.Value);
+                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress, parent.MobileNumber);
                             recipients.Add(parentRecipient);
                         }
-                        else if (phone.IsSuccess)
+                        else if (parent.MobileNumber != PhoneNumber.Empty)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, phone.Value);
+                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.MobileNumber);
                             recipients.Add(parentRecipient);
                         }
-                        else if (email.IsSuccess)
+                        else if (parent.EmailAddress != EmailAddress.None)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value);
+                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress);
                             recipients.Add(parentRecipient);
                         }
                     }
@@ -502,29 +482,19 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<Name> name = Name.Create(
-                            family.FamilyTitle.Split(' ')[0], string.Empty,
-                            string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
-
-                        if (name.IsFailure)
-                            continue;
-
-                        Result<EmailAddress> email = EmailAddress.Create(family.FamilyEmail);
-                        Result<PhoneNumber> phone = PhoneNumber.Create(parent.MobileNumber);
-
-                        if (email.IsSuccess && phone.IsSuccess)
+                        if (parent.EmailAddress != EmailAddress.None && parent.MobileNumber != PhoneNumber.Empty)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value, phone.Value);
+                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress, parent.MobileNumber);
                             recipients.Add(parentRecipient);
                         }
-                        else if (phone.IsSuccess)
+                        else if (parent.MobileNumber != PhoneNumber.Empty)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, phone.Value);
+                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.MobileNumber);
                             recipients.Add(parentRecipient);
                         }
-                        else if (email.IsSuccess)
+                        else if (parent.EmailAddress != EmailAddress.None)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(name.Value, email.Value);
+                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress);
                             recipients.Add(parentRecipient);
                         }
                     }

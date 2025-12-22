@@ -125,7 +125,7 @@ internal sealed class SendNotificationsForAssessmentProvisionsCommandHandler
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                        Result<EmailRecipient> parentRecipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                         if (parentRecipient.IsSuccess)
                             recipients.Add(parentRecipient.Value);

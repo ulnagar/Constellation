@@ -8,7 +8,6 @@ using Core.Models.Families;
 using Core.Models.Families.Errors;
 using Core.Models.Students;
 using Core.Shared;
-using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +28,7 @@ internal sealed class GetFamilyEditContextQueryHandler
 
     public async Task<Result<FamilyEditContextResponse>> Handle(GetFamilyEditContextQuery request, CancellationToken cancellationToken)
     {
-        Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
             return Result.Failure<FamilyEditContextResponse>(FamilyErrors.NotFound(request.FamilyId));
@@ -37,18 +36,13 @@ internal sealed class GetFamilyEditContextQueryHandler
         List<string> parents = new();
 
         foreach (Parent parent in family.Parents)
-        {
-            Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
-
-            if (name.IsSuccess)
-                parents.Add(name.Value.DisplayName);
-        }
+            parents.Add(parent.Name);
 
         List<string> students = new();
 
         foreach (StudentFamilyMembership member in family.Students)
         {
-            Student student = await _studentRepository.GetById(member.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(member.StudentId, cancellationToken);
 
             if (student is not null)
                 students.Add($"{student.Name.DisplayName} ({student.CurrentEnrolment?.Grade.AsName()})");

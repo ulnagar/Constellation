@@ -49,7 +49,7 @@ internal sealed class GetParentUserFromMobileNumberQueryHandler
 
         List<Parent> parents = families
             .SelectMany(family => family.Parents)
-            .Where(parent => parent.MobileNumber == request.PhoneNumber.ToString(PhoneNumber.Format.None))
+            .Where(parent => parent.MobileNumber == request.PhoneNumber)
             .ToList();
 
         switch (parents.Count)
@@ -62,11 +62,11 @@ internal sealed class GetParentUserFromMobileNumberQueryHandler
 
                 return Result.Failure<AppUser>(ParentErrors.NotFoundWithNumber(request.PhoneNumber));
             case 1:
-                AppUser singleUser = await _userManager.FindByEmailAsync(parents.First().EmailAddress);
+                AppUser? singleUser = await _userManager.FindByEmailAsync(parents.First().EmailAddress);
 
                 return singleUser;
             case > 1:
-                List<string> emails = parents.Select(parent => parent.EmailAddress).Distinct().ToList();
+                List<EmailAddress> emails = parents.Select(parent => parent.EmailAddress).Distinct().ToList();
 
                 if (emails.Count > 1)
                 {
@@ -78,7 +78,7 @@ internal sealed class GetParentUserFromMobileNumberQueryHandler
                     return Result.Failure<AppUser>(ParentErrors.TooManyWithSameNumber(request.PhoneNumber));
                 }
 
-                AppUser singleEmail = await _userManager.FindByEmailAsync(emails.First());
+                AppUser? singleEmail = await _userManager.FindByEmailAsync(emails.First());
 
                 return singleEmail;
         }

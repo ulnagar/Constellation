@@ -97,7 +97,7 @@ internal sealed class SendConfirmationEmail
                 if (recipients.Any(entry => entry.Email == parent.EmailAddress))
                     continue;
 
-                Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                Result<EmailRecipient> parentRecipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (parentRecipient.IsSuccess)
                     recipients.Add(parentRecipient.Value);

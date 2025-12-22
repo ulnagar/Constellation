@@ -82,24 +82,19 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
 
             foreach (Parent parent in family.Parents)
             {
-                Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-                if (nameResult.IsFailure)
-                    continue;
-
-                Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+                Result<EmailRecipient> result = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
                     recipients.Add(result.Value);
             }
 
-            Offering offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
-            Course course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
+            Offering? offering = await _offeringRepository.GetById(request.OfferingId, cancellationToken);
+            Course? course = offering is not null ? await _courseRepository.GetById(offering.CourseId, cancellationToken) : null;
 
             await _emailService.SendMissedWorkEmail(
                 student,
-                course is not null ? course.Name : string.Empty,
-                offering is not null ? offering.Name : string.Empty,
+                course?.Name ?? string.Empty,
+                offering?.Name ?? string.Empty,
                 request.AbsenceDate,
                 recipients,
                 cancellationToken);

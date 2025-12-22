@@ -1,0 +1,58 @@
+﻿@page
+@using Constellation.Application.Domains.EmergencyConsole.Queries.GetContactDetails
+@model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Contacts.IndexModel
+@{
+}
+
+<h2>Emergency Contacts</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right show-loader">Go Back</a>
+</div>
+
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Contacts)
+    {
+        <tr>
+            <td data-order="@item.Name.SortOrder">
+                @item.Name.DisplayName<br/>
+                @item.AdditionalDetail
+            </td>
+            <td data-order="@Enum.Format(typeof(ContactDetail.ContactCategory), item.Category, "d")">@item.Category</td>
+            <td>@item.PhoneNumber</td>
+            <td>@item.EmailAddress</td>
+            <td>
+                @if (item.Category != ContactDetail.ContactCategory.Parent)
+                {
+                    <button class="btn btn-sm btn-info btn-show-hover">Update Phone</button>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+                "order": [
+                    [1, 'asc']
+                ]
+            });
+        })
+    </script>
+}

@@ -82,8 +82,8 @@ internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
         {
             UserName = parent.EmailAddress,
             Email = parent.EmailAddress,
-            FirstName = parent.FirstName,
-            LastName = parent.LastName,
+            FirstName = parent.Name.FirstName,
+            LastName = parent.Name.LastName,
             IsParent = true
         };
 

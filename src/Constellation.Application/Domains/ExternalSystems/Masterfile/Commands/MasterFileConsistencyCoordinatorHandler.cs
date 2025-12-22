@@ -169,7 +169,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         "MasterFile Email is invalid"));
                 }
 
-                Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToLower() == fileStudent.Parent1Email.ToLower());
+                Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToString().ToLower() == fileStudent.Parent1Email.ToLower());
 
                 if (matchedParent is null)
                 {
@@ -204,7 +204,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         "MasterFile Email is invalid"));
                 }
 
-                Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToLower() == fileStudent.Parent2Email.ToLower());
+                Parent matchedParent = parents.FirstOrDefault(parent => parent.EmailAddress.ToString().ToLower() == fileStudent.Parent2Email.ToLower());
 
                 if (matchedParent is null)
                 {
@@ -233,7 +233,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Parent Email",
                         string.Empty,
-                        parent.EmailAddress.ToLower(),
+                        parent.EmailAddress.ToString().ToLower(),
                         "Constellation value does not exist in MasterFile"));
                 }
                 else
@@ -244,7 +244,7 @@ internal sealed class MasterFileConsistencyCoordinatorHandler
                         dbStudent.Name.DisplayName,
                         "Other Parent Email",
                         string.Empty,
-                        parent.EmailAddress.ToLower(),
+                        parent.EmailAddress.ToString().ToLower(),
                         "Constellation value does not exist in MasterFile"));
                 }
             }

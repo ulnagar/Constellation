@@ -5,7 +5,6 @@ using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Models.Identifiers;
 using Core.Models.Families.Errors;
 using Core.Models.Students.Identifiers;
-using Core.Models.Students.ValueObjects;
 
 public class FamilyTests
 {
@@ -22,15 +21,13 @@ public class FamilyTests
     private const string _parentFirstName = "Leslie";
     private const string _parentLastName = "Higgins";
     private const string _parentMobile = "0400111222";
-    private readonly StudentId _studentId = StudentId.FromValue(new Guid("27864b85-a672-48cb-a93a-ad671ba72d24")) ;
-    private readonly StudentReferenceNumber _studentReferenceNumber = StudentReferenceNumber.FromValue("123456789");
+    private readonly StudentId _studentId = StudentId.FromValue(new Guid("27864b85-a672-48cb-a93a-ad671ba72d24"));
 
     [Fact]
     public void LinkFamilyToSentralDetails_ShouldReturnFailure_WhenEmptySentralIdProvided()
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -46,7 +43,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -62,7 +58,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -83,7 +78,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -104,7 +98,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -125,7 +118,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -146,7 +138,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -171,7 +162,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         sut.UpdateFamilyAddress(
@@ -203,7 +193,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -218,7 +207,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -233,7 +221,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -251,7 +238,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -273,7 +259,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         sut.AddParent(
@@ -304,7 +289,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -329,7 +313,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -352,7 +335,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -375,7 +357,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
         
         var parent = sut.AddParent(
@@ -406,7 +387,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -429,7 +409,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var parent = sut.AddParent(
@@ -465,7 +444,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var parent = sut.AddParent(
@@ -500,7 +478,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var parent = sut.AddParent(
@@ -532,7 +509,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var parent = sut.AddParent(
@@ -564,11 +540,9 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var otherFamily = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var parent = otherFamily.AddParent(
@@ -593,7 +567,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         var parent = sut.AddParent(
@@ -621,11 +594,10 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
-        var result = sut.AddStudent(_studentId, _studentReferenceNumber, false);
+        var result = sut.AddStudent(_studentId, false);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -639,14 +611,13 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
-        sut.AddStudent(_studentId, _studentReferenceNumber, false);
+        sut.AddStudent(_studentId, false);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddStudent(_studentId, _studentReferenceNumber, false);
+        var result = sut.AddStudent(_studentId, false);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -659,14 +630,13 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
-        sut.AddStudent(_studentId, _studentReferenceNumber, false);
+        sut.AddStudent(_studentId, false);
         sut.ClearDomainEvents();
 
         // Act
-        var result = sut.AddStudent(_studentId, _studentReferenceNumber, true);
+        var result = sut.AddStudent(_studentId, true);
         var events = sut.GetDomainEvents();
 
         // Assert
@@ -680,7 +650,6 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
         // Act
@@ -697,10 +666,9 @@ public class FamilyTests
     {
         // Arrange
         var sut = Family.Create(
-            new FamilyId(),
             _familyName);
 
-        sut.AddStudent(_studentId, _studentReferenceNumber, false);
+        sut.AddStudent(_studentId, false);
         sut.ClearDomainEvents();
 
         // Act

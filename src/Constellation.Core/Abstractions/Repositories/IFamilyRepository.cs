@@ -13,9 +13,9 @@ public interface IFamilyRepository
     Task<bool> DoesFamilyWithEmailExist(EmailAddress email, CancellationToken cancellationToken = default);
     Task<List<Family>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Family>> GetAllCurrent(CancellationToken cancellationToken = default);
-    Task<Family> GetFamilyBySentralId(string SentralId, CancellationToken cancellationToken = default);
-    Task<Family> GetFamilyById(FamilyId Id, CancellationToken cancellationToken = default);
-    Task<Family> GetFamilyByEmail(EmailAddress email, CancellationToken cancellationToken = default);
+    Task<Family?> GetFamilyBySentralId(string SentralId, CancellationToken cancellationToken = default);
+    Task<Family?> GetFamilyById(FamilyId Id, CancellationToken cancellationToken = default);
+    Task<Family?> GetFamilyByEmail(EmailAddress email, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamiliesByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<bool> DoesEmailBelongToParentOrFamily(string email, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamilyByMobileNumber(PhoneNumber phoneNumber, CancellationToken cancellationToken = default);

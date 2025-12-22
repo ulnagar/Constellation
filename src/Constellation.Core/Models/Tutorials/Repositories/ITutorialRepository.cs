@@ -12,7 +12,7 @@ using ValueObjects;
 
 public interface ITutorialRepository
 {
-    Task<Tutorial> GetById(TutorialId tutorialId, CancellationToken cancellationToken = default);
+    Task<Tutorial?> GetById(TutorialId tutorialId, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetAll(CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetInactive(CancellationToken cancellationToken = default);
@@ -21,13 +21,13 @@ public interface ITutorialRepository
     Task<List<Tutorial>> GetAllForStudent(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly absenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Tutorial>> GetWithLinkedTeam(Guid teamId, CancellationToken cancellationToken = default);
-    Task<Tutorial> GetByNameAndYear(int year, TutorialName name, CancellationToken cancellationToken = default);
+    Task<Tutorial?> GetByNameAndYear(int year, TutorialName name, CancellationToken cancellationToken = default);
 
     Task<bool> DoesTutorialAlreadyExist(TutorialName name, DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
     Task<int> GetNextTutorialNameSequence(TutorialName name, CancellationToken cancellationToken);
     void Insert(Tutorial tutorial);
 
-    Task<Request> GetRequestById(RequestId requestId, CancellationToken cancellationToken = default);
+    Task<Request?> GetRequestById(RequestId requestId, CancellationToken cancellationToken = default);
     Task<List<Request>> GetAllRequests(CancellationToken cancellationToken = default);
     Task<int> CountPendingRequests(CancellationToken cancellationToken = default);
     Task<int> CountApprovedRequests(CancellationToken cancellationToken = default);

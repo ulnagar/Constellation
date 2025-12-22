@@ -29,7 +29,7 @@ internal sealed class TutorialRepository : ITutorialRepository
         _dateTime = dateTime;
     }
 
-    public async Task<Tutorial> GetById(
+    public async Task<Tutorial?> GetById(
         TutorialId tutorialId,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -50,7 +50,7 @@ internal sealed class TutorialRepository : ITutorialRepository
                 tutorial.Teams.Any(team => team.TeamId == teamId))
             .ToListAsync(cancellationToken);
 
-    public async Task<Tutorial> GetByNameAndYear(
+    public async Task<Tutorial?> GetByNameAndYear(
         int year,
         TutorialName name,
         CancellationToken cancellationToken = default) =>
@@ -233,7 +233,7 @@ internal sealed class TutorialRepository : ITutorialRepository
     public void Insert(Tutorial tutorial) =>
         _context.Set<Tutorial>().Add(tutorial);
 
-    public async Task<Request> GetRequestById(
+    public async Task<Request?> GetRequestById(
         RequestId requestId,
         CancellationToken cancellationToken = default) =>
         await _context

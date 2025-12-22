@@ -104,7 +104,7 @@ internal sealed class AuditAllUsersCommandHandler
         {
             _logger
                 .ForContext(nameof(Parent), parent, true)
-                .Information("Checking parent {name}", $"{parent.FirstName} {parent.LastName}");
+                .Information("Checking parent {name}", parent.Name);
 
             AppUser? existingUser = users.FirstOrDefault(user => user.Email == parent.EmailAddress);
 
@@ -251,8 +251,8 @@ internal sealed class AuditAllUsersCommandHandler
     private Task CreateUserFromParent(Parent parent) =>
         CreateUser(
             parent.EmailAddress,
-            parent.FirstName,
-            parent.LastName,
+            parent.Name.FirstName,
+            parent.Name.LastName,
             isParent: true);
 
     private Task CreateUserFromStaffMember(StaffMember staffMember) =>
@@ -361,18 +361,18 @@ internal sealed class AuditAllUsersCommandHandler
 
     private async Task CheckParentUserDetails(AppUser user, Parent parent)
     {
-        if (user.FirstName != parent.FirstName)
+        if (user.FirstName != parent.Name.FirstName)
         {
-            _logger.Information("Updating FirstName to {firstName}", parent.FirstName);
+            _logger.Information("Updating FirstName to {firstName}", parent.Name.FirstName);
 
-            user.FirstName = parent.FirstName;
+            user.FirstName = parent.Name.FirstName;
         }
 
-        if (user.LastName != parent.LastName)
+        if (user.LastName != parent.Name.LastName)
         {
-            _logger.Information("Updating LastName to {lastName}", parent.LastName);
+            _logger.Information("Updating LastName to {lastName}", parent.Name.LastName);
 
-            user.LastName = parent.LastName;
+            user.LastName = parent.Name.LastName;
         }
 
         if (user.IsParent != true)

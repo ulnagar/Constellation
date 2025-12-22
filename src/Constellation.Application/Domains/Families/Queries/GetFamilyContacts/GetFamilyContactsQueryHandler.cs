@@ -9,7 +9,6 @@ using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
-using GetFamilyContactsForStudent;
 using Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,16 +59,12 @@ internal sealed class GetFamilyContactsQueryHandler
 
             foreach (Parent parent in family.Parents)
             {
-                Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-                Result<PhoneNumber> parentMobile = PhoneNumber.Create(parent.MobileNumber);
-                Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
-
                 contacts.Add(new(
                     isResidentialFamily,
                     parent.SentralLink,
-                    name.IsSuccess ? name.Value.DisplayName : string.Empty,
-                    parentEmail.IsSuccess ? parentEmail.Value : null,
-                    parentMobile.IsSuccess ? parentMobile.Value : null,
+                    parent.Name,
+                    parent.EmailAddress,
+                    parent.MobileNumber,
                     parent.Id,
                     family.Id,
                     studentNames));

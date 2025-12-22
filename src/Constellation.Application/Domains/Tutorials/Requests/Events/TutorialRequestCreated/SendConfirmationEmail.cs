@@ -85,19 +85,19 @@ internal sealed class SendConfirmationEmail
         List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
 
         // Should this only go to Residential parents?
-        foreach (var family in families)
+        foreach (Family family in families)
         {
-            StudentFamilyMembership studentLink = family.Students.FirstOrDefault(link => link.StudentId == student.Id);
+            StudentFamilyMembership? studentLink = family.Students.FirstOrDefault(link => link.StudentId == student.Id);
 
             if (studentLink is null || !studentLink.IsResidentialFamily)
                 continue;
 
-            foreach (var parent in family.Parents)
+            foreach (Parent parent in family.Parents)
             {
                 if (recipients.Any(entry => entry.Email == parent.EmailAddress))
                     continue;
 
-                Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                Result<EmailRecipient> parentRecipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (parentRecipient.IsSuccess)
                     recipients.Add(parentRecipient.Value);
@@ -112,9 +112,9 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(familyRecipient.Value);
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode, Position.Coordinator, cancellationToken);
+        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode ?? string.Empty, Position.Coordinator, cancellationToken);
 
-        foreach (var contact in contacts)
+        foreach (SchoolContact contact in contacts)
         {
             if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
                 continue;

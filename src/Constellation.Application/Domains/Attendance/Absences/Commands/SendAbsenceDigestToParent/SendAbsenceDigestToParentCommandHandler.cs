@@ -91,12 +91,7 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
 
             foreach (Parent parent in family.Parents)
             {
-                Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-                if (nameResult.IsFailure)
-                    continue;
-
-                Result<EmailRecipient> parentEmail = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+                Result<EmailRecipient> parentEmail = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (parentEmail.IsSuccess && 
                     recipients.All(recipient => parentEmail.Value.Email != recipient.Email))

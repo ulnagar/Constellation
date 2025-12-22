@@ -96,14 +96,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
 
         foreach (Parent parent in parents)
         {
-            if (string.IsNullOrWhiteSpace(parent.EmailAddress))
-                continue;
-
-            Result<Name> name = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-            string parentName = name.IsFailure ? $"{parent.FirstName} {parent.LastName}" : name.Value.DisplayName;
-
-            Result<EmailRecipient> recipient = EmailRecipient.Create(parentName, parent.EmailAddress);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
             if (recipient.IsFailure)
             {

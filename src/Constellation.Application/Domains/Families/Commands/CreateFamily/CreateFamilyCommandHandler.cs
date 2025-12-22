@@ -43,7 +43,7 @@ internal sealed class CreateFamilyCommandHandler
             return family;
         }
 
-        Family newFamily = Family.Create(new FamilyId(), request.FamilyTitle);
+        Family newFamily = Family.Create(request.FamilyTitle);
 
         Result result = newFamily.UpdateFamilyAddress(
             request.FamilyTitle,
