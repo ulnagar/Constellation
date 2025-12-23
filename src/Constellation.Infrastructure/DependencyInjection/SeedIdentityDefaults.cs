@@ -7,11 +7,13 @@ using System.Security.Claims;
 
 public static class IdentityDefaults
 {
+    public static string SuperAdminRole = "SuperAdmin";
+
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
         List<AuthPermission> permissions = AuthPermission.GetOptions.ToList();
 
-        await CreateRoleWithPermission(roleManager, "SuperAdmin", permissions);
+        await CreateRoleWithPermission(roleManager, SuperAdminRole, permissions);
     }
 
     private static async Task CreateRoleWithPermission(RoleManager<AppRole> roleManager, string roleName, List<AuthPermission> permissions)

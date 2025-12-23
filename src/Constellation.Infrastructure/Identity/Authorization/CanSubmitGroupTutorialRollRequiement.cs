@@ -50,7 +50,11 @@ public sealed class HasRequiredGroupTutorialModulePermissions : AuthorizationHan
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanSubmitGroupTutorialRollRequirement requirement)
     {
-        if (context.User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.GroupTutorialsEdit))
+        IEnumerable<string> userPermissions = context.User.Claims
+            .Where(c => c.Type == AuthClaimType.Permission)
+            .Select(c => c.Value);
+
+        if (userPermissions.Contains(AuthPermission.Subjects_GroupTutorials_Edit))
             context.Succeed(requirement);
 
         return Task.CompletedTask;

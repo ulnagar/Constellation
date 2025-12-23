@@ -172,15 +172,13 @@ public static class ServicesRegistration
         services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
         services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
         services.AddScoped<IAuthorizationHandler, IsAssignedToActionByResource>();
-        services.AddScoped<IAuthorizationHandler, IsInGroupAllowedToEditWorkFlows>();
+        services.AddScoped<IAuthorizationHandler, HasWorkflowEditPermissions>();
         services.AddScoped<IAuthorizationHandler, IsAssignedToActionByRoute>();
         services.AddScoped<IAuthorizationHandler, HasActiveParentRecord>();
         services.AddScoped<IAuthorizationHandler, HasActiveContactAssignmentToCurrentPartnerSchool>();
         services.AddScoped<IAuthorizationHandler, HasAdminUserPrivileges>();
         services.AddScoped<IAuthorizationHandler, HasActiveStaffRecord>();
         services.AddScoped<IAuthorizationHandler, IsActiveStudent>();
-        services.AddScoped<IAuthorizationHandler, HasRequiredEmergencyConsolePermissions>();
-        services.AddScoped<IAuthorizationHandler, IsSiteAdmin>();
 
         return services;
     }

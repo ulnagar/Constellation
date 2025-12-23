@@ -21,7 +21,12 @@ public sealed class PermissionAuthorizationPolicyProvider : DefaultAuthorization
         List<AuthPermission> permissions = [];
 
         foreach (var permissionName in permissionNames)
-            permissions.Add(AuthPermission.FromValue(permissionName));
+        {
+            AuthPermission? permission = AuthPermission.FromValue(permissionName);
+
+            if (permission is not null)
+                permissions.Add(permission);
+        }
 
         return new AuthorizationPolicyBuilder()
             .AddRequirements(new PermissionRequirement(permissions))

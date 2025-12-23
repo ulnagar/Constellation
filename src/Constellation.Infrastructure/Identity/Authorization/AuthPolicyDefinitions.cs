@@ -1,25 +1,30 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
 using Constellation.Application.Models.Auth;
+using DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
 
 public static class AuthPolicyDefinitions
 {
     public static AuthorizationOptions AddApplicationPolicies(this AuthorizationOptions options)
     {
-        // Determines access to the Schools Portal
+        // Site Super Admin
+        options.AddPolicy(AuthPolicies.IsSiteAdmin, policy =>
+            policy.RequireRole(IdentityDefaults.SuperAdminRole));
+        
+        // Has active School Contact Role
         options.AddPolicy(AuthPolicies.IsSchoolContact, policy =>
             policy.Requirements.Add(new CanAccessSchoolPortalRequirement()));
 
-        // Determines access to the Parent Portal
+        // Has active Student linked to Family
         options.AddPolicy(AuthPolicies.IsParent, policy =>
             policy.Requirements.Add(new IsParentOfCurrentStudentRequirement()));
 
-        // Determines access to the Staff Portal
+        // Has active Staff Member record
         options.AddPolicy(AuthPolicies.IsStaffMember, policy =>
             policy.Requirements.Add(new IsCurrentStaffMemberRequirement()));
 
-        // Determines access to the Student Portal
+        // Has active Student record
         options.AddPolicy(AuthPolicies.IsStudent, policy =>
             policy.Requirements.Add(new IsCurrentStudentRequirement()));
 
@@ -28,10 +33,7 @@ public static class AuthPolicyDefinitions
         
         options.AddPolicy(AuthPolicies.CanSubmitGroupTutorialRolls, policy =>
             policy.Requirements.Add(new CanSubmitGroupTutorialRollRequirement()));
-
-        options.AddPolicy(AuthPolicies.IsSiteAdmin, policy =>
-            policy.RequireRole(AuthRoles.Admin));
-
+        
         options.AddPolicy(AuthPolicies.CanEditWorkFlowAction, policy =>
             policy.Requirements.Add(new CanEditWorkFlowActionRequirement()));
         

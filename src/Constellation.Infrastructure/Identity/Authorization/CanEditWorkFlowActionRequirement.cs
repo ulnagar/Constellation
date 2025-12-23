@@ -106,14 +106,15 @@ public sealed class IsAssignedToActionByResource : AuthorizationHandler<CanEditW
     }
 }
 
-public sealed class IsInGroupAllowedToEditWorkFlows : AuthorizationHandler<CanEditWorkFlowActionRequirement>
+public sealed class HasWorkflowEditPermissions : AuthorizationHandler<CanEditWorkFlowActionRequirement>
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanEditWorkFlowActionRequirement requirement)
     {
-        bool execStaff = context.User.IsInRole(AuthRoles.ExecStaffMember);
-        bool adminStaff = context.User.IsInRole(AuthRoles.Admin);
+        IEnumerable<string> userPermissions = context.User.Claims
+            .Where(c => c.Type == AuthClaimType.Permission)
+            .Select(c => c.Value);
 
-        if (execStaff || adminStaff)
+        if (userPermissions.Contains(AuthPermission.SchoolAdmin_WorkFlow_Edit))
             context.Succeed(requirement);
 
         return Task.CompletedTask;
