@@ -42,7 +42,7 @@ public sealed class IsAssignedToActionByRoute : AuthorizationHandler<CanEditWork
         if (string.IsNullOrWhiteSpace(recordId))
             return;
 
-        string userStaffId = context.User
+        string? userStaffId = context.User
             .Claims
             .FirstOrDefault(claim => 
                 claim.Type == AuthClaimType.StaffEmployeeId)
@@ -81,7 +81,7 @@ public sealed class IsAssignedToActionByResource : AuthorizationHandler<CanEditW
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanEditWorkFlowActionRequirement requirement, Guid resource)
     {
-        string userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         _logger.ForContext(nameof(userStaffId), userStaffId)
             .Information("Detected logged in user with ID");

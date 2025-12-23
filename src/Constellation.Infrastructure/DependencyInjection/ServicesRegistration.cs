@@ -163,6 +163,9 @@ public static class ServicesRegistration
 
     public static IServiceCollection AddAuthorizationPolicies(this IServiceCollection services)
     {
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
         services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();

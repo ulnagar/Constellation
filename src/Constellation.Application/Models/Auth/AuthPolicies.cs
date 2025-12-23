@@ -1,9 +1,12 @@
 ﻿namespace Constellation.Application.Models.Auth;
 
-// ReSharper disable InconsistentNaming
+using System.ComponentModel.Design;
 
 public static class AuthPolicies
 {
+    public const string HasPermission = "HasPermission";
+
+
     public const string CanViewTrainingCompletionRecord = "CanViewTrainingCompletionRecord";
     public const string CanEditTrainingModuleContent = "CanManageTrainingModule";
     public const string CanViewTrainingModuleContent = "CanViewTrainingModuleContent";

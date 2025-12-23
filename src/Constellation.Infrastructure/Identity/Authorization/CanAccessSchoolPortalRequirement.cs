@@ -1,10 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
 using Application.Models.Identity;
-using Constellation.Application.Domains.SchoolContacts.Commands.CreateContact;
-using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts;
-using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
 using Core.Models.SchoolContacts.Repositories;
 using Core.ValueObjects;
@@ -41,7 +38,7 @@ public sealed class HasActiveContactAssignmentToCurrentPartnerSchool : Authoriza
         if (response is null)
             return;
 
-        if (response.Assignments.Count(entry => !entry.IsDeleted) > 0)
+        if (response.Assignments.Any(entry => !entry.IsDeleted))
             context.Succeed(requirement);
     }
 }
@@ -58,12 +55,12 @@ public sealed class HasAdminUserPrivileges : AuthorizationHandler<CanAccessSchoo
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanAccessSchoolPortalRequirement requirement)
     {
-        Claim emailClaim = context.User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email);
+        Claim? emailClaim = context.User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email);
 
         if (emailClaim is null)
             return;
 
-        AppUser user = await _userManager.FindByEmailAsync(emailClaim.Value);
+        AppUser? user = await _userManager.FindByEmailAsync(emailClaim.Value);
 
         if (user is null)
             return;
