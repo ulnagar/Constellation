@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
 using Application.Domains.Schools.Queries.GetSchoolById;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Enums;
 using Core.Shared;
@@ -19,7 +20,7 @@ using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Contacts_Edit_Value)]
 public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -33,8 +34,9 @@ public class CreateModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

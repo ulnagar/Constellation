@@ -1,12 +1,16 @@
 ﻿@page "{lessonId}/{rollId}"
 @model Constellation.Presentation.Schools.Areas.Schools.Pages.ScienceRolls.RollModel
+
+@inject IAuthorizationService authorizationService
+
 @{
+    var canEdit = await authorizationService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_SciencePracs_Edit_Value);
 }
 
 <h2>Science Practical Roll</h2>
 
 <div class="d-flex flex-row mt-3 mb-3 page-menu">
-    @if (Model.Editable)
+    @if (Model.Editable && canEdit.Succeeded)
     {
         <a asp-page="/ScienceRolls/Submit" asp-area="Schools" asp-route-rollId="@Model.RollId" asp-route-lessonId="@Model.LessonId" class="btn btn-success">Edit</a>
     }

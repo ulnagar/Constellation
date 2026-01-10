@@ -13,6 +13,7 @@ using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsFromS
 using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
@@ -26,7 +27,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Stocktake_Edit_Value)]
 public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -39,10 +40,10 @@ public class UpdateModel : BasePageModel
         ICurrentUserService currentUserService,
         LinkGenerator linkGenerator,
         ILogger logger,
-
+        IAuthorizationService authorizationService,
         IHttpContextAccessor httpContextAccessor,
         IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;

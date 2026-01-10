@@ -6,6 +6,7 @@ using Application.Domains.Students.Queries.GetStudentById;
 using Application.Models.Auth;
 using Constellation.Application.Domains.MeritAwards.Awards.Queries.GetSummaryForStudent;
 using Constellation.Application.Domains.Students.Models;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
@@ -15,14 +16,13 @@ using Core.Models.Students.Errors;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.IsStudent)]
+[HasPermission(AuthPermission.StudentPortal_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -90,7 +90,7 @@ public class IndexModel : BasePageModel
             Members = members.Select(member =>
                     new RoleMemberDto(
                         member.Id,
-                        member.DisplayName,
+                        member.Name.DisplayName,
                         member.Email))
                 .ToList();
         }

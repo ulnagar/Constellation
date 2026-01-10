@@ -8,13 +8,13 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Hosting;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Models.Hosting.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Hosting_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -87,7 +87,7 @@ public class DetailsModel : BasePageModel
         StudentId studentId,
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -155,7 +155,7 @@ public class DetailsModel : BasePageModel
         ParentId parentId, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -192,7 +192,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddStudent(FamilyAddStudentSelection viewModel, CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorised.Succeeded)
         {

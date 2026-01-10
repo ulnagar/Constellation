@@ -1,12 +1,21 @@
 ﻿@page
+@using Constellation.Application.Models.Auth
+@using Microsoft.AspNetCore.Authorization
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Hosting.NewslettersModel
+
+@inject IAuthorizationService AuthorizationService
+
 @{
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Hosting_Edit_Value);
 }
 
 <h2>Newsletters</h2>
 
 <div class="page-menu">
-    <a asp-page="/Hosting/Upsert" asp-area="Admin" class="btn btn-primary">New</a>
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="/Hosting/Upsert" asp-area="Admin" class="btn btn-primary">New</a>
+    }
 </div>
 
 <hr />
@@ -28,7 +37,10 @@
                 <td>@item.Issue</td>
                 <td>@item.Name</td>
                 <td>
-                    <a asp-page="/Hosting/Upsert" asp-area="Admin" asp-route-issue="@item.Issue" class="btn btn-sm btn-warning btn-show-hover">Edit</a>
+                    @if (canEdit.Succeeded)
+                    {
+                        <a asp-page="/Hosting/Upsert" asp-area="Admin" asp-route-issue="@item.Issue" class="btn btn-sm btn-warning btn-show-hover">Edit</a>
+                    }
                 </td>
             </tr>
         }

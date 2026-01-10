@@ -4,13 +4,13 @@ using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize(Roles = AuthRoles.Admin)]
+[HasPermission(AuthPermission.Admin_Automation_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly IRecurringJobManager _jobManager;

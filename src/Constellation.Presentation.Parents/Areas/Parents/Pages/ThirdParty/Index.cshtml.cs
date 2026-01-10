@@ -5,16 +5,16 @@ using Application.Domains.Families.Queries.IsResidentialParent;
 using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplicationsWithoutRequiredConsent;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsParent)]
+[HasPermission(AuthPermission.ParentPortal_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

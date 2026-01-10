@@ -1,13 +1,9 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu;
 
-using Application.Domains.StaffMembers.Models;
-using Application.Domains.StaffMembers.Queries.GetStaffByEmail;
-using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Domains.Timetables.Timetables.Queries.GetStaffDailyTimetableData;
 using Application.Domains.Training.Queries.GetCountOfExpiringCertificatesForStaffMember;
 using Application.Extensions;
 using Application.Models.Auth;
-using Application.Models.Identity;
 using Constellation.Application.Domains.Offerings.Queries.GetCurrentOfferingsForTeacher;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.StaffMembers.Repositories;
@@ -72,8 +68,9 @@ public class StaffSidebarMenuViewComponent : ViewComponent
     {
         DashboardModel model = new();
 
-        AuthorizationResult emergencyConsole = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.CanUseEmergencyConsole);
-        model.ShowEmergencyConsole = emergencyConsole.Succeeded || User.IsInRole(AuthRoles.Admin);
+        AuthorizationResult emergencyConsole = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPermission.Admin_EmergencyConsole_Edit_Value);
+        AuthorizationResult siteAdmin = await _authService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.IsSiteAdmin);
+        model.ShowEmergencyConsole = emergencyConsole.Succeeded || siteAdmin.Succeeded;
 
         if (staffId == StaffId.Empty)
             return model;

@@ -13,6 +13,7 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Stocktake.Enums;
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
@@ -23,7 +24,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Stocktake_Edit_Value)]
 public class ManualModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -37,8 +38,9 @@ public class ManualModel : BasePageModel
         LinkGenerator linkGenerator,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor,
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;

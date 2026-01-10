@@ -8,6 +8,7 @@ using Constellation.Application.Domains.Attendance.Plans.Commands.SaveDraftAtten
 using Constellation.Application.Domains.Attendance.Plans.Commands.SubmitAttendancePlan;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlanForSubmit;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetRecentlyCompletedPlans;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
@@ -23,7 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Absences_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -37,8 +38,9 @@ public class DetailsModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

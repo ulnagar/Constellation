@@ -87,7 +87,7 @@ public class CreateModel : BasePageModel
 
     public async Task OnGet()
     {
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         if (rolesRequest.IsFailure)
@@ -122,7 +122,7 @@ public class CreateModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
         
         if (!ModelState.IsValid)
         {

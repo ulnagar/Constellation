@@ -85,7 +85,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDeleteRecord()
     {
-        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
         if (!canEditTest.Succeeded) return RedirectToPage("/SchoolAdmin/Training/Completion/Index", new { area = "Staff" });
 

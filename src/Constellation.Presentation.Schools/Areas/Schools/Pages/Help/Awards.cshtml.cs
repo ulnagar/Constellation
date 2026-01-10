@@ -19,8 +19,9 @@ public class AwardsModel : BasePageModel
         IHttpContextAccessor httpContextAccessor,
         IServiceScopeFactory serviceFactory,
         ICurrentUserService currentUserService,
+        IAuthorizationService authorizationService,
         ILogger logger)
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _currentUserService = currentUserService;
         _logger = logger
