@@ -3,7 +3,7 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
-    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_GroupTutorials_Edit_Value);
     var canSubmitTest = await AuthorizationService.AuthorizeAsync(User, Model.Id, AuthPolicies.CanSubmitGroupTutorialRolls);
 }
 

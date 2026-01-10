@@ -11,9 +11,9 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Extensions;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -21,7 +21,7 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Assignments_Edit_Value)]
 public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;

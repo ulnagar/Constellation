@@ -4,7 +4,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult isAdminTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+    AuthorizationResult isAdminTest = await authService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_WorkFlow_Edit_Value);
 }
 
 <h2>WorkFlow Case</h2>

@@ -1,9 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Identity;
 
 using Application.Models.Identity;
-using Core.Models.SchoolContacts.Identifiers;
-using Core.Models.StaffMembers.Identifiers;
-using Core.Models.Students.Identifiers;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,21 +10,45 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
     public void Configure(EntityTypeBuilder<AppUser> builder)
     {
         builder
-            .Property(user => user.SchoolContactId)
-            .HasConversion(
-                id => id.Value,
-                value => SchoolContactId.FromValue(value));
+            .ComplexProperty(user => user.Name)
+            .IsRequired();
 
         builder
-            .Property(user => user.StudentId)
-            .HasConversion(
-                id => id.Value,
-                value => StudentId.FromValue(value));
+            .ComplexProperty(user => user.Name)
+            .Property(name => name.FirstName)
+            .HasColumnName(nameof(Name.FirstName))
+            .IsRequired();
 
         builder
-            .Property(user => user.StaffId)
-            .HasConversion(
-                id => id.Value,
-                value => StaffId.FromValue(value));
+            .ComplexProperty(user => user.Name)
+            .Property(name => name.PreferredName)
+            .HasColumnName(nameof(Name.PreferredName))
+            .IsRequired(false);
+
+        builder
+            .ComplexProperty(user => user.Name)
+            .Property(name => name.LastName)
+            .HasColumnName(nameof(Name.LastName))
+            .IsRequired();
+        
+        builder
+            .HasMany(user => user.Logins)
+            .WithOne()
+            .HasForeignKey(user => user.AppUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(user => user.Logins)
+            .AutoInclude();
+
+        builder
+            .HasMany(user => user.Links)
+            .WithOne()
+            .HasForeignKey(user => user.AppUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Navigation(user => user.Links)
+            .AutoInclude();
     }
 }

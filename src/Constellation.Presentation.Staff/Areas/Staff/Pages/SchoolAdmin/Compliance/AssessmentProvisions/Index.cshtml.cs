@@ -10,14 +10,14 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_AssessmentProvisions_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

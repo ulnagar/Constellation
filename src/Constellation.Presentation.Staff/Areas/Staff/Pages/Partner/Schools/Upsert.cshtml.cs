@@ -5,17 +5,15 @@ using Application.Domains.Schools.Commands.UpsertSchool;
 using Application.Domains.Schools.Queries.GetSchoolForEdit;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
-using Core.Errors;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditSchools)]
+[HasPermission(AuthPermission.Partners_Schools_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

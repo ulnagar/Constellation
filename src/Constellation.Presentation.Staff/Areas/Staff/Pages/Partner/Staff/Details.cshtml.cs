@@ -10,10 +10,8 @@ using Application.Domains.StaffMembers.Commands.TransferStaffMember;
 using Application.Domains.StaffMembers.Queries.GetLifecycleDetailsForStaffMember;
 using Application.Domains.StaffMembers.Queries.GetStaffDetails;
 using Application.Models.Auth;
-using Constellation.Application.Domains.Students.Commands.RemoveSchoolEnrolment;
-using Constellation.Application.Domains.Students.Commands.TransferStudent;
 using Constellation.Application.Domains.Students.Queries.GetLifecycleDetailsForStudent;
-using Constellation.Core.Models.Enrolments.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Faculties.Identifiers;
@@ -31,7 +29,7 @@ using Shared.Components.TeacherAddFaculty;
 using Shared.Components.TransferStaffMember;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Staff_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -75,7 +73,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetResign()
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -110,7 +108,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostReinstate(ReinstateStaffMemberSelection viewModel)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -145,7 +143,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRemoveSchoolAssignment(SchoolAssignmentId assignmentId)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -184,7 +182,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostTransferStaffMember(TransferStaffMemberSelection viewModel, CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -222,7 +220,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddFacultyRole(TeacherAddFacultySelection viewModel)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -260,7 +258,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDeleteFacultyRole(Guid facultyId)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 
         if (!authorised.Succeeded)
         {

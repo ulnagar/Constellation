@@ -17,6 +17,24 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
         LastName = lastName;
     }
 
+    public static Result<Name> Create(string mononym)
+    {
+        if (string.IsNullOrEmpty(mononym))
+        {
+            return Result.Failure<Name>(DomainErrors.ValueObjects.Name.FirstNameEmpty);
+        }
+
+        string[] tokens = mononym.Split(' ');
+        string firstName = tokens[0];
+        string preferredName = firstName;
+        string lastName = string.Join(" ", tokens[1..]);
+
+        return new Name(
+            firstName.Trim(),
+            preferredName.Trim(),
+            lastName.Trim());
+    }
+
     public static Result<Name> Create(string firstName, string preferredName, string lastName)
     {
         if (string.IsNullOrEmpty(firstName))

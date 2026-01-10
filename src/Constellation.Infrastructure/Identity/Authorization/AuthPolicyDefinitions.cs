@@ -36,7 +36,7 @@ public static class AuthPolicyDefinitions
         
         options.AddPolicy(AuthPolicies.CanEditWorkFlowAction, policy =>
             policy.Requirements.Add(new CanEditWorkFlowActionRequirement()));
-        
+       
         return options;
     }
 }

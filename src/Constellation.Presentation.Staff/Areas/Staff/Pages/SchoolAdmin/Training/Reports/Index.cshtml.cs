@@ -12,17 +12,17 @@ using Application.Models.Auth;
 using Areas;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.SelectStaffMemberForReportModal;
 using Shared.PartialViews.SelectTrainingModuleForReportModal;
 
-[Authorize(Policy = AuthPolicies.CanRunTrainingModuleReports)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_ViewAll_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

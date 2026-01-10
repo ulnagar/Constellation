@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Auth.Commands.RepairSchoolContactUser;
 
 using Abstractions.Messaging;
+using Constellation.Application.Models.Identity.Enums;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -35,12 +37,23 @@ internal sealed class RepairSchoolContactUserCommandHandler
 
     public async Task<Result<AppUser>> Handle(RepairSchoolContactUserCommand request, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+        
+        if (contact is null)
+        {
+            _logger
+                .ForContext(nameof(RepairSchoolContactUserCommand), request, true)
+                .ForContext(nameof(Error), SchoolContactErrors.NotFound(request.ContactId), true)
+                .Warning("Could not repair the School Contact User item");
+
+            return Result.Failure<AppUser>(SchoolContactErrors.NotFound(request.ContactId));
+        }
+
         List<SchoolContactRole> roles = contact.Assignments
             .Where(role => !role.IsDeleted)
             .ToList();
 
-        if (!roles.Any())
+        if (roles.Count == 0)
         {
             if (!contact.IsDeleted)
             {
@@ -57,7 +70,7 @@ internal sealed class RepairSchoolContactUserCommandHandler
             return Result.Failure<AppUser>(new Error("Authorisation.AppUser.Deleted", "School Contact has no active roles"));
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
 
         if (user is null)
         {
@@ -66,47 +79,59 @@ internal sealed class RepairSchoolContactUserCommandHandler
             {
                 UserName = contact.EmailAddress.Email,
                 Email = contact.EmailAddress.Email,
-                FirstName = contact.Name.FirstName,
-                LastName = contact.Name.LastName,
-                IsSchoolContact = true,
-                SchoolContactId = contact.Id
+                Name = contact.Name
             };
 
-            IdentityResult result = await _userManager.CreateAsync(newUser);
+            newUser.AddContactLink(contact.Id);
 
-            if (result.Succeeded)
+            IdentityResult createResult = await _userManager.CreateAsync(newUser);
+
+            if (createResult.Succeeded)
+            {
+                foreach (var role in roles)
+                    await _userManager.AddToRoleAsync(newUser, role.Role.Value);
+                
                 return newUser;
-            
+            }
+
             _logger
                 .ForContext(nameof(RepairSchoolContactUserCommand), request, true)
                 .ForContext(nameof(AppUser), newUser, true)
                 .ForContext(nameof(Error), new Error("Authorisation.AppUser.Create", "Failed to create AppUser"), true)
-                .ForContext(nameof(IdentityResult), result, true)
+                .ForContext(nameof(IdentityResult), createResult, true)
                 .Warning("Could not repair the School Contact User item");
 
             return Result.Failure<AppUser>(new Error("Authorisation.AppUser.Create", "Failed to create AppUser"));
         }
 
-        if (user.IsSchoolContact == false)
+        List<AppUserLink> contactLinks = user.Links
+            .Where(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Contact)
+            .ToList();
+
+        if (contactLinks.Count == 0)
+            user.AddContactLink(contact.Id);
+
+        if (contactLinks.All(link => link.LinkId != contact.Id.Value))
+            user.AddContactLink(contact.Id);
+
+        IdentityResult updateResult = await _userManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
         {
-            // Link existing user to contact
-            user.IsSchoolContact = true;
-            user.SchoolContactId = contact.Id;
-
-            IdentityResult result = await _userManager.UpdateAsync(user);
-
-            if (result.Succeeded)
-                return user;
-
             _logger
                 .ForContext(nameof(RepairSchoolContactUserCommand), request, true)
                 .ForContext(nameof(AppUser), user, true)
                 .ForContext(nameof(Error), new Error("Authorisation.AppUser.Update", "Failed to update AppUser"), true)
-                .ForContext(nameof(IdentityResult), result, true)
+                .ForContext(nameof(IdentityResult), updateResult, true)
                 .Warning("Could not repair the School Contact User item");
 
             return Result.Failure<AppUser>(new Error("Authorisation.AppUser.Update", "Failed to update AppUser"));
         }
+
+        foreach (var role in roles)
+            await _userManager.AddToRoleAsync(user, role.Role.Value);
 
         return user;
     }

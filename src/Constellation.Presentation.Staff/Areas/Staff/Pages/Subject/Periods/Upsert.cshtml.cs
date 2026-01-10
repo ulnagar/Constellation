@@ -4,22 +4,21 @@ using Application.Common.PresentationModels;
 using Application.Domains.Timetables.Periods.Commands.UpsertPeriod;
 using Application.Domains.Timetables.Periods.Queries.GetPeriodById;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Timetables.Enums;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanEditSubjects)]
+[HasPermission(AuthPermission.Subjects_Timetables_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

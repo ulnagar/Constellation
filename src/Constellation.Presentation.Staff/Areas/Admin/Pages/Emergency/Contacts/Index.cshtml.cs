@@ -13,14 +13,14 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 using Shared.PartialViews.AddPhoneNumberToSchoolContact;
 using Shared.PartialViews.AddPhoneNumberToStaffMember;
 
-[Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
+[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

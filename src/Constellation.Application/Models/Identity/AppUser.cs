@@ -1,33 +1,45 @@
 ﻿namespace Constellation.Application.Models.Identity;
 
 using Constellation.Core.ValueObjects;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
+using Enums;
 using Microsoft.AspNetCore.Identity;
 using System;
 
-public class AppUser : IdentityUser<Guid>
+public sealed class AppUser : IdentityUser<Guid>
 {
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string DisplayName => GetDisplayName();
-    public bool IsSchoolContact { get; set; }
-    public SchoolContactId SchoolContactId { get; set; }
-    public bool IsStaffMember { get; set; }
-    public StaffId StaffId { get; set; }
-    public bool IsParent { get; set; }
-    public bool IsStudent { get; set; }
-    public StudentId StudentId { get; set; }
-    public DateTime? LastLoggedIn { get; set; }
+    private readonly List<AppUserLoginAttempt> _logins = [];
+    private readonly List<AppUserLink> _links = [];
 
-    private string GetDisplayName()
-    {
-        var name = Name.Create(FirstName, null, LastName);
+    public Name Name { get; set; }
 
-        if (name.IsFailure)
-            return $"{FirstName} {LastName}";
+    public bool IsSchoolContact => _links.Any(link => !link.IsDeleted && link.Type == LinkType.Contact);
+    public bool IsStaffMember => _links.Any(link => !link.IsDeleted && link.Type == LinkType.Staff);
+    public bool IsParent => _links.Any(link => !link.IsDeleted && link.Type == LinkType.Parent);
+    public bool IsFamily => _links.Any(link => !link.IsDeleted && link.Type == LinkType.Family);
+    public bool IsStudent => _links.Any(link => !link.IsDeleted && link.Type == LinkType.Student);
 
-        return name.Value.DisplayName;
-    }
+    public IReadOnlyList<AppUserLoginAttempt> Logins => _logins.AsReadOnly();
+    public IReadOnlyList<AppUserLink> Links => _links.AsReadOnly();
+
+    public void AddLogin(DateTime dateTime, LoginStatus status) 
+        => _logins.Add(new(Id, dateTime, status));
+
+    public void AddStudentLink(StudentId studentId)
+        => _links.Add(new(studentId, Id));
+
+    public void AddStaffLink(StaffId staffId)
+        => _links.Add(new(staffId, Id));
+
+    public void AddParentLink(ParentId parentId)
+        => _links.Add(new(parentId, Id));
+
+    public void AddFamilyLink(FamilyId familyId)
+        => _links.Add(new(familyId, Id));
+
+    public void AddContactLink(SchoolContactId contactId)
+        => _links.Add(new(contactId, Id));
 }

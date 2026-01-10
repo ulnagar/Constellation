@@ -1,14 +1,12 @@
 ﻿@page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Compliance.Attendance.IndexModel
 
-@using Constellation.Application.Models.Auth
 @using Constellation.Core.Extensions
-@using Microsoft.AspNetCore.Authorization
 @inject IAuthorizationService AuthorizationService
 
 @{
     AuthorizationResult isAdmin = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.IsSiteAdmin);
-    AuthorizationResult isManager = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanManageCompliance);
+    AuthorizationResult isManager = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_AttendancePercentages_Edit_Value);
 }
 
 <h2>Attendance Percentages</h2>

@@ -5,9 +5,8 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Staff.Areas.Staff.Models;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
@@ -15,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_Edit_Value)]
 public class NotPresentModel : BasePageModel
 {
     private readonly ISender _mediator;

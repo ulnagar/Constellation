@@ -1,17 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Families.Events;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families;
 using Constellation.Core.Models.Families.Events;
-using Core.Models;
-using Core.Models.SchoolContacts;
-using Core.Models.SchoolContacts.Repositories;
-using Core.Models.StaffMembers;
-using Core.Models.StaffMembers.Identifiers;
-using Core.Models.StaffMembers.Repositories;
-using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
@@ -22,28 +16,22 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
     : IDomainEventHandler<ParentEmailAddressChangedDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
-    private readonly IStaffRepository _staffRepository;
-    private readonly ISchoolContactRepository _contactRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
     public ParentEmailAddressChangedDomainEvent_UpdateUser(
         IFamilyRepository familyRepository,
-        IStaffRepository staffRepository,
-        ISchoolContactRepository contactRepository,
         UserManager<AppUser> userManager,
         ILogger logger)
     {
         _familyRepository = familyRepository;
-        _staffRepository = staffRepository;
-        _contactRepository = contactRepository;
         _userManager = userManager;
         _logger = logger.ForContext<ParentEmailAddressChangedDomainEvent>();
     }
 
     public async Task Handle(ParentEmailAddressChangedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Family family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
 
         if (family is null)
         {
@@ -56,7 +44,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
             return;
         }
 
-        Parent parent = family.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
+        Parent? parent = family.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
 
         if (parent is null)
         {
@@ -70,7 +58,7 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
         }
 
         // If there is an AppUser with the old email address, update their properties to reflect the new state
-        AppUser oldUser = await _userManager.FindByEmailAsync(notification.OldEmail);
+        AppUser? oldUser = await _userManager.FindByEmailAsync(notification.OldEmail);
 
         if (oldUser is not null)
         {
@@ -78,60 +66,32 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
 
             if (otherParents == 0)
             {
-                oldUser.IsParent = false;
-            }
+                IEnumerable<AppUserLink> links = oldUser.Links.Where(link => link.Type == LinkType.Parent && !link.IsDeleted);
 
-            EmailAddress oldEmailAddress = EmailAddress.FromValue(notification.OldEmail);
+                foreach (AppUserLink link in links)
+                    link.Delete();
 
-            StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(oldEmailAddress, cancellationToken);
-
-            if (staffMember is null)
-            {
-                oldUser.IsStaffMember = false;
-                oldUser.StaffId = StaffId.Empty;
-            }
-
-            SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(oldEmailAddress, cancellationToken);
-
-            if (schoolContact is null)
-            {
-                oldUser.IsSchoolContact = false;
-            }
-
-            if (!oldUser.IsSchoolContact && !oldUser.IsStaffMember && !oldUser.IsParent)
-            {
-                IdentityResult deleteResult = await _userManager.DeleteAsync(oldUser);
-
-                if (!deleteResult.Succeeded)
-                {
-                    _logger.Warning(
-                        "EID {eid}: Could not delete old user {uid} while attempting to update parent {pid} in family {fid}",
-                        notification.Id.ToString(),
-                        oldUser.Id.ToString(),
-                        notification.ParentId.ToString(),
-                        notification.FamilyId.ToString());
-
-                    foreach (IdentityError error in deleteResult.Errors)
-                    {
-                        _logger.Warning(
-                            "EID {eid}: Failed with error {error}",
-                            notification.Id.ToString(),
-                            error);
-                    }
-                }
-            }
-            else
-            {
                 await _userManager.UpdateAsync(oldUser);
+            }
+
+            if (oldUser.Links.All(link => link.IsDeleted))
+            {
+                await _userManager.DeleteAsync(oldUser);
             }
         }
 
         // Is there already a registered user with this email address?
-        AppUser existingUser = await _userManager.FindByEmailAsync(notification.NewEmail);
+        AppUser? existingUser = await _userManager.FindByEmailAsync(notification.NewEmail);
 
         if (existingUser is not null)
         {
-            existingUser.IsParent = true;
+            bool existingLink = existingUser.Links.Any(link => !link.IsDeleted && link.Type == LinkType.Parent && link.LinkId == parent.Id.Value);
+
+            if (existingLink)
+                return;
+
+            existingUser.AddParentLink(parent.Id);
+
             IdentityResult updateResult = await _userManager.UpdateAsync(existingUser);
 
             if (updateResult.Succeeded)
@@ -154,10 +114,10 @@ internal sealed class ParentEmailAddressChangedDomainEvent_UpdateUser
         {
             UserName = parent.EmailAddress,
             Email = parent.EmailAddress,
-            FirstName = parent.Name.FirstName,
-            LastName = parent.Name.LastName,
-            IsParent = true
+            Name = parent.Name
         };
+
+        user.AddParentLink(parent.Id);
 
         IdentityResult result = await _userManager.CreateAsync(user);
 

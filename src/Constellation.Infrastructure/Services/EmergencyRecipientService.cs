@@ -3,6 +3,8 @@
 using Application.Extensions;
 using Application.Models.Auth;
 using Application.Models.Identity;
+using Application.Models.Identity.Enums;
+using Application.Models.Identity.Repositories;
 using Constellation.Core.Models.EmergencyConsole.Enums;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
@@ -24,7 +26,6 @@ using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -34,9 +35,9 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
     private readonly IFamilyRepository _familyRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
-    private readonly UserManager<AppUser> _userManager;
     private readonly IDateTimeProvider _dateTime;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly IIdentityRepository _identityRepository;
     private readonly IPeriodRepository _periodRepository;
 
     public EmergencyRecipientService(
@@ -44,18 +45,18 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
         IFamilyRepository familyRepository,
         IStaffRepository staffRepository,
         ISchoolContactRepository schoolContactRepository,
-        UserManager<AppUser> userManager,
         IDateTimeProvider dateTime,
         IOfferingRepository offeringRepository,
+        IIdentityRepository identityRepository,
         IPeriodRepository periodRepository)
     {
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _staffRepository = staffRepository;
         _schoolContactRepository = schoolContactRepository;
-        _userManager = userManager;
         _dateTime = dateTime;
         _offeringRepository = offeringRepository;
+        _identityRepository = identityRepository;
         _periodRepository = periodRepository;
     }
 
@@ -79,9 +80,17 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
         if (group == RecipientGroup.AllExecStaff)
         {
-            IList<AppUser> execUsers = await _userManager.GetUsersInRoleAsync(AuthRoles.ExecStaffMember);
+            List<AppUser> execUsers = await _identityRepository.UsersWithTransientClaim(AuthPermission.Admin_EmergencyConsole_Edit, cancellationToken);
 
-            List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(execUsers.Select(user => user.StaffId).ToList(), cancellationToken);
+            List<StaffId> staffIds = execUsers
+                .SelectMany(user => 
+                    user.Links.Where(link => 
+                        !link.IsDeleted && 
+                        link.Type == LinkType.Staff))
+                .Select(link => StaffId.FromValue(link.LinkId))
+                .ToList();
+
+            List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
 
             foreach (StaffMember member in staffMembers)
             {

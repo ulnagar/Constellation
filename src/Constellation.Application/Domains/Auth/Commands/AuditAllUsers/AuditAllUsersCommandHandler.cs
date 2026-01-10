@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
@@ -16,9 +17,11 @@ using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Models.Identity;
+using Models.Identity.Enums;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -195,9 +198,6 @@ internal sealed class AuditAllUsersCommandHandler
 
         foreach (AppUser user in users)
         {
-            if (user.Email!.Contains("auroracollegeitsupport@det.nsw.edu.au") || user.Email.Contains("noemail@here.com"))
-                continue;
-
             _logger
                 .ForContext(nameof(AppUser), user, true)
                 .Information("Checking user {email}", user.Email);
@@ -246,21 +246,20 @@ internal sealed class AuditAllUsersCommandHandler
             family.FamilyEmail,
             string.Empty,
             family.FamilyTitle,
-            isParent: true);
+            familyId: family.Id);
 
     private Task CreateUserFromParent(Parent parent) =>
         CreateUser(
             parent.EmailAddress,
             parent.Name.FirstName,
             parent.Name.LastName,
-            isParent: true);
+            parentId: parent.Id);
 
     private Task CreateUserFromStaffMember(StaffMember staffMember) =>
         CreateUser(
             staffMember.EmailAddress.Email,
             staffMember.Name.FirstName,
             staffMember.Name.LastName,
-            isStaff: true,
             staffId: staffMember.Id);
 
     private Task CreateUserFromStudent(Student student) =>
@@ -268,92 +267,116 @@ internal sealed class AuditAllUsersCommandHandler
             student.EmailAddress.Email,
             student.Name.PreferredName,
             student.Name.LastName,
-            isStudent: true,
-            studentId: student.Id.Value);
+            studentId: student.Id);
 
-    private Task CreateUserFromContact(SchoolContact contact) =>
-        CreateUser(
+    private async Task CreateUserFromContact(SchoolContact contact)
+    {
+        List<SchoolContactRole> roles = contact.Assignments
+            .Where(role => !role.IsDeleted)
+            .ToList();
+
+        AppUser? user = await CreateUser(
             contact.EmailAddress.Email,
             contact.Name.FirstName,
             contact.Name.LastName,
-            isContact: true,
-            contactId: contact.Id.Value);
+            contactId: contact.Id);
 
-    private async Task CreateUser(
+        if (user is not null)
+        {
+            foreach (var role in roles)
+                await _userManager.AddToRoleAsync(user, role.Role.Value);
+        }
+    }
+        
+
+    private async Task<AppUser?> CreateUser(
         string email,
         string firstName,
         string lastName,
         StaffId? staffId = null,
-        Guid? contactId = null,
-        Guid? studentId = null,
-        bool? isParent = null,
-        bool? isStaff = null,
-        bool? isContact = null,
-        bool? isStudent = null)
+        SchoolContactId? contactId = null,
+        StudentId? studentId = null,
+        ParentId? parentId = null,
+        FamilyId? familyId = null)
     {
         _logger.Information("Found no matching user.");
         _logger.Information("User will be created");
+
+        Result<Name> name = Name.Create(firstName, string.Empty, lastName);
+
+        if (name.IsFailure)
+        {
+            _logger
+                .Warning("Failed to create user for email {email}", email);
+        }
 
         AppUser user = new()
         {
             UserName = email,
             Email = email,
-            FirstName = firstName,
-            LastName = lastName
+            Name = name.Value
         };
 
-        if (isParent.HasValue)
-        {
-            user.IsParent = isParent.Value;
-        }
+        if (parentId.HasValue)
+            user.AddParentLink(parentId.Value);
 
-        if (isStaff.HasValue && staffId.HasValue)
-        {
-            user.IsStaffMember = isStaff.Value;
-            user.StaffId = staffId.Value;
-        }
+        if (familyId.HasValue)
+            user.AddFamilyLink(familyId.Value);
 
-        if (isContact.HasValue && contactId.HasValue)
-        {
-            user.IsSchoolContact = isContact.Value;
-            user.SchoolContactId = SchoolContactId.FromValue(contactId.Value);
-        }
+        if (staffId.HasValue)
+            user.AddStaffLink(staffId.Value);
 
-        if (isStudent.HasValue && studentId.HasValue)
-        {
-            user.IsStudent = isStudent.Value;
-            user.StudentId = StudentId.FromValue(studentId.Value);
-        }
+        if (contactId.HasValue)
+            user.AddContactLink(contactId.Value);
+
+        if (studentId.HasValue)
+            user.AddStudentLink(studentId.Value);
 
         IdentityResult result = await _userManager.CreateAsync(user);
 
-        if (!result.Succeeded)
-            _logger
-                .ForContext("Request", user, true)
-                .Warning("Failed to create user due to error {@error}", result.Errors);
+        if (result.Succeeded)
+            return await _userManager.FindByEmailAsync(email);
+
+        _logger
+            .ForContext("Request", user, true)
+            .ForContext(nameof(Error), result.Errors, true)
+            .Warning("Failed to create user due to error");
+
+        return null;
     }
 
     private async Task CheckFamilyUserDetails(AppUser user, Family family)
     {
-        if (user.FirstName != string.Empty)
+        if (user.Name.DisplayName != family.FamilyTitle)
         {
-            _logger.Information("Updating FirstName to {firstName}", string.Empty);
+            _logger.Information("Updating Name to {name}", family.FamilyTitle);
 
-            user.FirstName = string.Empty;
+            Result<Name> name = Name.Create(family.FamilyTitle);
+
+            if (name.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(Error), name.Error, true)
+                    .Warning("Failed to update Name to {name}", family.FamilyTitle);
+            }
+
+            user.Name = name.Value;
         }
 
-        if (user.LastName != family.FamilyTitle)
+        List<AppUserLink> familyLinks = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Family).ToList();
+
+        if (familyLinks.Count == 0)
         {
-            _logger.Information("Updating LastName to {lastName}", family.FamilyTitle);
-            
-            user.LastName = family.FamilyTitle;
+            _logger.Information("Updating IsFamily to {isFamily}", true);
+
+            user.AddFamilyLink(family.Id);
         }
 
-        if (user.IsParent != true)
+        if (familyLinks.All(link => link.LinkId != family.Id.Value))
         {
-            _logger.Information("Updating IsParent to {isParent}", true);
-            
-            user.IsParent = true;
+            _logger.Information("Updating FamilyId to {familyId}", family.Id);
+
+            user.AddFamilyLink(family.Id);
         }
 
         await _userManager.UpdateAsync(user);
@@ -361,25 +384,31 @@ internal sealed class AuditAllUsersCommandHandler
 
     private async Task CheckParentUserDetails(AppUser user, Parent parent)
     {
-        if (user.FirstName != parent.Name.FirstName)
+        if (user.Name != parent.Name.FirstName)
         {
-            _logger.Information("Updating FirstName to {firstName}", parent.Name.FirstName);
+            _logger.Information("Updating Name to {Name}", parent.Name.DisplayName);
 
-            user.FirstName = parent.Name.FirstName;
+            user.Name = parent.Name;
         }
 
-        if (user.LastName != parent.Name.LastName)
-        {
-            _logger.Information("Updating LastName to {lastName}", parent.Name.LastName);
+        List<AppUserLink> parentLinks = user.Links
+            .Where(link => 
+                !link.IsDeleted && 
+                link.Type == LinkType.Parent)
+            .ToList();
 
-            user.LastName = parent.Name.LastName;
-        }
-
-        if (user.IsParent != true)
+        if (parentLinks.Count == 0)
         {
             _logger.Information("Updating IsParent to {isParent}", true);
 
-            user.IsParent = true;
+            user.AddParentLink(parent.Id);
+        }
+
+        if (parentLinks.All(link => link.LinkId != parent.Id.Value))
+        {
+            _logger.Information("Updating ParentId to {parentId}", parent.Id);
+
+            user.AddParentLink(parent.Id);
         }
 
         await _userManager.UpdateAsync(user);
@@ -387,32 +416,31 @@ internal sealed class AuditAllUsersCommandHandler
 
     private async Task CheckStaffUserDetails(AppUser user, StaffMember staffMember)
     {
-        if (user.FirstName != staffMember.Name.FirstName)
+        if (user.Name != staffMember.Name)
         {
-            _logger.Information("Updating FirstName to {firstName}", staffMember.Name.FirstName);
+            _logger.Information("Updating Name to {Name}", staffMember.Name.DisplayName);
 
-            user.FirstName = staffMember.Name.FirstName;
+            user.Name = staffMember.Name;
         }
 
-        if (user.LastName != staffMember.Name.LastName)
-        {
-            _logger.Information("Updating LastName to {lastName}", staffMember.Name.LastName);
+        List<AppUserLink> staffLinks = user.Links
+            .Where(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Staff)
+            .ToList();
 
-            user.LastName = staffMember.Name.LastName;
+        if (staffLinks.Count == 0)
+        {
+            _logger.Information("Updating IsStaff to {isStaff}", true);
+
+            user.AddStaffLink(staffMember.Id);
         }
 
-        if (user.IsStaffMember != true)
-        {
-            _logger.Information("Updating IsStaffMember to {isStaffMember}", true);
-
-            user.IsStaffMember = true;
-        }
-
-        if (user.StaffId != staffMember.Id)
+        if (staffLinks.All(link => link.LinkId != staffMember.Id.Value))
         {
             _logger.Information("Updating StaffId to {staffId}", staffMember.Id);
 
-            user.StaffId = staffMember.Id;
+            user.AddStaffLink(staffMember.Id);
         }
 
         await _userManager.UpdateAsync(user);
@@ -420,65 +448,70 @@ internal sealed class AuditAllUsersCommandHandler
 
     private async Task CheckContactUserDetails(AppUser user, SchoolContact contact)
     {
-        if (user.FirstName != contact.Name.FirstName)
+        if (user.Name != contact.Name)
         {
-            _logger.Information("Updating FirstName to {firstName}", contact.Name.FirstName);
+            _logger.Information("Updating Name to {Name}", contact.Name.DisplayName);
 
-            user.FirstName = contact.Name.FirstName;
+            user.Name = contact.Name;
         }
 
-        if (user.LastName != contact.Name.LastName)
-        {
-            _logger.Information("Updating LastName to {lastName}", contact.Name.LastName);
+        List<AppUserLink> contactLinks = user.Links
+            .Where(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Contact)
+            .ToList();
 
-            user.LastName = contact.Name.LastName;
+        if (contactLinks.Count == 0)
+        {
+            _logger.Information("Updating IsContact to {isContact}", true);
+
+            user.AddContactLink(contact.Id);
         }
 
-        if (user.IsSchoolContact != true)
+        if (contactLinks.All(link => link.LinkId != contact.Id.Value))
         {
-            _logger.Information("Updating IsSchoolContact to {isSchoolContact}", true);
+            _logger.Information("Updating ContactId to {contactId}", contact.Id);
 
-            user.IsSchoolContact = true;
-        }
-
-        if (user.SchoolContactId != contact.Id)
-        {
-            _logger.Information("Updating SchoolContactId to {schoolContactId}", contact.Id.Value);
-
-            user.SchoolContactId = contact.Id;
+            user.AddContactLink(contact.Id);
         }
 
         await _userManager.UpdateAsync(user);
+
+        List<SchoolContactRole> roles = contact.Assignments
+            .Where(role => !role.IsDeleted)
+            .ToList();
+
+        foreach (var role in roles)
+            await _userManager.AddToRoleAsync(user, role.Role.Value);
     }
 
     private async Task CheckStudentUserDetails(AppUser user, Student student)
     {
-        if (user.FirstName != student.Name.PreferredName)
+        if (user.Name != student.Name)
         {
-            _logger.Information("Updating FirstName to {firstName}", student.Name.PreferredName);
+            _logger.Information("Updating Name to {Name}", student.Name);
 
-            user.FirstName = student.Name.PreferredName;
+            user.Name = student.Name;
         }
 
-        if (user.LastName != student.Name.LastName)
-        {
-            _logger.Information("Updating LastName to {lastName}", student.Name.LastName);
+        List<AppUserLink> studentLinks = user.Links
+            .Where(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Student)
+            .ToList();
 
-            user.LastName = student.Name.LastName;
-        }
-
-        if (user.IsStudent != true)
+        if (studentLinks.Count == 0)
         {
             _logger.Information("Updating IsStudent to {isStudent}", true);
 
-            user.IsStudent = true;
+            user.AddStudentLink(student.Id);
         }
 
-        if (user.StudentId != student.Id)
+        if (studentLinks.All(link => link.LinkId != student.Id.Value))
         {
             _logger.Information("Updating StudentId to {studentId}", student.Id);
 
-            user.StudentId = student.Id;
+            user.AddStudentLink(student.Id);
         }
 
         await _userManager.UpdateAsync(user);

@@ -13,7 +13,6 @@ using Application.DTOs;
 using Application.Models.Auth;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
-using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.SelectTrainingModuleForReportModal;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Attachments.ValueObjects;
@@ -32,6 +31,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
+// All staff members should be able to submit links. Complex auth is handled below.
 [Authorize(Policy = AuthPolicies.IsStaffMember)]
 [RequestSizeLimit(10485760)]
 public class UpsertModel : BasePageModel
@@ -101,7 +101,7 @@ public class UpsertModel : BasePageModel
         var guidStaffId = Guid.Parse(claimStaffId);
         StaffId staffId = StaffId.FromValue(guidStaffId);
 
-        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
         CanEditRecords = canEditTest.Succeeded;
 
         // Does the current user have permissions for the selected mode?

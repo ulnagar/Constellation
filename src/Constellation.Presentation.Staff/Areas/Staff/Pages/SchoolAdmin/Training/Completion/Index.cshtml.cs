@@ -6,6 +6,7 @@ using Application.Domains.Training.Queries.GetListOfCompletionRecords;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
@@ -18,7 +19,7 @@ using Shared.Components.StaffTrainingReport;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanViewTrainingModuleContent)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_ViewAll_Value, AuthPermission.SchoolAdmin_Training_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -62,9 +63,10 @@ public class IndexModel : BasePageModel
         string? staffId = User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
         
         // If user does not have details view permissions, only show their own records
-        AuthorizationResult authCheck = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanViewTrainingModuleContentDetails);
+        AuthorizationResult viewAllCheck = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_ViewAll_Value);
+        AuthorizationResult editCheck = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
-        if (!authCheck.Succeeded)
+        if (!viewAllCheck.Succeeded && !editCheck.Succeeded)
         {
             return RedirectToPage("/SchoolAdmin/Training/Staff/Index", new { area = "Staff", StaffId = staffId });
         }

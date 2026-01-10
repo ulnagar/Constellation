@@ -19,6 +19,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Canvas.Models;
@@ -28,7 +29,6 @@ using Core.Models.Students.Identifiers;
 using Core.Models.Timetables.Errors;
 using Core.Models.Timetables.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
@@ -43,7 +43,7 @@ using Shared.PartialViews.RemoveSessionModal;
 using Shared.PartialViews.RemoveTeacherFromOfferingModal;
 using Shared.PartialViews.UnenrolStudentModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Offerings_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _sender;

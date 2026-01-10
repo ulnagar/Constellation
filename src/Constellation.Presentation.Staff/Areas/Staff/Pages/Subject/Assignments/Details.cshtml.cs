@@ -10,6 +10,7 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assignments.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using MediatR;
@@ -22,7 +23,7 @@ using Serilog;
 using Shared.Components.UploadAssignmentSubmission;
 using AssignmentId = Core.Models.Assignments.Identifiers.AssignmentId;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Assignments_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

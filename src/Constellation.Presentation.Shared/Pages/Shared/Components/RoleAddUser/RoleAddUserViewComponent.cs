@@ -29,7 +29,7 @@ public class RoleAddUserViewComponent : ViewComponent
                 new RoleAddUserSelection.UserDto
                 {
                     Id = user.Id,
-                    Name = user.DisplayName,
+                    Name = user.Name.DisplayName,
                     Email = user.Email
                 })
             .ToList();

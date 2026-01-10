@@ -4,17 +4,17 @@ using Application.Domains.StaffMembers.Commands.RemoveStaffFromFaculty;
 using Constellation.Application.Domains.Faculties.Queries.GetFacultyDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanViewFacultyDetails)]
+[HasPermission(AuthPermission.Partners_Faculties_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

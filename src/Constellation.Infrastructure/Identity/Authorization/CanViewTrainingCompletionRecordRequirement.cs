@@ -13,9 +13,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-public sealed class CanViewTrainingCompletionRecordRequirement : IAuthorizationRequirement
-{
-}
+public sealed class CanViewTrainingCompletionRecordRequirement : IAuthorizationRequirement;
 
 public sealed class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
 {
@@ -95,11 +93,15 @@ public sealed class HasRequiredMandatoryTrainingModulePermissions : Authorizatio
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanViewTrainingCompletionRecordRequirement requirement)
     {
-        IEnumerable<string> userPermissions = context.User.Claims
+        List<string> userPermissions = context.User.Claims
             .Where(c => c.Type == AuthClaimType.Permission)
-            .Select(c => c.Value);
+            .Select(c => c.Value)
+            .ToList();
 
         if (userPermissions.Contains(AuthPermission.SchoolAdmin_Training_Edit))
+            context.Succeed(requirement);
+
+        if (userPermissions.Contains(AuthPermission.SchoolAdmin_Training_ViewAll_Value))
             context.Succeed(requirement);
 
         return Task.CompletedTask;

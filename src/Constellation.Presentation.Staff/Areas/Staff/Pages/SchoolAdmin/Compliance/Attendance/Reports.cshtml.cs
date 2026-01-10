@@ -6,15 +6,15 @@ using Application.Domains.Attendance.Reports.Queries.GenerateCustomReportForPeri
 using Application.Domains.Attendance.Reports.Queries.GetAttendancePeriodLabels;
 using Application.Helpers;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_AttendancePercentages_View_Value)]
 public class ReportModel : BasePageModel
 {
     private readonly ISender _mediator;

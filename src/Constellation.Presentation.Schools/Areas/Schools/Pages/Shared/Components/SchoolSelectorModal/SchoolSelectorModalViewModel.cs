@@ -1,6 +1,6 @@
-﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.Components.SchoolSelector;
+﻿namespace Constellation.Presentation.Schools.Areas.Schools.Pages.Shared.Components.SchoolSelectorModal;
 
-using Application.Domains.Schools.Queries.GetSchoolsForContact;
+using Constellation.Application.Domains.Schools.Queries.GetSchoolsForContact;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 

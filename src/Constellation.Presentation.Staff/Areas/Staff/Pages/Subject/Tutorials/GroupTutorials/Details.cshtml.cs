@@ -16,6 +16,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialRollCreate;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialStudentEnrolment;
@@ -29,7 +30,7 @@ using Microsoft.AspNetCore.Routing;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
+[HasPermission(AuthPermission.Subjects_GroupTutorials_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -81,7 +82,7 @@ public class DetailsModel : BasePageModel
             .ForContext(nameof(AddStudentToTutorialCommand), command, true)
             .Information("Requested to enrol student in Group Tutorial by user {User}", _currentUserService.UserName);
 
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Subjects_Tutorials_Edit_Value);
 
         if (!isAuthorised.Succeeded)
         {
@@ -127,7 +128,7 @@ public class DetailsModel : BasePageModel
             .ForContext(nameof(AddTeacherToTutorialCommand), command, true)
             .Information("Requested to add teacher to Group Tutorial by user {User}", _currentUserService.UserName);
 
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Subjects_Tutorials_Edit_Value);
 
         if (!isAuthorised.Succeeded)
         {

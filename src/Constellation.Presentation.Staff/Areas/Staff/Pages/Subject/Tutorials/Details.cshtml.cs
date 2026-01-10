@@ -9,12 +9,12 @@ using Constellation.Application.Domains.Tutorials.Tutorials.Commands.RemoveAllSe
 using Constellation.Application.Domains.Tutorials.Tutorials.Commands.RemoveSessionFromTutorial;
 using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialDetails;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Clock;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.ValueObjects;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
@@ -25,7 +25,7 @@ using Shared.Components.EnrolStudentInTutorial;
 using Shared.PartialViews.RemoveAllSessionsFromTutorialModal;
 using Shared.PartialViews.RemoveSessionFromTutorialModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Tutorials_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -5,7 +5,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSciencePracs);
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPermission.Subjects_SciencePracs_Edit_Value);
 }
 
 <h2>Science Prac Lessons</h2>

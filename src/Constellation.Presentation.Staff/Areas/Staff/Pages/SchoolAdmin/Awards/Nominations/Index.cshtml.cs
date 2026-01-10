@@ -4,15 +4,14 @@ using Application.Common.PresentationModels;
 using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetAllNominationPeriods;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
+[HasPermission(AuthPermission.SchoolAdmin_AwardNominations_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

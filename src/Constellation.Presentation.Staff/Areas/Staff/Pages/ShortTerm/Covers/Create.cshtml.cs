@@ -9,13 +9,13 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
 using Core.Abstractions.Services;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
@@ -24,7 +24,7 @@ using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanEditCovers)]
+[HasPermission(AuthPermission.ShortTerm_Covers_Edit_Value)]
 public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;

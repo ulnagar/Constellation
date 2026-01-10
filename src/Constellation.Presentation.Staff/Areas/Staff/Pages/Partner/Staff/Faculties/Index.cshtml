@@ -7,8 +7,7 @@
 @{
     Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 
-    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditFaculties);
-    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanViewFacultyDetails);
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_Faculties_Edit_Value);
 }
 
 <h2>Faculties</h2>
@@ -39,10 +38,7 @@
                 <td><Faculty-Label faculty="item" /></td>
                 <td>@item.MemberCount</td>
                 <td>
-                    @if (canViewDetailsTest.Succeeded)
-                    {
-                        <a asp-page="/Partner/Staff/Faculties/Details" asp-page="Staff" asp-route-facultyId="@item.FacultyId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
-                    }
+                    <a asp-page="/Partner/Staff/Faculties/Details" asp-page="Staff" asp-route-facultyId="@item.FacultyId.Value" class="btn btn-sm btn-secondary btn-show-hover">More Details...</a>
                 </td>
             </tr>
         }

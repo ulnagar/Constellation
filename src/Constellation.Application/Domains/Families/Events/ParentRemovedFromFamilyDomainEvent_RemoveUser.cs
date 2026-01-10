@@ -2,15 +2,9 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families.Events;
-using Core.Models;
-using Core.Models.SchoolContacts;
-using Core.Models.SchoolContacts.Repositories;
-using Core.Models.StaffMembers;
-using Core.Models.StaffMembers.Identifiers;
-using Core.Models.StaffMembers.Repositories;
-using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Threading;
@@ -20,81 +14,54 @@ internal sealed class ParentRemovedFromFamilyDomainEvent_RemoveUser
     : IDomainEventHandler<ParentRemovedFromFamilyDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
-    private readonly IStaffRepository _staffRepository;
-    private readonly ISchoolContactRepository _contactRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
     public ParentRemovedFromFamilyDomainEvent_RemoveUser(
         IFamilyRepository familyRepository,
-        IStaffRepository staffRepository,
-        ISchoolContactRepository contactRepository,
         UserManager<AppUser> userManager,
         ILogger logger)
     {
         _familyRepository = familyRepository;
-        _staffRepository = staffRepository;
-        _contactRepository = contactRepository;
         _userManager = userManager;
-        _logger = logger.ForContext<ParentRemovedFromFamilyDomainEvent>();
+        _logger = logger
+            .ForContext<ParentRemovedFromFamilyDomainEvent>();
     }
 
     public async Task Handle(ParentRemovedFromFamilyDomainEvent notification, CancellationToken cancellationToken)
     {
-        AppUser existingUser = await _userManager.FindByEmailAsync(notification.EmailAddress);
+        AppUser? existingUser = await _userManager.FindByEmailAsync(notification.EmailAddress);
 
         if (existingUser is null)
             return;
+
+        AppUserLink? existingLink = existingUser.Links.FirstOrDefault(link =>
+            !link.IsDeleted && 
+            link.Type == LinkType.Parent && 
+            link.LinkId == notification.ParentId.Value);
+
+        if (existingLink is not null)
+        {
+            existingLink.Delete();
+
+            await _userManager.UpdateAsync(existingUser);
+        }
 
         int otherParents = await _familyRepository.CountOfParentsWithEmailAddress(notification.EmailAddress, cancellationToken);
 
         if (otherParents == 0)
         {
-            existingUser.IsParent = false;
-        }
+            IEnumerable<AppUserLink> links = existingUser.Links.Where(link => link.Type == LinkType.Parent && !link.IsDeleted);
 
-        EmailAddress emailAddress = EmailAddress.FromValue(notification.EmailAddress);
+            foreach (AppUserLink link in links)
+                link.Delete();
 
-        StaffMember staffMember = await _staffRepository.GetCurrentByEmailAddress(emailAddress, cancellationToken);
-
-        if (staffMember is null)
-        {
-            existingUser.IsStaffMember = false;
-            existingUser.StaffId = StaffId.Empty;
-        }
-
-        SchoolContact schoolContact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress, cancellationToken);
-
-        if (schoolContact is null)
-        {
-            existingUser.IsSchoolContact = false;
-        }
-
-        if (!existingUser.IsSchoolContact && !existingUser.IsStaffMember && !existingUser.IsParent)
-        {
-            IdentityResult deleteResult = await _userManager.DeleteAsync(existingUser);
-
-            if (!deleteResult.Succeeded)
-            {
-                _logger.Warning(
-                    "EID {eid}: Could not delete old user {uid} while attempting to update parent {pid} in family {fid}",
-                    notification.Id.ToString(),
-                    existingUser.Id.ToString(),
-                    notification.EmailAddress,
-                    notification.FamilyId.ToString());
-
-                foreach (IdentityError error in deleteResult.Errors)
-                {
-                    _logger.Warning(
-                        "EID {eid}: Failed with error {error}",
-                        notification.Id.ToString(),
-                        error);
-                }
-            }
-        }
-        else
-        {
             await _userManager.UpdateAsync(existingUser);
+        }
+
+        if (existingUser.Links.All(link => link.IsDeleted))
+        {
+            await _userManager.DeleteAsync(existingUser);
         }
     }
 }

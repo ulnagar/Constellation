@@ -3,16 +3,16 @@ namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Templates
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
+[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
 public sealed class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

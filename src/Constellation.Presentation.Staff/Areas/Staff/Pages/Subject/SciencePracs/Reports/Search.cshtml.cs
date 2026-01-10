@@ -10,16 +10,16 @@ using Application.Domains.Students.Queries.GetStudentById;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.BulkCancelSciencePracRolls;
 
-[Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_Edit_Value)]
 public class SearchModel : BasePageModel
 {
     private readonly ISender _mediator;

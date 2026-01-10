@@ -187,7 +187,7 @@ public sealed class Family : AggregateRoot, IAuditableEntity
 
         _parents.Remove(existingParent);
 
-        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new(), Id, existingParent.EmailAddress));
+        RaiseDomainEvent(new ParentRemovedFromFamilyDomainEvent(new(), Id, parentId, existingParent.EmailAddress));
 
         return Result.Success();
     }

@@ -4,7 +4,7 @@
 @inject IAuthorizationService authService
 
 @{
-    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+    var authorised = await authService.AuthorizeAsync(User, AuthPermission.Equipment_Stocktake_Edit_Value);
 }
 
 <h2>Stocktake</h2>

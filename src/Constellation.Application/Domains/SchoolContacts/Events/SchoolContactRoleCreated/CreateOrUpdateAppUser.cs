@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Events.SchoolContactRoleCreated;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
 using Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Events;
@@ -32,7 +32,7 @@ internal sealed class CreateOrUpdateAppUser
 
     public async Task Handle(SchoolContactRoleCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
 
         if (contact is null)
         {
@@ -44,70 +44,58 @@ internal sealed class CreateOrUpdateAppUser
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(contact.EmailAddress.Email);
 
         if (user is not null)
         {
-            user.IsSchoolContact = true;
-            user.SchoolContactId = contact.Id;
+            List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Contact).ToList();
 
-            IdentityResult update = await _userManager.UpdateAsync(user);
+            if (links.All(link => link.LinkId != contact.Id.Value))
+            {
+                user.AddContactLink(contact.Id);
 
-            if (!update.Succeeded)
+                IdentityResult update = await _userManager.UpdateAsync(user);
+
+                if (!update.Succeeded)
+                {
+                    _logger
+                        .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
+                        .ForContext(nameof(AppUser), user, true)
+                        .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                        .Warning("Failed to update School Contact AppUser");
+
+                    return;
+                }
+            }
+        }
+        else
+        {
+            user = new()
+            {
+                UserName = contact.EmailAddress.Email,
+                Email = contact.EmailAddress.Email,
+                Name = contact.Name
+            };
+
+            user.AddContactLink(contact.Id);
+
+            IdentityResult create = await _userManager.CreateAsync(user);
+
+            if (!create.Succeeded)
             {
                 _logger
                     .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
                     .ForContext(nameof(AppUser), user, true)
-                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                    .Warning("Failed to update School Contact AppUser");
-
-                return;
+                    .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
+                    .Warning("Failed to create new School Contact AppUser");
             }
-                
-            IdentityResult addRole = await _userManager.AddToRoleAsync(user, AuthRoles.SchoolContact);
-
-            if (!addRole.Succeeded)
-            {
-                _logger
-                    .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
-                    .ForContext(nameof(AppUser), user, true)
-                    .ForContext(nameof(IdentityResult.Errors), addRole.Errors, true)
-                    .Warning("Failed to update School Contact AppUser");
-            }
-
-            return;
         }
 
-        user = new()
-        {
-            UserName = contact.EmailAddress.Email,
-            Email = contact.EmailAddress.Email,
-            FirstName = contact.Name.FirstName,
-            LastName = contact.Name.LastName,
-            IsSchoolContact = true,
-            SchoolContactId = contact.Id
-        };
+        List<SchoolContactRole> roles = contact.Assignments
+            .Where(role => !role.IsDeleted)
+            .ToList();
 
-        IdentityResult create = await _userManager.CreateAsync(user);
-
-        if (create.Succeeded)
-            return;
-
-        _logger
-            .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
-            .ForContext(nameof(AppUser), user, true)
-            .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
-            .Warning("Failed to create new School Contact AppUser");
-
-        IdentityResult addNewRole = await _userManager.AddToRoleAsync(user, AuthRoles.SchoolContact);
-
-        if (!addNewRole.Succeeded)
-        {
-            _logger
-                .ForContext(nameof(SchoolContactRoleCreatedDomainEvent), notification, true)
-                .ForContext(nameof(AppUser), user, true)
-                .ForContext(nameof(IdentityResult.Errors), addNewRole.Errors, true)
-                .Warning("Failed to create new School Contact AppUser");
-        }
+        foreach (SchoolContactRole role in roles)
+            await _userManager.AddToRoleAsync(user, role.Role.Value);
     }
 }

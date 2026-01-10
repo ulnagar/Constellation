@@ -9,7 +9,7 @@
 @inject IAuthorizationService authorizationService
 
 @{
-    var canManageTest = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
+    var canManageTest = await authorizationService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendancePlans_Approve_Value);
 }
 
 <h2>Attendance Plan</h2>

@@ -4,14 +4,14 @@ using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEve
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
+[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
 public class SentModel : BasePageModel
 {
     private readonly ISender _mediator;

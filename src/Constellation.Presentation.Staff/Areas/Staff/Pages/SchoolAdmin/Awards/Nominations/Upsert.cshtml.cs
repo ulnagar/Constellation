@@ -8,15 +8,15 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanAddAwards)]
+[HasPermission(AuthPermission.SchoolAdmin_AwardNominations_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

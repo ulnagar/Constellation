@@ -17,7 +17,7 @@ public interface ICoverRepository
     Task<List<Cover>> GetAllCurrent(CancellationToken cancellationToken = default);
     Task<List<Cover>> GetAllUpcoming(CancellationToken cancellationToken = default);
     Task<List<Cover>> GetAllForCurrentCalendarYear(CancellationToken cancellationToken = default);
-    Task<Cover> GetById(CoverId CoverId, CancellationToken cancellationToken = default);
+    Task<Cover?> GetById(CoverId CoverId, CancellationToken cancellationToken = default);
 
     Task<List<string>> GetCurrentTeacherEmailsForAccessProvisioning(OfferingId offeringId, CancellationToken cancellationToken = default);
     

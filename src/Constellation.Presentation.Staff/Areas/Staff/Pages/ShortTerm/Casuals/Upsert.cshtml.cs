@@ -8,19 +8,18 @@ using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanEditCasuals)]
+[HasPermission(AuthPermission.ShortTerm_Casuals_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

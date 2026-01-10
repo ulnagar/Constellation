@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Infrastructure.DependencyInjection;
 
+using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Core.Models.SchoolContacts.Enums;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -13,17 +15,27 @@ public static class IdentityDefaults
     {
         List<AuthPermission> permissions = AuthPermission.GetOptions.ToList();
 
-        await CreateRoleWithPermission(roleManager, SuperAdminRole, permissions);
+        await CreateRoleWithPermission(roleManager, SuperAdminRole, permissions, AppRoleType.Staff);
+
+        IEnumerable<Position> positions = Position.GetOptions;
+
+        foreach (var position in positions)
+            await CreateRole(roleManager, position.Value, AppRoleType.Contact);
     }
 
-    private static async Task CreateRoleWithPermission(RoleManager<AppRole> roleManager, string roleName, List<AuthPermission> permissions)
+    private static async Task<AppRole?> CreateRole(RoleManager<AppRole> roleManager, string roleName, AppRoleType type)
     {
         AppRole? existing = await roleManager.FindByNameAsync(roleName);
 
         if (existing is null)
-            await roleManager.CreateAsync(new AppRole { Name = roleName });
+            await roleManager.CreateAsync(new AppRole(roleName, type));
 
-        AppRole? role = existing ?? await roleManager.FindByNameAsync(roleName);
+        return null;
+    }
+
+    private static async Task CreateRoleWithPermission(RoleManager<AppRole> roleManager, string roleName, List<AuthPermission> permissions, AppRoleType type)
+    {
+        AppRole? role = await CreateRole(roleManager, roleName, type);
         
         IList<Claim> claims = await roleManager.GetClaimsAsync(role!);
 

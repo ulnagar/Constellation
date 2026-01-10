@@ -5,7 +5,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canManageAssets = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+    AuthorizationResult canManageAssets = await authService.AuthorizeAsync(User, AuthPermission.Equipment_Assets_Edit_Value);
 }
 
 <h2>Assets</h2>

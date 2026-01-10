@@ -40,6 +40,15 @@ internal sealed class FamilyRepository : IFamilyRepository
                     parent.MobileNumber == phoneNumber))
             .ToListAsync(cancellationToken);
 
+    public async Task<Parent?> GetParentByEmail(
+        EmailAddress email,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .FirstOrDefaultAsync(
+                parent => parent.EmailAddress == email,
+                cancellationToken);
+
     public async Task<List<Family>> GetAll(
         CancellationToken cancellationToken = default) =>
         await _context

@@ -79,6 +79,7 @@ public sealed class AppConfiguration
         public string ContactName { get; set; }
         public string ContactTitle { get; set; }
         public string ContactPhone { get; set; }
+        public List<EmployeeId> CoverContacts { get; set; }
     }
 
     public class WorkFlowConfiguration

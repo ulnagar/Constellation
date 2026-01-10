@@ -5,15 +5,15 @@ using Application.Domains.Courses.Queries.GetCourseSummaryList;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Courses_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -7,15 +7,14 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Assets_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

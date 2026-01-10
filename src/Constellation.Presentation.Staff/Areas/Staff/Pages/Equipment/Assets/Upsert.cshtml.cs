@@ -13,15 +13,14 @@ using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Assets_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

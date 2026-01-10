@@ -5,20 +5,20 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.Tutorials.Tutorials.Commands.CreateTutorial;
 using Constellation.Application.Domains.Tutorials.Tutorials.Commands.UpdateTutorial;
 using Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialForEdit;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.ValueObjects;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanEditSubjects)]
+[HasPermission(AuthPermission.Subjects_Tutorials_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

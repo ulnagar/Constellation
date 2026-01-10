@@ -6,20 +6,20 @@ using Application.Domains.EmergencyConsole.Commands.DeleteEmergencyConsoleMessag
 using Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
 using Core.Models.EmergencyConsole.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
+[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

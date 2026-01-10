@@ -5,18 +5,18 @@ using Application.Domains.AssetManagement.Stocktake.Queries.ExportStocktakeSight
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventDetails;
 using Constellation.Application.DTOs;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Stocktake_Edit_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

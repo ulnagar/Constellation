@@ -6,6 +6,8 @@ using System;
 public record struct FamilyId(Guid Value)
     : IStronglyTypedId
 {
+    public static FamilyId Empty => new(Guid.Empty);
+
     public static FamilyId FromValue(Guid value) =>
         new(value);
 

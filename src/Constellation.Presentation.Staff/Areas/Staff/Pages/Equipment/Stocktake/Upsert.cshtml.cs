@@ -10,16 +10,16 @@ using Core.Abstractions.Services;
 using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Stocktake_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

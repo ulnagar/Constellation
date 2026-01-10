@@ -14,10 +14,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_Edit_Value)]
 public class BulkAddMembersModel : BasePageModel
 {
     private readonly ISender _mediator;

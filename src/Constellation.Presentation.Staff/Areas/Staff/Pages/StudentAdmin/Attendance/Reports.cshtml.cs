@@ -14,12 +14,12 @@ using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.Histo
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StudentAttendanceReport;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_AttendanceSettings_View_Value)]
 public class ReportsModel : BasePageModel
 {
     private readonly ISender _mediator;

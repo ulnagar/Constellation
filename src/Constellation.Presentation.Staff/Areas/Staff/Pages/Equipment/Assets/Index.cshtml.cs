@@ -15,10 +15,10 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Presentation.Shared.Helpers.Logging;
@@ -26,7 +26,7 @@ using Serilog;
 using Shared.PartialViews.AddAssetSighting;
 using System.Security.Claims;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Assets_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

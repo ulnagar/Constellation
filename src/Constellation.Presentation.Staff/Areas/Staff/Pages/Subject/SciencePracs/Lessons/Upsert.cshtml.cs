@@ -13,14 +13,14 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using Core.Models.SciencePracs.Errors;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

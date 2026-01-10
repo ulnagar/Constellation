@@ -16,12 +16,12 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Staff.Areas;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditGroupTutorials)]
+[HasPermission(AuthPermission.Subjects_GroupTutorials_Edit_Value)]
 public class AddStudentsModel : BasePageModel
 {
     private readonly ISender _mediator;

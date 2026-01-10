@@ -1,13 +1,14 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Events.StaffMemberResignedDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
+using Constellation.Core.Errors;
 using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Events;
-using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
@@ -33,28 +34,53 @@ internal sealed class RemoveUserAccount
 
     public async Task Handle(StaffMemberResignedDomainEvent notification, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
 
-        // Remove user access
-        UserTemplateDto userDetails = new()
+        if (staffMember is null)
         {
-            FirstName = staffMember.Name.FirstName,
-            LastName = staffMember.Name.LastName,
-            Email = staffMember.EmailAddress.Email,
-            Username = staffMember.EmailAddress.Email,
-            IsStaffMember = false
-        };
+            _logger
+                .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(notification.StaffId), true)
+                .Warning("Failed to delete old Staff Member AppUser");
 
-        if (_userManager.Users.Any(u => u.UserName == userDetails.Username))
+            return;
+        }
+        
+        AppUser? user = await _userManager.FindByEmailAsync(staffMember.EmailAddress.Email);
+
+        if (user is null)
         {
-            AppUser user = await _userManager.FindByEmailAsync(userDetails.Email);
+            _logger
+                .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
+                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .Warning("Failed to delete old Staff Member AppUser");
 
-            user!.IsStaffMember = false;
-            user.StaffId = StaffId.Empty;
+            return;
+        }
 
-            await _userManager.RemoveFromRoleAsync(user, AuthRoles.StaffMember);
+        AppUserLink? link = user.Links
+            .FirstOrDefault(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Staff &&
+                link.LinkId == staffMember.Id.Value);
 
-            await _userManager.UpdateAsync(user);
+        if (link is not null)
+            link.Delete();
+
+        await _userManager.UpdateAsync(user);
+
+        if (user.Links.All(link => link.IsDeleted))
+        {
+            IdentityResult update = await _userManager.DeleteAsync(user);
+
+            if (!update.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                    .Warning("Failed to delete old Staff Member AppUser");
+            }
         }
     }
 }

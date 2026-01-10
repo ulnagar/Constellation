@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 
+using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -23,18 +24,24 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
 
         identity.AddClaims(new []
         {
-            new Claim(ClaimTypes.GivenName, user.FirstName),
-            new Claim(ClaimTypes.Surname, user.LastName)
+            new Claim(ClaimTypes.GivenName, user.Name.FirstName),
+            new Claim(ClaimTypes.Surname, user.Name.LastName)
         });
 
         if (user.IsStaffMember)
         {
-            identity.AddClaim(new Claim(AuthClaimType.StaffEmployeeId, user.StaffId.ToString()));
+            AppUserLink? link = user.Links.FirstOrDefault(link => !link.IsDeleted && link.Type == LinkType.Staff);
+
+            if (link is not null)
+                identity.AddClaim(new Claim(AuthClaimType.StaffEmployeeId, link.LinkId.ToString()));
         }
 
         if (user.IsStudent)
         {
-            identity.AddClaim(new Claim(AuthClaimType.StudentId, user.StudentId.ToString()));
+            AppUserLink? link = user.Links.FirstOrDefault(link => !link.IsDeleted && link.Type == LinkType.Student);
+
+            if (link is not null)
+                identity.AddClaim(new Claim(AuthClaimType.StudentId, link.LinkId.ToString()));
         }
 
         return identity;

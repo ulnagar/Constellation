@@ -1,16 +1,18 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverEndDateChangedDomainEvent;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
-using Application.Models.Identity;
+using Constellation.Application.Domains.Covers.Events.CoverCreatedDomainEvent;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
+using Constellation.Core.Models.StaffMembers.Errors;
+using Constellation.Core.Models.StaffMembers.ValueObjects;
 using Core.Abstractions.Repositories;
 using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
 using Core.Models.Identifiers;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -23,11 +25,13 @@ using Core.Models.Timetables.ValueObjects;
 using Core.Shared;
 using Core.ValueObjects;
 using Extensions;
+using Interfaces.Configuration;
 using Interfaces.Services;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading;
@@ -43,9 +47,9 @@ internal sealed class SendCoverUpdatedEmailHandler
     private readonly IStudentRepository _studentRepository;
     private readonly ITeamRepository _teamRepository;
     private readonly IPeriodRepository _periodRepository;
-    private readonly UserManager<AppUser> _userManager;
     private readonly IEmailAttachmentService _emailAttachmentService;
     private readonly IEmailService _emailService;
+    private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
 
     public SendCoverUpdatedEmailHandler(
@@ -56,9 +60,9 @@ internal sealed class SendCoverUpdatedEmailHandler
         IStudentRepository studentRepository,
         ITeamRepository teamRepository,
         IPeriodRepository periodRepository,
-        UserManager<AppUser> userManager,
         IEmailAttachmentService emailAttachmentService,
         IEmailService emailService,
+        IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
         _coverRepository = coverRepository;
@@ -68,16 +72,16 @@ internal sealed class SendCoverUpdatedEmailHandler
         _studentRepository = studentRepository;
         _teamRepository = teamRepository;
         _periodRepository = periodRepository;
-        _userManager = userManager;
         _emailAttachmentService = emailAttachmentService;
         _emailService = emailService;
+        _configuration = configuration.Value;
         _logger = logger.ForContext<CoverEndDateChangedDomainEvent>();
     }
 
     public async Task Handle(CoverEndDateChangedDomainEvent notification, CancellationToken cancellationToken)
     {
         // Gather details
-        Cover cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
+        Cover? cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
 
         if (cover is null)
         {
@@ -89,7 +93,17 @@ internal sealed class SendCoverUpdatedEmailHandler
         if (cover is AccessCover)
             return;
 
-        Offering offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
+
+        if (offering is null)
+        {
+            _logger
+                .ForContext(nameof(SendCoverCreatedEmailHandler), notification, true)
+                .ForContext(nameof(Error), OfferingErrors.NotFound(cover.OfferingId), true)
+                .Warning("Failed to send Cover Updated Email notification");
+            
+            return;
+        }
 
         List<EmailRecipient> primaryRecipients = new(); // Casual, Classroom Teacher
         List<EmailRecipient> secondaryRecipients = new(); // Head Teacher, Additional Recipients
@@ -132,7 +146,7 @@ internal sealed class SendCoverUpdatedEmailHandler
             secondaryRecipients.Add(address.Value);
         }
 
-        EmailRecipient coveringTeacher = null;
+        EmailRecipient? coveringTeacher = null;
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
@@ -156,7 +170,7 @@ internal sealed class SendCoverUpdatedEmailHandler
         {
             StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
 
-            StaffMember teacher = staffId == StaffId.Empty
+            StaffMember? teacher = staffId == StaffId.Empty
                 ? null
                 : await _staffRepository.GetById(staffId, cancellationToken);
 
@@ -183,26 +197,42 @@ internal sealed class SendCoverUpdatedEmailHandler
             return;
         }
 
-        IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
-        foreach (AppUser teacher in additionalRecipients)
+        foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
         {
-            if (primaryRecipients.All(entry => entry.Email != teacher.Email) && secondaryRecipients.All(entry => entry.Email != teacher.Email))
+            StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
+
+            if (teacher is null)
             {
-                Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.Email);
+                _logger
+                    .ForContext(nameof(SendCoverCreatedEmailHandler), notification, true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                    .ForContext(nameof(EmployeeId), employeeId)
+                    .Warning("Failed to send Cover Updated Email notification");
 
-                if (address.IsFailure)
-                {
-                    _logger.Warning("{action}: Could not create valid email address for {teacher} during processing of cover {id}", nameof(SendCoverUpdatedEmailHandler), teacher.DisplayName, cover.Id);
-
-                    continue;
-                }
-
-                secondaryRecipients.Add(address.Value);
+                continue;
             }
+
+            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress) ||
+                secondaryRecipients.Any(entry => entry.Email == teacher.EmailAddress))
+                continue;
+
+            Result<EmailRecipient> address = teacher.GetEmailRecipient();
+
+            if (address.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(SendCoverCreatedEmailHandler), notification, true)
+                    .ForContext(nameof(Error), address.Error, true)
+                    .ForContext(nameof(EmailAddress), teacher.EmailAddress)
+                    .Warning("Failed to send Cover Updated Email notification");
+
+                continue;
+            }
+
+            secondaryRecipients.Add(address.Value);
         }
 
-        string teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
+        string? teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(CultureInfo.InvariantCulture), cancellationToken);
 
         TimeOnly startTime = TimeOnly.MinValue;
         TimeOnly endTime = TimeOnly.MinValue;
@@ -235,6 +265,6 @@ internal sealed class SendCoverUpdatedEmailHandler
             attachments.Add(timetableAttachment);
         }
 
-        await _emailService.SendUpdatedCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, cover.StartDate, startTime, endTime, teamLink, attachments, cancellationToken);
+        await _emailService.SendUpdatedCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, cover.StartDate, startTime, endTime, teamLink ?? string.Empty, attachments, cancellationToken);
     }
 }

@@ -7,19 +7,19 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanManageSchoolContacts)]
+[HasPermission(AuthPermission.Partners_SchoolContacts_Edit_Value)]
 public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;

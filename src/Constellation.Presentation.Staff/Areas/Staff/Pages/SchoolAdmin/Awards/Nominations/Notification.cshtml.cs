@@ -3,16 +3,16 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Awards.
 using Application.Domains.MeritAwards.Nominations.Queries.GetNotification;
 using Application.Models.Auth;
 using Constellation.Core.Models.Awards.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
+[HasPermission(AuthPermission.SchoolAdmin_AwardNominations_View_Value)]
 public class NotificationModel : BasePageModel
 {
     private readonly ISender _mediator;

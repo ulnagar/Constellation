@@ -5,6 +5,7 @@ using Application.Domains.WorkFlows.Commands.CreateAttendanceCase;
 using Application.Domains.WorkFlows.Commands.UpdateAttendanceCaseDetails;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Attendance.Reports.Queries.GetAttendanceTrendValues;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Students.Identifiers;
@@ -16,7 +17,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_WorkFlow_View_Value)]
 public class AttendanceModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -72,7 +73,7 @@ public class AttendanceModel : BasePageModel
 
     public async Task<IActionResult> OnPostCreateWorkFlows(List<WorkFlowNeeded> entries)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_WorkFlow_Edit_Value);
 
         if (!authorised.Succeeded)
         {

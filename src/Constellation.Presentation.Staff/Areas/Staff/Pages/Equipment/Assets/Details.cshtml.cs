@@ -15,19 +15,17 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Enums;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.AddAssetNote;
 using Shared.Components.AllocateAsset;
@@ -36,7 +34,7 @@ using Shared.Components.UpdateAssetStatus;
 using Shared.PartialViews.AddAssetSighting;
 using System.Security.Claims;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Assets_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

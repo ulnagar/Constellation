@@ -6,13 +6,12 @@ using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_Edit_Value)]
 public class WithoutModuleModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -4,19 +4,19 @@ using Application.Common.PresentationModels;
 using Constellation.Application.Domains.Families.Commands.CreateFamily;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.ValueObjects;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Families;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.Partners_Families_Edit_Value)]
 public class AddFamilyModel : BasePageModel
 {
     private readonly ISender _mediator;

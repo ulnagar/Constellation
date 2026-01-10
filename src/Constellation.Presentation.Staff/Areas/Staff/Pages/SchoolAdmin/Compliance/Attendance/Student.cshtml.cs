@@ -8,16 +8,16 @@ using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_AttendancePercentages_View_Value)]
 public class StudentModel : BasePageModel
 {
     private readonly ISender _mediator;

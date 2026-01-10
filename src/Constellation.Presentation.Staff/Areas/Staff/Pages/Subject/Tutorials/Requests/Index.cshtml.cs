@@ -8,13 +8,13 @@ using Core.Abstractions.Services;
 using Core.Models.Tutorials.Enums;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Tutorials_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -8,18 +8,18 @@ using Application.Domains.Covers.Queries.GetAllCurrentAndFutureCovers;
 using Application.Domains.Covers.Queries.GetFutureCovers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Covers.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.ShortTerm_Covers_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -55,7 +55,7 @@ public class IndexModel : BasePageModel
         CoverId id, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCovers);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.ShortTerm_Covers_Edit_Value);
 
         if (!authorised.Succeeded)
         {

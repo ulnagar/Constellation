@@ -16,6 +16,7 @@ using Application.Domains.WorkFlows.Commands.UpdateCaseStatus;
 using Application.Domains.WorkFlows.Queries.GetCaseById;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
@@ -25,7 +26,6 @@ using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
@@ -41,7 +41,7 @@ using Shared.PartialViews.AddSentralIncidentStatusAction;
 using Shared.PartialViews.ConfirmActionUpdateModal;
 using Shared.PartialViews.ReassignActionToStaffMemberModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_WorkFlow_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

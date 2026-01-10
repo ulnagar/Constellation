@@ -4,24 +4,23 @@ using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Extensions;
-using Application.Helpers;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Plans.Commands.GenerateAttendancePlans;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+[HasPermission(AuthPermission.StudentAdmin_AttendancePlans_Edit_Value)]
 public class GenerateModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -2,17 +2,17 @@
 
 using Application.Models.Auth;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummary;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_AttendancePlans_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

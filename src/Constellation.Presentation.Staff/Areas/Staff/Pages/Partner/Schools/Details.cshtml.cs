@@ -5,17 +5,16 @@ using Application.Domains.ExternalSystems.NetworkStatistics.Queries.GetGraphData
 using Application.Domains.Schools.Queries.GetSchoolDetails;
 using Application.DTOs;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Schools_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -5,16 +5,15 @@ using Application.Domains.Compliance.Wellbeing.Queries.ExportWellbeingReport;
 using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Application.DTOs;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_Compliance_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

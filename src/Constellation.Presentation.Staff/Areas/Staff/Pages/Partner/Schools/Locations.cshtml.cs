@@ -2,13 +2,11 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools;
 
 using Application.Common.PresentationModels;
 using Application.Domains.Schools.Queries.GetSchoolLocationsAsMapLayers;
-using Application.Interfaces.Repositories;
 using Constellation.Application.DTOs;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 

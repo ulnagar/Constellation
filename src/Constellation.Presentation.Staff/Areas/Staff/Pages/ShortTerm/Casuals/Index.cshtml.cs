@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[Authorize(Policy = AuthPermission.ShortTerm_Casuals_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -52,7 +52,7 @@ public class IndexModel : BasePageModel
         CasualId id, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.ShortTerm_Casuals_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -91,7 +91,7 @@ public class IndexModel : BasePageModel
         CasualId id, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.ShortTerm_Casuals_Edit_Value);
 
         if (!authorised.Succeeded)
         {

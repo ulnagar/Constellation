@@ -2,6 +2,7 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Events;
@@ -33,7 +34,7 @@ internal sealed class AddOrUpdateUserAccount
 
     public async Task Handle(StudentEmailAddressChangedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -49,99 +50,95 @@ internal sealed class AddOrUpdateUserAccount
         if (newAddress.IsFailure)
         {
             _logger
-                .Warning("Could not convert email addresses");
+                .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
+                .ForContext(nameof(Error), newAddress.Error, true)
+                .Warning("Failed to update Student AppUser for new Email");
+
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(notification.OldAddress))
+        AppUser? user = null;
+
+        // Fix/remove old user account
+        if (!string.IsNullOrWhiteSpace(notification.OldAddress))
         {
-            // No previous address known. Create new user
-            AppUser user = new()
-            {
-                UserName = student.EmailAddress.Email,
-                Email = student.EmailAddress.Email,
-                FirstName = student.Name.PreferredName,
-                LastName = student.Name.LastName,
-                IsStudent = true,
-                StudentId = student.Id
-            };
+            user = await _userManager.FindByEmailAsync(notification.OldAddress);
 
-            IdentityResult create = await _userManager.CreateAsync(user);
-
-            if (create.Succeeded)
+            if (user is not null)
             {
-                _logger
-                    .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
-                    .ForContext(nameof(AppUser), user, true)
-                    .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
-                    .Warning("Failed to update Student AppUser for new Email");
+                AppUserLink? link = user.Links
+                    .FirstOrDefault(link =>
+                        !link.IsDeleted &&
+                        link.Type == LinkType.Student &&
+                        link.LinkId == student.Id.Value);
+
+                if (link is not null)
+                    link.Delete();
+
+                await _userManager.UpdateAsync(user);
+
+                if (user.Links.All(link => link.IsDeleted))
+                {
+                    IdentityResult update = await _userManager.DeleteAsync(user);
+
+                    if (!update.Succeeded)
+                    {
+                        _logger
+                            .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
+                            .ForContext(nameof(AppUser), user, true)
+                            .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                            .Warning("Failed to update Student AppUser for new Email");
+                    }
+                }
+            }
+        }
+
+        user = await _userManager.FindByEmailAsync(newAddress.Value.Email);
+
+        if (user is not null)
+        {
+            List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).ToList();
+
+            if (links.All(link => link.LinkId != student.Id.Value))
+            {
+                user.AddStudentLink(student.Id);
+
+                IdentityResult update = await _userManager.UpdateAsync(user);
+
+                if (!update.Succeeded)
+                {
+                    _logger
+                        .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
+                        .ForContext(nameof(AppUser), user, true)
+                        .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                        .Warning("Failed to update Student AppUser for new Email");
+
+                    return;
+                }
             }
         }
         else
         {
-            AppUser user = await _userManager.FindByEmailAsync(notification.OldAddress);
-
-            if (user is not null)
-            {
-                user.IsStudent = true;
-                user.StudentId = student.Id;
-                user.UserName = newAddress.Value.Email;
-                user.Email = newAddress.Value.Email;
-
-                IdentityResult update = await _userManager.UpdateAsync(user);
-
-                if (!update.Succeeded)
-                {
-                    _logger
-                        .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
-                        .ForContext(nameof(AppUser), user, true)
-                        .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                        .Warning("Failed to update Student AppUser for new Email");
-                }
-
-                return;
-            }
-
-            user = await _userManager.FindByEmailAsync(newAddress.Value.Email);
-
-            if (user is not null)
-            {
-                user.IsStudent = true;
-                user.StudentId = student.Id;
-
-                IdentityResult update = await _userManager.UpdateAsync(user);
-
-                if (!update.Succeeded)
-                {
-                    _logger
-                        .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
-                        .ForContext(nameof(AppUser), user, true)
-                        .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                        .Warning("Failed to update Student AppUser for new Email");
-                }
-
-                return;
-            }
-
             user = new()
             {
                 UserName = student.EmailAddress.Email,
                 Email = student.EmailAddress.Email,
-                FirstName = student.Name.PreferredName,
-                LastName = student.Name.LastName,
-                IsStudent = true,
-                StudentId = student.Id
+                Name = student.Name
             };
+
+            user.AddStudentLink(student.Id);
 
             IdentityResult create = await _userManager.CreateAsync(user);
 
-            if (create.Succeeded)
+            if (!create.Succeeded)
             {
                 _logger
                     .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
                     .ForContext(nameof(AppUser), user, true)
                     .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
                     .Warning("Failed to update Student AppUser for new Email");
+
+                return;
             }
         }
     }

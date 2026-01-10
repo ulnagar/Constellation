@@ -6,18 +6,17 @@ using Application.Domains.StudentReports.Queries.GetExternalReportList;
 using Application.Models.Auth;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attachments.ValueObjects;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Reports.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_Reports_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

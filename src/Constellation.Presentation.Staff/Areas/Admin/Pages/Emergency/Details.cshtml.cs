@@ -7,12 +7,12 @@ using Constellation.Core.Abstractions.Services;
 using Core.Models.EmergencyConsole.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanUseEmergencyConsole)]
+[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

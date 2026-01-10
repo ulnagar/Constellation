@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.EmailExternalReports;
@@ -31,7 +32,7 @@ using Shared.PartialViews.UpdateTempReportDetails;
 using System.Net.Mime;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageReports)]
+[HasPermission(AuthPermission.StudentAdmin_Reports_Edit_Value)]
 public class BulkUploadModel : BasePageModel
 {
     private readonly ISender _mediator;

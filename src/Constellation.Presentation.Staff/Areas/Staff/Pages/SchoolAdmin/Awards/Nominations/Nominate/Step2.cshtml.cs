@@ -8,11 +8,10 @@ using Constellation.Application.Domains.MeritAwards.Nominations.Queries.GetNomin
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Models.Identifiers;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -20,7 +19,7 @@ using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanAddAwards)]
+[HasPermission(AuthPermission.SchoolAdmin_AwardNominations_Submit_Value)]
 public class Step2Model : BasePageModel
 {
     private readonly ISender _mediator;

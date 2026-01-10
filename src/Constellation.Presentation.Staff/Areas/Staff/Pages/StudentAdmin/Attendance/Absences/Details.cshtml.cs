@@ -14,10 +14,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_AttendanceList_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -79,7 +80,7 @@ public class DetailsModel : BasePageModel
     {
         _logger.Information("Requested to send notification for Absence with id {Id} by user {User}", Id, _currentUserService.UserName);
 
-        AuthorizationResult isAuthorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
+        AuthorizationResult isAuthorised = await _authService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendanceList_Notify_Value);
 
         if (!isAuthorised.Succeeded)
         {

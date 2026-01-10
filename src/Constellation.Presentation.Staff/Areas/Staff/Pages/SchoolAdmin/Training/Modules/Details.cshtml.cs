@@ -17,14 +17,13 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.AddStaffMemberToTrainingModule;
 using Shared.PartialViews.RemoveStaffMemberFromTrainingModuleModal;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanViewTrainingModuleContentDetails)]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -62,7 +61,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRetireModule()
     {
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
         if (!isAuthorised.Succeeded)
         {
@@ -99,7 +98,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetReinstateModule()
     {
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
         if (!isAuthorised.Succeeded)
         {
@@ -149,7 +148,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetRemoveStaff(StaffId staffId)
     {
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
         if (!isAuthorised.Succeeded)
         {
@@ -190,7 +189,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddStaffMember(AddStaffMemberToTrainingModuleSelection viewModel)
     {
-        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult isAuthorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
         if (!isAuthorised.Succeeded)
         {

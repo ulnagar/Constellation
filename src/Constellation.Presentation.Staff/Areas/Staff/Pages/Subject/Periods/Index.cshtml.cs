@@ -3,16 +3,15 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Periods;
 using Application.Common.PresentationModels;
 using Application.Domains.Timetables.Periods.Queries.GetPeriodsForVisualSelection;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Timetables_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

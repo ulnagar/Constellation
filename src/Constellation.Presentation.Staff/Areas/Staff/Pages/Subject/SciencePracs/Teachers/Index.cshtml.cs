@@ -11,24 +11,22 @@ using Application.Domains.SchoolContacts.Queries.GetContactRolesForSelectionList
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Application.Models.Auth;
-using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.AssignRoleModal;
 using Shared.PartialViews.DeleteRoleModal;
 using Shared.PartialViews.UpdateRoleNoteModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

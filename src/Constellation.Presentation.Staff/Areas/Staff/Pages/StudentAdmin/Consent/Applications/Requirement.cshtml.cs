@@ -8,20 +8,20 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Courses.Models;
 using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetApplicationById;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.StudentAdmin_Consent_Edit_Value)]
 public class RequirementModel : BasePageModel
 {
     private readonly ISender _mediator;

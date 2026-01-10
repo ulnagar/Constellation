@@ -2,22 +2,24 @@
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Models.Families.Events;
+using Core.Models.Families;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
+internal sealed class ParentAddedToFamilyDomainEvent_CreateUser
     : IDomainEventHandler<ParentAddedToFamilyDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
-    public ParentAddedtoFamilyDomainEvent_CreateUser(
+    public ParentAddedToFamilyDomainEvent_CreateUser(
         IFamilyRepository familyRepository,
         UserManager<AppUser> userManager,
         ILogger logger)
@@ -29,7 +31,7 @@ internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
 
     public async Task Handle(ParentAddedToFamilyDomainEvent notification, CancellationToken cancellationToken)
     {
-        var family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
 
         if (family is null)
         {
@@ -42,7 +44,7 @@ internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
             return;
         }
 
-        var parent = family.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
+        Parent? parent = family.Parents.FirstOrDefault(entry => entry.Id == notification.ParentId);
 
         if (parent is null)
         {
@@ -55,17 +57,24 @@ internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
             return;
         }
 
-        var existingUser = await _userManager.FindByEmailAsync(parent.EmailAddress);
+        AppUser? existingUser = await _userManager.FindByEmailAsync(parent.EmailAddress);
 
         if (existingUser is not null)
         {
-            existingUser.IsParent = true;
-            var updateResult = await _userManager.UpdateAsync(existingUser);
+            bool existingLink = existingUser.Links.Any(link =>
+                !link.IsDeleted && link.Type == LinkType.Parent && link.LinkId == parent.Id.Value);
+
+            if (existingLink)
+                return;
+
+            existingUser.AddParentLink(parent.Id);
+
+            IdentityResult updateResult = await _userManager.UpdateAsync(existingUser);
 
             if (updateResult.Succeeded)
                 return;
 
-            foreach (var error in updateResult.Errors)
+            foreach (IdentityError error in updateResult.Errors)
             {
                 _logger.Warning(
                     "EID {eid}: Could not update user for parent {pid} in family {fid} due to error {error}",
@@ -78,21 +87,21 @@ internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
             return;
         }
 
-        var user = new AppUser
+        AppUser user = new AppUser
         {
             UserName = parent.EmailAddress,
             Email = parent.EmailAddress,
-            FirstName = parent.Name.FirstName,
-            LastName = parent.Name.LastName,
-            IsParent = true
+            Name = parent.Name
         };
 
-        var result = await _userManager.CreateAsync(user);
+        user.AddParentLink(parent.Id);
+
+        IdentityResult result = await _userManager.CreateAsync(user);
 
         if (result.Succeeded)
             return;
 
-        foreach (var error in result.Errors)
+        foreach (IdentityError error in result.Errors)
         {
             _logger.Warning(
                 "EID {eid}: Could not create user for parent {pid} in family {fid} due to error {error}",
@@ -101,7 +110,5 @@ internal sealed class ParentAddedtoFamilyDomainEvent_CreateUser
                 notification.FamilyId.ToString(),
                 error);
         }
-
-        return;
     }
 }

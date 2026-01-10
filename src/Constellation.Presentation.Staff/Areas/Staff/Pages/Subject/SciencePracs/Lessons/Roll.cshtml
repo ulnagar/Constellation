@@ -5,7 +5,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSciencePracs);
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPermission.Subjects_SciencePracs_Edit_Value);
 }
 
 <h2>Roll Details</h2>

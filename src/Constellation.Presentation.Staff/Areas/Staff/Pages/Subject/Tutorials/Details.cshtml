@@ -8,7 +8,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSubjects);
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPermission.Subjects_Tutorials_Edit_Value);
 }
 
 <h2>Tutorial Details</h2>

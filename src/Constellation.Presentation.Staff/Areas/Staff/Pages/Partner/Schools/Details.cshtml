@@ -5,12 +5,11 @@
 @using Constellation.Application.Domains.Schools.Queries.GetSchoolDetails
 @using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsWithCurrentOfferings
 @using Constellation.Core.Extensions
-@using Constellation.Core.Models.Enrolments
 
 @inject IAuthorizationService authService
 
 @{
-    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSchools);
+    var authorised = await authService.AuthorizeAsync(User, AuthPermission.Partners_Schools_Edit_Value);
 }
 
 <h2>School Details</h2>

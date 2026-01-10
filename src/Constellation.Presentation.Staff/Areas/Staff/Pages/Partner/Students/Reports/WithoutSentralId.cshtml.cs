@@ -5,15 +5,15 @@ using Application.Domains.Students.Commands.UpdateStudentSentralId;
 using Application.Domains.Students.Queries.GetCurrentStudentsWithoutSentralId;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Students.Models;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Partners_Students_View_Value)]
 public class WithoutSentralIdModel : BasePageModel
 {
     private readonly ISender _mediator;

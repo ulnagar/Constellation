@@ -13,6 +13,7 @@ using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
@@ -20,14 +21,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.AssignRoleModal;
 using Shared.PartialViews.DeleteRoleModal;
 using Shared.PartialViews.UpdateRoleNoteModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_SchoolContacts_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -66,7 +66,7 @@ public class IndexModel : BasePageModel
 
         Result<List<SchoolContactResponse>> contacts;
 
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         contacts = await _mediator.Send(new GetAllContactsQuery(Filter, execMemberTest.Succeeded));
 
@@ -140,7 +140,7 @@ public class IndexModel : BasePageModel
     {
         AssignRoleModalViewModel viewModel = new();
 
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));

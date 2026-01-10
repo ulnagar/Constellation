@@ -7,7 +7,7 @@
 @{
     Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 
-    var canEditStudents = await authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+    var canEditStudents = await authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 }
 
 <h2>Family Contacts</h2>

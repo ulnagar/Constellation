@@ -5,7 +5,7 @@
 @using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GetAllTutorials
 
 @{
-    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditGroupTutorials);
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Subjects_GroupTutorials_Edit_Value);
 }
 
 <h2>Group Tutorials</h2>

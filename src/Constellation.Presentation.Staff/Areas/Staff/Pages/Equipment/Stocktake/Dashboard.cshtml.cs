@@ -6,23 +6,20 @@ using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEvent;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingsForStaffMember;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
-using Constellation.Application.Domains.Offerings.Commands.RemoveSession;
-using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.StaffMembers.Identifiers;
-using Constellation.Core.Models.Students.Enums;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Stocktake.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.DeleteStocktakeSightingConfirmationModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Stocktake_View_Value)]
 public class DashboardModel : BasePageModel
 {
     private readonly ISender _mediator;
