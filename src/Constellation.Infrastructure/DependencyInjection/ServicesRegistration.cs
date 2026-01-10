@@ -78,8 +78,7 @@ public static class ServicesRegistration
 
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
 
-        // Add Hangfire Services
-
+        // Add Hangfire Authorization Filter
         //services.Scan(selector =>
         //    selector
         //        .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)

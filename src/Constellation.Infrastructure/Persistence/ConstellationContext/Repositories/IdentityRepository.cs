@@ -55,4 +55,16 @@ public sealed class IdentityRepository : IIdentityRepository
                     roleIds.Contains(userRole.RoleId)))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<AppRole>> GetRoles(
+        CancellationToken cancellationToken = default) =>
+        await _roleManager.Roles.ToListAsync(cancellationToken);
+
+    public async Task<int> GetUserCountInRole(
+        string roleName,
+        CancellationToken cancellationToken = default)
+    {
+        IList<AppUser> users = await _userManager.GetUsersInRoleAsync(roleName);
+        return users.Count;
+    }
 }

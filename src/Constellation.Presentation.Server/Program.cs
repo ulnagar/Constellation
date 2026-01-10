@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Polly;
 using Serilog;
 using System.Text;
 
@@ -81,6 +80,8 @@ builder.Services.AddHangfire((provider, configuration) => configuration
         DisableGlobalLocks = true
     }));
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
+
+builder.Services.AddTransient<HangfireAuthorizationFilter>();
 
 builder.Services.AddRazorPages()
     .AddSessionStateTempDataProvider()
@@ -152,10 +153,8 @@ using (IServiceScope scope = app.Services.CreateScope())
     IServiceProvider services = scope.ServiceProvider;
     try
     {
-        UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
         RoleManager<AppRole> roleManager = services.GetRequiredService<RoleManager<AppRole>>();
         await IdentityDefaults.SeedRoles(roleManager);
-        await IdentityDefaults.SeedUsers(userManager);
 
         IWebHostEnvironment env = services.GetRequiredService<IWebHostEnvironment>();
         if (env.IsDevelopment())
@@ -185,7 +184,7 @@ app.UseHangfireDashboard("/hangfire", new DashboardOptions()
     DashboardTitle = "Hangfire Dashboard",
     Authorization = new[]
     {
-        new HangfireAuthorizationFilter()
+        app.Services.GetRequiredService<HangfireAuthorizationFilter>()
     }
 });
 

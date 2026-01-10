@@ -14,7 +14,7 @@
     <div class="col">
         <dl>
             <dt>UserName</dt>
-            <dd>@Model.AppUser.DisplayName</dd>
+            <dd>@Model.AppUser.Name.DisplayName</dd>
             <dt>Email Address</dt>
             <dd>@Model.AppUser.Email</dd>
         </dl>
@@ -33,12 +33,11 @@
     </div>
     <div class="col">
         <dl>
-            <dt>Staff User Id</dt>
-            <dd>@Model.AppUser.StaffId &nbsp;</dd>
-            <dt>School Contact Id</dt>
-            <dd>@Model.AppUser.SchoolContactId &nbsp;</dd>
-            <dt>Student Id</dt>
-            <dd>@Model.AppUser.StudentId &nbsp;</dd>
+            @foreach (var link in Model.AppUser.Links.Where(link => !link.IsDeleted))
+            {
+                <dt>@link.Type</dt>
+                <dd>@link.LinkId</dd>
+            }
         </dl>
     </div>
 </div>

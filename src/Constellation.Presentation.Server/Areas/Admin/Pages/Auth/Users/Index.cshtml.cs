@@ -108,11 +108,11 @@ public class IndexModel : BasePageModel
         return new UserDetailsDto
         {
             Id = user.Id,
-            Name = user.DisplayName,
-            LastName = user.LastName,
+            Name = user.Name.DisplayName,
+            LastName = user.Name.LastName,
             Email = user.Email,
             Roles = memberRoles,
-            LastLoggedIn = user.LastLoggedIn.HasValue ? DateTime.SpecifyKind(user.LastLoggedIn.Value, DateTimeKind.Utc) : null,
+            LastLoggedIn = user.Logins.OrderByDescending(login => login.LoginDateTime).FirstOrDefault()?.LoginDateTime ?? DateTime.MinValue
         };
     }
 

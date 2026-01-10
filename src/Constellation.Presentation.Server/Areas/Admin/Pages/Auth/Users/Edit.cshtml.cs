@@ -58,13 +58,8 @@ public class EditModel : BasePageModel
             return RedirectToPage("/Auth/Users/Index", new { area = "Admin" });
         }
 
-        FirstName = user.FirstName;
-        LastName = user.LastName;
-        IsStaffMember = user.IsStaffMember;
-        StaffId = user.StaffId;
-        IsSchoolContact = user.IsSchoolContact;
-        SchoolContactId = user.SchoolContactId;
-        IsParent = user.IsParent;
+        FirstName = user.Name.FirstName;
+        LastName = user.Name.LastName;
 
         return Page();
     }
@@ -78,15 +73,6 @@ public class EditModel : BasePageModel
             return RedirectToPage("/Auth/Users/Index", new { area = "Admin" });
         }
 
-        user.FirstName = FirstName;
-        user.LastName = LastName;
-        user.IsStaffMember = IsStaffMember;
-        user.StaffId = StaffId;
-        user.IsSchoolContact = IsSchoolContact;
-        user.SchoolContactId = SchoolContactId;
-        user.IsParent = IsParent;
-
-        await _userManager.UpdateAsync(user);
 
         return RedirectToPage("/Auth/Users/Details", new { area = "Admin", EmailAddress = user.Email });
     }
