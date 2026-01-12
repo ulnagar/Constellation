@@ -4,6 +4,8 @@ using Enums;
 
 public sealed class AppUserLoginAttempt
 {
+    private AppUserLoginAttempt() { }
+
     public AppUserLoginAttempt(
         Guid id,
         DateTime dateTime,

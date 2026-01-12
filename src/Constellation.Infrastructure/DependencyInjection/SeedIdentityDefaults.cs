@@ -10,6 +10,9 @@ using System.Security.Claims;
 public static class IdentityDefaults
 {
     public static string SuperAdminRole = "SuperAdmin";
+    public static string Parent = "Parent";
+    public static string Student = "Student";
+    public static string Staff = "Staff";
 
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
@@ -21,6 +24,10 @@ public static class IdentityDefaults
 
         foreach (var position in positions)
             await CreateRole(roleManager, position.Value, AppRoleType.Contact);
+
+        await CreateRole(roleManager, Parent, AppRoleType.Parent);
+        await CreateRole(roleManager, Student, AppRoleType.Student);
+        await CreateRole(roleManager, Staff, AppRoleType.Staff);
     }
 
     private static async Task<AppRole?> CreateRole(RoleManager<AppRole> roleManager, string roleName, AppRoleType type)
