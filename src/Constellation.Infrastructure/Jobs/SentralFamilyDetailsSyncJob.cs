@@ -55,49 +55,6 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
         List<ParentContactChangeDto> changeLog = new();
         List<Student> students = await _studentRepository.GetCurrentStudents(token);
 
-        // Get the CSV file from Sentral
-        // Convert to temporary objects
-        //ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReport(_logger);
-
-#region 2025-02-06: Converted to API use
-        // 2025-02-06: Converted to API use
-        //List<FamilyDetailsDto> families = new();
-
-        //Dictionary<string, List<string>> familyGroups = await _gateway.GetFamilyGroupings();
-
-
-        //foreach (KeyValuePair<string, List<string>> family in familyGroups)
-        //{
-        //    Student firstStudent = students.FirstOrDefault(student => student.StudentReferenceNumber.Number == family.Value.First());
-
-        //    if (firstStudent is null)
-        //        continue;
-
-        //    SystemLink link = firstStudent.SystemLinks.FirstOrDefault(link => link.System == SystemType.Sentral);
-
-        //    if (link is null)
-        //        continue;
-
-        //    FamilyDetailsDto entry = await _gateway.GetParentContactEntry(link.Value);
-
-        //    entry.StudentReferenceNumbers = family.Value;
-        //    entry.FamilyId = family.Key;
-
-        //    foreach (FamilyDetailsDto.Contact contact in entry.Contacts)
-        //    {
-        //        string name = contact.FirstName.Contains(' ')
-        //            ? contact.FirstName.Split(' ')[0]
-        //            : contact.FirstName;
-
-        //        name = name.Length > 8 ? name[..8] : name;
-
-        //        contact.SentralId = $"{entry.FamilyId}-{contact.SentralReference}-{name.ToLowerInvariant()}";
-        //    }
-
-        //    families.Add(entry);
-        //}
-#endregion
-
         ICollection<FamilyDetailsDto> families = await _gateway.GetFamilyDetailsReportFromApi(_logger, token);
 
         _logger
@@ -119,10 +76,10 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 .Information("Checking family: {name} ({code})", family.AddressName, family.FamilyId);
 
             foreach (FamilyDetailsDto.Contact contact in family.Contacts)
-                contact.Mobile = contact.Mobile.Replace(" ", "");
+                contact.Mobile = contact.Mobile.Replace(" ", "", StringComparison.InvariantCulture);
 
             // Check family exists in database
-            Family entry = dbFamilies.FirstOrDefault(entry => entry.SentralId == family.FamilyId);
+            Family? entry = dbFamilies.FirstOrDefault(entry => entry.SentralId == family.FamilyId);
 
             if (entry is null)
             {
@@ -142,6 +99,9 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                 List<Student> familyStudents = students
                     .Where(student => student.StudentReferenceNumber != StudentReferenceNumber.Empty)
                     .Where(student => family.StudentReferenceNumbers.Contains(student.StudentReferenceNumber.Number)).ToList();
+
+                if (familyStudents.Count == 0)
+                    continue;
 
                 foreach (Student student in familyStudents)
                 {
@@ -264,10 +224,13 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
                         entry.AddStudent(sentralStudent.Id, true);
                     }
                 }
+
+                if (entry.Students.Count == 0)
+                    continue;
                 
                 foreach (Parent parent in entry.Parents.ToList())
                 {
-                    FamilyDetailsDto.Contact contact = family.Contacts.FirstOrDefault(contact => contact.SentralId == parent.SentralId);
+                    FamilyDetailsDto.Contact? contact = family.Contacts.FirstOrDefault(contact => contact.SentralId == parent.SentralId);
 
                     if (contact is null)
                     {
@@ -278,7 +241,7 @@ internal sealed class SentralFamilyDetailsSyncJob : ISentralFamilyDetailsSyncJob
 
                 foreach (FamilyDetailsDto.Contact contact in family.Contacts)
                 {
-                    Parent parent = entry.Parents.FirstOrDefault(parent => parent.SentralId == contact.SentralId);
+                    Parent? parent = entry.Parents.FirstOrDefault(parent => parent.SentralId == contact.SentralId);
 
                     if (parent is not null)
                     {
