@@ -45,36 +45,14 @@ internal sealed class CreateOrUpdateUserAccount
 
         AppUser? user = await _userManager.FindByEmailAsync(student.EmailAddress.Email);
 
-        if (user is not null)
-        {
-            List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).ToList();
-
-            if (links.All(link => link.LinkId != student.Id.Value))
-            {
-                user.AddStudentLink(student.Id);
-
-                IdentityResult update = await _userManager.UpdateAsync(user);
-
-                if (!update.Succeeded)
-                {
-                    _logger
-                        .ForContext(nameof(StudentReinstatedDomainEvent), notification, true)
-                        .ForContext(nameof(AppUser), user, true)
-                        .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                        .Warning("Failed to update Student AppUser");
-                }
-            }
-        }
-        else
+        if (user is null)
         {
             user = new()
             {
-                UserName = student.EmailAddress.Email,
-                Email = student.EmailAddress.Email,
+                UserName = student.EmailAddress.Email, 
+                Email = student.EmailAddress.Email, 
                 Name = student.Name
             };
-
-            user.AddStudentLink(student.Id);
 
             IdentityResult create = await _userManager.CreateAsync(user);
 
@@ -87,5 +65,25 @@ internal sealed class CreateOrUpdateUserAccount
                     .Warning("Failed to create new Student AppUser");
             }
         }
+
+        List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).ToList();
+
+        if (links.All(link => link.LinkId != student.Id.Value))
+        {
+            user.AddStudentLink(student.Id);
+
+            IdentityResult update = await _userManager.UpdateAsync(user);
+
+            if (!update.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(StudentReinstatedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                    .Warning("Failed to update Student AppUser");
+            }
+        }
+
+        await _userManager.AddToRoleAsync(user, AppRole.Student);
     }
 }

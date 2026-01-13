@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Students.Events.StudentEmailAddressChanged;
 
+using Application.Models.Identity.Repositories;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Enums;
@@ -19,15 +20,18 @@ internal sealed class AddOrUpdateUserAccount
 {
     private readonly IStudentRepository _studentRepository;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IIdentityRepository _identityRepository;
     private readonly ILogger _logger;
 
     public AddOrUpdateUserAccount(
         IStudentRepository studentRepository,
         UserManager<AppUser> userManager,
+        IIdentityRepository identityRepository,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _userManager = userManager;
+        _identityRepository = identityRepository;
         _logger = logger
             .ForContext<StudentEmailAddressChangedDomainEvent>();
     }
@@ -57,53 +61,38 @@ internal sealed class AddOrUpdateUserAccount
             return;
         }
 
-        AppUser? user = null;
+        AppUser? user = await _userManager.FindByEmailAsync(notification.OldAddress);
 
-        // Fix/remove old user account
-        if (!string.IsNullOrWhiteSpace(notification.OldAddress))
-        {
-            user = await _userManager.FindByEmailAsync(notification.OldAddress);
-
-            if (user is not null)
-            {
-                AppUserLink? link = user.Links
-                    .FirstOrDefault(link =>
-                        !link.IsDeleted &&
-                        link.Type == LinkType.Student &&
-                        link.LinkId == student.Id.Value);
-
-                if (link is not null)
-                    link.Delete();
-
-                await _userManager.UpdateAsync(user);
-
-                if (user.Links.All(link => link.IsDeleted))
-                {
-                    IdentityResult update = await _userManager.DeleteAsync(user);
-
-                    if (!update.Succeeded)
-                    {
-                        _logger
-                            .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
-                            .ForContext(nameof(AppUser), user, true)
-                            .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                            .Warning("Failed to update Student AppUser for new Email");
-                    }
-                }
-            }
-        }
-
-        user = await _userManager.FindByEmailAsync(newAddress.Value.Email);
+        List<AppRole> oldUserRoles = [];
 
         if (user is not null)
         {
-            List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).ToList();
+            AppUserLink? link = user.Links
+                .FirstOrDefault(link =>
+                    !link.IsDeleted &&
+                    link.Type == LinkType.Student &&
+                    link.LinkId == student.Id.Value);
 
-            if (links.All(link => link.LinkId != student.Id.Value))
+            if (link is not null)
+                link.Delete();
+
+            await _userManager.UpdateAsync(user);
+
+            if (user.Links.Where(link => link.Type == LinkType.Student).All(link => link.IsDeleted))
             {
-                user.AddStudentLink(student.Id);
+                List<AppRole> roles = await _identityRepository.GetRolesForUser(user, cancellationToken);
 
-                IdentityResult update = await _userManager.UpdateAsync(user);
+                foreach (AppRole role in roles.Where(role => role.Type == AppRoleType.Student))
+                {
+                    await _userManager.RemoveFromRoleAsync(user, role.Name);
+
+                    oldUserRoles.Add(role);
+                }
+            }
+
+            if (user.Links.All(link => link.IsDeleted))
+            {
+                IdentityResult update = await _userManager.DeleteAsync(user);
 
                 if (!update.Succeeded)
                 {
@@ -112,21 +101,18 @@ internal sealed class AddOrUpdateUserAccount
                         .ForContext(nameof(AppUser), user, true)
                         .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
                         .Warning("Failed to update Student AppUser for new Email");
-
-                    return;
                 }
             }
         }
-        else
+
+        user = await _userManager.FindByEmailAsync(newAddress.Value.Email);
+
+        if (user is null)
         {
             user = new()
             {
-                UserName = student.EmailAddress.Email,
-                Email = student.EmailAddress.Email,
-                Name = student.Name
+                UserName = student.EmailAddress.Email, Email = student.EmailAddress.Email, Name = student.Name
             };
-
-            user.AddStudentLink(student.Id);
 
             IdentityResult create = await _userManager.CreateAsync(user);
 
@@ -141,5 +127,30 @@ internal sealed class AddOrUpdateUserAccount
                 return;
             }
         }
+
+        List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).ToList();
+
+        if (links.All(link => link.LinkId != student.Id.Value))
+        {
+            user.AddStudentLink(student.Id);
+
+            IdentityResult update = await _userManager.UpdateAsync(user);
+
+            if (!update.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(StudentEmailAddressChangedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                    .Warning("Failed to update Student AppUser for new Email");
+
+                return;
+            }
+        }
+
+        await _userManager.AddToRoleAsync(user, AppRole.Student);
+
+        foreach (AppRole role in oldUserRoles)
+            await _userManager.AddToRoleAsync(user, role.Name);
     }
 }

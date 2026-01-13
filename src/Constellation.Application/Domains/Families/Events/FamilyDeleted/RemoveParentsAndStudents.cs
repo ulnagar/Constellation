@@ -1,17 +1,13 @@
-﻿namespace Constellation.Application.Domains.Families.Events.FamilyDeletedDomainEvent;
+﻿namespace Constellation.Application.Domains.Families.Events.FamilyDeleted;
 
-using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Errors;
-using Constellation.Core.Models.Families;
-using Constellation.Core.Models.Families.Events;
-using Constellation.Core.Shared;
+using Abstractions.Messaging;
+using Core.Abstractions.Repositories;
+using Core.Models.Families;
 using Core.Models.Families.Errors;
+using Core.Models.Families.Events;
+using Core.Shared;
+using Interfaces.Repositories;
 using Serilog;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 internal sealed class RemoveParentsAndStudents
     : IDomainEventHandler<FamilyDeletedDomainEvent>
@@ -32,7 +28,7 @@ internal sealed class RemoveParentsAndStudents
 
     public async Task Handle(FamilyDeletedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Family family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(notification.FamilyId, cancellationToken);
 
         if (family is null)
         {
@@ -44,7 +40,7 @@ internal sealed class RemoveParentsAndStudents
             return;
         }
 
-        if (family.Parents.Any())
+        if (family.Parents.Count > 0)
         {
             foreach (Parent parent in family.Parents)
             {
@@ -54,7 +50,7 @@ internal sealed class RemoveParentsAndStudents
             }
         }
 
-        if (family.Students.Any())
+        if (family.Students.Count > 0)
         {
             foreach (StudentFamilyMembership student in family.Students)
             {

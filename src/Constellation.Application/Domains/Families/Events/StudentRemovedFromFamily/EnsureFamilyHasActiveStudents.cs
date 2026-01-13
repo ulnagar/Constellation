@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Families.Events;
+﻿namespace Constellation.Application.Domains.Families.Events.StudentRemovedFromFamily;
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
@@ -9,14 +9,14 @@ using Serilog;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class StudentRemovedFromFamilyDomainEvent_EnsureFamilyHasActiveStudents
+internal sealed class EnsureFamilyHasActiveStudents
     : IDomainEventHandler<StudentRemovedFromFamilyDomainEvent>
 {
     private readonly IFamilyRepository _familyRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
-    public StudentRemovedFromFamilyDomainEvent_EnsureFamilyHasActiveStudents(
+    public EnsureFamilyHasActiveStudents(
         IFamilyRepository familyRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -28,7 +28,7 @@ internal sealed class StudentRemovedFromFamilyDomainEvent_EnsureFamilyHasActiveS
 
     public async Task Handle(StudentRemovedFromFamilyDomainEvent notification, CancellationToken cancellationToken)
     {
-        Family family = await _familyRepository.GetFamilyById(notification.Membership.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(notification.Membership.FamilyId, cancellationToken);
 
         if (family is null)
         {

@@ -9,4 +9,5 @@ public interface IIdentityRepository
 
     Task<List<AppRole>> GetRoles(CancellationToken cancellationToken = default);
     Task<int> GetUserCountInRole(string roleName, CancellationToken cancellationToken = default);
+    Task<List<AppRole>> GetRolesForUser(AppUser user, CancellationToken cancellationToken = default);
 }
