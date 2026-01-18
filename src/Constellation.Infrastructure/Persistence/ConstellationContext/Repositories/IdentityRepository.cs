@@ -115,4 +115,20 @@ public sealed class IdentityRepository : IIdentityRepository
                 entry => entry.Email == user.Email,
                 cancellationToken);
     }
+
+    public async Task<List<AppRole>> GetRolesForUser(
+        AppUser user,
+        CancellationToken cancellationToken = default)
+    {
+        List<Guid> roleIds = await _context
+            .UserRoles
+                .Where(userRole => userRole.UserId == user.Id)
+                .Select(userRole => userRole.RoleId)
+                .ToListAsync(cancellationToken);
+
+        return await _context
+            .Set<AppRole>()
+            .Where(role => roleIds.Contains(role.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

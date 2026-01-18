@@ -3,6 +3,7 @@
 using Application.Models.Identity.Enums;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Repositories;
 using Constellation.Core.Models.SchoolContacts.Events;
 using Constellation.Core.Models.StaffMembers;
 using Constellation.Core.Models.StaffMembers.Errors;
@@ -19,15 +20,18 @@ internal sealed class CreateOrUpdateUserAccount
 {
     private readonly IStaffRepository _staffRepository;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IIdentityRepository _identityRepository;
     private readonly ILogger _logger;
 
     public CreateOrUpdateUserAccount(
         IStaffRepository staffRepository,
         UserManager<AppUser> userManager,
+        IIdentityRepository identityRepository,
         ILogger logger)
     {
         _staffRepository = staffRepository;
         _userManager = userManager;
+        _identityRepository = identityRepository;
         _logger = logger;
     }
 
@@ -46,6 +50,8 @@ internal sealed class CreateOrUpdateUserAccount
 
         AppUser? user = await _userManager.FindByEmailAsync(notification.OldEmailAddress);
 
+        List<AppRole> oldUserRoles = [];
+
         if (user is not null)
         {
             AppUserLink? link = user.Links
@@ -58,6 +64,18 @@ internal sealed class CreateOrUpdateUserAccount
                 link.Delete();
 
             await _userManager.UpdateAsync(user);
+
+            if (user.Links.Where(link => link.Type == LinkType.Staff).All(link => link.IsDeleted))
+            {
+                List<AppRole> roles = await _identityRepository.GetRolesForUser(user, cancellationToken);
+
+                foreach (AppRole role in roles.Where(role => role.Type == AppRoleType.Staff))
+                {
+                    await _userManager.RemoveFromRoleAsync(user, role.Name);
+
+                    oldUserRoles.Add(role);
+                }
+            }
 
             if (user.Links.All(link => link.IsDeleted))
             {
@@ -76,29 +94,7 @@ internal sealed class CreateOrUpdateUserAccount
 
         user = await _userManager.FindByEmailAsync(notification.NewEmailAddress);
 
-        if (user is not null)
-        {
-            List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Staff).ToList();
-
-            if (links.All(link => link.LinkId != staffMember.Id.Value))
-            {
-                user.AddStaffLink(staffMember.Id);
-
-                IdentityResult update = await _userManager.UpdateAsync(user);
-
-                if (!update.Succeeded)
-                {
-                    _logger
-                        .ForContext(nameof(SchoolContactEmailAddressChangedDomainEvent), notification, true)
-                        .ForContext(nameof(AppUser), user, true)
-                        .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                        .Warning("Failed to update Staff Member AppUser email address");
-
-                    return;
-                }
-            }
-        }
-        else
+        if (user is null)
         {
             user = new()
             {
@@ -106,8 +102,6 @@ internal sealed class CreateOrUpdateUserAccount
                 Email = staffMember.EmailAddress.Email,
                 Name = staffMember.Name
             };
-
-            user.AddStaffLink(staffMember.Id);
 
             IdentityResult create = await _userManager.CreateAsync(user);
 
@@ -122,5 +116,30 @@ internal sealed class CreateOrUpdateUserAccount
                 return;
             }
         }
+        
+        List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Staff).ToList();
+
+        if (links.All(link => link.LinkId != staffMember.Id.Value))
+        {
+            user.AddStaffLink(staffMember.Id);
+
+            IdentityResult update = await _userManager.UpdateAsync(user);
+
+            if (!update.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(SchoolContactEmailAddressChangedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                    .Warning("Failed to update Staff Member AppUser email address");
+
+                return;
+            }
+        }
+
+        await _userManager.AddToRoleAsync(user, AppRole.Staff);
+
+        foreach (AppRole role in oldUserRoles)
+            await _userManager.AddToRoleAsync(user, role.Name);
     }
 }

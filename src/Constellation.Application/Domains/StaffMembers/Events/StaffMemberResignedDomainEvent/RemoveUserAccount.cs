@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Events.StaffMemberResignedDomainEvent;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
 using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Errors;
@@ -20,15 +21,18 @@ internal sealed class RemoveUserAccount
 {
     private readonly IStaffRepository _staffRepository;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IIdentityRepository _identityRepository;
     private readonly ILogger _logger;
 
     public RemoveUserAccount(
         IStaffRepository staffRepository,
         UserManager<AppUser> userManager,
+        IIdentityRepository identityRepository,
         ILogger logger)
     {
         _staffRepository = staffRepository;
         _userManager = userManager;
+        _identityRepository = identityRepository;
         _logger = logger;
     }
 
@@ -81,6 +85,13 @@ internal sealed class RemoveUserAccount
                     .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
                     .Warning("Failed to delete old Staff Member AppUser");
             }
+
+            return;
         }
+
+        List<AppRole> roles = await _identityRepository.GetRolesForUser(user, cancellationToken);
+
+        foreach (var role in roles.Where(role => role.Type == AppRoleType.Staff))
+            await _userManager.RemoveFromRoleAsync(user, role.Name);
     }
 }
