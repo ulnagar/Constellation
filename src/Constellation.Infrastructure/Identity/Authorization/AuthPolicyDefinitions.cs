@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Identity.Authorization;
 
+using Application.Models.Identity;
 using Constellation.Application.Models.Auth;
 using DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,7 @@ public static class AuthPolicyDefinitions
     {
         // Site Super Admin
         options.AddPolicy(AuthPolicies.IsSiteAdmin, policy =>
-            policy.RequireRole(IdentityDefaults.SuperAdminRole));
+            policy.RequireRole(AppRole.SuperAdminRole));
         
         // Has active School Contact Role
         options.AddPolicy(AuthPolicies.IsSchoolContact, policy =>

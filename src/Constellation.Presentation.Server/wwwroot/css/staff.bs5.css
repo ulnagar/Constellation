@@ -181,7 +181,8 @@ label {
     visibility: hidden;
 }
 
-tr:hover .btn-show-hover {
+tr:hover .btn-show-hover,
+.list-group-item:hover .btn-show-hover {
     visibility: visible;
 }
 

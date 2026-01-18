@@ -7,6 +7,9 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
+    
+    Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
+
     var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Authentication_Edit_Value);
 }
 
@@ -38,7 +41,7 @@
                 <td>@role.Type</td>
                 <td>@role.Members</td>
                 <td>
-                    <a asp-page="/Auth/Roles/Details" asp-area="Admin" asp-route-id="@role.Id" class="btn btn-sm btn-warning btn-hover">More Info...</a>
+                    <a asp-page="/Auth/Roles/Details" asp-area="Admin" asp-route-id="@role.Id" class="btn btn-sm btn-warning btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

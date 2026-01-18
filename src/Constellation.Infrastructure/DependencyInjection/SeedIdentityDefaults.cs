@@ -9,41 +9,48 @@ using System.Security.Claims;
 
 public static class IdentityDefaults
 {
-    public static string SuperAdminRole = "SuperAdmin";
-    public static string Parent = "Parent";
-    public static string Student = "Student";
-    public static string Staff = "Staff";
+
 
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
         List<AuthPermission> permissions = AuthPermission.GetOptions.ToList();
 
-        await CreateRoleWithPermission(roleManager, SuperAdminRole, permissions, AppRoleType.Staff);
+        await CreateRoleWithPermission(roleManager, AppRole.SuperAdminRole, permissions, AppRoleType.Staff);
 
         IEnumerable<Position> positions = Position.GetOptions;
 
         foreach (var position in positions)
             await CreateRole(roleManager, position.Value, AppRoleType.Contact);
 
-        await CreateRole(roleManager, Parent, AppRoleType.Parent);
-        await CreateRole(roleManager, Student, AppRoleType.Student);
-        await CreateRole(roleManager, Staff, AppRoleType.Staff);
+        await CreateRole(roleManager, AppRole.Parent, AppRoleType.Parent);
+        await CreateRole(roleManager, AppRole.Student, AppRoleType.Student);
+        await CreateRole(roleManager, AppRole.Staff, AppRoleType.Staff);
     }
 
     private static async Task<AppRole?> CreateRole(RoleManager<AppRole> roleManager, string roleName, AppRoleType type)
     {
-        AppRole? existing = await roleManager.FindByNameAsync(roleName);
+        AppRole? role = await roleManager.FindByNameAsync(roleName);
 
-        if (existing is null)
-            await roleManager.CreateAsync(new AppRole(roleName, type));
+        if (role is null)
+        {
+            IdentityResult create = await roleManager.CreateAsync(new AppRole(roleName, type));
 
-        return null;
+            if (create.Succeeded)
+                role = await roleManager.FindByNameAsync(roleName);
+            else
+                return null;
+        }
+
+        return role;
     }
 
     private static async Task CreateRoleWithPermission(RoleManager<AppRole> roleManager, string roleName, List<AuthPermission> permissions, AppRoleType type)
     {
         AppRole? role = await CreateRole(roleManager, roleName, type);
-        
+
+        if (role is null)
+            return;
+
         IList<Claim> claims = await roleManager.GetClaimsAsync(role!);
 
         List<Claim> permissionClaims = claims

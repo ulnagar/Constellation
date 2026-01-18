@@ -5,7 +5,6 @@ using Constellation.Core.Models.SchoolContacts;
 using Constellation.Core.Shared;
 using Core.Models.SchoolContacts.Repositories;
 using Core.ValueObjects;
-using DependencyInjection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -66,7 +65,7 @@ public sealed class HasAdminUserPrivileges : AuthorizationHandler<CanAccessSchoo
         if (user is null)
             return;
 
-        bool isAdmin = await _userManager.IsInRoleAsync(user, IdentityDefaults.SuperAdminRole);
+        bool isAdmin = await _userManager.IsInRoleAsync(user, AppRole.SuperAdminRole);
 
         if (isAdmin)
             context.Succeed(requirement);

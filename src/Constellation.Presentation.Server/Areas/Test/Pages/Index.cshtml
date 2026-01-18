@@ -3,3 +3,19 @@
 
 <h2>Test Page</h2>
 
+@if (Model.Message is not null)
+{
+    <dl>
+        <dt>Id</dt>
+        <dd>@Model.Message.Id</dd>
+        
+        <dt>OccurredOn</dt>
+        <dd>@Model.Message.OccurredOn</dd>
+        
+        <dt>Type</dt>
+        <dd>@Model.Message.Type</dd>
+        
+        <dt>Content</dt>
+        <dd><pre>@Model.Message.Content</pre></dd>
+    </dl>
+}

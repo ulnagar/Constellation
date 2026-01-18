@@ -24,6 +24,10 @@ public sealed class IdentityRepository : IIdentityRepository
         _context = context;
     }
 
+    public async Task<List<AppUser>> GetUsers(
+        CancellationToken cancellationToken = default) =>
+        _userManager.Users.ToList();
+
     public async Task<List<AppUser>> UsersInRole(
         string roleName,
         CancellationToken cancellationToken = default)
@@ -60,11 +64,55 @@ public sealed class IdentityRepository : IIdentityRepository
         CancellationToken cancellationToken = default) =>
         await _roleManager.Roles.ToListAsync(cancellationToken);
 
+    public async Task<AppRole?> GetRole(
+        Guid roleId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<AppRole>()
+            .FirstOrDefaultAsync(role => role.Id == roleId, cancellationToken);
+
     public async Task<int> GetUserCountInRole(
         string roleName,
         CancellationToken cancellationToken = default)
     {
         IList<AppUser> users = await _userManager.GetUsersInRoleAsync(roleName);
         return users.Count;
+    }
+
+    public async Task<List<AuthPermission>> GetRolePermissions(
+        Guid roleId,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .RoleClaims
+            .Where(claim => 
+                claim.RoleId == roleId &&
+                claim.ClaimType == AuthClaimType.Permission)
+            .Select(claim => AuthPermission.FromValue(claim.ClaimValue))
+            .ToListAsync(cancellationToken);
+
+    public async Task DeleteUser(AppUser user) => 
+        await _userManager.DeleteAsync(user);
+
+    public async Task AddUserToRole(
+        AppUser user,
+        string roleName,
+        CancellationToken cancellationToken = default) =>
+        await _userManager
+            .AddToRoleAsync(user, roleName);
+
+    public async Task<AppUser?> CreateUser(
+        AppUser user, 
+        CancellationToken cancellationToken = default)
+    {
+        IdentityResult created = await _userManager.CreateAsync(user);
+
+        if (!created.Succeeded)
+            return null;
+
+        return await _context
+            .Set<AppUser>()
+            .FirstOrDefaultAsync(
+                entry => entry.Email == user.Email,
+                cancellationToken);
     }
 }

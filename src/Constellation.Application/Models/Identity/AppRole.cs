@@ -6,6 +6,11 @@ using System;
 
 public sealed class AppRole : IdentityRole<Guid>
 {
+    public const string SuperAdminRole = "SuperAdmin";
+    public const string Parent = "Parent";
+    public const string Student = "Student";
+    public const string Staff = "Staff";
+
     public AppRole() 
         : base() { }
 

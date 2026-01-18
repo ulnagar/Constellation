@@ -15,6 +15,10 @@ internal sealed class AppUserLinkConfiguration : IEntityTypeConfiguration<AppUse
             .HasKey(link => link.Id);
 
         builder
+            .Property(link => link.Id)
+            .ValueGeneratedNever();
+
+        builder
             .Property(link => link.Type)
             .HasConversion(
                 type => type.Value,

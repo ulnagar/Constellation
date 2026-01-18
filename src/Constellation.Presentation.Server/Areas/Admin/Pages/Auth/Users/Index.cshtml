@@ -50,7 +50,10 @@
                             }
                         </td>
                         <td>
-                            @user.LastLoggedIn?.ToLocalTime()
+                            @if (user.LastLoggedIn is not null && user.LastLoggedIn > DateTime.MinValue)
+                            {
+                                @user.LastLoggedIn?.ToLocalTime()
+                            }
                         </td>
                         <td>
                             <div class="btn-group" role="group">

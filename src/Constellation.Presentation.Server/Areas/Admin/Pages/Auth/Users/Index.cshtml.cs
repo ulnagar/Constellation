@@ -105,6 +105,9 @@ public class IndexModel : BasePageModel
         if (user.IsStudent)
             memberRoles.Add("Student");
 
+        if (user.IsFamily)
+            memberRoles.Add("Family");
+
         return new UserDetailsDto
         {
             Id = user.Id,

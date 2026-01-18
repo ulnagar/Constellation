@@ -44,7 +44,7 @@ internal sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder
             .HasMany(user => user.Links)
             .WithOne()
-            .HasForeignKey(user => user.AppUserId)
+            .HasForeignKey(link => link.AppUserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder

@@ -15,13 +15,13 @@ using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
+using Interfaces.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Models.Identity;
 using Models.Identity.Enums;
+using Models.Identity.Repositories;
 using Serilog;
-using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +33,9 @@ internal sealed class AuditAllUsersCommandHandler
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IStudentRepository _studentRepository;
+    private readonly IIdentityRepository _identityRepository;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public AuditAllUsersCommandHandler(
@@ -41,14 +43,18 @@ internal sealed class AuditAllUsersCommandHandler
         IStaffRepository staffRepository,
         ISchoolContactRepository contactRepository,
         IStudentRepository studentRepository,
+        IIdentityRepository identityRepository,
         UserManager<AppUser> userManager,
+        IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _familyRepository = familyRepository;
         _staffRepository = staffRepository;
         _contactRepository = contactRepository;
         _studentRepository = studentRepository;
+        _identityRepository = identityRepository;
         _userManager = userManager;
+        _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<AuditAllUsersCommand>();
     }
@@ -57,6 +63,7 @@ internal sealed class AuditAllUsersCommandHandler
     {
         _logger.Information("Starting scan of users");
         
+        //List<AppUser> users = await _identityRepository.GetUsers(cancellationToken);
         List<AppUser> users = _userManager.Users.ToList();
 
         _logger.Information("Found {count} users currently registered", users.Count);
@@ -89,7 +96,7 @@ internal sealed class AuditAllUsersCommandHandler
                 .ForContext(nameof(Family), family, true)
                 .Information("Checking Family {name}", family.FamilyTitle);
 
-            AppUser? existingUser = users.FirstOrDefault(user => user.Email == family.FamilyEmail);
+            AppUser? existingUser = users.FirstOrDefault(user => string.Equals(user.Email!, family.FamilyEmail, StringComparison.OrdinalIgnoreCase));
 
             if (existingUser is null)
             {
@@ -194,7 +201,9 @@ internal sealed class AuditAllUsersCommandHandler
 
         _logger.Information("Finished processing potential users");
 
-        _logger.Information("{count} total users now registered", _userManager.Users.Count());
+        users = await _identityRepository.GetUsers(cancellationToken);
+
+        _logger.Information("{count} total users now registered", users.Count);
 
         foreach (AppUser user in users)
         {
@@ -230,13 +239,16 @@ internal sealed class AuditAllUsersCommandHandler
                     .ForContext(nameof(AppUser), user, true)
                     .Information("User will be deleted");
 
-                await _userManager.DeleteAsync(user);
+                await _identityRepository.DeleteUser(user);
+                await _unitOfWork.CompleteAsync(cancellationToken);
             }
         }
 
         _logger.Information("Finished processing registered users");
 
-        _logger.Information("{count} registered users remaining", _userManager.Users.Count());
+        users = await _identityRepository.GetUsers(cancellationToken);
+
+        _logger.Information("{count} registered users remaining", users.Count);
         
         return Result.Success();
     }
@@ -284,10 +296,9 @@ internal sealed class AuditAllUsersCommandHandler
         if (user is not null)
         {
             foreach (var role in roles)
-                await _userManager.AddToRoleAsync(user, role.Role.Value);
+                await _identityRepository.AddUserToRole(user, role.Role.Value);
         }
     }
-        
 
     private async Task<AppUser?> CreateUser(
         string email,
@@ -302,12 +313,16 @@ internal sealed class AuditAllUsersCommandHandler
         _logger.Information("Found no matching user.");
         _logger.Information("User will be created");
 
-        Result<Name> name = Name.Create(firstName, string.Empty, lastName);
+        Result<Name> name = string.IsNullOrEmpty(firstName) 
+            ? Name.Create(lastName)
+            : Name.Create(firstName, string.Empty, lastName);
 
         if (name.IsFailure)
         {
             _logger
                 .Warning("Failed to create user for email {email}", email);
+
+            return null;
         }
 
         AppUser user = new()
@@ -317,32 +332,35 @@ internal sealed class AuditAllUsersCommandHandler
             Name = name.Value
         };
 
+        AppUser? result = await _identityRepository.CreateUser(user);
+
+        if (result is null)
+        {
+            _logger
+                .ForContext("Request", user, true)
+                .Warning("Failed to create user due to error");
+
+            return null;
+        }
+
         if (parentId.HasValue)
-            user.AddParentLink(parentId.Value);
+            result.AddParentLink(parentId.Value);
 
         if (familyId.HasValue)
-            user.AddFamilyLink(familyId.Value);
+            result.AddFamilyLink(familyId.Value);
 
         if (staffId.HasValue)
-            user.AddStaffLink(staffId.Value);
+            result.AddStaffLink(staffId.Value);
 
         if (contactId.HasValue)
-            user.AddContactLink(contactId.Value);
+            result.AddContactLink(contactId.Value);
 
         if (studentId.HasValue)
-            user.AddStudentLink(studentId.Value);
+            result.AddStudentLink(studentId.Value);
+        
+        await _unitOfWork.CompleteAsync();
 
-        IdentityResult result = await _userManager.CreateAsync(user);
-
-        if (result.Succeeded)
-            return await _userManager.FindByEmailAsync(email);
-
-        _logger
-            .ForContext("Request", user, true)
-            .ForContext(nameof(Error), result.Errors, true)
-            .Warning("Failed to create user due to error");
-
-        return null;
+        return result;
     }
 
     private async Task CheckFamilyUserDetails(AppUser user, Family family)
@@ -363,23 +381,21 @@ internal sealed class AuditAllUsersCommandHandler
             user.Name = name.Value;
         }
 
-        List<AppUserLink> familyLinks = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Family).ToList();
-
-        if (familyLinks.Count == 0)
+        if (!user.Links.Any(link => !link.IsDeleted && link.Type == LinkType.Family))
         {
             _logger.Information("Updating IsFamily to {isFamily}", true);
 
             user.AddFamilyLink(family.Id);
         }
 
-        if (familyLinks.All(link => link.LinkId != family.Id.Value))
+        if (user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Family).All(link => link.LinkId != family.Id.Value))
         {
             _logger.Information("Updating FamilyId to {familyId}", family.Id);
 
             user.AddFamilyLink(family.Id);
         }
 
-        await _userManager.UpdateAsync(user);
+        await _unitOfWork.CompleteAsync();
     }
 
     private async Task CheckParentUserDetails(AppUser user, Parent parent)
@@ -391,27 +407,21 @@ internal sealed class AuditAllUsersCommandHandler
             user.Name = parent.Name;
         }
 
-        List<AppUserLink> parentLinks = user.Links
-            .Where(link => 
-                !link.IsDeleted && 
-                link.Type == LinkType.Parent)
-            .ToList();
-
-        if (parentLinks.Count == 0)
+        if (!user.Links.Any(link => !link.IsDeleted && link.Type == LinkType.Parent))
         {
             _logger.Information("Updating IsParent to {isParent}", true);
 
             user.AddParentLink(parent.Id);
         }
 
-        if (parentLinks.All(link => link.LinkId != parent.Id.Value))
+        if (user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Parent).All(link => link.LinkId != parent.Id.Value))
         {
             _logger.Information("Updating ParentId to {parentId}", parent.Id);
 
             user.AddParentLink(parent.Id);
         }
 
-        await _userManager.UpdateAsync(user);
+        await _unitOfWork.CompleteAsync();
     }
 
     private async Task CheckStaffUserDetails(AppUser user, StaffMember staffMember)
@@ -423,27 +433,21 @@ internal sealed class AuditAllUsersCommandHandler
             user.Name = staffMember.Name;
         }
 
-        List<AppUserLink> staffLinks = user.Links
-            .Where(link =>
-                !link.IsDeleted &&
-                link.Type == LinkType.Staff)
-            .ToList();
-
-        if (staffLinks.Count == 0)
+        if (!user.Links.Any(link => !link.IsDeleted && link.Type == LinkType.Staff))
         {
             _logger.Information("Updating IsStaff to {isStaff}", true);
 
             user.AddStaffLink(staffMember.Id);
         }
 
-        if (staffLinks.All(link => link.LinkId != staffMember.Id.Value))
+        if (user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Staff).All(link => link.LinkId != staffMember.Id.Value))
         {
             _logger.Information("Updating StaffId to {staffId}", staffMember.Id);
 
             user.AddStaffLink(staffMember.Id);
         }
 
-        await _userManager.UpdateAsync(user);
+        await _unitOfWork.CompleteAsync();
     }
 
     private async Task CheckContactUserDetails(AppUser user, SchoolContact contact)
@@ -454,35 +458,29 @@ internal sealed class AuditAllUsersCommandHandler
 
             user.Name = contact.Name;
         }
-
-        List<AppUserLink> contactLinks = user.Links
-            .Where(link =>
-                !link.IsDeleted &&
-                link.Type == LinkType.Contact)
-            .ToList();
-
-        if (contactLinks.Count == 0)
+        
+        if (!user.Links.Any(link => !link.IsDeleted && link.Type == LinkType.Contact))
         {
             _logger.Information("Updating IsContact to {isContact}", true);
 
             user.AddContactLink(contact.Id);
         }
 
-        if (contactLinks.All(link => link.LinkId != contact.Id.Value))
+        if (user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Contact).All(link => link.LinkId != contact.Id.Value))
         {
             _logger.Information("Updating ContactId to {contactId}", contact.Id);
 
             user.AddContactLink(contact.Id);
         }
 
-        await _userManager.UpdateAsync(user);
-
         List<SchoolContactRole> roles = contact.Assignments
             .Where(role => !role.IsDeleted)
             .ToList();
 
         foreach (var role in roles)
-            await _userManager.AddToRoleAsync(user, role.Role.Value);
+            await _identityRepository.AddUserToRole(user, role.Role.Value);
+
+        await _unitOfWork.CompleteAsync();
     }
 
     private async Task CheckStudentUserDetails(AppUser user, Student student)
@@ -494,26 +492,20 @@ internal sealed class AuditAllUsersCommandHandler
             user.Name = student.Name;
         }
 
-        List<AppUserLink> studentLinks = user.Links
-            .Where(link =>
-                !link.IsDeleted &&
-                link.Type == LinkType.Student)
-            .ToList();
-
-        if (studentLinks.Count == 0)
+        if (!user.Links.Any(link => !link.IsDeleted && link.Type == LinkType.Student))
         {
             _logger.Information("Updating IsStudent to {isStudent}", true);
 
             user.AddStudentLink(student.Id);
         }
 
-        if (studentLinks.All(link => link.LinkId != student.Id.Value))
+        if (user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).All(link => link.LinkId != student.Id.Value))
         {
             _logger.Information("Updating StudentId to {studentId}", student.Id);
 
             user.AddStudentLink(student.Id);
         }
 
-        await _userManager.UpdateAsync(user);
+        await _unitOfWork.CompleteAsync();
     }
 }

@@ -10,7 +10,7 @@ using Hangfire.Common;
 using Hangfire.Storage;
 using Microsoft.AspNetCore.Mvc;
 
-[HasPermission(AuthPermission.Admin_Automation_Edit_Value)]
+//[HasPermission(AuthPermission.Admin_Automation_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly IRecurringJobManager _jobManager;

@@ -109,6 +109,23 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 name: "IX_AspNetUserLinks_AppUserId",
                 table: "AspNetUserLinks",
                 column: "AppUserId");
+
+            migrationBuilder.Sql(
+                @"INSERT INTO [dbo].[OutboxMessages]
+                    ([Id],
+                    [Type],
+                    [Content],
+                    [OccurredOn],
+                    [ProcessedOn],
+                    [Error])
+                VALUES
+                    ('44fbb61b-9a5e-416f-bc5f-960629561c3e',
+                    'AppIdentityCodeUpdatedIntegrationEvent',
+                    '{""$type"":""Constellation.Core.IntegrationEvents.AppIdentityCodeUpdatedIntegrationEvent, Constellation.Core"",""Id"":{""$type"":""Constellation.Core.Models.Identifiers.IntegrationEventId, Constellation.Core"",""Value"":""2dba976e-6d33-40ea-9fdc-0b4bb2bb9fe8""},""DelayUntil"":null}',
+                    '2026-01-01 00:00:00.0000',
+                    null,
+                    null);");
+
         }
 
         /// <inheritdoc />
