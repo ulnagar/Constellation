@@ -161,6 +161,18 @@ using (IServiceScope scope = app.Services.CreateScope())
         {
             //await IdentityDefaults.SeedTestUsers(userManager);
         }
+
+        HangfireAuthorizationFilter filter = services.GetRequiredService<HangfireAuthorizationFilter>();
+
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+        {
+            AppPath = "/",
+            DashboardTitle = "Hangfire Dashboard",
+            Authorization = new[]
+            {
+                filter
+            }
+        });
     }
     catch
     {
@@ -178,15 +190,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHangfireDashboard("/hangfire", new DashboardOptions()
-{
-    AppPath = "/",
-    DashboardTitle = "Hangfire Dashboard",
-    Authorization = new[]
-    {
-        app.Services.GetRequiredService<HangfireAuthorizationFilter>()
-    }
-});
+
 
 app.MapRazorPages();
 app.MapControllers();

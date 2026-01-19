@@ -1,19 +1,23 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles;
 
+using Application.Domains.Auth.Commands.AddPermissionToRole;
+using Application.Domains.Auth.Commands.RemovePermissionFromRole;
 using Application.Domains.Auth.Queries.GetRoleDetails;
+using Application.Models.Auth;
 using BaseModels;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Auth.Commands.AddUserToRole;
 using Constellation.Application.Domains.Auth.Commands.RemoveUserFromRole;
-using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Helpers.ModelBinders;
+using Shared.Pages.Shared.Components.RoleAddPermission;
 
-//[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
@@ -54,12 +58,24 @@ public class DetailsModel : BasePageModel
     public async Task<IActionResult> OnGetRemoveUser(Guid userId)
     {
         if (userId == Guid.Empty)
-            return ShowError(DomainErrors.Auth.UserNotFound);
+        {
+            ModalContent = ErrorDisplay.Create(
+                DomainErrors.Auth.UserNotFound,
+                _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
 
         Result result = await _mediator.Send(new RemoveUserFromRoleCommand(Id, userId));
 
         if (result.IsFailure)
-            return ShowError(result.Error);
+        {
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
 
         return RedirectToPage();
     }
@@ -67,22 +83,57 @@ public class DetailsModel : BasePageModel
     public async Task<IActionResult> OnPostAddUser(RoleAddUserSelection viewModel)
     {
         if (viewModel.UserId == Guid.Empty)
-            return ShowError(DomainErrors.Auth.UserNotFound);
+        {
+            ModalContent = ErrorDisplay.Create(
+                DomainErrors.Auth.UserNotFound,
+                _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
 
-        Result result = await _mediator.Send(new AddUserToRoleCommand(viewModel.RoleId, viewModel.UserId));
+            return Page();
+        }
+
+        Result result = await _mediator.Send(new AddUserToRoleCommand(Id, viewModel.UserId));
 
         if (result.IsFailure)
-            return ShowError(result.Error);
+        {
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
 
         return RedirectToPage();
     }
 
-    private IActionResult ShowError(Error error)
+    public async Task<IActionResult> OnPostAddPermission(RoleAddPermissionSelection viewModel)
     {
-        ModalContent = ErrorDisplay.Create(
-            error,
-            _linkGenerator.GetPathByPage("/Auth/Roles/Index", values: new { area = "Admin" }));
-        
-        return Page();
+        Result result = await _mediator.Send(new AddPermissionToRoleCommand(Id, viewModel.Permission));
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnGetRemovePermission([ModelBinder(typeof(BaseFromValueBinder))] AuthPermission permission)
+    {
+        Result result = await _mediator.Send(new RemovePermissionFromRoleCommand(Id, permission));
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Roles/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
     }
 }

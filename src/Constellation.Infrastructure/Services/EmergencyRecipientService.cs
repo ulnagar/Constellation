@@ -80,7 +80,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
         if (group == RecipientGroup.AllExecStaff)
         {
-            List<AppUser> execUsers = await _identityRepository.UsersWithTransientClaim(AuthPermission.Admin_EmergencyConsole_Edit, cancellationToken);
+            List<AppUser> execUsers = await _identityRepository.GetUsersWithTransientClaim(AuthPermission.Admin_EmergencyConsole_Edit, cancellationToken);
 
             List<StaffId> staffIds = execUsers
                 .SelectMany(user => 

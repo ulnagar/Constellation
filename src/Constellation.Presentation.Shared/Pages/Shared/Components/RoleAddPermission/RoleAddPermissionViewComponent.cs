@@ -1,7 +1,7 @@
-﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUPermission;
+﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddPermission;
 
-using Application.Models.Auth;
-using Application.Models.Identity.Repositories;
+using Constellation.Application.Models.Auth;
+using Constellation.Application.Models.Identity.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 public class RoleAddPermissionViewComponent : ViewComponent

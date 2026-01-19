@@ -40,7 +40,7 @@ internal sealed class GetRoleDetailsQueryHandler
             return Result.Failure<RoleDetailResponse>(AuthErrors.RoleNotFound(request.RoleId));
         }
 
-        List<AppUser> users = await _identityRepository.UsersInRole(role.Name, cancellationToken);
+        List<AppUser> users = await _identityRepository.GetUsersInRole(role.Name, cancellationToken);
 
         List<RoleDetailResponse.UserResponse> userResponses = [];
 

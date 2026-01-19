@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Application.Models.Identity.Repositories;
 
 using Auth;
+using Microsoft.AspNetCore.Identity;
 
 public interface IIdentityRepository
 {
     Task<List<AppUser>> GetUsers(CancellationToken cancellationToken = default);
-    Task<List<AppUser>> UsersInRole(string role, CancellationToken cancellationToken = default);
-    Task<List<AppUser>> UsersWithTransientClaim(AuthPermission permission, CancellationToken cancellationToken = default);
+    Task<List<AppUser>> GetUsersInRole(string role, CancellationToken cancellationToken = default);
+    Task<List<AppUser>> GetUsersWithTransientClaim(AuthPermission permission, CancellationToken cancellationToken = default);
     Task AddUserToRole(AppUser user, string role, CancellationToken cancellationToken = default);
     Task<AppUser?> CreateUser(AppUser user, CancellationToken cancellationToken = default);
 
@@ -18,4 +19,6 @@ public interface IIdentityRepository
     Task<List<AppRole>> GetRolesForUser(AppUser user, CancellationToken cancellationToken = default);
 
     Task<List<AuthPermission>> GetRolePermissions(Guid roleId, CancellationToken cancellationToken = default);
+    Task<IdentityResult> AddPermissionToRole(AppRole role, AuthPermission permission, CancellationToken cancellationToken = default);
+    Task<IdentityResult> RemovePermissionFromRole(AppRole role, AuthPermission permission, CancellationToken cancellationToken = default);
 }

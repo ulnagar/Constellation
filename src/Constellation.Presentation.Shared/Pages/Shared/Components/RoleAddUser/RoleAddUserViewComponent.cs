@@ -1,38 +1,44 @@
 ﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 
+using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 public class RoleAddUserViewComponent : ViewComponent
 {
-    private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<AppRole> _roleManager;
+    private readonly IIdentityRepository _identityRepository;
 
     public RoleAddUserViewComponent(
-        UserManager<AppUser> userManager,
-        RoleManager<AppRole> roleManager)
+        IIdentityRepository identityRepository)
     {
-        _userManager = userManager;
-        _roleManager = roleManager;
+        _identityRepository = identityRepository;
     }
 
-    public async Task<IViewComponentResult> InvokeAsync(Guid RoleId)
+    public async Task<IViewComponentResult> InvokeAsync(Guid roleId)
     {
-        var role = await _roleManager.FindByIdAsync(RoleId.ToString());
+        AppRole? role = await _identityRepository.GetRole(roleId);
 
-        var viewModel = new RoleAddUserSelection();
-        viewModel.RoleId = RoleId;
-        viewModel.RoleName = role.Name;
-        viewModel.UserList = _userManager.Users
-            .Select(user =>
-                new RoleAddUserSelection.UserDto
-                {
-                    Id = user.Id,
-                    Name = user.Name.DisplayName,
-                    Email = user.Email
-                })
-            .ToList();
+        if (role is null)
+            return Content(string.Empty);
+
+        List<AppUser> users = await _identityRepository.GetUsers();
+        List<AppUser> roleUsers = await _identityRepository.GetUsersInRole(role.Name);
+        
+        RoleAddUserSelection viewModel = new()
+        { 
+            RoleName = role.Name,
+        };
+
+        foreach (AppUser user in users)
+        {
+            viewModel.UserList.Add(new()
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Available = !roleUsers.Contains(user)
+            });
+        }
 
         return View(viewModel);
     }

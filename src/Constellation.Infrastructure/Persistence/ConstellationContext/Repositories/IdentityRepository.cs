@@ -6,6 +6,7 @@ using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 public sealed class IdentityRepository : IIdentityRepository
@@ -28,7 +29,7 @@ public sealed class IdentityRepository : IIdentityRepository
         CancellationToken cancellationToken = default) =>
         _userManager.Users.ToList();
 
-    public async Task<List<AppUser>> UsersInRole(
+    public async Task<List<AppUser>> GetUsersInRole(
         string roleName,
         CancellationToken cancellationToken = default)
     {
@@ -37,7 +38,7 @@ public sealed class IdentityRepository : IIdentityRepository
         return users.ToList();
     }
 
-    public async Task<List<AppUser>> UsersWithTransientClaim(
+    public async Task<List<AppUser>> GetUsersWithTransientClaim(
         AuthPermission permission,
         CancellationToken cancellationToken = default)
     {
@@ -130,5 +131,28 @@ public sealed class IdentityRepository : IIdentityRepository
             .Set<AppRole>()
             .Where(role => roleIds.Contains(role.Id))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IdentityResult> AddPermissionToRole(
+        AppRole role,
+        AuthPermission permission,
+        CancellationToken cancellationToken = default) =>
+        await _roleManager.AddClaimAsync(role, new Claim(AuthClaimType.Permission, permission));
+
+    public async Task<IdentityResult> RemovePermissionFromRole(
+        AppRole role,
+        AuthPermission permission,
+        CancellationToken cancellationToken = default)
+    {
+        IList<Claim> claims = await _roleManager.GetClaimsAsync(role);
+
+        Claim? claim = claims.FirstOrDefault(claim => 
+            claim.Type == AuthClaimType.Permission && 
+            claim.Value == permission);
+
+        if (claim is null)
+            return new IdentityResult();
+
+        return await _roleManager.RemoveClaimAsync(role, claim);
     }
 }

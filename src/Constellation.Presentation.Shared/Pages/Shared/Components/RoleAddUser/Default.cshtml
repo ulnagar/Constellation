@@ -16,7 +16,14 @@
                                     <option value="">-- Select --</option>
                                     @foreach (var entry in Model.UserList)
                                     {
-                                        <option value="@entry.Id">@entry.Name (@entry.Email)</option>
+                                        if (entry.Available)
+                                        {
+                                            <option value="@entry.Id">@entry.Name (@entry.Email)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@entry.Id" disabled="disabled">@entry.Name (@entry.Email)</option>
+                                        }
                                     }
                                 </select>
                             </div>
@@ -24,9 +31,8 @@
                     </div>
 
                     <div class="mb-3 row">
-                        <label asp-for="RoleId" class="col-md-3">Group</label>
+                        <label class="col-md-3">Group</label>
                         <div class="col-md-9">
-                            <input asp-for="RoleId" type="hidden" value="@Model.RoleId"/>
                             <span class="font-weight-bold">@Model.RoleName</span>
                         </div>
                     </div>
