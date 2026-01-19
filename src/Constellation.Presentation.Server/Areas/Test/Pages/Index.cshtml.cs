@@ -30,23 +30,7 @@ public class IndexModel : BasePageModel
         _logger = logger;
     }
 
-    public OutboxMessage Message { get; set; }
-
     public async Task OnGet()
     {
-        var integrationEvent = new AppIdentityCodeUpdatedIntegrationEvent(new());
-
-        Message = new OutboxMessage
-        {
-            Id = Guid.NewGuid(),
-            OccurredOn = integrationEvent.DelayUntil?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now,
-            Type = integrationEvent.GetType().Name,
-            Content = JsonConvert.SerializeObject(
-                integrationEvent,
-                new JsonSerializerSettings
-                {
-                    TypeNameHandling = TypeNameHandling.All
-                })
-        };
     }
 }

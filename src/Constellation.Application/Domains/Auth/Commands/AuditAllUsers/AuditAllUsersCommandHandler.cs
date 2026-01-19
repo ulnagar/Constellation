@@ -100,7 +100,10 @@ internal sealed class AuditAllUsersCommandHandler
 
             if (existingUser is null)
             {
-                await CreateUserFromFamily(family);
+                AppUser? newUser = await CreateUserFromFamily(family);
+
+                if (newUser is not null)
+                    users.Add(newUser);
             }
             else
             {
@@ -120,7 +123,10 @@ internal sealed class AuditAllUsersCommandHandler
 
             if (existingUser is null)
             {
-                await CreateUserFromParent(parent);
+                AppUser? newUser = await CreateUserFromParent(parent);
+
+                if (newUser is not null)
+                    users.Add(newUser);
             }
             else
             {
@@ -143,7 +149,10 @@ internal sealed class AuditAllUsersCommandHandler
 
             if (existingUser is null)
             {
-                await CreateUserFromContact(contact);
+                AppUser? newUser = await CreateUserFromContact(contact);
+
+                if (newUser is not null)
+                    users.Add(newUser);
             }
             else
             {
@@ -163,7 +172,10 @@ internal sealed class AuditAllUsersCommandHandler
 
             if (existingUser is null)
             {
-                await CreateUserFromStaffMember(member);
+                AppUser? newUser = await CreateUserFromStaffMember(member);
+
+                if (newUser is not null)
+                    users.Add(newUser);
             }
             else
             {
@@ -189,7 +201,10 @@ internal sealed class AuditAllUsersCommandHandler
 
             if (existingUser is null)
             {
-                await CreateUserFromStudent(student);
+                AppUser? newUser = await CreateUserFromStudent(student);
+
+                if (newUser is not null)
+                    users.Add(newUser);
             }
             else
             {
@@ -253,35 +268,63 @@ internal sealed class AuditAllUsersCommandHandler
         return Result.Success();
     }
 
-    private Task CreateUserFromFamily(Family family) =>
-        CreateUser(
+    private async Task<AppUser?> CreateUserFromFamily(Family family)
+    {
+        AppUser? user = await CreateUser(
             family.FamilyEmail,
             string.Empty,
             family.FamilyTitle,
             familyId: family.Id);
 
-    private Task CreateUserFromParent(Parent parent) =>
-        CreateUser(
+        if (user is not null)
+            await _identityRepository.AddUserToRole(user, AppRole.Student);
+
+        return user;
+    }
+
+    private async Task<AppUser?> CreateUserFromParent(Parent parent)
+    {
+        AppUser? user = await CreateUser(
             parent.EmailAddress,
             parent.Name.FirstName,
             parent.Name.LastName,
             parentId: parent.Id);
 
-    private Task CreateUserFromStaffMember(StaffMember staffMember) =>
-        CreateUser(
+        if (user is not null)
+            await _identityRepository.AddUserToRole(user, AppRole.Parent);
+
+        return user;
+    }
+
+    private async Task<AppUser?> CreateUserFromStaffMember(StaffMember staffMember)
+    {
+        AppUser? user = await CreateUser(
             staffMember.EmailAddress.Email,
             staffMember.Name.FirstName,
             staffMember.Name.LastName,
             staffId: staffMember.Id);
 
-    private Task CreateUserFromStudent(Student student) =>
-        CreateUser(
+        if (user is not null)
+            await _identityRepository.AddUserToRole(user, AppRole.Staff);
+
+        return user;
+    }
+
+    private async Task<AppUser?> CreateUserFromStudent(Student student)
+    {
+        AppUser? user = await CreateUser(
             student.EmailAddress.Email,
             student.Name.PreferredName,
             student.Name.LastName,
             studentId: student.Id);
 
-    private async Task CreateUserFromContact(SchoolContact contact)
+        if (user is not null)
+            await _identityRepository.AddUserToRole(user, AppRole.Student);
+
+        return user;
+    }
+
+    private async Task<AppUser?> CreateUserFromContact(SchoolContact contact)
     {
         List<SchoolContactRole> roles = contact.Assignments
             .Where(role => !role.IsDeleted)
@@ -298,6 +341,8 @@ internal sealed class AuditAllUsersCommandHandler
             foreach (var role in roles)
                 await _identityRepository.AddUserToRole(user, role.Role.Value);
         }
+
+        return user;
     }
 
     private async Task<AppUser?> CreateUser(

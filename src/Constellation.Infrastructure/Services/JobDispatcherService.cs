@@ -84,7 +84,7 @@ public sealed class JobDispatcherService<T> : IJobDispatcherService<T> where T :
                     .ForContext(nameof(IHangfireJob), typeof(T).Name)
                     .ForContext("JobId", jobId)
                     .ForContext(nameof(Exception), e, true)
-                    .Error(e, "Job failed with exception");
+                    .Error("Job failed with exception");
             }
         }
 
