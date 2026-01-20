@@ -23,26 +23,40 @@
 
 <hr />
 
-<table class="data-table table table-striped">
+<table class="table table-striped role-data-table">
     <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th># Users</th>
-            <th></th>
-        </tr>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th># Users</th>
+        <th></th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var role in Model.Roles)
-        {
-            <tr>
-                <td>@role.Name</td>
-                <td>@role.Type</td>
-                <td>@role.Members</td>
-                <td>
-                    <a asp-page="/Auth/Roles/Details" asp-area="Admin" asp-route-id="@role.Id" class="btn btn-sm btn-warning btn-show-hover">More Info...</a>
-                </td>
-            </tr>
-        }
+    @foreach (var role in Model.Roles)
+    {
+        <tr>
+            <td>@role.Name</td>
+            <td>@role.Type</td>
+            <td>@role.Members</td>
+            <td>
+                <a asp-page="/Auth/Roles/Details" asp-area="Admin" asp-route-id="@role.Id" class="btn btn-sm btn-warning btn-show-hover">More Info...</a>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('.role-data-table').DataTable({
+                "order": [
+                    [1, 'asc'],
+                    [0, 'asc']
+                ]
+            });
+        });
+    </script>
+}

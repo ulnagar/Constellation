@@ -1,17 +1,30 @@
 ﻿@page "{id:guid}"
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles.DetailsModel
 
 @using Constellation.Application.Extensions
+@using Constellation.Application.Models.Auth
 @using Constellation.Application.Models.Identity.Enums
+@using Constellation.Infrastructure.Identity.Authorization
+@using Microsoft.AspNetCore.Authorization
 
-@model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles.DetailsModel
+@inject IAuthorizationService AuthorizationService
 
 @{
     Layout = "/Areas/Admin/Pages/_AdminLayout.bs5.cshtml";
+
+    IAuthorizationRequirement permissionRequirement = new PermissionRequirement([AuthPermission.Admin_Authentication_Edit]);
+
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, null, permissionRequirement);
 }
 
 <h3>Role Management</h3>
 
 <div class="page-menu">
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="/Auth/Roles/Upsert" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+    }
+
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 

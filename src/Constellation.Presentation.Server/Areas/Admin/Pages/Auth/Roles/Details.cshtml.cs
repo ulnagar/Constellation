@@ -9,15 +9,15 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Auth.Commands.AddUserToRole;
 using Constellation.Application.Domains.Auth.Commands.RemoveUserFromRole;
 using Constellation.Core.Errors;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Helpers.ModelBinders;
 using Shared.Pages.Shared.Components.RoleAddPermission;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Authentication_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;

@@ -6,10 +6,10 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Helpers.Attributes;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Authentication_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

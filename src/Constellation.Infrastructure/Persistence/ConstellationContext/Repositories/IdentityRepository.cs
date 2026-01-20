@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 public sealed class IdentityRepository : IIdentityRepository
 {
@@ -154,5 +156,21 @@ public sealed class IdentityRepository : IIdentityRepository
             return new IdentityResult();
 
         return await _roleManager.RemoveClaimAsync(role, claim);
+    }
+
+    public async Task<AppRole?> AddRole(
+        AppRole role,
+        CancellationToken cancellationToken = default)
+    {
+        IdentityResult created = await _roleManager.CreateAsync(role);
+
+        if (!created.Succeeded)
+            return null;
+
+        return await _context
+            .Set<AppRole>()
+            .FirstOrDefaultAsync(
+                entry => entry.Name == role.Name,
+                cancellationToken);
     }
 }

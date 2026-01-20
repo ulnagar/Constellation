@@ -21,4 +21,6 @@ public interface IIdentityRepository
     Task<List<AuthPermission>> GetRolePermissions(Guid roleId, CancellationToken cancellationToken = default);
     Task<IdentityResult> AddPermissionToRole(AppRole role, AuthPermission permission, CancellationToken cancellationToken = default);
     Task<IdentityResult> RemovePermissionFromRole(AppRole role, AuthPermission permission, CancellationToken cancellationToken = default);
+
+    Task<AppRole?> AddRole(AppRole role, CancellationToken cancellationToken = default);
 }
