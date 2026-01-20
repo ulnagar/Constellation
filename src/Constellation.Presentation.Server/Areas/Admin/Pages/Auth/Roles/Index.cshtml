@@ -7,8 +7,6 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
-    Layout = "/Areas/Admin/Pages/_AdminLayout.bs5.cshtml";
-
     var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Authentication_Edit_Value);
 }
 

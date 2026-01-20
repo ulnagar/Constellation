@@ -3,125 +3,62 @@
 using Application.Common.PresentationModels;
 using Application.Domains.Auth.Commands.AuditAllUsers;
 using Application.Domains.Auth.Commands.AuditUser;
+using Application.Domains.Auth.Queries.GetFilteredUsers;
+using Application.Models.Identity.Errors;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
+using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+using Shared.Helpers.Attributes;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Authentication_View_Value)]
 public class IndexModel : BasePageModel
 {
+    private readonly IAuthorizationService _authorizationService;
     private readonly IMediator _mediator;
-    private readonly UserManager<AppUser> _userManager;
     private readonly LinkGenerator _linkGenerator;
-
+    
     public IndexModel(
+        IAuthorizationService authorizationService,
         IMediator mediator,
-        UserManager<AppUser> userManager,
         LinkGenerator linkGenerator)
     {
+        _authorizationService = authorizationService;
         _mediator = mediator;
-        _userManager = userManager;
         _linkGenerator = linkGenerator;
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Auth_Users;
     [ViewData] public string PageTitle => "Auth Users";
 
-    public int StaffUserCount { get; set; }
-    public int SchoolContactUserCount { get; set; }
-    public int ParentUserCount { get; set; }
-    public int StudentUserCount { get; set; }
-
-    public List<UserDetailsDto> Users { get; set; } = new();
-
-    public class UserDetailsDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public List<string> Roles { get; set; } = new();
-        public DateTime? LastLoggedIn { get; set; }
-
-        public bool IsLocked { get; set; }
-    }
+    public List<AppUser> Users { get; set; } = [];
 
     [BindProperty(SupportsGet = true)]
-    public UserType SelectedUserType { get; set; } = UserType.All;
+    public UserFilter Filter { get; set; } = UserFilter.Staff;
     
-    public enum UserType
-    {
-        [Display(Name = "All Users")]
-        All,
-        [Display(Name = "Staff Users")]
-        Staff,
-        [Display(Name = "School Contact Users")]
-        School,
-        [Display(Name = "Parent Users")]
-        Parent,
-        [Display(Name = "Student Users")]
-        Student
-    }
-
     public async Task OnGet()
     {
-        List<AppUser> users = await _userManager.Users.ToListAsync();
-        
-        Users = SelectedUserType switch
-        {
-            UserType.Staff => users.Where(user => user.IsStaffMember).AsEnumerable().Select(ConvertFromAppUser).ToList(),
-            UserType.School => users.Where(user => user.IsSchoolContact).AsEnumerable().Select(ConvertFromAppUser).ToList(),
-            UserType.Parent => users.Where(user => user.IsParent).AsEnumerable().Select(ConvertFromAppUser).ToList(),
-            UserType.Student => users.Where(user => user.IsStudent).AsEnumerable().Select(ConvertFromAppUser).ToList(),
-            _ => users.AsEnumerable().Select(ConvertFromAppUser).ToList()
-        };
-
-        StaffUserCount = users.Count(user => user.IsStaffMember);
-        SchoolContactUserCount = users.Count(user => user.IsSchoolContact);
-        ParentUserCount = users.Count(user => user.IsParent);
-        StudentUserCount = users.Count(user => user.IsStudent);
+        await PreparePage();
     }
-        
-
-    private UserDetailsDto ConvertFromAppUser(AppUser user)
-    {
-        List<string> memberRoles = new();
-
-        if (user.IsStaffMember)
-            memberRoles.Add("Staff");
-
-        if (user.IsSchoolContact)
-            memberRoles.Add("SchoolContact");
-
-        if (user.IsParent)
-            memberRoles.Add("Parent");
-
-        if (user.IsStudent)
-            memberRoles.Add("Student");
-
-        if (user.IsFamily)
-            memberRoles.Add("Family");
-
-        return new UserDetailsDto
-        {
-            Id = user.Id,
-            Name = user.Name.DisplayName,
-            LastName = user.Name.LastName,
-            Email = user.Email,
-            Roles = memberRoles,
-            LastLoggedIn = user.Logins.OrderByDescending(login => login.LoginDateTime).FirstOrDefault()?.LoginDateTime ?? DateTime.MinValue
-        };
-    }
-
+    
     public async Task<IActionResult> OnGetAudit(Guid userId)
     {
-        var result = await _mediator.Send(new AuditUserCommand(userId));
+        IAuthorizationRequirement permissionRequirement = new PermissionRequirement([AuthPermission.Admin_Authentication_Edit]);
+
+        AuthorizationResult canEdit = await _authorizationService.AuthorizeAsync(User, null, permissionRequirement);
+
+        if (!canEdit.Succeeded)
+        {
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
+
+            await PreparePage();
+        }
+
+        Result result = await _mediator.Send(new AuditUserCommand(userId));
 
         if (result.IsFailure)
         {
@@ -129,11 +66,40 @@ public class IndexModel : BasePageModel
                 result.Error,
                 _linkGenerator.GetPathByPage("/Auth/Users/Index", values: new { area = "Admin" }));
 
-            return Page();
+            await PreparePage();
         }
 
         return RedirectToPage();
     }
 
-    public async Task OnGetAuditAllUsers(CancellationToken cancellationToken = default) => await _mediator.Send(new AuditAllUsersCommand(), cancellationToken);
+    public async Task OnGetAuditAllUsers(CancellationToken cancellationToken = default)
+    {
+        IAuthorizationRequirement permissionRequirement = new PermissionRequirement([AuthPermission.Admin_Authentication_Edit]);
+
+        AuthorizationResult canEdit = await _authorizationService.AuthorizeAsync(User, null, permissionRequirement);
+
+        if (!canEdit.Succeeded)
+        {
+            ModalContent = ErrorDisplay.Create(AuthErrors.NotAuthorised);
+
+            await PreparePage();
+        }
+
+        await _mediator.Send(new AuditAllUsersCommand(), cancellationToken);
+    }
+
+
+    private async Task<IActionResult> PreparePage()
+    {
+        Result<List<AppUser>> users = await _mediator.Send(new GetFilteredUsersQuery(Filter));
+
+        if (users.IsFailure)
+        {
+            return Page();
+        }
+
+        Users = users.Value;
+
+        return Page();
+    }
 }

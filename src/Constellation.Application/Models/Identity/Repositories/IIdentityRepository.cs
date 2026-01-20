@@ -1,14 +1,19 @@
 ﻿namespace Constellation.Application.Models.Identity.Repositories;
 
 using Auth;
+using Domains.Auth.Queries.GetFilteredUsers;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using System.Threading;
 
 public interface IIdentityRepository
 {
+    Task<AppUser?> GetUser(Guid Id, CancellationToken cancellationToken = default);
     Task<List<AppUser>> GetUsers(CancellationToken cancellationToken = default);
     Task<List<AppUser>> GetUsersInRole(string role, CancellationToken cancellationToken = default);
     Task<List<AppUser>> GetUsersWithTransientClaim(AuthPermission permission, CancellationToken cancellationToken = default);
-    Task AddUserToRole(AppUser user, string role, CancellationToken cancellationToken = default);
+    Task<List<AppUser>> GetFilteredUsers(UserFilter filter, CancellationToken cancellationToken = default);
+    Task<IdentityResult> AddUserToRole(AppUser user, string role, CancellationToken cancellationToken = default);
     Task<AppUser?> CreateUser(AppUser user, CancellationToken cancellationToken = default);
 
     Task DeleteUser(AppUser user);
@@ -23,4 +28,5 @@ public interface IIdentityRepository
     Task<IdentityResult> RemovePermissionFromRole(AppRole role, AuthPermission permission, CancellationToken cancellationToken = default);
 
     Task<AppRole?> AddRole(AppRole role, CancellationToken cancellationToken = default);
+    Task<List<Claim>> GetClaims(AppUser user, CancellationToken cancellationToken = default);
 }

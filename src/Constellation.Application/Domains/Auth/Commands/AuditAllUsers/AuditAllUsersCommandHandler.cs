@@ -22,6 +22,7 @@ using Models.Identity.Enums;
 using Models.Identity.Repositories;
 using Serilog;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -277,7 +278,18 @@ internal sealed class AuditAllUsersCommandHandler
             familyId: family.Id);
 
         if (user is not null)
-            await _identityRepository.AddUserToRole(user, AppRole.Student);
+        {
+            IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Parent);
+
+            if (!addRole.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(AppRole), AppRole.Parent)
+                    .ForContext(nameof(Error), addRole.Errors, true)
+                    .Warning("Failed to add user to Role");
+            }
+        }
 
         return user;
     }
@@ -291,7 +303,18 @@ internal sealed class AuditAllUsersCommandHandler
             parentId: parent.Id);
 
         if (user is not null)
-            await _identityRepository.AddUserToRole(user, AppRole.Parent);
+        {
+            IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Parent);
+
+            if (!addRole.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(AppRole), AppRole.Parent)
+                    .ForContext(nameof(Error), addRole.Errors, true)
+                    .Warning("Failed to add user to Role");
+            }
+        }
 
         return user;
     }
@@ -305,7 +328,18 @@ internal sealed class AuditAllUsersCommandHandler
             staffId: staffMember.Id);
 
         if (user is not null)
-            await _identityRepository.AddUserToRole(user, AppRole.Staff);
+        {
+            IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Staff);
+
+            if (!addRole.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(AppRole), AppRole.Staff)
+                    .ForContext(nameof(Error), addRole.Errors, true)
+                    .Warning("Failed to add user to Role");
+            }
+        }
 
         return user;
     }
@@ -319,15 +353,28 @@ internal sealed class AuditAllUsersCommandHandler
             studentId: student.Id);
 
         if (user is not null)
-            await _identityRepository.AddUserToRole(user, AppRole.Student);
+        {
+            IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Student);
+
+            if (!addRole.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(AppRole), AppRole.Student)
+                    .ForContext(nameof(Error), addRole.Errors, true)
+                    .Warning("Failed to add user to Role");
+            }
+        }
 
         return user;
     }
 
     private async Task<AppUser?> CreateUserFromContact(SchoolContact contact)
     {
-        List<SchoolContactRole> roles = contact.Assignments
+        List<string> roles = contact.Assignments
             .Where(role => !role.IsDeleted)
+            .Select(role => role.Role.Value)
+            .Distinct()
             .ToList();
 
         AppUser? user = await CreateUser(
@@ -338,8 +385,19 @@ internal sealed class AuditAllUsersCommandHandler
 
         if (user is not null)
         {
-            foreach (var role in roles)
-                await _identityRepository.AddUserToRole(user, role.Role.Value);
+            foreach (string role in roles)
+            {
+                IdentityResult addRole = await _identityRepository.AddUserToRole(user, role);
+
+                if (addRole.Succeeded)
+                    continue;
+
+                _logger
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(AppRole), role)
+                    .ForContext(nameof(Error), addRole.Errors, true)
+                    .Warning("Failed to add user to Role");
+            }
         }
 
         return user;
@@ -440,6 +498,17 @@ internal sealed class AuditAllUsersCommandHandler
             user.AddFamilyLink(family.Id);
         }
 
+        IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Parent);
+
+        if (!addRole.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(AppUser), user, true)
+                .ForContext(nameof(AppRole), AppRole.Parent)
+                .ForContext(nameof(Error), addRole.Errors, true)
+                .Warning("Failed to add user to Role");
+        }
+
         await _unitOfWork.CompleteAsync();
     }
 
@@ -466,6 +535,17 @@ internal sealed class AuditAllUsersCommandHandler
             user.AddParentLink(parent.Id);
         }
 
+        IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Parent);
+
+        if (!addRole.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(AppUser), user, true)
+                .ForContext(nameof(AppRole), AppRole.Parent)
+                .ForContext(nameof(Error), addRole.Errors, true)
+                .Warning("Failed to add user to Role");
+        }
+
         await _unitOfWork.CompleteAsync();
     }
 
@@ -490,6 +570,17 @@ internal sealed class AuditAllUsersCommandHandler
             _logger.Information("Updating StaffId to {staffId}", staffMember.Id);
 
             user.AddStaffLink(staffMember.Id);
+        }
+        
+        IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Staff);
+
+        if (!addRole.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(AppUser), user, true)
+                .ForContext(nameof(AppRole), AppRole.Staff)
+                .ForContext(nameof(Error), addRole.Errors, true)
+                .Warning("Failed to add user to Role");
         }
 
         await _unitOfWork.CompleteAsync();
@@ -518,12 +609,25 @@ internal sealed class AuditAllUsersCommandHandler
             user.AddContactLink(contact.Id);
         }
 
-        List<SchoolContactRole> roles = contact.Assignments
+        List<string> roles = contact.Assignments
             .Where(role => !role.IsDeleted)
+            .Select(role => role.Role.Value)
+            .Distinct()
             .ToList();
 
-        foreach (var role in roles)
-            await _identityRepository.AddUserToRole(user, role.Role.Value);
+        foreach (string role in roles)
+        {
+            IdentityResult addRole = await _identityRepository.AddUserToRole(user, role);
+
+            if (addRole.Succeeded)
+                continue;
+
+            _logger
+                .ForContext(nameof(AppUser), user, true)
+                .ForContext(nameof(AppRole), role)
+                .ForContext(nameof(Error), addRole.Errors, true)
+                .Warning("Failed to add user to Role");
+        }
 
         await _unitOfWork.CompleteAsync();
     }
@@ -549,6 +653,17 @@ internal sealed class AuditAllUsersCommandHandler
             _logger.Information("Updating StudentId to {studentId}", student.Id);
 
             user.AddStudentLink(student.Id);
+        }
+
+        IdentityResult addRole = await _identityRepository.AddUserToRole(user, AppRole.Student);
+
+        if (!addRole.Succeeded)
+        {
+            _logger
+                .ForContext(nameof(AppUser), user, true)
+                .ForContext(nameof(AppRole), AppRole.Student)
+                .ForContext(nameof(Error), addRole.Errors, true)
+                .Warning("Failed to add user to Role");
         }
 
         await _unitOfWork.CompleteAsync();

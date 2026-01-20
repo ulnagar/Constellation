@@ -1,10 +1,24 @@
-﻿@page "{EmailAddress}"
+﻿@page "{id}"
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users.DetailsModel
+
+@using Constellation.Application.Models.Auth
+@using Constellation.Application.Models.Identity.Enums
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Authentication_Edit_Value);
+}
 
 <h2>User Details</h2>
 
 <div class="page-menu">
-    <a asp-page="Edit" asp-route-id="@Model.AppUser.Id" class="btn btn-warning">Edit</a>
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page="Edit" asp-route-id="@Model.User.Id" class="btn btn-warning">Edit</a>
+    }
+    
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>
 
@@ -13,61 +27,176 @@
 <div class="row">
     <div class="col">
         <dl>
-            <dt>UserName</dt>
-            <dd>@Model.AppUser.Name.DisplayName</dd>
+            <dt>User Name</dt>
+            <dd>@Model.User.Name.DisplayName</dd>
             <dt>Email Address</dt>
-            <dd>@Model.AppUser.Email</dd>
-        </dl>
-    </div>
-    <div class="col">
-        <dl>
-            <dt>Is Staff User?</dt>
-            <dd>@Model.AppUser.IsStaffMember</dd>
-            <dt>Is School Contact User?</dt>
-            <dd>@Model.AppUser.IsSchoolContact</dd>
-            <dt>Is Parent User?</dt>
-            <dd>@Model.AppUser.IsParent</dd>
-            <dt>Is Student?</dt>
-            <dd>@Model.AppUser.IsStudent</dd>
-        </dl>
-    </div>
-    <div class="col">
-        <dl>
-            @foreach (var link in Model.AppUser.Links.Where(link => !link.IsDeleted))
+            <dd>@Model.User.Email</dd>
+            
+            <dt>User Links</dt>
+            @foreach (var link in Model.User.Links.OrderBy(link => link.Type))
             {
-                <dt>@link.Type</dt>
-                <dd>@link.LinkId</dd>
+                <dd>
+                    @if (link.Type == LinkType.Staff)
+                    {
+                        <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Staff</a>
+                    }
+
+                    @if (link.Type == LinkType.Student)
+                    {
+                        <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Student</a>
+                    }
+
+                    @if (link.Type == LinkType.Contact)
+                    {
+                        <a asp-page="/Partner/Schools/Contacts/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Contact</a>
+                    }
+
+                    @if (link.Type == LinkType.Family)
+                    {
+                        <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0" tooltip="Id: @link.LinkId">Family</a>
+                    }
+
+                    @if (link.Type == LinkType.Parent)
+                    {
+                        <span class="badge bg-primary" tooltip="Id: @link.LinkId">Parent</span>
+                    }
+                </dd>
             }
         </dl>
     </div>
 </div>
 
+<hr />
 
-<h2>Claims</h2>
-@{
-    var claimList = Model.Claims
-        .GroupBy(claim => claim.Type)
-        .OrderBy(group => group.Key.Split('/').Last())
-        .ToList();
-}
+<div>
+    <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-success bg-gradient local-nav">
+        <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
+            <ul class="nav navbar-nav flex-grow-1 me-auto ms-3 mb-2">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#roles" data-bs-toggle="tab" role="tab">Roles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#claims" data-bs-toggle="tab" role="tab">Claims</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#logins" data-bs-toggle="tab" role="tab">Login Activity</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-<dl>
-    @foreach (var group in claimList)
-    {
-        <dt>@group.Key</dt>
-        <dd>
-            @foreach (var entry in group.OrderBy(claim => claim.Value).DistinctBy(claim => claim.Value))
+    <div class="tab-content">
+        <div id="roles" class="tab-pane active">
+            <h3>Roles</h3>
+            
+            @if (canEdit.Succeeded)
             {
-                @entry.Value<br />
+                <button data-bs-toggle="modal" data-bs-target="#addRoleModal" class="btn btn-warning">Add Role</button>
             }
-        </dd>
-    }
-</dl>
 
-<h2>Roles</h2>
-<ul>
-    @foreach (var role in Model.Roles)
-    {
-        <li>@role</li>
-    }
-</ul>
+            <table class="table table-striped table-hover roles-data-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var entry in Model.User.Roles)
+                {
+                    <tr>
+                        <td>@entry.Name</td>
+                        <td>@entry.Type</td>
+                        <td>
+                            @if (canEdit.Succeeded)
+                            {
+                                <a asp-page-handler="RemoveRole" asp-route-roleId="@entry.Id" class="btn btn-warning btn-sm btn-show-hover">Remove</a>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="claims" class="tab-pane">
+            <h3>Claims</h3>
+            
+            <table class="table table-striped table-hover claims-data-table">
+                <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Roles</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var entry in Model.User.Claims.GroupBy(entry => entry.Value))
+                {
+                    <tr>
+                        <td>@entry.First().Type</td>
+                        <td>@entry.First().Value</td>
+                        <td>
+                            @foreach (var item in entry)
+                            {
+                                <span class="badge bg-primary ms-1">@item.RoleName</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="logins" class="tab-pane">
+            <h3>Login Activity</h3>
+            
+            <table class="table table-striped table-hover login-data-table">
+                <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Activity</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var entry in Model.User.Logins)
+                {
+                    <tr>
+                        <td>@entry.LoginDateTime.ToLocalTime()</td>
+                        <td>@entry.Status</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<vc:user-add-role user-id="@Model.Id" />
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('.roles-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+
+            $('.claims-data-table').DataTable({
+                "order": [
+                    [0, 'asc'],
+                    [1, 'asc']
+                ]
+            });
+
+            $('.login-data-table').DataTable({
+                "order": [
+                    [0, 'desc']
+                ]
+            });
+        });
+    </script>
+}

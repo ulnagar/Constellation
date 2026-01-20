@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
 using Application.Models.Auth;
+using Application.Models.Identity.Enums;
 using Application.Models.Identity.Repositories;
+using Constellation.Application.Domains.Auth.Queries.GetFilteredUsers;
 using Constellation.Application.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +11,6 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 public sealed class IdentityRepository : IIdentityRepository
 {
@@ -26,6 +27,14 @@ public sealed class IdentityRepository : IIdentityRepository
         _roleManager = roleManager;
         _context = context;
     }
+
+    public async Task<AppUser?> GetUser(
+        Guid id,
+        CancellationToken cancellationToken = default) =>
+        await _userManager.Users
+            .FirstOrDefaultAsync(user => 
+                user.Id == id, 
+                cancellationToken);
 
     public async Task<List<AppUser>> GetUsers(
         CancellationToken cancellationToken = default) =>
@@ -63,6 +72,51 @@ public sealed class IdentityRepository : IIdentityRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<List<AppUser>> GetFilteredUsers(
+        UserFilter filter,
+        CancellationToken cancellationToken = default) =>
+        filter switch
+        {
+            UserFilter.Staff => 
+                await _context
+                    .Set<AppUser>()
+                    .Where(user => user.Links.Any(link => 
+                        !link.IsDeleted && 
+                        link.Type == LinkType.Staff))
+                    .ToListAsync(cancellationToken),
+            UserFilter.Student => 
+                await _context
+                    .Set<AppUser>()
+                    .Where(user => user.Links.Any(link =>
+                        !link.IsDeleted &&
+                        link.Type == LinkType.Student))
+                    .ToListAsync(cancellationToken),
+            UserFilter.Family => 
+                await _context
+                    .Set<AppUser>()
+                    .Where(user => user.Links.Any(link =>
+                        !link.IsDeleted &&
+                        link.Type == LinkType.Family))
+                    .ToListAsync(cancellationToken),
+            UserFilter.Parent => 
+                await _context
+                    .Set<AppUser>()
+                    .Where(user => user.Links.Any(link =>
+                        !link.IsDeleted &&
+                        link.Type == LinkType.Parent))
+                    .ToListAsync(cancellationToken),
+            UserFilter.School => 
+                await _context
+                    .Set<AppUser>()
+                    .Where(user => user.Links.Any(link =>
+                        !link.IsDeleted &&
+                        link.Type == LinkType.Contact))
+                    .ToListAsync(cancellationToken),
+            _ => await _context
+                .Set<AppUser>()
+                .ToListAsync(cancellationToken)
+        };
+
     public async Task<List<AppRole>> GetRoles(
         CancellationToken cancellationToken = default) =>
         await _roleManager.Roles.ToListAsync(cancellationToken);
@@ -96,7 +150,7 @@ public sealed class IdentityRepository : IIdentityRepository
     public async Task DeleteUser(AppUser user) => 
         await _userManager.DeleteAsync(user);
 
-    public async Task AddUserToRole(
+    public async Task<IdentityResult> AddUserToRole(
         AppUser user,
         string roleName,
         CancellationToken cancellationToken = default) =>
@@ -172,5 +226,14 @@ public sealed class IdentityRepository : IIdentityRepository
             .FirstOrDefaultAsync(
                 entry => entry.Name == role.Name,
                 cancellationToken);
+    }
+
+    public async Task<List<Claim>> GetClaims(
+        AppUser user,
+        CancellationToken cancellationToken = default)
+    {
+        IList<Claim> claims = await _userManager.GetClaimsAsync(user);
+
+        return claims.ToList();
     }
 }

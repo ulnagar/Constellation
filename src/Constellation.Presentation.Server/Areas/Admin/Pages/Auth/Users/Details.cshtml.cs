@@ -1,57 +1,114 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users;
 
+using Application.Common.PresentationModels;
+using Application.Domains.Auth.Queries.GetUserDetails;
+using Application.Models.Identity.Errors;
+using Constellation.Application.Domains.Auth.Commands.AddUserToRole;
+using Constellation.Application.Domains.Auth.Commands.RemoveUserFromRole;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
+using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Shared.Helpers.Attributes;
+using Shared.Pages.Shared.Components.UserAddRole;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Authentication_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<AppRole> _roleManager;
+    private readonly LinkGenerator _linkGenerator;
 
-    public DetailsModel(IMediator mediator, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+    public DetailsModel(
+        IMediator mediator, 
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
-        _userManager = userManager;
-        _roleManager = roleManager;
+        _linkGenerator = linkGenerator;
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Auth_Users;
     [ViewData] public string PageTitle => "Auth Users";
 
+
     [BindProperty(SupportsGet = true)]
-    public string EmailAddress { get; set; }
-    public AppUser AppUser { get; set; }
-    public List<Claim> Claims { get; set; } = new();
-    public List<string> Roles { get; set; } = new();
+    public Guid Id { get; set; } = Guid.Empty;
 
-    public async Task<IActionResult> OnGetAsync()
+    public UserResponse User { get; set; }
+
+    public async Task<IActionResult> OnGet()
     {
-        if (string.IsNullOrWhiteSpace(EmailAddress))
-        {
-            return RedirectToPage("Index");
-        }
+        if (Id == Guid.Empty)
+            return RedirectToPage("/Auth/Users/Index", routeValues: new { area = "Admin" });
 
-        AppUser = await _userManager.FindByEmailAsync(EmailAddress);
-
-        Claims = (await _userManager.GetClaimsAsync(AppUser)).ToList();
-
-        Roles = (await _userManager.GetRolesAsync(AppUser)).ToList();
-
-        foreach (var roleName in Roles)
-        {
-            var role = await _roleManager.FindByNameAsync(roleName);
-
-            Claims.AddRange(await _roleManager.GetClaimsAsync(role));
-        }
+        await PreparePage();
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetRemoveRole(Guid roleId)
+    {
+        if (roleId == Guid.Empty)
+        {
+            await PreparePage();
+
+            return Page();
+        }
+
+        Result result = await _mediator.Send(new RemoveUserFromRoleCommand(roleId, Id));
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Users/Details", values: new { area = "Admin", Id }));
+
+            await PreparePage();
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAddRole(UserAddRoleSelection viewModel)
+    {
+        if (viewModel.RoleId == Guid.Empty)
+        {
+            ModalContent = ErrorDisplay.Create(
+                AuthErrors.RoleNotFound(Guid.Empty),
+                _linkGenerator.GetPathByPage("/Auth/Users/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
+
+        Result result = await _mediator.Send(new AddUserToRoleCommand(viewModel.RoleId, Id));
+
+        if (result.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/Auth/Users/Details", values: new { area = "Admin", Id }));
+
+            return Page();
+        }
+
+        return RedirectToPage();
+    }
+
+    public async Task PreparePage()
+    {
+        Result<UserResponse> user = await _mediator.Send(new GetUserDetailsQuery(Id));
+
+        if (user.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                user.Error,
+                _linkGenerator.GetPathByPage("/Auth/Users/Index", values: new { area = "Admin" }));
+
+            return;
+        }
+
+        User = user.Value;
     }
 }

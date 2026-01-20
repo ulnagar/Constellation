@@ -1,10 +1,6 @@
 ﻿@page "{id?}"
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles.UpsertModel
 
-@{
-    Layout = "/Areas/Admin/Pages/_AdminLayout.bs5.cshtml";
-}
-
 <h2>@(Model.Id == Guid.Empty ? "New Role" : "Edit Role")</h2>
 
 <div class="page-menu">

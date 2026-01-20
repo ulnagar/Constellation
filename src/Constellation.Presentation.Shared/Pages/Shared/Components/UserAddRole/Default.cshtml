@@ -1,0 +1,51 @@
+﻿@model UserAddRoleSelection
+
+<form asp-page-handler="AddRole" id="addRoleForm">
+    <div class="modal fade" tabindex="-1" id="addRoleModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Role</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="row">
+                            <label asp-for="RoleId">Role</label>
+                            <div class="w-100 col">
+                                <select asp-for="RoleId" class="combo w-100">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var group in Model.RoleList.GroupBy(entry => entry.Type).OrderBy(entry => entry.Key.Name))
+                                    {
+                                        <optgroup label="@group.Key">
+                                            @foreach (var entry in group.OrderBy(entry => entry.Name))
+                                            {
+                                                if (entry.Available)
+                                                {
+                                                    <option value="@entry.Id">@entry.Name (@entry.Type)</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@entry.Id" disabled="disabled">@entry.Name (@entry.Type)</option>
+                                                }
+                                            }
+                                        </optgroup>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-md-3">User</label>
+                        <div class="col-md-9">
+                            <span class="font-weight-bold">@Model.Name</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -29,11 +29,10 @@ public class CustomUserPropertiesClaimsFactory : UserClaimsPrincipalFactory<AppU
     {
         ClaimsIdentity identity = await base.GenerateClaimsAsync(user);
 
-        identity.AddClaims(new []
-        {
+        identity.AddClaims([
             new Claim(ClaimTypes.GivenName, user.Name.FirstName),
             new Claim(ClaimTypes.Surname, user.Name.LastName)
-        });
+        ]);
 
         if (user.IsStaffMember)
         {

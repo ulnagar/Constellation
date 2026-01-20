@@ -4,17 +4,12 @@
 @using Constellation.Application.Extensions
 @using Constellation.Application.Models.Auth
 @using Constellation.Application.Models.Identity.Enums
-@using Constellation.Infrastructure.Identity.Authorization
 @using Microsoft.AspNetCore.Authorization
 
 @inject IAuthorizationService AuthorizationService
 
 @{
-    Layout = "/Areas/Admin/Pages/_AdminLayout.bs5.cshtml";
-
-    IAuthorizationRequirement permissionRequirement = new PermissionRequirement([AuthPermission.Admin_Authentication_Edit]);
-
-    var canEdit = await AuthorizationService.AuthorizeAsync(User, null, permissionRequirement);
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Authentication_Edit_Value);
 }
 
 <h3>Role Management</h3>
@@ -135,7 +130,7 @@
             <h3>Permissions</h3>
 
             <button data-bs-toggle="modal" data-bs-target="#addPermissionModal" class="btn btn-warning">Add Permission</button>
-            <a asp-page="/Auth/Rols/ManagePermissions" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-warning">Bulk Add Permissions</a>
+            <a asp-page="/Auth/Roles/ManagePermissions" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-warning">Bulk Add Permissions</a>
 
             @{
                 var list = Model.RoleDetails.Permissions.OrderBy(entry => entry.Value).Partition(Model.RoleDetails.Permissions.Count / 3);

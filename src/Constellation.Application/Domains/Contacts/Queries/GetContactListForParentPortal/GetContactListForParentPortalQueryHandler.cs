@@ -66,7 +66,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Counsellor
-        foreach (EmployeeId staffId in _configuration.Contacts.CounsellorIds)
+        foreach (EmployeeId staffId in _configuration.Contacts?.CounsellorIds ?? [])
         {
             StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
@@ -88,7 +88,7 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Careers Advisor
-        foreach (EmployeeId staffId in _configuration.Contacts.CareersAdvisorIds)
+        foreach (EmployeeId staffId in _configuration.Contacts?.CareersAdvisorIds ?? [])
         {
             StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
@@ -110,9 +110,9 @@ internal sealed class GetContactListForParentPortalQueryHandler
         }
 
         // Add Librarian
-        foreach (EmployeeId staffId in _configuration.Contacts.LibrarianIds)
+        foreach (EmployeeId staffId in _configuration.Contacts?.LibrarianIds ?? [])
         {
-            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+            StaffMember? member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (member is null)
             {
@@ -169,14 +169,16 @@ internal sealed class GetContactListForParentPortalQueryHandler
         if (enrolment is null)
             return response;
 
-        bool success = _configuration.Contacts.LearningSupportIds.TryGetValue(enrolment.Grade, out List<EmployeeId> lastStaffIds);
+        List<EmployeeId> lastStaffIds = [];
+
+        bool success = _configuration.Contacts?.LearningSupportIds.TryGetValue(enrolment.Grade, out lastStaffIds) ?? false;
 
         if (!success)
             return response;
         
-        foreach (EmployeeId staffId in lastStaffIds)
+        foreach (EmployeeId staffId in lastStaffIds!)
         {
-            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+            StaffMember? member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
             if (member is not null)
             {
