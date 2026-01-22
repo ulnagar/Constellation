@@ -27,12 +27,15 @@ public static class StringExtensions
         return line switch
         {
             "G" => ("Secondary", "G"),
-            "P" => ("Secondary", "P"),
+            "N" => ("Secondary", "N"),
+            
             "V" => ("Alternate", "V"),
             "Y" => ("Alternate", "Y"),
-            "A" => ("Primary", "A"),
+
             "B" => ("Primary", "B"),
-            "C" => ("Primary", "C"),
+            "P" => ("Primary", "P"),
+            "R" => ("Primary", "R"),
+
             "1" => ("Senior", "1"),
             "2" => ("Senior", "2"),
             "3" => ("Senior", "3"),
