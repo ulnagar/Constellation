@@ -39,7 +39,7 @@ internal sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
         foreach (OutboxMessage message in messages)
         {
-            IEvent eventItem = JsonConvert
+            IEvent? eventItem = JsonConvert
                 .DeserializeObject<IEvent>(
                     message.Content,
                     new JsonSerializerSettings

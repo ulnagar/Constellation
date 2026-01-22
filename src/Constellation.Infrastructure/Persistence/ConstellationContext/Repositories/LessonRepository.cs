@@ -96,7 +96,7 @@ public class LessonRepository : ILessonRepository
                         attendance.StudentId == studentId)))
             .ToListAsync(cancellationToken);
 
-    public async Task<SciencePracLesson> GetById(
+    public async Task<SciencePracLesson?> GetById(
         SciencePracLessonId LessonId,
         CancellationToken cancellationToken = default) =>
         await _context

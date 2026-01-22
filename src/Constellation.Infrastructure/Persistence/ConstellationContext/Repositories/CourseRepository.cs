@@ -1,7 +1,6 @@
 #nullable enable
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Identifiers;
@@ -36,6 +35,16 @@ public class CourseRepository : ICourseRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Course>()
+            .ToListAsync(cancellationToken);
+
+    public async Task<List<Course>> GetActive(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Course>()
+            .Where(course => course.Offerings.Any(offering =>
+                offering.StartDate <= _dateTime.Today &&
+                offering.EndDate >= _dateTime.Today &&
+                offering.Sessions.Any(session => !session.IsDeleted)))
             .ToListAsync(cancellationToken);
 
     public async Task<Course?> GetByLessonId(

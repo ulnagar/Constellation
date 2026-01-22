@@ -8,13 +8,16 @@ using System.Collections.Generic;
 
 public sealed record LessonDetailsResponse(
     SciencePracLessonId LessonId,
-    CourseId CourseId,
-    string CourseName,
     string Name,
     DateOnly DueDate,
+    List<LessonDetailsResponse.CourseSummary> Courses,
     List<string> Offerings,
     List<LessonDetailsResponse.LessonRollSummary> Rolls)
 {
+    public sealed record CourseSummary(
+        CourseId CourseId,
+        string CourseName);
+
     public sealed record LessonRollSummary(
         SciencePracRollId RollId,
         string SchoolCode,

@@ -14,6 +14,7 @@ public interface ICourseRepository
 {
     Task<Course?> GetById(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Course>> GetAll(CancellationToken cancellationToken = default);
+    Task<List<Course>> GetActive(CancellationToken cancellationToken = default);
     Task<Course?> GetByLessonId(SciencePracLessonId lessonId, CancellationToken cancellationToken = default);
     Task<Course?> GetByOfferingId(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<Course>> GetByGrade(Grade grade, CancellationToken cancellationToken = default);

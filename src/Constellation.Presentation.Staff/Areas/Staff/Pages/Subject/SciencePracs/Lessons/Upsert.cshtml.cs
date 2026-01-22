@@ -14,7 +14,6 @@ using Core.Abstractions.Services;
 using Core.Models.SciencePracs.Errors;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
@@ -53,11 +52,11 @@ public class UpsertModel : BasePageModel
     [BindProperty]
     public DateOnly DueDate { get; set; }
     [BindProperty]
-    public CourseId CourseId { get; set; }
+    public List<CourseId> CourseIds { get; set; } = [];
     [BindProperty]
     public bool DoNotGenerateRolls { get; set; }
 
-    public SelectList CourseList { get; set; }
+    public List<CourseSelectListItemResponse> CourseList { get; set; }
 
     public async Task OnGet()
     {
@@ -97,7 +96,7 @@ public class UpsertModel : BasePageModel
 
             LessonName = lessonResponse.Value.Name;
             DueDate = lessonResponse.Value.DueDate;
-            CourseId = lessonResponse.Value.CourseId;
+            CourseIds = lessonResponse.Value.Courses.Select(entry => entry.CourseId).ToList();
             
             PageTitle = $"Edit - {LessonName}";
         }
@@ -165,7 +164,7 @@ public class UpsertModel : BasePageModel
             return Page();
         }
 
-        CreateLessonCommand command = new(LessonName, DueDate, CourseId, DoNotGenerateRolls);
+        CreateLessonCommand command = new(LessonName, DueDate, CourseIds, DoNotGenerateRolls);
 
         _logger
             .ForContext(nameof(CreateLessonCommand), command, true)
@@ -191,7 +190,7 @@ public class UpsertModel : BasePageModel
 
     private async Task BuildCourseSelectList()
     {
-        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery());
+        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery(true));
 
         if (coursesResponse.IsFailure)
         {
@@ -200,6 +199,6 @@ public class UpsertModel : BasePageModel
             return;
         }
 
-        CourseList = new SelectList(coursesResponse.Value, "Id", "DisplayName", null, "FacultyName");
+        CourseList = coursesResponse.Value;
     }
 }

@@ -40,6 +40,10 @@ public static class OfferingErrors
         "Offerings.Offering.IsNull",
         "An Offering is required, but none supplied");
 
+    public static readonly Error NoneFound = new(
+        "Offerings.Offering.NoneFound",
+        "No Offerings were found");
+
     public static class Validation
     {
         public static readonly Error StartDateAfterEndDate = new(

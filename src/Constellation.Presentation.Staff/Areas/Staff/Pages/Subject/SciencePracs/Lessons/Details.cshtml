@@ -31,10 +31,15 @@
         </dd>
 
         <dt class="col-md-2">
-            <label asp-for="Lesson.CourseName">Course</label>
+            <label>Courses</label>
         </dt>
         <dd class="col-md-10">
-            <span>@Model.Lesson.CourseName</span>
+            <ul>
+                @foreach (var course in Model.Lesson.Courses)
+                {
+                    <li>@course.CourseName</li>
+                }
+            </ul>
         </dd>
 
         <dt class="col-md-2">
@@ -55,7 +60,12 @@
             <label asp-for="Lesson.Offerings">Classes</label>
         </dt>
         <dd class="col-md-10">
-            @String.Join(", ", Model.Lesson.Offerings)
+            <ul>
+                @foreach (var offering in Model.Lesson.Offerings.OrderBy(entry => entry))
+                {
+                    <li>@offering</li>
+                }
+            </ul>
         </dd>
     </dl>
 </div>
