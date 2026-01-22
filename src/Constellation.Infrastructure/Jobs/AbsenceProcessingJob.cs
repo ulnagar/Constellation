@@ -28,6 +28,7 @@ using Core.Shared;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
 using System.Globalization;
+using System.Management.Automation;
 using System.Threading;
 
 internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
@@ -41,8 +42,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly IAbsenceRepository _absenceRepository;
 
     private Student _student;
-    private List<DateOnly> _excludedDates = []; 
-    private Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> _periodAbsenceCache;
+    private List<DateOnly> _excludedDates = [];
+    private Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> _periodAbsenceCache = [];
     private readonly AppConfiguration _configuration;
     private Guid JobId { get; set; }
 
@@ -77,7 +78,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
         List<Absence> returnAbsences = [];
 
-        if (_periodAbsenceCache is null || _periodAbsenceCache.Count == 0)
+        if (_periodAbsenceCache.Count == 0)
         {
             _periodAbsenceCache = await _sentralGateway.GetAttendanceModuleAbsenceDataForSchool(cancellationToken);
         }
@@ -124,7 +125,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return returnAbsences;
         }
 
-        SystemLink sentralId = student.SystemLinks.FirstOrDefault(link => link.System.Equals(SystemType.Sentral));
+        SystemLink? sentralId = student.SystemLinks.FirstOrDefault(link => link.System.Equals(SystemType.Sentral));
         if (sentralId is null)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -160,10 +161,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             _excludedDates = await _sentralGateway.GetExcludedDatesFromCalendar(DateTime.Today.Year.ToString(DateTimeFormatInfo.InvariantInfo));
 
         List<SentralPeriodAbsenceDto> pxpAbsences = await _sentralGateway.GetAbsenceDataAsync(sentralId.Value);
-        bool success = _periodAbsenceCache.TryGetValue(student.StudentReferenceNumber, out List<SentralPeriodAbsenceDto> attendanceAbsences);
-
-        if (!success)
-            attendanceAbsences = [];
+        List<SentralPeriodAbsenceDto> attendanceAbsences = [];
+        bool success = _periodAbsenceCache.TryGetValue(student.StudentReferenceNumber, out attendanceAbsences);
 
         // If the webattend absence is not a whole day absence, calculate the absence length
         foreach (SentralPeriodAbsenceDto attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))
@@ -259,20 +258,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                         // Find all absences from the day (group) that occur during this periodGroup
                         List<SentralPeriodAbsenceDto> absencesToProcess = classAbsences
                             .Where(absence =>
-                                coursePeriods.Any(period =>
-                                    // TODO: 2026: Remove this when there are no historical absences for the old grid prefix
-                                    absence.Date <= DateOnly.Parse("2025-05-27", new DateTimeFormatInfo()) &&
-                                    absence.Period.Length == 1
-                                        ? period.PeriodCode.ToString() == absence.Period
-                                        : period.SentralPeriodName() == absence.Period))
+                                coursePeriods.Any(period => period.SentralPeriodName() == absence.Period))
                             .ToList();
-
-                        // Original Code for TODO above
-                        // List<SentralPeriodAbsenceDto> absencesToProcess = group
-                        //    .Where(absence =>
-                        //        coursePeriods.Any(period =>
-                        //            period.SentralPeriodName() == absence.Period))
-                        //    .ToList();
 
                         if (absencesToProcess.Count == 0)
                             continue;
@@ -288,16 +275,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             if (absenceTime.Type == SentralPeriodAbsenceDto.Whole)
                             {
                                 Period period = coursePeriods
-                                    .First(period =>
-                                        // TODO: 2026: Remove this when there are no historical absences for the old grid prefix
-                                        absenceTime.Date <= DateOnly.Parse("2025-05-27", new DateTimeFormatInfo()) &&
-                                        absenceTime.Period.Length == 1
-                                            ? period.PeriodCode.ToString() == absenceTime.Period
-                                            : period.SentralPeriodName() == absenceTime.Period);
-
-                                // Original Code for TODO above
-                                // Period period = coursePeriods
-                                //    .First(period => period.SentralPeriodName() == absenceTime.Period);
+                                    .First(period => period.SentralPeriodName() == absenceTime.Period);
 
                                 absenceTime.MinutesAbsent = period.Duration;
                             }
@@ -471,22 +449,11 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
                         // This should be a single contiguous block of periods for the day.
                         // Find all absences from the day (group) that occur during this periodGroup
-                        List<SentralPeriodAbsenceDto> absencesToProcess = classAbsences
-                            .Where(absence =>
-                                coursePeriods.Any(period =>
-                                    // TODO: 2026: Remove this when there are no historical absences for the old grid prefix
-                                    absence.Date <= DateOnly.Parse("2025-05-27", new DateTimeFormatInfo()) &&
-                                    absence.Period.Length == 1
-                                        ? period.PeriodCode.ToString() == absence.Period
-                                        : period.SentralPeriodName() == absence.Period))
-                            .ToList();
-
-                        // Original Code for TODO above
-                        // List<SentralPeriodAbsenceDto> absencesToProcess = group
-                        //    .Where(absence =>
-                        //        coursePeriods.Any(period =>
-                        //            period.SentralPeriodName() == absence.Period))
-                        //    .ToList();
+                        List<SentralPeriodAbsenceDto> absencesToProcess = group
+                           .Where(absence =>
+                               coursePeriods.Any(period =>
+                                   period.SentralPeriodName() == absence.Period))
+                           .ToList();
 
                         if (absencesToProcess.Count == 0)
                             continue;
@@ -502,16 +469,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             if (absenceTime.Type == SentralPeriodAbsenceDto.Whole)
                             {
                                 Period period = coursePeriods
-                                    .First(period =>
-                                        // TODO: 2026: Remove this when there are no historical absences for the old grid prefix
-                                        absenceTime.Date <= DateOnly.Parse("2025-05-27", new DateTimeFormatInfo()) &&
-                                        absenceTime.Period.Length == 1
-                                            ? period.PeriodCode.ToString() == absenceTime.Period
-                                            : period.SentralPeriodName() == absenceTime.Period);
-
-                                // Original Code for TODO above
-                                // Period period = coursePeriods
-                                //    .First(period => period.SentralPeriodName() == absenceTime.Period);
+                                    .First(period => period.SentralPeriodName() == absenceTime.Period);
 
                                 absenceTime.MinutesAbsent = period.Duration;
                             }
@@ -659,58 +617,28 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         SentralPeriodAbsenceDto absence, 
         List<Period> periodGroup)
     {
-        //TODO: 2026: Remove the old grid prefix handling when all historical absences are gone
-        if (absence.Date <= DateOnly.Parse("2025-10-01", new DateTimeFormatInfo()))
+        Period? period = absence.Period.Length == 1
+            ? periodGroup.FirstOrDefault(pg => pg.PeriodCode.ToString() == absence.Period)
+            : periodGroup.FirstOrDefault(pg => pg.SentralPeriodName() == absence.Period);
+
+        if (period is null)
+            return Result.Failure(Error.NullValue);
+
+        TimeSpan absenceLength = new(0, absence.MinutesAbsent, 0);
+
+        switch (absence.PartialType)
         {
-            Period period = (absence.Period.Contains('S', StringComparison.InvariantCultureIgnoreCase))
-                ? periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period.Remove(0, 1), StringComparison.InvariantCultureIgnoreCase))
-                : periodGroup.FirstOrDefault(pg => pg.Name.Contains(absence.Period, StringComparison.InvariantCultureIgnoreCase));
+            case "Early Leaver":
+                absence.EndTime = TimeOnly.FromTimeSpan(period.EndTime);
+                absence.StartTime = absence.EndTime.Add(-absenceLength);
 
-            if (period is null)
-                return Result.Failure(Error.NullValue);
+                break;
+            case "Late Arrival":
+            case null:
+                absence.StartTime = TimeOnly.FromTimeSpan(period.StartTime);
+                absence.EndTime = absence.StartTime.Add(absenceLength);
 
-            TimeSpan absenceLength = new(0, absence.MinutesAbsent, 0);
-
-            switch (absence.PartialType)
-            {
-                case "Early Leaver":
-                    absence.EndTime = TimeOnly.FromTimeSpan(period.EndTime);
-                    absence.StartTime = absence.EndTime.Add(-absenceLength);
-
-                    break;
-                case "Late Arrival":
-                case null:
-                    absence.StartTime = TimeOnly.FromTimeSpan(period.StartTime);
-                    absence.EndTime = absence.StartTime.Add(absenceLength);
-
-                    break;
-            }
-        }
-        else
-        {
-            Period period = absence.Period.Length == 1
-                ? periodGroup.FirstOrDefault(pg => pg.PeriodCode.ToString() == absence.Period)
-                : periodGroup.FirstOrDefault(pg => pg.SentralPeriodName() == absence.Period);
-
-            if (period is null)
-                return Result.Failure(Error.NullValue);
-
-            TimeSpan absenceLength = new(0, absence.MinutesAbsent, 0);
-
-            switch (absence.PartialType)
-            {
-                case "Early Leaver":
-                    absence.EndTime = TimeOnly.FromTimeSpan(period.EndTime);
-                    absence.StartTime = absence.EndTime.Add(-absenceLength);
-
-                    break;
-                case "Late Arrival":
-                case null:
-                    absence.StartTime = TimeOnly.FromTimeSpan(period.StartTime);
-                    absence.EndTime = absence.StartTime.Add(absenceLength);
-
-                    break;
-            }
+                break;
         }
 
         return Result.Success();
@@ -748,7 +676,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         }
     }
 
-    private async Task<SentralPeriodAbsenceDto> SelectBestWebAttendEntryForPartialAbsence(
+    private async Task<SentralPeriodAbsenceDto?> SelectBestWebAttendEntryForPartialAbsence(
         SentralPeriodAbsenceDto absence, 
         List<SentralPeriodAbsenceDto> webAttendAbsences,
         List<Period> periodGroup,
@@ -772,10 +700,11 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         TimeSpan periodGroupStart = periodGroup.OrderBy(period => period.StartTime).First().StartTime;
         TimeSpan periodGroupEnd = periodGroup.OrderBy(period => period.StartTime).Last().EndTime;
 
-        IEnumerable<SentralPeriodAbsenceDto> filteredWebAttendAbsences = webAttendAbsences
+        List<SentralPeriodAbsenceDto> filteredWebAttendAbsences = webAttendAbsences
             .Where(aa => aa.WholeDay ||
                     (aa.StartTime >= TimeOnly.FromTimeSpan(periodGroupStart) && 
-                     aa.EndTime <= TimeOnly.FromTimeSpan(periodGroupEnd)));
+                     aa.EndTime <= TimeOnly.FromTimeSpan(periodGroupEnd)))
+            .ToList();
 
         // Check for a whole day WebAttendance Absence entry first
         List<SentralPeriodAbsenceDto> wholeDayAttendanceAbsence = filteredWebAttendAbsences
@@ -838,7 +767,10 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 // How do we tell these apart?
                 // Can we match the period for the WebAttend absences to the PxP absence entry?
                 char timetablePrefix = absence.Period.TakeWhile(Char.IsLetter).FirstOrDefault();
-                Timetable timetable = Timetable.FromPrefix(timetablePrefix);
+                Timetable? timetable = Timetable.FromPrefix(timetablePrefix);
+
+                if (timetable is null)
+                    return null;
 
                 List<Period> periods = await _periodRepository.GetAllFromTimetable([timetable], cancellationToken);
 
@@ -865,7 +797,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return null;
     }
 
-    private SentralPeriodAbsenceDto SelectBestWebAttendEntryForWholeAbsence(
+    private SentralPeriodAbsenceDto? SelectBestWebAttendEntryForWholeAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
         Absence absence)
@@ -933,8 +865,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             {
                 return new SentralPeriodAbsenceDto
                 {
-                    ExternalExplanation = combinedBlockAttendanceAbsences.FirstOrDefault(aa => !string.IsNullOrWhiteSpace(aa.ExternalExplanation))?.ExternalExplanation,
-                    ExternalExplanationSource = combinedBlockAttendanceAbsences.FirstOrDefault(aa => !string.IsNullOrWhiteSpace(aa.ExternalExplanation))?.ExternalExplanationSource,
+                    ExternalExplanation = combinedBlockAttendanceAbsences.FirstOrDefault(aa => !string.IsNullOrWhiteSpace(aa.ExternalExplanation))?.ExternalExplanation ?? string.Empty,
+                    ExternalExplanationSource = combinedBlockAttendanceAbsences.FirstOrDefault(aa => !string.IsNullOrWhiteSpace(aa.ExternalExplanation))?.ExternalExplanationSource ?? string.Empty,
                 };
             }
         }
@@ -942,7 +874,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return null;
     }
 
-    private async Task<Absence> ProcessPartialAbsence(
+    private async Task<Absence?> ProcessPartialAbsence(
         SentralPeriodAbsenceDto absence, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
         OfferingId courseEnrolmentId, 
@@ -956,7 +888,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return null;
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
-        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, periodGroup, cancellationToken);
+        SentralPeriodAbsenceDto? attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, periodGroup, cancellationToken);
         
         if (attendanceAbsence is null)
             return null;
@@ -1053,7 +985,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return absenceRecord;
     }
 
-    private async Task<Absence> ProcessPartialAbsence(
+    private async Task<Absence?> ProcessPartialAbsence(
         SentralPeriodAbsenceDto absence,
         List<SentralPeriodAbsenceDto> webAttendAbsences,
         TutorialId tutorialId,
@@ -1067,7 +999,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return null;
 
         // If we did figure this out, is there an (Attendance) absence that either exactly matches, or covers this timeframe?
-        SentralPeriodAbsenceDto attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, periodGroup, cancellationToken);
+        SentralPeriodAbsenceDto? attendanceAbsence = await SelectBestWebAttendEntryForPartialAbsence(absence, webAttendAbsences, periodGroup, cancellationToken);
 
         if (attendanceAbsence is null)
             return null;
@@ -1139,7 +1071,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return absenceRecord;
     }
 
-    private async Task<Absence> ProcessWholeAbsence(
+    private async Task<Absence?> ProcessWholeAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
         List<SentralPeriodAbsenceDto> webAttendAbsences, 
         OfferingId courseEnrolmentId, 
@@ -1149,12 +1081,14 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         // Calculate acceptable reason
         List<AbsenceReason> reasons = absencesToProcess
             .Select(absence => AbsenceReason.FromValue(absence.Reason))
+            .Where(reason => reason is not null)
             .Distinct()
             .ToList();
+
         AbsenceReason reason = (reasons.Count == 1) ? reasons.First() : Absence.FindWorstAbsenceReason(reasons);
 
         // Create an object to save this data to the database.
-        Absence absenceRecord = CreateAbsence(
+        Absence? absenceRecord = CreateAbsence(
             absencesToProcess, 
             null,
             courseEnrolmentId, 
@@ -1163,7 +1097,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             periodGroup);
 
         // Find a webAttend absence that covers this set
-        SentralPeriodAbsenceDto attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
+        SentralPeriodAbsenceDto? attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
             absencesToProcess, 
             webAttendAbsences, 
             absenceRecord);
@@ -1295,7 +1229,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return null;
     }
 
-    private async Task<Absence> ProcessWholeAbsence(
+    private async Task<Absence?> ProcessWholeAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess,
         List<SentralPeriodAbsenceDto> webAttendAbsences,
         TutorialId tutorialId,
@@ -1305,12 +1239,14 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         // Calculate acceptable reason
         List<AbsenceReason> reasons = absencesToProcess
             .Select(absence => AbsenceReason.FromValue(absence.Reason))
+            .Where(reason => reason is not null)
             .Distinct()
             .ToList();
+
         AbsenceReason reason = (reasons.Count == 1) ? reasons.First() : Absence.FindWorstAbsenceReason(reasons);
 
         // Create an object to save this data to the database.
-        Absence absenceRecord = CreateAbsence(
+        Absence? absenceRecord = CreateAbsence(
             absencesToProcess,
             null,
             tutorialId,
@@ -1319,7 +1255,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             periodGroup);
 
         // Find a webAttend absence that covers this set
-        SentralPeriodAbsenceDto attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
+        SentralPeriodAbsenceDto? attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
             absencesToProcess,
             webAttendAbsences,
             absenceRecord);
@@ -1451,9 +1387,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return null;
     }
 
-    private Absence CreateAbsence(
+    private Absence? CreateAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess, 
-        SentralPeriodAbsenceDto attendanceAbsence,
+        SentralPeriodAbsenceDto? attendanceAbsence,
         OfferingId courseEnrolmentId, 
         AbsenceType type, 
         AbsenceReason reason, 
@@ -1528,9 +1464,9 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         return absence;
     }
 
-    private Absence CreateAbsence(
+    private Absence? CreateAbsence(
         List<SentralPeriodAbsenceDto> absencesToProcess,
-        SentralPeriodAbsenceDto attendanceAbsence,
+        SentralPeriodAbsenceDto? attendanceAbsence,
         TutorialId tutorialId,
         AbsenceType type,
         AbsenceReason reason,
