@@ -23,12 +23,12 @@ public sealed class TrainingCompletion : IAuditableEntity
     public DateOnly CompletedDate { get; private set; }
     public TrainingModuleId TrainingModuleId { get; private set; }
     public TrainingModule Module { get; set; }
-    public string CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
     public static TrainingCompletion Create(

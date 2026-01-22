@@ -11,7 +11,6 @@ using Application.Domains.WorkFlows.Commands.UpdateUploadTrainingCertificateActi
 using Application.Domains.WorkFlows.Queries.GetCaseById;
 using Application.Models.Auth;
 using Constellation.Application.DTOs;
-using Constellation.Core.Enums;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
@@ -23,7 +22,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.ActionUpdateForm;

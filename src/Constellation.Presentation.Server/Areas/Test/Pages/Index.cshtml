@@ -1,22 +1,4 @@
-﻿@page "{flag?}"
+﻿@page
 @model Constellation.Presentation.Server.Areas.Test.Pages.IndexModel
 
 <h2>Test Page</h2>
-
-<ul>
-	@foreach (var flag in Model.Flags.OrderBy(flag => flag))
-	{
-		<li>
-			<a asp-route-flag="@flag">@flag</a>
-			@if (Model.Flag == flag)
-			{
-				<ul>
-					@foreach (var studentId in Model.StudentIds)
-					{
-						<li>@studentId</li>
-					}
-				</ul>
-			}
-		</li>
-	}
-</ul>

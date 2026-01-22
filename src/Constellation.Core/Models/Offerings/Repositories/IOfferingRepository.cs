@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Timetables.Enums;
+using Timetables.Identifiers;
 using Timetables.ValueObjects;
 
 public interface IOfferingRepository
@@ -42,6 +43,7 @@ public interface IOfferingRepository
     Task<List<Offering>> GetByCourseId(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateTime AbsenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
     Task<List<Offering>> GetCurrentEnrolmentsFromStudentForDate(StudentId studentId, DateOnly AbsenceDate, PeriodWeek week, PeriodDay day, CancellationToken cancellationToken = default);
+    Task<List<Offering>> GetFromListOfPeriodIds(List<PeriodId> periodIds, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get all current Course Offerings that a student is enrolled in

@@ -48,43 +48,9 @@ internal sealed class GetContactsBySchoolQueryHandler
 
             foreach (SchoolContact contact in contacts)
             {
-                Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-
-                if (name.IsFailure)
-                {
-                    _logger
-                        .ForContext("Contact.FirstName", contact.FirstName)
-                        .ForContext("Contact.LastName", contact.LastName)
-                        .ForContext(nameof(Error), name.Error, true)
-                        .Warning("Failed to retrieve list of School with active Contacts");
-
-                    continue;
-                }
-
-                Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
-
-                if (email.IsFailure)
-                {
-                    _logger
-                        .ForContext("Contact.EmailAddress", contact.EmailAddress)
-                        .ForContext(nameof(Error), email.Error, true)
-                        .Warning("Failed to retrieve list of School with active Contacts");
-
-                    continue;
-                }
-
-                Result<PhoneNumber> phone = string.IsNullOrWhiteSpace(contact.PhoneNumber)
-                    ? PhoneNumber.Create(school.PhoneNumber)
-                    : PhoneNumber.Create(contact.PhoneNumber);
-
-                if (phone.IsFailure)
-                {
-                    _logger
-                        .ForContext("Contact.PhoneNumber", contact.PhoneNumber)
-                        .ForContext("School.PhoneNumber", school.PhoneNumber)
-                        .ForContext(nameof(Error), phone.Error, true)
-                        .Warning("Failed to retrieve list of School with active Contacts");
-                }
+               PhoneNumber phone = contact.PhoneNumber == PhoneNumber.Empty
+                    ? PhoneNumber.Create(school.PhoneNumber).Value
+                    : contact.PhoneNumber;
 
                 List<SchoolContactRole> roles = contact.Assignments
                     .Where(assignment =>
@@ -100,9 +66,9 @@ internal sealed class GetContactsBySchoolQueryHandler
                     entries.Add(new(
                         contact.Id,
                         role.Id,
-                        name.Value,
-                        email.Value,
-                        phone.IsFailure ? PhoneNumber.Empty : phone.Value,
+                        contact.Name,
+                        contact.EmailAddress,
+                        phone,
                         role.Role,
                         role.Note));
                 }

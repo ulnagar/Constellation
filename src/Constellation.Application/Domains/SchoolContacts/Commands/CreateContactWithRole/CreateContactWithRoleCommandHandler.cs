@@ -1,11 +1,14 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.SchoolContacts.Commands.CreateContact;
+using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Core.Errors;
 using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Interfaces.Repositories;
 using Serilog;
 using System.Linq;
@@ -34,7 +37,7 @@ internal sealed class CreateContactWithRoleCommandHandler
 
     public async Task<Result> Handle(CreateContactWithRoleCommand request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {
@@ -46,7 +49,19 @@ internal sealed class CreateContactWithRoleCommandHandler
             return Result.Failure(DomainErrors.Partners.School.NotFound(request.SchoolCode));
         }
 
-        SchoolContact existingContact = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+        if (emailAddress.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(CreateContactWithRoleCommand), request, true)
+                .ForContext(nameof(Error), emailAddress.Error, true)
+                .Warning("Failed to create new School Contact");
+
+            return Result.Failure(emailAddress.Error);
+        }
+
+        SchoolContact? existingContact = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
 
         if (existingContact is null)
         {
@@ -54,7 +69,7 @@ internal sealed class CreateContactWithRoleCommandHandler
                 request.FirstName,
                 request.LastName,
                 request.EmailAddress,
-                request.PhoneNumber,
+                request.PhoneNumber.ToString(PhoneNumber.Format.None),
                 request.SelfRegistered);
 
             if (contact.IsFailure)

@@ -11,7 +11,6 @@ using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
@@ -22,18 +21,15 @@ public class DashboardModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IWebHostEnvironment _environment;
     private readonly ILogger _logger;
 
     public DashboardModel(
         ISender mediator,
         ICurrentUserService currentUserService,
-        IWebHostEnvironment environment,
         ILogger logger)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;
-        _environment = environment;
         _logger = logger
             .ForContext<DashboardModel>()
             .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);

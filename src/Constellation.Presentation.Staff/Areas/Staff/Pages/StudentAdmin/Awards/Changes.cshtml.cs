@@ -6,18 +6,18 @@ using Constellation.Application.Awards.GetStudentAwardStatistics;
 using Constellation.Application.Domains.MeritAwards.Awards.Commands.IssueAwardInSentral;
 using Constellation.Application.Domains.MeritAwards.Awards.Enums;
 using Constellation.Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanManageAwards)]
+[HasPermission(AuthPermission.StudentAdmin_Awards_Edit_Value)]
 public class ChangesModel : BasePageModel
 {
     private readonly ISender _mediator;

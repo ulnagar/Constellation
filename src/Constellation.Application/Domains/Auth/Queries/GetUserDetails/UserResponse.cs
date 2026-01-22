@@ -1,0 +1,21 @@
+﻿namespace Constellation.Application.Domains.Auth.Queries.GetUserDetails;
+
+using Core.ValueObjects;
+using Models.Identity;
+using System;
+using System.Collections.Generic;
+
+public sealed record UserResponse(
+    Guid Id,
+    Name Name,
+    string Email,
+    List<AppUserLoginAttempt> Logins,
+    List<AppUserLink> Links,
+    List<AppRole> Roles,
+    List<UserResponse.UserClaim> Claims)
+{
+    public sealed record UserClaim(
+        string RoleName,
+        string Type,
+        string Value);
+}

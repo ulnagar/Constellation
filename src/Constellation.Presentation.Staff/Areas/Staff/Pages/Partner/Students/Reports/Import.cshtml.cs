@@ -8,14 +8,13 @@ using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.Partners_Students_Edit_Value)]
 public class ImportModel : BasePageModel
 {
     private readonly ISender _mediator;

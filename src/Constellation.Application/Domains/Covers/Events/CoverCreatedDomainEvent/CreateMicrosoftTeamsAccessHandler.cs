@@ -1,20 +1,23 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverCreatedDomainEvent;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
-using Application.Models.Identity;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
+using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.Errors;
+using Constellation.Core.Models.StaffMembers.Repositories;
+using Constellation.Core.Models.StaffMembers.ValueObjects;
+using Constellation.Core.Shared;
 using Core.Enums;
 using Core.Models;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
 using Core.Models.StaffMembers.Identifiers;
+using Interfaces.Configuration;
 using Interfaces.Repositories;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,26 +27,29 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICoverRepository _coverRepository;
     private readonly IMSTeamOperationsRepository _operationsRepository;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IStaffRepository _staffRepository;
+    private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
 
     public CreateMicrosoftTeamsAccessHandler(
         IUnitOfWork unitOfWork,
         ICoverRepository coverRepository,
         IMSTeamOperationsRepository operationsRepository,
-        UserManager<AppUser> userManager,
+        IOptions<AppConfiguration> configuration,
+        IStaffRepository staffRepository,
         ILogger logger)
     {
         _unitOfWork = unitOfWork;
         _coverRepository = coverRepository;
         _operationsRepository = operationsRepository;
-        _userManager = userManager;
+        _staffRepository = staffRepository;
+        _configuration = configuration.Value;
         _logger = logger.ForContext<CoverCreatedDomainEvent>();
     }
 
     public async Task Handle(CoverCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Cover cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
+        Cover? cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
 
         if (cover is null)
         {
@@ -111,17 +117,25 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
         }
 
         // Cover administrators
-        IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
-        foreach (AppUser coverAdmin in additionalRecipients)
+        foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
         {
-            if (!coverAdmin.IsStaffMember)
+            StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
+
+            if (teacher is null)
+            {
+                _logger
+                    .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                    .ForContext(nameof(EmployeeId), employeeId)
+                    .Warning("Failed to send Cover Cancelled Email notification");
+
                 continue;
-            
+            }
+
             TeacherMSTeamOperation addOperation = new()
             {
                 OfferingId = cover.OfferingId,
-                StaffId = coverAdmin.StaffId,
+                StaffId = teacher.Id,
                 Action = MSTeamOperationAction.Add,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.StartDate.ToDateTime(TimeOnly.MinValue).AddDays(-1),
@@ -133,7 +147,7 @@ internal sealed class CreateMicrosoftTeamsAccessHandler
             TeacherMSTeamOperation removeOperation = new()
             {
                 OfferingId = cover.OfferingId,
-                StaffId = coverAdmin.StaffId,
+                StaffId = teacher.Id,
                 Action = MSTeamOperationAction.Remove,
                 PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                 DateScheduled = cover.EndDate.ToDateTime(TimeOnly.MinValue).AddDays(1),

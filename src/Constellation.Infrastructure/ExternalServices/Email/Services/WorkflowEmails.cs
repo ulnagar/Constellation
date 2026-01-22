@@ -7,6 +7,7 @@ using Constellation.Core.Models.WorkFlow.Identifiers;
 using Constellation.Infrastructure.Templates.Views.Emails.WorkFlow;
 using Core.Extensions;
 using Core.ValueObjects;
+using MimeKit;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendActionCancelledEmail(
@@ -59,7 +60,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ActionCancelledEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendComplianceWorkFlowNotificationEmail(
@@ -91,7 +92,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ComplianceWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendTrainingWorkFlowNotificationEmail(
@@ -115,7 +116,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TrainingWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendAllActionsCompletedEmail(
@@ -135,7 +136,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(CaseActionsCompletedEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendEnteredEmailForAction(
@@ -145,5 +146,5 @@ public sealed partial class Service : IEmailService
         string body,
         List<Attachment> attachments,
         CancellationToken cancellationToken = default) =>
-        await _emailSender.Send([], [], recipients, sender.Email, subject, body, attachments, cancellationToken);
+        await _emailSender.Send([], [], recipients, sender.Email, subject, body, attachments, MessagePriority.Normal, cancellationToken);
 }

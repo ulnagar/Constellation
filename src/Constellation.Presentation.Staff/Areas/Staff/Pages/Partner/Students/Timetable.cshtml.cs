@@ -7,15 +7,14 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
-
+[HasPermission(AuthPermission.Partners_Students_View_Value)]
 public sealed class TimetableModel : BasePageModel
 {
     private readonly ISender _mediator;

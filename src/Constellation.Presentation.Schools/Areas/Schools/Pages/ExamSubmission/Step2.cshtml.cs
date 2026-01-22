@@ -5,6 +5,7 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Courses.Queries.GetCoursesForStudent;
 using Constellation.Application.Domains.Students.Queries.GetStudentsFromSchoolForSelectionList;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Exams_Edit_Value)]
 public class Step2Model : BasePageModel
 {
     private readonly ISender _mediator;
@@ -32,8 +33,9 @@ public class Step2Model : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor,
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

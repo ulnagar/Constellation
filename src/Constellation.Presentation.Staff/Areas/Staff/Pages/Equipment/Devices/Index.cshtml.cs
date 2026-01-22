@@ -3,17 +3,16 @@
 using Application.Common.PresentationModels;
 using Application.Domains.AssetManagement.Archive.Queries.GetDevices;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Assets_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

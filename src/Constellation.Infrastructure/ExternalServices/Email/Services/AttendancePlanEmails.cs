@@ -5,6 +5,7 @@ using Constellation.Core.Models.Attendance;
 using Constellation.Infrastructure.Templates.Views.Emails.AttendancePlans;
 using Core.Extensions;
 using Core.ValueObjects;
+using MimeKit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -62,7 +63,7 @@ public sealed partial class Service : IEmailService
             fromRecipient: EmailRecipient.AuroraCollege,
             subject: viewModel.Title,
             body: body,
-        cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendAttendancePlanRejectedNotificationToSchool(

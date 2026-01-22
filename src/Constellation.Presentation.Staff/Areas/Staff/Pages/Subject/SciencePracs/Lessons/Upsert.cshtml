@@ -1,4 +1,5 @@
 ﻿@page "{id:guid?}"
+@using Constellation.Core.Extensions
 @using Constellation.Core.Models.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.SciencePracs.Lessons.UpsertModel
 
@@ -32,24 +33,35 @@
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
         </div>
-
-        <div class="form-group row">
-            <label asp-for="CourseId" class="col-md-2">Course</label>
-            <div class="col-md-5">
-                @if (Model.Id != SciencePracLessonId.Empty)
-                {
-                    SelectListItem? course = Model.CourseList.FirstOrDefault(entry => entry.Value == Model.CourseId.ToString());
-                    <span>@course.Text</span>
-                }
-                else
-                {
-                    <select asp-for="CourseId" asp-items="@Model.CourseList" class="form-control combo">
-                        <option value="">-- Select --</option>
-                    </select>
-                    <span asp-validation-for="CourseId" class="text-danger"></span>
-                }
+        
+        @if (Model.Id == SciencePracLessonId.Empty)
+        {
+            <div class="form-group row">
+                <label asp-for="CourseIds" class="col-md-12">Selected Courses</label>
+                <div class="col-offset-1 col-md-2">
+                    <button id="ShowCourseSelectList" type="button" class="btn btn-success">Add Courses</button>
+                </div>
+                <div class="col-md-8" id="SelectedCoursesList">
+                </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="form-group row">
+                <label asp-for="CourseIds" class="col-md-12">Selected Courses</label>
+                <div class="col-offset-1 col-md-10">
+                    @foreach (var courseId in Model.CourseIds)
+                    {
+                        var course = Model.CourseList.FirstOrDefault(entry => entry.Id == courseId);
+
+                        if (course is null)
+                            continue;
+                        
+                        <button class="btn btn-outline-info course-button">@course.Grade @course.Name</button>
+                    }
+                </div>
+            </div>
+        }
 
         @if (Model.Id == SciencePracLessonId.Empty)
         {
@@ -76,3 +88,93 @@
         </div>
     </div>
 </form>
+
+<div class="modal" id="CourseListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Courses for Lesson</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Courses:</h5>
+                        <div class="col-md-12" id="ModalSelectedCoursesList"> </div>
+                    </div>
+                    @foreach (var grade in Model.CourseList.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).GroupBy(entry => entry.Grade))
+                    {
+                        <div class="row">
+                            <div class="col-md-2">
+                                <h5>@grade.Key.AsName()</h5>
+                            </div>
+                            <div class="col">
+                                @foreach (var course in grade)
+                                {
+                                    <button id="courseSelect-@course.Id" class="btn btn-outline-info course-button" onClick="toggleCourse('@course.Id')">@course.Grade.AsName() @course.Name</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            @foreach (var courseId in Model.CourseIds)
+            {
+                @:toggleCourse('@courseId');
+            }
+        });
+
+        // When the button is pressed
+        //  1. show the modal with the class list
+        $('#ShowCourseSelectList').on('click', function() {
+            $('#CourseListModal').modal('show');
+        });
+
+        function toggleCourse(courseId) {
+            var selectDiv = $('#courseSelect-' + courseId);
+
+            if (selectDiv.hasClass('btn-info'))
+            {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-courseSelect-' + courseId).remove();
+                $('#md-courseSelect-' + courseId).remove();
+                $('#i-courseSelect-' + courseId).remove();
+            }
+            else
+            {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#courseSelect-' + courseId).clone().prop('id', 'pd-courseSelect-' + courseId);
+                pageDisplayDiv.appendTo('#SelectedCoursesList');
+                var modalDisplayDiv = $('#courseSelect-' + courseId).clone().prop('id', 'md-courseSelect-' + courseId);
+                modalDisplayDiv.appendTo('#ModalSelectedCoursesList');
+
+                var input = $('<input>').attr('id', 'i-courseSelect-' + courseId)
+                    .attr('name', 'CourseIds')
+                    .attr('type', "hidden");
+                input.val(courseId);
+                var classInputDiv = $('#SelectedCoursesList');
+                classInputDiv.append(input);
+            }
+        }
+    </script>
+}

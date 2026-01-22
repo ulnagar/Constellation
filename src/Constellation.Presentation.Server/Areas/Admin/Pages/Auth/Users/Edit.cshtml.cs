@@ -1,25 +1,28 @@
 namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users;
 
+using Application.Common.PresentationModels;
+using Application.Domains.Auth.Commands.UpdateUser;
+using Application.Domains.Auth.Queries.GetUserDetails;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
-using Core.Models.SchoolContacts.Identifiers;
-using Core.Models.StaffMembers.Identifiers;
+using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Helpers.Attributes;
+using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Authentication_Edit_Value)]
 public class EditModel : BasePageModel
 {
     private readonly IMediator _mediator;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly LinkGenerator _linkGenerator;
 
-    public EditModel(IMediator mediator, UserManager<AppUser> userManager)
+    public EditModel(
+        IMediator mediator,
+        LinkGenerator linkGenerator)
     {
         _mediator = mediator;
-        _userManager = userManager;
+        _linkGenerator = linkGenerator;
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Auth_Users;
@@ -35,59 +38,40 @@ public class EditModel : BasePageModel
     public string LastName { get; set; }
 
     [BindProperty]
-    public bool IsStaffMember { get; set; }
+    [EmailAddress]
+    public string Email { get; set; }
 
-    [BindProperty] 
-    public StaffId StaffId { get; set; } = StaffId.Empty;
-
-    [BindProperty]
-    public bool IsSchoolContact { get; set; }
-
-    [BindProperty]
-    public SchoolContactId SchoolContactId { get; set; }
-
-    [BindProperty]
-    public bool IsParent { get; set; }
-
-    public async Task<IActionResult> OnGet()
+    public async Task OnGet()
     {
-        var user = await _userManager.FindByIdAsync(Id.ToString());
+        Result<UserResponse> user = await _mediator.Send(new GetUserDetailsQuery(Id));
 
-        if (user is null)
+        if (user.IsFailure)
         {
-            return RedirectToPage("/Auth/Users/Index", new { area = "Admin" });
+            ModalContent = ErrorDisplay.Create(
+                user.Error,
+                _linkGenerator.GetPathByPage("/Auth/Users/Index", values: new { area = "Admin" }));
+
+            return;
         }
 
-        FirstName = user.FirstName;
-        LastName = user.LastName;
-        IsStaffMember = user.IsStaffMember;
-        StaffId = user.StaffId;
-        IsSchoolContact = user.IsSchoolContact;
-        SchoolContactId = user.SchoolContactId;
-        IsParent = user.IsParent;
-
-        return Page();
+        FirstName = user.Value.Name.FirstName;
+        LastName = user.Value.Name.LastName;
+        Email = user.Value.Email;
     }
 
-    public async Task<IActionResult> OnPostUpdate()
+    public async Task<IActionResult> OnPost()
     {
-        var user = await _userManager.FindByIdAsync(Id.ToString());
+        Result update = await _mediator.Send(new UpdateUserCommand(Id, FirstName, LastName, Email));
 
-        if (user is null)
+        if (update.IsFailure)
         {
-            return RedirectToPage("/Auth/Users/Index", new { area = "Admin" });
+            ModalContent = ErrorDisplay.Create(
+                update.Error,
+                _linkGenerator.GetPathByPage("/Auth/Users/Index", values: new { area = "Admin" }));
+
+            return Page();
         }
 
-        user.FirstName = FirstName;
-        user.LastName = LastName;
-        user.IsStaffMember = IsStaffMember;
-        user.StaffId = StaffId;
-        user.IsSchoolContact = IsSchoolContact;
-        user.SchoolContactId = SchoolContactId;
-        user.IsParent = IsParent;
-
-        await _userManager.UpdateAsync(user);
-
-        return RedirectToPage("/Auth/Users/Details", new { area = "Admin", EmailAddress = user.Email });
+        return RedirectToPage("/Auth/Users/Details", routeValues: new { area = "Admin", Id });
     }
 }

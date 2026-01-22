@@ -6,7 +6,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult authCheck = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+    AuthorizationResult authCheck = await authService.AuthorizeAsync(User, AuthPermission.StudentAdmin_Consent_Edit_Value);
 }
 
 <h2>Applications</h2>

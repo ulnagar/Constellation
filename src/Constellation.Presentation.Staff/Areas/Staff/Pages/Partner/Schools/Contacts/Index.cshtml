@@ -2,14 +2,13 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Schools.Contacts.IndexModel
 
 @using Constellation.Application.Domains.SchoolContacts.Queries.GetAllContacts
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @using Constellation.Core.Models.SchoolContacts.Enums
 @using Constellation.Core.ValueObjects
 
 @inject IAuthorizationService authService
 
 @{
-    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSchoolContacts);
+    var authorised = await authService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_Edit_Value);
 }
 
 <h2>School Contacts</h2>

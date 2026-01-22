@@ -25,7 +25,7 @@ internal sealed class GetContactSummaryQueryHandler
 
     public async Task<Result<ContactSummaryResponse>> Handle(GetContactSummaryQuery request, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
         if (contact is null)
         {
@@ -36,8 +36,7 @@ internal sealed class GetContactSummaryQueryHandler
 
         return new ContactSummaryResponse(
             contact.Id,
-            contact.FirstName,
-            contact.LastName,
+            contact.Name,
             contact.EmailAddress,
             contact.PhoneNumber);
     }

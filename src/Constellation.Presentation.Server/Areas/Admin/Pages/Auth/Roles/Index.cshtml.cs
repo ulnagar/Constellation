@@ -1,145 +1,44 @@
 ﻿namespace Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles;
 
-using Application.Domains.Auth.Commands.AddUserToRole;
-using Application.Domains.Auth.Commands.RemoveUserFromRole;
+using Application.Domains.Auth.Queries.GetAuthRolesAsSummary;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
-using Constellation.Application.Models.Identity;
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Shared.Pages.Shared.Components.RoleAddUser;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Shared.Helpers.Attributes;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Authentication_View_Value)]
 public class IndexModel : BasePageModel
 {
-    private readonly IMediator _mediator;
-    private readonly UserManager<AppUser> _userManager;
-    private readonly RoleManager<AppRole> _roleManager;
+    private readonly ISender _mediator;
     private readonly LinkGenerator _linkGenerator;
 
     public IndexModel(
-        IMediator mediator,
-        UserManager<AppUser> userManager,
-        RoleManager<AppRole> roleManager,
+        ISender mediator,
         LinkGenerator linkGenerator)
     {
         _mediator = mediator;
-        _userManager = userManager;
-        _roleManager = roleManager;
         _linkGenerator = linkGenerator;
     }
 
     [ViewData] public string ActivePage => Models.ActivePage.Auth_Roles;
-    [ViewData] public string PageTitle => "Auth Roles";
+    [ViewData] public string PageTitle => "Roles";
 
-    public List<UserRoleDetailsDto> Roles { get; set; } = new();
+    public List<RoleSummaryResponse> Roles { get; set; } = new();
 
-    public class UserRoleDetailsDto
+    public async Task OnGet()
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public int MemberCount { get; set; }
-    }
+        Result<List<RoleSummaryResponse>> roles = await _mediator.Send(new GetAuthRolesAsSummaryQuery());
 
-    [BindProperty(SupportsGet = true)]
-    public Guid? RoleId { get; set; }
-
-    [BindProperty]
-    public RoleAddUserSelection AddUserForm { get; set; }
-
-    public string RoleName { get; set; }
-    public List<RoleMemberDto> Members { get; set; } = new();
-
-    public record RoleMemberDto(
-        Guid UserId,
-        string DisplayName,
-        string EmailAddress);
-
-    public async Task<IActionResult> OnGet()
-    {
-        List<AppRole> roles = await _roleManager.Roles.ToListAsync();
-
-        foreach (AppRole role in roles)
+        if (roles.IsFailure)
         {
-            IList<AppUser> members = await _userManager.GetUsersInRoleAsync(role!.Name);
+            ModalContent = ErrorDisplay.Create(roles.Error);
 
-            Roles.Add(new UserRoleDetailsDto
-            {
-                Id = role.Id,
-                Name = role.Name,
-                MemberCount = members.Count()
-            });
+            return;
         }
 
-        if (RoleId is not null)
-        {
-            AppRole role = await _roleManager.FindByIdAsync(RoleId.ToString());
-
-            if (role is null)
-                return Page();
-
-            RoleName = role.Name;
-
-            IList<AppUser> members = await _userManager.GetUsersInRoleAsync(RoleName);
-            Members = members.Select(member =>
-                    new RoleMemberDto(
-                        member.Id,
-                        member.DisplayName,
-                        member.Email))
-                .ToList();
-        }
-
-        return Page();
-    }
-
-    public async Task<IActionResult> OnGetRemoveUser(Guid UserId)
-    {
-        if (UserId == Guid.Empty)
-        {
-            return ShowError(DomainErrors.Auth.UserNotFound);
-        }
-
-        var result = await _mediator.Send(new RemoveUserFromRoleCommand(RoleId!.Value, UserId));
-
-        if (result.IsFailure)
-        {
-            return ShowError(result.Error);
-        }
-
-        return RedirectToPage();
-    }
-
-    public async Task<IActionResult> OnPostAddUser()
-    {
-        if (AddUserForm.UserId == Guid.Empty)
-        {
-            return ShowError(DomainErrors.Auth.UserNotFound);
-        }
-
-        var result = await _mediator.Send(new AddUserToRoleCommand(AddUserForm.RoleId, AddUserForm.UserId));
-
-        if (result.IsFailure)
-        {
-            return ShowError(result.Error);
-        }
-
-        return RedirectToPage();
-    }
-
-    private IActionResult ShowError(Error error)
-    {
-        ModalContent = ErrorDisplay.Create(
-            error,
-            _linkGenerator.GetPathByPage("/Auth/Roles/Index", values: new { area = "Admin", RoleId }));
-
-        AddUserForm = null;
-
-        return Page();
+        Roles = roles.Value;
     }
 }

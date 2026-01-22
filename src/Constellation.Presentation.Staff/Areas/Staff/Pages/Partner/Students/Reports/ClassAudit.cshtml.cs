@@ -3,15 +3,15 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Students.Re
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Students.Queries.GetCurrentStudentsWithCurrentOfferings;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Students_View_Value)]
 public sealed class ClassAuditModel : BasePageModel
 {
     private readonly ISender _mediator;

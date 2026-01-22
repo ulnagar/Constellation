@@ -7,6 +7,7 @@ using Application.Models.Auth;
 using Constellation.Application.DTOs;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Timetables_View_Value)]
 public class ViewModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -32,8 +33,9 @@ public class ViewModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

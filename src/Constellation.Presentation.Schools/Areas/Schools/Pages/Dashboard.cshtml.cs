@@ -5,6 +5,7 @@ using Application.Domains.Attendance.Plans.Queries.CountPendingPlansForSchool;
 using Application.Domains.Students.Queries.GetCurrentStudentsFromSchool;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
@@ -17,7 +18,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_View_Value)]
 public class DashboardModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -31,8 +32,9 @@ public class DashboardModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor,
+        IAuthorizationService authorizationService,
         IServiceScopeFactory scopeFactory)
-        : base(httpContextAccessor, scopeFactory)
+        : base(httpContextAccessor, scopeFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

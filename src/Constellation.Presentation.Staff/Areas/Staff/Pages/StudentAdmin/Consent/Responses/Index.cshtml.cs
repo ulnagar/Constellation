@@ -11,17 +11,17 @@ using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelecti
 using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetConsentsWithFilter;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_Consent_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

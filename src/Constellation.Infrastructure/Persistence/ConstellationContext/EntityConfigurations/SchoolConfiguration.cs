@@ -33,5 +33,21 @@ public class SchoolConfiguration : IEntityTypeConfiguration<School>
             .WithOne()
             .HasForeignKey(s => s.SchoolCode)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder
+            .Property(entry => entry.Directorate)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.TimetableApplication)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.RollCallGroup)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Website)
+            .IsRequired(false);
     }
 }

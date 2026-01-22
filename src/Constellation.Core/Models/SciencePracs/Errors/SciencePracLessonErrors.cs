@@ -29,4 +29,8 @@ public static class SciencePracLessonErrors
     public static readonly Error NoOfferingsLinked = new(
         "SciencePracs.Lesson.NoOfferingsLinked",
         "There are no Offerings linked to the selected Science Prac Lesson");
+
+    public static readonly Error MustBeSameGrade = new(
+        "SciencePracs.Lesson.MustBeSameGrade",
+        "All Courses linked to a Science Prac Lesson must be of the same Grade");
 }

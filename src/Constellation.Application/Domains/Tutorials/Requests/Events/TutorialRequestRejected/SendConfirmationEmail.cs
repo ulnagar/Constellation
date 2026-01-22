@@ -97,7 +97,7 @@ internal sealed class SendConfirmationEmail
                 if (recipients.Any(entry => entry.Email == parent.EmailAddress))
                     continue;
 
-                Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                Result<EmailRecipient> parentRecipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (parentRecipient.IsSuccess)
                     recipients.Add(parentRecipient.Value);
@@ -116,7 +116,7 @@ internal sealed class SendConfirmationEmail
 
         foreach (var contact in contacts)
         {
-            if (recipients.Any(entry => entry.Email == contact.EmailAddress))
+            if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
                 continue;
 
             Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();

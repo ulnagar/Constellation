@@ -4,7 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.WorkFlows.Queries.GetCaseSummaryList;
 using Application.Models.Auth;
 using Constellation.Core.Models.StaffMembers.Identifiers;
-using Core.Abstractions.Clock;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.WorkFlow.Enums;
 using Core.Shared;
@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_WorkFlow_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -50,7 +50,7 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve list of WorkFlow Cases by user {User}", _currentUserService.UserName);
 
-        AuthorizationResult isAdminTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+        AuthorizationResult isAdminTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_WorkFlow_Edit_Value);
 
         if (isAdminTest.Succeeded)
             IsAdmin = true;

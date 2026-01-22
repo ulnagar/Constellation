@@ -5,15 +5,15 @@ using Application.Domains.Students.Commands.ImportStudentsFromFile;
 using Application.DTOs;
 using Application.Models.Auth;
 using BaseModels;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Rollover_Edit_Value)]
 public class ImportModel : BasePageModel
 {
     private readonly ISender _mediator;

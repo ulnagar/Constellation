@@ -46,12 +46,12 @@ public sealed class Application : AggregateRoot, IAuditableEntity
     public IReadOnlyList<Consent> Consents => _consents.ToList();
     public IReadOnlyList<ConsentRequirement> Requirements => _requirements.ToList();
 
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static Application Create(

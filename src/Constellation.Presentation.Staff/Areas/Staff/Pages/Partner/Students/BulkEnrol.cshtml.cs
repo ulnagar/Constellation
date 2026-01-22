@@ -13,13 +13,13 @@ using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.Partners_Students_Edit_Value)]
 public class BulkEnrolModel : BasePageModel
 {
     private readonly ISender _mediator;

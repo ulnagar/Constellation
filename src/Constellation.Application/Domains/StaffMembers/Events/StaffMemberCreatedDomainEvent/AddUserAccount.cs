@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Events.StaffMemberCreatedDomainEvent;
 
 using Abstractions.Messaging;
+using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Errors;
 using Core.Models.StaffMembers;
@@ -11,6 +12,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +35,7 @@ internal sealed class AddUserAccount
 
     public async Task Handle(StaffMemberCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -53,12 +55,34 @@ internal sealed class AddUserAccount
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(staffMember.EmailAddress.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(staffMember.EmailAddress.Email);
 
-        if (user is not null)
+        if (user is null)
         {
-            user.IsStaffMember = true;
-            user.StaffId = staffMember.Id;
+            user = new()
+            {
+                UserName = staffMember.EmailAddress.Email,
+                Email = staffMember.EmailAddress.Email,
+                Name = staffMember.Name
+            };
+
+            IdentityResult create = await _userManager.CreateAsync(user);
+
+            if (create.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(StaffMemberCreatedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
+                    .Warning("Failed to create new Staff Member AppUser");
+            }
+        }
+
+        List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Staff).ToList();
+
+        if (links.All(link => link.LinkId != staffMember.Id.Value))
+        {
+            user.AddStaffLink(staffMember.Id);
 
             IdentityResult update = await _userManager.UpdateAsync(user);
 
@@ -70,29 +94,8 @@ internal sealed class AddUserAccount
                     .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
                     .Warning("Failed to update Staff Member AppUser");
             }
-
-            return;
         }
-
-        user = new()
-        {
-            UserName = staffMember.EmailAddress.Email,
-            Email = staffMember.EmailAddress.Email,
-            FirstName = staffMember.Name.PreferredName,
-            LastName = staffMember.Name.LastName,
-            IsStudent = true,
-            StaffId = staffMember.Id
-        };
-
-        IdentityResult create = await _userManager.CreateAsync(user);
-
-        if (create.Succeeded)
-        {
-            _logger
-                .ForContext(nameof(StaffMemberCreatedDomainEvent), notification, true)
-                .ForContext(nameof(AppUser), user, true)
-                .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
-                .Warning("Failed to create new Staff Member AppUser");
-        }
+        
+        await _userManager.AddToRoleAsync(user, AppRole.Staff);
     }
 }

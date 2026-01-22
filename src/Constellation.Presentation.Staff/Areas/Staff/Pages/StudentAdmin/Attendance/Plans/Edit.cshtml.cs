@@ -10,17 +10,17 @@ using Constellation.Application.Domains.Attendance.Plans.Queries.GetRecentlyComp
 using Constellation.Core.Models.Attendance.Identifiers;
 using Constellation.Core.Models.Timetables.Enums;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+[HasPermission(AuthPermission.StudentAdmin_AttendancePlans_Edit_Value)]
 public class EditModel : BasePageModel
 {
     private readonly ISender _mediator;

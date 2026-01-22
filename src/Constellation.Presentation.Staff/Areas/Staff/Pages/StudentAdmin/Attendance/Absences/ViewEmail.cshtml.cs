@@ -5,14 +5,14 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_AttendanceList_View_Value)]
 public class ViewEmailModel : PageModel
 {
     private readonly ISender _mediator;

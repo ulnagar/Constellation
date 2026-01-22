@@ -6,7 +6,6 @@ using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Application.Domains.Students.Queries.GetCurrentStudentsAsDictionary;
 using Application.Extensions;
 using Constellation.Application.Common.PresentationModels;
-using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Services;
@@ -15,15 +14,15 @@ using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+[HasPermission(AuthPermission.StudentAdmin_AttendanceSettings_Edit_Value)]
 public class SettingsModel : BasePageModel
 {
     private readonly ISender _mediator;

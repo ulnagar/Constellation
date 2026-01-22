@@ -1,5 +1,7 @@
 ﻿namespace Constellation.Application.Extensions;
 
+using Helpers;
+
 public static class StringExtensions
 {
     public static string FormatField(this string content)
@@ -25,12 +27,15 @@ public static class StringExtensions
         return line switch
         {
             "G" => ("Secondary", "G"),
-            "P" => ("Secondary", "P"),
+            "N" => ("Secondary", "N"),
+            
             "V" => ("Alternate", "V"),
             "Y" => ("Alternate", "Y"),
-            "A" => ("Primary", "A"),
+
             "B" => ("Primary", "B"),
-            "C" => ("Primary", "C"),
+            "P" => ("Primary", "P"),
+            "R" => ("Primary", "R"),
+
             "1" => ("Senior", "1"),
             "2" => ("Senior", "2"),
             "3" => ("Senior", "3"),
@@ -49,5 +54,35 @@ public static class StringExtensions
     private static string RemoveWhitespace(this string content)
     {
         return content.TrimStart(' ').TrimEnd(' ');
+    }
+
+    /// <summary>
+    ///  Extension Method to Remove HTML Tags from a given String.
+    /// </summary>
+    /// <param name="source">Sourch HTML String</param>
+    /// <returns>Plain Text</returns>
+    public static string RemoveHtml(this string source)
+    {
+        return HtmlHelper.RemoveHtmlTags(source);
+    }
+
+    /// <summary>
+    /// Extension Method to Return a copy of this string converted to HTML markup.
+    /// </summary>
+    public static string ToHtml(this string source)
+    {
+        return ToHtml(source, false);
+    }
+
+    /// <summary>
+    /// Extension Method to Return a copy of this string converted to HTML markup.
+    /// </summary>
+    /// <param name="source">Non-HTML Text Source String</param>
+    /// <param name="nofollow">If true, links are given "nofollow"
+    /// attribute</param>
+    public static string ToHtml(this string source, bool nofollow)
+    {
+        // Return HTML Version
+        return HtmlHelper.ConvertToHtml(source, nofollow);
     }
 }

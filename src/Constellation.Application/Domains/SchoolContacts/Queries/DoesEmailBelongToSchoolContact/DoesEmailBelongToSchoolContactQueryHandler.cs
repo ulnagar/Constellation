@@ -2,8 +2,10 @@
 
 using Abstractions.Messaging;
 using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using Serilog;
 using System.Linq;
 using System.Threading;
@@ -25,7 +27,19 @@ internal sealed class DoesEmailBelongToSchoolContactQueryHandler
 
     public async Task<Result<bool>> Handle(DoesEmailBelongToSchoolContactQuery request, CancellationToken cancellationToken)
     {
-        SchoolContact? response = await _contactRepository.GetWithRolesByEmailAddress(request.EmailAddress, cancellationToken);
+        Result<EmailAddress> emailAddress = EmailAddress.Create(request.EmailAddress);
+
+        if (emailAddress.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(DoesEmailBelongToSchoolContactQuery), request, true)
+                .ForContext(nameof(Error), emailAddress.Error, true)
+                .Warning("Failed to check email against School Contacts");
+
+            return Result.Failure<bool>(emailAddress.Error);
+        }
+
+        SchoolContact? response = await _contactRepository.GetWithRolesByEmailAddress(emailAddress.Value, cancellationToken);
 
         if (response is null)
             return false;

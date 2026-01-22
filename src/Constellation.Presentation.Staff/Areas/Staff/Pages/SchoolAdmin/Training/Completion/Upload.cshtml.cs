@@ -6,16 +6,14 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_Edit_Value)]
 [RequestSizeLimit(10485760)]
 public class UploadModel : BasePageModel
 {

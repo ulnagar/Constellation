@@ -10,18 +10,18 @@ using Application.Domains.Edval.Commands.RefreshTimetableDifferences;
 using Application.Domains.Edval.Commands.RemoveIgnoreRuleForDifference;
 using Application.Domains.Edval.Queries.GetEdvalDifferences;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Edval;
 using Core.Models.Edval.Enums;
 using Core.Models.Edval.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanManageAbsences)]
+[HasPermission(AuthPermission.Subjects_Timetables_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

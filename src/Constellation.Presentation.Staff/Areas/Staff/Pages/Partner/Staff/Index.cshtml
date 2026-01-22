@@ -7,7 +7,7 @@
 @{
     Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 
-    AuthorizationResult canManageStaff = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStaff);
+    AuthorizationResult canManageStaff = await authService.AuthorizeAsync(User, AuthPermission.Partners_Staff_Edit_Value);
 }
 
 <h2>Staff List</h2>

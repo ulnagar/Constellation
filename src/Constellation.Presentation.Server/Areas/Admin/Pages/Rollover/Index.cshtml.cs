@@ -2,11 +2,11 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages.Rollover;
 
 using Application.Models.Auth;
 using BaseModels;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Rollover_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

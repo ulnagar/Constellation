@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-public class AllowExtensionsAttribute : ValidationAttribute
+public sealed class AllowExtensionsAttribute : ValidationAttribute
 {
     private List<string> AllowedExtensions { get; set; }
 

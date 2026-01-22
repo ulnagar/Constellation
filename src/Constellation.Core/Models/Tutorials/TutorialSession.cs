@@ -23,11 +23,11 @@ public sealed class TutorialSession : IAuditableEntity
     public PeriodId PeriodId { get; private set; }
     public StaffId StaffId { get; private set; }
     public bool IsDeleted { get; private set; }
-    public string CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 
     internal void Delete() => IsDeleted = true;

@@ -3,19 +3,17 @@
 using Application.Common.PresentationModels;
 using Application.Domains.AssetManagement.Archive.Queries.GetDeviceDetails;
 using Application.Models.Auth;
-using Constellation.Core.Models.Assets;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Assets_Edit_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

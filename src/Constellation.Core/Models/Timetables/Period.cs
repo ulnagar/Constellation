@@ -6,7 +6,6 @@ using Enums;
 using Identifiers;
 using Primitives;
 using System;
-using System.Linq;
 
 public sealed class Period : AggregateRoot, IAuditableEntity
 {
@@ -54,12 +53,12 @@ public sealed class Period : AggregateRoot, IAuditableEntity
     public int Duration => (int)EndTime.Subtract(StartTime).TotalMinutes;
     public string SortOrder => $"{Timetable.Code}.{Week.Value.ToString()}.{Day.Value.ToString().PadLeft(2, '0')}.{StartTime:c}";
 
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public static Period Create(

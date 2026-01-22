@@ -7,6 +7,8 @@ using Constellation.Application.Interfaces.Services;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
+using System.Security.Cryptography;
+using System.Text;
 
 public class Service : ISMSService
 {
@@ -56,5 +58,25 @@ public class Service : ISMSService
         };
 
         return await _service.SendSmsAsync(messageContent);
+    }
+
+    public async Task<Result<string>> SendEmergencyConsoleSms(
+        AlertRecipient recipient,
+        string message,
+        CancellationToken cancellationToken = default)
+    {
+        SMSMessageToSend messageContent = new()
+        {
+            origin = "Aurora",
+            destinations = [recipient.PhoneNumber.ToString(PhoneNumber.Format.None)],
+            message = message
+        };
+
+        Result<SMSMessageCollectionDto> result = await _service.SendSmsAsync(messageContent);
+
+        if (result.IsFailure)
+            return Result.Failure<string>(result.Error);
+
+        return Result.Success(result.Value.Messages.First().OutgoingId);
     }
 }

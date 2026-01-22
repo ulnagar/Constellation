@@ -43,5 +43,21 @@ public class ResponseConfiguration : IEntityTypeConfiguration<Response>
         //    .HasOne<Absence>()
         //    .WithMany()
         //    .HasForeignKey(response => response.AbsenceId);
+
+        builder
+            .Property(entry => entry.From)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Explanation)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Verifier)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.VerificationComment)
+            .IsRequired(false);
     }
 }

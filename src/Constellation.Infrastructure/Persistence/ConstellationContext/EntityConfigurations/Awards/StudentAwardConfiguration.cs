@@ -35,5 +35,13 @@ public class StudentAwardConfiguration : IEntityTypeConfiguration<StudentAward>
 
         builder
             .HasIndex(award => award.IncidentId);
+
+        builder
+            .Property(entry => entry.Reason)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.IncidentId)
+            .IsRequired(false);
     }
 }

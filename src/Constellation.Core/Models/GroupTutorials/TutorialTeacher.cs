@@ -26,11 +26,11 @@ public sealed class TutorialTeacher : IAuditableEntity
     public GroupTutorialId TutorialId { get; private set; }
     public DateOnly EffectiveFrom { get; private set; }
     public DateOnly? EffectiveTo { get; internal set; }
-    public string CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; internal set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
 }

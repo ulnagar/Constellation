@@ -3,19 +3,18 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Complia
 using Application.Domains.ExternalSystems.Masterfile.Commands;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_MasterFile_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

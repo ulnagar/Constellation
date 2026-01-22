@@ -8,17 +8,16 @@ using Application.Domains.SciencePracs.Queries.GetLessonRollDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.Components.CancelRoll;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_View_Value)]
 public class RollModel : BasePageModel
 {
     private readonly ISender _mediator;

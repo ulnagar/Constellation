@@ -4,7 +4,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canEdit = await authService.AuthorizeAsync(User, AuthPolicies.CanManageReports);
+    AuthorizationResult canEdit = await authService.AuthorizeAsync(User, AuthPermission.StudentAdmin_Reports_Edit_Value);
 }
 
 <h2>External Student Reports</h2>

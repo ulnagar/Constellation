@@ -1,41 +1,46 @@
 ﻿@model RoleAddUserSelection
 
-<div class="modal fade" tabindex="-1" id="addUserModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-page-handler="AddUser" id="addUserForm">
+<form asp-page-handler="AddUser" id="addUserForm">
+    <div class="modal fade" tabindex="-1" id="addUserModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add User</h5>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">User</span>
-                            <select asp-for="UserId" class="combo" style="width:100%">
-                                <option value="">-- Select --</option>
-                                @foreach (var entry in Model.UserList)
-                                {
-                                    <option value="@entry.Id">@entry.Name (@entry.Email)</option>
-                                }
-                            </select>
+                    <div class="mb-3">
+                        <div class="row">
+                            <label asp-for="UserId">User</label>
+                            <div class="w-100 col">
+                                <select asp-for="UserId" class="combo w-100">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var entry in Model.UserList)
+                                    {
+                                        if (entry.Available)
+                                        {
+                                            <option value="@entry.Id">@entry.Name (@entry.Email)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@entry.Id" disabled="disabled">@entry.Name (@entry.Email)</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="form-group col-6">
-                            <span class="control-label">Group</span>
-                        </div>
-                        <div class="form-group col-12">
-                            <input asp-for="RoleId" type="hidden" value="@Model.RoleId" />
+                    <div class="mb-3 row">
+                        <label class="col-md-3">Group</label>
+                        <div class="col-md-9">
                             <span class="font-weight-bold">@Model.RoleName</span>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="button" id="addUserSubmitButton" value="Save" class="btn btn-primary btn-block btn-lg" />
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
-
+</form>

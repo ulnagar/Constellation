@@ -6,6 +6,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Core.ValueObjects;
+using MimeKit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -145,6 +146,6 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml", viewModel);
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 }

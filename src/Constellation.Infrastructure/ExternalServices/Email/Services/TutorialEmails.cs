@@ -33,7 +33,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TutorialRequestReceivedEmailViewModel.ViewLocation, viewModel);
 
-        Result<MimeMessage> emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        Result<MimeMessage> emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure(emailSendOperation.Error);
@@ -63,7 +63,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TutorialRequestReceivedNotificationEmailViewModel.ViewLocation, viewModel);
 
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure(emailSendOperation.Error);
@@ -92,7 +92,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TutorialRequestApprovedNotificationEmailViewModel.ViewLocation, viewModel);
 
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure(emailSendOperation.Error);
@@ -121,7 +121,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TutorialRequestRejectedEmailViewModel.ViewLocation, viewModel);
 
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure(emailSendOperation.Error);
@@ -155,7 +155,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TutorialRequestScheduledEmailViewModel.ViewLocation, viewModel);
 
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, cancellationToken);
+        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
 
         if (emailSendOperation.IsFailure)
             return Result.Failure<string>(emailSendOperation.Error);

@@ -14,7 +14,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading.Tasks;
@@ -86,7 +85,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnGetDeleteRecord()
     {
-        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+        AuthorizationResult canEditTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 
         if (!canEditTest.Succeeded) return RedirectToPage("/SchoolAdmin/Training/Completion/Index", new { area = "Staff" });
 

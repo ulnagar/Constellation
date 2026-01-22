@@ -12,6 +12,7 @@ using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.TutorialRollAddStudent;
 using MediatR;
@@ -20,7 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
+[HasPermission(AuthPermission.Subjects_GroupTutorials_View_Value)]
 public class RollModel : BasePageModel
 {
     private readonly ISender _mediator;

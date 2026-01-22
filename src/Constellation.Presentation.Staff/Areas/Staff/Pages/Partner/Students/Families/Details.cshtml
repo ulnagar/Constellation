@@ -10,7 +10,7 @@
 @{
     Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 
-    var isAuthorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+    var isAuthorised = await authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
     var isNotResidential = !Model.Family?.IsResidential ?? false;
 
     var canEdit = isAuthorised.Succeeded && isNotResidential;

@@ -16,15 +16,15 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_AttendanceList_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -14,14 +14,14 @@ using Core.Models;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Students.Enums;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditSchools)]
+[HasPermission(AuthPermission.Partners_Staff_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

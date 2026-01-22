@@ -6,15 +6,15 @@ using Application.Models.Auth;
 using Constellation.Application.Domains.Students.Commands.SetStudentPhoto;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.Partners_Students_Edit_Value)]
 public class AddPhotoModel : BasePageModel
 {
     private readonly ISender _mediator;

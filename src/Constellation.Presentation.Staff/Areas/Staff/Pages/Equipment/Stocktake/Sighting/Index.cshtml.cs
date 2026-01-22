@@ -6,6 +6,7 @@ using Application.Domains.AssetManagement.Stocktake.Queries.GetAssetForSightingC
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeSightingForAsset;
 using Constellation.Core.Models.Stocktake.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Models.Assets.Errors;
@@ -13,12 +14,11 @@ using Core.Models.Assets.Identifiers;
 using Core.Models.Assets.ValueObjects;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Stocktake_Submit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

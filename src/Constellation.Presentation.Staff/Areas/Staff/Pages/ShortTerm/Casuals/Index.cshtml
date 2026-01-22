@@ -4,7 +4,7 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
-    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditCasuals);
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.ShortTerm_Casuals_Edit_Value);
 }
 
 <h2>Casual Teacher List</h2>

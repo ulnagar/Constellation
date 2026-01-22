@@ -7,19 +7,19 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanManageSchoolContacts)]
+[HasPermission(AuthPermission.Partners_SchoolContacts_Edit_Value)]
 public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -59,14 +59,15 @@ public class UpdateModel : BasePageModel
 
     [BindProperty]
     [Required]
+    [ModelBinder(typeof(FromValueBinder))]
     [DataType(DataType.EmailAddress)]
     [Display(Name = DisplayNameDefaults.EmailAddress)]
-    public string EmailAddress { get; set; } = string.Empty;
+    public EmailAddress EmailAddress { get; set; } = EmailAddress.None;
 
     [BindProperty]
+    [ModelBinder(typeof(FromValueBinder))]
     [DataType(DataType.PhoneNumber)]
-    [Display(Name = DisplayNameDefaults.PhoneNumber)]
-    public string? PhoneNumber { get; set; } = string.Empty;
+    public PhoneNumber? PhoneNumber { get; set; } = PhoneNumber.Empty;
 
     public async Task OnGet()
     {
@@ -88,8 +89,8 @@ public class UpdateModel : BasePageModel
             return;
         }
 
-        FirstName = contact.Value.FirstName;
-        LastName = contact.Value.LastName;
+        FirstName = contact.Value.Name.FirstName;
+        LastName = contact.Value.Name.LastName;
         EmailAddress = contact.Value.EmailAddress;
         PhoneNumber = contact.Value.PhoneNumber;
     }
@@ -101,15 +102,13 @@ public class UpdateModel : BasePageModel
 
         FirstName = FirstName.Trim();
         LastName = LastName.Trim();
-        PhoneNumber = string.IsNullOrWhiteSpace(PhoneNumber) ? PhoneNumber : PhoneNumber.Trim();
-        EmailAddress = EmailAddress.Trim();
 
         UpdateContactCommand command = new(
             Id,
             FirstName,
             LastName,
             EmailAddress,
-            PhoneNumber);
+            PhoneNumber ?? PhoneNumber.Empty);
 
         _logger
             .ForContext(nameof(UpdateContactCommand), command, true)

@@ -30,7 +30,7 @@ internal sealed class ExceptionHandlingPipelineBehaviour<TRequest, TResponse>
         catch (Exception e)
         {
             _logger
-                .ForContext(nameof(Exception), e, true)
+                .ForContext(nameof(Exception), e.Message)
                 .Error("Unhandled exception for {request}", typeof(TRequest).Name);
 
             throw;

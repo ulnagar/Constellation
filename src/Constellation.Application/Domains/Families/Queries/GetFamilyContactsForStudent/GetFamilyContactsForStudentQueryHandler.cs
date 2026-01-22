@@ -57,15 +57,12 @@ internal sealed class GetFamilyContactsForStudentQueryHandler
 
             foreach (Parent parent in family.Parents)
             {
-                Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-                Result<PhoneNumber> parentMobile = PhoneNumber.Create(parent.MobileNumber);
-
                 contacts.Add(new(
                     isResidentialFamily,
                     parent.SentralLink,
-                    $"{parent.FirstName} {parent.LastName}",
-                    parentEmail.Value,
-                    parentMobile.IsSuccess ? parentMobile.Value : null,
+                    parent.Name,
+                    parent.EmailAddress,
+                    parent.MobileNumber,
                     parent.Id,
                     family.Id,
                     new()));

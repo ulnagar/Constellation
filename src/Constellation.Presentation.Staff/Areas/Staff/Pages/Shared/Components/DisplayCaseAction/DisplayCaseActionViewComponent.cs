@@ -46,7 +46,7 @@ public class DisplayCaseActionViewComponent : ViewComponent
         bool assignedToMeInChain = action.AssignedToId == staffId ||
                             subActions.Any(subAction => subAction.AssignedToId == staffId);
 
-        AuthorizationResult isAdmin = await _authorizationService.AuthorizeAsync(UserClaimsPrincipal, AuthPolicies.CanManageWorkflows);
+        AuthorizationResult isAdmin = await _authorizationService.AuthorizeAsync(UserClaimsPrincipal, AuthPermission.SchoolAdmin_WorkFlow_Edit_Value);
 
         if (!assignedToMeInChain && !isAdmin.Succeeded)
             return Content(string.Empty);

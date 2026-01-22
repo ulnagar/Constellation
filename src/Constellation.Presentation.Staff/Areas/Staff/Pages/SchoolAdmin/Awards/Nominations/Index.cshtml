@@ -6,7 +6,7 @@
 @inject IAuthorizationService authService;
 
 @{
-    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAwards);
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_AwardNominations_Edit_Value);
 }
 
 <h2>Nomination Periods</h2>

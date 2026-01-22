@@ -5,13 +5,13 @@ using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GetAllT
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanViewGroupTutorials)]
+[HasPermission(AuthPermission.Subjects_GroupTutorials_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -1,0 +1,103 @@
+﻿@page
+@using Constellation.Application.Extensions
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Roles.ManagePermissionsModel
+
+<h2>Add Multiple Permissions</h2>
+
+<div class="page-menu">
+    <a asp-page="/Auth/Roles/Details" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-danger btn-pull-right show-loader">Go Back</a>
+</div>
+
+<hr />
+
+<h4>Select permissions to add to role @Model.RoleName</h4>
+
+<form method="post">
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Existing Permissions:</label>
+            <div>
+                @foreach (var entry in Model.EnabledPermissions)
+                {
+                    <button type="button" class="btn btn-outline-success permission-button">@entry.Name</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <div class="col">
+            <label class="text-bold">Selected Permissions:</label>
+            <div id="SelectedPermissionsList">
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="form-group">
+        <div class="col-md-3">
+            <input type="submit" value="Save" class="btn btn-primary btn-block btn-lg" />
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<div class="row">
+    @{
+        var partitionedList = Model.AvailablePermissions.OrderBy(permission => permission.Value).Partition(Model.AvailablePermissions.Count / 3);
+
+        foreach (var list in partitionedList)
+        {
+            <div class="col-4 button-list">
+                @foreach (var entry in list)
+                {
+                    if (Model.EnabledPermissions.Contains(entry))
+                    {
+                        <button type="button" class="btn btn-outline-success permission-button">@entry.Name</button>
+                    }
+                    else
+                    {
+                        <button type="button" id="permissionSelect-@(entry.Value.Replace('.', '_'))" class="btn btn-outline-info permission-button" onClick="togglePermission('@entry.Value')">@entry.Name</button>
+                    }
+                }
+            </div>
+        }
+    }
+</div>
+
+@section Scripts
+{
+    <script>
+        function togglePermission(permissionValue) {
+            var permissionIdValue = permissionValue.replaceAll(".", "_");
+            var selectDiv = $('#permissionSelect-' + permissionIdValue);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-permissionSelect-' + permissionIdValue).remove();
+                $('#i-permissionSelect-' + permissionIdValue).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#permissionSelect-' + permissionIdValue).clone().prop('id', 'pd-permissionSelect-' + permissionIdValue);
+                pageDisplayDiv.appendTo('#SelectedPermissionsList');
+
+                var input = $('<input>').attr('id', 'i-permissionSelect-' + permissionIdValue)
+                    .attr('name', 'Permissions')
+                    .attr('type', "hidden");
+                input.val(permissionValue);
+                var classInputDiv = $('#SelectedPermissionsList');
+                classInputDiv.append(input);
+            }
+        }
+    </script>
+}

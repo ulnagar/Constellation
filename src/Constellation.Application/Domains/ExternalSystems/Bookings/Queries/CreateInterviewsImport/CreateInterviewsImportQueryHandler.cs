@@ -129,8 +129,8 @@ internal sealed class CreateInterviewsImportQueryHandler
                             InterviewExportDto.Parent entry = new()
                             {
                                 ParentCode = parent.EmailAddress,
-                                ParentFirstName = parent.FirstName,
-                                ParentLastName = parent.LastName,
+                                ParentFirstName = parent.Name.FirstName,
+                                ParentLastName = parent.Name.LastName,
                                 ParentEmailAddress = parent.EmailAddress
                             };
 

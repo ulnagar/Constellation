@@ -8,6 +8,7 @@ using Constellation.Application.Domains.Students.Commands.CreateStudent;
 using Constellation.Application.Domains.Students.Commands.UpdateStudent;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Application.Domains.Students.Queries.GetStudentById;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Enums;
@@ -17,14 +18,13 @@ using Core.Models.Students.ValueObjects;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.Partners_Students_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

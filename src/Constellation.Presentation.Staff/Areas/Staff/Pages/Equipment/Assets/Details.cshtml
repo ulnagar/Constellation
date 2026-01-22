@@ -5,7 +5,7 @@
 @inject IAuthorizationService authService
 
 @{
-    var canManageAssets = await authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets);
+    var canManageAssets = await authService.AuthorizeAsync(User, AuthPermission.Equipment_Assets_Edit_Value);
 
     if (Model.Asset.Status.Equals(AssetStatus.Disposed))
         canManageAssets = AuthorizationResult.Failed();

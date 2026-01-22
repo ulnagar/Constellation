@@ -4,17 +4,17 @@ using Application.Common.PresentationModels;
 using Application.Domains.WorkFlows.Queries.ExportOpenCaseReport;
 using Application.DTOs;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_WorkFlow_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -45,7 +45,7 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to generate Open Case Report for WorkFlow Cases by user {User}", _currentUserService.UserName);
 
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanManageWorkflows);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_WorkFlow_Edit_Value);
 
         if (!authorised.Succeeded)
         {

@@ -23,7 +23,7 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Family>()
             .AnyAsync(family => family.FamilyEmail == email.Email, cancellationToken);
 
-    public async Task<Family> GetFamilyByEmail(
+    public async Task<Family?> GetFamilyByEmail(
         EmailAddress email,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -37,8 +37,17 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Family>()
             .Where(entry =>
                 entry.Parents.Any(parent => 
-                    parent.MobileNumber == phoneNumber.ToString(PhoneNumber.Format.None)))
+                    parent.MobileNumber == phoneNumber))
             .ToListAsync(cancellationToken);
+
+    public async Task<Parent?> GetParentByEmail(
+        EmailAddress email,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .FirstOrDefaultAsync(
+                parent => parent.EmailAddress == email,
+                cancellationToken);
 
     public async Task<List<Family>> GetAll(
         CancellationToken cancellationToken = default) =>
@@ -91,9 +100,9 @@ internal sealed class FamilyRepository : IFamilyRepository
         await _context
             .Set<Family>()
             .AnyAsync(family => 
-                family.FamilyEmail.ToLower() == email.ToLower() ||
-                family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()
-            ), cancellationToken);
+                family.FamilyEmail == email ||
+                family.Parents.Any(parent => parent.EmailAddress == email)
+            , cancellationToken);
 
     public async Task<Dictionary<StudentId, bool>> GetStudentIdsFromFamilyWithEmail(
         string email,
@@ -102,7 +111,7 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Family>()
             .Where(family =>
                 family.FamilyEmail.ToLower() == email.ToLower() ||
-                family.Parents.Any(parent => parent.EmailAddress.ToLower() == email.ToLower()))
+                family.Parents.Any(parent => parent.EmailAddress == email))
             .SelectMany(family => family.Students)
             .ToDictionaryAsync(member => member.StudentId, member => member.IsResidentialFamily, cancellation);
 
@@ -111,7 +120,7 @@ internal sealed class FamilyRepository : IFamilyRepository
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<Parent>()
-            .CountAsync(parent => parent.EmailAddress.ToLower() == email.ToLower(), cancellationToken);
+            .CountAsync(parent => parent.EmailAddress == email, cancellationToken);
 
     public void Insert(Family family) =>
         _context.Set<Family>().Add(family);

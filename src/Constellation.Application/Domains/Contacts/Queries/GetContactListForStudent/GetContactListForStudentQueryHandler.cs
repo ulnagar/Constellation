@@ -124,17 +124,6 @@ internal sealed class GetContactListForStudentQueryHandler
 
         foreach (SchoolContact contact in contacts)
         {
-            Result<Name> contactName = Name.Create(contact.FirstName, null, contact.LastName);
-            if (contactName.IsFailure)
-                continue;
-
-            Result<EmailAddress> contactEmail = EmailAddress.Create(contact.EmailAddress);
-
-            if (contactEmail.IsFailure)
-                continue;
-
-            Result<PhoneNumber> contactPhone = PhoneNumber.Create(contact.PhoneNumber);
-
             foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
             {
                 ContactCategory category = role switch
@@ -151,9 +140,9 @@ internal sealed class GetContactListForStudentQueryHandler
                     enrolment.Grade,
                     enrolment.SchoolName,
                     category,
-                    contactName.Value.DisplayName,
-                    contactEmail.Value,
-                    contactPhone.IsSuccess ? contactPhone.Value : schoolPhone.Value,
+                    contact.Name.DisplayName,
+                    contact.EmailAddress,
+                    contact.PhoneNumber,
                     role.Note));
             }
         }
@@ -184,18 +173,6 @@ internal sealed class GetContactListForStudentQueryHandler
 
                 foreach (Parent parent in family.Parents)
                 {
-                    Result<Name> parentName = Name.Create(parent.FirstName, null, parent.LastName);
-
-                    if (parentName.IsFailure)
-                        continue;
-
-                    Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-
-                    if (parentEmail.IsFailure)
-                        continue;
-
-                    Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
-
                     ContactCategory category = parent.SentralLink switch
                     {
                         Parent.SentralReference.Father => ContactCategory.ResidentialFather,
@@ -209,9 +186,9 @@ internal sealed class GetContactListForStudentQueryHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         category,
-                        parentName.Value.DisplayName,
-                        parentEmail.Value,
-                        parentPhone.IsSuccess ? parentPhone.Value : null,
+                        parent.Name.DisplayName,
+                        parent.EmailAddress,
+                        parent.MobileNumber,
                         null));
                 }
             }
@@ -230,27 +207,15 @@ internal sealed class GetContactListForStudentQueryHandler
 
                 foreach (Parent parent in family.Parents)
                 {
-                    Result<Name> parentName = Name.Create(parent.FirstName, null, parent.LastName);
-
-                    if (parentName.IsFailure)
-                        continue;
-
-                    Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-
-                    if (parentEmail.IsFailure)
-                        continue;
-
-                    Result<PhoneNumber> parentPhone = PhoneNumber.Create(parent.MobileNumber);
-
                     result.Add(new(
                         student.StudentReferenceNumber,
                         student.Name,
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.NonResidentialParent,
-                        parentName.Value.DisplayName,
-                        parentEmail.Value,
-                        parentPhone.IsSuccess ? parentPhone.Value : null,
+                        parent.Name.DisplayName,
+                        parent.EmailAddress,
+                        parent.MobileNumber,
                         null));
                 }
             }

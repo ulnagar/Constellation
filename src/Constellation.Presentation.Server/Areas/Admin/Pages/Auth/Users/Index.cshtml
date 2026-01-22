@@ -1,76 +1,185 @@
-﻿@page "{SelectedUserType?}"
-@using Constellation.Application.Extensions
-@using Constellation.Application.Helpers
+﻿@page
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Auth.Users.IndexModel
+
+@using Constellation.Application.Domains.Auth.Queries.GetFilteredUsers
+@using Constellation.Application.Models.Auth
+@using Constellation.Application.Models.Identity.Enums
+@using Microsoft.AspNetCore.Authorization
+
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canEdit = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Admin_Authentication_Edit_Value);
+}
 
 <h3>User Management</h3>
 
 <div class="page-menu">
-    <a asp-page-handler="AuditAllUsers" class="btn btn-warning">Audit All Users</a>
+    @{
+        var allStyle = "btn-outline-secondary";
+        var contactStyle = allStyle;
+        var parentStyle = allStyle;
+        var familyStyle = allStyle;
+        var studentStyle = allStyle;
+        var staffStyle = allStyle;
+
+        switch (Model.Filter)
+        {
+            case UserFilter.All:
+                allStyle = "btn-primary";
+                break;
+            case UserFilter.School:
+                contactStyle = "btn-primary";
+                break;
+            case UserFilter.Staff:
+                staffStyle = "btn-primary";
+                break;
+            case UserFilter.Parent:
+                parentStyle = "btn-primary";
+                break;
+            case UserFilter.Family:
+                familyStyle = "btn-primary";
+                break;
+            case UserFilter.Student:
+                studentStyle = "btn-primary";
+                break;
+        }
+    }
+
+    <div class="btn-group">
+        <a asp-route-filter="@UserFilter.All" class="btn @allStyle">All</a>
+        <a asp-route-filter="@UserFilter.Staff" class="btn @staffStyle">Staff</a>
+        <a asp-route-filter="@UserFilter.Student" class="btn @studentStyle">Student</a>
+        <a asp-route-filter="@UserFilter.Family" class="btn @familyStyle">Family</a>
+        <a asp-route-filter="@UserFilter.Parent" class="btn @parentStyle">Parent</a>
+        <a asp-route-filter="@UserFilter.School" class="btn @contactStyle">School Contact</a>
+    </div>
+
+    @if (canEdit.Succeeded)
+    {
+        <a asp-page-handler="AuditAllUsers" class="btn btn-warning">Audit All Users</a>
+    }
 </div>
 
 <hr />
 
-<div class="d-flex">
-    <div class="w-25 p-2">
-        <h3>Users</h3>
+<h4>
+    @{
+        switch (Model.Filter)
+        {
+            case UserFilter.All:
+                @:All Users
+                break;
 
-        <a asp-route-selectedUserType="Staff" class="btn btn-success btn-block">Staff: @Model.StaffUserCount</a>
-        <a asp-route-selectedUserType="School" class="btn btn-success btn-block">School Contact: @Model.SchoolContactUserCount</a>
-        <a asp-route-selectedUserType="Parent" class="btn btn-success btn-block">Parent: @Model.ParentUserCount</a>
-        <a asp-route-selectedUserType="Student" class="btn btn-success btn-block">Student: @Model.StudentUserCount</a>
-    </div>
-    
-    <div class="w-75 ms-3 p-3">
-        <h4>@Model.SelectedUserType.GetDisplayName()</h4>
+            case UserFilter.School:
+                @:School Contact Users
+                break;
 
-        <table class="data-table table table-striped">
-            <thead>
+            case UserFilter.Staff:
+                @:Staff Member Users
+                break;
+
+            case UserFilter.Parent:
+                @:Parent Users
+                break;
+
+            case UserFilter.Family:
+                @:Family Users
+                break;
+           
+            case UserFilter.Student:
+                @:Student Users
+                break;
+        }
+    }
+</h4>
+
+<table class="table table-striped user-data-table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Access</th>
+            <th>Last Login</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
             <tr>
-                <th>User</th>
-                <th>Access</th>
-                <th>Last Login</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            @if (Model.Users.Any())
-            {
-                @foreach (var user in Model.Users.OrderBy(user => user.LastName))
-                {
-                    <tr>
-                        <td>
-                            @user.Name<br/>
-                            @user.Email
-                        </td>
-                        <td>
-                            @foreach (var role in user.Roles)
-                            {
-                                <span class="badge badge-secondary">@role</span>
-                            }
-                        </td>
-                        <td>
-                            @user.LastLoggedIn?.ToLocalTime()
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
-                                <div class="dropdown-menu">
-                                    <a asp-page="/Auth/Users/Details" asp-area="Admin" asp-route-emailAddress="@user.Email" class="dropdown-item">View Info...</a>
-                                    <a asp-page-handler="Audit" asp-route-userId="@user.Id" class="dropdown-item">Audit Access</a>
-                                </div>
+                <td data-order="@user.Name.SortOrder">
+                    @user.Name<br/>
+                    <em>@user.Email</em>
+                </td>
+                <td>
+                    @foreach (var link in user.Links)
+                    {
+                        if (link.Type == LinkType.Staff)
+                        {
+                            <a asp-page="/Partner/Staff/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0 me-1" tooltip="Id: @link.LinkId">Staff</a>
+                        }
+
+                        if (link.Type == LinkType.Student)
+                        {
+                            <a asp-page="/Partner/Students/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0 me-1" tooltip="Id: @link.LinkId">Student</a>
+                        }
+
+                        if (link.Type == LinkType.Contact)
+                        {
+                            <a asp-page="/Partner/Schools/Contacts/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0 me-1" tooltip="Id: @link.LinkId">Contact</a>
+                        }
+
+                        if (link.Type == LinkType.Family)
+                        {
+                            <a asp-page="/Partner/Students/Families/Details" asp-area="Staff" asp-route-id="@link.LinkId" class="badge bg-primary link-underline link-underline-opacity-0 me-1" tooltip="Id: @link.LinkId">Family</a>
+                        }
+
+                        if (link.Type == LinkType.Parent)
+                        {
+                            <span class="badge bg-primary me-1" tooltip="Id: @link.LinkId">Parent</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @{
+                        var lastLoggedIn = user.Logins.OrderByDescending(login => login.LoginDateTime).FirstOrDefault()?.LoginDateTime ?? DateTime.MinValue;
+
+                        if (lastLoggedIn > DateTime.MinValue)
+                        {
+                            <span>@lastLoggedIn.ToLocalTime()</span>
+                        }
+                    }
+                </td>
+                <td>
+                    @if (canEdit.Succeeded)
+                    {
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-warning dropdown-toggle btn-show-hover" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Actions</button>
+                            <div class="dropdown-menu">
+                                <a asp-page="/Auth/Users/Details" asp-area="Admin" asp-route-id="@user.Id" class="dropdown-item">View Info...</a>
+                                <a asp-page-handler="Audit" asp-route-userId="@user.Id" class="dropdown-item">Audit Access</a>
                             </div>
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="4">No Items Found!</td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
-</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-page="/Auth/Users/Details" asp-area="Admin" asp-route-id="@user.Id" class="btn btn-primary btn-show-hover">More Info...</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function (){
+            $('.user-data-table').DataTable({
+                "order": [
+                    [0, 'asc']
+                ]
+            });
+        });
+    </script>
+}

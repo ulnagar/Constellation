@@ -5,7 +5,7 @@
 @inject IAuthorizationService authService
 
 @{
-    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanManageSchoolContacts);
+    var authorised = await authService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_Edit_Value);
 }
 <h2>School Contacts by School</h2>
 

@@ -2,12 +2,11 @@
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Subject.Courses.DetailsModel
 
 @using Constellation.Core.Extensions
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSubjects);
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPermission.Subjects_Courses_Edit_Value);
 }
 
 <h2>Course Details</h2>

@@ -4,17 +4,17 @@ using Application.Common.PresentationModels;
 using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Domains.Training.Queries.GetModuleStatusByStaffMember;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanRunTrainingModuleReports)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_ViewAll_Value)]
 public class StaffMemberModel : BasePageModel
 {
     private readonly ISender _mediator;

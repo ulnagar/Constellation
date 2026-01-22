@@ -12,5 +12,13 @@ internal class AuditConfiguration : IEntityTypeConfiguration<Audit>
 
         builder
             .HasKey(audit => audit.Id);
+
+        builder
+            .Property(entry => entry.OldValues)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.AffectedColumns)
+            .IsRequired(false);
     }
 }

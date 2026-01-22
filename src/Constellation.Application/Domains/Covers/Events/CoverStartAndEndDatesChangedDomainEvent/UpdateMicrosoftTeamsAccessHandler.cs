@@ -1,17 +1,21 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverStartAndEndDatesChangedDomainEvent;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
-using Application.Models.Identity;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
+using Constellation.Core.Models.StaffMembers;
+using Constellation.Core.Models.StaffMembers.Errors;
+using Constellation.Core.Models.StaffMembers.ValueObjects;
 using Core.Enums;
 using Core.Models;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
+using Interfaces.Configuration;
 using Interfaces.Repositories;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -25,26 +29,29 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMSTeamOperationsRepository _operationsRepository;
     private readonly ICoverRepository _coverRepository;
-    private readonly UserManager<AppUser> _userManager;
+    private readonly AppConfiguration _configuration;
+    private readonly IStaffRepository _staffRepository;
     private readonly ILogger _logger;
 
     public UpdateMicrosoftTeamsAccessHandler(
         IUnitOfWork unitOfWork,
         IMSTeamOperationsRepository operationsRepository,
         ICoverRepository coverRepository,
-        UserManager<AppUser> userManager,
+        IOptions<AppConfiguration> configuration,
+        IStaffRepository staffRepository,
         ILogger logger)
     {
         _unitOfWork = unitOfWork;
         _operationsRepository = operationsRepository;
         _coverRepository = coverRepository;
-        _userManager = userManager;
+        _configuration = configuration.Value;
+        _staffRepository = staffRepository;
         _logger = logger.ForContext<CoverStartAndEndDatesChangedDomainEvent>();
     }
 
     public async Task Handle(CoverStartAndEndDatesChangedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Cover cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
+        Cover? cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
 
         if (cover is null)
         {
@@ -52,14 +59,11 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
 
             return;
         }
-
-        // Cover administrators
-        IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
+        
         List<MSTeamOperation> existingRequests = await _operationsRepository
             .GetByCoverId(notification.CoverId, cancellationToken);
 
-        if (existingRequests is null)
+        if (existingRequests.Count == 0)
         {
             _logger.Warning("{action}: Could not find operations for cover with Id {id} in database", nameof(Events.CoverEndDateChangedDomainEvent.UpdateMicrosoftTeamsAccessHandler), notification.CoverId);
 
@@ -95,7 +99,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
 
         // If access has not been granted, change the operation
         // If it has, determine whether there is a big enough difference to remove access and then grant later or just leave it
-        MSTeamOperation alreadyGranted = addRequests.FirstOrDefault(operation => operation.IsCompleted);
+        MSTeamOperation? alreadyGranted = addRequests.FirstOrDefault(operation => operation.IsCompleted);
 
         if (alreadyGranted is null)
         {
@@ -106,15 +110,25 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 request.DateScheduled = newActionDate;
             }
 
-            foreach (AppUser coverAdmin in additionalRecipients)
+            foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
             {
-                if (!coverAdmin.IsStaffMember)
-                    continue;
+                StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
 
-                TeacherMSTeamOperation existingAddOperation = existingRequests
+                if (teacher is null)
+                {
+                    _logger
+                        .ForContext(nameof(CoverStartAndEndDatesChangedDomainEvent), notification, true)
+                        .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                        .ForContext(nameof(EmployeeId), employeeId)
+                        .Warning("Failed to update Cover Teams Access");
+
+                    continue;
+                }
+
+                TeacherMSTeamOperation? existingAddOperation = existingRequests
                     .OfType<TeacherMSTeamOperation>()
                     .FirstOrDefault(operation =>
-                        operation.StaffId == coverAdmin.StaffId &&
+                        operation.StaffId == teacher.Id &&
                         operation.Action == MSTeamOperationAction.Add);
 
                 if (existingAddOperation is not null)
@@ -189,15 +203,25 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     _operationsRepository.Insert(addTimelyOperation);
                 }
 
-                foreach (AppUser coverAdmin in additionalRecipients)
+                foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
                 {
-                    if (!coverAdmin.IsStaffMember)
-                        continue;
+                    StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
 
-                    TeacherMSTeamOperation existingAddOperation = existingRequests
+                    if (teacher is null)
+                    {
+                        _logger
+                            .ForContext(nameof(CoverStartAndEndDatesChangedDomainEvent), notification, true)
+                            .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                            .ForContext(nameof(EmployeeId), employeeId)
+                            .Warning("Failed to update Cover Teams Access");
+
+                        continue;
+                    }
+
+                    TeacherMSTeamOperation? existingAddOperation = existingRequests
                         .OfType<TeacherMSTeamOperation>()
                         .FirstOrDefault(operation =>
-                            operation.StaffId == coverAdmin.StaffId &&
+                            operation.StaffId == teacher.Id &&
                             operation.Action == MSTeamOperationAction.Add &&
                             operation.DateScheduled == alreadyGranted.DateScheduled);
 
@@ -208,7 +232,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                         TeacherMSTeamOperation removeOperation = new()
                         {
                             OfferingId = cover.OfferingId,
-                            StaffId = coverAdmin.StaffId,
+                            StaffId = teacher.Id,
                             Action = MSTeamOperationAction.Remove,
                             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                             DateScheduled = DateTime.Today,
@@ -221,7 +245,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation addOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = coverAdmin.StaffId,
+                        StaffId = teacher.Id,
                         Action = MSTeamOperationAction.Add,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,
@@ -234,7 +258,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
         }
 
         // Process removal
-        MSTeamOperation alreadyRemoved = removeRequests.FirstOrDefault(operation => operation.IsCompleted);
+        MSTeamOperation? alreadyRemoved = removeRequests.FirstOrDefault(operation => operation.IsCompleted);
 
         if (alreadyRemoved is null)
         {
@@ -245,15 +269,25 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                 request.DateScheduled = newActionDate;
             }
 
-            foreach (AppUser coverAdmin in additionalRecipients)
+            foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
             {
-                if (!coverAdmin.IsStaffMember)
-                    continue;
+                StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
 
-                TeacherMSTeamOperation existingRemoveOperation = existingRequests
+                if (teacher is null)
+                {
+                    _logger
+                        .ForContext(nameof(CoverStartAndEndDatesChangedDomainEvent), notification, true)
+                        .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                        .ForContext(nameof(EmployeeId), employeeId)
+                        .Warning("Failed to update Cover Teams Access");
+
+                    continue;
+                }
+
+                TeacherMSTeamOperation? existingRemoveOperation = existingRequests
                     .OfType<TeacherMSTeamOperation>()
                     .FirstOrDefault(operation =>
-                        operation.StaffId == coverAdmin.StaffId &&
+                        operation.StaffId == teacher.Id &&
                         operation.Action == MSTeamOperationAction.Remove);
 
                 if (existingRemoveOperation is not null)
@@ -329,15 +363,25 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     _operationsRepository.Insert(removeTimelyOperation);
                 }
 
-                foreach (AppUser coverAdmin in additionalRecipients)
+                foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
                 {
-                    if (!coverAdmin.IsStaffMember)
-                        continue;
+                    StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
 
-                    TeacherMSTeamOperation existingRemoveOperation = existingRequests
+                    if (teacher is null)
+                    {
+                        _logger
+                            .ForContext(nameof(CoverStartAndEndDatesChangedDomainEvent), notification, true)
+                            .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                            .ForContext(nameof(EmployeeId), employeeId)
+                            .Warning("Failed to update Cover Teams Access");
+
+                        continue;
+                    }
+
+                    TeacherMSTeamOperation? existingRemoveOperation = existingRequests
                         .OfType<TeacherMSTeamOperation>()
                         .FirstOrDefault(operation =>
-                            operation.StaffId == coverAdmin.StaffId &&
+                            operation.StaffId == teacher.Id &&
                             operation.Action == MSTeamOperationAction.Remove &&
                             operation.DateScheduled == alreadyRemoved.DateScheduled);
 
@@ -348,7 +392,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                         TeacherMSTeamOperation addOperation = new()
                         {
                             OfferingId = cover.OfferingId,
-                            StaffId = coverAdmin.StaffId,
+                            StaffId = teacher.Id,
                             Action = MSTeamOperationAction.Add,
                             PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                             DateScheduled = DateTime.Now,
@@ -361,7 +405,7 @@ internal sealed class UpdateMicrosoftTeamsAccessHandler
                     TeacherMSTeamOperation removeOperation = new()
                     {
                         OfferingId = cover.OfferingId,
-                        StaffId = coverAdmin.StaffId,
+                        StaffId = teacher.Id,
                         Action = MSTeamOperationAction.Remove,
                         PermissionLevel = MSTeamOperationPermissionLevel.Owner,
                         DateScheduled = newActionDate,

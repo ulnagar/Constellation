@@ -34,8 +34,17 @@ internal sealed class SchoolContactRoleConfiguration : IEntityTypeConfiguration<
                 role => role.Value,
                 value => Position.FromValue(value));
 
-        builder.HasOne<School>()
+        builder
+            .HasOne<School>()
             .WithMany(s => s.StaffAssignments)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder
+            .Property(entry => entry.Note)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.SchoolCode)
+            .IsRequired(false);
     }
 }

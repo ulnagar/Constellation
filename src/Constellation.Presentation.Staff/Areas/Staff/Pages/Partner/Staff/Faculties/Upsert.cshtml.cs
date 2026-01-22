@@ -10,13 +10,13 @@ using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanEditFaculties)]
+[HasPermission(AuthPermission.Partners_Faculties_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

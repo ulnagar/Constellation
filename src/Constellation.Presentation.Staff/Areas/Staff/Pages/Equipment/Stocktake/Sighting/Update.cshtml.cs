@@ -17,19 +17,18 @@ using Constellation.Core.Models.Assets.Errors;
 using Constellation.Core.Models.Assets.ValueObjects;
 using Constellation.Core.Models.StaffMembers.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Models.Stocktake.Enums;
 using Core.Models.Stocktake.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
-using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Stocktake_Submit_Value)]
 public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -52,10 +52,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                             b1.IsRequired();
 
                             b1.Property<string>("Email")
+                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Email");
 
                             b1.Property<string>("Name")
+                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Name");
                         });
@@ -80,45 +82,31 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NewValues")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OldValues")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PrimaryKey")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TypeName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Audit", (string)null);
-                });
-
-            modelBuilder.Entity("Constellation.Application.Models.Identity.AppAccessToken", b =>
-                {
-                    b.Property<Guid>("AccessToken")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Expiry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("MapToUser")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RedirectTo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("AccessToken");
-
-                    b.ToTable("AspNetAccessTokens");
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.Identity.AppRole", b =>
@@ -138,6 +126,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -169,27 +161,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FirstName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsParent")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSchoolContact")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsStaffMember")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsStudent")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastLoggedIn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -213,17 +184,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("SchoolContactId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("StaffId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -231,6 +193,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Application.Models.Identity.AppUser.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+
+                            b1.Property<string>("PreferredName")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PreferredName");
+                        });
 
                     b.HasKey("Id");
 
@@ -243,6 +224,67 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("LinkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AspNetUserLinks", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLoginAttempt", b =>
+                {
+                    b.Property<Guid>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LoginDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AppUserId", "LoginDateTime");
+
+                    b.ToTable("AspNetUserLoginAttempts", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Application.Models.JobActivation", b =>
@@ -258,15 +300,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("bit");
 
                     b.Property<string>("JobName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("JobName")
-                        .IsUnique()
-                        .HasFilter("[JobName] IS NOT NULL");
+                        .IsUnique();
 
-                    b.ToTable("JobActivations");
+                    b.ToTable("JobActivations", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -278,9 +320,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("AbsenceReason")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AbsenceTimeframe")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("Date")
@@ -299,12 +343,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PeriodName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PeriodTimeframe")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Source")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SourceId")
@@ -317,6 +364,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -331,7 +379,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AbsenceId")
+                    b.Property<Guid>("AbsenceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("ConfirmedDelivered")
@@ -344,6 +392,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Message")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OutgoingId")
@@ -356,6 +405,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -370,7 +420,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AbsenceId")
+                    b.Property<Guid>("AbsenceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Explanation")
@@ -386,12 +436,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VerificationComment")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VerificationStatus")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("VerifiedAt")
@@ -426,14 +478,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -443,7 +493,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ResponsibleOfficer")
@@ -481,14 +530,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -510,7 +557,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PurchaseCost")
@@ -571,7 +617,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("CurrentLocation")
@@ -581,7 +626,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("DepartureDate")
@@ -594,7 +638,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Room")
@@ -630,14 +673,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -651,7 +692,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -714,6 +754,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UnlockDate")
@@ -741,6 +782,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SubmittedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("SubmittedOn")
@@ -764,6 +806,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Checksum")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -779,6 +822,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("FileType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LinkId")
@@ -790,6 +834,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1021,6 +1066,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("decimal(5,2)");
 
                     b.Property<string>("PeriodLabel")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("StartDate")
@@ -1091,15 +1137,19 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Body")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CcAddresses")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FromAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nominations")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("PeriodId")
@@ -1109,12 +1159,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Subject")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ToAddresses")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1133,6 +1186,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("date");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1162,6 +1216,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Category")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IncidentId")
@@ -1177,6 +1232,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1209,6 +1265,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
@@ -1221,6 +1278,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
                     b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.Casuals.Casual.Name#Name", b1 =>
@@ -1245,8 +1303,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasKey("Id");
 
                     b.HasIndex("EmailAddress")
-                        .IsUnique()
-                        .HasFilter("[EmailAddress] IS NOT NULL");
+                        .IsUnique();
 
                     b.HasIndex("SchoolCode");
 
@@ -1294,9 +1351,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("date");
 
                     b.Property<string>("TeacherId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TeacherType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1328,9 +1387,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Make")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Model")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
@@ -1359,6 +1420,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("bit");
 
                     b.Property<string>("SerialNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("StudentId")
@@ -1385,16 +1447,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Details")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SerialNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes");
+                    b.ToTable("DeviceNotes", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -1403,18 +1467,22 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Identifier")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Ignored")
                         .HasColumnType("bit");
 
                     b.Property<string>("System")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1428,9 +1496,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClassCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Form")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("EdvalClassCode");
@@ -1447,6 +1517,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClassCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId", "EdvalClassCode");
@@ -1477,6 +1548,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasAnnotation("Relational:JsonPropertyName", "StudentId");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Email");
 
@@ -1485,14 +1557,17 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasAnnotation("Relational:JsonPropertyName", "EndDate");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "FirstName");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Gender");
 
                     b.Property<string>("Grade")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Form");
 
@@ -1501,6 +1576,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasAnnotation("Relational:JsonPropertyName", "House");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Surname");
 
@@ -1543,22 +1619,27 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DisplayName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Email");
 
                     b.Property<string>("Faculty")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Surname");
 
@@ -1570,12 +1651,15 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StaffType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TeacherCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TeacherId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -1596,12 +1680,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClassCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("DayNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("Period")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoomCode")
@@ -1611,15 +1697,136 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TeacherId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Timetable")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "TtStructure");
 
                     b.HasKey("Id");
 
                     b.ToTable("Timetable", "Edval");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SentBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MessageEvents", "EmergencyConsole");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEventRecipient", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RecipientAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RecipientName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("MessageRecipients", "EmergencyConsole");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Template")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TemplateType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Templates", "EmergencyConsole");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.QueuedMessage", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.ComplexProperty<Dictionary<string, object>>("AlertRecipient", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("EmailAddress")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("EmailAddress");
+
+                            b1.Property<string>("PhoneNumber")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PhoneNumber");
+
+                            b1.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient.Name#Name", b2 =>
+                                {
+                                    b2.IsRequired();
+
+                                    b2.Property<string>("FirstName")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("FirstName");
+
+                                    b2.Property<string>("LastName")
+                                        .IsRequired()
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("LastName");
+
+                                    b2.Property<string>("PreferredName")
+                                        .HasColumnType("nvarchar(max)")
+                                        .HasColumnName("PreferredName");
+                                });
+                        });
+
+                    b.HasKey("EventId", "MessageId");
+
+                    b.ToTable("Queue", "EmergencyConsole");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
@@ -1673,6 +1880,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Colour")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1697,6 +1905,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -1734,6 +1943,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StaffId")
@@ -1773,14 +1983,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FamilyEmail")
@@ -1798,7 +2006,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SentralId")
@@ -1822,14 +2029,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("MobileNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1844,6 +2043,21 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.Families.Parent.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+                        });
 
                     b.HasKey("Id");
 
@@ -1900,6 +2114,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("StartDate")
@@ -2075,9 +2290,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("EmbedCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Issue");
@@ -2098,9 +2315,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("bit");
 
                     b.Property<string>("Link")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2142,7 +2361,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasKey("Id");
 
-                    b.ToTable("MSTeamOperations");
+                    b.ToTable("MSTeamOperations", (string)null);
 
                     b.HasDiscriminator<string>("UserType").HasValue("MSTeamOperation");
 
@@ -2180,6 +2399,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("OfferingId")
@@ -2193,6 +2413,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2280,6 +2501,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2317,6 +2539,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2369,15 +2592,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PublishId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ReportingPeriod")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Year")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2399,6 +2625,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2420,6 +2647,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2434,18 +2662,22 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Directorate")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EducationalServicesTeam")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FaxNumber")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
@@ -2459,28 +2691,34 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("float");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("PostCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PrincipalNetwork")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RollCallGroup")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("State")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TimetableApplication")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Town")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Website")
@@ -2509,16 +2747,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("datetime2");
@@ -2527,11 +2760,30 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("SelfRegistered")
                         .HasColumnType("bit");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.SchoolContacts.SchoolContact.Name#Name", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("LastName");
+
+                            b1.Property<string>("PreferredName")
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("PreferredName");
+                        });
 
                     b.HasKey("Id");
 
@@ -2568,6 +2820,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolCode")
@@ -2577,6 +2830,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SchoolName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2628,6 +2882,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasDefaultValue(13);
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2674,6 +2929,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("SubmittedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("SubmittedDate")
@@ -2722,6 +2978,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<string>("SchoolName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StaffId")
@@ -2760,12 +3017,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmployeeId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -2778,6 +3037,10 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.StaffMembers.StaffMember.Name#Name", b1 =>
@@ -2817,6 +3080,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StaffId", "System");
@@ -2830,6 +3094,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Category")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("EventId")
@@ -2862,6 +3127,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -2899,12 +3165,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("bit");
 
                     b.Property<string>("LocationCategory")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LocationCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LocationName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SerialNumber")
@@ -2914,6 +3182,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SightedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StocktakeEventId")
@@ -2923,9 +3192,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -2941,6 +3212,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AbsenceType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("CalendarYear")
@@ -3038,9 +3310,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<string>("SchoolName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("StartDate")
@@ -3079,12 +3353,14 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("IndigenousStatus")
+                    b.Property<int>("IndigenousStatus")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -3097,6 +3373,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PreferredGender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentReferenceNumber")
@@ -3136,6 +3413,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Value")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId", "System");
@@ -3164,6 +3442,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("TargetMinutesPerCycle")
@@ -3194,14 +3473,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("InformationCollected")
@@ -3215,7 +3492,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -3251,15 +3527,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("bit");
 
                     b.Property<string>("Method")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MethodNotes")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ProvidedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ProvidedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StudentId")
@@ -3293,14 +3572,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
@@ -3314,7 +3591,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
@@ -3397,7 +3673,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Day")
@@ -3408,7 +3683,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<TimeSpan>("EndTime")
@@ -3421,7 +3695,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -3525,6 +3798,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
@@ -3559,14 +3833,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Grade")
@@ -3583,7 +3855,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PeriodIds")
@@ -3671,6 +3942,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("TeamId")
@@ -3680,6 +3952,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Url")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -3719,6 +3992,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateOnly>("StartDate")
@@ -3802,14 +4076,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -3819,7 +4091,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ParentActionId")
@@ -3847,16 +4118,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ActionId")
+                    b.Property<Guid>("ActionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("SubmittedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SubmittedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -3875,14 +4148,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DeletedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("DetailId")
@@ -3898,7 +4169,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -3947,6 +4217,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
@@ -4108,6 +4379,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
@@ -4118,6 +4390,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4135,6 +4408,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
@@ -4145,6 +4419,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4162,6 +4437,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
@@ -4172,6 +4448,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4189,6 +4466,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
@@ -4199,6 +4477,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4216,6 +4495,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
@@ -4226,6 +4506,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4243,6 +4524,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Awards.Nomination");
 
                     b.Property<string>("ClassName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ClassName");
@@ -4253,6 +4535,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4275,6 +4558,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4297,6 +4581,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4319,6 +4604,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("CourseId");
 
                     b.Property<string>("CourseName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CourseName");
@@ -4357,6 +4643,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Covers.Cover");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("AccessCover");
@@ -4401,6 +4688,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
@@ -4414,9 +4702,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
 
                     b.Property<string>("TeamDescription")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
@@ -4449,12 +4739,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("MSTeamOperations", t =>
+                    b.ToTable("MSTeamOperations", null, t =>
                         {
                             t.Property("StudentId")
                                 .HasColumnName("StudentEnrolledMSTeamOperation_StudentId");
@@ -4473,6 +4764,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("StudentId");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
@@ -4512,6 +4804,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("StaffId");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
@@ -4529,10 +4822,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("StaffId");
 
-                    b.Property<Guid?>("StaffId1")
+                    b.Property<Guid>("StaffId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
@@ -4548,9 +4842,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.MSTeamOperation");
 
                     b.Property<string>("TeamDescription")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TeamName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)");
 
@@ -4559,7 +4855,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("TutorialId");
 
-                    b.ToTable("MSTeamOperations", t =>
+                    b.ToTable("MSTeamOperations", null, t =>
                         {
                             t.Property("TeamDescription")
                                 .HasColumnName("TutorialCreatedMSTeamOperation_TeamDescription");
@@ -4591,15 +4887,19 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.CanvasOperation");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PortalUsername")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("PortalUsername");
@@ -4619,6 +4919,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.CanvasOperation");
 
                     b.Property<string>("Action")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CourseId")
@@ -4630,6 +4931,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("ModifyEnrolment");
@@ -4640,6 +4942,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.CanvasOperation");
 
                     b.Property<string>("PortalUsername")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("PortalUsername");
@@ -4652,6 +4955,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.TeamOperation");
 
                     b.Property<string>("ChannelName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ChannelName");
@@ -4684,6 +4988,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Name");
@@ -4701,9 +5006,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.TeamOperation");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Name");
@@ -4716,11 +5023,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.TeamOperation");
 
                     b.Property<string>("Action")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Action");
 
                     b.Property<string>("ChannelName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ChannelName");
@@ -4731,6 +5040,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("TeamId");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("UserId");
@@ -4743,6 +5053,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.Operations.TeamOperation");
 
                     b.Property<string>("Action")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Action");
@@ -4753,6 +5064,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("TeamId");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("UserId");
@@ -4944,6 +5256,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("Grade");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Name");
@@ -4961,19 +5274,23 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PeriodLabel")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SchoolCode");
 
                     b.Property<string>("SchoolName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SchoolName");
 
                     b.Property<string>("Severity")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("StudentId")
@@ -4989,6 +5306,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasBaseType("Constellation.Core.Models.WorkFlow.CaseDetail");
 
                     b.Property<string>("CreatedBy")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("CreatedById")
@@ -5003,22 +5321,27 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("Grade");
 
                     b.Property<string>("IncidentId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IncidentType")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Name");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SchoolCode");
 
                     b.Property<string>("SchoolName")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("SchoolName");
@@ -5029,6 +5352,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("StudentId");
 
                     b.Property<string>("Subject")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasDiscriminator().HasValue("ComplianceCaseDetail");
@@ -5043,10 +5367,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnName("DueDate");
 
                     b.Property<string>("ModuleName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ModuleName");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Name");
@@ -5093,7 +5419,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("MSTeamOperations", t =>
+                    b.ToTable("MSTeamOperations", null, t =>
                         {
                             t.Property("StudentId")
                                 .HasColumnName("StudentMSTeamOperation_StudentId");
@@ -5111,13 +5437,31 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("StaffId");
 
-                    b.ToTable("MSTeamOperations", t =>
+                    b.ToTable("MSTeamOperations", null, t =>
                         {
                             t.Property("StaffId")
                                 .HasColumnName("TeacherMSTeamOperation_StaffId");
                         });
 
                     b.HasDiscriminator().HasValue("Teacher");
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLink", b =>
+                {
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
+                        .WithMany("Links")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUserLoginAttempt", b =>
+                {
+                    b.HasOne("Constellation.Application.Models.Identity.AppUser", null)
+                        .WithMany("Logins")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -5133,14 +5477,18 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.HasOne("Constellation.Core.Models.Absences.Absence", null)
                         .WithMany("Notifications")
-                        .HasForeignKey("AbsenceId");
+                        .HasForeignKey("AbsenceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Response", b =>
                 {
                     b.HasOne("Constellation.Core.Models.Absences.Absence", null)
                         .WithMany("Responses")
-                        .HasForeignKey("AbsenceId");
+                        .HasForeignKey("AbsenceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assets.Allocation", b =>
@@ -5211,7 +5559,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanFreePeriod", "FreePeriods", b1 =>
+                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlan.FreePeriods#Constellation.Core.Models.Attendance.AttendancePlanFreePeriod", "FreePeriods", b1 =>
                         {
                             b1.Property<Guid>("AttendancePlanId")
                                 .HasColumnType("uniqueidentifier");
@@ -5249,7 +5597,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasForeignKey("AttendancePlanId");
                         });
 
-                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanMissedLesson", "MissedLessons", b1 =>
+                    b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlan.MissedLessons#Constellation.Core.Models.Attendance.AttendancePlanMissedLesson", "MissedLessons", b1 =>
                         {
                             b1.Property<Guid>("AttendancePlanId")
                                 .HasColumnType("uniqueidentifier");
@@ -5379,7 +5727,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.School", null)
                         .WithMany()
                         .HasForeignKey("SchoolCode")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Covers.Cover", b =>
@@ -5395,7 +5744,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.HasOne("Constellation.Core.Models.Device", "Device")
                         .WithMany("Allocations")
-                        .HasForeignKey("SerialNumber");
+                        .HasForeignKey("SerialNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Constellation.Core.Models.Students.Student", "Student")
                         .WithMany()
@@ -5412,9 +5763,20 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.HasOne("Constellation.Core.Models.Device", "Device")
                         .WithMany("Notes")
-                        .HasForeignKey("SerialNumber");
+                        .HasForeignKey("SerialNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Device");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEventRecipient", b =>
+                {
+                    b.HasOne("Constellation.Core.Models.EmergencyConsole.MessageEvent", null)
+                        .WithMany("Recipients")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Enrolments.Enrolment", b =>
@@ -5724,7 +6086,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.School", null)
                         .WithMany()
                         .HasForeignKey("SchoolCode")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Constellation.Core.Models.Students.Student", null)
                         .WithMany("SchoolEnrolments")
@@ -5815,7 +6178,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.OwnsOne("Constellation.Core.Models.Tutorials.RequestPlan", "Plan", b1 =>
+                    b.OwnsOne("Constellation.Core.Models.Tutorials.Request.Plan#Constellation.Core.Models.Tutorials.RequestPlan", "Plan", b1 =>
                         {
                             b1.Property<Guid>("RequestId")
                                 .HasColumnType("uniqueidentifier");
@@ -5901,7 +6264,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.WorkFlow.Action", null)
                         .WithMany("Notes")
                         .HasForeignKey("ActionId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.CaseDetail", b =>
@@ -6073,7 +6437,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasOne("Constellation.Core.Models.StaffMembers.StaffMember", "Staff")
                         .WithMany()
-                        .HasForeignKey("StaffId1");
+                        .HasForeignKey("StaffId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Staff");
                 });
@@ -6105,7 +6471,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.WorkFlow.SendEmailAction", b =>
                 {
-                    b.OwnsMany("Constellation.Core.ValueObjects.EmailRecipient", "Recipients", b1 =>
+                    b.OwnsMany("Constellation.Core.Models.WorkFlow.SendEmailAction.Recipients#Constellation.Core.ValueObjects.EmailRecipient", "Recipients", b1 =>
                         {
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -6114,10 +6480,12 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                             SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
 
                             b1.Property<string>("Email")
+                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Email");
 
                             b1.Property<string>("Name")
+                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("Name");
 
@@ -6134,22 +6502,24 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasForeignKey("OwnerId");
                         });
 
-                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "Sender", b1 =>
+                    b.OwnsOne("Constellation.Core.Models.WorkFlow.SendEmailAction.Sender#Constellation.Core.ValueObjects.EmailRecipient", "Sender", b1 =>
                         {
                             b1.Property<Guid>("SendEmailActionId")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Email")
+                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("SenderEmail");
 
                             b1.Property<string>("Name")
+                                .IsRequired()
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("SenderName");
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions");
+                            b1.ToTable("WorkFlows_Actions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");
@@ -6191,6 +6561,13 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired();
 
                     b.Navigation("Staff");
+                });
+
+            modelBuilder.Entity("Constellation.Application.Models.Identity.AppUser", b =>
+                {
+                    b.Navigation("Links");
+
+                    b.Navigation("Logins");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -6237,6 +6614,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Navigation("Allocations");
 
                     b.Navigation("Notes");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.EmergencyConsole.MessageEvent", b =>
+                {
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Faculties.Faculty", b =>
@@ -6314,7 +6696,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.Navigation("AbsenceConfigurations");
 
-                    b.Navigation("AwardTally");
+                    b.Navigation("AwardTally")
+                        .IsRequired();
 
                     b.Navigation("SchoolEnrolments");
 

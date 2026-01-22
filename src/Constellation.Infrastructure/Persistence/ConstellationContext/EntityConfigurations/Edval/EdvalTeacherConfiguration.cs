@@ -12,5 +12,25 @@ internal class EdvalTeacherConfiguration : IEntityTypeConfiguration<EdvalTeacher
 
         builder
             .HasKey(entity => entity.UniqueId);
+
+        builder
+            .Property(entry => entry.Title)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.PreferredName)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.Gender)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.DaysAvailable)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.PhoneNumber)
+            .IsRequired(false);
     }
 }

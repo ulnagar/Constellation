@@ -10,6 +10,7 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Services;
+using MimeKit;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,6 +79,6 @@ internal sealed class SendNotificationToSchoolAdminOfSelfRegisteredContact
 
         List<EmailRecipient> toRecipients = [EmailRecipient.AuroraCollege, EmailRecipient.InfoTechTeam];
 
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "New School Contact registered", body, cancellationToken);
+        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "New School Contact registered", body, MessagePriority.Normal, cancellationToken);
     }
 }

@@ -6,10 +6,13 @@
 @using Constellation.Core.Models.Attendance.Enums
 @using Constellation.Core.Models.Timetables.Enums
 @using Constellation.Presentation.Schools.Areas.Schools.Pages.Absences.Plans
+@inject IAuthorizationService authorizationService
 
 @{
+    var editPermissions = await authorizationService.AuthorizeAsync(User, AuthPermission.SchoolsPortal_Absences_Edit_Value);
+
     var viewMode = Model.Mode == DetailsModel.PageMode.View;
-    var allowEdit = Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing;
+    var allowEdit = editPermissions.Succeeded && (Model.Plan.Status == AttendancePlanStatus.Pending || Model.Plan.Status == AttendancePlanStatus.Processing);
     var allowVersioning = Model.Plan.Status == AttendancePlanStatus.Accepted;
     var missedLessonFieldIndex = 0;
     var freePeriodFieldIndex = 0;

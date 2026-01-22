@@ -4,9 +4,11 @@ using Application.Common.PresentationModels;
 using Application.Domains.SchoolContacts.Commands.CreateContactWithRole;
 using Application.Domains.Schools.Queries.GetSchoolById;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Enums;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,9 +17,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Contacts_Edit_Value)]
 public class CreateModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -31,8 +34,9 @@ public class CreateModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;
@@ -52,10 +56,12 @@ public class CreateModel : BasePageModel
     public string LastName { get; set; }
 
     [BindProperty]
-    public string? PhoneNumber { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public PhoneNumber? PhoneNumber { get; set; } = PhoneNumber.Empty;
 
     [BindProperty]
-    public string EmailAddress { get; set; }
+    [ModelBinder(typeof(FromValueBinder))]
+    public EmailAddress EmailAddress { get; set; } = EmailAddress.None;
 
     [BindProperty]
     public Position Position { get; set; }
@@ -108,7 +114,7 @@ public class CreateModel : BasePageModel
             FirstName,
             LastName,
             EmailAddress,
-            PhoneNumber,
+            PhoneNumber ?? PhoneNumber.Empty,
             Position,
             SchoolCode,
             string.Empty,

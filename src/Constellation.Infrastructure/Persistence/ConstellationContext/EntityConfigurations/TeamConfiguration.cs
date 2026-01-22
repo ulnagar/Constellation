@@ -11,5 +11,9 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.ToTable("LinkedSystems_Teams");
 
         builder.HasKey(team => team.Id);
+
+        builder
+            .Property(team => team.Description)
+            .IsRequired(false);
     }
 }

@@ -69,7 +69,7 @@ public class CompletionRecordExtendedDetailsDto
     public void AddPrincipalDetails(SchoolContact principal, School school)
     {
         Result<EmailRecipient> request = EmailRecipient.Create(
-            principal.DisplayName,
+            principal.Name,
             principal.EmailAddress);
 
         if (request.IsFailure)

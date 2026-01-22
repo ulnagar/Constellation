@@ -19,5 +19,13 @@ internal sealed class InterviewAttendeeConfiguration : IEntityTypeConfiguration<
             .HasConversion(
                 id => id.Value,
                 value => InterviewAttendeeId.FromValue(value));
+
+        builder
+            .Property(attendee => attendee.Notes)
+            .IsRequired(false);
+
+        builder
+            .Property(attendee => attendee.Name)
+            .IsRequired();
     }
 }

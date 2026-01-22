@@ -35,12 +35,12 @@ public abstract class Action : IAuditableEntity
     public string AssignedTo { get; protected set; } = string.Empty;
     public DateTime AssignedAt { get; protected set; } = DateTime.MinValue;
 
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.MinValue;
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; } = DateTime.MinValue;
     public bool IsDeleted { get; internal set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; } = DateTime.MinValue;
     
     public abstract string Description { get; }

@@ -7,11 +7,11 @@ using Constellation.Application.Domains.Attendance.Plans.Commands.AddAttendanceP
 using Constellation.Application.Domains.Attendance.Plans.Commands.ApproveAttendancePlan;
 using Constellation.Application.Domains.Attendance.Plans.Commands.RejectAttendancePlan;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlanDetails;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Attendance.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
@@ -20,7 +20,7 @@ using Shared.Components.AddAttendancePlanNote;
 using Shared.Components.ApproveAttendancePlanModal;
 using Shared.Components.RejectAttendancePlanModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_AttendancePlans_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

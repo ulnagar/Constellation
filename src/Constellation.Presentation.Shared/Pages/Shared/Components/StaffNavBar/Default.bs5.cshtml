@@ -1,8 +1,10 @@
 ﻿@model Constellation.Presentation.Shared.Pages.Shared.Components.StaffNavBar.StaffNavBarViewModel
 
+@inject IAuthorizationService AuthService;
+
 @{
     var loggedIn = User.Identity!.IsAuthenticated;
-    var isAdmin = User.IsInRole(AuthRoles.Admin);
+    var isAdmin = (await AuthService.AuthorizeAsync(User, AuthPolicies.IsSiteAdmin)).Succeeded;
 }
 
 <nav class="navbar navbar-expand-xl navbar-toggleable-xl navbar-dark bg-dark box-shadow fixed-top">

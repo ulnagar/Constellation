@@ -10,15 +10,14 @@ using Constellation.Application.Domains.Offerings.Queries.GetFilteredOfferingsFo
 using Constellation.Application.Domains.Students.Queries.GetFilteredStudentsForSelectionList;
 using Constellation.Core.Enums;
 using Constellation.Core.Models.Awards.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Students.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -26,7 +25,7 @@ using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanAddAwards)]
+[HasPermission(AuthPermission.SchoolAdmin_AwardNominations_Submit_Value)]
 public class Step4Model : BasePageModel
 {
     private readonly ISender _mediator;

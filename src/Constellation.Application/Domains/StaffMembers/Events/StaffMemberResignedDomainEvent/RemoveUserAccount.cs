@@ -1,13 +1,15 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Events.StaffMemberResignedDomainEvent;
 
 using Abstractions.Messaging;
-using Constellation.Application.DTOs;
-using Constellation.Application.Models.Auth;
+using Application.Models.Identity.Repositories;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
+using Constellation.Core.Errors;
 using Core.Models.StaffMembers;
+using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Events;
-using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Shared;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using System.Linq;
@@ -19,42 +21,77 @@ internal sealed class RemoveUserAccount
 {
     private readonly IStaffRepository _staffRepository;
     private readonly UserManager<AppUser> _userManager;
+    private readonly IIdentityRepository _identityRepository;
     private readonly ILogger _logger;
 
     public RemoveUserAccount(
         IStaffRepository staffRepository,
         UserManager<AppUser> userManager,
+        IIdentityRepository identityRepository,
         ILogger logger)
     {
         _staffRepository = staffRepository;
         _userManager = userManager;
+        _identityRepository = identityRepository;
         _logger = logger;
     }
 
     public async Task Handle(StaffMemberResignedDomainEvent notification, CancellationToken cancellationToken)
     {
-        StaffMember staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
 
-        // Remove user access
-        UserTemplateDto userDetails = new()
+        if (staffMember is null)
         {
-            FirstName = staffMember.Name.FirstName,
-            LastName = staffMember.Name.LastName,
-            Email = staffMember.EmailAddress.Email,
-            Username = staffMember.EmailAddress.Email,
-            IsStaffMember = false
-        };
+            _logger
+                .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
+                .ForContext(nameof(Error), StaffMemberErrors.NotFound(notification.StaffId), true)
+                .Warning("Failed to delete old Staff Member AppUser");
 
-        if (_userManager.Users.Any(u => u.UserName == userDetails.Username))
-        {
-            AppUser user = await _userManager.FindByEmailAsync(userDetails.Email);
-
-            user!.IsStaffMember = false;
-            user.StaffId = StaffId.Empty;
-
-            await _userManager.RemoveFromRoleAsync(user, AuthRoles.StaffMember);
-
-            await _userManager.UpdateAsync(user);
+            return;
         }
+        
+        AppUser? user = await _userManager.FindByEmailAsync(staffMember.EmailAddress.Email);
+
+        if (user is null)
+        {
+            _logger
+                .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
+                .ForContext(nameof(Error), DomainErrors.Auth.UserNotFound, true)
+                .Warning("Failed to delete old Staff Member AppUser");
+
+            return;
+        }
+
+        AppUserLink? link = user.Links
+            .FirstOrDefault(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Staff &&
+                link.LinkId == staffMember.Id.Value);
+
+        if (link is not null)
+            link.Delete();
+
+        await _userManager.UpdateAsync(user);
+
+        if (user.Links.All(link => link.IsDeleted))
+        {
+            IdentityResult update = await _userManager.DeleteAsync(user);
+
+            if (!update.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(StaffMemberResignedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                    .Warning("Failed to delete old Staff Member AppUser");
+            }
+
+            return;
+        }
+
+        List<AppRole> roles = await _identityRepository.GetRolesForUser(user, cancellationToken);
+
+        foreach (var role in roles.Where(role => role.Type == AppRoleType.Staff))
+            await _userManager.RemoveFromRoleAsync(user, role.Name);
     }
 }

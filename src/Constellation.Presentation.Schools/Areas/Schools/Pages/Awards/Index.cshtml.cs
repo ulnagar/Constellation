@@ -19,9 +19,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Awards_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -35,8 +36,9 @@ public class IndexModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory)
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

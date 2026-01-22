@@ -4,7 +4,7 @@
 @inject IAuthorizationService authService
 
 @{
-    var authorised = await authService.AuthorizeAsync(User, AuthPolicies.IsSiteAdmin);
+    var authorised = await authService.AuthorizeAsync(User, AuthPermission.Subjects_Timetables_Edit_Value);
 }
 
 <h2>Periods View</h2>

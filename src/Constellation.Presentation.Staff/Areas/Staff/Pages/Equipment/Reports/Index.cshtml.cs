@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Equipment.Reports;
 
 using Application.Models.Auth;
-using Microsoft.AspNetCore.Authorization;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanManageAssets)]
+[HasPermission(AuthPermission.Equipment_Assets_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     public IndexModel()

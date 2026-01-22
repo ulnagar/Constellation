@@ -9,19 +9,19 @@ using Constellation.Application.Domains.Attendance.Reports.Queries.GetValidAtten
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsParent)]
+[HasPermission(AuthPermission.ParentPortal_View_Value)]
 public class ReportsModel : BasePageModel
 {
     private readonly ISender _mediator;

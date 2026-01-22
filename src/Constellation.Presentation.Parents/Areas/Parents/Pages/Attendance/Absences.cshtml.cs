@@ -4,16 +4,16 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Attendance.Absences.Queries.GetAbsencesForFamily;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsParent)]
+[HasPermission(AuthPermission.ParentPortal_View_Value)]
 public class AbsencesModel : BasePageModel
 {
     private readonly ISender _mediator;

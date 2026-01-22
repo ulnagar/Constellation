@@ -9,15 +9,15 @@ using Core.Abstractions.Services;
 using Core.Models.Covers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanEditCovers)]
+[HasPermission(AuthPermission.ShortTerm_Covers_Edit_Value)]
 public class UpdateModel : BasePageModel
 {
     private readonly ISender _mediator;

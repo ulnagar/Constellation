@@ -7,6 +7,6 @@ using System;
 public sealed record CreateLessonCommand(
     string Name,
     DateOnly DueDate,
-    CourseId CourseId,
+    List<CourseId> CourseIds,
     bool DoNotGenerateRolls)
     : ICommand;

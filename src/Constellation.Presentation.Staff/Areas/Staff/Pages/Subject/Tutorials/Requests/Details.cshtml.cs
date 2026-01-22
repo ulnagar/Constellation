@@ -7,13 +7,13 @@ using Application.Domains.Tutorials.Requests.Commands.RejectTutorialRequest;
 using Application.Domains.Tutorials.Requests.Commands.ScheduleTutorialRequest;
 using Application.Domains.Tutorials.Requests.Queries.GetTutorialRequestById;
 using Application.Models.Auth;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
@@ -22,7 +22,7 @@ using Shared.Components.AddTutorialRequestNote;
 using Shared.Components.ReviewTutorialRequest;
 using Shared.Components.ScheduleTutorialRequest;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Tutorials_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

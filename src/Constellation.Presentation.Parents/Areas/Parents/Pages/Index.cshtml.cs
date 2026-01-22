@@ -6,16 +6,16 @@ using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Domains.Students.Queries.GetStudentsByParentEmail;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Models;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsParent)]
+[HasPermission(AuthPermission.ParentPortal_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

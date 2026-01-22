@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Models.Identity;
+using Application.Models.Identity.Enums;
 using Core.Errors;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
@@ -32,7 +33,7 @@ internal sealed class RemoveOldAppUser
 
     public async Task Handle(SchoolContactEmailAddressChangedDomainEvent notification, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
 
         if (contact is null)
         {
@@ -44,7 +45,7 @@ internal sealed class RemoveOldAppUser
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(notification.OldEmailAddress);
+        AppUser? user = await _userManager.FindByEmailAsync(notification.OldEmailAddress);
 
         if (user is null)
         {
@@ -57,15 +58,29 @@ internal sealed class RemoveOldAppUser
             return;
         }
 
-        IdentityResult update = await _userManager.DeleteAsync(user);
+        AppUserLink? link = user.Links
+            .FirstOrDefault(link =>
+                !link.IsDeleted &&
+                link.Type == LinkType.Contact &&
+                link.LinkId == contact.Id.Value);
 
-        if (!update.Succeeded)
+        if (link is not null)
+            link.Delete();
+
+        await _userManager.UpdateAsync(user);
+
+        if (user.Links.All(link => link.IsDeleted))
         {
-            _logger
-                .ForContext(nameof(SchoolContactEmailAddressChangedDomainEvent), notification, true)
-                .ForContext(nameof(AppUser), user, true)
-                .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
-                .Warning("Failed to delete old School Contact AppUser");
+            IdentityResult update = await _userManager.DeleteAsync(user);
+
+            if (!update.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(SchoolContactEmailAddressChangedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
+                    .Warning("Failed to delete old School Contact AppUser");
+            }
         }
     }
 }

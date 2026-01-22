@@ -10,13 +10,12 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanViewTrainingModuleContent)]
+[Authorize(Policy = AuthPolicies.IsStaffMember)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

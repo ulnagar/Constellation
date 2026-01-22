@@ -6,8 +6,8 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
-    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
-    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanViewTrainingModuleContentDetails);
+    var canEditTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
+    var canViewDetailsTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_ViewAll_Value);
 }
 
 <h2>Mandatory Training Modules</h2>

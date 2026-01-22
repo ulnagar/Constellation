@@ -34,24 +34,24 @@
             {
                 <tr>
                     <td>
-                        <input type="hidden" name="Statuses.Index" value="@entry.StudentId" />
-                        <input type="hidden" name="Statuses[@entry.StudentId].StudentId" value="@entry.StudentId" />
+                        <input type="hidden" name="Recipients.Index" value="@entry.StudentId" />
+                        <input type="hidden" name="Recipients[@entry.StudentId].StudentId" value="@entry.StudentId" />
                         @entry.StudentId
                     </td>
                     <td>
-                        <input type="hidden" name="Statuses[@entry.StudentId].StudentName" value="@entry.StudentName" />
+                        <input type="hidden" name="Recipients[@entry.StudentId].StudentName" value="@entry.StudentName" />
                         @entry.StudentName
                     </td>
                     <td>
-                        <input type="hidden" name="Statuses[@entry.StudentId].Grade" value="@entry.Grade" />
+                        <input type="hidden" name="Recipients[@entry.StudentId].Grade" value="@entry.Grade" />
                         @entry.Grade.AsName()
                     </td>
                     <td>
-                        <input type="hidden" name="Statuses[@entry.StudentId].SchoolName" value="@entry.SchoolName" />
+                        <input type="hidden" name="Recipients[@entry.StudentId].SchoolName" value="@entry.SchoolName" />
                         @entry.SchoolName
                     </td>
                     <td>
-                        <select class="waiting-value" name="Statuses[@entry.StudentId].Decision">
+                        <select class="waiting-value" name="Recipients[@entry.StudentId].Decision">
                             <option value="@RolloverStatus.Rollover">Rollover</option>
                             <option value="@RolloverStatus.Withdraw">Withdraw</option>
                             <option value="@RolloverStatus.Remain">Remain</option>

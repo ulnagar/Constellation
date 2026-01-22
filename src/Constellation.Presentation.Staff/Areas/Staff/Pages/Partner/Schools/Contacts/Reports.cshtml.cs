@@ -14,6 +14,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
@@ -21,13 +22,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.AssignRoleModal;
 using Shared.PartialViews.DeleteRoleModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_SchoolContacts_View_Value)]
 public class ReportsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -62,7 +62,7 @@ public class ReportsModel : BasePageModel
         _logger
             .Information("Requested to retrieve School Contact Reports by user {User}", _currentUserService.UserName);
         
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         Result<List<SchoolWithContactsResponse>> schools = await _mediator.Send(new GetContactsBySchoolQuery(execMemberTest.Succeeded));
 
@@ -87,7 +87,7 @@ public class ReportsModel : BasePageModel
         _logger
             .Information("Requested to export School Contact Reports by user {User}", _currentUserService.UserName);
 
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         Result<FileDto> file = await _mediator.Send(new ExportContactsBySchoolQuery(execMemberTest.Succeeded));
 
@@ -114,7 +114,7 @@ public class ReportsModel : BasePageModel
     {
         AssignRoleModalViewModel viewModel = new();
 
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         Result<List<Position>> rolesRequest = await _mediator.Send(new GetContactRolesForSelectionListQuery(execMemberTest.Succeeded));
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetSchoolsForSelectionListQuery(GetSchoolsForSelectionListQuery.SchoolsFilter.PartnerSchools));

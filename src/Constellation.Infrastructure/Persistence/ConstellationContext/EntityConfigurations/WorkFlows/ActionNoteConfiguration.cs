@@ -20,6 +20,15 @@ internal sealed class ActionNoteConfiguration : IEntityTypeConfiguration<ActionN
                 id => id.Value,
                 value => ActionNoteId.FromValue(value));
 
+        builder
+            .Property(note => note.ActionId)
+            .IsRequired();
+
+        builder
+            .Property(note => note.SubmittedBy)
+            .IsRequired();
+
+
         //builder
         //    .Property(note => note.ActionId)
         //    .HasConversion(

@@ -11,6 +11,8 @@ using Core.Models;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
+using Core.Shared;
+using Core.ValueObjects;
 
 internal sealed class SchoolRegisterJob : ISchoolRegisterJob
 {
@@ -195,17 +197,20 @@ internal sealed class SchoolRegisterJob : ISchoolRegisterJob
                 continue;
 
             // If the csvSchools Principal entry matches an existing entry in the database, check the next school
-            if (principals.Any(entry => entry.EmailAddress == csvSchool.PrincipalEmail))
+            if (principals.Any(entry => entry.EmailAddress.Email == csvSchool.PrincipalEmail))
                 continue;
 
             // Does the email address appear in the SchoolContact list?
             Console.WriteLine($" Adding new Principal: {csvSchool.PrincipalEmail}");
             Console.WriteLine($" Linking Principal {csvSchool.PrincipalFirstName} {csvSchool.PrincipalLastName} with {csvSchool.Name}");
+
+            Result<EmailAddress> emailAddress = EmailAddress.Create(csvSchool.PrincipalEmail);
+
             await _mediator.Send(new CreateContactWithRoleCommand(
                 csvSchool.PrincipalFirstName,
                 csvSchool.PrincipalLastName,
-                csvSchool.PrincipalEmail,
-                string.Empty,
+                emailAddress.IsSuccess ? emailAddress.Value : EmailAddress.None,
+                PhoneNumber.Empty,
                 Position.Principal, 
                 csvSchool.SchoolCode,
                 $"{_dateTime.Today.ToString("dd/MM/yy")} - Principal created from CESE Data Source",

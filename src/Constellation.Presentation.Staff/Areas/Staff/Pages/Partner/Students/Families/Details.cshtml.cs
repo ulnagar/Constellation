@@ -13,6 +13,7 @@ using Constellation.Application.Domains.Families.Queries.GetFamilyDetailsById;
 using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
@@ -26,7 +27,7 @@ using Serilog;
 using Shared.Components.FamilyAddStudent;
 using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Families_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -86,7 +87,7 @@ public class DetailsModel : BasePageModel
         StudentId studentId,
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -154,7 +155,7 @@ public class DetailsModel : BasePageModel
         ParentId parentId, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -191,7 +192,7 @@ public class DetailsModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddStudent(FamilyAddStudentSelection viewModel, CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorised.Succeeded)
         {

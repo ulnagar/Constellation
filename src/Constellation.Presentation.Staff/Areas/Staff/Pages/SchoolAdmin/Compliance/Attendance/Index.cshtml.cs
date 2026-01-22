@@ -9,14 +9,13 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
-using Core.Models.Attendance;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.SchoolAdmin_AttendancePercentages_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

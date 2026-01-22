@@ -34,7 +34,9 @@ public class GetCoursesForSelectionListQueryHandler
 
     public async Task<Result<List<CourseSelectListItemResponse>>> Handle(GetCoursesForSelectionListQuery request, CancellationToken cancellationToken)
     {
-        List<Course> courses = await _courseRepository.GetAll(cancellationToken);
+        List<Course> courses = request.ActiveOnly
+            ? await _courseRepository.GetActive(cancellationToken)
+            : await _courseRepository.GetAll(cancellationToken);
 
         if (courses.Count == 0)
         {

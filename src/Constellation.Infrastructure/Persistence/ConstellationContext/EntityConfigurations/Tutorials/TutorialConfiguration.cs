@@ -24,6 +24,7 @@ internal sealed class TutorialConfiguration : IEntityTypeConfiguration<Tutorial>
 
         builder
             .Property(tutorial => tutorial.Name)
+            .IsRequired()
             .HasConversion(
                 name => name.Value,
                 value => TutorialName.FromValue(value));

@@ -9,19 +9,20 @@ using Application.Domains.Schools.Queries.GetSchoolsForSelectionList;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.SchoolContacts.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.SchoolContacts.Enums;
+using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -59,12 +60,14 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     [Required]
+    [ModelBinder(typeof(FromValueBinder))]
     [DataType(DataType.EmailAddress)]
-    public string EmailAddress { get; set; }
+    public EmailAddress EmailAddress { get; set; } = EmailAddress.None;
 
     [BindProperty]
+    [ModelBinder(typeof(FromValueBinder))]
     [DataType(DataType.PhoneNumber)]
-    public string? PhoneNumber { get; set; }
+    public PhoneNumber? PhoneNumber { get; set; } = PhoneNumber.Empty;
 
     [BindProperty]
     public string SchoolCode { get; set; }
@@ -95,8 +98,8 @@ public class UpsertModel : BasePageModel
                 return;
             }
 
-            FirstName = contactRequest.Value.FirstName;
-            LastName = contactRequest.Value.LastName;
+            FirstName = contactRequest.Value.Name.FirstName;
+            LastName = contactRequest.Value.Name.LastName;
             EmailAddress = contactRequest.Value.EmailAddress;
             PhoneNumber = contactRequest.Value.PhoneNumber;
 
@@ -122,7 +125,7 @@ public class UpsertModel : BasePageModel
             FirstName,
             LastName,
             EmailAddress,
-            PhoneNumber,
+            PhoneNumber ?? PhoneNumber.Empty,
             Role,
             SchoolCode,
             string.Empty,

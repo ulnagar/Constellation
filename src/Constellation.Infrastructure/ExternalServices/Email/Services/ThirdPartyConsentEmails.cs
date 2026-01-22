@@ -3,6 +3,7 @@
 using Constellation.Application.Interfaces.Services;
 using Core.Models.ThirdPartyConsent;
 using Core.ValueObjects;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(TransactionReceiptParentEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, [attachment], cancellationToken);
+        await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, [attachment], MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendConsentRefusedNotification(
@@ -54,6 +55,6 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync(ConsentRefusedNotificationEmailViewModel.ViewLocation, viewModel);
 
-        await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 }

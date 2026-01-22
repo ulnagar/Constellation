@@ -6,16 +6,15 @@ using Constellation.Application.Domains.Offerings.Queries.GetAllOfferingSummarie
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Enums;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Offerings_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _sender;

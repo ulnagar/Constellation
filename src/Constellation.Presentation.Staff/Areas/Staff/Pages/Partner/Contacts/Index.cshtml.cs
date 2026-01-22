@@ -14,6 +14,7 @@ using Application.Models.Auth;
 using Areas;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Enums;
 using Core.Models.Offerings.Identifiers;
@@ -25,7 +26,7 @@ using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Contacts_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -89,7 +90,7 @@ public class IndexModel : BasePageModel
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         ExportContactListCommand command = new(
             offeringIds,
@@ -194,7 +195,7 @@ public class IndexModel : BasePageModel
             Filter.Schools.Any() ||
             Filter.Flags.Any())
         {
-            AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPolicies.IsExecutive);
+            AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
             Result<List<ContactResponse>> contactRequest = await _mediator.Send(
                 new GetContactListQuery(

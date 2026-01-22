@@ -164,12 +164,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
 
         foreach (Parent parent in parents)
         {
-            Result<Name> nameResult = Name.Create(parent.FirstName, string.Empty, parent.LastName);
-
-            if (nameResult.IsFailure)
-                continue;
-
-            Result<EmailRecipient> result = EmailRecipient.Create(nameResult.Value.DisplayName, parent.EmailAddress);
+            Result<EmailRecipient> result = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
             if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))
                 recipients.Add(result.Value);
@@ -217,11 +212,6 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
 
         foreach (SchoolContact coordinator in coordinators)
         {
-            Result<Name> nameResult = coordinator.GetName();
-
-            if (nameResult.IsFailure)
-                continue;
-
             Result<EmailRecipient> result = coordinator.GetEmailRecipient();
 
             if (result.IsSuccess && recipients.All(recipient => result.Value.Email != recipient.Email))

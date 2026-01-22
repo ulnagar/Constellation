@@ -31,5 +31,13 @@ internal sealed class AttachmentConfiguration : IEntityTypeConfiguration<Attachm
         builder
             .Property(attachment => attachment.LinkId)
             .IsRequired();
+
+        builder
+            .Property(entry => entry.FileData)
+            .IsRequired(false);
+
+        builder
+            .Property(entry => entry.FilePath)
+            .IsRequired(false);
     }
 }

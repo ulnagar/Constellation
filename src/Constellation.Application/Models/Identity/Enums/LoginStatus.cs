@@ -1,0 +1,17 @@
+﻿namespace Constellation.Application.Models.Identity.Enums;
+
+using Core.Common;
+
+public sealed class LoginStatus : StringEnumeration<LoginStatus>
+{
+    public static readonly LoginStatus None = new("");
+
+    public static readonly LoginStatus Success = new("Success");
+    public static readonly LoginStatus Failed = new("Failed");
+    public static readonly LoginStatus Started = new("Started");
+    
+    private LoginStatus(string value)
+        : base(value, value) { }
+
+    public static IEnumerable<LoginStatus> GetOptions => GetEnumerable;
+}

@@ -5,21 +5,19 @@ using Application.Helpers;
 using Application.Models.Auth;
 using Areas;
 using Constellation.Application.Domains.Families.Commands.CreateParent;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Families;
 using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanEditStudents)]
+[HasPermission(AuthPermission.Partners_Families_Edit_Value)]
 public class AddParentModel : BasePageModel
 {
     private readonly ISender _mediator;

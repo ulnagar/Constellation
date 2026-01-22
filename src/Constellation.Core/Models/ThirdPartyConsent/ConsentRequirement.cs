@@ -20,12 +20,12 @@ public abstract class ConsentRequirement : IAuditableEntity
     public string ApplicationName { get; protected set; } = string.Empty;
     public string Description { get; protected set; } = string.Empty;
 
-    public string CreatedBy { get; set; } = string.Empty;
+    public string? CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; } = string.Empty;
+    public string? ModifiedBy { get; set; } = string.Empty;
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; } = string.Empty;
+    public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
     public void Delete() => IsDeleted = true;

@@ -11,18 +11,18 @@ using Constellation.Application.Domains.Students.Queries.GetStudentsFromOffering
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Enums;
 using Core.Models.Students.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditSubjects)]
+[HasPermission(AuthPermission.Subjects_Offerings_Edit_Value)]
 public class AddStudentsModel : BasePageModel
 {
     private readonly ISender _mediator;

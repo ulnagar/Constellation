@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverCancelledDomainEvent;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
 using Application.Models.Identity;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
@@ -18,16 +17,20 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
+using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Extensions;
+using Interfaces.Configuration;
 using Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading;
@@ -44,6 +47,7 @@ internal sealed class SendCoverCancelledEmailHandler
     private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly ITeamRepository _teamRepository;
+    private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
 
     public SendCoverCancelledEmailHandler(
@@ -55,6 +59,7 @@ internal sealed class SendCoverCancelledEmailHandler
         UserManager<AppUser> userManager,
         IEmailService emailService,
         ITeamRepository teamRepository,
+        IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
         _coverRepository = coverRepository;
@@ -65,6 +70,7 @@ internal sealed class SendCoverCancelledEmailHandler
         _userManager = userManager;
         _emailService = emailService;
         _teamRepository = teamRepository;
+        _configuration = configuration.Value;
         _logger = logger
             .ForContext<CoverCancelledDomainEvent>();
     }
@@ -72,7 +78,7 @@ internal sealed class SendCoverCancelledEmailHandler
     public async Task Handle(CoverCancelledDomainEvent notification, CancellationToken cancellationToken)
     {
         // Gather details
-        Cover cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
+        Cover? cover = await _coverRepository.GetById(notification.CoverId, cancellationToken);
 
         if (cover is null)
         {
@@ -87,7 +93,7 @@ internal sealed class SendCoverCancelledEmailHandler
         if (cover is AccessCover)
             return;
 
-        Offering offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(cover.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -148,7 +154,7 @@ internal sealed class SendCoverCancelledEmailHandler
             secondaryRecipients.Add(address.Value);
         }
 
-        EmailRecipient coveringTeacher = null;
+        EmailRecipient? coveringTeacher = null;
 
         if (cover.TeacherType == CoverTeacherType.Casual)
         {
@@ -176,7 +182,7 @@ internal sealed class SendCoverCancelledEmailHandler
         {
             StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
 
-            StaffMember teacher = staffId == StaffId.Empty
+            StaffMember? teacher = staffId == StaffId.Empty
                 ? null
                 : await _staffRepository.GetById(staffId, cancellationToken);
 
@@ -210,22 +216,33 @@ internal sealed class SendCoverCancelledEmailHandler
             return;
         }
 
-        IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
-        foreach (AppUser teacher in additionalRecipients)
+        foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
         {
-            if (primaryRecipients.Any(entry => entry.Email == teacher.Email) || 
-                secondaryRecipients.Any(entry => entry.Email == teacher.Email)) 
+            StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
+
+            if (teacher is null)
+            {
+                _logger
+                    .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
+                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                    .ForContext(nameof(EmployeeId), employeeId)
+                    .Warning("Failed to send Cover Cancelled Email notification");
+
+                continue;
+            }
+
+            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress) ||
+                secondaryRecipients.Any(entry => entry.Email == teacher.EmailAddress))
                 continue;
 
-            Result<EmailRecipient> address = EmailRecipient.Create(teacher.DisplayName, teacher.Email);
+            Result<EmailRecipient> address = teacher.GetEmailRecipient();
 
             if (address.IsFailure)
             {
                 _logger
                     .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
                     .ForContext(nameof(Error), address.Error, true)
-                    .ForContext(nameof(EmailAddress), teacher.Email)
+                    .ForContext(nameof(EmailAddress), teacher.EmailAddress)
                     .Warning("Failed to send Cover Cancelled Email notification");
 
                 continue;
@@ -234,7 +251,7 @@ internal sealed class SendCoverCancelledEmailHandler
             secondaryRecipients.Add(address.Value);
         }
 
-        string teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(), cancellationToken);
+        string? teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(CultureInfo.InvariantCulture), cancellationToken);
 
         TimeOnly startTime = TimeOnly.MinValue;
         TimeOnly endTime = TimeOnly.MinValue;
@@ -247,6 +264,6 @@ internal sealed class SendCoverCancelledEmailHandler
             endTime = TimeOnly.FromTimeSpan(periods.Max(period => period.EndTime));
         }
 
-        await _emailService.SendCancelledCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, startTime, endTime, teamLink, new List<Attachment>(), cancellationToken);
+        await _emailService.SendCancelledCoverEmail(cover, offering, coveringTeacher, primaryRecipients, secondaryRecipients, startTime, endTime, teamLink ?? string.Empty, new List<Attachment>(), cancellationToken);
     }
 }

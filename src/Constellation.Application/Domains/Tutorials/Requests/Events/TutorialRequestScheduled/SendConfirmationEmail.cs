@@ -69,7 +69,7 @@ internal sealed class SendConfirmationEmail
 
     public async Task Handle(TutorialRequestScheduledDomainEvent notification, CancellationToken cancellationToken)
     {
-        Request tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
+        Request? tutorialRequest = await _tutorialRepository.GetRequestById(notification.RequestId, cancellationToken);
 
         if (tutorialRequest is null)
         {
@@ -93,7 +93,7 @@ internal sealed class SendConfirmationEmail
             return;
         }
 
-        Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+        Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
         if (tutorial is null)
         {
@@ -115,15 +115,15 @@ internal sealed class SendConfirmationEmail
 
         foreach (TutorialSession session in tutorial.Sessions)
         {
-            StaffMember staffMember = staff.FirstOrDefault(entry => entry.Id == session.StaffId);
+            StaffMember? staffMember = staff.FirstOrDefault(entry => entry.Id == session.StaffId);
 
             if (staffMember is null)
             {
                 staffMember = await _staffRepository.GetById(session.StaffId, cancellationToken);
-                staff.Add(staffMember);
+                staff.Add(staffMember!);
             }
 
-            Period period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
+            Period? period = periods.FirstOrDefault(entry => entry.Id == session.PeriodId);
 
             periodDayNumbers.Add(period.DayNumber);
 
@@ -134,7 +134,7 @@ internal sealed class SendConfirmationEmail
         
         List<EmailRecipient> recipients = [];
         
-        Student student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(tutorialRequest.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -155,7 +155,7 @@ internal sealed class SendConfirmationEmail
 
         foreach (var family in families)
         {
-            StudentFamilyMembership studentLink = family.Students.FirstOrDefault(link => link.StudentId == student.Id);
+            StudentFamilyMembership? studentLink = family.Students.FirstOrDefault(link => link.StudentId == student.Id);
 
             if (studentLink is null || !studentLink.IsResidentialFamily)
                 continue;
@@ -165,7 +165,7 @@ internal sealed class SendConfirmationEmail
                 if (recipients.Any(entry => entry.Email == parent.EmailAddress))
                     continue;
 
-                Result<EmailRecipient> parentRecipient = EmailRecipient.Create($"{parent.FirstName} {parent.LastName}", parent.EmailAddress);
+                Result<EmailRecipient> parentRecipient = EmailRecipient.Create(parent.Name, parent.EmailAddress);
 
                 if (parentRecipient.IsSuccess)
                     recipients.Add(parentRecipient.Value);
@@ -184,7 +184,7 @@ internal sealed class SendConfirmationEmail
 
         foreach (var contact in contacts)
         {
-            if (recipients.Any(entry => entry.Email == contact.EmailAddress))
+            if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
                 continue;
 
             Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();

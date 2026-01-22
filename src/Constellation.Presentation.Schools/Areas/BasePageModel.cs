@@ -1,31 +1,36 @@
 ﻿namespace Constellation.Presentation.Schools.Areas;
 
 using Application.Domains.Schools.Queries.GetSchoolsForContact;
+using Application.Models.Identity.Enums;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Shared;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.DependencyInjection;
-using Schools.Pages.Shared.Components.SchoolSelector;
+using Schools.Pages.Shared.Components.SchoolSelectorModal;
 using System.Security.Claims;
 
 public class BasePageModel : PageModel, IBaseModel
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IServiceScopeFactory _serviceFactory;
+    private readonly IAuthorizationService _authService;
 
     public BasePageModel(
         IHttpContextAccessor httpContextAccessor,
-        IServiceScopeFactory serviceFactory)
+        IServiceScopeFactory serviceFactory,
+        IAuthorizationService authService)
     {
         _httpContextAccessor = httpContextAccessor;
         _serviceFactory = serviceFactory;
+        _authService = authService;
 
         if (httpContextAccessor.HttpContext is null)
             return;
@@ -46,7 +51,7 @@ public class BasePageModel : PageModel, IBaseModel
     {
         CurrentSchoolCode = viewModel.NewSchoolCode;
 
-        _httpContextAccessor.HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode);
+        _httpContextAccessor.HttpContext?.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), viewModel.NewSchoolCode);
 
         return RedirectToPage();
     }
@@ -57,20 +62,34 @@ public class BasePageModel : PageModel, IBaseModel
         ISender mediator = scope.ServiceProvider.GetRequiredService<ISender>();
         UserManager<AppUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
-        ClaimsPrincipal User = _httpContextAccessor.HttpContext.User;
+        ClaimsPrincipal? httpContextUser = _httpContextAccessor.HttpContext?.User;
 
-        AppUser user = userManager.FindByNameAsync(User.Identity?.Name).Result;
+        if (httpContextUser is null)
+            return string.Empty;
 
-        Result<List<SchoolResponse>> schoolsRequest = User.IsInRole(AuthRoles.Admin)
+        AppUser? user = userManager.FindByNameAsync(httpContextUser.Identity?.Name ?? string.Empty).Result;
+
+        AuthorizationResult isAdminTest = _authService.AuthorizeAsync(httpContextUser, AuthPolicies.IsSiteAdmin).Result;
+
+        AppUserLink? contactLink = user?.Links.FirstOrDefault(link => !link.IsDeleted && link.Type == LinkType.Contact);
+
+        if (contactLink is null && !isAdminTest.Succeeded)
+            return string.Empty;
+
+        SchoolContactId contactId = contactLink is not null
+            ? SchoolContactId.FromValue(contactLink.LinkId)
+            : SchoolContactId.Empty;
+
+        Result<List<SchoolResponse>> schoolsRequest = isAdminTest.Succeeded
             ? mediator.Send(new GetSchoolsForContactQuery(SchoolContactId.Empty, true)).Result
-            : mediator.Send(new GetSchoolsForContactQuery(user.SchoolContactId)).Result;
+            : mediator.Send(new GetSchoolsForContactQuery(contactId)).Result;
 
         if (schoolsRequest.IsFailure || schoolsRequest.Value.Count == 0)
             return string.Empty;
 
         SchoolResponse school = schoolsRequest.Value.MinBy(school => school.SchoolCode)!;
 
-        _httpContextAccessor.HttpContext.Session.SetString(nameof(BasePageModel.CurrentSchoolCode), school!.SchoolCode);
+        _httpContextAccessor.HttpContext?.Session.SetString(nameof(CurrentSchoolCode), school!.SchoolCode);
 
         return school.SchoolCode;
     }

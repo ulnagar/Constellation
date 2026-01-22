@@ -5,16 +5,16 @@ using Constellation.Application.Domains.Courses.Queries.GetCourseDetails;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Courses_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

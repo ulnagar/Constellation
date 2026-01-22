@@ -3,10 +3,13 @@
 using Abstractions.Messaging;
 using Core.Abstractions.Repositories;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.SciencePracs;
+using Core.Models.SciencePracs.Errors;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Errors;
+using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -41,19 +44,42 @@ internal sealed class CreateLessonCommandHandler
 
     public async Task<Result> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
     {
-        Course course = await _courseRepository.GetById(request.CourseId, cancellationToken);
+        List<Course> courses = [];
+        List<Offering> offerings = [];
+        
+        foreach (CourseId courseId in request.CourseIds)
+        {
+            Course? course = await _courseRepository.GetById(courseId, cancellationToken);
 
-        if (course is null)
+            if (course is null)
+                continue;
+
+            courses.Add(course);
+
+            List<Offering> courseOfferings = await _offeringRepository.GetByCourseId(courseId, cancellationToken);
+
+            offerings.AddRange(courseOfferings);
+        }
+
+        if (courses.Count == 0)
         {
             _logger
                 .ForContext(nameof(CreateLessonCommand), request, true)
-                .ForContext(nameof(Error), CourseErrors.NotFound(request.CourseId), true)
+                .ForContext(nameof(Error), CourseErrors.NoneFound, true)
                 .Warning("Failed to create Science Prac Lesson");
 
-            return Result.Failure(CourseErrors.NotFound(request.CourseId));
+            return Result.Failure(CourseErrors.NoneFound);
         }
 
-        List<Offering> offerings = await _offeringRepository.GetByCourseId(request.CourseId, cancellationToken);
+        if (courses.Select(course => course.Grade).Distinct().Count() > 1)
+        {
+            _logger
+                .ForContext(nameof(CreateLessonCommand), request, true)
+                .ForContext(nameof(Error), SciencePracLessonErrors.MustBeSameGrade, true)
+                .Warning("Failed to create Science Prac Lesson");
+
+            return Result.Failure(SciencePracLessonErrors.MustBeSameGrade);
+        }
 
         offerings = offerings.Where(offering => offering.IsCurrent).ToList();
 
@@ -61,16 +87,16 @@ internal sealed class CreateLessonCommandHandler
         {
             _logger
                 .ForContext(nameof(CreateLessonCommand), request, true)
-                .ForContext(nameof(Error), CourseErrors.NoOfferings(request.CourseId), true)
+                .ForContext(nameof(Error), OfferingErrors.NoneFound, true)
                 .Warning("Failed to create Science Prac Lesson");
 
-            return Result.Failure(CourseErrors.NoOfferings(request.CourseId));
+            return Result.Failure(OfferingErrors.NoneFound);
         }
 
         Result<SciencePracLesson> lesson = SciencePracLesson.Create(
             request.Name,
             request.DueDate,
-            course.Grade,
+            courses.First().Grade,
             offerings.Select(offering => offering.Id).ToList(),
             request.DoNotGenerateRolls);
 

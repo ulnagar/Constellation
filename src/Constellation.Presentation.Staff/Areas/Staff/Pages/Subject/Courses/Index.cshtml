@@ -6,7 +6,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSubjects);
+    AuthorizationResult canEditTest = await authService.AuthorizeAsync(User, AuthPermission.Subjects_Courses_View_Value);
 }
 
 <h2>Course List</h2>

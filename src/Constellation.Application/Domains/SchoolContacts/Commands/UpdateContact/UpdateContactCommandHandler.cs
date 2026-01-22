@@ -61,22 +61,11 @@ internal sealed class UpdateContactCommandHandler
             return Result.Failure(contactName.Error);
         }
 
-        Result<PhoneNumber> contactPhone = PhoneNumber.Create(request.PhoneNumber);
-
-        if (contactPhone.IsFailure && !string.IsNullOrWhiteSpace(request.PhoneNumber))
-        {
-            _logger
-                .ForContext(nameof(Result.Error), contactPhone.Error, true)
-                .Warning("Could not create phone number for School Contact with Id {id}", request.ContactId);
-
-            return Result.Failure(contactPhone.Error);
-        }
-
         contact.Update(
             contactName.Value.FirstName,
             contactName.Value.LastName,
             contactEmail.Value.Email,
-            contactPhone.IsSuccess ? contactPhone.Value.ToString(PhoneNumber.Format.None) : string.Empty);
+            request.PhoneNumber.ToString(PhoneNumber.Format.None));
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

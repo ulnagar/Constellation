@@ -3,6 +3,7 @@
 using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Core.ValueObjects;
+using MimeKit;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ public sealed partial class Service : IEmailService
 
             string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Reports/AcademicReportEmail.cshtml", viewModel);
 
-            await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, attachments, cancellationToken);
+            await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
         }
     }
 }

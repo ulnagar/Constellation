@@ -11,16 +11,15 @@ using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
-[Authorize(Policy = AuthPolicies.CanEditTrainingModuleContent)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;

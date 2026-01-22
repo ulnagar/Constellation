@@ -48,9 +48,6 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
                     assignment.Role == Position.SciencePracticalTeacher)
                 .ToList();
 
-            Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-            Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
-
             foreach (SchoolContactRole assignment in activeAssignments)
             {
                 School school = schools.FirstOrDefault(entry => entry.Code == assignment.SchoolCode);
@@ -61,23 +58,22 @@ internal sealed class GetAllSciencePracTeachersQueryHandler
                 bool directNumber = false;
                 PhoneNumber phone;
 
-                if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
+                if (contact.PhoneNumber == PhoneNumber.Empty)
                 {
                     Result<PhoneNumber> phoneNumber = PhoneNumber.Create(school.PhoneNumber);
                     phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
                 }
                 else
                 {
-                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(contact.PhoneNumber);
-                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    phone = contact.PhoneNumber;
                     directNumber = true;
                 }
 
                 response.Add(new(
                     contact.Id,
                     assignment.Id,
-                    name.Value,
-                    email.Value,
+                    contact.Name,
+                    contact.EmailAddress,
                     phone,
                     directNumber,
                     assignment.Role,

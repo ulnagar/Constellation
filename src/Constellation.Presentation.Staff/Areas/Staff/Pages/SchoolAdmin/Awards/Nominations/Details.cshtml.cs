@@ -10,21 +10,19 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Awards.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
-using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using Shared.Components.ExportAwardNominations;
 using Shared.Components.SendNominationNotifications;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.CanViewAwardNominations)]
+[HasPermission(AuthPermission.SchoolAdmin_AwardNominations_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

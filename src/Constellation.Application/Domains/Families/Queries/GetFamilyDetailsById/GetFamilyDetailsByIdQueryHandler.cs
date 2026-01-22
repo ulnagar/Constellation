@@ -7,7 +7,6 @@ using Core.Models.Families;
 using Core.Models.Families.Errors;
 using Core.Models.Students;
 using Core.Shared;
-using Core.ValueObjects;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -38,12 +37,12 @@ internal sealed class GetFamilyDetailsByIdQueryHandler
 
         foreach (StudentFamilyMembership member in family.Students)
         {
-            Student student = await _studentRepository.GetById(member.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(member.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
 
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
@@ -63,15 +62,11 @@ internal sealed class GetFamilyDetailsByIdQueryHandler
 
         foreach (Parent parent in family.Parents)
         {
-            Result<Name> name = Name.Create(parent.FirstName, null, parent.LastName);
-            Result<EmailAddress> email = EmailAddress.Create(parent.EmailAddress);
-            Result<PhoneNumber> mobile = PhoneNumber.Create(parent.MobileNumber);
-
             FamilyDetailsResponse.ParentResponse entry = new(
                 parent.Id,
-                name.Value,
-                email.Value,
-                mobile.IsSuccess ? mobile.Value : null);
+                parent.Name,
+                parent.EmailAddress,
+                parent.MobileNumber);
 
             parents.Add(entry);
         }

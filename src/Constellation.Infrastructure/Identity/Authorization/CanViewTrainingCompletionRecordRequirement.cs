@@ -13,11 +13,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class CanViewTrainingCompletionRecordRequirement : IAuthorizationRequirement
-{
-}
+public sealed class CanViewTrainingCompletionRecordRequirement : IAuthorizationRequirement;
 
-public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
+public sealed class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
 {
     private readonly AppDbContext _context;
 
@@ -28,7 +26,7 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanViewTrainingCompletionRecordRequirement requirement)
     {
-        HttpContext httpContext = context.Resource switch
+        HttpContext? httpContext = context.Resource switch
         {
             AuthorizationFilterContext mvcContext => mvcContext.HttpContext,
             HttpContext razorPageContext => razorPageContext,
@@ -36,13 +34,11 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
         };
 
         if (httpContext is null)
-        {
             return;
-        }
 
         string recordId = httpContext.Request.Path.ToString().Split('/').Last();
 
-        string userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
+        string? userStaffId = context.User.Claims.FirstOrDefault(claim => claim.Type == AuthClaimType.StaffEmployeeId)?.Value;
 
         if (!string.IsNullOrWhiteSpace(recordId) && userStaffId is not null)
         {
@@ -59,12 +55,10 @@ public class OwnsTrainingCompletionRecordByRoute : AuthorizationHandler<CanViewT
             if (userOwns)
                 context.Succeed(requirement);
         }
-
-        return;
     }
 }
 
-public class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement, Guid>
+public sealed class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement, Guid>
 {
     private readonly AppDbContext _context;
 
@@ -92,16 +86,22 @@ public class OwnsTrainingCompletionRecordByResource : AuthorizationHandler<CanVi
             if (userOwns)
                 context.Succeed(requirement);
         }
-
-        return;
     }
 }
 
-public class HasRequiredMandatoryTrainingModulePermissions : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
+public sealed class HasRequiredMandatoryTrainingModulePermissions : AuthorizationHandler<CanViewTrainingCompletionRecordRequirement>
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, CanViewTrainingCompletionRecordRequirement requirement)
     {
-        if (context.User.HasClaim(claim => claim.Type == AuthClaimType.Permission && claim.Value == AuthPermissions.MandatoryTrainingDetailsView))
+        List<string> userPermissions = context.User.Claims
+            .Where(c => c.Type == AuthClaimType.Permission)
+            .Select(c => c.Value)
+            .ToList();
+
+        if (userPermissions.Contains(AuthPermission.SchoolAdmin_Training_Edit))
+            context.Succeed(requirement);
+
+        if (userPermissions.Contains(AuthPermission.SchoolAdmin_Training_ViewAll_Value))
             context.Succeed(requirement);
 
         return Task.CompletedTask;

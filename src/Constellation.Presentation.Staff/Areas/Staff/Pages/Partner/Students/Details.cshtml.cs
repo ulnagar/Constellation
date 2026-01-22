@@ -21,6 +21,7 @@ using Constellation.Application.Domains.Students.Queries.GetSchoolEnrolmentHisto
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Errors;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Offerings.Identifiers;
@@ -41,7 +42,7 @@ using Shared.PartialViews.BulkUnenrolStudentConfirmationModal;
 using Shared.PartialViews.WithdrawStudentConfirmationModal;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Students_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -160,7 +161,7 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGetWithdraw(CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -197,7 +198,7 @@ public class DetailsModel : BasePageModel
         ReinstateStudentSelection viewModel,
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -236,7 +237,7 @@ public class DetailsModel : BasePageModel
         OfferingId offeringId, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -273,7 +274,7 @@ public class DetailsModel : BasePageModel
         TutorialId tutorialId,
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -315,7 +316,7 @@ public class DetailsModel : BasePageModel
 
     public async Task OnGetBulkUnenrol(CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -352,7 +353,7 @@ public class DetailsModel : BasePageModel
         TransferStudentSelection viewModel,
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {
@@ -393,7 +394,7 @@ public class DetailsModel : BasePageModel
         SchoolEnrolmentId enrolmentId,
         CancellationToken cancellationToken = default)
     {
-        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorised = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 
         if (!authorised.Succeeded)
         {

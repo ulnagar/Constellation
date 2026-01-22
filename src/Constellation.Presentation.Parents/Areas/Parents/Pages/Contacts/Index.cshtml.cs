@@ -9,13 +9,13 @@ using Core.Abstractions.Services;
 using Core.Models.Students.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsParent)]
+[HasPermission(AuthPermission.ParentPortal_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

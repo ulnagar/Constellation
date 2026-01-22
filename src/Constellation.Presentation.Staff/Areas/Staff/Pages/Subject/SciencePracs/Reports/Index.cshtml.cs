@@ -6,15 +6,14 @@ using Constellation.Application.Common.PresentationModels;
 using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanManageSciencePracs)]
+[HasPermission(AuthPermission.Subjects_SciencePracs_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

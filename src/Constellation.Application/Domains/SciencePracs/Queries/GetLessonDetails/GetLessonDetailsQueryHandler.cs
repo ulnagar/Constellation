@@ -8,7 +8,6 @@ using Core.Models.Offerings.Repositories;
 using Core.Models.SciencePracs;
 using Core.Models.SciencePracs.Errors;
 using Core.Models.Subjects;
-using Core.Models.Subjects.Identifiers;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -44,7 +43,7 @@ internal sealed class GetLessonDetailsQueryHandler
 
     public async Task<Result<LessonDetailsResponse>> Handle(GetLessonDetailsQuery request, CancellationToken cancellationToken)
     {
-        SciencePracLesson lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
+        SciencePracLesson? lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -53,11 +52,11 @@ internal sealed class GetLessonDetailsQueryHandler
             return Result.Failure<LessonDetailsResponse>(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
-        List<string> offerings = new();
+        List<string> offerings = [];
 
         foreach (SciencePracLessonOffering entry in lesson.Offerings)
         {
-            Offering offering = await _offeringRepository.GetById(entry.OfferingId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(entry.OfferingId, cancellationToken);
 
             if (offering is null)
                 continue;
@@ -65,11 +64,11 @@ internal sealed class GetLessonDetailsQueryHandler
             offerings.Add(offering.Name);
         }
 
-        List<LessonDetailsResponse.LessonRollSummary> rollSummaries = new();
+        List<LessonDetailsResponse.LessonRollSummary> rollSummaries = [];
 
         foreach (SciencePracRoll roll in lesson.Rolls)
         {
-            School school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
+            School? school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
 
             if (school is null)
                 continue;
@@ -82,23 +81,35 @@ internal sealed class GetLessonDetailsQueryHandler
                 school.Name,
                 roll.Status,
                 roll.Attendance.Count(attendance => attendance.Present),
-                roll.Attendance.Count(),
+                roll.Attendance.Count,
                 roll.NotificationCount,
                 overdue);
 
             rollSummaries.Add(rollSummary);
         }
 
-        Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
+        List<LessonDetailsResponse.CourseSummary> courses = [];
 
-        string courseName = $"{course?.Grade} {course?.Name}";
+        foreach (var offering in lesson.Offerings)
+        {
+            Course? course = await _courseRepository.GetByOfferingId(offering.OfferingId, cancellationToken);
 
+            if (course is null)
+                continue;
+
+            if (courses.Any(entry => entry.CourseId == course.Id))
+                continue;
+
+            courses.Add(new(
+                course.Id,
+                $"{course.Grade} {course.Name}"));
+        }
+        
         LessonDetailsResponse response = new(
             lesson.Id,
-            course?.Id ?? CourseId.Empty,
-            courseName,
             lesson.Name,
             lesson.DueDate,
+            courses,
             offerings,
             rollSummaries);
 

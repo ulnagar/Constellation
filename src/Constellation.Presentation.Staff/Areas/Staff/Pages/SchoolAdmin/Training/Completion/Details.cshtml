@@ -10,7 +10,7 @@
 <h2>Training Completion Record Details</h2>
 
 @{
-    var canManage = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+    var canManage = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 }
 
 <div class="page-menu">

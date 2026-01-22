@@ -1,0 +1,94 @@
+﻿@page "{id?}"
+@model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Templates.UpsertModel
+
+@using Constellation.Core.Models.EmergencyConsole.Enums
+@using Constellation.Core.Models.EmergencyConsole.Identifiers
+
+@{
+}
+
+<h2>@(Model.Id == TemplateId.Empty ? "New Template" : "Edit Template")</h2>
+
+<div class="page-menu">
+    @if (Model.Id != TemplateId.Empty)
+    {
+        <button class="btn btn-danger delete-button">Delete</button>
+    }
+
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="mb-3 row">
+            <label asp-for="Type" class="col-md-2"></label>
+            <div class="col-md-3">
+                @if (Model.Id != TemplateId.Empty)
+                {
+                    @Model.Type.Name
+                }
+                else
+                {
+                    <div class="btn-group" role="group">
+                        @foreach (var option in MessageType.GetOptions)
+                        {
+                            <input type="radio" class="btn-check" asp-for="Type" value="@option.Value" id="type-@option.Value"/>
+                            <label class="btn btn-outline-success" for="type-@option.Value">@option.Name</label>
+                        }
+                    </div>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="Name" class="col-md-2"></label>
+            <div class="col-md-3">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label asp-for="Template" class="col-md-2">MessageEvent</label>
+            <div class="col-md-3">
+                <textarea asp-for="Template" rows="10" cols="100" class="form-control"></textarea>
+                <span asp-validation-for="Template" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <div class="col-md-offset-2 col-md-3 d-grid">
+                <input type="submit" value="Save" class="btn btn-primary btn-lg" />
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+@section scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $('.delete-button').click(function (event) {
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxDelete",
+                type: "POST",
+                data: {
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+    </script>
+}

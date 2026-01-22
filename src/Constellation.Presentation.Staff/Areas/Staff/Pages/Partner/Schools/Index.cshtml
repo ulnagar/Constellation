@@ -6,7 +6,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult authorised = await authService.AuthorizeAsync(User, AuthPolicies.CanEditSchools);
+    AuthorizationResult authorised = await authService.AuthorizeAsync(User, AuthPermission.Partners_Schools_Edit_Value);
 }
 
 <h2>School List</h2>

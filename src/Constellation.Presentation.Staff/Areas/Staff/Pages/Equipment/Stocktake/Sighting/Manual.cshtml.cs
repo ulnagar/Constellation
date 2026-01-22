@@ -20,12 +20,12 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Stocktake_Submit_Value)]
 public class ManualModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -2,7 +2,9 @@
 
 using Constellation.Application.Interfaces.Services;
 using Core.ValueObjects;
+using MimeKit;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Contacts;
 
@@ -24,7 +26,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewACCoordinatorEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendWelcomeEmailToSciencePracTeacher(
@@ -43,6 +45,6 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Contacts/NewSciencePracTeacherEmail.cshtml", viewModel);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, cancellationToken);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
     }
 }

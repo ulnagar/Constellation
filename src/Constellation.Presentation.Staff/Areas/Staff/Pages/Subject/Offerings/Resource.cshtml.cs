@@ -12,18 +12,18 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.CanEditSubjects)]
+[HasPermission(AuthPermission.Subjects_Offerings_Edit_Value)]
 public class ResourceModel : BasePageModel
 {
     private readonly ISender _mediator;

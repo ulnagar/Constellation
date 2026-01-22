@@ -1,11 +1,10 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Teams.Queries.GetTeamMembershipById;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
-using Application.Models.Identity;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Models.LinkedSystems;
+using Constellation.Core.Models.StaffMembers.Errors;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Repositories;
@@ -14,7 +13,6 @@ using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Errors;
 using Core.Extensions;
-using Core.Models;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
 using Core.Models.Faculties;
@@ -36,11 +34,11 @@ using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Configuration;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,7 +59,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly IGroupTutorialRepository _groupTutorialRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IDateTimeProvider _dateTime;
-    private readonly UserManager<AppUser> _userManager;
     private readonly ILogger _logger;
 
     public GetTeamMembershipByIdQueryHandler(
@@ -75,7 +72,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IGroupTutorialRepository groupTutorialRepository,
         ICourseRepository courseRepository,
         IDateTimeProvider dateTime,
-        UserManager<AppUser> userManager,
         ILogger logger,
         ICoverRepository coverRepository,
         IOptions<AppConfiguration> configuration,
@@ -94,7 +90,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _groupTutorialRepository = groupTutorialRepository;
         _courseRepository = courseRepository;
         _dateTime = dateTime;
-        _userManager = userManager;
         _logger = logger.ForContext<GetTeamMembershipByIdQuery>();
     }
 
@@ -102,7 +97,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     {
         List<TeamMembershipResponse> returnData = new();
 
-        Team team = await _teamRepository.GetById(request.Id, cancellationToken);
+        Team? team = await _teamRepository.GetById(request.Id, cancellationToken);
 
         if (team is null)
         {
@@ -233,27 +228,10 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                         returnData.Add(entry);
-
-                    // Cover administrators
-                    IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
-                    foreach (AppUser coverAdmin in additionalRecipients)
-                    {
-                        if (coverAdmin.IsStaffMember)
-                        {
-                            TeamMembershipResponse teacherEntry = new(
-                                team.Id,
-                                coverAdmin.Email,
-                                TeamsMembershipLevel.Owner.Value);
-
-                            if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
-                                returnData.Add(teacherEntry);
-                        }
-                    }
                 }
 
                 // Head Teachers
-                Faculty faculty = await _facultyRepository.GetByOfferingId(offering.Id, cancellationToken);
+                Faculty? faculty = await _facultyRepository.GetByOfferingId(offering.Id, cancellationToken);
 
                 if (faculty is null)
                 {
@@ -277,20 +255,44 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 if (_configuration is null) continue;
-                
-                Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+                // Cover administrators
+                foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
+                {
+                    StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
+
+                    if (teacher is null)
+                    {
+                        _logger
+                            .ForContext(nameof(GetTeamMembershipByIdQuery), request, true)
+                            .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                            .ForContext(nameof(EmployeeId), employeeId)
+                            .Warning("Failed to retrieve Team Membership");
+
+                        continue;
+                    }
+
+                    TeamMembershipResponse teacherEntry = new(
+                        team.Id,
+                        teacher.EmailAddress,
+                        TeamsMembershipLevel.Owner.Value);
+
+                    if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
+                        returnData.Add(teacherEntry);
+                }
+
+                Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
                 if (course is null) continue;
 
                 // Deputy Principals
-                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<EmployeeId> deputyIds);
+                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<EmployeeId>? deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
-
-                    foreach (EmployeeId deputyId in deputyIds)
+                    foreach (EmployeeId deputyId in deputyIds!)
                     {
-                        StaffMember deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
+                        StaffMember? deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
 
                         if (deputyPrincipal is null) continue;
 
@@ -305,13 +307,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<EmployeeId> lastStaffIds);
+                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<EmployeeId>? lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (EmployeeId staffId in lastStaffIds)
+                    foreach (EmployeeId staffId in lastStaffIds!)
                     {
-                        StaffMember learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+                        StaffMember? learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
                         if (learningSupportTeacher is null) continue;
 
@@ -429,7 +431,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 foreach (CourseId courseId in courseIds)
                 {
-                    Faculty faculty = await _facultyRepository.GetByCourseId(courseId, cancellationToken);
+                    Faculty? faculty = await _facultyRepository.GetByCourseId(courseId, cancellationToken);
 
                     if (faculty is null)
                     {
@@ -469,27 +471,27 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 try
                 {
                     string stringGrade = tutorial.Name.Value[..2];
-                    int intGrade = Convert.ToInt32(stringGrade);
+                    int intGrade = Convert.ToInt32(stringGrade, CultureInfo.InvariantCulture);
                     grade = (Grade)intGrade;
                 }
                 catch (Exception e)
                 {
                     _logger
                         .ForContext(nameof(Tutorial.Name), tutorial.Name, true)
+                        .ForContext(nameof(Exception), e, true)
                         .Error("Failed to convert Tutorial Name into Grade");
 
                     continue;
                 }
                 
                 // Deputy Principals
-                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId> deputyIds);
+                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId>? deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
-
-                    foreach (EmployeeId deputyId in deputyIds)
+                    foreach (EmployeeId deputyId in deputyIds!)
                     {
-                        StaffMember deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
+                        StaffMember? deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
 
                         if (deputyPrincipal is null) continue;
 
@@ -504,13 +506,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId> lastStaffIds);
+                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId>? lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (EmployeeId staffId in lastStaffIds)
+                    foreach (EmployeeId staffId in lastStaffIds!)
                     {
-                        StaffMember learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+                        StaffMember? learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
                         if (learningSupportTeacher is null) continue;
 
@@ -531,7 +533,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             // Group Tutorial Team which will have a group tutorial
             string teamCourse = team.Name.Split(" - ")[2];
 
-            GroupTutorial tutorial = await _groupTutorialRepository.GetByName(teamCourse, cancellationToken);
+            GroupTutorial? tutorial = await _groupTutorialRepository.GetByName(teamCourse, cancellationToken);
 
             if (tutorial is null)
             {
@@ -587,11 +589,11 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         // Mandatory Owners
         List<EmployeeId> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
 
-        if (mandatoryOwners.Any())
+        if (mandatoryOwners.Count > 0)
         {
             foreach (EmployeeId staffId in mandatoryOwners)
             {
-                StaffMember mandatoryOwner = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+                StaffMember? mandatoryOwner = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
 
                 if (mandatoryOwner is null) continue;
 
@@ -609,10 +611,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             List<string> standardOwners =
             [
                 "michael.necovski2@det.nsw.edu.au",
-                "christopher.robertson@det.nsw.edu.au",
-                "virginia.cluff@det.nsw.edu.au",
-                //"scott.new@det.nsw.edu.au",
-                "julie.dent@det.nsw.edu.au",
                 "benjamin.hillsley@det.nsw.edu.au"
             ];
 

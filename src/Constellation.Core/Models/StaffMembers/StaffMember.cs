@@ -42,16 +42,17 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
     public EmployeeId EmployeeId { get; private set; }
     public Name Name { get; private set; }
     public EmailAddress EmailAddress { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
     public Gender Gender { get; private set; }
     public bool IsShared { get; private set; }
 
 
-    public string CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
     public DateTime? DateDeleted { get; set; }
 
@@ -164,6 +165,16 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
     public void RemoveSchoolAssignment(SchoolAssignment assignment, IDateTimeProvider dateTime)
     {
         assignment.Delete(dateTime.Today, dateTime);
+    }
+
+    public Result AddPhoneNumber(
+        PhoneNumber phoneNumber)
+    {
+        if (!phoneNumber.IsMobile())
+            return Result.Failure(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+
+        PhoneNumber = phoneNumber;
+        return Result.Success();
     }
 
     public Result AddSystemLink(

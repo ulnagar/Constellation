@@ -1,15 +1,13 @@
 ﻿@page
 @model ConfigurationModel
 
-@using Constellation.Core.Models.Absences;
 @using Constellation.Core.Models.Absences.Enums
 @using Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 
 @inject IAuthorizationService authorisationService
 
 @{
-    var authorised = await authorisationService.AuthorizeAsync(User, AuthPolicies.CanManageAbsences);
+    var authorised = await authorisationService.AuthorizeAsync(User, AuthPermission.StudentAdmin_AttendanceSettings_Edit_Value);
 
     var allStyle = "btn-outline-secondary";
     var enabledStyle = allStyle;

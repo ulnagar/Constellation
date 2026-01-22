@@ -6,7 +6,7 @@
 @inject IAuthorizationService authService
 
 @{
-    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPolicies.CanManageTutorials);
+    AuthorizationResult canManageTest = await authService.AuthorizeAsync(User, AuthPermission.Subjects_Tutorials_Edit_Value);
 }
 
 <h2>Tutorial Request Details</h2>

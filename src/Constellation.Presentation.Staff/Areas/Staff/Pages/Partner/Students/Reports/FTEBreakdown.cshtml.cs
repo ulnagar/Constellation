@@ -4,17 +4,16 @@ using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Enrolments.Queries.GetFTETotalByGrade;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Students_View_Value)]
 public class FTEBreakdownModel : BasePageModel
 {
     private readonly ISender _mediator;

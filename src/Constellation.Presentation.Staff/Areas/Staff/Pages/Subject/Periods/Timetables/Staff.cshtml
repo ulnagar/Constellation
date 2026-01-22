@@ -183,7 +183,7 @@
 
                                     <div class="Student-Timetable-Day-Period integrated @style" style="height: @(period.Duration * 1.75)px;">
 
-                                        <div class="class-details" title="@period.OfferingName &#013; @period.PeriodCode - @period.PeriodName &#013; @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
+                                        <div class="class-eventDetails" title="@period.OfferingName &#013; @period.PeriodCode - @period.PeriodName &#013; @period.StartTime.As12HourTime() - @period.EndTime.As12HourTime()">
                                             @if (period.OfferingName != OfferingName.None)
                                             {
                                                 @period.OfferingName
@@ -270,7 +270,7 @@
                                             <div class="Student-Timetable-Day-Period @style">
                                                 @if (period.OfferingName != OfferingName.None)
                                                 {
-                                                    <div class="class-details">
+                                                    <div class="class-eventDetails">
                                                         @period.OfferingName
                                                     </div>
                                                 }

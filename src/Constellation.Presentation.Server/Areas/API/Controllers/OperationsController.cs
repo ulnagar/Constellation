@@ -399,7 +399,7 @@ public sealed class OperationsController : ControllerBase
             {
                 Id = operation.Id,
                 TeamName = operation.TeamName,
-                UserEmail = operation.Contact.EmailAddress
+                UserEmail = operation.Contact.EmailAddress.Email
             };
 
             teamOperation.Action = operation.Action switch

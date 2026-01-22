@@ -8,16 +8,16 @@ using Constellation.Application.DTOs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Offerings_View_Value)]
 public class MapModel : BasePageModel
 {
     private readonly ISender _mediator;

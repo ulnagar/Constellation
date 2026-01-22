@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 public interface IAppDbContext
 {
-    DbSet<AppAccessToken> AspNetAccessTokens { get; set; }
     DbSet<JobActivation> JobActivations { get; set; }
     DbSet<MSTeamOperation> MSTeamOperations { get; set; }
     

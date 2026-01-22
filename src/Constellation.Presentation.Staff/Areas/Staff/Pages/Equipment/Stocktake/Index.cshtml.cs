@@ -4,6 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.AssetManagement.Stocktake.Queries.GetStocktakeEventList;
 using Application.Models.Auth;
 using Constellation.Application.Domains.AssetManagement.Stocktake.Models;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Equipment_Stocktake_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -59,7 +60,7 @@ public class IndexModel : BasePageModel
 
         StocktakeEventResponse? currentEvent = events.Value.FirstOrDefault(entry => entry.EndDate >= DateTime.Now);
 
-        if (!(await _authService.AuthorizeAsync(User, AuthPolicies.CanManageAssets)).Succeeded)
+        if (!(await _authService.AuthorizeAsync(User, AuthPermission.Equipment_Stocktake_Edit_Value)).Succeeded)
         {
             return currentEvent is not null 
                 ? RedirectToPage("/Equipment/Stocktake/Dashboard", new { area = "Staff", Id = currentEvent.Id }) 

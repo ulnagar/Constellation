@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Polly;
 using Serilog;
 using System.Text;
 
@@ -82,6 +81,8 @@ builder.Services.AddHangfire((provider, configuration) => configuration
     }));
 GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 0 });
 
+builder.Services.AddTransient<HangfireAuthorizationFilter>();
+
 builder.Services.AddRazorPages()
     .AddSessionStateTempDataProvider()
     .AddApplicationPart(Constellation.Presentation.Shared.AssemblyReference.Assembly)
@@ -106,6 +107,9 @@ builder.Services.AddMvc(options =>
         options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
         options.ModelBinderProviders.Insert(0, new PositionEnumBinderProvider());
         options.ModelBinderProviders.Insert(0, new AssetNumberBinderProvider());
+        options.ModelBinderProviders.Insert(0, new RecipientGroupBinderProvider());
+        options.ModelBinderProviders.Insert(0, new AlertRecipientBinderProvider());
+        options.ModelBinderProviders.Insert(0, new AuthPermissionBinderProvider());
     })
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
@@ -150,16 +154,26 @@ using (IServiceScope scope = app.Services.CreateScope())
     IServiceProvider services = scope.ServiceProvider;
     try
     {
-        UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
         RoleManager<AppRole> roleManager = services.GetRequiredService<RoleManager<AppRole>>();
         await IdentityDefaults.SeedRoles(roleManager);
-        await IdentityDefaults.SeedUsers(userManager);
 
         IWebHostEnvironment env = services.GetRequiredService<IWebHostEnvironment>();
         if (env.IsDevelopment())
         {
             //await IdentityDefaults.SeedTestUsers(userManager);
         }
+
+        HangfireAuthorizationFilter filter = services.GetRequiredService<HangfireAuthorizationFilter>();
+
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+        {
+            AppPath = "/",
+            DashboardTitle = "Hangfire Dashboard",
+            Authorization = new[]
+            {
+                filter
+            }
+        });
     }
     catch
     {
@@ -177,15 +191,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHangfireDashboard("/hangfire", new DashboardOptions()
-{
-    AppPath = "/",
-    DashboardTitle = "Hangfire Dashboard",
-    Authorization = new[]
-    {
-        new HangfireAuthorizationFilter()
-    }
-});
+
 
 app.MapRazorPages();
 app.MapControllers();

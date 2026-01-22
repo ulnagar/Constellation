@@ -9,7 +9,7 @@
 @{
     Layout = "/Areas/Staff/Pages/Shared/_StaffLayout.bs5.cshtml";
 
-    var canEditStudents = await authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+    var canEditStudents = await authService.AuthorizeAsync(User, AuthPermission.Partners_Students_Edit_Value);
 }
 
 <h2>Students</h2>

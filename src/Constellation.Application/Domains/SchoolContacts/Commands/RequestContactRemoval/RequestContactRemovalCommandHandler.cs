@@ -60,7 +60,7 @@ internal sealed class RequestContactRemovalCommandHandler
 
         List<EmailRecipient> toRecipients = [EmailRecipient.AuroraCollege, EmailRecipient.InfoTechTeam];
 
-        Result<MimeMessage> response = await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "School Contact change requested", body, cancellationToken);
+        Result<MimeMessage> response = await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "School Contact change requested", body, MessagePriority.Normal, cancellationToken);
 
         if (response.IsSuccess)
             return Result.Success();

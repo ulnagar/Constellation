@@ -7,6 +7,7 @@ using Application.Models.Auth;
 using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attachments.ValueObjects;
 using Constellation.Core.Models.Reports.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
@@ -18,7 +19,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsSchoolContact)]
+[HasPermission(AuthPermission.SchoolsPortal_Reports_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -32,8 +33,9 @@ public class IndexModel : BasePageModel
         ICurrentUserService currentUserService,
         ILogger logger,
         IHttpContextAccessor httpContextAccessor, 
+        IAuthorizationService authorizationService,
         IServiceScopeFactory serviceFactory) 
-        : base(httpContextAccessor, serviceFactory)
+        : base(httpContextAccessor, serviceFactory, authorizationService)
     {
         _mediator = mediator;
         _linkGenerator = linkGenerator;

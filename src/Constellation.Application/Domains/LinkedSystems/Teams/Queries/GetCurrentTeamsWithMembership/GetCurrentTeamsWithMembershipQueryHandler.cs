@@ -1,16 +1,12 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Teams.Queries.GetCurrentTeamsWithMembership;
 
 using Abstractions.Messaging;
-using Application.Models.Auth;
-using Application.Models.Identity;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Extensions;
-using Core.Models;
-using Core.Models.Assets.Enums;
 using Core.Models.Casuals;
 using Core.Models.Covers;
 using Core.Models.Covers.Enums;
@@ -36,11 +32,11 @@ using Core.Models.Tutorials.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Configuration;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +56,6 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
     private readonly ICasualRepository _casualRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
-    private readonly UserManager<AppUser> _userManager;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
@@ -77,7 +72,6 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         ICasualRepository casualRepository,
         IFacultyRepository facultyRepository,
         IGroupTutorialRepository groupTutorialRepository,
-        UserManager<AppUser> userManager,
         IDateTimeProvider dateTime,
         ILogger logger)
     {
@@ -93,7 +87,6 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         _casualRepository = casualRepository;
         _facultyRepository = facultyRepository;
         _groupTutorialRepository = groupTutorialRepository;
-        _userManager = userManager;
         _dateTime = dateTime;
         _logger = logger
             .ForContext<GetCurrentTeamsWithMembershipQuery>();
@@ -121,8 +114,8 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         List<Tutorial> tutorials = await _tutorialRepository.GetAllActive(cancellationToken);
         List<Cover> covers = await _coverRepository.GetAllCurrent(cancellationToken);
         List<Casual> casuals = await _casualRepository.GetAll(cancellationToken);
-        IList<AppUser> additionalRecipients = await _userManager.GetUsersInRoleAsync(AuthRoles.CoverRecipient);
-
+        List<EmployeeId> additionalRecipients = _appConfiguration.Covers.CoverContacts;
+        
         foreach (var team in serverTeams)
         {
             List<TeamWithMembership.Member> members = [];
@@ -168,7 +161,10 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 continue;
             }
 
-            TeamWithMembership.Member left = list.Find(member => member.EmailAddress == right.EmailAddress);
+            TeamWithMembership.Member? left = list.Find(member => member.EmailAddress == right.EmailAddress);
+
+            if (left is null)
+                continue;
 
             string newPermissionLevel = string.Empty;
             Dictionary<string, string> newChannels = new();
@@ -178,7 +174,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
 
             foreach (KeyValuePair<string, string> leftChannel in left.Channels)
             {
-                if (!right.Channels.TryGetValue(leftChannel.Key, out string rightChannel))
+                if (!right.Channels.TryGetValue(leftChannel.Key, out string? rightChannel))
                 {
                     newChannels.Add(leftChannel.Key, leftChannel.Value);
                     continue;
@@ -212,7 +208,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         // Group Tutorial Team which will have a group tutorial
         string teamCourse = team.Name.Split(" - ")[2];
 
-        GroupTutorial tutorial = await _groupTutorialRepository.GetByName(teamCourse, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetByName(teamCourse, cancellationToken);
 
         if (tutorial is null)
         {
@@ -278,7 +274,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         List<Offering> offerings, 
         List<Student> students, 
         List<StaffMember> staff, 
-        IList<AppUser> additionalRecipients,
+        List<EmployeeId> additionalRecipients,
         CancellationToken cancellationToken = default)
     {
         List<TeamWithMembership.Member> members = [];
@@ -384,23 +380,25 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Cover administrators
-                foreach (AppUser coverAdmin in additionalRecipients)
+                foreach (EmployeeId coverAdmin in additionalRecipients)
                 {
-                    if (coverAdmin.IsStaffMember)
-                    {
-                        TeamWithMembership.Member teacherEntry = new(
-                            coverAdmin.Email,
-                            TeamsMembershipLevel.Owner.Value,
-                            []);
+                    StaffMember? teacher = staff.FirstOrDefault(member => member.EmployeeId == coverAdmin);
 
-                        if (members.All(value => value.EmailAddress != teacherEntry.EmailAddress))
-                            members.Add(teacherEntry);
-                    }
+                    if (teacher is null)
+                        continue;
+
+                    TeamWithMembership.Member teacherEntry = new(
+                        teacher.EmailAddress,
+                        TeamsMembershipLevel.Owner.Value,
+                        []);
+
+                    if (members.All(value => value.EmailAddress != teacherEntry.EmailAddress))
+                        members.Add(teacherEntry);
                 }
             }
 
             // Head Teachers
-            Faculty faculty = await _facultyRepository.GetByCourseId(offering.CourseId, cancellationToken);
+            Faculty? faculty = await _facultyRepository.GetByCourseId(offering.CourseId, cancellationToken);
 
             if (faculty is null)
             {
@@ -437,7 +435,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 try
                 {
                     string stringGrade = offering.Name.Value[..2];
-                    int intGrade = Convert.ToInt32(stringGrade);
+                    int intGrade = Convert.ToInt32(stringGrade, CultureInfo.InvariantCulture);
                     grade = (Grade)intGrade;
                 }
                 catch (Exception e)
@@ -450,14 +448,13 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Deputy Principals
-                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId> deputyIds);
+                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId>? deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
-
-                    foreach (var deputyId in deputyIds)
+                    foreach (var deputyId in deputyIds!)
                     {
-                        StaffMember deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == deputyId);
+                        StaffMember? deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == deputyId);
 
                         if (deputyPrincipal is null) continue;
 
@@ -472,13 +469,13 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId> lastStaffIds);
+                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId>? lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (EmployeeId staffId in lastStaffIds)
+                    foreach (EmployeeId staffId in lastStaffIds!)
                     {
-                        StaffMember learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
+                        StaffMember? learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
 
                         if (learningSupportTeacher is null) continue;
 
@@ -610,7 +607,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
 
             foreach (CourseId courseId in courseIds)
             {
-                Faculty faculty = await _facultyRepository.GetByCourseId(courseId, cancellationToken);
+                Faculty? faculty = await _facultyRepository.GetByCourseId(courseId, cancellationToken);
 
                 if (faculty is null)
                 {
@@ -648,7 +645,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 try
                 {
                     string stringGrade = tutorial.Name.Value[..2];
-                    int intGrade = Convert.ToInt32(stringGrade);
+                    int intGrade = Convert.ToInt32(stringGrade, CultureInfo.InvariantCulture);
                     grade = (Grade)intGrade;
                 }
                 catch (Exception e)
@@ -661,14 +658,13 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Deputy Principals
-                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId> deputyIds);
+                bool deputyPrincipals = _appConfiguration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId>? deputyIds);
 
                 if (deputyPrincipals is not false)
                 {
-
-                    foreach (var deputyId in deputyIds)
+                    foreach (var deputyId in deputyIds!)
                     {
-                        StaffMember deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == deputyId);
+                        StaffMember? deputyPrincipal = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == deputyId);
 
                         if (deputyPrincipal is null) continue;
 
@@ -683,13 +679,13 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId> lastStaffIds);
+                bool learningSupport = _appConfiguration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId>? lastStaffIds);
 
                 if (learningSupport is not false)
                 {
-                    foreach (EmployeeId staffId in lastStaffIds)
+                    foreach (EmployeeId staffId in lastStaffIds!)
                     {
-                        StaffMember learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
+                        StaffMember? learningSupportTeacher = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
 
                         if (learningSupportTeacher is null) continue;
 
@@ -716,7 +712,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         {
             foreach (EmployeeId staffId in _teamConfiguration.MandatoryOwnerIds)
             {
-                StaffMember mandatoryOwner = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
+                StaffMember? mandatoryOwner = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
 
                 if (mandatoryOwner is null) continue;
 

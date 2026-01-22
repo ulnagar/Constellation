@@ -78,8 +78,7 @@ public static class ServicesRegistration
 
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
 
-        // Add Hangfire Services
-
+        // Add Hangfire Authorization Filter
         //services.Scan(selector =>
         //    selector
         //        .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
@@ -163,13 +162,16 @@ public static class ServicesRegistration
 
     public static IServiceCollection AddAuthorizationPolicies(this IServiceCollection services)
     {
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByRoute>();
         services.AddScoped<IAuthorizationHandler, HasRequiredMandatoryTrainingModulePermissions>();
         services.AddScoped<IAuthorizationHandler, OwnsTrainingCompletionRecordByResource>();
         services.AddScoped<IAuthorizationHandler, IsCurrentTeacherAddedToTutorial>();
         services.AddScoped<IAuthorizationHandler, HasRequiredGroupTutorialModulePermissions>();
         services.AddScoped<IAuthorizationHandler, IsAssignedToActionByResource>();
-        services.AddScoped<IAuthorizationHandler, IsInGroupAllowedToEditWorkFlows>();
+        services.AddScoped<IAuthorizationHandler, HasWorkflowEditPermissions>();
         services.AddScoped<IAuthorizationHandler, IsAssignedToActionByRoute>();
         services.AddScoped<IAuthorizationHandler, HasActiveParentRecord>();
         services.AddScoped<IAuthorizationHandler, HasActiveContactAssignmentToCurrentPartnerSchool>();

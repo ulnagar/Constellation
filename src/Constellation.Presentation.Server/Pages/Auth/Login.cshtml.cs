@@ -142,7 +142,7 @@ public class LoginModel : PageModel
             return Page();
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(Input.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
 
         if (user is null)
         {
@@ -157,7 +157,11 @@ public class LoginModel : PageModel
 
         _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
-        bool result = new();
+        bool result;
+
+        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Started);
+
+        await _userManager.UpdateAsync(user);
 
         if (loginType == LoginType.Domain)
         {
@@ -187,10 +191,10 @@ public class LoginModel : PageModel
             MagicLinkEmail notification = new()
             {
                 Link = url,
-                Name = user.DisplayName
+                Name = user.Name.DisplayName
             };
 
-            Result<EmailRecipient> recipient = EmailRecipient.Create(user.DisplayName, user.Email);
+            Result<EmailRecipient> recipient = EmailRecipient.Create(user.Name.DisplayName, user.Email);
 
             if (recipient.IsFailure)
             {
@@ -259,7 +263,10 @@ public class LoginModel : PageModel
         returnUrl ??= Url.Content("~/");
         
         _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
-        AppUser user = await _userManager.FindByEmailAsync(Input.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
+
+        if (user is null)
+            return Page();
 
         _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
@@ -282,6 +289,10 @@ public class LoginModel : PageModel
 
                 Status = LoginStatus.WaitingPasswordInput;
 
+                user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+
+                await _userManager.UpdateAsync(user);
+
                 return Page();
             }
 
@@ -289,7 +300,7 @@ public class LoginModel : PageModel
 
             await _signInManager.SignInAsync(user, false);
 
-            user.LastLoggedIn = DateTime.UtcNow;
+            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
             await _userManager.UpdateAsync(user);
 
             return LocalRedirect(returnUrl);
@@ -299,6 +310,10 @@ public class LoginModel : PageModel
 
         Status = LoginStatus.InvalidUsername;
 
+        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+
+        await _userManager.UpdateAsync(user);
+
         return Page();
     }
 
@@ -307,7 +322,10 @@ public class LoginModel : PageModel
         _logger.Information("Continuing Login Attempt by {user}", userId);
 
         // Get user entry from database
-        AppUser user = await _userManager.FindByIdAsync(userId);
+        AppUser? user = await _userManager.FindByIdAsync(userId);
+
+        if (user is null)
+            return Page();
 
         _logger.Information("Found user {user} with Id {id}", user.Email, userId);
 
@@ -320,6 +338,10 @@ public class LoginModel : PageModel
 
             Status = LoginStatus.TokenInvalid;
 
+            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+
+            await _userManager.UpdateAsync(user);
+
             return Page();
         }
         
@@ -327,8 +349,9 @@ public class LoginModel : PageModel
         await _signInManager.SignInAsync(user, false);
 
         _logger.Information(" - Login succeeded for {user}", user.Email);
+        
+        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
 
-        user.LastLoggedIn = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
         // Redirect to home page
@@ -388,6 +411,9 @@ public class LoginModel : PageModel
                 _logger.Warning(" - Token invalid for {user}", parent.Value.Email);
 
                 Status = LoginStatus.TokenInvalid;
+                
+                parent.Value.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+                await _userManager.UpdateAsync(parent.Value);
 
                 return Page();
             }
@@ -397,7 +423,7 @@ public class LoginModel : PageModel
 
             _logger.Information(" - Login succeeded for {user}", parent.Value.Email);
 
-            parent.Value.LastLoggedIn = DateTime.UtcNow;
+            parent.Value.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
             await _userManager.UpdateAsync(parent.Value);
 
             // Redirect to home page
@@ -407,6 +433,9 @@ public class LoginModel : PageModel
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 
         Status = LoginStatus.InvalidUsername;
+
+        parent.Value.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+        await _userManager.UpdateAsync(parent.Value);
 
         return Page();
     }

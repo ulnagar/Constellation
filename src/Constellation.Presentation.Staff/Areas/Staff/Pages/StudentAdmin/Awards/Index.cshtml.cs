@@ -9,19 +9,19 @@ using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.ValueObjects;
 using Hangfire;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_Awards_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -5,6 +5,7 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Services;
 using Core.Shared;
 using Core.ValueObjects;
+using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +51,7 @@ public sealed partial class Service : IEmailService
             new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendAdminLowCreditAlert(double credit)
@@ -85,7 +86,7 @@ public sealed partial class Service : IEmailService
             new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, cancellationToken);
+        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, MessagePriority.Normal, cancellationToken);
     }
 
     public async Task SendServiceLogEmail(ServiceLogEmail notification)

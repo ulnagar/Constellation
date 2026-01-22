@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffDetails;
 
 using Abstractions.Messaging;
+using Constellation.Core.ValueObjects;
 using Core.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
@@ -168,8 +169,8 @@ internal sealed class GetStaffDetailsQueryHandler
                     schoolContacts.Add(new(
                         contact.Id,
                         contact.DisplayName,
-                        contact.EmailAddress,
-                        string.IsNullOrWhiteSpace(contact.PhoneNumber) ? school.PhoneNumber : contact.PhoneNumber,
+                        contact.EmailAddress.Email,
+                        contact.PhoneNumber == PhoneNumber.Empty ? school.PhoneNumber : contact.PhoneNumber.ToString(PhoneNumber.Format.None),
                         assignment.Role,
                         school.Name));
                 }

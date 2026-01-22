@@ -2,7 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Core.Errors;
+using Core.Models.Families;
 using Core.Models.Families.Errors;
 using Core.Shared;
 using Core.ValueObjects;
@@ -33,18 +33,18 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
 
     public async Task<Result<List<PhoneNumber>>> Handle(GetResidentialFamilyMobileNumbersQuery request, CancellationToken cancellationToken)
     {
-        var phoneNumbers = new List<PhoneNumber>();
+        List<PhoneNumber> phoneNumbers = new();
 
-        var studentFamilies = await _familyRepository.GetFamiliesByStudentId(request.StudentId, cancellationToken);
+        List<Family> studentFamilies = await _familyRepository.GetFamiliesByStudentId(request.StudentId, cancellationToken);
 
-        if (!studentFamilies.Any())
+        if (studentFamilies.Count == 0)
         {
             _logger.Warning("Could not find any families associated with student id {id}.", request.StudentId);
 
             return Result.Failure<List<PhoneNumber>>(FamilyStudentErrors.NoLinkedFamilies);
         }
 
-        var residentialFamily = studentFamilies.FirstOrDefault(family =>
+        Family? residentialFamily = studentFamilies.FirstOrDefault(family =>
             family.Students.Any(student =>
                 student.StudentId == request.StudentId &&
                 student.IsResidentialFamily));
@@ -56,51 +56,29 @@ public class GetResidentialFamilyMobileNumbersQueryHandler
             return Result.Failure<List<PhoneNumber>>(FamilyStudentErrors.NoResidentialFamily);
         }
 
-        var mother = residentialFamily
+        Parent? mother = residentialFamily
             .Parents
             .FirstOrDefault(parent =>
                 parent.SentralLink == Core.Models.Families.Parent.SentralReference.Mother);
 
         Result<PhoneNumber> motherMobile;
 
-        if (mother is null) 
-        {
+        if (mother is null || mother.MobileNumber == PhoneNumber.Empty) 
             motherMobile = Result.Failure<PhoneNumber>(Error.NullValue);
-        }
         else
-        {
-            var motherMobileRequest = PhoneNumber.Create(mother.MobileNumber);
+            motherMobile = mother.MobileNumber;
 
-            if (motherMobileRequest.IsFailure)
-            {
-                _logger.Warning("Parent contact mobile is invalid: {@parent}", mother);
-            }
-                
-            motherMobile = motherMobileRequest;
-        }
-
-        var father = residentialFamily
+        Parent? father = residentialFamily
             .Parents
             .FirstOrDefault(parent =>
                 parent.SentralLink == Core.Models.Families.Parent.SentralReference.Father);
 
         Result<PhoneNumber> fatherMobile;
 
-        if (father is null)
-        {
+        if (father is null || father.MobileNumber == PhoneNumber.Empty)
             fatherMobile = Result.Failure<PhoneNumber>(Error.NullValue);
-        }
         else
-        {
-            var fatherMobileRequest = PhoneNumber.Create(father.MobileNumber);
-
-            if (fatherMobileRequest.IsFailure)
-            {
-                _logger.Warning("Parent contact mobile is invalid: {@parent}", father);
-            }
- 
-            fatherMobile = fatherMobileRequest;
-        }
+            fatherMobile = father.MobileNumber;
 
         switch (_settings?.ContactPreference)
         {

@@ -27,7 +27,7 @@ internal sealed class AwardNominationRepository
             .Set<NominationPeriod>()
             .ToListAsync(cancellationToken);
 
-    public async Task<NominationPeriod> GetById(
+    public async Task<NominationPeriod?> GetById(
         AwardNominationPeriodId periodId,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -45,7 +45,7 @@ internal sealed class AwardNominationRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<NominationNotification> GetNotificationById(
+    public async Task<NominationNotification?> GetNotificationById(
         NominationNotificationId notificationId,
         CancellationToken cancellationToken = default) =>
         await _context

@@ -39,13 +39,11 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(ClaimsPrincipal user, CancellationToken cancellationToken = default)
     {
-        //TODO: 1.17.1: Update to AuthorizationService checks against AuthPolicies instead of group memberships
-        var staffTest = await _authService.AuthorizeAsync(user, AuthPolicies.IsStaffMember);
         var adminTest = await _authService.AuthorizeAsync(user, AuthPolicies.IsSiteAdmin);
-        var trainingTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanEditTrainingModuleContent);
-        var absencesTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanManageAbsences);
-        var awardsTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanManageAwards);
-        var tutorialsTest = await _authService.AuthorizeAsync(user, AuthPolicies.CanManageTutorials);
+        var trainingTest = await _authService.AuthorizeAsync(user, AuthPermission.SchoolAdmin_Training_Edit_Value);
+        var absencesTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_AttendanceSettings_Edit_Value);
+        var awardsTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_Awards_Edit_Value);
+        var tutorialsTest = await _authService.AuthorizeAsync(user, AuthPermission.Subjects_Tutorials_Edit_Value);
 
         StaffId staffId = _currentUserService.StaffId;
 

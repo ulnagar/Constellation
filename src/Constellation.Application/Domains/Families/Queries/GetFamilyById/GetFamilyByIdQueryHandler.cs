@@ -4,7 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Domains.Families.Models;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
-using Constellation.Core.ValueObjects;
+using Core.Models.Families;
 using Core.Models.Families.Errors;
 using System.Collections.Generic;
 using System.Threading;
@@ -23,24 +23,15 @@ internal sealed class GetFamilyByIdQueryHandler
 
     public async Task<Result<FamilyResponse>> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
     {
-        var family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
-        {
             return Result.Failure<FamilyResponse>(FamilyErrors.NotFound(request.FamilyId));
-        }
 
         List<ParentResponse> parents = new();
 
-        foreach (var parent in family.Parents)
-        {
-            var name = Name.Create(parent.FirstName, null, parent.LastName);
-
-            if (name.IsFailure)
-                continue;
-
-            parents.Add(new(parent.Id, name.Value.DisplayName));
-        }
+        foreach (Parent parent in family.Parents)
+            parents.Add(new(parent.Id, parent.Name));
 
         return new FamilyResponse(
             family.Id,

@@ -32,17 +32,17 @@ internal sealed class AddStudentToFamilyCommandHandler
 
     public async Task<Result> Handle(AddStudentToFamilyCommand request, CancellationToken cancellationToken)
     {
-        Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
             return Result.Failure(FamilyErrors.NotFound(request.FamilyId));
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
 
-        Result<StudentFamilyMembership> result = family.AddStudent(request.StudentId, student.StudentReferenceNumber, false);
+        Result<StudentFamilyMembership> result = family.AddStudent(request.StudentId, false);
 
         if (result.IsSuccess)
             await _unitOfWork.CompleteAsync(cancellationToken);

@@ -3,17 +3,17 @@ namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Consen
 using Application.Common.PresentationModels;
 using Application.Models.Auth;
 using Constellation.Application.Domains.ThirdPartyConsent.Queries.GetConsentDetails;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.ThirdPartyConsent.Identifiers;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.StudentAdmin_Consent_View_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;

@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models.SchoolContacts;
 
+using Core.Errors;
 using Enums;
 using Errors;
 using Events;
@@ -15,72 +16,68 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
 {
     private readonly List<SchoolContactRole> _roles = new();
 
+    private SchoolContact() { }
     private SchoolContact(
-        string firstName,
-        string lastName,
-        string emailAddress,
-        string phoneNumber,
+        Name name,
+        EmailAddress emailAddress,
+        PhoneNumber phoneNumber,
         bool selfRegistered)
     {
         Id = new();
 
-        FirstName = firstName;
-        LastName = lastName;
+        Name = name;
         EmailAddress = emailAddress;
         PhoneNumber = phoneNumber;
         SelfRegistered = selfRegistered;
     }
 
     public SchoolContactId Id { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public string EmailAddress { get; private set; }
-    public string PhoneNumber { get; private set; }
-    public string CreatedBy { get; set; }
+    public Name Name { get; private set; }
+    public EmailAddress EmailAddress { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
+    public string? CreatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
-    public string ModifiedBy { get; set; }
+    public string? ModifiedBy { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; private set; }
-    public string DeletedBy { get; set; }
+    public string? DeletedBy { get; set; }
     public DateTime DeletedAt { get; set; }
     public bool SelfRegistered { get; private set; }
-    public string DisplayName => FirstName + " " + LastName;
+    public string DisplayName => Name.DisplayName;
     public IReadOnlyList<SchoolContactRole> Assignments => _roles;
 
     public static Result<SchoolContact> Create(
         string firstName,
         string lastName,
         string emailAddress,
-        string phoneNumber,
+        string number,
         bool selfRegistered)
     {
-        if (string.IsNullOrWhiteSpace(firstName))
-            return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.FirstNameEmpty);
+        Result<Name> name = Name.Create(firstName, string.Empty, lastName);
+        if (name.IsFailure)
+            return Result.Failure<SchoolContact>(name.Error);
 
-        if (string.IsNullOrWhiteSpace(lastName))
-            return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.LastNameEmpty);
-
-        if (string.IsNullOrWhiteSpace(emailAddress))
-            return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.EmailAddressEmpty);
-
-        Result<EmailAddress> email = ValueObjects.EmailAddress.Create(emailAddress);
+        Result<EmailAddress> email = EmailAddress.Create(emailAddress);
         if (email.IsFailure)
             return Result.Failure<SchoolContact>(email.Error);
 
-        if (!string.IsNullOrWhiteSpace(phoneNumber))
+        PhoneNumber phoneNumber = PhoneNumber.Empty;
+
+        if (!string.IsNullOrWhiteSpace(number))
         {
-            if (!int.TryParse(phoneNumber.Trim().Replace(" ", ""), out _))
+            if (!int.TryParse(number.Trim().Replace(" ", ""), out _))
                 return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.PhoneNumberInvalid);
 
-            Result<PhoneNumber> phone = ValueObjects.PhoneNumber.Create(phoneNumber);
+            Result<PhoneNumber> phone = PhoneNumber.Create(number);
             if (phone.IsFailure)
                 return Result.Failure<SchoolContact>(phone.Error);
+
+            phoneNumber = phone.Value;
         }
 
         SchoolContact contact = new(
-            firstName,
-            lastName,
-            emailAddress,
+            name.Value,
+            email.Value,
             phoneNumber,
             selfRegistered);
 
@@ -164,38 +161,62 @@ public sealed class SchoolContact : AggregateRoot, IAuditableEntity
 
         return Result.Success();
     }
+    public Result AddPhoneNumber(
+        PhoneNumber phoneNumber)
+    {
+        if (!phoneNumber.IsMobile())
+            return Result.Failure(DomainErrors.ValueObjects.PhoneNumber.NumberInvalid);
+
+        PhoneNumber = phoneNumber;
+        return Result.Success();
+    }
 
     public Result Update(
         string firstName,
         string lastName,
         string emailAddress,
-        string phoneNumber)
+        string number)
     {
-        FirstName = firstName;
-        LastName = lastName;
+        Result<Name> name = Name.Create(firstName, string.Empty, lastName);
+        if (name.IsFailure)
+            return Result.Failure(name.Error);
+
+        Name = name.Value;
+
+        PhoneNumber phoneNumber = PhoneNumber.Empty;
+
+        if (!string.IsNullOrWhiteSpace(number))
+        {
+            if (!int.TryParse(number.Trim().Replace(" ", ""), out _))
+                return Result.Failure<SchoolContact>(SchoolContactErrors.Validation.PhoneNumberInvalid);
+
+            Result<PhoneNumber> phone = PhoneNumber.Create(number);
+            if (phone.IsFailure)
+                return Result.Failure<SchoolContact>(phone.Error);
+
+            phoneNumber = phone.Value;
+        }
+
         PhoneNumber = phoneNumber;
 
         if (!string.IsNullOrWhiteSpace(emailAddress))
         {
-            Result<EmailAddress> newEmail = ValueObjects.EmailAddress.Create(emailAddress);
+            Result<EmailAddress> newEmail = EmailAddress.Create(emailAddress);
             if (newEmail.IsFailure)
                 return Result.Failure(newEmail.Error);
 
-            if (EmailAddress != newEmail.Value.Email)
+            if (EmailAddress != newEmail.Value)
             {
-                RaiseDomainEvent(new SchoolContactEmailAddressChangedDomainEvent(new(), Id, EmailAddress, newEmail.Value.Email));
+                RaiseDomainEvent(new SchoolContactEmailAddressChangedDomainEvent(new(), Id, EmailAddress.Email, newEmail.Value.Email));
 
-                EmailAddress = newEmail.Value.Email;
+                EmailAddress = newEmail.Value;
             }
         }
 
         return Result.Success();
     }
-
-    public Result<Name> GetName() => 
-        Name.Create(FirstName, string.Empty, LastName);
-
+    
     public Result<EmailRecipient> GetEmailRecipient() => 
-        EmailRecipient.Create(DisplayName, EmailAddress);
+        EmailRecipient.Create(Name, EmailAddress);
 
 }

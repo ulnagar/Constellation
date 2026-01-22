@@ -59,31 +59,13 @@ internal sealed class GetAllContactsQueryHandler
                 .Where(assignment => !assignment.IsDeleted)
                 .ToList();
             
-            Result<Name> name = Name.Create(contact.FirstName, string.Empty, contact.LastName);
-            if (name.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(SchoolContact), contact, true)
-                    .ForContext(nameof(Error), name.Error, true)
-                    .Warning("Failed to create Name for School Contact by user {User}", _currentUserService.UserName);
-            }
-
-            Result<EmailAddress> email = EmailAddress.Create(contact.EmailAddress);
-            if (email.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(SchoolContact), contact, true)
-                    .ForContext(nameof(Error), email.Error, true)
-                    .Warning("Failed to create EmailAddress for School Contact by user {User}", _currentUserService.UserName);
-            }
-
             if (activeAssignments.Count == 0)
             {
                 response.Add(new SchoolContactResponse(
                     contact.Id,
                     SchoolContactRoleId.Empty, 
-                    name.IsSuccess ? name.Value : null,
-                    email.IsSuccess ? email.Value : EmailAddress.None,
+                    contact.Name,
+                    contact.EmailAddress,
                     PhoneNumber.Empty, 
                     true,
                     Position.Empty,
@@ -106,7 +88,7 @@ internal sealed class GetAllContactsQueryHandler
                 bool directNumber = false;
                 PhoneNumber phone;
 
-                if (string.IsNullOrWhiteSpace(contact.PhoneNumber))
+                if (contact.PhoneNumber == PhoneNumber.Empty)
                 {
                     if (school is null)
                     {
@@ -120,16 +102,15 @@ internal sealed class GetAllContactsQueryHandler
                 }
                 else
                 {
-                    Result<PhoneNumber> phoneNumber = PhoneNumber.Create(contact.PhoneNumber);
-                    phone = phoneNumber.IsFailure ? PhoneNumber.Empty : phoneNumber.Value;
+                    phone = contact.PhoneNumber;
                     directNumber = true;
                 }
 
                 response.Add(new(
                     contact.Id,
                     assignment.Id,
-                    name.Value,
-                    email.Value,
+                    contact.Name,
+                    contact.EmailAddress,
                     phone,
                     directNumber,
                     assignment.Role,

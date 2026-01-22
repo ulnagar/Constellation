@@ -13,4 +13,5 @@ public interface ISMSService
 {
     Task<Result<SMSMessageCollectionDto>> SendAbsenceNotification(List<AbsenceEntry> absences, Student student, List<PhoneNumber> phoneNumbers, CancellationToken cancellationToken = default);
     Task<Result> SendLoginToken(string token, PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
+    Task<Result<string>> SendEmergencyConsoleSms(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
 }

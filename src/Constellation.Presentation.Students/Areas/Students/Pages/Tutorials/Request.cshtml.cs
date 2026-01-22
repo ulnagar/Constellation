@@ -9,20 +9,20 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Models.Subjects.Identifiers;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Tutorials.Enums;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStudent)]
+[HasPermission(AuthPermission.StudentPortal_View_Value)]
 public class RequestModel : BasePageModel
 {
     private readonly ISender _mediator;

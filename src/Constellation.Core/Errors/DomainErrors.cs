@@ -327,7 +327,7 @@ public static class DomainErrors
 
             public static readonly Error NumberInvalid = new(
                 "ValueObjects.PhoneNumber.NumberInvalid",
-                "Phone NUmber is not valid");
+                "Phone Number is not valid");
         }
     }
 

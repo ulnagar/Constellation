@@ -9,12 +9,12 @@ using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.Shared;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStudent)]
+[HasPermission(AuthPermission.StudentPortal_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

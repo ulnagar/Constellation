@@ -68,7 +68,7 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
         }
         else
         {
-            motherEmail = EmailRecipient.Create($"{mother.FirstName} {mother.LastName}", mother.EmailAddress);
+            motherEmail = EmailRecipient.Create(mother.Name, mother.EmailAddress);
 
             if (motherEmail.IsFailure)
             {
@@ -89,7 +89,7 @@ public class GetResidentialFamilyEmailAddressesQueryHandler
         }
         else
         {
-            fatherEmail = EmailRecipient.Create($"{father.FirstName} {father.LastName}", father.EmailAddress);
+            fatherEmail = EmailRecipient.Create(father.Name, father.EmailAddress);
 
             if (fatherEmail.IsFailure)
             {

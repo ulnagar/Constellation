@@ -10,11 +10,11 @@ using Constellation.Core.Models.Rollover;
 using Constellation.Core.Models.Rollover.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Server.BaseModels;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Authorize(Policy = AuthPolicies.IsSiteAdmin)]
+[HasPermission(AuthPermission.Admin_Rollover_Edit_Value)]
 public class RolloverModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -38,20 +38,6 @@ public class RolloverModel : BasePageModel
 
     [BindProperty(SupportsGet = true)]
     public Grade CurrentGrade { get; set; }
-
-    // Withdraw old Year 12 students
-    // Move Year 11 to Year 12
-    // Withdraw leaving Year 10 students
-    // Move remaining Year 10 to Year 11
-    // Move Year 9 to Year 10
-    // Move Year 8 to Year 9
-    // Move Year 7 to Year 8
-    // Withdraw leaving Year 6 students
-    // Move remaining Year 6 to Year 7
-    // Move Year 5 to Year 6
-    // Enrol new Year 11 students
-    // Enrol new Year 7 students
-    // Enrol new Year 5 students
 
     public async Task OnGetAsync()
     {

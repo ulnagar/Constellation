@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Core.Models.Stocktake;
 
 using Assets.ValueObjects;
-using Constellation.Core.Models.Assets;
 using Constellation.Core.Models.Stocktake.Enums;
 using Errors;
 using Identifiers;

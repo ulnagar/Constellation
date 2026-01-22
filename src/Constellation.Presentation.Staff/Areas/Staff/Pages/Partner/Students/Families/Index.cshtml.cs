@@ -8,6 +8,7 @@ using Areas;
 using Constellation.Application.Domains.Families.Commands.DeleteFamilyById;
 using Constellation.Application.Domains.Families.Commands.DeleteParentById;
 using Constellation.Application.Domains.Families.Models;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Errors;
 using Core.Models.Identifiers;
@@ -22,7 +23,7 @@ using Shared.PartialViews.DeleteFamilyMemberConfirmationModal;
 using Shared.PartialViews.DeleteFamilySelectionModal;
 using System.Threading;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Partners_Families_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -81,7 +82,7 @@ public class IndexModel : BasePageModel
         FamilyId id, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorized.Succeeded)
         {
@@ -141,7 +142,7 @@ public class IndexModel : BasePageModel
         ParentId parent, 
         CancellationToken cancellationToken)
     {
-        AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPolicies.CanEditStudents);
+        AuthorizationResult authorized = await _authService.AuthorizeAsync(User, AuthPermission.Partners_Families_Edit_Value);
 
         if (!authorized.Succeeded)
         {

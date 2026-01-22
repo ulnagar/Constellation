@@ -9,17 +9,17 @@ using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
 using Core.ValueObjects;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStudent)]
+[HasPermission(AuthPermission.StudentPortal_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

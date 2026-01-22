@@ -4,6 +4,7 @@ using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
 using Constellation.Core.Shared;
 using Core.Models.Families.Errors;
+using Core.ValueObjects;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,9 +36,9 @@ internal sealed class GetParentEditContextQueryHandler
             parent.Id,
             family.Id,
             parent.Title,
-            parent.FirstName,
-            parent.LastName,
-            parent.MobileNumber,
+            parent.Name.FirstName,
+            parent.Name.LastName,
+            parent.MobileNumber == PhoneNumber.Empty ? string.Empty : parent.MobileNumber.ToString(),
             parent.EmailAddress);
 
         return entry;

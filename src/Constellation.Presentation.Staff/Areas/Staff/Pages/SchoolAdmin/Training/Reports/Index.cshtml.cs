@@ -12,17 +12,17 @@ using Application.Models.Auth;
 using Areas;
 using Constellation.Core.Models.Training.Identifiers;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using Shared.PartialViews.SelectStaffMemberForReportModal;
 using Shared.PartialViews.SelectTrainingModuleForReportModal;
 
-[Authorize(Policy = AuthPolicies.CanRunTrainingModuleReports)]
+[HasPermission(AuthPermission.SchoolAdmin_Training_ViewAll_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -132,7 +132,7 @@ public class IndexModel : BasePageModel
 
         TrainingModuleId moduleId = TrainingModuleId.FromValue(viewModel.ModuleId);
 
-        _logger.Information("Requested to generate Training Module detail report by user {User}", _currentUserService.UserName);
+        _logger.Information("Requested to generate Training Module eventDetail report by user {User}", _currentUserService.UserName);
         
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateModuleReportCommand(moduleId, true));
 
@@ -140,7 +140,7 @@ public class IndexModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), reportRequest.Error, true)
-                .Warning("Failed to generate Training Module detail report by user {User}", _currentUserService.UserName);
+                .Warning("Failed to generate Training Module eventDetail report by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(reportRequest.Error);
 
@@ -168,7 +168,7 @@ public class IndexModel : BasePageModel
         }
         
         SelectStaffMemberForReportModalViewModel.ReportType type = reportType == "summary" ? SelectStaffMemberForReportModalViewModel.ReportType.Summary
-            : reportType == "detail" ? SelectStaffMemberForReportModalViewModel.ReportType.Detail
+            : reportType == "eventDetail" ? SelectStaffMemberForReportModalViewModel.ReportType.Detail
             : SelectStaffMemberForReportModalViewModel.ReportType.Module;
 
         SelectStaffMemberForReportModalViewModel viewModel = new()
@@ -216,7 +216,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        _logger.Information("Requested to generate staff Training detail report by user {User}", _currentUserService.UserName);
+        _logger.Information("Requested to generate staff Training eventDetail report by user {User}", _currentUserService.UserName);
         
         Result<ReportDto> reportRequest = await _mediator.Send(new GenerateStaffReportCommand(viewModel.StaffId, true));
 
@@ -224,7 +224,7 @@ public class IndexModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), reportRequest.Error, true)
-                .Warning("Failed to generate staff Training detail report by user {User}", _currentUserService.UserName);
+                .Warning("Failed to generate staff Training eventDetail report by user {User}", _currentUserService.UserName);
             
             ModalContent = ErrorDisplay.Create(reportRequest.Error);
 

@@ -7,14 +7,14 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[Authorize(Policy = AuthPolicies.IsStaffMember)]
+[HasPermission(AuthPermission.Subjects_Timetables_View_Value)]
 public class StaffModel : BasePageModel
 {
     private readonly ISender _mediator;

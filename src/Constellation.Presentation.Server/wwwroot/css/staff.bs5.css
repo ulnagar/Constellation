@@ -181,7 +181,8 @@ label {
     visibility: hidden;
 }
 
-tr:hover .btn-show-hover {
+tr:hover .btn-show-hover,
+.list-group-item:hover .btn-show-hover {
     visibility: visible;
 }
 
@@ -416,74 +417,87 @@ table.grouped-data-table th {
 }
 
 /* Custom badge colouring */
-.Primary-A {
-    background-color: #e83e8c;
-    color: #fff;
-}
-
 .Primary-B {
-    background-color: #28a745;
-    color: #fff;
+    background-color: #9de3fd;
+    color: #000;
+    text-decoration: none;
 }
 
-.Primary-C {
-    background-color: #007bff;
-    color: #fff;
+.Primary-P {
+    background-color: #fcdbfa;
+    color: #000;
+    text-decoration: none;
+}
+
+.Primary-R {
+    background-color: #f66a68;
+    text-decoration: none;
 }
 
 .Secondary-G {
-    background-color: #28a745;
-    color: #fff;
+    background-color: #c6e5af;
+    color: #000;
+    text-decoration: none;
 }
 
-.Secondary-P {
-    background-color: #e83e8c;
-    color: #fff;
+.Secondary-N {
+    background-color: #146197;
+    text-decoration: none;
 }
 
 .Alternate-V {
-    background-color: #37c6f0;
+    background-color: #e4c7ee;
+    color: #000;
+    text-decoration: none;
 }
 
 .Alternate-Y {
-    background-color: #f6e282;
+    background-color: #f5e28a;
+    color: #000;
+    text-decoration: none;
 }
 
 .Senior-1 {
     background-color: #007bff;
     color: #fff;
+    text-decoration: none;
 }
 
 .Senior-2 {
     background-color: #6f42c1;
     color: #fff;
+    text-decoration: none;
 }
 
 .Senior-3 {
     background-color: #dc3545;
     color: #fff;
+    text-decoration: none;
 }
 
 .Senior-4 {
     background-color: #28a745;
     color: #fff;
+    text-decoration: none;
 }
 
 .Senior-5 {
     background-color: #ffc107;
     color: #212529;
+    text-decoration: none;
 }
 
 .Senior-6 {
     background-color: #17a2b8;
     color: #fff;
+    text-decoration: none;
 }
 
-a.Primary-A:hover, a.Primary-A:focus,
 a.Primary-B:hover, a.Primary-B:focus,
-a.Primary-C:hover, a.Primary-C:focus,
+a.Primary-P:hover, a.Primary-P:focus,
+a.Primary-R:hover, a.Primary-R:focus,
 a.Secondary-G:hover, a.Secondary-G:focus,
-a.Secondary-P:hover, a.Secondary-P:focus,
+a.Secondary-N:hover, a.Secondary-N:focus,
 a.Alternate-V:hover, a.Alternate-V:focus,
 a.Alternate-Y:hover, a.Alternate-Y:focus,
 a.Senior-1:hover, a.Senior-1:focus,
@@ -495,11 +509,11 @@ a.Senior-6:hover, a.Senior-6:focus {
     background-color: #1d2124;
 }
 
-a.Primary-A:focus, a.Primary-A.focus,
 a.Primary-B:focus, a.Primary-B.focus,
-a.Primary-C:focus, a.Primary-C.focus,
+a.Primary-P:focus, a.Primary-P.focus,
+a.Primary-R:focus, a.Primary-R.focus,
 a.Secondary-G:focus, a.Secondary-G.focus,
-a.Secondary-P:focus, a.Secondary-P.focus,
+a.Secondary-N:focus, a.Secondary-N.focus,
 a.Alternate-V:hover, a.Alternate-V:focus,
 a.Alternate-Y:hover, a.Alternate-Y:focus,
 a.Senior-1:focus, a.Senior-1.focus,

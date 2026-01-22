@@ -7,7 +7,7 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
-    var isEditorTest = await AuthorizationService.AuthorizeAsync(User, AuthPolicies.CanEditTrainingModuleContent);
+    var isEditorTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.SchoolAdmin_Training_Edit_Value);
 }
 
 <h2>Mandatory Training Completion Records</h2>

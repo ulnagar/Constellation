@@ -2,6 +2,7 @@ namespace Constellation.Application.Domains.Students.Events.StudentReinstatedDom
 
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Models.Identity;
+using Constellation.Application.Models.Identity.Enums;
 using Constellation.Core.Models.Students.Events;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
@@ -31,7 +32,7 @@ internal sealed class CreateOrUpdateUserAccount
 
     public async Task Handle(StudentReinstatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -42,12 +43,34 @@ internal sealed class CreateOrUpdateUserAccount
             return;
         }
 
-        AppUser user = await _userManager.FindByEmailAsync(student.EmailAddress.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(student.EmailAddress.Email);
 
-        if (user is not null)
+        if (user is null)
         {
-            user.IsStudent = true;
-            user.StudentId = student.Id;
+            user = new()
+            {
+                UserName = student.EmailAddress.Email, 
+                Email = student.EmailAddress.Email, 
+                Name = student.Name
+            };
+
+            IdentityResult create = await _userManager.CreateAsync(user);
+
+            if (create.Succeeded)
+            {
+                _logger
+                    .ForContext(nameof(StudentReinstatedDomainEvent), notification, true)
+                    .ForContext(nameof(AppUser), user, true)
+                    .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
+                    .Warning("Failed to create new Student AppUser");
+            }
+        }
+
+        List<AppUserLink> links = user.Links.Where(link => !link.IsDeleted && link.Type == LinkType.Student).ToList();
+
+        if (links.All(link => link.LinkId != student.Id.Value))
+        {
+            user.AddStudentLink(student.Id);
 
             IdentityResult update = await _userManager.UpdateAsync(user);
 
@@ -58,32 +81,9 @@ internal sealed class CreateOrUpdateUserAccount
                     .ForContext(nameof(AppUser), user, true)
                     .ForContext(nameof(IdentityResult.Errors), update.Errors, true)
                     .Warning("Failed to update Student AppUser");
-
-                return;
             }
-
-            return;
         }
 
-        user = new()
-        {
-            UserName = student.EmailAddress.Email,
-            Email = student.EmailAddress.Email,
-            FirstName = student.Name.FirstName,
-            LastName = student.Name.LastName,
-            IsStudent = true,
-            StudentId = student.Id
-        };
-
-        IdentityResult create = await _userManager.CreateAsync(user);
-
-        if (create.Succeeded)
-        {
-            _logger
-                .ForContext(nameof(StudentReinstatedDomainEvent), notification, true)
-                .ForContext(nameof(AppUser), user, true)
-                .ForContext(nameof(IdentityResult.Errors), create.Errors, true)
-                .Warning("Failed to create new Student AppUser");
-        }
+        await _userManager.AddToRoleAsync(user, AppRole.Student);
     }
 }

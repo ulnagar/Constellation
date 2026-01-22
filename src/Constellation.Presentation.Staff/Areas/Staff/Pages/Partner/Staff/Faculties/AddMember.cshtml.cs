@@ -6,13 +6,13 @@ using Application.Domains.StaffMembers.Queries.GetStaffMembersAsDictionary;
 using Constellation.Application.Domains.Faculties.Queries.GetFaculty;
 using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
+using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.ValueObjects;
 using Core.Models.StaffMembers.Identifiers;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
@@ -20,7 +20,7 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[Authorize(Policy = AuthPolicies.CanEditFaculties)]
+[HasPermission(AuthPermission.Partners_Faculties_Edit_Value)]
 public class AddMemberModel : BasePageModel
 {
     private readonly ISender _mediator;
