@@ -149,37 +149,8 @@ else
     app.UseHsts();
 }
 
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    IServiceProvider services = scope.ServiceProvider;
-    try
-    {
-        RoleManager<AppRole> roleManager = services.GetRequiredService<RoleManager<AppRole>>();
-        await IdentityDefaults.SeedRoles(roleManager);
-
-        IWebHostEnvironment env = services.GetRequiredService<IWebHostEnvironment>();
-        if (env.IsDevelopment())
-        {
-            //await IdentityDefaults.SeedTestUsers(userManager);
-        }
-
-        HangfireAuthorizationFilter filter = services.GetRequiredService<HangfireAuthorizationFilter>();
-
-        app.UseHangfireDashboard("/hangfire", new DashboardOptions()
-        {
-            AppPath = "/",
-            DashboardTitle = "Hangfire Dashboard",
-            Authorization = new[]
-            {
-                filter
-            }
-        });
-    }
-    catch
-    {
-        // ignored
-    }
-}
+RoleManager<AppRole> roleManager = app.Services.GetRequiredService<RoleManager<AppRole>>();
+await IdentityDefaults.SeedRoles(roleManager);
 
 app.UseSerilogRequestLogging();
 
@@ -191,6 +162,17 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+HangfireAuthorizationFilter filter = app.Services.GetRequiredService<HangfireAuthorizationFilter>();
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+{
+    AppPath = "/",
+    DashboardTitle = "Hangfire Dashboard",
+    Authorization = new[]
+    {
+        filter
+    }
+});
 
 
 app.MapRazorPages();
