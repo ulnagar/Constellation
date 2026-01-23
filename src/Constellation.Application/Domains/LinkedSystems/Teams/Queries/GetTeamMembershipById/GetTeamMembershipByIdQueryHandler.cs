@@ -257,28 +257,32 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 if (_configuration is null) continue;
 
                 // Cover administrators
-                foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
+                // Only if class is being covered
+                if (coveringTeachers.Count > 1)
                 {
-                    StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
-
-                    if (teacher is null)
+                    foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
                     {
-                        _logger
-                            .ForContext(nameof(GetTeamMembershipByIdQuery), request, true)
-                            .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
-                            .ForContext(nameof(EmployeeId), employeeId)
-                            .Warning("Failed to retrieve Team Membership");
+                        StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
 
-                        continue;
+                        if (teacher is null)
+                        {
+                            _logger
+                                .ForContext(nameof(GetTeamMembershipByIdQuery), request, true)
+                                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
+                                .ForContext(nameof(EmployeeId), employeeId)
+                                .Warning("Failed to retrieve Team Membership");
+
+                            continue;
+                        }
+
+                        TeamMembershipResponse teacherEntry = new(
+                            team.Id,
+                            teacher.EmailAddress,
+                            TeamsMembershipLevel.Owner.Value);
+
+                        if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
+                            returnData.Add(teacherEntry);
                     }
-
-                    TeamMembershipResponse teacherEntry = new(
-                        team.Id,
-                        teacher.EmailAddress,
-                        TeamsMembershipLevel.Owner.Value);
-
-                    if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
-                        returnData.Add(teacherEntry);
                 }
 
                 Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
