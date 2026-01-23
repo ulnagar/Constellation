@@ -10,6 +10,7 @@ using Core.Enums;
 using Core.Models;
 using Core.Models.Casuals;
 using Core.Models.Operations;
+using Core.Models.Operations.Enums;
 using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
@@ -438,6 +439,14 @@ public sealed class OperationsController : ControllerBase
                     TeamName = createTeam.Name,
                     Action = "Group",
                     AdditionalInformation = createTeam.Description
+                },
+                ModifyTeamMembershipTeamOperation modifyMembership => new TeamsOperationDto()
+                {
+                    Id = modifyMembership.Id,
+                    TeamId = modifyMembership.TeamId.ToString(),
+                    UserEmail = modifyMembership.UserId.Email,
+                    Action = modifyMembership.Action == TeamAction.Remove ? "Remove" : "Add",
+                    Role = modifyMembership.Action == TeamAction.AddOwner ? "Owner" : "Member"
                 },
                 _ => throw new ArgumentOutOfRangeException()
             };

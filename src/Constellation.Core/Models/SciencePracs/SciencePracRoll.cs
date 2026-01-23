@@ -28,7 +28,7 @@ public sealed class SciencePracRoll
     public SciencePracRollId Id { get; private set; }
     public SciencePracLessonId LessonId { get; private set; }
     public string SchoolCode { get; private set; }
-    public string SubmittedBy { get; private set; }
+    public string SubmittedBy { get; private set; } = string.Empty;
 
     public IReadOnlyCollection<SciencePracAttendance> Attendance => _attendance;
     public DateOnly? LessonDate { get; private set; }

@@ -36,30 +36,34 @@ internal sealed class UpdateStudentTeamMembershipLevel
 
     public async Task Handle(FacultyMemberAddedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Faculty faculty = await _facultyRepository.GetById(notification.FacultyId, cancellationToken);
-        FacultyMembership membership = faculty
-            .Members
-            .FirstOrDefault(entry => entry.Id == notification.FacultyMembershipId);
+        // 2026-01-23 : Remove below
+        //      Code implies that all Faculty Members are Owners of the Students Team,
+        //      however it should only be Faculty Managers, and this is managed elsewhere.
 
-        if (membership is null)
-            return;
-        
-        if (!faculty.Name.Contains("Administration") &&
-            !faculty.Name.Contains("Executive") &&
-            !faculty.Name.Contains("Support"))
-            return;
-        
-        // Create Operation
-        TeacherEmployedMSTeamOperation studentTeamOperation = new()
-        {
-            StaffId = membership.StaffId,
-            TeamName = MicrosoftTeam.Students,
-            Action = MSTeamOperationAction.Add,
-            DateScheduled = _dateTime.Now,
-            PermissionLevel = MSTeamOperationPermissionLevel.Owner
-        };
+        //Faculty faculty = await _facultyRepository.GetById(notification.FacultyId, cancellationToken);
+        //FacultyMembership membership = faculty
+        //    .Members
+        //    .FirstOrDefault(entry => entry.Id == notification.FacultyMembershipId);
 
-        _operationsRepository.Insert(studentTeamOperation);
-        await _unitOfWork.CompleteAsync(cancellationToken);
+        //if (membership is null)
+        //    return;
+
+        //if (!faculty.Name.Contains("Administration") &&
+        //    !faculty.Name.Contains("Executive") &&
+        //    !faculty.Name.Contains("Support"))
+        //    return;
+
+        //// Create Operation
+        //TeacherEmployedMSTeamOperation studentTeamOperation = new()
+        //{
+        //    StaffId = membership.StaffId,
+        //    TeamName = MicrosoftTeam.Students,
+        //    Action = MSTeamOperationAction.Add,
+        //    DateScheduled = _dateTime.Now,
+        //    PermissionLevel = MSTeamOperationPermissionLevel.Owner
+        //};
+
+        //_operationsRepository.Insert(studentTeamOperation);
+        //await _unitOfWork.CompleteAsync(cancellationToken);
     }
 }
