@@ -14,8 +14,8 @@ internal sealed class PhoneNumberConverter : ValueConverter<PhoneNumber, string?
     { }
 
     private static string? PhoneNumberToString(PhoneNumber? number) =>
-        number is null ? null
-        : number == PhoneNumber.Empty ? null 
+        number is null ? string.Empty
+        : number == PhoneNumber.Empty ? string.Empty 
         : number.ToString(PhoneNumber.Format.None);
 
     private static PhoneNumber StringToPhoneNumber(string? value) =>

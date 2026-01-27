@@ -365,9 +365,10 @@ public class UpsertModel : BasePageModel
         }
 
         if (Mode == CompletionPageMode.SoloModule)
-        {
             return RedirectToPage("/SchoolAdmin/Training/Modules/Details", new { area = "Staff", Id = ModuleId });
-        }
+        
+        if (Mode == CompletionPageMode.SoloStaff)
+            return RedirectToPage("/SchoolAdmin/Training/Staff/Index", new { area = "Staff", StaffId = SelectedStaffId });
 
         return RedirectToPage("Index");
     }
