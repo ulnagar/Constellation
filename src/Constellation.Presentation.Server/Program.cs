@@ -1,3 +1,4 @@
+using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Infrastructure.DependencyInjection;
@@ -149,11 +150,21 @@ else
     app.UseHsts();
 }
 
-RoleManager<AppRole> roleManager = app.Services.GetRequiredService<RoleManager<AppRole>>();
-await IdentityDefaults.SeedRoles(roleManager);
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    IServiceProvider services = scope.ServiceProvider;
+    try
+    {
+        RoleManager<AppRole> roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+        await IdentityDefaults.SeedRoles(roleManager);
+    }
+    catch
+    {
+        // ignored
+    }
+}
 
 app.UseSerilogRequestLogging();
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -161,19 +172,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-HangfireAuthorizationFilter filter = app.Services.GetRequiredService<HangfireAuthorizationFilter>();
-
-app.UseHangfireDashboard("/hangfire", new DashboardOptions()
-{
-    AppPath = "/",
-    DashboardTitle = "Hangfire Dashboard",
-    Authorization = new[]
-    {
-        filter
-    }
-});
-
 
 app.MapRazorPages();
 app.MapControllers();
@@ -200,5 +198,13 @@ app.Map("/debug/services", hostBuilder => hostBuilder.Run(async context =>
     sb.Append("</tbody></table>");
     await context.Response.WriteAsync(sb.ToString());
 }));
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHangfireDashboardWithAuthorizationPolicy(
+        AuthPolicies.IsSiteAdmin, 
+        "/hangfire",
+        new DashboardOptions() { DashboardTitle = "Hangfire Dashboard", AppPath = "/" });
+});
 
 app.Run();
