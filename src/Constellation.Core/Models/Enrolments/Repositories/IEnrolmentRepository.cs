@@ -13,7 +13,7 @@ using Tutorials.Identifiers;
 
 public interface IEnrolmentRepository
 {
-    Task<Enrolment> GetById(EnrolmentId enrolmentId, CancellationToken cancellationToken = default);
+    Task<Enrolment?> GetById(EnrolmentId enrolmentId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrent(CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentByStudentId(StudentId studentId, CancellationToken cancellationToken = default);
     Task<List<Enrolment>> GetCurrentAndFutureByStudentId(StudentId studentId, CancellationToken cancellationToken = default);

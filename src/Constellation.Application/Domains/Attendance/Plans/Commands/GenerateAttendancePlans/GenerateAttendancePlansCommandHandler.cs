@@ -64,7 +64,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
 
         if (request.StudentId != StudentId.Empty)
         {
-            Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
             if (student is not null)
                 students.Add(student);
@@ -113,7 +113,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
 
             foreach (Offering offering in offerings)
             {
-                Course course = await _courseRepository.GetByOfferingId(offering.Id, cancellationToken);
+                Course? course = await _courseRepository.GetByOfferingId(offering.Id, cancellationToken);
 
                 if (course is null)
                     continue;

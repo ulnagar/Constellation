@@ -2,13 +2,12 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Abstractions.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Core.DomainEvents;
 using Core.Models.GroupTutorials;
+using Core.Models.Operations;
+using Core.Models.Operations.Repositories;
 using Helpers;
 using Interfaces.Repositories;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,12 +15,12 @@ internal sealed class CreateTeam
     : IDomainEventHandler<GroupTutorialCreatedDomainEvent>
 {
     private readonly IGroupTutorialRepository _groupTutorialRepository;
-    private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ITeamOperationRepository _operationsRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateTeam(
         IGroupTutorialRepository groupTutorialRepository, 
-        IMSTeamOperationsRepository operationsRepository,
+        ITeamOperationRepository operationsRepository,
         IUnitOfWork unitOfWork)
     {
         _groupTutorialRepository = groupTutorialRepository;
@@ -31,20 +30,16 @@ internal sealed class CreateTeam
 
     public async Task Handle(GroupTutorialCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        GroupTutorial tutorial = await _groupTutorialRepository.GetById(notification.TutorialId, cancellationToken);
+        GroupTutorial? tutorial = await _groupTutorialRepository.GetById(notification.TutorialId, cancellationToken);
 
         if (tutorial is null)
             return;
 
         // Create Team
-        GroupTutorialCreatedMSTeamOperation operation = new()
-        {
-            DateScheduled = DateTime.Now,
-            TeamName = MicrosoftTeamsHelper.FormatTeamName(tutorial.Name),
-            Action = MSTeamOperationAction.Add,
-            TutorialId = notification.TutorialId
-        };
-        
+        CreateTeamTeamOperation operation = new(
+            MicrosoftTeamsHelper.FormatTeamName(tutorial.Name),
+            "8912;GTUT;Support;");
+
         _operationsRepository.Insert(operation);
         await _unitOfWork.CompleteAsync(cancellationToken);
     }

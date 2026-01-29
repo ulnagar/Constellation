@@ -14,6 +14,7 @@ public abstract class TeamOperation
 
     public void Complete() => IsCompleted = true;
     public void Delete() => IsDeleted = true;
+    public void UpdateSchedule(DateTime schedule) => ScheduledFor = schedule;
 }
 
 public sealed class CreateTeamTeamOperation : TeamOperation

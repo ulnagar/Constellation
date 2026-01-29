@@ -3,13 +3,14 @@
 using Abstractions.Messaging;
 using Constellation.Application.Enums;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Operations;
+using Core.Models.Operations.Enums;
+using Core.Models.Operations.Repositories;
 using Core.Models.Students.Events;
+using Core.ValueObjects;
 using Serilog;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,12 +19,12 @@ internal sealed class RemoveSchoolwideTeamsAccess
 {
     private readonly ILogger _logger;
     private readonly IStudentRepository _studentRepository;
-    private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ITeamOperationRepository _operationsRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public RemoveSchoolwideTeamsAccess(
         IStudentRepository studentRepository,
-        IMSTeamOperationsRepository operationsRepository,
+        ITeamOperationRepository operationsRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -37,7 +38,7 @@ internal sealed class RemoveSchoolwideTeamsAccess
     {
         _logger.Information("Attempting to remove student ({studentId}) from school wide teams due to withdrawal", notification.StudentId);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student == null)
         {
@@ -45,14 +46,16 @@ internal sealed class RemoveSchoolwideTeamsAccess
             return;
         }
 
-        StudentEnrolledMSTeamOperation operation = new()
+        if (student.EmailAddress == EmailAddress.None)
         {
-            StudentId = notification.StudentId,
-            TeamName = MicrosoftTeam.Students,
-            DateScheduled = DateTime.Now,
-            Action = MSTeamOperationAction.Remove,
-            PermissionLevel = MSTeamOperationPermissionLevel.Member
-        };
+            _logger.Warning("Student does not have valid email address to remove from school wide teams");
+            return;
+        }
+
+        ModifyTeamMembershipTeamOperation operation = new(
+            MicrosoftTeam.StudentsTeamId,
+            student.EmailAddress,
+            TeamAction.Remove);
 
         _operationsRepository.Insert(operation);
         await _unitOfWork.CompleteAsync(cancellationToken);

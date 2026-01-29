@@ -3,14 +3,18 @@
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Core.Abstractions.Clock;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Offerings.Errors;
 using Constellation.Core.Models.Offerings.Events;
 using Constellation.Core.Models.Offerings.Repositories;
 using Constellation.Core.Models.Offerings.ValueObjects;
 using Constellation.Core.Shared;
+using Core.Abstractions.Repositories;
+using Core.Models.LinkedSystems;
+using Core.Models.LinkedSystems.Errors;
+using Core.Models.Operations;
+using Core.Models.Operations.Enums;
+using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
@@ -25,7 +29,8 @@ internal sealed class AddTeachersToMicrosoftTeamResource
 {
     private readonly IOfferingRepository _offeringRepository;
     private readonly IStaffRepository _staffRepository;
-    private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ITeamOperationRepository _operationsRepository;
+    private readonly ITeamRepository _teamRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
@@ -33,7 +38,8 @@ internal sealed class AddTeachersToMicrosoftTeamResource
     public AddTeachersToMicrosoftTeamResource(
         IOfferingRepository offeringRepository,
         IStaffRepository staffRepository,
-        IMSTeamOperationsRepository operationsRepository,
+        ITeamOperationRepository operationsRepository,
+        ITeamRepository teamRepository,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -41,6 +47,7 @@ internal sealed class AddTeachersToMicrosoftTeamResource
         _offeringRepository = offeringRepository;
         _staffRepository = staffRepository;
         _operationsRepository = operationsRepository;
+        _teamRepository = teamRepository;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
         _logger = logger.ForContext<ResourceAddedToOfferingDomainEvent>();
@@ -51,7 +58,7 @@ internal sealed class AddTeachersToMicrosoftTeamResource
         if (notification.ResourceType != ResourceType.MicrosoftTeam)
             return;
 
-        Offering offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(notification.OfferingId, cancellationToken);
 
         if (offering is null)
         {
@@ -63,7 +70,7 @@ internal sealed class AddTeachersToMicrosoftTeamResource
             return;
         }
 
-        MicrosoftTeamResource resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as MicrosoftTeamResource;
+        MicrosoftTeamResource? resource = offering.Resources.FirstOrDefault(resource => resource.Id == notification.ResourceId) as MicrosoftTeamResource;
 
         if (resource is null)
         {
@@ -75,20 +82,38 @@ internal sealed class AddTeachersToMicrosoftTeamResource
             return;
         }
 
+        List<Team> teams = await _teamRepository.GetByName(resource.ResourceId, cancellationToken);
+
+        if (teams.Count == 0)
+        {
+            _logger
+                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), TeamErrors.NotFoundByName(resource.ResourceId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
+        if (teams.Count > 1)
+        {
+            _logger
+                .ForContext(nameof(ResourceAddedToOfferingDomainEvent), notification, true)
+                .ForContext(nameof(Error), TeamErrors.TooManyResults(resource.ResourceId))
+                .Error("Failed to complete the event handler");
+
+            return;
+        }
+
         List<StaffId> staffIds = offering.Teachers.Where(assignment => !assignment.IsDeleted).Select(assignment => assignment.StaffId).ToList();
 
         List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
 
         foreach (StaffMember staffMember in staffMembers)
         {
-            TeacherAssignmentMSTeamOperation operation = new()
-            {
-                TeamName = resource.TeamName,
-                StaffId = staffMember.Id,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Owner,
-                DateScheduled = _dateTime.Now
-            };
+            ModifyTeamMembershipTeamOperation operation = new(
+                teams.First().Id,
+                staffMember.EmailAddress,
+                TeamAction.AddOwner);
 
             _operationsRepository.Insert(operation);
         }

@@ -93,4 +93,6 @@ public sealed class AttendancePlanPeriod
 
         return Result.Success();
     }
+
+    public override string ToString() => $"{Timetable} {Week} {Day} {PeriodName} - {OfferingName}";
 }

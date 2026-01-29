@@ -45,7 +45,7 @@ internal sealed class RemovePreviousSchoolEnrolment
             .ForContext(nameof(StudentMovedSchoolsDomainEvent), notification, true)
             .Information("Updating school enrolments for student");
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -61,7 +61,7 @@ internal sealed class RemovePreviousSchoolEnrolment
         // Check if the new enrolment is still valid. E.g. has it been deleted?
         // If it is still valid, find any other active enrolments and delete them.
 
-        SchoolEnrolment newEnrolment = student.SchoolEnrolments
+        SchoolEnrolment? newEnrolment = student.SchoolEnrolments
             .FirstOrDefault(entry =>
                 !entry.IsDeleted &&
                 entry.SchoolCode == notification.CurrentSchoolCode &&

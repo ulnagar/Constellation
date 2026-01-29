@@ -25,7 +25,7 @@ public class EnrolmentRepository : IEnrolmentRepository
         _dateTime = dateTime;
     }
 
-    public async Task<Enrolment> GetById(
+    public async Task<Enrolment?> GetById(
         EnrolmentId enrolmentId,
         CancellationToken cancellationToken = default) =>
         await _context

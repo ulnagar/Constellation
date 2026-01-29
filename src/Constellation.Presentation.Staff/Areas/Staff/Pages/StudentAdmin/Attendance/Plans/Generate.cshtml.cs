@@ -41,7 +41,7 @@ public class GenerateModel : BasePageModel
         _currentUserService = currentUserService;
         _dateTime = dateTime;
         _logger = logger
-            .ForContext<SettingsModel>()
+            .ForContext<GenerateModel>()
             .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 

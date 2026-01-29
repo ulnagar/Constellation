@@ -19,7 +19,6 @@ public class AppDbContext : IdentityDbContext<AppUser, AppRole, Guid>, IAppDbCon
         : base(options)
     { }
 
-    public DbSet<MSTeamOperation> MSTeamOperations { get; set; }
     public DbSet<JobActivation> JobActivations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)

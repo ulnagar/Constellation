@@ -3,7 +3,6 @@ namespace Constellation.Core.Models.Attendance;
 
 using Abstractions.Clock;
 using Abstractions.Services;
-using Constellation.Core.Models.Timetables.Identifiers;
 using Core.Enums;
 using Enums;
 using Errors;
@@ -18,8 +17,6 @@ using Subjects;
 using Subjects.Identifiers;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using Timetables;
 using Timetables.Enums;

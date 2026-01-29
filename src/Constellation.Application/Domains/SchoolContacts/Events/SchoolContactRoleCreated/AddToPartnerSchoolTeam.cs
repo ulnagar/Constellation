@@ -1,8 +1,9 @@
 ﻿namespace Constellation.Application.Domains.SchoolContacts.Events.SchoolContactRoleCreated;
 
 using Abstractions.Messaging;
-using Core.Enums;
-using Core.Models;
+using Core.Models.Operations;
+using Core.Models.Operations.Enums;
+using Core.Models.Operations.Repositories;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Events;
@@ -12,7 +13,6 @@ using Enums;
 using Interfaces.Repositories;
 using Schools.Enums;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,14 +23,14 @@ internal sealed class AddToPartnerSchoolTeam
 {
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ISchoolRepository _schoolRepository;
-    private readonly IMSTeamOperationsRepository _operationsRepository;
+    private readonly ITeamOperationRepository _operationsRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public AddToPartnerSchoolTeam(
         ISchoolContactRepository contactRepository,
         ISchoolRepository schoolRepository,
-        IMSTeamOperationsRepository operationsRepository,
+        ITeamOperationRepository operationsRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -43,7 +43,7 @@ internal sealed class AddToPartnerSchoolTeam
 
     public async Task Handle(SchoolContactRoleCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
 
         if (contact is null)
         {
@@ -83,28 +83,20 @@ internal sealed class AddToPartnerSchoolTeam
 
         if (isPrimary)
         {
-            ContactAddedMSTeamOperation operation = new()
-            {
-                ContactId = contact.Id,
-                DateScheduled = DateTime.Now,
-                TeamName = MicrosoftTeam.PrimaryPartnerSchools,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
-            };
+            ModifyTeamMembershipTeamOperation operation = new(
+                MicrosoftTeam.PrimaryPartnerSchoolsTeamId,
+                contact.EmailAddress,
+                TeamAction.AddMember);
 
             _operationsRepository.Insert(operation);
         }
 
         if (isSecondary)
         {
-            ContactAddedMSTeamOperation operation = new()
-            {
-                ContactId = contact.Id,
-                DateScheduled = DateTime.Now,
-                TeamName = MicrosoftTeam.SecondaryPartnerSchools,
-                Action = MSTeamOperationAction.Add,
-                PermissionLevel = MSTeamOperationPermissionLevel.Member
-            };
+            ModifyTeamMembershipTeamOperation operation = new(
+                MicrosoftTeam.SecondaryPartnerSchoolsTeamId,
+                contact.EmailAddress,
+                TeamAction.AddMember);
 
             _operationsRepository.Insert(operation);
         }

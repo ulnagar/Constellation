@@ -3,9 +3,10 @@
 using Abstractions.Messaging;
 using Constellation.Application.Enums;
 using Constellation.Application.Interfaces.Repositories;
-using Constellation.Core.Enums;
-using Constellation.Core.Models;
 using Core.Abstractions.Clock;
+using Core.Models.Operations;
+using Core.Models.Operations.Enums;
+using Core.Models.Operations.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Events;
 using Core.Models.StaffMembers.Repositories;
@@ -18,22 +19,22 @@ internal sealed class AddSchoolwideTeamsAccess
 : IDomainEventHandler<StaffMemberCreatedDomainEvent>
 {
     private readonly IStaffRepository _staffRepository;
-    private readonly IMSTeamOperationsRepository _operationsRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITeamOperationRepository _operationsRepository;
     private readonly IDateTimeProvider _dateTime;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
     public AddSchoolwideTeamsAccess(
         IStaffRepository staffRepository,
-        IMSTeamOperationsRepository operationsRepository,
-        IUnitOfWork unitOfWork,
+        ITeamOperationRepository operationsRepository,
         IDateTimeProvider dateTime,
+        IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _staffRepository = staffRepository;
         _operationsRepository = operationsRepository;
-        _unitOfWork = unitOfWork;
         _dateTime = dateTime;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -41,7 +42,7 @@ internal sealed class AddSchoolwideTeamsAccess
     {
         _logger.Information("Attempting to add staff member ({StaffId}) to school wide teams", notification.StaffId);
 
-        StaffMember staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
+        StaffMember? staffMember = await _staffRepository.GetById(notification.StaffId, cancellationToken);
 
         if (staffMember is null)
         {
@@ -55,26 +56,26 @@ internal sealed class AddSchoolwideTeamsAccess
             return;
         }
 
-        TeacherEmployedMSTeamOperation studentTeamOperation = new()
-        {
-            StaffId = notification.StaffId,
-            TeamName = MicrosoftTeam.Students,
-            Action = MSTeamOperationAction.Add,
-            DateScheduled = _dateTime.Now,
-            PermissionLevel = MSTeamOperationPermissionLevel.Member
-        };
-
+        ModifyTeamMembershipTeamOperation studentTeamOperation = new(
+            MicrosoftTeam.StudentsTeamId,
+            staffMember.EmailAddress,
+            TeamAction.AddMember);
+        
         _operationsRepository.Insert(studentTeamOperation);
 
-        TeacherEmployedMSTeamOperation schoolTeamOperation = new()
-        {
-            StaffId = notification.StaffId,
-            TeamName = MicrosoftTeam.Staff,
-            Action = MSTeamOperationAction.Add,
-            DateScheduled = _dateTime.Now,
-            PermissionLevel = MSTeamOperationPermissionLevel.Member
-        };
+        ModifyTeamChannelMembershipTeamOperation studentTeamChannelOperation = new(
+            MicrosoftTeam.StudentsTeamId,
+            $"{_dateTime.CurrentYear} - *",
+            staffMember.EmailAddress,
+            TeamAction.AddMember);
 
+        _operationsRepository.Insert(studentTeamChannelOperation);
+
+        ModifyTeamMembershipTeamOperation schoolTeamOperation = new(
+            MicrosoftTeam.StaffTeamId,
+            staffMember.EmailAddress,
+            TeamAction.AddMember);
+        
         _operationsRepository.Insert(schoolTeamOperation);
 
         await _unitOfWork.CompleteAsync(cancellationToken);

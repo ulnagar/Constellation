@@ -1,10 +1,9 @@
 ﻿namespace Constellation.Core.Models.Offerings.Events;
 
-using DomainEvents;
 using Constellation.Core.Models.Identifiers;
+using DomainEvents;
 using Identifiers;
 using ValueObjects;
-using Constellation.Core.Models.Subjects.Identifiers;
 
 public sealed record ResourceAddedToOfferingDomainEvent(
     DomainEventId Id,
