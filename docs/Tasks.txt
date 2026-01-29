@@ -1,9 +1,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~
 CURRENT TASK
 ~~~~~~~~~~~~~~~~~~~~~~~~
-	- Update SchoolContactId field in SciencePracRoll
-		- Remove field
-		- Update SubmittedBy with School Contact name instead
+SSO: Integrate OIDC to enable connection to DoE SSO platform
+	https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-10.0
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
