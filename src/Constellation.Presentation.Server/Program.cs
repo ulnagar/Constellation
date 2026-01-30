@@ -12,11 +12,15 @@ using Constellation.Presentation.Server.Services;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Hangfire;
 using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
 using System.Text;
 
@@ -48,6 +52,10 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
+builder.Services
+    .AddAuthorization(opt => opt.AddApplicationPolicies())
+    .AddAuthorizationPolicies();
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "Constellation.Identity";
@@ -56,9 +64,39 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = new PathString("/Auth/Logout");
 });
 
+
 builder.Services
-    .AddAuthorization(opt => opt.AddApplicationPolicies())
-    .AddAuthorizationPolicies();
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "Constellation.Identity";
+        options.ExpireTimeSpan = TimeSpan.FromHours(7);
+        options.LoginPath = new PathString("/Auth/Login");
+        options.LogoutPath = new PathString("/Auth/Logout");
+    })
+    .AddOpenIdConnect(options =>
+    {
+        options.RequireHttpsMetadata = false; // DEVELOPMENT ONLY
+        var oidcConfig = builder.Configuration.GetSection("OpenIDConnectSettings");
+
+        options.Authority = oidcConfig["Authority"];
+        options.ClientId = oidcConfig["ClientId"];
+        options.ClientSecret = oidcConfig["ClientSecret"];
+
+        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.SignedOutCallbackPath = new PathString("/Auth/Logout");
+
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
+        options.TokenValidationParameters.RoleClaimType = "roles";
+    });
 
 // Register Current User Service
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
