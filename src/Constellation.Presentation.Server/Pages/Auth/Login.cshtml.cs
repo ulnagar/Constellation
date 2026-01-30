@@ -8,6 +8,7 @@ using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -47,8 +48,6 @@ public class LoginModel : PageModel
     [BindProperty]
     public InputModel Input { get; set; }
 
-    public string ReturnUrl { get; set; } = string.Empty;
-
     public class InputModel
     {
         [Required]
@@ -82,24 +81,29 @@ public class LoginModel : PageModel
 
     public LoginStatus Status { get; set; } = LoginStatus.WaitingUserInput;
 
-    public async Task OnGet(string returnUrl = null)
+    public async Task OnGet()
     {
-        returnUrl ??= Url.Content("~/");
-
         // Clear the existing external cookie to ensure a clean login process
-        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        await HttpContext.SignOutAsync();
+        //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
         Status = LoginStatus.WaitingUserInput;
-
-        ReturnUrl = returnUrl;
     }
 
-    public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+    public async Task OnGetSingleSignOn()
+    {
+        var properties = new AuthenticationProperties
+        {
+            RedirectUri = "https://localhost:44350/Auth/CompleteSSO"
+        };
+
+        await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
+    }
+
+    public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
             return Page();
-
-        returnUrl ??= Url.Content("~/");
 
         LoginType loginType = GetLoginParameters();
 
@@ -176,7 +180,7 @@ public class LoginModel : PageModel
             _logger.Information(" - DEBUG code found. Bypass login check.");
             await _signInManager.SignInAsync(user, false);
 
-            return LocalRedirect(returnUrl);
+            return LocalRedirect("/Index");
         }
 #endif
 
@@ -247,7 +251,7 @@ public class LoginModel : PageModel
         return loginType;
     }
 
-    public async Task<IActionResult> OnPostPasswordLogin(string returnUrl = null)
+    public async Task<IActionResult> OnPostPasswordLogin()
     {
         if (string.IsNullOrWhiteSpace(Input.Password))
         {
@@ -259,8 +263,6 @@ public class LoginModel : PageModel
         if (!ModelState.IsValid) return Page();
 
         LoginType loginType = GetLoginParameters();
-
-        returnUrl ??= Url.Content("~/");
         
         _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
         AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
@@ -279,6 +281,7 @@ public class LoginModel : PageModel
             bool result = Input.Email.Contains("@education.nsw.gov.au")
                 ? context.ValidateCredentials(Input.Email.Replace("education.nsw.gov.au", "detnsw"), Input.Password)
                 : context.ValidateCredentials(Input.Email, Input.Password);
+
             context.Dispose();
 
             if (!result)
@@ -303,7 +306,7 @@ public class LoginModel : PageModel
             user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
             await _userManager.UpdateAsync(user);
 
-            return LocalRedirect(returnUrl);
+            return LocalRedirect("/Index");
         }
         
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
@@ -358,7 +361,7 @@ public class LoginModel : PageModel
         return RedirectToPage("/Dashboard", new { area = "Parents" });
     }
 
-    public async Task<IActionResult> OnPostTokenLogin(string returnUrl = null)
+    public async Task<IActionResult> OnPostTokenLogin()
     {
         if (string.IsNullOrWhiteSpace(Input.Password))
         {
@@ -370,8 +373,6 @@ public class LoginModel : PageModel
         if (!ModelState.IsValid) return Page();
 
         LoginType loginType = GetLoginParameters();
-
-        returnUrl ??= Url.Content("~/");
 
         Result<PhoneNumber> phoneNumber = PhoneNumber.Create(Input.Email);
 
