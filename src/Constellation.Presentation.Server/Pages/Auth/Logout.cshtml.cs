@@ -2,6 +2,9 @@
 
 using Constellation.Application.Models.Identity;
 using Constellation.Presentation.Server.BaseModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,31 +20,36 @@ public class LogoutModel : BasePageModel
         _signInManager = signInManager;
     }
 
-    public async Task<IActionResult> OnGet(string returnUrl = null)
+    public async Task OnGet()
     {
         await _signInManager.SignOutAsync();
 
         HttpContext.Session.Clear();
+        await HttpContext.SignOutAsync();
+        //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
-        if (returnUrl is not null)
-        {
-            return LocalRedirect(returnUrl);
-        }
-         
-        return RedirectToPage("/Index", new { area = ""});
+        //return RedirectToPage("/Index", new { area = "" });
     }
 
-    public async Task<IActionResult> OnPost(string returnUrl = null)
+    //public async Task<IActionResult> OnGet()
+    //{
+    //    await _signInManager.SignOutAsync();
+
+    //    HttpContext.Session.Clear();
+    //    await HttpContext.SignOutAsync();
+    //    //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
+         
+    //    return RedirectToPage("/Index", new { area = ""});
+    //}
+
+    public async Task<IActionResult> OnPost()
     {
         await _signInManager.SignOutAsync();
 
         HttpContext.Session.Clear();
-        
-        if (returnUrl is not null)
-        {
-            return LocalRedirect(returnUrl);
-        }
+        await HttpContext.SignOutAsync();
+        //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
-        return RedirectToPage("/");
+        return RedirectToPage("/Index", new { area = "" });
     }
 }
