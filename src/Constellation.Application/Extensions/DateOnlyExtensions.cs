@@ -17,17 +17,18 @@ public static class DateOnlyExtensions
         DateOnly firstOfYear = new DateOnly(date.Year, 1, 1);
         int yearStartDay = (firstOfYear.DayOfWeek == 0) ? 7 : ((int)firstOfYear.DayOfWeek);
 
+        // Moved Case 4 (Thursday) to Week A for 2026 timetable
         switch (yearStartDay)
         {
             case 1:
             case 2:
             case 3:
+            case 4:
             case 6:
             case 7:
                 if ((weekNum % 2) != 0)
                     day += 5;
                 break;
-            case 4:
             case 5:
                 if ((weekNum % 2) == 0)
                     day += 5;
