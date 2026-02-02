@@ -109,35 +109,41 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 _ => LocationCategory.CoordinatingOffice
             };
 
-            Result<Asset> asset = await Asset.Create(
-                assetNumber.Value,
-                importAsset.SerialNumber ?? string.Empty,
-                importAsset.SapNumber ?? string.Empty,
-                importAsset.Manufacturer ?? string.Empty,
-                importAsset.ModelNumber ?? string.Empty,
-                importAsset.ModelDescription ?? string.Empty,
-                category,
-                importAsset.PurchaseDate ?? _dateTime.Today,
-                string.Empty,
-                importAsset.PurchaseCost,
-                importAsset.WarrantyEndDate ?? DateOnly.MinValue,
-                _assetRepository);
-
-            if (asset.IsFailure)
+            Asset? asset = await _assetRepository.GetByAssetNumber(assetNumber.Value, cancellationToken);
+            if (asset is null)
             {
-                _logger
-                    .ForContext(nameof(ImportAssetDto), importAsset, true)
-                    .ForContext(nameof(Error), asset.Error, true)
-                    .Warning("Failed to import Asset");
+                Result<Asset> newAsset = await Asset.Create(
+                    assetNumber.Value,
+                    importAsset.SerialNumber ?? string.Empty,
+                    importAsset.SapNumber ?? string.Empty,
+                    importAsset.Manufacturer ?? string.Empty,
+                    importAsset.ModelNumber ?? string.Empty,
+                    importAsset.ModelDescription ?? string.Empty,
+                    category,
+                    importAsset.PurchaseDate ?? _dateTime.Today,
+                    string.Empty,
+                    importAsset.PurchaseCost,
+                    importAsset.WarrantyEndDate ?? DateOnly.MinValue,
+                    _assetRepository);
 
-                response.Add(new(importAsset.RowNumber, false, asset.Error));
-                
-                continue;
+                if (newAsset.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), newAsset.Error, true)
+                        .Warning("Failed to import Asset");
+
+                    response.Add(new(importAsset.RowNumber, false, newAsset.Error));
+
+                    continue;
+                }
+
+                asset = newAsset.Value;
             }
 
-            if (!status.Equals(AssetStatus.Active))
+            if (asset.Status != status)
             {
-                Result statusUpdate = asset.Value.UpdateStatus(status);
+                Result statusUpdate = asset.UpdateStatus(status);
 
                 if (statusUpdate.IsFailure)
                 {
@@ -151,46 +157,69 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     continue;
                 }
             }
-
-            School? locationSchool = schools.FirstOrDefault(entry => entry.Name == importAsset.LocationSite);
-
-            if (locationSchool is null && locationCategory.Equals(LocationCategory.PublicSchool))
+            
+            if (locationCategory.Equals(LocationCategory.PublicSchool))
             {
-                _logger
-                    .ForContext(nameof(ImportAssetDto), importAsset, true)
-                    .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(""), true)
-                    .Warning("Failed to import Asset");
+                School? locationSchool = schools.FirstOrDefault(entry => entry.Name == importAsset.LocationSite);
 
-                response.Add(new(importAsset.RowNumber, false, DomainErrors.Partners.School.NotFound("")));
+                if (locationSchool is null)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), DomainErrors.Partners.School.NotFound(""), true)
+                        .Warning("Failed to import Asset");
 
-                continue;
+                    response.Add(new(importAsset.RowNumber, false, DomainErrors.Partners.School.NotFound("")));
+
+                    continue;
+                }
+
+                Result<Location> schoolLocation = Location.CreatePublicSchoolLocationRecord(asset.Id, locationSchool!.Name, locationSchool!.Code, true, _dateTime.Today);
+
+                if (schoolLocation.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), schoolLocation.Error, true)
+                        .Warning("Failed to import Asset");
+
+                    response.Add(new(importAsset.RowNumber, false, schoolLocation.Error));
+
+                    continue;
+                }
+
+                if (asset.CurrentLocation is null || asset.CurrentLocation != schoolLocation.Value)
+                    asset.AddLocation(schoolLocation.Value);
             }
 
-            Result<Location> location = locationCategory switch
+            Result<Location>? location = locationCategory switch
             {
                 _ when locationCategory.Equals(LocationCategory.CoordinatingOffice) =>
-                    Location.CreateOfficeLocationRecord(asset.Value.Id, importAsset.LocationRoom ?? string.Empty, true, _dateTime.Today),
+                    Location.CreateOfficeLocationRecord(asset.Id, importAsset.LocationRoom ?? string.Empty, true, _dateTime.Today),
                 _ when locationCategory.Equals(LocationCategory.CorporateOffice) =>
-                    Location.CreateCorporateOfficeLocationRecord(asset.Value.Id, importAsset.LocationSite ?? string.Empty, true, _dateTime.Today),
+                    Location.CreateCorporateOfficeLocationRecord(asset.Id, importAsset.LocationSite ?? string.Empty, true, _dateTime.Today),
                 _ when locationCategory.Equals(LocationCategory.PrivateResidence) =>
-                    Location.CreatePrivateResidenceLocationRecord(asset.Value.Id, true, _dateTime.Today),
-                _ when locationCategory.Equals(LocationCategory.PublicSchool) =>
-                    Location.CreatePublicSchoolLocationRecord(asset.Value.Id, locationSchool!.Name, locationSchool!.Code, true, _dateTime.Today)
+                    Location.CreatePrivateResidenceLocationRecord(asset.Id, true, _dateTime.Today),
+                _ => null
             };
 
-            if (location.IsFailure)
+            if (location is not null)
             {
-                _logger
-                    .ForContext(nameof(ImportAssetDto), importAsset, true)
-                    .ForContext(nameof(Error), location.Error, true)
-                    .Warning("Failed to import Asset");
+                if (location.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), location.Error, true)
+                        .Warning("Failed to import Asset");
 
-                response.Add(new(importAsset.RowNumber, false, location.Error));
-                
-                continue;
+                    response.Add(new(importAsset.RowNumber, false, location.Error));
+
+                    continue;
+                }
+
+                if (asset.CurrentLocation is null || asset.CurrentLocation != location.Value)
+                    asset.AddLocation(location.Value);
             }
-
-            asset.Value.AddLocation(location.Value);
 
             if (!string.IsNullOrWhiteSpace(importAsset.ResponsibleOfficer))
             {
@@ -201,7 +230,7 @@ internal sealed class ImportAssetsFromFileCommandHandler
                 if (allocationSchool is not null)
                 {
                     Result<Allocation> allocation = Allocation.Create(
-                        asset.Value.Id,
+                        asset.Id,
                         allocationSchool,
                         _dateTime.Today);
 
@@ -217,13 +246,14 @@ internal sealed class ImportAssetsFromFileCommandHandler
                         continue;
                     }
 
-                    asset.Value.AddAllocation(allocation.Value);
+                    if (asset.CurrentAllocation is null || asset.CurrentAllocation!.UserId != allocation.Value.UserId)
+                        asset.AddAllocation(allocation.Value);
                 }
 
                 if (staffMember is not null)
                 {
                     Result<Allocation> allocation = Allocation.Create(
-                        asset.Value.Id,
+                        asset.Id,
                         staffMember,
                         _dateTime.Today);
 
@@ -239,13 +269,14 @@ internal sealed class ImportAssetsFromFileCommandHandler
                         continue;
                     }
 
-                    asset.Value.AddAllocation(allocation.Value);
+                    if (asset.CurrentAllocation is null || asset.CurrentAllocation!.UserId != allocation.Value.UserId)
+                        asset.AddAllocation(allocation.Value);
                 }
 
                 if (student is not null)
                 {
                     Result<Allocation> allocation = Allocation.Create(
-                        asset.Value.Id,
+                        asset.Id,
                         student,
                         _dateTime.Today);
 
@@ -261,32 +292,36 @@ internal sealed class ImportAssetsFromFileCommandHandler
                         continue;
                     }
 
-                    asset.Value.AddAllocation(allocation.Value);
+                    if (asset.CurrentAllocation is null || asset.CurrentAllocation!.UserId != allocation.Value.UserId)
+                        asset.AddAllocation(allocation.Value);
                 }
             }
 
-            Result<Note> note = Note.Create(
-                asset.Value.Id,
-                "Imported from file");
-
-            if (note.IsFailure)
+            if (asset.Notes.Count == 0)
             {
-                _logger
-                    .ForContext(nameof(ImportAssetDto), importAsset, true)
-                    .ForContext(nameof(Error), note.Error, true)
-                .Warning("Failed to import Asset");
+                Result<Note> note = Note.Create(
+                    asset.Id,
+                    "Imported from file");
 
-                response.Add(new(importAsset.RowNumber, false, note.Error));
-                
-                continue;
+                if (note.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(ImportAssetDto), importAsset, true)
+                        .ForContext(nameof(Error), note.Error, true)
+                        .Warning("Failed to import Asset");
+
+                    response.Add(new(importAsset.RowNumber, false, note.Error));
+
+                    continue;
+                }
+
+                asset.AddNote(note.Value);
             }
-
-            asset.Value.AddNote(note.Value);
 
             if (!string.IsNullOrWhiteSpace(importAsset.Notes))
             {
                 Result<Note> oldNote = Note.Create(
-                    asset.Value.Id,
+                    asset.Id,
                     importAsset.Notes);
 
                 if (oldNote.IsFailure)
@@ -301,13 +336,13 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     continue;
                 }
 
-                asset.Value.AddNote(oldNote.Value);
+                asset.AddNote(oldNote.Value);
             }
 
             if (importAsset.LastSighted.HasValue && importAsset.LastSighted != DateOnly.MinValue)
             {
                 Result<Sighting> sighting = Sighting.Create(
-                    asset.Value.Id,
+                    asset.Id,
                     "Legacy Import",
                     importAsset.LastSighted.Value.ToDateTime(TimeOnly.MinValue),
                     string.Empty,
@@ -325,10 +360,12 @@ internal sealed class ImportAssetsFromFileCommandHandler
                     continue;
                 }
 
-                asset.Value.AddSighting(sighting.Value);
+                asset.AddSighting(sighting.Value);
             }
 
-            _assetRepository.Insert(asset.Value);
+            if (asset.CreatedAt == DateTime.MinValue)
+                _assetRepository.Insert(asset);
+            
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             response.Add(new(importAsset.RowNumber, true, null));

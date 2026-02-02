@@ -52,7 +52,7 @@ public sealed record Location : IAuditableEntity
     public string? DeletedBy { get; set; } = string.Empty;
     public DateTime DeletedAt { get; set; }
 
-    public static Location CreateOfficeLocationRecord(
+    public static Result<Location> CreateOfficeLocationRecord(
         AssetId assetId,
         string room,
         bool current,
@@ -70,7 +70,7 @@ public sealed record Location : IAuditableEntity
         return location;
     }
 
-    public static Location CreatePublicSchoolLocationRecord(
+    public static Result<Location> CreatePublicSchoolLocationRecord(
         AssetId assetId,
         string site,
         string schoolCode,
@@ -110,7 +110,7 @@ public sealed record Location : IAuditableEntity
         return location;
     }
 
-    public static Location CreatePrivateResidenceLocationRecord(
+    public static Result<Location> CreatePrivateResidenceLocationRecord(
         AssetId assetId,
         bool current,
         DateOnly arrivalDate)
