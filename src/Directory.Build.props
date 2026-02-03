@@ -1,9 +1,9 @@
-<Project>
+﻿<Project>
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<AssemblyVersion>1.18.4.26027</AssemblyVersion>
+		<VersionPrefix>1.18.4</VersionPrefix>
 	</PropertyGroup>
 
 	<PropertyGroup>
