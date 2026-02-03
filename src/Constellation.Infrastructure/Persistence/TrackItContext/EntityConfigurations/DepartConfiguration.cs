@@ -6,35 +6,59 @@ namespace Constellation.Infrastructure.Persistence.TrackItContext.EntityConfigur
 {
     public class DepartConfiguration : IEntityTypeConfiguration<Department>
     {
-        public void Configure(EntityTypeBuilder<Department> builder)
+        public void Configure(EntityTypeBuilder<Department> entity)
         {
-            builder.HasKey(e => e.Sequence).HasName("PK_DEPART_");
-            builder.ToTable("_DEPART_", "_SMDBA_", tb =>
+            entity.HasKey(e => e.Sequence).HasName("PK_DEPART_");
+
+            entity.ToTable("_DEPART_", "_SMDBA_", tb =>
             {
                 tb.HasTrigger("sm_ad__DEPART_st");
                 tb.HasTrigger("sm_ai__DEPART_st");
                 tb.HasTrigger("sm_au__DEPART_st");
             });
-            builder.HasIndex(e => new { e.Assistmanager, e.Sequence }, "FK_DEPART_ASSISTMANAGER");
-            builder.HasIndex(e => new { e.Location, e.Sequence }, "FK_DEPART_LOCATION");
-            builder.HasIndex(e => new { e.SeqDeptmanager, e.Sequence }, "FK_DEPART_SEQ_DEPTMANAGER");
-            builder.HasIndex(e => e.SeqPriority, "FK_DEPART_SEQ_PRIORITY");
-            builder.HasIndex(e => new { e.Group, e.Sequence }, "FK_DEPART__GROUP_");
-            builder.HasIndex(e => e.Name, "UQ_DEPART_NAME").IsUnique();
-            builder.Property(e => e.Sequence).ValueGeneratedNever().HasColumnName("SEQUENCE");
-            builder.Property(e => e.Assistmanager).HasColumnName("ASSISTMANAGER");
-            builder.Property(e => e.Dept).HasMaxLength(15).HasColumnName("DEPT");
-            builder.Property(e => e.Fax).HasMaxLength(30).HasColumnName("FAX");
-            builder.Property(e => e.Group).HasColumnName("_GROUP_");
-            builder.Property(e => e.Inactive).HasColumnName("_INACTIVE_:");
-            builder.Property(e => e.Lastmodified).HasColumnType("datetime").HasColumnName("LASTMODIFIED").HasDefaultValueSql("(getdate())");
-            builder.Property(e => e.Lastuser).HasMaxLength(255).HasColumnName("LASTUSER").HasDefaultValueSql("(user_name())");
-            builder.Property(e => e.Location).HasColumnName("LOCATION");
-            builder.Property(e => e.Name).IsRequired().HasMaxLength(50).HasColumnName("NAME");
-            builder.Property(e => e.Note).HasColumnName("NOTE");
-            builder.Property(e => e.Phone).HasMaxLength(30).HasColumnName("PHONE");
-            builder.Property(e => e.SeqDeptmanager).HasColumnName("SEQ_DEPTMANAGER");
-            builder.Property(e => e.SeqPriority).HasColumnName("SEQ_PRIORITY");
+
+            entity.HasIndex(e => new { e.Assistmanager, e.Sequence }, "FK_DEPART_ASSISTMANAGER");
+
+            entity.HasIndex(e => new { e.Location, e.Sequence }, "FK_DEPART_LOCATION");
+
+            entity.HasIndex(e => new { e.SeqDeptmanager, e.Sequence }, "FK_DEPART_SEQ_DEPTMANAGER");
+
+            entity.HasIndex(e => e.SeqPriority, "FK_DEPART_SEQ_PRIORITY");
+
+            entity.HasIndex(e => new { e.Group, e.Sequence }, "FK_DEPART__GROUP_");
+
+            entity.HasIndex(e => e.Name, "UQ_DEPART_NAME").IsUnique();
+
+            entity.Property(e => e.Sequence)
+                .ValueGeneratedNever()
+                .HasColumnName("SEQUENCE");
+            entity.Property(e => e.Assistmanager).HasColumnName("ASSISTMANAGER");
+            entity.Property(e => e.Dept)
+                .HasMaxLength(15)
+                .HasColumnName("DEPT");
+            entity.Property(e => e.Fax)
+                .HasMaxLength(30)
+                .HasColumnName("FAX");
+            entity.Property(e => e.Group).HasColumnName("_GROUP_");
+            entity.Property(e => e.Inactive).HasColumnName("_INACTIVE_:");
+            entity.Property(e => e.Lastmodified)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("LASTMODIFIED");
+            entity.Property(e => e.Lastuser)
+                .HasMaxLength(255)
+                .HasDefaultValueSql("(user_name())")
+                .HasColumnName("LASTUSER");
+            entity.Property(e => e.Location).HasColumnName("LOCATION");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("NAME");
+            entity.Property(e => e.Note).HasColumnName("NOTE");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(30)
+                .HasColumnName("PHONE");
+            entity.Property(e => e.SeqDeptmanager).HasColumnName("SEQ_DEPTMANAGER");
+            entity.Property(e => e.SeqPriority).HasColumnName("SEQ_PRIORITY");
         }
     }
 

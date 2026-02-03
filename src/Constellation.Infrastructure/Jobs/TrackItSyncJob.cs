@@ -209,7 +209,7 @@ internal sealed class TrackItSyncJob : ITrackItSyncJob
             if (cancellationToken.IsCancellationRequested)
                 return;
 
-            _logger.Information("{id}: Teacher: Name {teacher} - Email {emailAddress}", jobId, acosStaffMember.Name.PreferredName, acosStaffMember.EmailAddress);
+            _logger.Information("{id}: Teacher: Name {teacher} - Email {emailAddress}", jobId, acosStaffMember.Name.DisplayName, acosStaffMember.EmailAddress);
 
             string customerEmailId = ConvertEmailToEmailId(acosStaffMember.EmailAddress);
             Customer? tiCustomer = tiCustomers.FirstOrDefault(c => acosStaffMember.EmailAddress.Email.Contains(c.Client, StringComparison.InvariantCultureIgnoreCase) || c.Emailid == customerEmailId);
