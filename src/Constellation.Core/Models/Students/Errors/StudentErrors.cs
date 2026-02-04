@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Core.Models.Students.Errors;
 
 using Constellation.Core.Enums;
+using Core.ValueObjects;
 using Identifiers;
 using Shared;
 using System;
@@ -23,6 +24,10 @@ public static class StudentErrors
     public static readonly Func<StudentReferenceNumber, Error> NotFoundBySRN = srn => new(
         "Student.NotFound",
         $"A student with the SRN {srn} could not be found");
+
+    public static readonly Func<EmailAddress, Error> NotFoundByEmail = email => new(
+        "Student.NotFound",
+        $"A student with the Email {email} could not be found");
 
     public static readonly Func<string, Error> NotFoundForSchool = id => new Error(
         "Student.NotFoundForSchool",

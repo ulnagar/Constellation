@@ -24,6 +24,10 @@ public static class OfferingErrors
         "Offerings.Offering.NotFoundForStudent",
         $"Could not find any Offering linked with Student with Id {id}");
 
+    public static readonly Func<StudentId, Error> TooManyForStudent = id => new(
+        "Offerings.Offering.TooManyForStudent",
+        $"Found too many Offerings linked with Student with Id {id}");
+
     public static readonly Func<string, Error> NotFoundForTeacher = id => new(
         "Offerings.Offering.NotFoundForTeacher",
         $"Could not find any Offering linked with Teacher with Id {id}");

@@ -29,6 +29,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_CheckIn ? "active" : "")" asp-page="/StudentAdmin/Attendance/CheckIn/Index" asp-area="Staff">
+                                Check Ins
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link @(Model == ActivePage.StudentAdmin_Attendance_Configuration ? "active" : "")" asp-page="/StudentAdmin/Attendance/Configuration" asp-area="Staff">
                                 Configuration
                             </a>
