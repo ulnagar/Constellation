@@ -26,132 +26,44 @@ internal sealed class GetCheckInResponsesQueryHandler
 
     public async Task<Result<List<CheckInResponse>>> Handle(GetCheckInResponsesQuery request, CancellationToken cancellationToken)
     {
+        List<CheckInResponse> responses = await _checkInRepository.GetAll(cancellationToken);
+
         if (request.Filter is null)
-            return await _checkInRepository.GetAll(cancellationToken);
-
-        List<CheckInResponse> responses = [];
-
-        if (request.Filter.Grades.Count > 0 && request.Filter.Schools.Count > 0)
-        {
-            foreach (var grade in request.Filter.Grades)
-            {
-                List<CheckInResponse> gradeResponses = await _checkInRepository.GetFromGrade(grade, cancellationToken);
-
-                foreach (CheckInResponse response in gradeResponses)
-                {
-                    if (request.Filter.Schools.Contains(response.SchoolCode) && 
-                        !responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
             return responses;
-        }
 
         if (request.Filter.Grades.Count > 0)
         {
-            foreach (var grade in request.Filter.Grades)
-            {
-                List<CheckInResponse> gradeResponses = await _checkInRepository.GetFromGrade(grade, cancellationToken);
-
-                foreach (CheckInResponse response in gradeResponses)
-                {
-                    if (!responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
-            return responses;
-        }
-
-        if (request.Filter.Courses.Count > 0 && request.Filter.Schools.Count > 0)
-        {
-            foreach (Guid course in request.Filter.Courses)
-            {
-                CourseId courseId = CourseId.FromValue(course);
-
-                List<CheckInResponse> courseResponses = await _checkInRepository.GetFromCourse(courseId, cancellationToken);
-
-                foreach (CheckInResponse response in courseResponses)
-                {
-                    if (request.Filter.Schools.Contains(response.SchoolCode) &&
-                        !responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
-            return responses;
+            responses = responses
+                .Where(response => request.Filter.Grades.Contains(response.Grade))
+                .ToList();
         }
 
         if (request.Filter.Courses.Count > 0)
         {
-            foreach (Guid course in request.Filter.Courses)
-            {
-                CourseId courseId = CourseId.FromValue(course);
-
-                List<CheckInResponse> courseResponses = await _checkInRepository.GetFromCourse(courseId, cancellationToken);
-
-                foreach (CheckInResponse response in courseResponses)
-                {
-                    if (!responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
-            return responses;
-        }
-
-        if (request.Filter.Offerings.Count > 0 && request.Filter.Schools.Count > 0)
-        {
-            foreach (Guid offering in request.Filter.Offerings)
-            {
-                OfferingId offeringId = OfferingId.FromValue(offering);
-
-                List<CheckInResponse> offeringResponses = await _checkInRepository.GetFromOffering(offeringId, cancellationToken);
-
-                foreach (CheckInResponse response in offeringResponses)
-                {
-                    if (request.Filter.Schools.Contains(response.SchoolCode) &&
-                        !responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
-            return responses;
+            responses = responses
+                .Where(response => request.Filter.Courses.Select(CourseId.FromValue).Contains(response.CourseId))
+                .ToList();
         }
 
         if (request.Filter.Offerings.Count > 0)
         {
-            foreach (Guid offering in request.Filter.Offerings)
-            {
-                OfferingId offeringId = OfferingId.FromValue(offering);
-
-                List<CheckInResponse> offeringResponses = await _checkInRepository.GetFromOffering(offeringId, cancellationToken);
-
-                foreach (CheckInResponse response in offeringResponses)
-                {
-                    if (!responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
-            return responses;
+            responses = responses
+                .Where(response => request.Filter.Offerings.Select(OfferingId.FromValue).Contains(response.OfferingId))
+                .ToList();
         }
 
         if (request.Filter.Schools.Count > 0)
         {
-            foreach (string schoolCode in request.Filter.Schools)
-            {
-                List<CheckInResponse> schoolResponses = await _checkInRepository.GetFromSchool(schoolCode, cancellationToken);
+            responses = responses
+                .Where(response => request.Filter.Schools.Contains(response.SchoolCode))
+                .ToList();
+        }
 
-                foreach (CheckInResponse response in schoolResponses)
-                {
-                    if (!responses.Contains(response))
-                        responses.Add(response);
-                }
-            }
-
-            return responses;
+        if (request.Filter.Sentiments.Count > 0)
+        {
+            responses = responses
+                .Where(response => request.Filter.Sentiments.Contains(response.Sentiment))
+                .ToList();
         }
 
         return responses;

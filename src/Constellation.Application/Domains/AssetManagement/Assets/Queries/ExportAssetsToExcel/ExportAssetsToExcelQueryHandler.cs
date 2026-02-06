@@ -4,8 +4,10 @@ using Abstractions.Messaging;
 using Constellation.Application.Domains.AssetManagement.Assets.Enums;
 using Constellation.Application.Helpers;
 using Core.Abstractions.Clock;
+using Core.Errors;
 using Core.Models.Assets;
 using Core.Models.Assets.Enums;
+using Core.Models.Assets.Errors;
 using Core.Models.Assets.Repositories;
 using Core.Shared;
 using DTOs;
@@ -23,10 +25,7 @@ internal sealed class ExportAssetsToExcelQueryHandler
     private readonly IExcelService _excelService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
-
-    private readonly Error _errorNoAssetsToExport = new("Assets.Export.NoAssetsFound", "No Assets found to export");
-    private readonly Error _errorDocumentServiceFailed = new("Assets.Export.DocumentServiceFailed", "Document Service failed to create document");
-
+    
     public ExportAssetsToExcelQueryHandler(
         IAssetRepository assetsRepository,
         IExcelService excelService,
@@ -52,10 +51,10 @@ internal sealed class ExportAssetsToExcelQueryHandler
         {
             _logger
                 .ForContext(nameof(ExportAssetsToExcelQuery), request, true)
-                .ForContext(nameof(Error), _errorNoAssetsToExport, true)
+                .ForContext(nameof(Error), AssetErrors.NoneFound, true)
                 .Warning("Failed to export Assets to Excel");
 
-            return Result.Failure<FileDto>(_errorNoAssetsToExport);
+            return Result.Failure<FileDto>(AssetErrors.NoneFound);
         }
 
         MemoryStream stream = await _excelService.CreateAssetExportFile(assets, cancellationToken);
@@ -64,10 +63,10 @@ internal sealed class ExportAssetsToExcelQueryHandler
         {
             _logger
                 .ForContext(nameof(ExportAssetsToExcelQuery), request, true)
-                .ForContext(nameof(Error), _errorDocumentServiceFailed, true)
+                .ForContext(nameof(Error), ApplicationErrors.ExportServiceFailed, true)
                 .Warning("Failed to export Assets to Excel");
 
-            return Result.Failure<FileDto>(_errorDocumentServiceFailed);
+            return Result.Failure<FileDto>(ApplicationErrors.ExportServiceFailed);
         }
 
         FileDto response = new()

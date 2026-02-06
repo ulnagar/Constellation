@@ -1,11 +1,13 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.CheckIn;
 
 using Application.Common.PresentationModels;
+using Application.Domains.Attendance.CheckIns.Queries.ExportCheckInResponses;
 using Application.Domains.Attendance.CheckIns.Queries.GetCheckInResponses;
 using Application.Domains.Attendance.CheckIns.Queries.GetSentimentList;
 using Application.Domains.Courses.Models;
 using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
 using Application.Domains.Courses.Queries.GetCourseSummary;
+using Application.DTOs;
 using Application.Models.Auth;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
 using Constellation.Application.Domains.Schools.Models;
@@ -70,7 +72,20 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken = default)
     {
-        return await PreparePage(cancellationToken);
+        Result<FileDto> file = await _mediator.Send(new ExportCheckInResponsesQuery(Filter), cancellationToken);
+
+        if (file.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(file.Error);
+
+            _logger
+                .ForContext(nameof(Error), file.Error, true)
+                .Warning("Failed to export list of Check In Responses by user {User}", _currentUserService.UserName);
+
+            return Page();
+        }
+
+        return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
     }
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)

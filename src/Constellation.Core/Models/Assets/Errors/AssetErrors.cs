@@ -8,6 +8,11 @@ using System;
 
 public static class AssetErrors
 {
+    public static readonly Error NoneFound = new(
+        "Assets.Asset.NoneFound",
+        "Could not find any Assets");
+
+
     public static readonly Func<AssetNumber, Error> NotFoundByAssetNumber = id => new(
         "Assets.Asset.NotFound",
         $"An Asset with the Asset Number {id} could not be found");

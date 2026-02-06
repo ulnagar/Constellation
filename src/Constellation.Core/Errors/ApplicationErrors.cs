@@ -16,4 +16,8 @@ public static class ApplicationErrors
     public static readonly Error UnknownError = new(
         "Application.UnknownError",
         "An unknown error has occurred");
+
+    public static readonly Error ExportServiceFailed = new (
+        "Service.Export.DocumentServiceFailed", 
+        "Document Service failed to create document");
 }

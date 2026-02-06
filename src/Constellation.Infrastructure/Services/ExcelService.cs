@@ -25,6 +25,7 @@ using Constellation.Application.Domains.Students.Commands.ImportStudentsFromFile
 using Constellation.Application.Domains.Tutorials.GroupTutorials.Queries.GenerateTutorialAttendanceReport;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Assets;
+using Constellation.Core.Models.Attendance.Checkin;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Extensions;
@@ -185,6 +186,54 @@ public class ExcelService : IExcelService
         excel.Dispose();
         return Task.FromResult(assets);
     }
+
+    public async Task<MemoryStream> CreateCheckInExportFile(
+        List<CheckInResponse> items,
+        CancellationToken cancellationToken = default)
+    {
+        ExcelPackage excel = new();
+
+        ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add("Sheet 1");
+
+        worksheet.Cells[1, 1].Value = "Reported";
+        worksheet.Cells[1, 2].Value = "Student First";
+        worksheet.Cells[1, 3].Value = "Student Last";
+        worksheet.Cells[1, 4].Value = "Grade";
+        worksheet.Cells[1, 5].Value = "School";
+        worksheet.Cells[1, 6].Value = "Class";
+        worksheet.Cells[1, 7].Value = "Course";
+        worksheet.Cells[1, 8].Value = "Sentiment";
+
+        int row = 2;
+
+        foreach (CheckInResponse response in items)
+        {
+            worksheet.Cells[row, 1].Value = response.SubmittedAt;
+            worksheet.Cells[row, 2].Value = response.Student.PreferredName;
+            worksheet.Cells[row, 3].Value = response.Student.LastName;
+            worksheet.Cells[row, 4].Value = response.Grade.AsName();
+            worksheet.Cells[row, 5].Value = response.School;
+            worksheet.Cells[row, 6].Value = response.Offering;
+            worksheet.Cells[row, 7].Value = response.Course;
+            worksheet.Cells[row, 8].Value = response.Sentiment;
+
+            worksheet.Cells[row, 1].Style.Numberformat.Format = "dd/MM/yyyy hh:mm:ss AM/PM";
+
+            row++;
+        }
+
+        worksheet.View.FreezePanes(2, 1);
+        worksheet.Cells[1, 1, row, 8].AutoFilter = true;
+        worksheet.Cells[1, 1, row, 8].AutoFitColumns();
+
+        MemoryStream memoryStream = new();
+        await excel.SaveAsAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+
+        excel.Dispose();
+        return memoryStream;
+    }
+
 
     public async Task<MemoryStream> CreateAssetExportFile(
         List<Asset> assets,

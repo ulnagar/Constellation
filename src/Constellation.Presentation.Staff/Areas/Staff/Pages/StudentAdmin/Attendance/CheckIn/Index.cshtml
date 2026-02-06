@@ -63,7 +63,7 @@
 
 <hr />
 
-<table class="table table-striped table-hover data-table">
+<table class="table table-striped table-hover custom-data-table">
     <thead>
         <tr>
             <th>Student</th>
@@ -235,12 +235,12 @@
                     {
                         <div class="row">
                             <div class="col-md-2">
-                                <h5>@grade.Key</h5>
+                                <h5>@grade.Key.AsName()</h5>
                             </div>
                             <div class="col">
                                 @foreach (var course in grade)
                                 {
-                                    <button id="courseSelect-@course.Id" class="btn btn-outline-info select-button" onClick="toggleCourse('@course.Id')">@course.Name</button>
+                                    <button id="courseSelect-@course.Id" class="btn btn-outline-info select-button" onClick="toggleCourse('@course.Id')">@course.Grade @course.Name</button>
                                 }
                             </div>
                         </div>
@@ -421,32 +421,32 @@
             }
         }
 
-        function toggleFlag(value) {
-            var selectDiv = $('button[id="flagSelect-' + value + '"]');
+        function toggleSentiment(value) {
+            var selectDiv = $('button[id="sentimentSelect-' + value + '"]');
             if (selectDiv.hasClass('btn-info')) {
                 // Selected, need to deselect
                 selectDiv.removeClass('btn-info');
                 selectDiv.addClass('btn-outline-info')
 
-                $('button[id="pd-flagSelect-' + value + '"]').remove();
-                $('button[id="md-flagSelect-' + value + '"]').remove();
-                $('input[id="i-flagSelect-' + value + '"]').remove();
+                $('button[id="pd-sentimentSelect-' + value + '"]').remove();
+                $('button[id="md-sentimentSelect-' + value + '"]').remove();
+                $('input[id="i-sentimentSelect-' + value + '"]').remove();
             }
             else {
                 // Deselected, need to select
                 selectDiv.addClass('btn-info');
                 selectDiv.removeClass('btn-outline-info');
 
-                var pageDisplayDiv = $('button[id="flagSelect-' + value + '"]').clone().prop('id', 'pd-flagSelect-' + value);
-                pageDisplayDiv.appendTo('#SelectedFlagsList');
-                var modalDisplayDiv = $('button[id="flagSelect-' + value + '"]').clone().prop('id', 'md-flagSelect-' + value);
-                modalDisplayDiv.appendTo('#ModalSelectedFlagsList');
+                var pageDisplayDiv = $('button[id="sentimentSelect-' + value + '"]').clone().prop('id', 'pd-sentimentSelect-' + value);
+                pageDisplayDiv.appendTo('#SelectedSentimentsList');
+                var modalDisplayDiv = $('button[id="sentimentSelect-' + value + '"]').clone().prop('id', 'md-sentimentSelect-' + value);
+                modalDisplayDiv.appendTo('#ModalSelectedSentimentsList');
 
-                var input = $('<input>').attr('id', 'i-flagSelect-' + value)
-                    .attr('name', 'Filter.Flags')
+                var input = $('<input>').attr('id', 'i-sentimentSelect-' + value)
+                    .attr('name', 'Filter.Sentiments')
                     .attr('type', "hidden");
                 input.val(value);
-                var classInputDiv = $('#SelectedFlagsList');
+                var classInputDiv = $('#SelectedSentimentsList');
                 classInputDiv.append(input);
             }
         }
@@ -487,9 +487,9 @@
                     @:toggleGrade('@grade');
             }
 
-            @foreach (var category in Model.Filter?.Courses ?? [])
+            @foreach (var course in Model.Filter?.Courses ?? [])
             {
-                    @:toggleCategory('@category');
+                    @:toggleCourse('@course');
             }
 
             @foreach (var offering in Model.Filter?.Offerings ?? [])
@@ -502,11 +502,18 @@
                     @:toggleSchool(@school);
             }
 
-            @foreach (var flag in Model.Filter?.Sentiments ?? [])
+            @foreach (var sentiment in Model.Filter?.Sentiments ?? [])
             {
-                    @:toggleFlag('@flag');
+                    @:toggleSentiment('@sentiment');
             }
         });
+
+        var table = $('.custom-data-table')
+            .DataTable({
+                "order": [ 
+                    [ 5, 'desc' ]
+                ]
+            });
 
         function makeModal(message) {
             return `
