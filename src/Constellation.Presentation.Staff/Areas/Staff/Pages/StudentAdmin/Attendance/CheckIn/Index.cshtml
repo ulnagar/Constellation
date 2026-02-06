@@ -1,4 +1,5 @@
 ﻿@page
+@using Constellation.Core.Enums
 @using Constellation.Core.Extensions
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.StudentAdmin.Attendance.CheckIn.IndexModel
 @{
@@ -7,7 +8,57 @@
 <h2>Check In Responses</h2>
 
 <div class="page-menu">
+    <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+</div>
 
+<hr />
+
+<div id="filterDefinition" class="collapse">
+    <form method="post" id="filterForm">
+        <div class="row">
+            <div class="col-md-10">
+                <div class="row nested-row">
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Grades">Grades</label>
+                        <div id="SelectedGradesList"> </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Schools">Schools</label>
+                        <div id="SelectedSchoolsList"> </div>
+                    </div>
+                </div>
+                <div class="row nested-row">
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Offerings">Classes</label>
+                        <div id="SelectedClassesList"> </div>
+
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Courses">Courses</label>
+                        <div id="SelectedCoursesList"> </div>
+
+                    </div>
+                </div>
+                <div class="row nested-row">
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Sentiments">Sentiments</label>
+                        <div id="SelectedSentimentsList"> </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button id="ShowGradeSelectList" type="button" class="btn btn-primary btn-block">Add Grades</button>
+                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary btn-block">Add Schools</button>
+                <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
+                <button id="ShowCoursesSelectList" type="button" class="btn btn-primary btn-block">Add Courses</button>
+                <button id="ShowSentimentsSelectList" type="button" class="btn btn-primary btn-block">Add Sentiments</button>
+
+                <input type="submit" asp-page-handler="Filter" class="btn btn-success btn-block mt-3" value="Filter" />
+                <input type="submit" asp-page-handler="Export" class="btn btn-success btn-block" value="Export" />
+            </div>
+        </div>
+    </form>
 </div>
 
 <hr />
@@ -37,3 +88,444 @@
         }
     </tbody>
 </table>
+
+
+<div class="modal" id="GradeListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Grades for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Grades:</h5>
+                        <div class="col-md-12" id="ModalSelectedGradesList"> </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Primary</h5>
+                        </div>
+                        <div class="col">
+                            <button id="gradeSelect-@Grade.Y05" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y05')">@Grade.Y05.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y06" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y06')">@Grade.Y06.AsName()</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Junior Secondary</h5>
+                        </div>
+                        <div class="col">
+                            <button id="gradeSelect-@Grade.Y07" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y07')">@Grade.Y07.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y08" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y08')">@Grade.Y08.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y09" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y09')">@Grade.Y09.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y10" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y10')">@Grade.Y10.AsName()</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h5>Senior Secondary</h5>
+                        </div>
+                        <div class="col">
+                            <button id="gradeSelect-@Grade.Y11" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y11')">@Grade.Y11.AsName()</button>
+                            <button id="gradeSelect-@Grade.Y12" type="button" class="btn btn-outline-info select-button" onClick="toggleGrade('@Grade.Y12')">@Grade.Y12.AsName()</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="SchoolListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Schools for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">School</span>
+                            <select asp-items="@(new SelectList(Model.SchoolsList, "Code", "Name"))" id="custom-combo" style="width:100%">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Schools:</h5>
+                        <div class="col-md-12" id="ModalSelectedSchoolsList"> </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="ClassListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Classes for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Classes:</h5>
+                        <div class="col-md-12" id="ModalSelectedClassesList"> </div>
+                    </div>
+                    @foreach (var grade in Model.ClassSelectionList.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).GroupBy(entry => entry.Grade))
+                    {
+                        <div class="row">
+                            <div class="col-md-2">
+                                <h5>@grade.Key</h5>
+                            </div>
+                            <div class="col">
+                                @foreach (var offering in grade)
+                                {
+                                    <button id="offeringSelect-@offering.Id" class="btn btn-outline-info select-button" onClick="toggleClass('@offering.Id')">@offering.Name (@offering.Teacher)</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="CourseListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Courses for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Courses:</h5>
+                        <div class="col-md-12" id="ModalSelectedCoursesList"> </div>
+                    </div>
+                    @foreach (var grade in Model.CourseSelectedList.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).GroupBy(entry => entry.Grade))
+                    {
+                        <div class="row">
+                            <div class="col-md-2">
+                                <h5>@grade.Key</h5>
+                            </div>
+                            <div class="col">
+                                @foreach (var course in grade)
+                                {
+                                    <button id="courseSelect-@course.Id" class="btn btn-outline-info select-button" onClick="toggleCourse('@course.Id')">@course.Name</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="SentimentListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Sentiments for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <h5 class="col-md-12">Selected Sentiments:</h5>
+                        <div class="col-md-12" id="ModalSelectedSentimentsList"> </div>
+                    </div>
+
+                    <div class="row">
+                        <h5 class="col-md-12">Available Sentiments:</h5>
+                        <div class="col">
+                            @foreach (var sentiment in Model.SentimentList)
+                            {
+                                <button id="sentimentSelect-@sentiment" class="btn btn-outline-info select-button" onClick="toggleSentiment('@sentiment')">@sentiment</button>
+                            }
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="hidden">
+    @foreach (var school in Model.SchoolsList)
+    {
+        <button id="schoolSelect-@school.Code" type="button" class="btn btn-outline-info select-button" onClick="toggleSchool('@school.Code')">@school.Name</button>
+    }
+</div>
+
+
+@section scripts {
+    <script>
+        $('#ShowGradeSelectList').on('click', function () {
+            $('#GradeListModal').modal('show');
+        });
+
+        $('#ShowCoursesSelectList').on('click', function () {
+            $('#CourseListModal').modal('show');
+        });
+
+        $('#ShowClassSelectList').on('click', function () {
+            $('#ClassListModal').modal('show');
+        });
+
+        $('#ShowSchoolSelectList').on('click', function () {
+            $('#SchoolListModal').modal('show');
+        });
+
+        $('#ShowSentimentsSelectList').on('click', function () {
+            $('#SentimentListModal').modal('show');
+        });
+
+        var $schoolOption = $("#custom-combo").select2({ theme: 'bootstrap' });
+
+        $schoolOption.on('select2:select', function(e) {
+            var code = e.params.data.id;
+            toggleSchool(code);
+        });
+
+        $schoolOption.on('select2:unselect', function(e) {
+            var code = e.params.data.id;
+            toggleSchool(code);
+        });
+
+        function toggleGrade(grade) {
+            var selectDiv = $('#gradeSelect-' + grade);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-gradeSelect-' + grade).remove();
+                $('#md-gradeSelect-' + grade).remove();
+                $('#i-gradeSelect-' + grade).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#gradeSelect-' + grade).clone().prop('id', 'pd-gradeSelect-' + grade);
+                pageDisplayDiv.appendTo('#SelectedGradesList');
+                var modalDisplayDiv = $('#gradeSelect-' + grade).clone().prop('id', 'md-gradeSelect-' + grade);
+                modalDisplayDiv.appendTo('#ModalSelectedGradesList');
+
+                var input = $('<input>').attr('id', 'i-gradeSelect-' + grade)
+                    .attr('name', 'Filter.Grades')
+                    .attr('type', "hidden");
+                input.val(grade);
+                var classInputDiv = $('#SelectedGradesList');
+                classInputDiv.append(input);
+            }
+        }
+
+        function toggleSchool(code) {
+            var selectDiv = $('#schoolSelect-' + code);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-schoolSelect-' + code).remove();
+                $('#md-schoolSelect-' + code).remove();
+                $('#i-schoolSelect-' + code).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'pd-schoolSelect-' + code);
+                pageDisplayDiv.appendTo('#SelectedSchoolsList');
+                var modalDisplayDiv = $('#schoolSelect-' + code).clone().prop('id', 'md-schoolSelect-' + code);
+                modalDisplayDiv.appendTo('#ModalSelectedSchoolsList');
+
+                var input = $('<input>').attr('id', 'i-schoolSelect-' + code)
+                    .attr('name', 'Filter.Schools')
+                    .attr('type', "hidden");
+                input.val(code);
+                var classInputDiv = $('#SelectedSchoolsList');
+                classInputDiv.append(input);
+            }
+        }
+
+        function toggleClass(offeringId) {
+            var selectDiv = $('#offeringSelect-' + offeringId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-offeringSelect-' + offeringId).remove();
+                $('#md-offeringSelect-' + offeringId).remove();
+                $('#i-offeringSelect-' + offeringId).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'pd-offeringSelect-' + offeringId);
+                pageDisplayDiv.appendTo('#SelectedClassesList');
+                var modalDisplayDiv = $('#offeringSelect-' + offeringId).clone().prop('id', 'md-offeringSelect-' + offeringId);
+                modalDisplayDiv.appendTo('#ModalSelectedClassesList');
+
+                var input = $('<input>').attr('id', 'i-offeringSelect-' + offeringId)
+                    .attr('name', 'Filter.Offerings')
+                    .attr('type', "hidden");
+                input.val(offeringId);
+                var classInputDiv = $('#SelectedClassesList');
+                classInputDiv.append(input);
+            }
+        }
+
+        function toggleFlag(value) {
+            var selectDiv = $('button[id="flagSelect-' + value + '"]');
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('button[id="pd-flagSelect-' + value + '"]').remove();
+                $('button[id="md-flagSelect-' + value + '"]').remove();
+                $('input[id="i-flagSelect-' + value + '"]').remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info');
+
+                var pageDisplayDiv = $('button[id="flagSelect-' + value + '"]').clone().prop('id', 'pd-flagSelect-' + value);
+                pageDisplayDiv.appendTo('#SelectedFlagsList');
+                var modalDisplayDiv = $('button[id="flagSelect-' + value + '"]').clone().prop('id', 'md-flagSelect-' + value);
+                modalDisplayDiv.appendTo('#ModalSelectedFlagsList');
+
+                var input = $('<input>').attr('id', 'i-flagSelect-' + value)
+                    .attr('name', 'Filter.Flags')
+                    .attr('type', "hidden");
+                input.val(value);
+                var classInputDiv = $('#SelectedFlagsList');
+                classInputDiv.append(input);
+            }
+        }
+
+        function toggleCourse(value) {
+            var selectDiv = $('button[id="courseSelect-' + value + '"]');
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('button[id="pd-courseSelect-' + value + '"]').remove();
+                $('button[id="md-courseSelect-' + value + '"]').remove();
+                $('input[id="i-courseSelect-' + value + '"]').remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info');
+
+                var pageDisplayDiv = $('button[id="courseSelect-' + value + '"]').clone().prop('id', 'pd-courseSelect-' + value);
+                pageDisplayDiv.appendTo('#SelectedCoursesList');
+                var modalDisplayDiv = $('button[id="courseSelect-' + value + '"]').clone().prop('id', 'md-courseSelect-' + value);
+                modalDisplayDiv.appendTo('#ModalSelectedCoursesList');
+
+                var input = $('<input>').attr('id', 'i-courseSelect-' + value)
+                    .attr('name', 'Filter.Courses')
+                    .attr('type', "hidden");
+                input.val(value);
+                var classInputDiv = $('#SelectedCoursesList');
+                classInputDiv.append(input);
+            }
+        }
+
+        $(document).ready(function () {
+            @foreach (var grade in Model.Filter?.Grades ?? [])
+            {
+                    @:toggleGrade('@grade');
+            }
+
+            @foreach (var category in Model.Filter?.Courses ?? [])
+            {
+                    @:toggleCategory('@category');
+            }
+
+            @foreach (var offering in Model.Filter?.Offerings ?? [])
+            {
+                    @:toggleClass('@offering');
+            }
+
+            @foreach (var school in Model.Filter?.Schools ?? [])
+            {
+                    @:toggleSchool(@school);
+            }
+
+            @foreach (var flag in Model.Filter?.Sentiments ?? [])
+            {
+                    @:toggleFlag('@flag');
+            }
+        });
+
+        function makeModal(message) {
+            return `
+                    <div class="modal fade" id="dummyModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Alert!</h5>
+                                </div>
+                                <div class="modal-body">
+                                    ${message}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+        }
+
+    </script>
+}

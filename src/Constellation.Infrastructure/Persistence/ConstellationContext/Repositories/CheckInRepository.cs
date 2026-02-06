@@ -57,5 +57,14 @@ internal sealed class CheckInRepository : ICheckInRepository
             .Where(response => response.SchoolCode == schoolCode)
             .ToListAsync(cancellationToken);
 
+    public async Task<List<string>> GetSentimentList(
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<CheckInResponse>()
+            .Select(response => response.Sentiment)
+            .Distinct()
+            .OrderBy(entry => entry)
+            .ToListAsync(cancellationToken);
+
     public void Insert(CheckInResponse item) => _context.Set<CheckInResponse>().Add(item);
 }

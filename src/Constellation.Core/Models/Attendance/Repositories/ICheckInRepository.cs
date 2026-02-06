@@ -12,5 +12,6 @@ public interface ICheckInRepository
     Task<List<CheckInResponse>> GetFromCourse(CourseId courseId, CancellationToken cancellationToken = default);
     Task<List<CheckInResponse>> GetFromOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<CheckInResponse>> GetFromSchool(string schoolCode, CancellationToken cancellationToken = default);
+    Task<List<string>> GetSentimentList(CancellationToken cancellationToken = default);
     void Insert(CheckInResponse item);
 }

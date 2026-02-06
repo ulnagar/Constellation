@@ -7,8 +7,5 @@ using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Identifiers;
 
 public sealed record GetCheckInResponsesQuery(
-    Grade? Grade = null,
-    string? SchoolCode = null,
-    OfferingId? OfferingId = null,
-    CourseId? CourseId = null)
+    CheckInFilter? Filter = null)
     : IQuery<List<CheckInResponse>>;
