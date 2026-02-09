@@ -85,9 +85,9 @@ internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
 
         foreach (Student student in students)
         {
-            _logger.Information("Processing {student}", student.Name.DisplayName);
+            _logger.Information("Processing {student} ({index}/{total})", student.Name.DisplayName, students.IndexOf(student), students.Count);
 
-            string sentralId = student.SystemLinks.FirstOrDefault(link => link.System.Equals(SystemType.Sentral))?.Value;
+            string? sentralId = student.SystemLinks.FirstOrDefault(link => link.System.Equals(SystemType.Sentral))?.Value;
 
             if (string.IsNullOrWhiteSpace(sentralId))
             {
@@ -228,7 +228,7 @@ internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
                 // If it is, add to separate list to duplicate percentage for absences only
                 foreach (Absence absence in group)
                 {
-                    SentralPeriodAbsenceDto matchingSentralAbsence = sentralAbsences.FirstOrDefault(entry => entry.Date == absence.Date);
+                    SentralPeriodAbsenceDto? matchingSentralAbsence = sentralAbsences.FirstOrDefault(entry => entry.Date == absence.Date);
 
                     if (matchingSentralAbsence is null)
                     {
