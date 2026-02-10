@@ -7,6 +7,7 @@ using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
+using Constellation.Presentation.Server.Helpers.Identity;
 using Constellation.Presentation.Server.Infrastructure;
 using Constellation.Presentation.Server.Services;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
@@ -64,11 +66,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = new PathString("/Auth/Logout");
 });
 
-
 builder.Services
     .AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
     .AddCookie(options =>
     {
@@ -86,16 +88,17 @@ builder.Services
         options.ClientId = oidcConfig["ClientId"];
         options.ClientSecret = oidcConfig["ClientSecret"];
 
-        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.ResponseType = OpenIdConnectResponseType.Code;
-        options.SignedOutCallbackPath = new PathString("/Auth/Logout");
-
         options.SaveTokens = true;
         options.GetClaimsFromUserInfoEndpoint = true;
 
-        options.MapInboundClaims = false;
-        options.TokenValidationParameters.NameClaimType = JwtRegisteredClaimNames.Name;
-        options.TokenValidationParameters.RoleClaimType = "roles";
+        options.Events = new OpenIdConnectEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                await IdentityHelpers.SyncUserWithIdentity(context);
+            }
+        };
     });
 
 // Register Current User Service

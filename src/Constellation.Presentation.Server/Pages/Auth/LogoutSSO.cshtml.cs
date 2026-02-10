@@ -2,8 +2,6 @@ namespace Constellation.Presentation.Server.Pages.Auth;
 
 using BaseModels;
 using Constellation.Application.Models.Identity;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +20,7 @@ public class LogoutSSOModel : BasePageModel
     public async Task<IActionResult> OnGet()
     {
         await _signInManager.SignOutAsync();
-
-        HttpContext.Session.Clear();
-        await HttpContext.SignOutAsync();
-        await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
-
+        
         return RedirectToPage("/Index", new { area = "" });
-
     }
 }
