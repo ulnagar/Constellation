@@ -103,6 +103,14 @@ section {
     margin: 5px;
 }
 
+.form-box.error {
+    width: 600px;
+
+    .form-value {
+        width: 510px;
+    }
+}
+
 .form-value {
     width: 310px;
     margin: auto;

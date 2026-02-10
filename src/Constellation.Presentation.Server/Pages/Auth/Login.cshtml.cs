@@ -66,6 +66,7 @@ public class LoginModel : PageModel
         Domain,
         MagicLink,
         Sms,
+        SSO,
         Debug
     }
 
@@ -85,20 +86,21 @@ public class LoginModel : PageModel
     {
         // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync();
-        //await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
 
         Status = LoginStatus.WaitingUserInput;
     }
 
-    public async Task OnGetSingleSignOn()
+    private async Task StartSingleSignOnProcess()
     {
-        var properties = new AuthenticationProperties
+        AuthenticationProperties properties = new()
         {
             RedirectUri = "https://localhost:44350/Auth/CompleteSSO"
         };
 
         await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
     }
+
+    public Task OnGetSingleSignOn() => StartSingleSignOnProcess();
 
     public async Task<IActionResult> OnPostAsync()
     {
@@ -161,17 +163,20 @@ public class LoginModel : PageModel
 
         _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
-        bool result;
-
         user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Started);
 
         await _userManager.UpdateAsync(user);
 
-        if (loginType == LoginType.Domain)
-        {
-            Status = LoginStatus.WaitingPasswordInput;
+        //if (loginType == LoginType.Domain)
+        //{
+        //    Status = LoginStatus.WaitingPasswordInput;
 
-            return Page();
+        //    return Page();
+        //}
+
+        if (loginType == LoginType.SSO)
+        {
+            await StartSingleSignOnProcess();
         }
 
 #if DEBUG
@@ -189,7 +194,7 @@ public class LoginModel : PageModel
             string token = await _userManager.GenerateUserTokenAsync(user, "PasswordlessLoginProvider", "passwordless-auth");
 
             // Create login url with embedded token
-            string url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
+            string? url = Url.Page("Login", "Passwordless", new { token, userId = user.Id.ToString() }, Request.Scheme);
 
             // Email login url to user
             MagicLinkEmail notification = new()
@@ -234,11 +239,12 @@ public class LoginModel : PageModel
         {
             case not null when Input.Email.StartsWith('~'):
                 loginType = LoginType.Debug;
-                Input.Email = Input.Email.Replace("~", "");
+                Input.Email = Input.Email.Replace("~", "", StringComparison.InvariantCultureIgnoreCase);
                 break;
-            case not null when Input.Email.Contains("@det.nsw.edu.au"):
-            case not null when Input.Email.Contains("@education.nsw.gov.au"):
-                loginType = LoginType.Domain;
+            case not null when Input.Email.Contains("@det.nsw.edu.au", StringComparison.InvariantCultureIgnoreCase):
+            case not null when Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase):
+                //loginType = LoginType.Domain;
+                loginType = LoginType.SSO;
                 break;
             case not null when Input.Email.All(Char.IsDigit):
                 loginType = LoginType.Sms;
@@ -251,74 +257,74 @@ public class LoginModel : PageModel
         return loginType;
     }
 
-    public async Task<IActionResult> OnPostPasswordLogin()
-    {
-        if (string.IsNullOrWhiteSpace(Input.Password))
-        {
-            ModelState.TryAddModelError(nameof(Input.Password), "You must specify a password!");
+    //public async Task<IActionResult> OnPostPasswordLogin()
+    //{
+    //    if (string.IsNullOrWhiteSpace(Input.Password))
+    //    {
+    //        ModelState.TryAddModelError(nameof(Input.Password), "You must specify a password!");
 
-            Status = LoginStatus.WaitingPasswordInput;
-        }
+    //        Status = LoginStatus.WaitingPasswordInput;
+    //    }
 
-        if (!ModelState.IsValid) return Page();
+    //    if (!ModelState.IsValid) return Page();
 
-        LoginType loginType = GetLoginParameters();
+    //    LoginType loginType = GetLoginParameters();
         
-        _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
-        AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
+    //    _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
+    //    AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
 
-        if (user is null)
-            return Page();
+    //    if (user is null)
+    //        return Page();
 
-        _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
+    //    _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
-        if (loginType == LoginType.Domain)
-        {
-            _logger.Information(" - Attempting domain login by {Email}", Input.Email);
+    //    if (loginType == LoginType.Domain)
+    //    {
+    //        _logger.Information(" - Attempting domain login by {Email}", Input.Email);
 
-            PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
+    //        PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
 
-            bool result = Input.Email.Contains("@education.nsw.gov.au")
-                ? context.ValidateCredentials(Input.Email.Replace("education.nsw.gov.au", "detnsw"), Input.Password)
-                : context.ValidateCredentials(Input.Email, Input.Password);
+    //        bool result = Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase)
+    //            ? context.ValidateCredentials(Input.Email.Replace("education.nsw.gov.au", "detnsw", StringComparison.InvariantCultureIgnoreCase), Input.Password)
+    //            : context.ValidateCredentials(Input.Email, Input.Password);
 
-            context.Dispose();
+    //        context.Dispose();
 
-            if (!result)
-            {
-                _logger.Warning(" - Domain login failed for {Email}", Input.Email);
+    //        if (!result)
+    //        {
+    //            _logger.Warning(" - Domain login failed for {Email}", Input.Email);
 
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+    //            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 
-                Status = LoginStatus.WaitingPasswordInput;
+    //            Status = LoginStatus.WaitingPasswordInput;
 
-                user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+    //            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
 
-                await _userManager.UpdateAsync(user);
+    //            await _userManager.UpdateAsync(user);
 
-                return Page();
-            }
+    //            return Page();
+    //        }
 
-            _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
+    //        _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
 
-            await _signInManager.SignInAsync(user, false);
+    //        await _signInManager.SignInAsync(user, false);
 
-            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
-            await _userManager.UpdateAsync(user);
+    //        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
+    //        await _userManager.UpdateAsync(user);
 
-            return LocalRedirect("/Index");
-        }
+    //        return LocalRedirect("/Index");
+    //    }
         
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+    //    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 
-        Status = LoginStatus.InvalidUsername;
+    //    Status = LoginStatus.InvalidUsername;
 
-        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+    //    user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
 
-        await _userManager.UpdateAsync(user);
+    //    await _userManager.UpdateAsync(user);
 
-        return Page();
-    }
+    //    return Page();
+    //}
 
     public async Task<IActionResult> OnGetPasswordless(string token, string userId)
     {

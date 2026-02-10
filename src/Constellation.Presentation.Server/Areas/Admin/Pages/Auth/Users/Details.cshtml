@@ -163,7 +163,7 @@
                 @foreach (var entry in Model.User.Logins)
                 {
                     <tr>
-                        <td>@entry.LoginDateTime.ToLocalTime()</td>
+                        <td data-order="@entry.LoginDateTime.ToString("yyyy-MM-dd HH:mm:ss")">@entry.LoginDateTime.ToLocalTime()</td>
                         <td>@entry.Status</td>
                     </tr>
                 }

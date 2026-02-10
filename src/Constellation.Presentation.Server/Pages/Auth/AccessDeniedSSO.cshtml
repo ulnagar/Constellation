@@ -1,0 +1,50 @@
+﻿@page
+@model Constellation.Presentation.Server.Pages.Auth.AccessDeniedSSOModel
+@{
+}
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg" href="~/logo.svg" />
+    <title>Constellation</title>
+    <link rel="stylesheet" href="~/css/glyphicon.css" />
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+<body style="padding: 0; margin: 0;">
+    <section>
+        <div class="title-box">
+            <div class="title-container">
+                <div class="logo">
+                    <img src="~/logo.svg" class="hero-logo" />
+                </div>
+                <div class="title">
+                    <h1>Constellation</h1>
+                </div>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="form-box error">
+                <div class="form-value">
+                    <h2>No Account</h2>
+                    <div class="login-text">
+                        <p>You have successfully logged in using DoE credentials. Unfortunately you do not have a valid account for this site.</p>
+                    </div>
+                    <div class="login-text">
+                        <p>If you think this is in error, please contact the Technology Support Team at <a href="mailto:support@aurora.nsw.edu.au?subject=Constellation%20Log-In">support@aurora.nsw.edu.au</a> or on <em>1300 610 733</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>
