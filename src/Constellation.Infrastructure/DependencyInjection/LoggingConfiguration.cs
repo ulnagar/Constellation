@@ -1,13 +1,16 @@
-﻿namespace Constellation.Infrastructure.DependencyInjection;
+﻿#pragma warning disable CA1062
+namespace Constellation.Infrastructure.DependencyInjection;
+
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
+using System.Diagnostics;
 
 public static class LoggingConfiguration
 {
     public static void SetupLogging(IConfiguration configuration, LogEventLevel minimumFileLogLevel)
     {
-        string seqServer = configuration["Constellation:LoggingServer:ServerUrl"];
-        string seqKey = configuration["Constellation:LoggingServer:ApiKey"];
+        string? seqServer = configuration["Constellation:LoggingServer:ServerUrl"];
+        string? seqKey = configuration["Constellation:LoggingServer:ApiKey"];
 
         LoggerConfiguration logger = new LoggerConfiguration()
             .MinimumLevel.Information()

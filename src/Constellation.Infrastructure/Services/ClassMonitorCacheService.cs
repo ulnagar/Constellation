@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 // Reviewed for ASYNC Operations
-public class ClassMonitorCacheService : IClassMonitorCacheService, ISingletonService
+public class ClassMonitorCacheService : IClassMonitorCacheService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private ClassMonitorDtos Cache { get; set; }

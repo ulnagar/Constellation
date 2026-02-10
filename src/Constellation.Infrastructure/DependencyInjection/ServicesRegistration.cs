@@ -1,4 +1,5 @@
-﻿namespace Microsoft.Extensions.DependencyInjection;
+﻿#pragma warning disable CA1062
+namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Clock;
 using Constellation.Application.Interfaces.Configuration;
@@ -56,7 +57,7 @@ public static class ServicesRegistration
                         b.CommandTimeout(120); // Increased command timeout to allow migrations to complete. May not be necessary after Term 1 2024.
                     });
 
-                options.EnableSensitiveDataLogging(true);
+                options.EnableSensitiveDataLogging();
 
                 options.AddInterceptors(new List<IInterceptor> {
                     sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
@@ -120,7 +121,6 @@ public static class ServicesRegistration
         services.AddCanvasExternalService(configuration);
         services.AddDoEDataServicesGateway(configuration);
         services.AddEmailExternalService(configuration);
-        services.AddLinkShortenerExternalService(configuration, environment);
         services.AddNetworkStatisticsExternalService(configuration);
         services.AddSentralExternalService(configuration);
         services.AddSMSExternalService(configuration, environment);

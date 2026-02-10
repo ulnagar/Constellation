@@ -1694,72 +1694,64 @@ public class Gateway : ISentralGateway
 
         HtmlNode calendarTable = page.DocumentNode.SelectSingleNode(_settings.XPaths.TermCalendarTable);
 
-        if (calendarTable != null)
+        if (calendarTable is null)
+            return Result.Failure<(DateOnly, DateOnly)>(new("SentralGateway.GetPage.Incorrect", "Sentral Server page did not include calendar table"));
+
+        IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
+
+        bool correctTerm = false;
+        bool correctWeek = false;
+
+        foreach (HtmlNode row in rows)
         {
-            IEnumerable<HtmlNode> rows = calendarTable.Descendants("tr");
-
-            bool correctTerm = false;
-
-            foreach (HtmlNode row in rows)
+            if (row.Descendants("td").Count() == 1)
             {
-                if (row.Descendants("td").Count() == 1)
+                // This is a header row
+                HtmlNode header = row.Descendants("td").First();
+                HtmlNode termName = header.Descendants("b").FirstOrDefault();
+
+                if (termName is not null)
+                    correctTerm = termName.InnerText == term.Name;
+
+                continue;
+            }
+
+            if (correctTerm)
+            {
+                HtmlNode weekName = row.Descendants("th").FirstOrDefault();
+
+                if (weekName is not null)
+                    correctWeek = weekName.InnerText == week.Name;
+
+                HtmlNode monday = row.Descendants("td").First();
+
+                string mondayAction = monday.GetAttributeValue("onclick", "");
+                if (!string.IsNullOrWhiteSpace(mondayAction))
                 {
-                    // This is a header row
-                    HtmlNode header = row.Descendants("td").First();
-                    HtmlNode termName = header.Descendants("b").FirstOrDefault();
+                    string detectedDate = mondayAction.Split('\'')[1];
+                    DateOnly date = DateOnly.Parse(detectedDate);
 
-                    if (termName is null)
-                    {
-                        // This is a blank row, skip
-                        continue;
-                    }
-
-                    if (termName.InnerText == term.Name)
-                    {
-                        correctTerm = true;
-                        continue;
-                    }
-                    else
-                    {
-                        correctTerm = false;
-                        continue;
-                    }
+                    startDate = date;
                 }
 
-                if (correctTerm == true)
+                HtmlNode friday = row.Descendants("td").Last();
+
+                string fridayAction = friday.GetAttributeValue("onclick", "");
+                if (!string.IsNullOrWhiteSpace(fridayAction))
                 {
-                    HtmlNode weekName = row.Descendants("th").FirstOrDefault();
+                    string detectedDate = fridayAction.Split('\'')[1];
+                    DateOnly date = DateOnly.Parse(detectedDate);
 
-                    if (weekName?.InnerText == week.Value)
-                    {
-                        HtmlNode monday = row.Descendants("td").First();
-
-                        string mondayAction = monday.GetAttributeValue("onclick", "");
-                        if (!string.IsNullOrWhiteSpace(mondayAction))
-                        {
-                            string detectedDate = mondayAction.Split('\'')[1];
-                            DateOnly date = DateOnly.Parse(detectedDate);
-
-                            startDate = date;
-                        }
-
-                        HtmlNode friday = row.Descendants("td").Last();
-
-                        string fridayAction = friday.GetAttributeValue("onclick", "");
-                        if (!string.IsNullOrWhiteSpace(fridayAction))
-                        {
-                            string detectedDate = fridayAction.Split('\'')[1];
-                            DateOnly date = DateOnly.Parse(detectedDate);
-
-                            endDate = date;
-                        }
-                    }
-
-                    if (startDate != DateOnly.MinValue && endDate != DateOnly.MinValue)
-                        return (startDate, endDate);
+                    endDate = date;
                 }
+
+                if (correctWeek)
+                    return (startDate, endDate);
             }
         }
+
+        if (startDate != DateOnly.MinValue && endDate != DateOnly.MinValue)
+            return (startDate, endDate);
 
         return Result.Failure<(DateOnly, DateOnly)>(new("SentralGateway.GetPage.Incorrect", "Sentral Server page did not include calendar table"));
     }

@@ -1,4 +1,5 @@
-﻿namespace Constellation.Infrastructure.DependencyInjection;
+﻿#pragma warning disable CA1062
+namespace Constellation.Infrastructure.DependencyInjection;
 
 using Application.Models.Identity.Enums;
 using Constellation.Application.Models.Auth;
@@ -9,8 +10,6 @@ using System.Security.Claims;
 
 public static class IdentityDefaults
 {
-
-
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
         List<AuthPermission> permissions = AuthPermission.GetOptions.ToList();
@@ -51,7 +50,7 @@ public static class IdentityDefaults
         if (role is null)
             return;
 
-        IList<Claim> claims = await roleManager.GetClaimsAsync(role!);
+        IList<Claim> claims = await roleManager.GetClaimsAsync(role);
 
         List<Claim> permissionClaims = claims
             .Where(claim => claim.Type == AuthClaimType.Permission)
@@ -64,13 +63,13 @@ public static class IdentityDefaults
             if (permissionValues.Contains(claim.Value))
                 continue;
 
-            await roleManager.RemoveClaimAsync(role!, claim);
+            await roleManager.RemoveClaimAsync(role, claim);
         }
 
         foreach (AuthPermission permission in permissions)
         {
             if (permissionClaims.All(claim => claim.Value != permission))
-                await roleManager.AddClaimAsync(role!, new Claim(AuthClaimType.Permission, permission));
+                await roleManager.AddClaimAsync(role, new Claim(AuthClaimType.Permission, permission));
         }
     }
 }

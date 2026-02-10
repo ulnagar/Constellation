@@ -7,7 +7,7 @@ using System.Text;
 namespace Constellation.Infrastructure.Services
 {
     // Reviewed for ASYNC Operations
-    public class CalendarService : ICalendarService, IScopedService
+    public class CalendarService : ICalendarService
     {
         public CalendarService()
         {
