@@ -68,13 +68,13 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
     public async Task<Result> Handle(SendAbsenceNotificationToParentCommand request, CancellationToken cancellationToken)
     {
-        if (!request.AbsenceIds.Any())
+        if (request.AbsenceIds.Count == 0)
         {
             _logger.Warning("{jobId}: No absences defined to send notifications for.", request.JobId);
             return Result.Failure(IntegrationErrors.Absences.Notifications.Parents.NoAbsencesDetected);
         }
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -83,10 +83,10 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        List<Absence> absences = new();
+        List<Absence> absences = [];
         foreach (AbsenceId absenceId in request.AbsenceIds)
         {
-            Absence absence = await _absenceRepository.GetById(absenceId, cancellationToken);
+            Absence? absence = await _absenceRepository.GetById(absenceId, cancellationToken);
 
             if (absence is not null && !absence.Explained)
                 absences.Add(absence);
@@ -101,7 +101,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             return Result.Failure(IntegrationErrors.Absences.Notifications.Parents.NoAbsencesDetected);
         }
 
-        List<AbsenceEntry> absenceEntries = new();
+        List<AbsenceEntry> absenceEntries = [];
 
         foreach (Absence absence in absences)
         {
@@ -111,7 +111,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             {
                 OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                 if (offering is null)
                 {
@@ -127,7 +127,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                 if (tutorial is null)
                 {
@@ -155,8 +155,8 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
         foreach (Family family in families)
         {
-            List<EmailRecipient> recipients = new();
-            List<PhoneNumber> phoneNumbers = new();
+            List<EmailRecipient> recipients = [];
+            List<PhoneNumber> phoneNumbers = [];
 
             Result<EmailRecipient> familyEmail = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);
 
@@ -182,7 +182,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
             foreach (IGrouping<DateOnly, AbsenceEntry> group in groupedAbsences)
             {
-                if (phoneNumbers.Any() && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
+                if (phoneNumbers.Count > 0 && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
                 {
                     Result<SMSMessageCollectionDto> sentMessages = await _smsService.SendAbsenceNotification(
                         group.ToList(),
@@ -195,7 +195,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                         // SMS Gateway failed. Send via email instead.
                         _logger.Warning("{id}: SMS Sending Failed! Fallback to Email notifications.", request.JobId);
 
-                        if (recipients.Any())
+                        if (recipients.Count > 0)
                         {
                             Result<EmailDtos.SentEmail> message = await _emailService.SendParentWholeAbsenceAlert(
                                 family.FamilyTitle, 
@@ -212,7 +212,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
                             foreach (AbsenceEntry entry in group)
                             {
-                                string emails = string.Join(", ", recipients.Select(entry => entry.Email));
+                                string emails = string.Join(", ", recipients.Select(recipient => recipient.Email));
                                 Absence absence = absences.First(absence => absence.Id == entry.Id);
 
                                 absence.AddNotification(NotificationType.Email, message.Value.message, emails, message.Value.id,
@@ -230,14 +230,16 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                                 request.JobId);
                         }
                     }
-
-                    // Once the message has been sent, add it to the database.
-                    if (sentMessages.Value.Messages.Count > 0)
+                    else
                     {
+                        // Once the message has been sent, add it to the database.
+                        if (sentMessages.Value.Messages.Count <= 0)
+                            continue;
+
                         foreach (AbsenceEntry entry in group)
                         {
                             string sentToNumbers = string.Join(", ",
-                                phoneNumbers.Select(entry => entry.ToString(PhoneNumber.Format.Mobile)));
+                                phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.Mobile)));
                             Absence absence = absences.First(absence => absence.Id == entry.Id);
 
                             absence.AddNotification(NotificationType.SMS, sentMessages.Value.Messages.First().MessageBody,
@@ -250,7 +252,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                         }
                     }
                 }
-                else if (recipients.Any())
+                else if (recipients.Count > 0)
                 {
                     Result<EmailDtos.SentEmail> message = await _emailService.SendParentWholeAbsenceAlert(
                         family.FamilyTitle, 
@@ -267,7 +269,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
                     foreach (AbsenceEntry entry in group)
                     {
-                        string emails = string.Join(", ", recipients.Select(entry => entry.Email));
+                        string emails = string.Join(", ", recipients.Select(recipient => recipient.Email));
                         Absence absence = absences.First(absence => absence.Id == entry.Id);
 
                         absence.AddNotification(NotificationType.Email, message.Value.message, emails, message.Value.id,
