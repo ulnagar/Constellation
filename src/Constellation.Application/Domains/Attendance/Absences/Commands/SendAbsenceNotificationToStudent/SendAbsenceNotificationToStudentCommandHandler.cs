@@ -58,7 +58,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
 
     public async Task<Result> Handle(SendAbsenceNotificationToStudentCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -70,7 +70,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
         List<Absence> absences = new();
         foreach (AbsenceId absenceId in request.AbsenceIds)
         {
-            Absence absence = await _absenceRepository.GetById(absenceId, cancellationToken);
+            Absence? absence = await _absenceRepository.GetById(absenceId, cancellationToken);
 
             if (absence is not null && !absence.Explained)
                 absences.Add(absence);
@@ -104,7 +104,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
             {
                 OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                 if (offering is null)
                 {
@@ -120,7 +120,7 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                 if (tutorial is null)
                 {

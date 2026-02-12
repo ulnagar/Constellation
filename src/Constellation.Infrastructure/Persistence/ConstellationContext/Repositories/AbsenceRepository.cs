@@ -28,7 +28,7 @@ public class AbsenceRepository : IAbsenceRepository
         _dateTime = dateTime;
     }
 
-    public async Task<Absence> GetById(
+    public async Task<Absence?> GetById(
         AbsenceId absenceId,
         CancellationToken cancellationToken = default) =>
         await _context
