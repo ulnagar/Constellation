@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.AppSettings.Models;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;

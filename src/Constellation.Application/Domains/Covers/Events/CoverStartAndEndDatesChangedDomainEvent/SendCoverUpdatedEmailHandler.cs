@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Application.Models.Auth;
 using Application.Models.Identity;
+using AppSettings.Models;
 using Constellation.Application.Domains.Covers.Events.CoverCreatedDomainEvent;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;

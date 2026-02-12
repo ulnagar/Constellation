@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseActionCancelledDomainEvent;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;

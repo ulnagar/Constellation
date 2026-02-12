@@ -1,10 +1,8 @@
-﻿namespace Constellation.Application.Interfaces.Configuration;
+﻿namespace Constellation.Application.Domains.AppSettings.Models;
 
-using Constellation.Core.Enums;
-using Constellation.Core.Models.Absences.Enums;
+using Core.Enums;
+using Core.Models.Absences.Enums;
 using Core.Models.StaffMembers.ValueObjects;
-using Core.ValueObjects;
-using System.Collections.Generic;
 
 public sealed class AppConfiguration
 {
@@ -28,13 +26,7 @@ public sealed class AppConfiguration
 
         public List<AbsenceReason> DiscountedPartialReasons { get; set; }
 
-        //public DateTime AbsenceScanStartDate { get; set; }
-
         public int PartialLengthThreshold { get; set; }
-
-        //public List<string> ForwardAbsenceEmailsTo { get; set; }
-
-        //public List<string> ForwardTruancyEmailsTo { get; set; }
 
         public string AbsenceCoordinatorName { get; set; }
 

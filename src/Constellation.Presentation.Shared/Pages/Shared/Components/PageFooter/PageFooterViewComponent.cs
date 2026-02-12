@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Shared.Pages.Shared.Components.PageFooter;
 
+using Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

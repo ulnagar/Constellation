@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.AppSettings.Models;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
 using Application.Interfaces.Configuration;

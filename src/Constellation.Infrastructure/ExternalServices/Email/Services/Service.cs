@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
+using Application.Domains.AppSettings.Models;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;

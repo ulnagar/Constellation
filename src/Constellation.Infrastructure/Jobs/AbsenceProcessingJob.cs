@@ -1,5 +1,7 @@
-﻿namespace Constellation.Infrastructure.Jobs;
+﻿#nullable disable
+namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.AppSettings.Models;
 using Application.DTOs;
 using Application.Extensions;
 using Application.Interfaces.Configuration;
@@ -163,6 +165,8 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         List<SentralPeriodAbsenceDto> pxpAbsences = await _sentralGateway.GetAbsenceDataAsync(sentralId.Value);
         List<SentralPeriodAbsenceDto> attendanceAbsences = [];
         bool success = _periodAbsenceCache.TryGetValue(student.StudentReferenceNumber, out attendanceAbsences);
+        if (!success)
+            return returnAbsences;
 
         // If the webattend absence is not a whole day absence, calculate the absence length
         foreach (SentralPeriodAbsenceDto attendAbsence in attendanceAbsences.Where(aa => !aa.WholeDay))

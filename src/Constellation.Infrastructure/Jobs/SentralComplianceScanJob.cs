@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.AppSettings.Models;
 using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
 using Application.Domains.WorkFlows.Commands.CreateComplianceCase;

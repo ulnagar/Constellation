@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Interfaces.Configuration;
+using AppSettings.Models;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;

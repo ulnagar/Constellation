@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseActionAddedDomainEvent;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.SchoolContacts;

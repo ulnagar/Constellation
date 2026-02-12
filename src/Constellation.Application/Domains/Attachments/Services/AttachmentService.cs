@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attachments.Services;
 
+using AppSettings.Models;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Errors;

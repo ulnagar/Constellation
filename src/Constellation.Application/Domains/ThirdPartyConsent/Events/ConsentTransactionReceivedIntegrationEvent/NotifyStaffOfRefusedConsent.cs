@@ -1,6 +1,7 @@
 ﻿#nullable enable
 namespace Constellation.Application.Domains.ThirdPartyConsent.Events.ConsentTransactionReceivedIntegrationEvent;
 
+using AppSettings.Models;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.IntegrationEvents;
 using Core.Models.StaffMembers;

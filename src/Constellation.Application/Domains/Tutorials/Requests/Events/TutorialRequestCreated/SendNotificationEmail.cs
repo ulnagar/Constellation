@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Requests.Events.TutorialRequestCreated;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Tutorials.Errors;

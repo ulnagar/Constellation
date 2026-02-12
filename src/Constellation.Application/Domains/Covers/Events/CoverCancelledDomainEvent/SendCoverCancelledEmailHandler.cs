@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Application.Models.Identity;
+using AppSettings.Models;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Repositories;

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Auth.Events.AppIdentityCodeUpdatedIntegrationEvent;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Commands.AuditAllUsers;
 using Constellation.Application.Models.Auth;
 using Constellation.Application.Models.Identity.Enums;

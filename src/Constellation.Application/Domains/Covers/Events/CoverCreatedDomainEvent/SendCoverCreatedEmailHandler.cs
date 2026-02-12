@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverCreatedDomainEvent;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.StaffMembers.Errors;

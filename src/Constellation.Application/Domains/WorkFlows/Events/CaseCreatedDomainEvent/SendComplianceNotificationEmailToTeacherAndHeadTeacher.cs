@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseCreatedDomainEvent;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Core.Abstractions.Clock;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;

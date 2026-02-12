@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.SciencePracs.Commands.SendLessonNotification;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Core.Abstractions.Repositories;
 using Core.Enums;
 using Core.Errors;

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Teams.Queries.GetCurrentTeamsWithMembership;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Clock;

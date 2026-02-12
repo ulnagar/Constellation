@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.LinkedSystems.Teams.Queries.GetTeamMembershipById;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Models.LinkedSystems;

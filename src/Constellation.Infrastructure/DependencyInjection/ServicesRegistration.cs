@@ -2,6 +2,7 @@
 namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Clock;
+using Constellation.Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;

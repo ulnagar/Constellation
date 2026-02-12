@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverEndDateChangedDomainEvent;
 
 using Abstractions.Messaging;
+using AppSettings.Models;
 using Constellation.Application.Domains.Covers.Events.CoverCreatedDomainEvent;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
