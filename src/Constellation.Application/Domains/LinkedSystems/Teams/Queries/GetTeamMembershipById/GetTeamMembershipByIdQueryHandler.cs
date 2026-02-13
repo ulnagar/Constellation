@@ -2,10 +2,11 @@
 
 using Abstractions.Messaging;
 using AppSettings.Models;
+using Constellation.Application.Extensions;
+using Constellation.Core.Models.AppSettings.Enums;
 using Constellation.Core.Models.Covers.Repositories;
 using Constellation.Core.Models.Faculties.ValueObjects;
 using Constellation.Core.Models.LinkedSystems;
-using Constellation.Core.Models.StaffMembers.Errors;
 using Constellation.Core.Models.Subjects.Identifiers;
 using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Repositories;
@@ -35,11 +36,11 @@ using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Configuration;
+using Interfaces.Services;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,8 +56,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly ITutorialRepository _tutorialRepository;
     private readonly ICoverRepository _coverRepository;
+    private readonly IAppSettingsService _appSettings;
     private readonly TeamsGatewayConfiguration _teamsConfiguration;
-    private readonly AppConfiguration _configuration;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IDateTimeProvider _dateTime;
@@ -75,8 +76,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IDateTimeProvider dateTime,
         ILogger logger,
         ICoverRepository coverRepository,
-        IOptions<AppConfiguration> configuration,
-        IOptions<TeamsGatewayConfiguration> teamsConfiguration)
+        IOptions<TeamsGatewayConfiguration> teamsConfiguration,
+        IAppSettingsService appSettings)
     {
         _teamRepository = teamRepository;
         _offeringRepository = offeringRepository;
@@ -86,8 +87,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _staffRepository = staffRepository;
         _tutorialRepository = tutorialRepository;
         _coverRepository = coverRepository;
+        _appSettings = appSettings;
         _teamsConfiguration = teamsConfiguration.Value;
-        _configuration = configuration.Value;
         _groupTutorialRepository = groupTutorialRepository;
         _courseRepository = courseRepository;
         _dateTime = dateTime;
@@ -106,6 +107,8 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
             return Result.Failure<List<TeamMembershipResponse>>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
         }
+
+        CoversConfiguration? coversConfiguration = await _appSettings.Covers(cancellationToken);
 
         if (team.Description.Split(';').Contains("STUDENT"))
         {
@@ -254,31 +257,27 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
                         returnData.Add(entry);
                 }
+                
+                Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
-                if (_configuration is null) continue;
+                if (course is null) 
+                    continue;
 
                 // Cover administrators
                 // Only if class is being covered
                 if (coveringTeachers.Count > 1)
                 {
-                    foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
+                    if (coversConfiguration is null)
+                        continue;
+
+                    foreach (var teacher in coversConfiguration.Contacts)
                     {
-                        StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
-
-                        if (teacher is null)
-                        {
-                            _logger
-                                .ForContext(nameof(GetTeamMembershipByIdQuery), request, true)
-                                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
-                                .ForContext(nameof(EmployeeId), employeeId)
-                                .Warning("Failed to retrieve Team Membership");
-
+                        if (!teacher.Value.Contains(course.Grade))
                             continue;
-                        }
 
                         TeamMembershipResponse teacherEntry = new(
                             team.Id,
-                            teacher.EmailAddress,
+                            teacher.Key.EmailAddress,
                             TeamsMembershipLevel.Owner.Value);
 
                         if (returnData.All(value => value.EmailAddress != teacherEntry.EmailAddress))
@@ -286,50 +285,44 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     }
                 }
 
-                Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
-
-                if (course is null) continue;
-
                 // Deputy Principals
-                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(course.Grade, out List<EmployeeId>? deputyIds);
+                ContactsConfiguration? deputyPrincipals = await _appSettings.Contacts(ContactPosition.DeputyPrincipal, cancellationToken);
 
-                if (deputyPrincipals is not false)
+                if (deputyPrincipals is null)
+                    continue;
+
+                foreach (var deputyPrincipal in deputyPrincipals.Contacts)
                 {
-                    foreach (EmployeeId deputyId in deputyIds!)
-                    {
-                        StaffMember? deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
+                    if (!deputyPrincipal.Value.Contains(course.Grade))
+                        continue;
 
-                        if (deputyPrincipal is null) continue;
+                    TeamMembershipResponse deputyEntry = new(
+                        team.Id,
+                        deputyPrincipal.Key.EmailAddress.Email,
+                        TeamsMembershipLevel.Owner.Value);
 
-                        TeamMembershipResponse deputyEntry = new(
-                            team.Id,
-                            deputyPrincipal.EmailAddress.Email,
-                            TeamsMembershipLevel.Owner.Value);
-
-                        if (returnData.All(value => value.EmailAddress != deputyEntry.EmailAddress))
-                            returnData.Add(deputyEntry);
-                    }
+                    if (returnData.All(value => value.EmailAddress != deputyEntry.EmailAddress))
+                        returnData.Add(deputyEntry);
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(course.Grade, out List<EmployeeId>? lastStaffIds);
+                ContactsConfiguration? learningSupport = await _appSettings.Contacts(ContactPosition.LearningSupport, cancellationToken);
 
-                if (learningSupport is not false)
+                if (learningSupport is null)
+                    continue;
+
+                foreach (var learningSupportTeacher in learningSupport.Contacts)
                 {
-                    foreach (EmployeeId staffId in lastStaffIds!)
-                    {
-                        StaffMember? learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+                    if (!learningSupportTeacher.Value.Contains(course.Grade))
+                        continue;
 
-                        if (learningSupportTeacher is null) continue;
+                    TeamMembershipResponse lastEntry = new(
+                        team.Id,
+                        learningSupportTeacher.Key.EmailAddress.Email,
+                        TeamsMembershipLevel.Owner.Value);
 
-                        TeamMembershipResponse lastEntry = new(
-                            team.Id,
-                            learningSupportTeacher.EmailAddress.Email,
-                            TeamsMembershipLevel.Owner.Value);
-
-                        if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
-                            returnData.Add(lastEntry);
-                    }
+                    if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
+                        returnData.Add(lastEntry);
                 }
             }
         }
@@ -469,66 +462,49 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     }
                 }
 
-                if (_configuration is null) continue;
+                Grade? grade = tutorial.Name.GetGrade();
 
-                Grade grade;
-
-                try
-                {
-                    string stringGrade = tutorial.Name.Value[..2];
-                    int intGrade = Convert.ToInt32(stringGrade, CultureInfo.InvariantCulture);
-                    grade = (Grade)intGrade;
-                }
-                catch (Exception e)
-                {
-                    _logger
-                        .ForContext(nameof(Tutorial.Name), tutorial.Name, true)
-                        .ForContext(nameof(Exception), e, true)
-                        .Error("Failed to convert Tutorial Name into Grade");
-
+                if (grade is null)
                     continue;
-                }
-                
+
                 // Deputy Principals
-                bool deputyPrincipals = _configuration.Contacts.DeputyPrincipalIds.TryGetValue(grade, out List<EmployeeId>? deputyIds);
+                ContactsConfiguration? deputyPrincipals = await _appSettings.Contacts(ContactPosition.DeputyPrincipal, cancellationToken);
 
-                if (deputyPrincipals is not false)
+                if (deputyPrincipals is null)
+                    continue;
+
+                foreach (var deputyPrincipal in deputyPrincipals.Contacts)
                 {
-                    foreach (EmployeeId deputyId in deputyIds!)
-                    {
-                        StaffMember? deputyPrincipal = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
+                    if (!deputyPrincipal.Value.Contains(grade.Value))
+                        continue;
 
-                        if (deputyPrincipal is null) continue;
+                    TeamMembershipResponse deputyEntry = new(
+                        team.Id,
+                        deputyPrincipal.Key.EmailAddress.Email,
+                        TeamsMembershipLevel.Owner.Value);
 
-                        TeamMembershipResponse deputyEntry = new(
-                            team.Id,
-                            deputyPrincipal.EmailAddress.Email,
-                            TeamsMembershipLevel.Owner.Value);
-
-                        if (returnData.All(value => value.EmailAddress != deputyEntry.EmailAddress))
-                            returnData.Add(deputyEntry);
-                    }
+                    if (returnData.All(value => value.EmailAddress != deputyEntry.EmailAddress))
+                        returnData.Add(deputyEntry);
                 }
 
                 // Learning and Support Teachers
-                bool learningSupport = _configuration.Contacts.LearningSupportIds.TryGetValue(grade, out List<EmployeeId>? lastStaffIds);
+                ContactsConfiguration? learningSupport = await _appSettings.Contacts(ContactPosition.LearningSupport, cancellationToken);
 
-                if (learningSupport is not false)
+                if (learningSupport is null)
+                    continue;
+
+                foreach (var learningSupportTeacher in learningSupport.Contacts)
                 {
-                    foreach (EmployeeId staffId in lastStaffIds!)
-                    {
-                        StaffMember? learningSupportTeacher = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+                    if (!learningSupportTeacher.Value.Contains(grade.Value))
+                        continue;
 
-                        if (learningSupportTeacher is null) continue;
+                    TeamMembershipResponse lastEntry = new(
+                        team.Id,
+                        learningSupportTeacher.Key.EmailAddress.Email,
+                        TeamsMembershipLevel.Owner.Value);
 
-                        TeamMembershipResponse lastEntry = new(
-                            team.Id,
-                            learningSupportTeacher.EmailAddress.Email,
-                            TeamsMembershipLevel.Owner.Value);
-
-                        if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
-                            returnData.Add(lastEntry);
-                    }
+                    if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
+                        returnData.Add(lastEntry);
                 }
             }
         }

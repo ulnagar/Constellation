@@ -4,6 +4,7 @@ using Application.Domains.AppSettings.Models;
 using Application.Interfaces.Services;
 using Constellation.Core.Enums;
 using Core.Models.AppSettings;
+using Core.Models.AppSettings.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -149,4 +150,69 @@ internal sealed class AppSettingsService : IAppSettingsService
         _context.Set<LessonsSettings>().Add(settings);
     }
 
+    public async Task<ContactsConfiguration?> Contacts(
+        ContactPosition position, 
+        CancellationToken cancellationToken = default)
+    {
+        List<ContactsSettings> entry = await _context
+            .Set<ContactsSettings>()
+            .Where(settings => settings.PositionName == position)
+            .ToListAsync(cancellationToken);
+
+        if (entry.Count == 0)
+            return null;
+
+        if (entry.Count > 1)
+            throw new ArgumentOutOfRangeException(nameof(ContactsSettings), "Too many ContactsSettings records found in database!");
+
+        ContactsSettings settings = entry.First();
+
+        List<StaffId> staffIds = settings.Members
+            .Select(memberLink => memberLink.StaffId)
+            .Distinct()
+            .ToList();
+
+        List<StaffMember> staffMembers = await _context
+            .Set<StaffMember>()
+            .Where(member => staffIds.Contains(member.Id))
+            .ToListAsync(cancellationToken);
+
+        Dictionary<StaffMember, List<Grade>> members = new();
+
+        foreach (var memberLink in settings.Members)
+        {
+            StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+            if (staffMember is null)
+                continue;
+
+            members.Add(staffMember, memberLink.Grades.ToList());
+        }
+
+        return new ContactsConfiguration(
+            position,
+            members);
+    }
+
+    public async Task Contacts(
+        ContactsConfiguration configuration, 
+        CancellationToken cancellationToken = default)
+    {
+        List<ContactsSettings> existingEntries = await _context
+            .Set<ContactsSettings>()
+            .Where(settings => settings.PositionName == configuration.Position)
+            .ToListAsync(cancellationToken);
+
+        if (existingEntries.Count > 0)
+            _context.Set<ContactsSettings>().RemoveRange(existingEntries);
+
+        ContactsSettings settings = new(configuration.Position);
+
+        foreach (var member in configuration.Contacts)
+        {
+            settings.AddMember(member.Key.Id, member.Value);
+        }
+
+        _context.Set<ContactsSettings>().Add(settings);
+    }
 }

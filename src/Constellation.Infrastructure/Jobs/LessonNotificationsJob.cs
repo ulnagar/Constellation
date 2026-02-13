@@ -3,10 +3,11 @@
 using Application.Domains.AppSettings.Models;
 using Application.DTOs;
 using Application.DTOs.EmailRequests;
-using Application.Interfaces.Configuration;
+using Application.Extensions;
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Errors;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
@@ -19,7 +20,6 @@ using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Microsoft.Extensions.Options;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -35,9 +35,9 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
     private readonly ICourseRepository _courseRepository;
     private readonly ISchoolContactRepository _contactRepository;
     private readonly IEmailService _emailService;
+    private readonly IAppSettingsService _appSettings;
     private readonly IDateTimeProvider _dateTime;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly AppConfiguration _configuration;
     private readonly ILogHandler<ILessonNotificationsJob> _logger;
 
     public LessonNotificationsJob(
@@ -46,7 +46,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
         ICourseRepository courseRepository,
         ISchoolContactRepository contactRepository,
         IEmailService emailService,
-        IOptions<AppConfiguration> configuration,
+        IAppSettingsService appSettings,
         IDateTimeProvider dateTime,
         IUnitOfWork unitOfWork,
         ILogHandler<ILessonNotificationsJob> logger)
@@ -56,33 +56,37 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
         _courseRepository = courseRepository;
         _contactRepository = contactRepository;
         _emailService = emailService;
+        _appSettings = appSettings;
         _dateTime = dateTime;
         _unitOfWork = unitOfWork;
-        _configuration = configuration.Value;
         _logger = logger;
     }
 
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
-        _logger.Log(LogSeverity.Information, $"Service started.");
+        _logger.Log(LogSeverity.Information, "Service started.");
 
-        string coordinatorEmail = _configuration.Lessons.CoordinatorEmail;
-        List<string> headTeacherEmails = _configuration.Lessons.HeadTeacherEmail;
-        List<EmailRecipient> facultyContacts = new();
-        
-        foreach (string headTeacher in headTeacherEmails)
+        List<EmailRecipient> facultyContacts = [];
+
+        LessonsConfiguration? lessonSettings = await _appSettings.Lessons(cancellationToken);
+
+        if (lessonSettings is null)
         {
-            Result<EmailRecipient> htResult = EmailRecipient.Create(headTeacher, headTeacher);
+            _logger.Log(LogSeverity.Error, ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)).Message);
+
+            return;
+        }
+
+        foreach (var headTeacher in lessonSettings.Contacts)
+        {
+            Result<EmailRecipient> htResult = headTeacher.Key.GetEmailRecipient();
 
             if (htResult.IsSuccess && facultyContacts.All(contact => contact.Email != htResult.Value.Email))
                 facultyContacts.Add(htResult.Value);
         }
 
-        Result<EmailRecipient> coordinatorResult = EmailRecipient.Create(_configuration.Lessons.CoordinatorName, coordinatorEmail);
-
-        if (coordinatorResult.IsSuccess && facultyContacts.All(contact => contact.Email != coordinatorResult.Value.Email))
-            facultyContacts.Add(coordinatorResult.Value);
-
+        if (facultyContacts.All(contact => contact.Email != lessonSettings.Recipient.Email))
+            facultyContacts.Add(lessonSettings.Recipient);
 
         List<School> schools = await _schoolRepository.GetWithCurrentStudents(cancellationToken);
 
@@ -98,19 +102,19 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                     lesson.DueDate < _dateTime.Today)
                 .ToList();
 
-            if (lessons is null || lessons.Count == 0)
+            if (lessons.Count == 0)
                 continue;
 
-            List<LessonEmail.LessonItem> lessonItems = new();
+            List<LessonEmail.LessonItem> lessonItems = [];
 
             foreach (SciencePracLesson lesson in lessons)
             {
-                Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
+                Course? course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
 
                 if (course is null)
                     continue;
 
-                SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.SchoolCode == school.Code);
+                SciencePracRoll? roll = lesson.Rolls.SingleOrDefault(roll => roll.SchoolCode == school.Code);
 
                 if (roll is null)
                     continue;
@@ -144,8 +148,8 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 continue;
             }
 
-            List<EmailRecipient> sptRecipients = new();
-            List<EmailRecipient> accRecipients = new();
+            List<EmailRecipient> sptRecipients = [];
+            List<EmailRecipient> accRecipients = [];
 
             foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.SciencePracticalTeacher && !role.IsDeleted)))
             {
@@ -155,7 +159,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                     sptRecipients.Add(result.Value);
             }
 
-            if (!sptRecipients.Any())
+            if (sptRecipients.Count == 0)
                 sptRecipients.Add(schoolResult.Value);
 
             foreach (SchoolContact contact in contacts.Where(contact => contact.Assignments.Any(role => role.Role == Position.Coordinator && !role.IsDeleted)))
@@ -166,10 +170,9 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                     accRecipients.Add(result.Value);
             }
 
-            if (!accRecipients.Any())
+            if (accRecipients.Count == 0)
                 accRecipients.Add(schoolResult.Value);
 
-           
             // Break these down into the outstanding time
             // Eg 1. first email after due date (SPT & ACC)
             // 2. second email a week after first (SPT, ACC) (rpt)
@@ -195,7 +198,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
 
             _logger.Log(LogSeverity.Information, string.Empty);
 
-            if (firstWarning.Any())
+            if (firstWarning.Count > 0)
             {
                 foreach (LessonEmail.LessonItem item in firstWarning)
                     _logger.Log(LogSeverity.Information, $" (1W) {item.Name} - {item.DueDate.ToShortDateString()}");
@@ -224,7 +227,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 }
             }
 
-            if (secondWarning.Any())
+            if (secondWarning.Count > 0)
             {
                 foreach (LessonEmail.LessonItem lesson in secondWarning)
                     _logger.Log(LogSeverity.Information, $" (2W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
@@ -253,7 +256,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 }
             }
 
-            if (thirdWarning.Any())
+            if (thirdWarning.Count > 0)
             {
                 foreach (LessonEmail.LessonItem lesson in thirdWarning)
                     _logger.Log(LogSeverity.Information, $" (3W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
@@ -283,7 +286,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 }
             }
 
-            if (finalWarning.Any())
+            if (finalWarning.Count > 0)
             {
                 foreach (LessonEmail.LessonItem lesson in finalWarning)
                     _logger.Log(LogSeverity.Information, $" (4W) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
@@ -313,7 +316,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
                 }
             }
 
-            if (alert.Any())
+            if (alert.Count > 0)
             {
                 foreach (LessonEmail.LessonItem lesson in alert)
                     _logger.Log(LogSeverity.Information, $" (FW) {lesson.Name} - {lesson.DueDate.ToShortDateString()}");
@@ -345,7 +348,7 @@ internal sealed class LessonNotificationsJob : ILessonNotificationsJob
         ServiceLogEmail logNotification = new()
         {
             Log = _logger.GetLogHistory(),
-            Source = Assembly.GetEntryAssembly().GetName().Name,
+            Source = Assembly.GetEntryAssembly()?.GetName().Name ?? nameof(LessonNotificationsJob),
             Recipients = facultyContacts
         };
 

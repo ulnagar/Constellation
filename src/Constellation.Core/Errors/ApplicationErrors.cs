@@ -20,4 +20,8 @@ public static class ApplicationErrors
     public static readonly Error ExportServiceFailed = new (
         "Service.Export.DocumentServiceFailed", 
         "Document Service failed to create document");
+
+    public static readonly Func<string, Error> InvalidConfiguration = config => new(
+        "Application.InvalidConfiguration",
+        $"The configuration required for {config} is missing or invalid");
 }

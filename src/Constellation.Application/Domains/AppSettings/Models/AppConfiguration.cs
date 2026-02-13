@@ -37,42 +37,15 @@ public sealed class AppConfiguration
         public List<string> SendRollMarkingReportTo { get; set; }
     }
 
-    public class LessonsConfiguration
-    {
-        public string CoordinatorEmail { get; set; }
-        public string CoordinatorName { get; set; }
-        public string CoordinatorTitle { get; set; }
-        public List<string> HeadTeacherEmail { get; set; }
-    }
-
     public class MandatoryTrainingConfiguration
     {
         public List<string> CoordinatorIds { get; set; }
-    }
-
-    public class ContactsConfiguration
-    {
-        public List<EmployeeId> CounsellorIds { get; set; }
-        public List<EmployeeId> CareersAdvisorIds { get; set; }
-        public List<EmployeeId> LibrarianIds { get; set; }
-        public Dictionary<Grade, List<EmployeeId>> LearningSupportIds { get; set; }
-        public Dictionary<Grade, List<EmployeeId>> DeputyPrincipalIds { get; set; }
-        public EmployeeId PrincipalId { get; set; }
-        public EmployeeId InstructionalLeader { get; set; }
     }
 
     public class AttachmentsConfiguration
     {
         public string BaseFilePath { get; set; }
         public int MaxDBStoreSize { get; set; }
-    }
-
-    public class CoversConfiguration
-    {
-        public string ContactName { get; set; }
-        public string ContactTitle { get; set; }
-        public string ContactPhone { get; set; }
-        public List<EmployeeId> CoverContacts { get; set; }
     }
 
     public class WorkFlowConfiguration

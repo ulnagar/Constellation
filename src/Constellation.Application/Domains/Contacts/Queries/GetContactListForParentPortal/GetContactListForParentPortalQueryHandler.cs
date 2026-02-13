@@ -1,20 +1,20 @@
 ﻿namespace Constellation.Application.Domains.Contacts.Queries.GetContactListForParentPortal;
 
 using Abstractions.Messaging;
-using Application.Interfaces.Configuration;
+using Application.Interfaces.Services;
 using AppSettings.Models;
+using Core.Enums;
+using Core.Models.AppSettings.Enums;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -27,30 +27,30 @@ internal sealed class GetContactListForParentPortalQueryHandler
     private readonly IStaffRepository _staffRepository;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ICourseRepository _courseRepository;
+    private readonly IAppSettingsService _appSettings;
     private readonly ILogger _logger;
-    private readonly AppConfiguration _configuration;
 
     public GetContactListForParentPortalQueryHandler(
         IStudentRepository studentRepository,
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
         ICourseRepository courseRepository,
-        IOptions<AppConfiguration> configuration,
+        IAppSettingsService appSettings,
         ILogger logger)
     {
         _studentRepository = studentRepository;
         _staffRepository = staffRepository;
         _offeringRepository = offeringRepository;
         _courseRepository = courseRepository;
+        _appSettings = appSettings;
         _logger = logger.ForContext<GetContactListForParentPortalQuery>();
-        _configuration = configuration.Value;
     }
 
     public async Task<Result<List<StudentSupportContactResponse>>> Handle(GetContactListForParentPortalQuery request, CancellationToken cancellationToken)
     {
         List<StudentSupportContactResponse> response = new();
 
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -59,74 +59,76 @@ internal sealed class GetContactListForParentPortalQueryHandler
             return Result.Failure<List<StudentSupportContactResponse>>(StudentErrors.NotFound(request.StudentId));
         }
 
-        if (_configuration.Contacts is null)
+        // Add Counsellor
+        ContactsConfiguration? counsellorConfiguration = await _appSettings.Contacts(ContactPosition.Counsellor, cancellationToken);
+
+        if (counsellorConfiguration is null)
         {
             _logger.Warning("Could not load configuration data for Contacts");
 
             return response;
         }
 
-        // Add Counsellor
-        foreach (EmployeeId staffId in _configuration.Contacts?.CounsellorIds ?? [])
+        foreach (var staffMember in counsellorConfiguration.Contacts)
         {
-            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
-
-            if (member is null)
-            {
-                _logger.Warning("Could not find Staff with Id {id}", staffId);
-
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
                 continue;
-            }
 
             response.Add(new(
-                member.Name.FirstName,
-                member.Name.LastName,
-                member.Name.DisplayName,
-                member.EmailAddress.Email,
+                staffMember.Key.Name.FirstName,
+                staffMember.Key.Name.LastName,
+                staffMember.Key.Name.DisplayName,
+                staffMember.Key.EmailAddress.Email,
                 string.Empty,
                 "Support",
                 "School Counsellor"));
         }
 
         // Add Careers Advisor
-        foreach (EmployeeId staffId in _configuration.Contacts?.CareersAdvisorIds ?? [])
+        ContactsConfiguration? careersAdvisorConfiguration = await _appSettings.Contacts(ContactPosition.CareersAdvisor, cancellationToken);
+
+        if (careersAdvisorConfiguration is null)
         {
-            StaffMember member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+            _logger.Warning("Could not load configuration data for Contacts");
 
-            if (member is null)
-            {
-                _logger.Warning("Could not find Staff with Id {id}", staffId);
+            return response;
+        }
 
+        foreach (var staffMember in careersAdvisorConfiguration.Contacts)
+        {
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
                 continue;
-            }
 
             response.Add(new(
-                member.Name.FirstName,
-                member.Name.LastName,
-                member.Name.DisplayName,
-                member.EmailAddress.Email,
+                staffMember.Key.Name.FirstName,
+                staffMember.Key.Name.LastName,
+                staffMember.Key.Name.DisplayName,
+                staffMember.Key.EmailAddress.Email,
                 string.Empty,
                 "Support",
                 "Careers Advisor"));
         }
 
         // Add Librarian
-        foreach (EmployeeId staffId in _configuration.Contacts?.LibrarianIds ?? [])
+        ContactsConfiguration? librarianConfiguration = await _appSettings.Contacts(ContactPosition.Librarian, cancellationToken);
+
+        if (librarianConfiguration is null)
         {
-            StaffMember? member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+            _logger.Warning("Could not load configuration data for Contacts");
 
-            if (member is null)
-            {
-                _logger.Warning("Could not find Staff with Id {id}", staffId);
+            return response;
+        }
 
+        foreach (var staffMember in librarianConfiguration.Contacts)
+        {
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
                 continue;
-            }
-
+            
             response.Add(new(
-                member.Name.FirstName,
-                member.Name.LastName,
-                member.Name.DisplayName,
-                member.EmailAddress.Email,
+                staffMember.Key.Name.FirstName,
+                staffMember.Key.Name.LastName,
+                staffMember.Key.Name.DisplayName,
+                staffMember.Key.EmailAddress.Email,
                 string.Empty,
                 "Support",
                 "School Librarian"));
@@ -165,33 +167,28 @@ internal sealed class GetContactListForParentPortalQueryHandler
             }
         }
 
-        SchoolEnrolment? enrolment = student.CurrentEnrolment;
+        ContactsConfiguration? lastConfiguration = await _appSettings.Contacts(ContactPosition.LearningSupport, cancellationToken);
 
-        if (enrolment is null)
-            return response;
-
-        List<EmployeeId> lastStaffIds = [];
-
-        bool success = _configuration.Contacts?.LearningSupportIds.TryGetValue(enrolment.Grade, out lastStaffIds) ?? false;
-
-        if (!success)
-            return response;
-        
-        foreach (EmployeeId staffId in lastStaffIds!)
+        if (lastConfiguration is null)
         {
-            StaffMember? member = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+            _logger.Warning("Could not load configuration data for Contacts");
 
-            if (member is not null)
-            {
-                response.Add(new(
-                    member.Name.FirstName,
-                    member.Name.LastName,
-                    member.Name.DisplayName,
-                    member.EmailAddress.Email,
-                    string.Empty,
-                    "Support",
-                    "Learning Support"));
-            }
+            return response;
+        }
+
+        foreach (var staffMember in librarianConfiguration.Contacts)
+        {
+            if (!staffMember.Value.Contains(student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram))
+                continue;
+
+            response.Add(new(
+                staffMember.Key.Name.FirstName,
+                staffMember.Key.Name.LastName,
+                staffMember.Key.Name.DisplayName,
+                staffMember.Key.EmailAddress.Email,
+                string.Empty,
+                "Support",
+                "Learning Support"));
         }
 
         return response;

@@ -3,6 +3,7 @@
 using Core.Enums;
 using Core.Models.AppSettings;
 using Core.Models.StaffMembers;
+using Core.ValueObjects;
 
 public sealed record LessonsConfiguration
 {
@@ -33,4 +34,8 @@ public sealed record LessonsConfiguration
     public string CoordinatorTitle { get; init; }
 
     public IReadOnlyDictionary<StaffMember, List<Grade>> Contacts { get; }
+
+    public EmailRecipient Recipient => EmailRecipient.Create(CoordinatorName, CoordinatorEmail).IsSuccess
+        ? EmailRecipient.Create(CoordinatorName, CoordinatorEmail).Value
+        : EmailRecipient.AuroraCollege;
 }

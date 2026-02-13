@@ -4,19 +4,15 @@ namespace Constellation.Application.Domains.ThirdPartyConsent.Events.ConsentTran
 using AppSettings.Models;
 using Constellation.Application.Abstractions.Messaging;
 using Constellation.Core.IntegrationEvents;
-using Core.Models.StaffMembers;
-using Core.Models.StaffMembers.Errors;
-using Core.Models.StaffMembers.Identifiers;
-using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
+using Constellation.Core.Models.AppSettings.Enums;
+using Core.Errors;
 using Core.Models.ThirdPartyConsent;
 using Core.Models.ThirdPartyConsent.Errors;
 using Core.Models.ThirdPartyConsent.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Interfaces.Configuration;
+using Extensions;
 using Interfaces.Services;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -28,21 +24,18 @@ internal class NotifyStaffOfRefusedConsent
     : IIntegrationEventHandler<ConsentTransactionReceivedIntegrationEvent>
 {
     private readonly IConsentRepository _consentRepository;
-    private readonly IStaffRepository _staffRepository;
-    private readonly AppConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public NotifyStaffOfRefusedConsent(
         IConsentRepository consentRepository,
-        IOptions<AppConfiguration> configuration,
-        IStaffRepository staffRepository,
+        IAppSettingsService appSettings,
         IEmailService emailService,
         ILogger logger)
     {
         _consentRepository = consentRepository;
-        _staffRepository = staffRepository;
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _emailService = emailService;
         _logger = logger
             .ForContext<ConsentTransactionReceivedIntegrationEvent>();
@@ -69,62 +62,51 @@ internal class NotifyStaffOfRefusedConsent
         if (responses.Count == 0)
             return;
 
-        List<EmailRecipient> recipients = new();
+        List<EmailRecipient> recipients = [];
 
-        StaffMember? instructionalLeader = await _staffRepository.GetByEmployeeId(_configuration.Contacts.InstructionalLeader, cancellationToken);
+        ContactsConfiguration? instructionalLeaders = await _appSettings.Contacts(ContactPosition.InstructionalLeader, cancellationToken);
 
-        if (instructionalLeader is null)
+        if (instructionalLeaders is null)
         {
             _logger
                 .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(_configuration.Contacts.InstructionalLeader), true)
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(ContactsConfiguration)), true)
                 .Warning("Failed to send notification of refused consent");
         }
         else
         {
-            Result<EmailRecipient> instructionalLeaderRecipient = EmailRecipient.Create(instructionalLeader.Name, instructionalLeader.EmailAddress);
+            foreach (var instructionalLeader in instructionalLeaders.Contacts)
+            {
+                if (!instructionalLeader.Value.Contains(transaction.Grade))
+                    continue;
 
-            if (instructionalLeaderRecipient.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                    .ForContext(nameof(Error), instructionalLeaderRecipient.Error, true)
-                    .Warning("Failed to send notification of refused consent");
-            }
-            else
-            {
-                recipients.Add(instructionalLeaderRecipient.Value);
+                Result<EmailRecipient> recipient = instructionalLeader.Key.GetEmailRecipient();
+
+                if (recipient.IsSuccess)
+                    recipients.Add(recipient.Value);
             }
         }
 
-        List<EmployeeId> deputyIds = _configuration.Contacts.DeputyPrincipalIds[transaction.Grade].ToList();
+        ContactsConfiguration? deputyPrincipals = await _appSettings.Contacts(ContactPosition.DeputyPrincipal, cancellationToken);
 
-        foreach (EmployeeId staffId in deputyIds)
+        if (deputyPrincipals is null)
         {
-            StaffMember? deputy = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
-
-            if (deputy is null)
+            _logger
+                .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(ContactsConfiguration)), true)
+                .Warning("Failed to send notification of refused consent");
+        }
+        else
+        {
+            foreach (var deputyPrincipal in deputyPrincipals.Contacts)
             {
-                _logger
-                    .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(staffId), true)
-                    .Warning("Failed to send notification of refused consent");
-            }
-            else
-            {
-                Result<EmailRecipient> deputyRecipient = EmailRecipient.Create(deputy.Name, deputy.EmailAddress);
+                if (!deputyPrincipal.Value.Contains(transaction.Grade))
+                    continue;
 
-                if (deputyRecipient.IsFailure)
-                {
-                    _logger
-                        .ForContext(nameof(ConsentTransactionReceivedIntegrationEvent), notification, true)
-                        .ForContext(nameof(Error), deputyRecipient.Error, true)
-                        .Warning("Failed to send notification of refused consent");
-                }
-                else
-                {
-                    recipients.Add(deputyRecipient.Value);
-                }
+                Result<EmailRecipient> recipient = deputyPrincipal.Key.GetEmailRecipient();
+
+                if (recipient.IsSuccess)
+                    recipients.Add(recipient.Value);
             }
         }
         

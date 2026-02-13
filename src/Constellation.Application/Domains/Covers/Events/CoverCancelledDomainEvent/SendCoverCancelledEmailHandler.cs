@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Covers.Events.CoverCancelledDomainEvent;
 
 using Abstractions.Messaging;
-using Application.Models.Identity;
 using AppSettings.Models;
 using Constellation.Core.Models.Covers.Events;
 using Constellation.Core.Models.Covers.Repositories;
@@ -18,15 +17,15 @@ using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
+using Core.Models.Subjects;
+using Core.Models.Subjects.Errors;
+using Core.Models.Subjects.Repositories;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Extensions;
-using Interfaces.Configuration;
 using Interfaces.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Serilog;
 using System;
@@ -42,36 +41,36 @@ internal sealed class SendCoverCancelledEmailHandler
 {
     private readonly ICoverRepository _coverRepository;
     private readonly IOfferingRepository _offeringRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICasualRepository _casualRepository;
     private readonly IPeriodRepository _periodRepository;
-    private readonly UserManager<AppUser> _userManager;
     private readonly IEmailService _emailService;
     private readonly ITeamRepository _teamRepository;
-    private readonly AppConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
     private readonly ILogger _logger;
 
     public SendCoverCancelledEmailHandler(
         ICoverRepository coverRepository,
         IOfferingRepository offeringRepository,
+        ICourseRepository courseRepository,
         IStaffRepository staffRepository,
         ICasualRepository casualRepository,
         IPeriodRepository periodRepository,
-        UserManager<AppUser> userManager,
         IEmailService emailService,
         ITeamRepository teamRepository,
-        IOptions<AppConfiguration> configuration,
+        IAppSettingsService appSettings,
         ILogger logger)
     {
         _coverRepository = coverRepository;
         _offeringRepository = offeringRepository;
+        _courseRepository = courseRepository;
         _staffRepository = staffRepository;
         _casualRepository = casualRepository;
         _periodRepository = periodRepository;
-        _userManager = userManager;
         _emailService = emailService;
         _teamRepository = teamRepository;
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _logger = logger
             .ForContext<CoverCancelledDomainEvent>();
     }
@@ -102,6 +101,19 @@ internal sealed class SendCoverCancelledEmailHandler
                 .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
                 .ForContext(nameof(Cover), cover, true)
                 .ForContext(nameof(Error), OfferingErrors.NotFound(cover.OfferingId))
+                .Warning("Failed to send Cover Cancelled Email notification");
+
+            return;
+        }
+
+        Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+
+        if (course is null)
+        {
+            _logger
+                .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
+                .ForContext(nameof(Cover), cover, true)
+                .ForContext(nameof(Error), CourseErrors.NotFound(offering.CourseId))
                 .Warning("Failed to send Cover Cancelled Email notification");
 
             return;
@@ -217,39 +229,34 @@ internal sealed class SendCoverCancelledEmailHandler
             return;
         }
 
-        foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
+        CoversConfiguration? configuration = await _appSettings.Covers(cancellationToken);
+
+        if (configuration is not null)
         {
-            StaffMember? teacher = await _staffRepository.GetByEmployeeId(employeeId, cancellationToken);
-
-            if (teacher is null)
+            foreach (var teacher in configuration.Contacts)
             {
-                _logger
-                    .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(employeeId), true)
-                    .ForContext(nameof(EmployeeId), employeeId)
-                    .Warning("Failed to send Cover Cancelled Email notification");
+                if (!teacher.Value.Contains(course.Grade))
+                    continue;
 
-                continue;
+                if (primaryRecipients.Any(entry => entry.Email == teacher.Key.EmailAddress) ||
+                    secondaryRecipients.Any(entry => entry.Email == teacher.Key.EmailAddress))
+                    continue;
+
+                Result<EmailRecipient> address = teacher.Key.GetEmailRecipient();
+
+                if (address.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
+                        .ForContext(nameof(Error), address.Error, true)
+                        .ForContext(nameof(EmailAddress), teacher.Key.EmailAddress)
+                        .Warning("Failed to send Cover Cancelled Email notification");
+
+                    continue;
+                }
+
+                secondaryRecipients.Add(address.Value);
             }
-
-            if (primaryRecipients.Any(entry => entry.Email == teacher.EmailAddress) ||
-                secondaryRecipients.Any(entry => entry.Email == teacher.EmailAddress))
-                continue;
-
-            Result<EmailRecipient> address = teacher.GetEmailRecipient();
-
-            if (address.IsFailure)
-            {
-                _logger
-                    .ForContext(nameof(CoverCancelledDomainEvent), notification, true)
-                    .ForContext(nameof(Error), address.Error, true)
-                    .ForContext(nameof(EmailAddress), teacher.EmailAddress)
-                    .Warning("Failed to send Cover Cancelled Email notification");
-
-                continue;
-            }
-
-            secondaryRecipients.Add(address.Value);
         }
 
         string? teamLink = await _teamRepository.GetLinkByOffering(offering.Name, offering.EndDate.Year.ToString(CultureInfo.InvariantCulture), cancellationToken);

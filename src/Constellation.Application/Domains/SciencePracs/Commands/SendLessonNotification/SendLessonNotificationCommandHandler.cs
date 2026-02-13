@@ -18,10 +18,10 @@ using Core.Shared;
 using Core.ValueObjects;
 using DTOs;
 using DTOs.EmailRequests;
-using Interfaces.Configuration;
+using Extensions;
 using Interfaces.Repositories;
 using Interfaces.Services;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,8 +36,8 @@ internal sealed class SendLessonNotificationCommandHandler
     private readonly ISchoolContactRepository _contactRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IEmailService _emailService;
+    private readonly IAppSettingsService _appSettings;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
     
     public SendLessonNotificationCommandHandler(
@@ -46,8 +46,8 @@ internal sealed class SendLessonNotificationCommandHandler
         ISchoolContactRepository contactRepository,
         ICourseRepository courseRepository,
         IEmailService emailService,
+        IAppSettingsService appSettings,
         IUnitOfWork unitOfWork,
-        IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
         _lessonRepository = lessonRepository;
@@ -55,31 +55,14 @@ internal sealed class SendLessonNotificationCommandHandler
         _contactRepository = contactRepository;
         _courseRepository = courseRepository;
         _emailService = emailService;
+        _appSettings = appSettings;
         _unitOfWork = unitOfWork;
-        _configuration = configuration.Value;
         _logger = logger.ForContext<SendLessonNotificationCommand>();
     }
 
     public async Task<Result> Handle(SendLessonNotificationCommand request, CancellationToken cancellationToken)
     {
-        string coordinatorEmail = _configuration.Lessons.CoordinatorEmail;
-        List<string> headTeacherEmails = _configuration.Lessons.HeadTeacherEmail;
-        List<EmailRecipient> facultyContacts = new();
-
-        foreach (string headTeacher in headTeacherEmails)
-        {
-            Result<EmailRecipient> htResult = EmailRecipient.Create(headTeacher, headTeacher);
-
-            if (htResult.IsSuccess && facultyContacts.All(contact => contact.Email != htResult.Value.Email))
-                facultyContacts.Add(htResult.Value);
-        }
-
-        Result<EmailRecipient> coordinatorResult = EmailRecipient.Create(_configuration.Lessons.CoordinatorName, coordinatorEmail);
-
-        if (coordinatorResult.IsSuccess && facultyContacts.All(contact => contact.Email != coordinatorResult.Value.Email))
-            facultyContacts.Add(coordinatorResult.Value);
-
-        SciencePracLesson lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
+        SciencePracLesson? lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -88,7 +71,7 @@ internal sealed class SendLessonNotificationCommandHandler
             return Result.Failure(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
-        SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
+        SciencePracRoll? roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
         {
@@ -97,7 +80,7 @@ internal sealed class SendLessonNotificationCommandHandler
             return Result.Failure(SciencePracRollErrors.NotFound(request.RollId));
         }
 
-        School school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
 
         if (school is null)
         {
@@ -108,7 +91,7 @@ internal sealed class SendLessonNotificationCommandHandler
 
         List<LessonEmail.LessonItem> lessonItems = new();
 
-        Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
+        Course? course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
 
         if (course is null)
         {
@@ -116,6 +99,27 @@ internal sealed class SendLessonNotificationCommandHandler
 
             return Result.Failure(CourseErrors.NoneFound);
         }
+
+        LessonsConfiguration? lessonSettings = await _appSettings.Lessons(cancellationToken);
+
+        if (lessonSettings is null)
+            return Result.Failure(ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)));
+
+        List<EmailRecipient> facultyContacts = new();
+
+        foreach (var headTeacher in lessonSettings.Contacts)
+        {
+            if (!headTeacher.Value.Contains(course.Grade))
+                continue;
+
+            Result<EmailRecipient> htResult = headTeacher.Key.GetEmailRecipient();
+
+            if (htResult.IsSuccess && facultyContacts.All(contact => contact.Email != htResult.Value.Email))
+                facultyContacts.Add(htResult.Value);
+        }
+
+        if (facultyContacts.All(contact => contact.Email != lessonSettings.Recipient.Email))
+            facultyContacts.Add(lessonSettings.Recipient);
 
         string description = $"{course.Grade} {lesson.Name}";
 
