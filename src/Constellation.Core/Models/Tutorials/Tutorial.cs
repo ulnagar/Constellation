@@ -54,7 +54,7 @@ public sealed class Tutorial : AggregateRoot, IAuditableEntity
 
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        if (_sessions.Count == 0 || _sessions.All(session => session.IsDeleted))
+        if (_sessions.Count > 0 && _sessions.All(session => session.IsDeleted))
             return false;
         
         if (StartDate <= today && EndDate >= today)
