@@ -9,7 +9,7 @@ public sealed class MandatoryTrainingSettings
 
     public MandatoryTrainingSettings() { }
 
-    public IReadOnlyList<StaffMemberLink> Contacts => _contacts.AsReadOnly();
+    public List<StaffMemberLink> Contacts => _contacts;
 
     public void AddContact(StaffId staffId, List<Grade> grades)
     {

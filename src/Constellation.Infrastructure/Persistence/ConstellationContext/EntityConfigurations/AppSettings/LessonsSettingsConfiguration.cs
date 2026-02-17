@@ -19,6 +19,6 @@ internal sealed class LessonsSettingsConfiguration : IEntityTypeConfiguration<Le
 
         builder
             .Property(entry => entry.Supervisor)
-            .HasConversion<JsonColumnConverter<IReadOnlyList<StaffMemberLink>>>();
+            .HasConversion<JsonColumnConverter<List<StaffMemberLink>>>();
     }
 }

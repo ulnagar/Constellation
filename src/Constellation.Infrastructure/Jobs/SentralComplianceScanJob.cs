@@ -4,42 +4,39 @@ using Application.Domains.AppSettings.Models;
 using Application.Domains.Compliance.Wellbeing.Queries.GetWellbeingReportFromSentral;
 using Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
 using Application.Domains.WorkFlows.Commands.CreateComplianceCase;
-using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Services;
+using Constellation.Core.Models.AppSettings.Enums;
+using Constellation.Core.Models.StaffMembers;
 using Core.Abstractions.Clock;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Repositories;
-using Microsoft.Extensions.Options;
 
 internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
 {
+    private readonly IAppSettingsService _appSettings;
     private readonly ISender _mediator;
     private readonly ISentralGateway _sentralGateway;
     private readonly IExcelService _excelService;
     private readonly ICaseRepository _caseRepository;
     private readonly IDateTimeProvider _dateTime;
-    private readonly AppConfiguration _configuration;
-    private readonly ILogger _logger;
 
     public SentralComplianceScanJob(
+        IAppSettingsService appSettings,
         ISender mediator,
         ISentralGateway sentralGateway,
         IExcelService excelService,
         ICaseRepository caseRepository,
-        IDateTimeProvider dateTime,
-        IOptions<AppConfiguration> configuration,
-        ILogger logger)
+        IDateTimeProvider dateTime)
     {
+        _appSettings = appSettings;
         _mediator = mediator;
         _sentralGateway = sentralGateway;
         _excelService = excelService;
         _caseRepository = caseRepository;
         _dateTime = dateTime;
-        _configuration = configuration.Value;
-        _logger = logger;
     }
 
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
@@ -56,7 +53,20 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
         // Get all entries that are currently 12 days overdue
         IEnumerable<SentralIncidentDetails> workingIncidents = incidents
             .Where(entry => entry.Severity == 12);
-        
+
+        WorkflowConfiguration? configuration = await _appSettings.Workflow(WorkflowArea.Compliance, cancellationToken);
+
+        if (configuration is null)
+            return;
+
+        StaffMember? reviewer = null;
+
+        foreach (var entry in configuration.Contacts)
+            reviewer = entry.Key;
+
+        if (reviewer is null)
+            return;
+
         foreach (SentralIncidentDetails incident in workingIncidents)
         {
             // Check for an existing WorkFlow for these items, and create one if not existing
@@ -68,7 +78,7 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
 
                 AddCaseDetailUpdateActionCommand command = new(
                     existingCase.Id,
-                    _configuration.WorkFlow.ComplianceReviewer,
+                    reviewer.EmployeeId,
                     $"Incident identified during scan on {_dateTime.Today.ToShortDateString()} as being {incident.Severity} days old.");
 
                 await _mediator.Send(command, cancellationToken);
@@ -97,7 +107,7 @@ internal sealed class SentralComplianceScanJob : ISentralComplianceScanJob
                     // force a reminder email update
                     AddCaseDetailUpdateActionCommand command = new(
                         existingCase.Id,
-                        _configuration.WorkFlow.ComplianceReviewer,
+                        reviewer.EmployeeId,
                         $"Incident identified during scan on {_dateTime.Today.ToShortDateString()} as being {incident.Severity} days old.");
 
                     await _mediator.Send(command, cancellationToken);

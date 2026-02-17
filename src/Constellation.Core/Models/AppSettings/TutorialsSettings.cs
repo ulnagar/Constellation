@@ -17,7 +17,7 @@ public sealed class TutorialsSettings
     }
 
     public TutorialPosition PositionName { get; private set; }
-    public IReadOnlyList<StaffMemberLink> Members => _members.AsReadOnly();
+    public List<StaffMemberLink> Members => _members;
 
     public void AddMember(StaffId staffId, List<Grade> grades)
     {

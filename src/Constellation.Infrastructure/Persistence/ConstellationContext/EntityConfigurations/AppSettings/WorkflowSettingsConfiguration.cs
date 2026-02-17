@@ -6,11 +6,11 @@ using Core.Models.AppSettings.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-internal sealed class TutorialsSettingsConfiguration : IEntityTypeConfiguration<TutorialsSettings>
+internal sealed class WorkflowSettingsConfiguration : IEntityTypeConfiguration<WorkflowSettings>
 {
-    public void Configure(EntityTypeBuilder<TutorialsSettings> builder)
+    public void Configure(EntityTypeBuilder<WorkflowSettings> builder)
     {
-        builder.ToTable("Tutorials", "AppSettings");
+        builder.ToTable("Workflows", "AppSettings");
 
         builder
             .HasKey(entry => entry.PositionName);
@@ -19,7 +19,7 @@ internal sealed class TutorialsSettingsConfiguration : IEntityTypeConfiguration<
             .Property(entry => entry.PositionName)
             .HasConversion(
                 position => position.Value,
-                value => TutorialPosition.FromValue(value));
+                value => WorkflowArea.FromValue(value));
 
         builder
             .Property(entry => entry.Members)

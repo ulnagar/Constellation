@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
+using Constellation.Application.Domains.AppSettings.Models;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Errors;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.Lessons;
 using Core.ValueObjects;
 using MimeKit;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 public sealed partial class Service : IEmailService
@@ -36,11 +39,23 @@ public sealed partial class Service : IEmailService
 
     private async Task SendFirstLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
+        LessonsConfiguration? configuration = await _appSettings.Lessons();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendFirstLessonWarningEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)), true)
+                .Warning("Failed to send lesson notification");
+
+            return;
+        }
+
         FirstWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Lessons.CoordinatorName,
-            SenderTitle = _configuration.Lessons.CoordinatorTitle,
+            SenderName = configuration.CoordinatorName,
+            SenderTitle = configuration.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/",
             SchoolName = notification.SchoolName,
@@ -49,16 +64,28 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FirstWarningEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, configuration.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendSecondLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
+        LessonsConfiguration? configuration = await _appSettings.Lessons();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendSecondLessonWarningEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)), true)
+                .Warning("Failed to send lesson notification");
+
+            return;
+        }
+
         SecondWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Lessons.CoordinatorName,
-            SenderTitle = _configuration.Lessons.CoordinatorTitle,
+            SenderName = configuration.CoordinatorName,
+            SenderTitle = configuration.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/",
             SchoolName = notification.SchoolName,
@@ -67,16 +94,28 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, configuration.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendThirdLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
+        LessonsConfiguration? configuration = await _appSettings.Lessons();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendThirdLessonWarningEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)), true)
+                .Warning("Failed to send lesson notification");
+
+            return;
+        }
+
         SecondWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Lessons.CoordinatorName,
-            SenderTitle = _configuration.Lessons.CoordinatorTitle,
+            SenderName = configuration.CoordinatorName,
+            SenderTitle = configuration.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/",
             SchoolName = notification.SchoolName,
@@ -85,16 +124,28 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/SecondWarningEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, configuration.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendFinalLessonWarningEmail(LessonMissedNotificationEmail notification)
     {
+        LessonsConfiguration? configuration = await _appSettings.Lessons();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendFinalLessonWarningEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)), true)
+                .Warning("Failed to send lesson notification");
+
+            return;
+        }
+
         FinalWarningEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Lessons.CoordinatorName,
-            SenderTitle = _configuration.Lessons.CoordinatorTitle,
+            SenderName = configuration.CoordinatorName,
+            SenderTitle = configuration.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             Link = "https://acos.aurora.nsw.edu.au/",
             SchoolName = notification.SchoolName,
@@ -103,16 +154,28 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/FinalWarningEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, configuration.CoordinatorEmail, viewModel.Title, body);
     }
 
     private async Task SendLessonAlertEmail(LessonMissedNotificationEmail notification)
     {
+        LessonsConfiguration? configuration = await _appSettings.Lessons();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendLessonAlertEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(LessonsConfiguration)), true)
+                .Warning("Failed to send lesson notification");
+
+            return;
+        }
+
         CoordinatorNotificationEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Lessons.CoordinatorName,
-            SenderTitle = _configuration.Lessons.CoordinatorTitle,
+            SenderName = configuration.CoordinatorName,
+            SenderTitle = configuration.CoordinatorTitle,
             Title = "[Aurora College] Science Practical Lesson Overdue",
             SchoolName = notification.SchoolName,
             Lessons = notification.Lessons
@@ -120,7 +183,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Lessons/CoordinatorNotificationEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, _configuration.Lessons.CoordinatorEmail, viewModel.Title, body);
+        await _emailSender.Send(notification.Recipients, configuration.CoordinatorEmail, viewModel.Title, body);
     }
 
     public async Task SendStudentLessonCompletedEmail(
@@ -129,6 +192,9 @@ public sealed partial class Service : IEmailService
         string courseName,
         CancellationToken cancellationToken)
     {
+        //TODO: Change Sender and Title to be configured in settings.
+        // 2026-02-17 - R1.18.4
+
         StudentMarkedPresentEmailViewModel viewModel = new()
         {
             Title = $"Congratulations on finishing your Science Prac!",

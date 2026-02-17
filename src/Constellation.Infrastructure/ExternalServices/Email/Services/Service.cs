@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
 using Application.Domains.AppSettings.Models;
-using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Core.Abstractions.Clock;
@@ -13,6 +12,7 @@ public sealed partial class Service : IEmailService
     private readonly ICalendarService _calendarService;
     private readonly IDateTimeProvider _dateTime;
     private readonly IRazorViewToStringRenderer _razorService;
+    private readonly IAppSettingsService _appSettings;
     private readonly ILogger _logger;
     private readonly AppConfiguration _configuration;
 
@@ -21,6 +21,7 @@ public sealed partial class Service : IEmailService
         ICalendarService calendarService,
         IDateTimeProvider dateTime,
         IRazorViewToStringRenderer razorService,
+        IAppSettingsService appSettings,
         IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
@@ -28,6 +29,7 @@ public sealed partial class Service : IEmailService
         _calendarService = calendarService;
         _dateTime = dateTime;
         _razorService = razorService;
+        _appSettings = appSettings;
         _logger = logger.ForContext<IEmailService>();
         _configuration = configuration.Value;
     }

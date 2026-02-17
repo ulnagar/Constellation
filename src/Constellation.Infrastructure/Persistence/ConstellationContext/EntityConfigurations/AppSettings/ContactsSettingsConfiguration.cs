@@ -23,6 +23,6 @@ internal sealed class ContactsSettingsConfiguration : IEntityTypeConfiguration<C
 
         builder
             .Property(entry => entry.Members)
-            .HasConversion<JsonColumnConverter<IReadOnlyList<StaffMemberLink>>>();
+            .HasConversion<JsonColumnConverter<List<StaffMemberLink>>>();
     }
 }

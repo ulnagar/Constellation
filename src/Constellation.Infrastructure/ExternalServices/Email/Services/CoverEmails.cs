@@ -1,9 +1,12 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
+using Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Covers;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
+using Core.Errors;
 using Core.Models.Offerings;
+using Core.Shared;
 using Core.ValueObjects;
 using MimeKit;
 using System;
@@ -28,15 +31,27 @@ public sealed partial class Service : IEmailService
         // Determine whether email or invite
         bool singleDayCover = cover.StartDate == cover.EndDate;
 
+        CoversConfiguration? configuration = await _appSettings.Covers(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendNewCoverEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(CoversConfiguration)), true)
+                .Warning("Failed to send cover email");
+
+            return;
+        }
+
         // Send
         NewCoverEmailViewModel viewModel = new()
         {
-            ContactName = _configuration.Covers.ContactName,
-            ContactPhone = _configuration.Covers.ContactPhone,
+            ContactName = configuration.ContactName,
+            ContactPhone = configuration.ContactPhone,
             ToName = coveringTeacher.Name,
             Title = $"Aurora Class Cover - {offering.Name}",
-            SenderName = _configuration.Covers.ContactName ?? string.Empty,
-            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
             HasAdobeAccount = true,
@@ -88,14 +103,26 @@ public sealed partial class Service : IEmailService
         // Determine whether email or invite
         bool singleDayCover = cover.StartDate == cover.EndDate;
 
+        CoversConfiguration? configuration = await _appSettings.Covers(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendNewCoverEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(CoversConfiguration)), true)
+                .Warning("Failed to send cover email");
+
+            return;
+        }
+
         UpdatedCoverEmailViewModel viewModel = new()
         {
-            ContactName = _configuration.Covers.ContactName,
-            ContactPhone = _configuration.Covers.ContactPhone,
+            ContactName = configuration.ContactName,
+            ContactPhone = configuration.ContactPhone,
             ToName = coveringTeacher.Name,
             Title = $"[UPDATED] Aurora Class Cover - {offering.Name}",
-            SenderName = _configuration.Covers.ContactName ?? string.Empty,
-            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
             HasAdobeAccount = true,
@@ -145,15 +172,27 @@ public sealed partial class Service : IEmailService
         // Determine whether email or invite
         bool singleDayCover = cover.StartDate == cover.EndDate;
 
+        CoversConfiguration? configuration = await _appSettings.Covers(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendNewCoverEmail))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(CoversConfiguration)), true)
+                .Warning("Failed to send cover email");
+
+            return;
+        }
+
         // Send
         CancelledCoverEmailViewModel viewModel = new()
         {
-            ContactName = _configuration.Covers.ContactName,
-            ContactPhone = _configuration.Covers.ContactPhone,
+            ContactName = configuration.ContactName,
+            ContactPhone = configuration.ContactPhone,
             ToName = coveringTeacher.Name,
             Title = $"Cancelled Aurora Class Cover - {offering.Name}",
-            SenderName = _configuration.Covers.ContactName ?? string.Empty,
-            SenderTitle = _configuration.Covers.ContactTitle ?? string.Empty,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
             HasAdobeAccount = true,

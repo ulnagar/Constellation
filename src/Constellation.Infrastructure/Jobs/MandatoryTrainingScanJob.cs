@@ -3,17 +3,17 @@
 using Application.Domains.AppSettings.Models;
 using Application.Domains.WorkFlows.Commands.AddCaseDetailUpdateAction;
 using Application.Domains.WorkFlows.Commands.CreateTrainingCase;
-using Application.Interfaces.Configuration;
+using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
 using Core.Enums;
+using Core.Models.AppSettings.Enums;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Training;
 using Core.Models.Training.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Repositories;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ using System.Threading.Tasks;
 
 internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
 {
-    private readonly AppConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
     private readonly ITrainingModuleRepository _trainingModuleRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ICaseRepository _caseRepository;
@@ -32,7 +32,7 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
     private readonly ILogger _logger;
 
     public MandatoryTrainingScanJob(
-        IOptions<AppConfiguration> configuration,
+        IAppSettingsService appSettings,
         ITrainingModuleRepository trainingModuleRepository,
         IStaffRepository staffRepository,
         ICaseRepository caseRepository,
@@ -40,7 +40,7 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
         ISender mediator,
         ILogger logger)
     {
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _trainingModuleRepository = trainingModuleRepository;
         _staffRepository = staffRepository;
         _caseRepository = caseRepository;
@@ -58,7 +58,7 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
 
         foreach (StaffMember staffMember in staff)
         {
-            _logger.Information($"Checking {staffMember.Name.DisplayName}");
+            _logger.Information("Checking {user}",staffMember.Name.DisplayName);
 
             // Get all roles for the staff member
             List<TrainingModule> staffModules = modules
@@ -110,10 +110,33 @@ internal sealed class MandatoryTrainingScanJob : IMandatoryTrainingScanJob
                 if (countdown is not (30 or 14 or 0 or -7 or -30)) 
                     continue;
 
+                WorkflowConfiguration? configuration = await _appSettings.Workflow(WorkflowArea.Training, cancellationToken);
+
+                if (configuration is null)
+                {
+                    _logger
+                        .Warning("Failed to send lesson notification");
+
+                    return;
+                }
+
+                StaffMember? reviewer = null;
+
+                foreach (var entry in configuration.Contacts)
+                    reviewer = entry.Key;
+
+                if (reviewer is null)
+                {
+                    _logger
+                        .Warning("Failed to send lesson notification");
+
+                    return;
+                }
+
                 // force a reminder email update
                 AddCaseDetailUpdateActionCommand command = new(
                     existingCase.Id,
-                    _configuration.WorkFlow.TrainingReviewer,
+                    reviewer.EmployeeId,
                     $"Module identified during scan on {_dateTime.Today.ToShortDateString()} as being due for completion in {countdown} days.");
 
                 await _mediator.Send(command, cancellationToken);
