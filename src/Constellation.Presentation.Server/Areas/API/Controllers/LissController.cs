@@ -1,4 +1,5 @@
-﻿namespace Constellation.Presentation.Server.Areas.API.Controllers;
+﻿#nullable disable
+namespace Constellation.Presentation.Server.Areas.API.Controllers;
 
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways.LissServerGateway;
@@ -35,7 +36,7 @@ public sealed class LissController : ControllerBase
     [Route("json")]
     public async Task<ILissResponse> ReceiveJson([FromBody] object body)
     {
-        string stringValue = body.ToString();
+        string stringValue = body?.ToString();
         if (stringValue is null)
             return LissResponseError.NotValid;
 
