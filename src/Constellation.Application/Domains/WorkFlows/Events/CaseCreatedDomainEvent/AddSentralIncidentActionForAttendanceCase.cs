@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseCreatedDomainEvent;
 
 using Abstractions.Messaging;
-using AppSettings.Models;
 using Core.Abstractions.Services;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
@@ -10,7 +9,6 @@ using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
-using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
@@ -19,9 +17,7 @@ using Core.Models.WorkFlow.Errors;
 using Core.Models.WorkFlow.Events;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
-using Interfaces.Configuration;
 using Interfaces.Repositories;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +33,6 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
     private readonly IOfferingRepository _offeringRepository;
     private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly AppConfiguration _configuration;
     private readonly ILogger _logger;
 
     public AddSentralIncidentActionForAttendanceCase(
@@ -46,7 +41,6 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         IStaffRepository staffRepository,
         IOfferingRepository offeringRepository,
         IEnrolmentRepository enrolmentRepository,
-        IOptions<AppConfiguration> configuration,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -56,13 +50,12 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         _offeringRepository = offeringRepository;
         _enrolmentRepository = enrolmentRepository;
         _unitOfWork = unitOfWork;
-        _configuration = configuration.Value;
         _logger = logger.ForContext<CaseCreatedDomainEvent>();
     }
 
     public async Task Handle(CaseCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
 
         if (item is null)
         {
@@ -77,7 +70,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
         if (!item.Type!.Equals(CaseType.Attendance))
             return;
 
-        AttendanceCaseDetail caseDetail = item.Detail as AttendanceCaseDetail;
+        AttendanceCaseDetail? caseDetail = item.Detail as AttendanceCaseDetail;
 
         List<AttendanceSeverity> severityList = new()
         {
@@ -88,22 +81,12 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
 
         if (!severityList.Contains(caseDetail!.Severity))
             return;
-
-        StaffMember reviewer = await _staffRepository.GetByEmployeeId(_configuration.WorkFlow.AttendanceReviewer, cancellationToken);
-        if (reviewer is null)
-        {
-            _logger
-                .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(_configuration.WorkFlow.AttendanceReviewer), true)
-                .Warning("Could not create default Action for new Case");
-            return;
-        }
-
+        
         List<Enrolment> enrolments = await _enrolmentRepository.GetCurrentByStudentId(caseDetail.StudentId, cancellationToken);
 
         foreach (OfferingEnrolment enrolment in enrolments.OfType<OfferingEnrolment>())
         {
-            Offering offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(enrolment.OfferingId, cancellationToken);
 
             if (offering is null)
             {
@@ -127,7 +110,7 @@ internal sealed class AddSentralIncidentActionForAttendanceCase
 
             foreach (StaffId teacherId in teacherIds)
             {
-                StaffMember teacher = await _staffRepository.GetById(teacherId, cancellationToken);
+                StaffMember? teacher = await _staffRepository.GetById(teacherId, cancellationToken);
 
                 if (teacher is null)
                     continue;

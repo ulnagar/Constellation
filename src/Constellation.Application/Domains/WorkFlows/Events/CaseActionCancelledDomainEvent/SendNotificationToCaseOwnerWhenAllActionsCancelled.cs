@@ -2,11 +2,9 @@
 
 using Abstractions.Messaging;
 using AppSettings.Models;
+using Constellation.Application.Extensions;
+using Constellation.Core.Models.AppSettings.Enums;
 using Core.Models.StaffMembers;
-using Core.Models.StaffMembers.Errors;
-using Core.Models.StaffMembers.Identifiers;
-using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -14,9 +12,7 @@ using Core.Models.WorkFlow.Events;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Interfaces.Configuration;
 using Interfaces.Services;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,28 +23,25 @@ internal sealed class SendNotificationToCaseOwnerWhenAllActionsCancelled
     : IDomainEventHandler<CaseActionCancelledDomainEvent>
 {
     private readonly ICaseRepository _caseRepository;
-    private readonly IStaffRepository _staffRepository;
-    private readonly AppConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public SendNotificationToCaseOwnerWhenAllActionsCancelled(
         ICaseRepository caseRepository,
-        IStaffRepository staffRepository,
-        IOptions<AppConfiguration> configuration,
+        IAppSettingsService appSettings,
         IEmailService emailService,
         ILogger logger)
     {
         _caseRepository = caseRepository;
-        _staffRepository = staffRepository;
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _emailService = emailService;
         _logger = logger.ForContext<SendNotificationToCaseOwnerWhenAllActionsCancelled>();
     }
 
     public async Task Handle(CaseActionCancelledDomainEvent notification, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
 
         if (item is null)
         {
@@ -63,44 +56,44 @@ internal sealed class SendNotificationToCaseOwnerWhenAllActionsCancelled
         if (item.Actions.Any(action => action.Status.Equals(ActionStatus.Open)))
             return;
 
-        EmployeeId assigneeId = item.Type switch
+        WorkflowConfiguration? configuration = item.Type switch
         {
-            not null when item.Type.Equals(CaseType.Attendance) => _configuration.WorkFlow.AttendanceReviewer,
-            not null when item.Type.Equals(CaseType.Compliance) => _configuration.WorkFlow.ComplianceReviewer,
-            not null when item.Type.Equals(CaseType.Training) => _configuration.WorkFlow.TrainingReviewer,
-            _ => EmployeeId.Empty
+            not null when item.Type.Equals(CaseType.Attendance) => await _appSettings.Workflow(WorkflowArea.Attendance, cancellationToken),
+            not null when item.Type.Equals(CaseType.Compliance) => await _appSettings.Workflow(WorkflowArea.Compliance, cancellationToken),
+            not null when item.Type.Equals(CaseType.Training) => await _appSettings.Workflow(WorkflowArea.Training, cancellationToken),
+            _ => null
         };
 
-        StaffMember assignee = assigneeId != EmployeeId.Empty 
-            ? await _staffRepository.GetByEmployeeId(assigneeId, cancellationToken)
-            : null;
+        List<EmailRecipient> recipients = [];
 
-        if (assignee is null)
+        if (configuration is null)
         {
             _logger
                 .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(assigneeId), true)
                 .Warning("Could not send notification to Case Assignee for new Status");
 
             return;
         }
 
-        List<EmailRecipient> recipients = new();
-
-        Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.Name, assignee.EmailAddress);
-        if (teacher.IsFailure)
+        foreach (var contact in configuration.Contacts)
         {
-            _logger
-                .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
-                .ForContext(nameof(StaffMember), assignee, true)
-                .ForContext(nameof(Error), teacher.Error, true)
-                .Warning("Could not send notification to Case Assignee for new Status");
+            Result<EmailRecipient> contactEmail = contact.Key.GetEmailRecipient();
 
-            return;
+            if (contactEmail.IsFailure)
+            {
+                _logger
+                    .ForContext(nameof(CaseActionCancelledDomainEvent), notification, true)
+                    .ForContext(nameof(StaffMember), contact.Key, true)
+                    .ForContext(nameof(Error), contactEmail.Error, true)
+                    .Warning("Could not send notification to Case Assignee for new Status");
+
+                continue;
+            }
+
+            recipients.Add(contactEmail.Value);
         }
 
-        recipients.Add(teacher.Value);
-
-        await _emailService.SendAllActionsCompletedEmail(recipients, item, cancellationToken);
+        if (recipients.Count > 0)
+            await _emailService.SendAllActionsCompletedEmail(recipients, item, cancellationToken);
     }
 }

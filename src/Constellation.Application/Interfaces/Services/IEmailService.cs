@@ -9,7 +9,6 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Core.Models.Assignments;
-using Core.Models.LinkedSystems;
 using Core.Models.SchoolContacts;
 using Core.Models.StaffMembers;
 using Core.Models.Subjects;
@@ -121,7 +120,7 @@ public interface IEmailService
     Task SendActionCancelledEmail(List<EmailRecipient> recipients, Case item, Action action, StaffMember assignee, CancellationToken cancellationToken = default);
     Task SendEnteredEmailForAction(List<EmailRecipient> recipients, EmailRecipient sender, string subject, string body, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendComplianceWorkFlowNotificationEmail(List<EmailRecipient> recipients, CaseId caseId, Name assignee, ComplianceCaseDetail detail, int incidentAge, string incidentLink, CancellationToken cancellationToken = default);
-    Task SendTrainingWorkFlowNotificationEmail(List<EmailRecipient> recipients, TrainingCaseDetail detail, string reviewer, CancellationToken cancellationToken = default);
+    Task SendTrainingWorkFlowNotificationEmail(List<EmailRecipient> recipients, TrainingCaseDetail detail, CancellationToken cancellationToken = default);
     Task SendAllActionsCompletedEmail(List<EmailRecipient> recipients, Case item, CancellationToken cancellationToken = default);
 
 }

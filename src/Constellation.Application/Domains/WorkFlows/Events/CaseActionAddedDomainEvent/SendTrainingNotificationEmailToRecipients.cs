@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseActionAddedDomainEvent;
 
 using Abstractions.Messaging;
-using AppSettings.Models;
+using Constellation.Application.Domains.AppSettings.Models;
+using Constellation.Core.Models.AppSettings.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.SchoolContacts;
@@ -9,7 +10,6 @@ using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -17,9 +17,8 @@ using Core.Models.WorkFlow.Events;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Interfaces.Configuration;
+using Extensions;
 using Interfaces.Services;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,35 +28,35 @@ using System.Threading.Tasks;
 internal sealed class SendTrainingNotificationEmailToRecipients
     : IDomainEventHandler<CaseActionAddedDomainEvent>
 {
-    private readonly AppConfiguration _configuration;
     private readonly ICaseRepository _caseRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFacultyRepository _facultyRepository;
     private readonly ISchoolContactRepository _contactRepository;
+    private readonly IAppSettingsService _appSettings;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
 
     public SendTrainingNotificationEmailToRecipients(
-        IOptions<AppConfiguration> configuration,
         ICaseRepository caseRepository,
         IStaffRepository staffRepository,
         IFacultyRepository facultyRepository,
         ISchoolContactRepository contactRepository,
+        IAppSettingsService appSettings,
         IEmailService emailService,
         ILogger logger)
     {
-        _configuration = configuration.Value;
         _caseRepository = caseRepository;
         _staffRepository = staffRepository;
         _facultyRepository = facultyRepository;
         _contactRepository = contactRepository;
+        _appSettings = appSettings;
         _emailService = emailService;
         _logger = logger.ForContext<SendTrainingNotificationEmailToRecipients>();
     }
 
     public async Task Handle(CaseActionAddedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
 
         if (item is null)
         {
@@ -72,7 +71,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
         if (!item.Type!.Equals(CaseType.Training))
             return;
 
-        Action action = item.Actions.FirstOrDefault(entry => entry.Id == notification.ActionId);
+        Action? action = item.Actions.FirstOrDefault(entry => entry.Id == notification.ActionId);
 
         if (action is null)
         {
@@ -87,9 +86,9 @@ internal sealed class SendTrainingNotificationEmailToRecipients
         if (action is not CaseDetailUpdateAction)
             return;
 
-        TrainingCaseDetail detail = item.Detail as TrainingCaseDetail;
+        TrainingCaseDetail? detail = item.Detail as TrainingCaseDetail;
 
-        StaffMember assignee = await _staffRepository.GetById(detail!.StaffId, cancellationToken);
+        StaffMember? assignee = await _staffRepository.GetById(detail!.StaffId, cancellationToken);
 
         if (assignee is null)
         {
@@ -101,7 +100,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
             return;
         }
 
-        List<EmailRecipient> recipients = new();
+        List<EmailRecipient> recipients = [];
 
         Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.Name, assignee.EmailAddress);
         if (teacher.IsFailure)
@@ -117,33 +116,28 @@ internal sealed class SendTrainingNotificationEmailToRecipients
 
         recipients.Add(teacher.Value);
 
-        EmployeeId reviewerId = _configuration.WorkFlow.TrainingReviewer;
+        WorkflowConfiguration? reviewers = await _appSettings.Workflow(WorkflowArea.Training, cancellationToken);
 
-        StaffMember reviewer = await _staffRepository.GetByEmployeeId(reviewerId, cancellationToken);
-
-        if (reviewer is null)
+        if (reviewers is not null)
         {
-            _logger
-                .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(reviewerId), true)
-                .Warning("Could not send notification to recipients for Training Case update");
+            foreach (var reviewer in reviewers.Contacts)
+            {
+                Result<EmailRecipient> reviewerEmail = reviewer.Key.GetEmailRecipient();
 
-            return;
+                if (reviewerEmail.IsFailure)
+                {
+                    _logger
+                        .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
+                        .ForContext(nameof(StaffMember), reviewer.Key, true)
+                        .ForContext(nameof(Error), reviewerEmail.Error, true)
+                        .Warning("Could not send notification to recipients for Training Case update");
+
+                    return;
+                }
+
+                recipients.Add(reviewerEmail.Value);
+            }
         }
-
-        Result<EmailRecipient> reviewerEmail = EmailRecipient.Create(reviewer.Name, reviewer.EmailAddress);
-        if (reviewerEmail.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                .ForContext(nameof(StaffMember), reviewer, true)
-                .ForContext(nameof(Error), reviewerEmail.Error, true)
-                .Warning("Could not send notification to recipients for Training Case update");
-
-            return;
-        }
-
-        recipients.Add(reviewerEmail.Value);
 
         if (detail.DaysUntilDue <= 14)
         {
@@ -181,7 +175,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
 
             if (assignee.IsShared)
             {
-                string schoolCode = assignee.CurrentAssignment?.SchoolCode ?? null;
+                string? schoolCode = assignee.CurrentAssignment?.SchoolCode ?? null;
 
                 if (schoolCode is not null)
                 {
@@ -209,38 +203,33 @@ internal sealed class SendTrainingNotificationEmailToRecipients
                 }
             }
 
-            EmployeeId principalId = _configuration.Contacts.PrincipalId;
+            ContactsConfiguration? principals = await _appSettings.Contacts(ContactPosition.Principal, cancellationToken);
 
-            StaffMember principal = await _staffRepository.GetByEmployeeId(principalId, cancellationToken);
-
-            if (principal is null)
+            if (principals is not null)
             {
-                _logger
-                    .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(principalId), true)
-                    .Warning("Could not send notification to recipients for Training Case update");
-
-                return;
-            }
-
-            if (recipients.All(entry => entry.Email != principal.EmailAddress.Email))
-            {
-                Result<EmailRecipient> principalEmail = EmailRecipient.Create(principal.Name, principal.EmailAddress);
-                if (principalEmail.IsFailure)
+                foreach (var principal in principals.Contacts)
                 {
-                    _logger
-                        .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
-                        .ForContext(nameof(StaffMember), principal, true)
-                        .ForContext(nameof(Error), principalEmail.Error, true)
-                        .Warning("Could not send notification to recipients for Training Case update");
+                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient();
 
-                    return;
+                    if (principalEmail.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(CaseActionAddedDomainEvent), notification, true)
+                            .ForContext(nameof(StaffMember), principal.Key, true)
+                            .ForContext(nameof(Error), principalEmail.Error, true)
+                            .Warning("Could not send notification to recipients for Training Case update");
+
+                        return;
+                    }
+
+                    if (recipients.Any(entry => entry.Email == principalEmail.Value.Email))
+                        continue;
+
+                    recipients.Add(principalEmail.Value);
                 }
-
-                recipients.Add(principalEmail.Value);
             }
         }
         
-        await _emailService.SendTrainingWorkFlowNotificationEmail(recipients, detail, reviewer.Name, cancellationToken);
+        await _emailService.SendTrainingWorkFlowNotificationEmail(recipients, detail, cancellationToken);
     }
 }

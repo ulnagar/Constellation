@@ -11,5 +11,4 @@ public sealed class TrainingWorkFlowNotificationEmailViewModel : EmailLayoutBase
     public string ModuleName { get; set; }
     public DateOnly DueDate { get; set; }
     public int DaysUntilDue { get; set; }
-    public string Reviewer { get; set; }
 }

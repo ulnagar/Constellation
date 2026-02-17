@@ -215,4 +215,196 @@ internal sealed class AppSettingsService : IAppSettingsService
 
         _context.Set<ContactsSettings>().Add(settings);
     }
+
+    public async Task<MandatoryTrainingConfiguration?> MandatoryTraining(
+        CancellationToken cancellationToken = default)
+    {
+        List<MandatoryTrainingSettings> entry = await _context
+            .Set<MandatoryTrainingSettings>()
+            .ToListAsync(cancellationToken);
+
+        if (entry.Count == 0)
+            return null;
+
+        if (entry.Count > 1)
+            throw new ArgumentOutOfRangeException(nameof(MandatoryTrainingSettings), "Too many MandatoryTrainingSettings records found in database!");
+
+        MandatoryTrainingSettings settings = entry.First();
+
+        List<StaffId> staffIds = settings.Contacts
+            .Select(memberLink => memberLink.StaffId)
+            .Distinct()
+            .ToList();
+
+        List<StaffMember> staffMembers = await _context
+            .Set<StaffMember>()
+            .Where(member => staffIds.Contains(member.Id))
+            .ToListAsync(cancellationToken);
+
+        Dictionary<StaffMember, List<Grade>> members = new();
+
+        foreach (var memberLink in settings.Contacts)
+        {
+            StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+            if (staffMember is null)
+                continue;
+
+            members.Add(staffMember, memberLink.Grades.ToList());
+        }
+
+        return new MandatoryTrainingConfiguration(members);
+    }
+
+    public async Task MandatoryTraining(
+        MandatoryTrainingConfiguration configuration, 
+        CancellationToken cancellationToken = default)
+    {
+        List<MandatoryTrainingSettings> existingEntries = await _context
+            .Set<MandatoryTrainingSettings>()
+            .ToListAsync(cancellationToken);
+
+        if (existingEntries.Count > 0)
+            _context.Set<MandatoryTrainingSettings>().RemoveRange(existingEntries);
+
+        MandatoryTrainingSettings settings = new();
+
+        foreach (var member in configuration.Contacts)
+        {
+            settings.AddContact(member.Key.Id, member.Value);
+        }
+
+        _context.Set<MandatoryTrainingSettings>().Add(settings);
+    }
+
+    public async Task<WorkflowConfiguration?> Workflow(
+        WorkflowArea position, 
+        CancellationToken cancellationToken = default)
+    {
+        List<WorkflowSettings> entry = await _context
+            .Set<WorkflowSettings>()
+            .Where(settings => settings.PositionName == position)
+            .ToListAsync(cancellationToken);
+
+        if (entry.Count == 0)
+            return null;
+
+        if (entry.Count > 1)
+            throw new ArgumentOutOfRangeException(nameof(WorkflowSettings), "Too many WorkflowSettings records found in database!");
+
+        WorkflowSettings settings = entry.First();
+
+        List<StaffId> staffIds = settings.Members
+            .Select(memberLink => memberLink.StaffId)
+            .Distinct()
+            .ToList();
+
+        List<StaffMember> staffMembers = await _context
+            .Set<StaffMember>()
+            .Where(member => staffIds.Contains(member.Id))
+            .ToListAsync(cancellationToken);
+
+        Dictionary<StaffMember, List<Grade>> members = new();
+
+        foreach (var memberLink in settings.Members)
+        {
+            StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+            if (staffMember is null)
+                continue;
+
+            members.Add(staffMember, memberLink.Grades.ToList());
+        }
+
+        return new WorkflowConfiguration(
+            position,
+            members);
+    }
+
+    public async Task Workflow(
+        WorkflowConfiguration configuration, 
+        CancellationToken cancellationToken = default)
+    {
+        List<WorkflowSettings> existingEntries = await _context
+            .Set<WorkflowSettings>()
+            .Where(settings => settings.PositionName == configuration.Position)
+            .ToListAsync(cancellationToken);
+
+        if (existingEntries.Count > 0)
+            _context.Set<WorkflowSettings>().RemoveRange(existingEntries);
+
+        WorkflowSettings settings = new(configuration.Position);
+
+        foreach (var member in configuration.Contacts)
+        {
+            settings.AddMember(member.Key.Id, member.Value);
+        }
+
+        _context.Set<WorkflowSettings>().Add(settings);
+    }
+
+    public async Task<TutorialsConfiguration?> Tutorials(
+        TutorialPosition position, 
+        CancellationToken cancellationToken = default)
+    {
+        List<TutorialsSettings> entry = await _context
+            .Set<TutorialsSettings>()
+            .Where(settings => settings.PositionName == position)
+            .ToListAsync(cancellationToken);
+
+        if (entry.Count == 0)
+            return null;
+
+        if (entry.Count > 1)
+            throw new ArgumentOutOfRangeException(nameof(TutorialsSettings), "Too many TutorialsSettings records found in database!");
+
+        TutorialsSettings settings = entry.First();
+
+        List<StaffId> staffIds = settings.Members
+            .Select(memberLink => memberLink.StaffId)
+            .Distinct()
+            .ToList();
+
+        List<StaffMember> staffMembers = await _context
+            .Set<StaffMember>()
+            .Where(member => staffIds.Contains(member.Id))
+            .ToListAsync(cancellationToken);
+
+        Dictionary<StaffMember, List<Grade>> members = new();
+
+        foreach (var memberLink in settings.Members)
+        {
+            StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+            if (staffMember is null)
+                continue;
+
+            members.Add(staffMember, memberLink.Grades.ToList());
+        }
+
+        return new TutorialsConfiguration(
+            position,
+            members);
+    }
+
+    public async Task Tutorials(
+        TutorialsConfiguration configuration, 
+        CancellationToken cancellationToken = default)
+    {
+        List<TutorialsSettings> existingEntries = await _context
+            .Set<TutorialsSettings>()
+            .Where(settings => settings.PositionName == configuration.Position)
+            .ToListAsync(cancellationToken);
+
+        if (existingEntries.Count > 0)
+            _context.Set<TutorialsSettings>().RemoveRange(existingEntries);
+
+        TutorialsSettings settings = new(configuration.Position);
+
+        foreach (var member in configuration.Contacts)
+        {
+            settings.AddMember(member.Key.Id, member.Value);
+        }
+
+    }
 }

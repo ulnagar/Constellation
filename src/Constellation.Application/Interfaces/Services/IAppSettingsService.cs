@@ -13,4 +13,13 @@ public interface IAppSettingsService
 
     Task<ContactsConfiguration?> Contacts(ContactPosition position, CancellationToken cancellationToken = default);
     Task Contacts(ContactsConfiguration settings, CancellationToken cancellationToken = default);
+
+    Task<MandatoryTrainingConfiguration?> MandatoryTraining(CancellationToken cancellationToken = default);
+    Task MandatoryTraining(MandatoryTrainingConfiguration settings, CancellationToken cancellationToken = default);
+
+    Task<WorkflowConfiguration?> Workflow(WorkflowArea position, CancellationToken cancellationToken = default);
+    Task Workflow(WorkflowConfiguration configuration, CancellationToken cancellationToken = default);
+
+    Task<TutorialsConfiguration?> Tutorials(TutorialPosition position, CancellationToken cancellationToken = default);
+    Task Tutorials(TutorialsConfiguration configuration, CancellationToken cancellationToken = default);
 }

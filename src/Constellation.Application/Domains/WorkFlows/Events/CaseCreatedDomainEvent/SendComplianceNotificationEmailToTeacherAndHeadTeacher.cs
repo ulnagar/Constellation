@@ -1,14 +1,14 @@
 ﻿namespace Constellation.Application.Domains.WorkFlows.Events.CaseCreatedDomainEvent;
 
 using Abstractions.Messaging;
-using AppSettings.Models;
+using Constellation.Application.Domains.AppSettings.Models;
+using Constellation.Core.Models.AppSettings.Enums;
 using Core.Abstractions.Clock;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
@@ -37,7 +37,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
     private readonly IEmailService _emailService;
     private readonly ISentralGateway _sentralGateway;
     private readonly IDateTimeProvider _dateTime;
-    private readonly AppConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
     private readonly SentralGatewayConfiguration _sentralConfiguration;
     private readonly ILogger _logger;
 
@@ -48,8 +48,8 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         IEmailService emailService,
         ISentralGateway sentralGateway,
         IDateTimeProvider dateTime,
+        IAppSettingsService appSettings,
         IOptions<SentralGatewayConfiguration> sentralConfiguration,
-        IOptions<AppConfiguration> configuration,
         ILogger logger)
     {
         _caseRepository = caseRepository;
@@ -58,14 +58,14 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         _emailService = emailService;
         _sentralGateway = sentralGateway;
         _dateTime = dateTime;
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _sentralConfiguration = sentralConfiguration.Value;
         _logger = logger.ForContext<CaseCreatedDomainEvent>();
     }
 
     public async Task Handle(CaseCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(notification.CaseId, cancellationToken);
 
         if (item is null)
         {
@@ -80,9 +80,9 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
         if (!item.Type!.Equals(CaseType.Compliance))
             return;
 
-        ComplianceCaseDetail detail = item.Detail as ComplianceCaseDetail;
+        ComplianceCaseDetail? detail = item.Detail as ComplianceCaseDetail;
         
-        StaffMember assignee = await _staffRepository.GetById(detail!.CreatedById, cancellationToken);
+        StaffMember? assignee = await _staffRepository.GetById(detail!.CreatedById, cancellationToken);
 
         if (assignee is null)
         {
@@ -94,7 +94,7 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
             return;
         }
 
-        List<EmailRecipient> recipients = new();
+        List<EmailRecipient> recipients = [];
 
         Result<EmailRecipient> teacher = EmailRecipient.Create(assignee.Name, assignee.EmailAddress);
         if (teacher.IsFailure)
@@ -153,75 +153,66 @@ internal sealed class SendComplianceNotificationEmailToTeacherAndHeadTeacher
 
         if (age >= 17)
         {
-            // Add DP to recipients
-            List<EmployeeId> deputies = _configuration.Contacts.DeputyPrincipalIds[detail.Grade];
+            ContactsConfiguration? deputyPrincipals = await _appSettings.Contacts(ContactPosition.DeputyPrincipal, cancellationToken);
 
-            foreach (EmployeeId deputyId in deputies)
+            if (deputyPrincipals is not null)
             {
-                StaffMember deputy = await _staffRepository.GetByEmployeeId(deputyId, cancellationToken);
-
-                if (deputy is null)
+                foreach (var deputy in deputyPrincipals.Contacts)
                 {
-                    _logger
-                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                        .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(deputyId), true)
-                        .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
+                    if (!deputy.Value.Contains(detail.Grade))
+                        continue;
 
-                    return;
+                    Result<EmailRecipient> deputyEmail = deputy.Key.GetEmailRecipient();
+
+                    if (deputyEmail.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                            .ForContext(nameof(StaffMember), deputy.Key, true)
+                            .ForContext(nameof(Error), deputyEmail.Error, true)
+                            .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
+
+                        return;
+                    }
+
+                    if (recipients.Any(entry => entry.Email == deputyEmail.Value.Email))
+                        continue;
+
+                    recipients.Add(deputyEmail.Value);
                 }
 
-                if (recipients.Any(entry => entry.Email == deputy.EmailAddress.Email))
-                    continue;
-
-                Result<EmailRecipient> deputyEmail = EmailRecipient.Create(deputy.Name, deputy.EmailAddress);
-                if (deputyEmail.IsFailure)
-                {
-                    _logger
-                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                        .ForContext(nameof(StaffMember), deputy, true)
-                        .ForContext(nameof(Error), deputyEmail.Error, true)
-                        .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
-
-                    return;
-                }
-
-                recipients.Add(deputyEmail.Value);
             }
         }
 
         if (age >= 22)
         {
-            // Add P to recipients
-            EmployeeId principalId = _configuration.Contacts.PrincipalId;
-            
-            StaffMember principal = await _staffRepository.GetByEmployeeId(principalId, cancellationToken);
+            ContactsConfiguration? principals = await _appSettings.Contacts(ContactPosition.Principal, cancellationToken);
 
-            if (principal is null)
+            if (principals is not null)
             {
-                _logger
-                    .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                    .ForContext(nameof(Error), StaffMemberErrors.NotFoundByEmployeeId(principalId), true)
-                    .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
-
-                return;
-            }
-
-
-            if (recipients.All(entry => entry.Email != principal.EmailAddress.Email))
-            {
-                Result<EmailRecipient> principalEmail = EmailRecipient.Create(principal.Name, principal.EmailAddress);
-                if (principalEmail.IsFailure)
+                foreach (var principal in principals.Contacts)
                 {
-                    _logger
-                        .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
-                        .ForContext(nameof(StaffMember), principal, true)
-                        .ForContext(nameof(Error), principalEmail.Error, true)
-                        .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
+                    if (!principal.Value.Contains(detail.Grade))
+                        continue;
 
-                    return;
+                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient();
+
+                    if (principalEmail.IsFailure)
+                    {
+                        _logger
+                            .ForContext(nameof(CaseCreatedDomainEvent), notification, true)
+                            .ForContext(nameof(StaffMember), principal.Key, true)
+                            .ForContext(nameof(Error), principalEmail.Error, true)
+                            .Warning("Could not send notification to teacher and head teacher for new Compliance Action");
+
+                        return;
+                    }
+
+                    if (recipients.Any(entry => entry.Email == principalEmail.Value.Email))
+                        continue;
+
+                    recipients.Add(principalEmail.Value);
                 }
-
-                recipients.Add(principalEmail.Value);
             }
         }
 

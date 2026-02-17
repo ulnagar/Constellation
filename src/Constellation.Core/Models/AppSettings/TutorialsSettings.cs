@@ -4,19 +4,19 @@ using Core.Enums;
 using Enums;
 using StaffMembers.Identifiers;
 
-public sealed class ContactsSettings
+public sealed class TutorialsSettings
 {
     private readonly List<StaffMemberLink> _members = [];
 
-    private ContactsSettings() { }
+    private TutorialsSettings() { }
 
-    public ContactsSettings(
-        ContactPosition position)
+    public TutorialsSettings(
+        TutorialPosition position)
     {
         PositionName = position;
     }
 
-    public ContactPosition PositionName { get; private set; }
+    public TutorialPosition PositionName { get; private set; }
     public IReadOnlyList<StaffMemberLink> Members => _members.AsReadOnly();
 
     public void AddMember(StaffId staffId, List<Grade> grades)

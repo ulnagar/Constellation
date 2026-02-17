@@ -98,7 +98,6 @@ public sealed partial class Service : IEmailService
     public async Task SendTrainingWorkFlowNotificationEmail(
         List<EmailRecipient> recipients,
         TrainingCaseDetail detail,
-        string reviewer,
         CancellationToken cancellationToken = default)
     {
         TrainingWorkFlowNotificationEmailViewModel viewModel = new()
@@ -110,8 +109,7 @@ public sealed partial class Service : IEmailService
             StaffName = detail.Name,
             ModuleName = detail.ModuleName,
             DueDate = detail.DueDate,
-            DaysUntilDue = detail.DaysUntilDue,
-            Reviewer = reviewer
+            DaysUntilDue = detail.DaysUntilDue
         };
 
         string body = await _razorService.RenderViewToStringAsync(TrainingWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
