@@ -15,6 +15,16 @@ public sealed record CanvasConfiguration
         Admins = admins;
     }
 
+    public CanvasConfiguration(
+        bool useGroups,
+        bool useSections,
+        Dictionary<StaffMember, List<Grade>> admins)
+    {
+        UseGroups = useGroups;
+        UseSections = useSections;
+        Admins = admins;
+    }
+
     public bool UseGroups { get; init; }
     public bool UseSections { get; init; }
     public IReadOnlyDictionary<StaffMember, List<Grade>> Admins { get; }

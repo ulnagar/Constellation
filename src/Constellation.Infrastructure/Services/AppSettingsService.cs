@@ -624,7 +624,7 @@ internal sealed class AppSettingsService : IAppSettingsService
             mandatoryOwners.Add(staffMember, memberLink.Grades.ToList());
         }
 
-        List<StaffId> studentTeamOwnerStaffIds = settings.MandatoryOwners
+        List<StaffId> studentTeamOwnerStaffIds = settings.StudentTeamOwners
             .Select(memberLink => memberLink.StaffId)
             .Distinct()
             .ToList();
@@ -636,7 +636,7 @@ internal sealed class AppSettingsService : IAppSettingsService
 
         Dictionary<StaffMember, List<Grade>> studentTeamOwners = new();
 
-        foreach (var memberLink in settings.MandatoryOwners)
+        foreach (var memberLink in settings.StudentTeamOwners)
         {
             StaffMember? staffMember = studentTeamOwnerStaffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
 
@@ -646,7 +646,7 @@ internal sealed class AppSettingsService : IAppSettingsService
             studentTeamOwners.Add(staffMember, memberLink.Grades.ToList());
         }
 
-        List<StaffId> studentChannelOwnerStaffIds = settings.MandatoryOwners
+        List<StaffId> studentChannelOwnerStaffIds = settings.StudentChannelOwners
             .Select(memberLink => memberLink.StaffId)
             .Distinct()
             .ToList();
@@ -658,7 +658,7 @@ internal sealed class AppSettingsService : IAppSettingsService
 
         Dictionary<StaffMember, List<Grade>> studentChannelOwners = new();
 
-        foreach (var memberLink in settings.MandatoryOwners)
+        foreach (var memberLink in settings.StudentChannelOwners)
         {
             StaffMember? staffMember = studentChannelOwnerStaffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
 

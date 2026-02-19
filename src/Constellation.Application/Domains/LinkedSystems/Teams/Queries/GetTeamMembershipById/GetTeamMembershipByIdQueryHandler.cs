@@ -143,13 +143,16 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             {
                 List<TeamMembershipResponse.TeamMembershipChannelResponse> staffChannels = new();
 
-                bool ownerExists = teamsConfiguration.StudentChannelOwners.TryGetValue(staffMember, out List<Grade>? ownerGrades);
+                List<Grade> grades = Enum.GetValues<Grade>().ToList();
+                grades.Remove(Grade.SpecialProgram);
 
-                if (ownerExists)
+                bool channelOwnerExists = teamsConfiguration.StudentChannelOwners.TryGetValue(staffMember, out List<Grade>? ownerChannelGrades);
+
+                if (channelOwnerExists)
                 {
-                    foreach (Grade grade in Enum.GetValues<Grade>())
+                    foreach (Grade grade in grades)
                     {
-                        if (ownerGrades!.Contains(grade))
+                        if (ownerChannelGrades!.Contains(grade))
                             staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
                         else
                             staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
@@ -157,11 +160,13 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
                 else
                 {
-                    foreach (Grade grade in Enum.GetValues<Grade>())
+                    foreach (Grade grade in grades)
                         staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
                 }
 
-                if (teamsConfiguration.StudentTeamOwners.ContainsKey(staffMember))
+                bool teamOwnerExists = teamsConfiguration.StudentTeamOwners.TryGetValue(staffMember, out _);
+
+                if (teamOwnerExists)
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
@@ -591,7 +596,17 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             foreach (var token in tokens)
             {
                 if (grade == Grade.SpecialProgram)
-                    Enum.TryParse(token, true, out grade);
+                {
+                    if (token.Contains("Year"))
+                    {
+                        var gradeNum = token.Split(' ')[1];
+                        bool success = Enum.TryParse(gradeNum, true, out grade);
+                        if (!success || !Enum.IsDefined(grade))
+                            grade = Grade.SpecialProgram;
+                    }
+                    else
+                        grade = Grade.SpecialProgram;
+                }
             }
 
             foreach (var mandatoryOwner in teamsConfiguration.MandatoryOwners)
