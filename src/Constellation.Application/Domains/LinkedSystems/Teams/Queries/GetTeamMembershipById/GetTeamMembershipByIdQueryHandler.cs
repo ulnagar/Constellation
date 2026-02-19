@@ -27,7 +27,6 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -35,9 +34,7 @@ using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Interfaces.Configuration;
 using Interfaces.Services;
-using Microsoft.Extensions.Options;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -57,7 +54,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
     private readonly ITutorialRepository _tutorialRepository;
     private readonly ICoverRepository _coverRepository;
     private readonly IAppSettingsService _appSettings;
-    private readonly TeamsGatewayConfiguration _teamsConfiguration;
     private readonly IGroupTutorialRepository _groupTutorialRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IDateTimeProvider _dateTime;
@@ -76,7 +72,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         IDateTimeProvider dateTime,
         ILogger logger,
         ICoverRepository coverRepository,
-        IOptions<TeamsGatewayConfiguration> teamsConfiguration,
         IAppSettingsService appSettings)
     {
         _teamRepository = teamRepository;
@@ -88,7 +83,6 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         _tutorialRepository = tutorialRepository;
         _coverRepository = coverRepository;
         _appSettings = appSettings;
-        _teamsConfiguration = teamsConfiguration.Value;
         _groupTutorialRepository = groupTutorialRepository;
         _courseRepository = courseRepository;
         _dateTime = dateTime;
@@ -106,6 +100,16 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             _logger.Warning("Error: Task failed with error {@error}", DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
 
             return Result.Failure<List<TeamMembershipResponse>>(DomainErrors.LinkedSystems.Teams.TeamNotFoundInDatabase);
+        }
+
+        TeamsConfiguration? teamsConfiguration = await _appSettings.Teams(cancellationToken);
+
+        if (teamsConfiguration is null)
+        {
+            _logger
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(TeamsConfiguration)));
+
+            return Result.Failure<List<TeamMembershipResponse>>(ApplicationErrors.InvalidConfiguration(nameof(TeamsConfiguration)));
         }
 
         CoversConfiguration? coversConfiguration = await _appSettings.Covers(cancellationToken);
@@ -139,15 +143,25 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             {
                 List<TeamMembershipResponse.TeamMembershipChannelResponse> staffChannels = new();
 
-                foreach (var grade in _teamsConfiguration.StudentTeamChannelOwnerIds)
+                bool ownerExists = teamsConfiguration.StudentChannelOwners.TryGetValue(staffMember, out List<Grade>? ownerGrades);
+
+                if (ownerExists)
                 {
-                    if (grade.Value.Contains(staffMember.EmployeeId))
-                        staffChannels.Add(new ($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Owner.Value));
-                    else
-                        staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Member.Value));
+                    foreach (Grade grade in Enum.GetValues<Grade>())
+                    {
+                        if (ownerGrades!.Contains(grade))
+                            staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
+                        else
+                            staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
+                    }
+                }
+                else
+                {
+                    foreach (Grade grade in Enum.GetValues<Grade>())
+                        staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
                 }
 
-                if (_teamsConfiguration.StudentTeamOwnerIds.Contains(staffMember.EmployeeId))
+                if (teamsConfiguration.StudentTeamOwners.ContainsKey(staffMember))
                 {
                     TeamMembershipResponse entry = new(
                         team.Id,
@@ -568,42 +582,43 @@ internal sealed class GetTeamMembershipByIdQueryHandler
         }
 
         // Mandatory Owners
-        List<EmployeeId> mandatoryOwners = _teamsConfiguration.MandatoryOwnerIds;
-
-        if (mandatoryOwners.Count > 0)
+        if (teamsConfiguration.MandatoryOwners.Count > 0)
         {
-            foreach (EmployeeId staffId in mandatoryOwners)
+            string[] tokens = team.Description.Split(';');
+
+            Grade grade = Grade.SpecialProgram;
+
+            foreach (var token in tokens)
             {
-                StaffMember? mandatoryOwner = await _staffRepository.GetByEmployeeId(staffId, cancellationToken);
+                if (grade == Grade.SpecialProgram)
+                    Enum.TryParse(token, true, out grade);
+            }
 
-                if (mandatoryOwner is null) continue;
+            foreach (var mandatoryOwner in teamsConfiguration.MandatoryOwners)
+            {
+                if (grade != Grade.SpecialProgram && !mandatoryOwner.Value.Contains(grade))
+                    continue;
 
-                TeamMembershipResponse lastEntry = new(
+                TeamMembershipResponse mandatoryOwnerEntry = new(
                     team.Id,
-                    mandatoryOwner.EmailAddress.Email,
+                    mandatoryOwner.Key.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value);
 
-                if (returnData.All(value => value.EmailAddress != lastEntry.EmailAddress))
-                    returnData.Add(lastEntry);
+                if (returnData.All(value => value.EmailAddress != mandatoryOwnerEntry.EmailAddress))
+                    returnData.Add(mandatoryOwnerEntry);
             }
         }
         else
         {
-            List<string> standardOwners =
-            [
-                "michael.necovski2@det.nsw.edu.au",
-                "benjamin.hillsley@det.nsw.edu.au"
-            ];
-
-            foreach (string owner in standardOwners)
+            foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
             {
-                TeamMembershipResponse entry = new(
+                TeamMembershipResponse mandatoryOwnerEntry = new(
                     team.Id,
                     owner,
                     TeamsMembershipLevel.Owner.Value);
 
-                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                    returnData.Add(entry);
+                if (returnData.All(value => value.EmailAddress != mandatoryOwnerEntry.EmailAddress))
+                    returnData.Add(mandatoryOwnerEntry);
             }
         }
 

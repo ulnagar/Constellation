@@ -4,7 +4,6 @@ namespace Constellation.Infrastructure.Jobs;
 using Application.Domains.AppSettings.Models;
 using Application.DTOs;
 using Application.Extensions;
-using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
@@ -27,10 +26,8 @@ using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
 using Core.Primitives;
 using Core.Shared;
-using Microsoft.Extensions.Options;
 using Serilog.Context;
 using System.Globalization;
-using System.Management.Automation;
 using System.Threading;
 
 internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
@@ -38,6 +35,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
     private readonly ISentralGateway _sentralGateway;
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
+    private readonly IAppSettingsService _appSettings;
     private readonly IOfferingRepository _offeringRepository;
     private readonly ITutorialRepository _tutorialRepository;
     private readonly IPeriodRepository _periodRepository;
@@ -46,11 +44,12 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
     private Student _student;
     private List<DateOnly> _excludedDates = [];
     private Dictionary<StudentReferenceNumber, List<SentralPeriodAbsenceDto>> _periodAbsenceCache = [];
-    private readonly AppConfiguration _configuration;
+    private AbsencesConfiguration? _configuration;
+
     private Guid JobId { get; set; }
 
     public AbsenceProcessingJob(
-        IOptions<AppConfiguration> configuration,
+        IAppSettingsService appSettings,
         IOfferingRepository offeringRepository,
         ITutorialRepository tutorialRepository,
         IPeriodRepository periodRepository,
@@ -59,7 +58,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         IEmailService emailService, 
         ILogger logger)
     {
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _offeringRepository = offeringRepository;
         _tutorialRepository = tutorialRepository;
         _periodRepository = periodRepository;
@@ -75,6 +74,18 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         JobId = jobId;
         _student = student;
         LogContext.PushProperty(nameof(JobId), JobId);
+
+        if (_configuration is null)
+        {
+            _configuration = await _appSettings.Absences(cancellationToken);
+
+            if (_configuration is null)
+            {
+                _logger.Information(" - Configuration missing or unavailable. Skipping.");
+
+                return [];
+            }
+        }
 
         _logger.Information("{id}: Scanning student {student} ({grade})", JobId, student.Name.DisplayName, student.CurrentEnrolment?.Grade.AsName());
 
@@ -355,7 +366,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             firstAbsence.MergeAbsence(secondAbsence);
                         }
 
-                        foreach (Absence newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _configuration.Absences.PartialLengthThreshold).ToList())
+                        foreach (Absence newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _configuration!.PartialLengthThreshold).ToList())
                         {
                             if (cancellationToken.IsCancellationRequested)
                                 return returnAbsences;
@@ -395,8 +406,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                                             newResponse.Explanation);
                                     }
                                 }
-
-                                existingAbsences = null;
                             }
                             else
                             {
@@ -411,8 +420,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             }
                         }
                     }
-
-                    periods = null;
                 }
 
                 foreach (Tutorial enrolledTutorial in enrolledTutorials)
@@ -549,7 +556,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             firstAbsence.MergeAbsence(secondAbsence);
                         }
 
-                        foreach (Absence newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _configuration.Absences.PartialLengthThreshold).ToList())
+                        foreach (Absence newAbsence in detectedAbsences.Where(absence => absence.AbsenceLength > _configuration!.PartialLengthThreshold).ToList())
                         {
                             if (cancellationToken.IsCancellationRequested)
                                 return returnAbsences;
@@ -586,8 +593,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                                         }
                                     }
                                 }
-
-                                existingAbsences = null;
                             }
                             else
                             {
@@ -602,16 +607,10 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                             }
                         }
                     }
-
-                    periods = null;
                 }
             }
-
-            enrolledOfferings = null;
         }
 
-        pxpAbsences = null;
-        attendanceAbsences = null;
         _student = null;
 
         return returnAbsences;
@@ -913,13 +912,28 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         }
 
         // Create an object to save this data to the database.
-        Absence absenceRecord = CreateAbsence(
+        Absence? absenceRecord = CreateAbsence(
             [absence],
             attendanceAbsence,
             courseEnrolmentId, 
             AbsenceType.Partial,
             AbsenceReason.FromValue(absence.Reason),
             periodGroup);
+
+        if (absenceRecord is null)
+        {
+            _logger
+                .ForContext(nameof(SentralPeriodAbsenceDto), absence, true)
+                .Warning("{id}: Student {student} ({grade}): Failed to create absence record for {Type} absence on {Date} - {PeriodName}", 
+                    JobId, 
+                    _student.Name.DisplayName, 
+                    _student.CurrentEnrolment?.Grade.AsName(), 
+                    AbsenceType.Partial, 
+                    absence.Date.ToShortDateString(), 
+                    absence.Period);
+
+            return null;
+        }
 
         if (absenceRecord.AbsenceLength != absence.MinutesAbsent)
         {
@@ -932,7 +946,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
         }
 
         // If this absence was explained using an Accepted Partial Absence Reason, then the absence should be created as explained
-        if (_configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
+        if (_configuration!.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
         {
             // This absence has been externally explained
             absenceRecord.AddResponse(
@@ -965,7 +979,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 existingAbsence.UpdateLastSeen();
 
                 // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                if (!existingAbsence.Explained && _configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
+                if (!existingAbsence.Explained && _configuration.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
                 {
                     _logger.Information("{id}: Student {student} ({grade}): Found external explanation for {Type} absence on {Date} - {PeriodName}", JobId, _student.Name.DisplayName, _student.CurrentEnrolment?.Grade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
@@ -979,9 +993,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     }
                 }
             }
-
-            existingAbsences = null;
-            absenceRecord = null;
 
             return null;
         }
@@ -1009,7 +1020,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             return null;
 
         // Create an object to save this data to the database.
-        Absence absenceRecord = CreateAbsence(
+        Absence? absenceRecord = CreateAbsence(
             [absence],
             attendanceAbsence,
             tutorialId,
@@ -1017,8 +1028,23 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             AbsenceReason.FromValue(absence.Reason),
             periodGroup);
 
+        if (absenceRecord is null)
+        {
+            _logger
+                .ForContext(nameof(SentralPeriodAbsenceDto), absence, true)
+                .Warning("{id}: Student {student} ({grade}): Failed to create absence record for {Type} absence on {Date} - {PeriodName}", 
+                    JobId, 
+                    _student.Name.DisplayName, 
+                    _student.CurrentEnrolment?.Grade.AsName(),
+                    AbsenceType.Partial, 
+                    absence.Date.ToShortDateString(), 
+                    absence.Period);
+
+            return null;
+        }
+        
         // If this absence was explained using an Accepted Partial Absence Reason, then the absence should be created as explained
-        if (_configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
+        if (_configuration!.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
         {
             // This absence has been externally explained
             absenceRecord.AddResponse(
@@ -1051,7 +1077,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                 existingAbsence.UpdateLastSeen();
 
                 // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                if (!existingAbsence.Explained && _configuration.Absences.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
+                if (!existingAbsence.Explained && _configuration.DiscountedPartialReasons.Contains(absenceRecord.AbsenceReason))
                 {
                     _logger.Information("{id}: Student {student} ({grade}): Found external explanation for {Type} absence on {Date} - {PeriodName}", JobId, _student.Name.DisplayName, _student.CurrentEnrolment?.Grade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
@@ -1065,9 +1091,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     }
                 }
             }
-
-            existingAbsences = null;
-            absenceRecord = null;
 
             return null;
         }
@@ -1099,6 +1122,19 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             AbsenceType.Whole, 
             reason, 
             periodGroup);
+
+        if (absenceRecord is null)
+        {
+            _logger
+                .Warning("{id}: Student {student} ({grade}): Failed to create absence record for {Type} absence on {Date}",
+                    JobId,
+                    _student.Name.DisplayName,
+                    _student.CurrentEnrolment?.Grade.AsName(),
+                    AbsenceType.Whole,
+                    absencesToProcess.First().Date.ToShortDateString());
+
+            return null;
+        }
 
         // Find a webAttend absence that covers this set
         SentralPeriodAbsenceDto? attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
@@ -1139,7 +1175,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     existingAbsence.UpdateLastSeen();
 
                     // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                    if (existingAbsences.All(innerAbsence => !innerAbsence.Explained) && _configuration.Absences.DiscountedWholeReasons.Contains(reason))
+                    if (existingAbsences.All(innerAbsence => !innerAbsence.Explained) && _configuration!.DiscountedWholeReasons.Contains(reason))
                     {
                         _logger.Information("{id}: Student {student} ({grade}): Found external explanation for {Type} absence on {Date} - {PeriodName}", JobId, _student.Name.DisplayName, _student.CurrentEnrolment?.Grade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
@@ -1156,11 +1192,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                         }
                     }
                 }
-
-                existingAbsences = null;
             }
-
-            absenceRecord = null;
 
             return null;
         }
@@ -1172,7 +1204,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
         // If all the parts of this whole absence have explained statuses, then record the explanation
         if (absencesToProcess.All(absence =>
-                _configuration.Absences.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason)) ||
+                _configuration!.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason)) ||
                 absence.Reason.Equals(AbsenceReason.SharedEnrolment)))
         {
             // This absence has been externally explained
@@ -1215,8 +1247,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     }
                 }
             }
-
-            existingAbsences = null;
         }
         else
         {
@@ -1258,6 +1288,19 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
             reason,
             periodGroup);
 
+        if (absenceRecord is null)
+        {
+            _logger
+                .Warning("{id}: Student {student} ({grade}): Failed to create absence record for {Type} absence on {Date}",
+                    JobId,
+                    _student.Name.DisplayName,
+                    _student.CurrentEnrolment?.Grade.AsName(),
+                    AbsenceType.Whole,
+                    absencesToProcess.First().Date.ToShortDateString());
+
+            return null;
+        }
+
         // Find a webAttend absence that covers this set
         SentralPeriodAbsenceDto? attendanceAbsence = SelectBestWebAttendEntryForWholeAbsence(
             absencesToProcess,
@@ -1297,7 +1340,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     existingAbsence.UpdateLastSeen();
 
                     // If the new absence is explained with an accepted reason, and the existing absences are not, then update them to signify they were changed on Sentral
-                    if (existingAbsences.All(innerAbsence => !innerAbsence.Explained) && _configuration.Absences.DiscountedWholeReasons.Contains(reason))
+                    if (existingAbsences.All(innerAbsence => !innerAbsence.Explained) && _configuration!.DiscountedWholeReasons.Contains(reason))
                     {
                         _logger.Information("{id}: Student {student} ({grade}): Found external explanation for {Type} absence on {Date} - {PeriodName}", JobId, _student.Name.DisplayName, _student.CurrentEnrolment?.Grade.AsName(), absenceRecord.Type, absenceRecord.Date.ToShortDateString(), absenceRecord.PeriodName);
 
@@ -1314,11 +1357,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                         }
                     }
                 }
-
-                existingAbsences = null;
             }
-
-            absenceRecord = null;
 
             return null;
         }
@@ -1330,7 +1369,7 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
 
         // If all the parts of this whole absence have explained statuses, then record the explanation
         if (absencesToProcess.All(absence =>
-                _configuration.Absences.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason)) ||
+                _configuration!.DiscountedWholeReasons.Contains(AbsenceReason.FromValue(absence.Reason)) ||
                 absence.Reason.Equals(AbsenceReason.SharedEnrolment, StringComparison.InvariantCultureIgnoreCase)))
         {
             // This absence has been externally explained
@@ -1373,8 +1412,6 @@ internal sealed class AbsenceProcessingJob : IAbsenceProcessingJob
                     }
                 }
             }
-
-            existingAbsences = null;
         }
         else
         {

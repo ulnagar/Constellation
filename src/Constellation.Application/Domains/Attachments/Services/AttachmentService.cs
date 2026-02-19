@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attachments.Services;
 
-using AppSettings.Models;
+using Core.Errors;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
 using Core.Models.Attachments.Errors;
@@ -21,16 +21,16 @@ using System.Threading.Tasks;
 internal sealed class AttachmentService : IAttachmentService
 {
     private readonly IAttachmentRepository _attachmentRepository;
-    private readonly AppConfiguration.AttachmentsConfiguration _configuration;
+    private readonly FileSystemGatewayConfiguration _configuration;
     private readonly ILogger _logger;
 
     public AttachmentService(
         IAttachmentRepository attachmentRepository,
-        IOptions<AppConfiguration> configuration,
+        IOptions<FileSystemGatewayConfiguration> configuration,
         ILogger logger)
     {
         _attachmentRepository = attachmentRepository;
-        _configuration = configuration.Value.Attachments;
+        _configuration = configuration.Value;
         _logger = logger.ForContext<IAttachmentService>();
     }
 
@@ -39,7 +39,7 @@ internal sealed class AttachmentService : IAttachmentService
         string linkId,
         CancellationToken cancellationToken = default)
     {
-        Attachment record = await _attachmentRepository.GetByTypeAndLinkId(type, linkId, cancellationToken);
+        Attachment? record = await _attachmentRepository.GetByTypeAndLinkId(type, linkId, cancellationToken);
         if (record is null)
         {
             _logger
@@ -92,7 +92,7 @@ internal sealed class AttachmentService : IAttachmentService
         bool overwrite = false,
         CancellationToken cancellationToken = default)
     {
-        bool useDisk = _configuration is not null;
+        bool useDisk = _configuration.IsConfigured();
 
         SHA256 sha = SHA256.Create();
         byte[] checksum = sha.ComputeHash(fileData);
@@ -106,7 +106,7 @@ internal sealed class AttachmentService : IAttachmentService
                 return Result.Success();
         }
 
-        if (useDisk && fileData.Length > _configuration.MaxDBStoreSize)
+        if (useDisk && fileData.Length > _configuration.MaxDbStoreSize)
         {
             string basePath = _configuration.BaseFilePath;
 
@@ -150,8 +150,8 @@ internal sealed class AttachmentService : IAttachmentService
         if (!string.IsNullOrWhiteSpace(attachment.FilePath) && attachment.FileData != Array.Empty<byte>())
             return Result.Failure(new("Invalid Attachment", "Attachment is not eligible for remediation"));
         
-        if (_configuration is null)
-            return Result.Failure(new("Invalid Configuration", "Attachment configuration options could not be found"));
+        if (!_configuration.IsConfigured())
+            return Result.Failure(ApplicationErrors.InvalidConfiguration(nameof(FileSystemGatewayConfiguration)));
 
         string basePath = _configuration.BaseFilePath;
 
@@ -184,7 +184,7 @@ internal sealed class AttachmentService : IAttachmentService
 
     public void DeleteAttachment(Attachment attachment)
     {
-        if (attachment.FilePath is not null)
+        if (!string.IsNullOrWhiteSpace(attachment.FilePath))
         {
             if (File.Exists(attachment.FilePath))
                 File.Delete(attachment.FilePath);

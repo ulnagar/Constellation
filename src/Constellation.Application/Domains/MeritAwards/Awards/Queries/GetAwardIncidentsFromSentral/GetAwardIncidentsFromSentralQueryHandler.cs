@@ -1,16 +1,17 @@
 ﻿namespace Constellation.Application.Domains.MeritAwards.Awards.Queries.GetAwardIncidentsFromSentral;
 
 using Abstractions.Messaging;
-using Constellation.Application.Interfaces.Configuration;
+using AppSettings.Models;
+using Core.Errors;
+using Core.Models.AppSettings.Enums;
 using Core.Models.Awards;
 using Core.Shared;
 using HtmlAgilityPack;
 using Interfaces.Gateways;
-using Microsoft.Extensions.Options;
+using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,16 +19,16 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
     : IQueryHandler<GetAwardIncidentsFromSentralQuery, List<AwardIncidentResponse>>
 {
     private readonly ISentralGateway _gateway;
-    private readonly SentralGatewayConfiguration _settings;
+    private readonly IAppSettingsService _appSettings;
     private readonly ILogger _logger;
 
     public GetAwardIncidentsFromSentralQueryHandler(
         ISentralGateway gateway,
-        IOptions<SentralGatewayConfiguration> settings,
+        IAppSettingsService appSettings,
         ILogger logger)
     {
         _gateway = gateway;
-        _settings = settings.Value;
+        _appSettings = appSettings;
         _logger = logger.ForContext<GetAwardIncidentsFromSentralQuery>();
     }
 
@@ -35,16 +36,55 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
     {
         List<AwardIncidentResponse> response = new();
         
-        HtmlDocument page = await _gateway.GetAwardsListing(request.StudentId, request.Year, cancellationToken);
-        
+        HtmlDocument? page = await _gateway.GetAwardsListing(request.StudentId, request.Year, cancellationToken);
+
         if (page is null)
-            _logger.Warning("Page is null");
+        {
+            _logger
+                .ForContext(nameof(GetAwardIncidentsFromSentralQuery), request, true)
+                .ForContext(nameof(Error), ApplicationErrors.UnknownError, true)
+                .Warning("Failed to retrieve Student Awards list from Sentral");
 
-        HtmlNode awardsList = page?.DocumentNode.SelectSingleNode(_settings.XPaths.WellbeingStudentAwardsList);
+            return Result.Failure<List<AwardIncidentResponse>>(ApplicationErrors.UnknownError);
+        }
 
-        if (awardsList is null) return response;
-        
+        SentralConfiguration? awardsListPath = await _appSettings.Sentral(SentralPath.WellbeingStudentAwardsList, cancellationToken);
+
+        if (awardsListPath is null)
+        {
+            _logger
+                .ForContext(nameof(GetAwardIncidentsFromSentralQuery), request, true)
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(SentralConfiguration)), true)
+                .Warning("Failed to retrieve Student Awards list from Sentral");
+
+            return Result.Failure<List<AwardIncidentResponse>>(ApplicationErrors.InvalidConfiguration(nameof(SentralConfiguration)));
+        }
+
+        HtmlNode? awardsList = page.DocumentNode.SelectSingleNode(awardsListPath.Path);
+
+        if (awardsList is null)
+        {
+            _logger
+                .ForContext(nameof(GetAwardIncidentsFromSentralQuery), request, true)
+                .ForContext(nameof(Error), ApplicationErrors.UnknownError, true)
+                .Warning("Failed to retrieve Student Awards list from Sentral");
+
+            return Result.Failure<List<AwardIncidentResponse>>(ApplicationErrors.UnknownError);
+        }
+
         IEnumerable<HtmlNode> rows = awardsList.Descendants("tr");
+
+        SentralConfiguration? incidentDatePath = await _appSettings.Sentral(SentralPath.IncidentCreatedDate, cancellationToken);
+
+        if (incidentDatePath is null)
+        {
+            _logger
+                .ForContext(nameof(GetAwardIncidentsFromSentralQuery), request, true)
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(SentralConfiguration)), true)
+                .Warning("Failed to retrieve Student Awards list from Sentral");
+
+            return Result.Failure<List<AwardIncidentResponse>>(ApplicationErrors.InvalidConfiguration(nameof(SentralConfiguration)));
+        }
 
         foreach (HtmlNode row in rows)
         {
@@ -83,11 +123,11 @@ internal sealed class GetAwardIncidentsFromSentralQueryHandler
                         if (!string.IsNullOrWhiteSpace(href))
                         {
                             // Date the award was created (i.e. when the award was entered into Sentral)
-                            HtmlDocument incidentPage = await _gateway.GetIncidentDetailsPage(href, cancellationToken);
+                            HtmlDocument? incidentPage = await _gateway.GetIncidentDetailsPage(href, cancellationToken);
 
                             if (incidentPage is not null)
                             {
-                                HtmlNode entry = incidentPage.DocumentNode.SelectSingleNode(_settings.XPaths.IncidentCreatedDate);
+                                HtmlNode? entry = incidentPage.DocumentNode.SelectSingleNode(incidentDatePath.Path);
 
                                 if (entry is null)
                                 {

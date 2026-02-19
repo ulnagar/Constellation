@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 public interface IEmailGateway
 {
-    // Using EmailRecipient value objects
     Task<Result<MimeMessage>> Send(List<EmailRecipient> toRecipients, EmailRecipient fromRecipient, string subject, string body, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
     Task<Result<MimeMessage>> Send(List<EmailRecipient> toRecipients, string fromAddress, string subject, string body, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
     Task<Result<MimeMessage>> Send(List<EmailRecipient> toRecipients, string fromAddress, string subject, string body, ICollection<Attachment> attachments, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
@@ -21,17 +20,4 @@ public interface IEmailGateway
     Task<Result<MimeMessage>> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, List<EmailRecipient> bccRecipients, string fromAddress, string subject, string body, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
     Task<Result<MimeMessage>> Send(List<EmailRecipient> toRecipients, List<EmailRecipient> ccRecipients, List<EmailRecipient> bccRecipients, string fromAddress, string subject, string body, ICollection<Attachment> attachments, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
     Task<Result<MimeMessage>> Send(List<EmailRecipient> toRecipients, EmailRecipient fromAddress, string subject, string body, ICollection<Attachment> attachments, MessagePriority priority = MessagePriority.Normal, CancellationToken cancellationToken = default);
-
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, string calendarInfo, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, string calendarInfo, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, string calendarInfo, CancellationToken cancellationToken = default);
-    //Task<MimeMessage> Send(IDictionary<string, string> toAddresses, IDictionary<string, string> ccAddresses, IDictionary<string, string> bccAddresses, string fromAddress, string subject, string body, ICollection<Attachment> attachments, string calendarInfo, CancellationToken cancellationToken = default);
 }

@@ -1,80 +1,75 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
-using Constellation.Application.DTOs;
+using Application.Domains.AppSettings.Models;
+using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Shared;
-using Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
+using Core.Errors;
+using Core.Shared;
 using Core.ValueObjects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Templates.Views.Emails.RollMarking;
 
 public sealed partial class Service : IEmailService
 {
     public async Task SendDailyRollMarkingReport(
     List<RollMarkingEmailDto> entries,
     DateOnly reportDate,
-    Dictionary<string, string> recipients)
+    List<EmailRecipient> recipients)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendDailyRollMarkingReport))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return;
+        }
+
         DailyReportEmailViewModel viewModel = new()
         {
             Preheader = "This is an automated email. No action is required outside of school hours.",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}",
             RollEntries = entries
         };
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = new();
-
-        foreach (KeyValuePair<string, string> entry in recipients)
-        {
-            if (toRecipients.Any(recipient => recipient.Email == entry.Value))
-            {
-                continue;
-            }
-
-            Result<EmailRecipient> recipient = EmailRecipient.Create(entry.Key, entry.Value);
-
-            if (recipient.IsSuccess)
-                toRecipients.Add(recipient.Value);
-        }
-
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, viewModel.Title, body);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body);
     }
 
     public async Task SendNoRollMarkingReport(
         DateOnly reportDate,
-        Dictionary<string, string> recipients)
+        List<EmailRecipient> recipients)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendNoRollMarkingReport))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return;
+        }
+
         DailyReportEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}"
         };
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/NoReportEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = new();
-
-        foreach (KeyValuePair<string, string> entry in recipients)
-        {
-            if (toRecipients.Any(recipient => recipient.Email == entry.Value))
-            {
-                continue;
-            }
-
-            Result<EmailRecipient> recipient = EmailRecipient.Create(entry.Key, entry.Value);
-
-            if (recipient.IsSuccess)
-                toRecipients.Add(recipient.Value);
-        }
-
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, viewModel.Title, body);
+        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body);
     }
 }

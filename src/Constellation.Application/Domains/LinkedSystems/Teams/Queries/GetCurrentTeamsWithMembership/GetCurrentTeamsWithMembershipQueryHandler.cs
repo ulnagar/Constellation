@@ -8,6 +8,7 @@ using Constellation.Core.Models.LinkedSystems;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Enums;
+using Core.Errors;
 using Core.Extensions;
 using Core.Models.AppSettings.Enums;
 using Core.Models.Casuals;
@@ -25,7 +26,6 @@ using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
-using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -123,24 +123,46 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         {
             List<TeamWithMembership.Member> members = [];
 
+            string[] tokens = team.Description.Split(';');
+
+            Grade grade = Grade.SpecialProgram;
+
+            foreach (var token in tokens)
+            {
+                if (grade == Grade.SpecialProgram)
+                    Enum.TryParse(token, true, out grade);
+            }
+            
             // Student Teams
-            if (team.Description.Split(';').Contains("STUDENT"))
-                AddUnique(members, ProcessStudentTeam(students, staff));
+            if (tokens.Contains("STUDENT"))
+            {
+                Result<List<TeamWithMembership.Member>> studentTeamMembers = await ProcessStudentTeam(students, staff);
+
+                if (studentTeamMembers.IsFailure)
+                    return Result.Failure<List<TeamWithMembership>>(studentTeamMembers.Error);
+
+                AddUnique(members, studentTeamMembers.Value);
+            }
 
             // Class Teams
-            if (team.Description.Split(';').Contains("CLASS"))
+            if (tokens.Contains("CLASS"))
                 AddUnique(members, await ProcessClassTeam(team, casuals, covers, offerings, students, staff, coversConfiguration, cancellationToken));
 
             // Tutorial Teams
-            if (team.Description.Split(';').Contains("TUTORIAL"))
+            if (tokens.Contains("TUTORIAL"))
                 AddUnique(members, await ProcessTutorialTeam(team, tutorials, students, staff, cancellationToken));
 
             // Group Tutorial Teams
-            if (team.Description.Split(';').Contains("GTUT"))
+            if (tokens.Contains("GTUT"))
                 AddUnique(members, await ProcessGroupTutorialTeam(team, students, staff, cancellationToken));
 
             // Mandatory Owners
-            AddUnique(members, ProcessMandatoryOwners(staff));
+            Result<List<TeamWithMembership.Member>> mandatoryOwners = await ProcessMandatoryOwners(grade);
+
+            if (mandatoryOwners.IsFailure)
+                return Result.Failure<List<TeamWithMembership>>(mandatoryOwners.Error);
+
+            AddUnique(members, mandatoryOwners.Value);
 
             teams.Add(new(
                 team.Id,
@@ -685,20 +707,29 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         return members;
     }
 
-    private List<TeamWithMembership.Member> ProcessMandatoryOwners(List<StaffMember> staff)
+    private async Task<Result<List<TeamWithMembership.Member>>> ProcessMandatoryOwners(Grade grade)
     {
         List<TeamWithMembership.Member> members = [];
 
-        if (_teamConfiguration.MandatoryOwnerIds.Count > 0)
-        {
-            foreach (EmployeeId staffId in _teamConfiguration.MandatoryOwnerIds)
-            {
-                StaffMember? mandatoryOwner = staff.FirstOrDefault(staffMember => staffMember.EmployeeId == staffId);
+        TeamsConfiguration? configuration = await _appSettings.Teams();
 
-                if (mandatoryOwner is null) continue;
+        if (configuration is null)
+        {
+            _logger
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(TeamsConfiguration)));
+
+            return Result.Failure<List<TeamWithMembership.Member>>(ApplicationErrors.InvalidConfiguration(nameof(TeamsConfiguration)));
+        }
+
+        if (configuration.MandatoryOwners.Count > 0)
+        {
+            foreach (var mandatoryOwner in configuration.MandatoryOwners)
+            {
+                if (grade != Grade.SpecialProgram && !mandatoryOwner.Value.Contains(grade))
+                    continue;
 
                 TeamWithMembership.Member mandatoryOwnerEntry = new(
-                    mandatoryOwner.EmailAddress.Email,
+                    mandatoryOwner.Key.EmailAddress.Email,
                     TeamsMembershipLevel.Owner.Value,
                     []);
 
@@ -708,13 +739,7 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         }
         else
         {
-            List<string> standardOwners = new()
-            {
-                "michael.necovski2@det.nsw.edu.au",
-                "benjamin.hillsley@det.nsw.edu.au"
-            };
-
-            foreach (string owner in standardOwners)
+            foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
             {
                 TeamWithMembership.Member entry = new(
                     owner,
@@ -729,10 +754,20 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         return members;
     }
 
-    private List<TeamWithMembership.Member> ProcessStudentTeam(List<Student> students, List<StaffMember> staff)
+    private async Task<Result<List<TeamWithMembership.Member>>> ProcessStudentTeam(List<Student> students, List<StaffMember> staff)
     {
         List<TeamWithMembership.Member> members = [];
 
+        TeamsConfiguration? configuration = await _appSettings.Teams();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(TeamsConfiguration)));
+
+            return Result.Failure<List<TeamWithMembership.Member>>(ApplicationErrors.InvalidConfiguration(nameof(TeamsConfiguration)));
+        }
+        
         foreach (var student in students)
         {
             if (student.EmailAddress == EmailAddress.None)
@@ -755,15 +790,25 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         {
             Dictionary<string, string> staffChannels = new();
 
-            foreach (var grade in _teamConfiguration.StudentTeamChannelOwnerIds)
+            bool ownerExists = configuration.StudentChannelOwners.TryGetValue(staffMember, out List<Grade>? ownerGrades);
+
+            if (ownerExists)
             {
-                if (grade.Value.Contains(staffMember.EmployeeId))
-                    staffChannels.Add($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Owner.Value);
-                else
-                    staffChannels.Add($"{_dateTime.CurrentYear} - {grade.Key.AsName()}", TeamsMembershipLevel.Member.Value);
+                foreach (Grade grade in Enum.GetValues<Grade>())
+                {
+                    if (ownerGrades!.Contains(grade))
+                        staffChannels.Add($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value);
+                    else
+                        staffChannels.Add($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value);
+                }
+            }
+            else
+            {
+                foreach (Grade grade in Enum.GetValues<Grade>())
+                    staffChannels.Add($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value);
             }
 
-            if (_teamConfiguration.StudentTeamOwnerIds.Contains(staffMember.EmployeeId))
+            if (configuration.StudentTeamOwners.ContainsKey(staffMember))
             {
                 TeamWithMembership.Member entry = new(
                     staffMember.EmailAddress.Email,

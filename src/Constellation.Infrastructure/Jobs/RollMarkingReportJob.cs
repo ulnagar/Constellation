@@ -3,21 +3,22 @@
 using Application.Domains.AppSettings.Models;
 using Application.Domains.Covers.Queries.GetClassCoversSummaryByDateAndOffering;
 using Application.Domains.Faculties.Queries.GetFacultyManagers;
-using Constellation.Application.DTOs;
-using Constellation.Application.Interfaces.Configuration;
-using Constellation.Application.Interfaces.Gateways;
+using Application.DTOs;
+using Application.Extensions;
+using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.Offerings.Repositories;
-using Constellation.Core.Models.Offerings.ValueObjects;
+using Core.Errors;
 using Core.Models.Offerings;
+using Core.Models.Offerings.Repositories;
+using Core.Models.Offerings.ValueObjects;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Subjects;
 using Core.Models.Subjects.Repositories;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
     private readonly IEmailService _emailService;
     private readonly ILogger _logger;
     private readonly IMediator _mediator;
-    private readonly AppConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
 
     public RollMarkingReportJob(
         ICourseRepository courseRepository,
@@ -43,7 +44,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
         IEmailService emailService, 
         ILogger logger, 
         IMediator mediator,
-        IOptions<AppConfiguration> configuration)
+        IAppSettingsService appSettings)
     {
         _courseRepository = courseRepository;
         _offeringRepository = offeringRepository;
@@ -52,7 +53,7 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
         _emailService = emailService;
         _logger = logger.ForContext<IRollMarkingReportJob>();
         _mediator = mediator;
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
     }
 
     public async Task StartJob(Guid jobId, CancellationToken token)
@@ -66,8 +67,18 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
         ICollection<RollMarkReportDto> entries = await _sentralService.GetRollMarkingReportAsync(date);
 
         List<RollMarkReportDto> unsubmitted = entries.Where(entry => !entry.Submitted).ToList();
-        AppConfiguration.AbsencesConfiguration absenceSettings = _configuration.Absences;
-        Dictionary<string, string> recipients;
+        AbsencesConfiguration? absenceSettings = await _appSettings.Absences(token);
+
+        if (absenceSettings is null)
+        {
+            _logger
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send Roll Marking Report");
+
+            return;
+        }
+        
+        List<EmailRecipient> recipients = [];
 
         if (unsubmitted.Count == 0)
         {
@@ -75,11 +86,15 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
             _logger.Information("{id}: {infoString}", jobId, infoString);
 
-            recipients = new();
-            foreach (string entry in absenceSettings.SendRollMarkingReportTo)
+            foreach (var contact in absenceSettings.RollMarkingReportRecipients)
             {
-                if (recipients.All(recipient => recipient.Value != entry))
-                    recipients.Add(entry, entry);
+                Result<EmailRecipient> recipient = contact.Key.GetEmailRecipient();
+
+                if (recipient.IsFailure)
+                    continue;
+
+                if (recipients.All(entry => entry.Email != recipient.Value.Email))
+                    recipients.Add(recipient.Value);
             }
             
             await _emailService.SendNoRollMarkingReport(date, recipients);
@@ -94,20 +109,20 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             if (token.IsCancellationRequested)
                 return;
 
-            if (entry.Teacher.Contains(','))
-                entry.Teacher = null;
+            if (entry.Teacher.Contains(',', StringComparison.InvariantCultureIgnoreCase))
+                entry.Teacher = string.Empty;
 
             RollMarkingEmailDto emailDto = new() { Period = entry.Period };
 
             entry.ClassName = entry.ClassName.PadLeft(7, '0');
 
-            Offering offering = await _offeringRepository.GetFromYearAndName(date.Year, entry.ClassName, token);
+            Offering? offering = await _offeringRepository.GetFromYearAndName(date.Year, entry.ClassName, token);
 
-            StaffMember teacher = null;
+            StaffMember? teacher = null;
 
             if (!string.IsNullOrWhiteSpace(entry.Teacher))
             {
-                teacher = await _staffRepository.GetFromName(entry.Teacher);
+                teacher = await _staffRepository.GetFromName(entry.Teacher, token);
             }
 
             if (offering is not null && teacher is null)
@@ -135,19 +150,24 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
             if (offering is null && teacher is null)
             {
                 // Add note that Constellation does not understand this entry and send only to Scott.
-                emailDto.Notes.Add($"Could not identify the class or the teacher from Constellation records.");
-                emailDto.Notes.Add($"No email sent to classroom teacher or head teacher.");
+                emailDto.Notes.Add("Could not identify the class or the teacher from Constellation records.");
+                emailDto.Notes.Add("No email sent to classroom teacher or head teacher.");
             }
 
             if (teacher is not null)
             {
-                emailDto.Teachers.Add(teacher.EmailAddress.Email, teacher.Name.DisplayName);
+                Result<EmailRecipient> recipient = teacher.GetEmailRecipient();
+
+                if (recipient.IsFailure)
+                    return;
+
+                emailDto.Teachers.Add(recipient.Value);
                 emailDto.TeacherName = teacher.Name.SortOrder;
             }
 
             if (offering is not null)
             {
-                Course course = await _courseRepository.GetById(offering.CourseId, token);
+                Course? course = await _courseRepository.GetById(offering.CourseId, token);
 
                 if (course is null)
                     continue;
@@ -159,15 +179,21 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
                         .ForContext(nameof(Error), headTeachersRequest.Error, true)
                         .Warning("Failed to determine Head Teachers for Faculty");
                 }
-                else
+
+                foreach (StaffMember headTeacher in headTeachersRequest.Value)
                 {
-                    emailDto.HeadTeachers = headTeachersRequest.Value
-                        .ToDictionary(member => member.EmailAddress.Email, member => member.Name.DisplayName);
+                    Result<EmailRecipient> recipient = headTeacher.GetEmailRecipient();
+
+                    if (recipient.IsFailure)
+                        continue;
+
+                    if (emailDto.HeadTeachers.All(entry => entry.Email != recipient.Value.Email))
+                        emailDto.HeadTeachers.Add(recipient.Value);
                 }
 
                 Result<List<ClassCoverSummaryByDateAndOfferingResponse>> coversRequest = await _mediator.Send(new GetClassCoversSummaryByDateAndOfferingQuery(date, offering.Id), token);
 
-                if (coversRequest.IsSuccess && coversRequest.Value.Count > 0)
+                if (coversRequest is { IsSuccess: true, Value.Count: > 0 })
                 {
                     ClassCoverSummaryByDateAndOfferingResponse classCover = coversRequest.Value.OrderBy(cover => cover.CreatedAt).Last();
 
@@ -193,53 +219,53 @@ internal sealed class RollMarkingReportJob : IRollMarkingReportJob
 
         // Send emails to teachers
         // get flattened list of teachers
-        List<KeyValuePair<string, string>> teachers = emailList.SelectMany(list => list.Teachers).Distinct().ToList();
+        List<EmailRecipient> teachers = emailList.SelectMany(list => list.Teachers).Distinct().ToList();
 
-        foreach (KeyValuePair<string, string> teacher in teachers)
+        foreach (EmailRecipient teacher in teachers)
         {
-            recipients = new();
-
-            List<RollMarkingEmailDto> emails = emailList.Where(item => item.Teachers.ContainsKey(teacher.Key)).ToList();
+            List<RollMarkingEmailDto> emails = emailList
+                .Where(item => item.Teachers.Contains(teacher))
+                .ToList();
 
             if (token.IsCancellationRequested)
                 return;
 
-            recipients.Add(teacher.Value, teacher.Key);
-
             // Email the relevant person (as outlined in the EmailSentTo field
             if (recipients.Count > 0)
-                await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
+                await _emailService.SendDailyRollMarkingReport(emails, date, [teacher]);
         }
 
         // Send emails to head teachers
-        recipients = new();
         teachers = emailList.SelectMany(list => list.HeadTeachers).Distinct().ToList();
 
-        foreach (KeyValuePair<string, string> teacher in teachers)
+        foreach (EmailRecipient teacher in teachers)
         {
-            recipients = new();
-
-            List<RollMarkingEmailDto> emails = emailList.Where(item => item.HeadTeachers.ContainsKey(teacher.Key)).ToList();
+            List<RollMarkingEmailDto> emails = emailList
+                .Where(item => item.HeadTeachers.Contains(teacher))
+                .ToList();
 
             if (token.IsCancellationRequested)
                 return;
 
-            recipients.Add(teacher.Value, teacher.Key);
-
             // Email the relevant person (as outlined in the EmailSentTo field
             if (recipients.Count > 0)
-                await _emailService.SendDailyRollMarkingReport(emails, date, recipients);
+                await _emailService.SendDailyRollMarkingReport(emails, date, [ teacher ]);
         }
 
         // Send emails to absence administrator
         if (token.IsCancellationRequested)
             return;
         
-        recipients = new();
-        foreach (string entry in absenceSettings.SendRollMarkingReportTo)
+        recipients = [];
+        foreach (var contact in absenceSettings.RollMarkingReportRecipients)
         {
-            if (recipients.All(recipient => recipient.Value != entry))
-                recipients.Add(entry, entry);
+            Result<EmailRecipient> recipient = contact.Key.GetEmailRecipient();
+
+            if (recipient.IsFailure) 
+                continue;
+
+            if (recipients.All(entry => entry.Email != recipient.Value.Email))
+                recipients.Add(recipient.Value);
         }
 
         if (recipients.Count > 0)

@@ -2,8 +2,6 @@
 namespace Microsoft.Extensions.DependencyInjection;
 
 using Constellation.Application.Clock;
-using Constellation.Application.Domains.AppSettings.Models;
-using Constellation.Application.Interfaces.Configuration;
 using Constellation.Application.Interfaces.Jobs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
@@ -33,12 +31,6 @@ public static class ServicesRegistration
     {
         // Add Logging
         services.AddSingleton(Log.Logger);
-
-        // Add IOptions
-        services.AddOptions<AppConfiguration>();
-        services.Configure<AppConfiguration>(configuration.GetSection(AppConfiguration.Section));
-        services.AddOptions<ParentPortalConfiguration>();
-        services.Configure<ParentPortalConfiguration>(configuration.GetSection(ParentPortalConfiguration.Section));
 
         // Add Constellation Context
 
@@ -79,12 +71,6 @@ public static class ServicesRegistration
         });
 
         services.AddScoped<ITrackItSyncJob, TrackItSyncJob>();
-
-        // Add Hangfire Authorization Filter
-        //services.Scan(selector =>
-        //    selector
-        //        .FromAssemblies(Constellation.Application.AssemblyReference.Assembly)
-        //        .RegisterHandlers(typeof(INotificationHandler<>)));
 
         services.Decorate(typeof(INotificationHandler<>), typeof(IdempotentDomainEventHandler<>));
 
@@ -127,6 +113,7 @@ public static class ServicesRegistration
         services.AddSMSExternalService(configuration, environment);
         services.AddTeamsExternalService(configuration);
         services.AddLissServer(configuration, environment);
+        services.AddFileSystemService(configuration);
 
         // Add Email Template Engine
 

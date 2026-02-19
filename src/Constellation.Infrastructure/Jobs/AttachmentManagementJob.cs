@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
-using Application.Domains.AppSettings.Models;
 using Application.Interfaces.Configuration;
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
@@ -24,7 +23,7 @@ using System.Security.Cryptography;
 
 internal sealed class AttachmentManagementJob : IAttachmentManagementJob
 {
-    private readonly AppConfiguration.AttachmentsConfiguration _configuration;
+    private readonly FileSystemGatewayConfiguration _configuration;
     private readonly IAttachmentRepository _attachmentRepository;
     private readonly IAttachmentService _attachmentService;
     private readonly IStudentRepository _studentRepository;
@@ -36,7 +35,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
     private readonly ILogger _logger;
 
     public AttachmentManagementJob(
-        IOptions<AppConfiguration> configuration,
+        IOptions<FileSystemGatewayConfiguration> configuration,
         IAttachmentRepository attachmentRepository,
         IAttachmentService attachmentService,
         IStudentRepository studentRepository,
@@ -47,7 +46,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _configuration = configuration.Value.Attachments;
+        _configuration = configuration.Value;
         _attachmentRepository = attachmentRepository;
         _attachmentService = attachmentService;
         _studentRepository = studentRepository;
@@ -62,7 +61,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
         // Move oversize attachments from db to file system
-        List<Attachment> forRelocation = await _attachmentRepository.GetSubsetOverSizeInDb(_configuration.MaxDBStoreSize, 10, cancellationToken);
+        List<Attachment> forRelocation = await _attachmentRepository.GetSubsetOverSizeInDb(_configuration.MaxDbStoreSize, 10, cancellationToken);
 
         foreach (Attachment attachment in forRelocation)
         {
@@ -165,7 +164,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
 
         foreach (var student in students)
         {
-            Attachment photoAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.StudentPhoto, student.Id.ToString(), cancellationToken);
+            Attachment? photoAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.StudentPhoto, student.Id.ToString(), cancellationToken);
 
             if (photoAttachment is not null)
             {
@@ -181,7 +180,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
 
             foreach (StudentAward awardRecord in awardRecords.Where(entry => entry.Type == StudentAward.Astra))
             {
-                Attachment awardAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.AwardCertificate, awardRecord.Id.ToString(), cancellationToken);
+                Attachment? awardAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.AwardCertificate, awardRecord.Id.ToString(), cancellationToken);
 
                 if (awardAttachment is not null)
                 {
@@ -197,7 +196,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
 
             foreach (AcademicReport reportRecord in reportRecords)
             {
-                Attachment reportAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.StudentReport, reportRecord.Id.ToString(), cancellationToken);
+                Attachment? reportAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.StudentReport, reportRecord.Id.ToString(), cancellationToken);
 
                 if (reportAttachment is not null)
                 {
@@ -218,7 +217,7 @@ internal sealed class AttachmentManagementJob : IAttachmentManagementJob
         {
             foreach (var submission in assignment.Submissions)
             {
-                Attachment assignmentAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.CanvasAssignmentSubmission, submission.Id.ToString(), cancellationToken);
+                Attachment? assignmentAttachment = await _attachmentRepository.GetByTypeAndLinkId(AttachmentType.CanvasAssignmentSubmission, submission.Id.ToString(), cancellationToken);
 
                 if (assignmentAttachment is not null)
                 {

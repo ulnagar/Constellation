@@ -1,25 +1,26 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
+using Application.Domains.AppSettings.Models;
 using Application.Domains.LinkedSystems.Canvas.Commands.ProcessCanvasOperation;
 using Application.Domains.LinkedSystems.Canvas.Models;
 using Application.Domains.LinkedSystems.Canvas.Queries.GetCourseMembershipByCourseCode;
-using Application.Interfaces.Configuration;
 using Application.Interfaces.Gateways;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Jobs;
 using Core.Abstractions.Clock;
+using Core.Errors;
 using Core.Models.Canvas.Models;
 using Core.Models.Operations;
 using Core.Shared;
 using MediatR;
-using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
 {
-    private readonly CanvasGatewayConfiguration _configuration;
+    private readonly IAppSettingsService _appSettings;
     private readonly ICanvasOperationsRepository _operationsRepository;
     private readonly ICanvasGateway _gateway;
     private readonly IDateTimeProvider _dateTime;
@@ -27,14 +28,14 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
     private readonly ILogger _logger;
 
     public CanvasAccessAuditJob(
-        IOptions<CanvasGatewayConfiguration> configuration,
+        IAppSettingsService appSettings,
         ICanvasOperationsRepository operationsRepository,
         ICanvasGateway gateway,
         IDateTimeProvider dateTime,
         ISender mediator,
         ILogger logger)
     {
-        _configuration = configuration.Value;
+        _appSettings = appSettings;
         _operationsRepository = operationsRepository;
         _gateway = gateway;
         _dateTime = dateTime;
@@ -51,9 +52,20 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
         List<CanvasOperation> operations = await _operationsRepository.AllToProcess(cancellationToken);
         
         _logger.Information("Found {count} operations to process.", operations.Count);
-        
+
+        CanvasConfiguration? configuration = await _appSettings.Canvas(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(CanvasConfiguration)), true)
+                .Warning("Error getting expected members of Canvas Course");
+
+            return;
+        }
+
         foreach (CanvasOperation operation in operations)
-            await _mediator.Send(new ProcessCanvasOperationCommand(operation.Id, _configuration.UseSections), cancellationToken);
+            await _mediator.Send(new ProcessCanvasOperationCommand(operation.Id, configuration.UseSections), cancellationToken);
 
         _logger.Information("Auditing Canvas Enrolments");
 
@@ -86,7 +98,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
             {
                 _logger.Information("Adding {user} to {course} in section {section}", missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.SectionId);
 
-                Result enrolAttempt = _configuration.UseSections switch
+                Result enrolAttempt = configuration.UseSections switch
                 {
                     true when missingEnrolment.PermissionLevel == CanvasPermissionLevel.Student && missingEnrolment.SectionId != CanvasSectionCode.Empty =>
                         await _gateway.EnrolToSection(missingEnrolment.UserId, canvasCourse.CourseCode, missingEnrolment.SectionId, missingEnrolment.PermissionLevel, cancellationToken),
@@ -107,7 +119,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                     continue;
                 }
 
-                if (!_configuration.UseGroups || missingEnrolment.PermissionLevel != CanvasPermissionLevel.Student) continue;
+                if (!configuration.UseGroups || missingEnrolment.PermissionLevel != CanvasPermissionLevel.Student) continue;
 
                 _logger.Information("Adding {user} to group {group} in course {course}", missingEnrolment.UserId, missingEnrolment.SectionId, canvasCourse.CourseCode);
                 
@@ -146,7 +158,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                 }
             }
 
-            if (_configuration.UseGroups)
+            if (configuration.UseGroups)
             {
                 foreach (var group in calculatedMembers.Value.GroupBy(entry => entry.SectionId))
                 {
@@ -204,7 +216,7 @@ internal sealed class CanvasAccessAuditJob : ICanvasAccessAuditJob
                 }
             }
 
-            if (!_configuration.UseSections) continue;
+            if (!configuration.UseSections) continue;
 
             foreach (var calculatedMember in calculatedMembers.Value.GroupBy(entry => entry.UserId))
             {

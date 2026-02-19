@@ -4,6 +4,13 @@ CURRENT TASK
 SSO: Integrate OIDC to enable connection to DoE SSO platform
 	https://learn.microsoft.com/en-us/aspnet/core/security/authentication/configure-oidc-web-authentication?view=aspnetcore-10.0
 
+AppSetting Realignment:
+	Canvas - UseGroups, UseSections, CourseAdmins
+	Sentral - ContactPreference, XPaths
+	Teams - MandatoryOwnerIds, StudentTeamOwnerIds, StudentTeamChannelOwnerIds
+
+
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 FUTURE PLANS
 ~~~~~~~~~~~~~~~~~~~~~~~~

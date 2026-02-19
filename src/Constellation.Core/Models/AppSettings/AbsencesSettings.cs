@@ -6,12 +6,12 @@ using StaffMembers.Identifiers;
 
 public sealed class AbsencesSettings
 {
-    private readonly List<AbsenceReason> _ignoredWholeReasons = [];
-    private readonly List<AbsenceReason> _ignoredPartialReasons = [];
+    private readonly List<AbsenceReason> _discountedWholeReasons = [];
+    private readonly List<AbsenceReason> _discountedPartialReasons = [];
     private readonly List<StaffMemberLink> _rollMarkingReportRecipients = [];
 
     private AbsencesSettings() { }
-
+    
     public AbsencesSettings(
         int partialLengthThreshold,
         string contactName,
@@ -29,35 +29,35 @@ public sealed class AbsencesSettings
     public string ContactTitle { get; private set; } = string.Empty;
     public string ContactEmail { get; private set; } = string.Empty;
 
-    public List<AbsenceReason> DiscountedWholeReasons => _ignoredWholeReasons;
-    public List<AbsenceReason> DiscountedPartialReasons => _ignoredPartialReasons;
+    public List<AbsenceReason> DiscountedWholeReasons => _discountedWholeReasons;
+    public List<AbsenceReason> DiscountedPartialReasons => _discountedPartialReasons;
     public List<StaffMemberLink> RollMarkingReportRecipients => _rollMarkingReportRecipients;
 
     public void AddWholeReason(AbsenceReason reason)
     {
-        bool existingEntry = _ignoredWholeReasons.Contains(reason);
+        bool existingEntry = _discountedWholeReasons.Contains(reason);
 
         if (existingEntry)
             return;
 
-        _ignoredWholeReasons.Add(reason);
+        _discountedWholeReasons.Add(reason);
     }
 
     public void RemoveWholeReason(AbsenceReason reason) =>
-        _ignoredWholeReasons.Remove(reason);
+        _discountedWholeReasons.Remove(reason);
 
     public void AddPartialReason(AbsenceReason reason)
     {
-        bool existingEntry = _ignoredPartialReasons.Contains(reason);
+        bool existingEntry = _discountedPartialReasons.Contains(reason);
 
         if (existingEntry)
             return;
 
-        _ignoredPartialReasons.Add(reason);
+        _discountedPartialReasons.Add(reason);
     }
 
     public void RemovePartialReason(AbsenceReason reason) =>
-        _ignoredPartialReasons.Remove(reason);
+        _discountedPartialReasons.Remove(reason);
 
     public void AddReportRecipient(StaffId staffId, List<Grade> grades)
     {

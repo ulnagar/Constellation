@@ -1,9 +1,11 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
+using Application.Domains.AppSettings.Models;
 using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Application.Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceExplanation;
 using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
+using Core.Errors;
 using Core.Models;
 using Core.Models.Students;
 using Core.Shared;
@@ -12,6 +14,7 @@ using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Absences;
 
@@ -19,11 +22,23 @@ public sealed partial class Service : IEmailService
 {
     public async Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendAbsenceReasonToSchoolAdmin))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return;
+        }
+
         AbsenceExplanationToSchoolAdminEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = "Absence Explanation Received",
             StudentName = notificationEmail.StudentName
         };
@@ -63,11 +78,23 @@ public sealed partial class Service : IEmailService
 
     public async Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences();
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendNonResidentialParentAbsenceReasonToSchoolAdmin))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return;
+        }
+
         NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = "Absence Explanation Received",
             StudentName = notificationEmail.StudentName
         };
@@ -112,12 +139,24 @@ public sealed partial class Service : IEmailService
        List<EmailRecipient> emailAddresses,
        CancellationToken cancellationToken = default)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendParentWholeAbsenceAlert))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+        }
+
         ParentAbsenceNotificationEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
-            Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
+            Title = "[Aurora College] Absentee Notice - Compulsory School Attendance",
             ParentName = familyName,
             StudentFirstName = student.Name.PreferredName,
             Absences = absences
@@ -152,12 +191,24 @@ public sealed partial class Service : IEmailService
         List<EmailRecipient> emailAddresses,
         CancellationToken cancellationToken = default)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendParentAbsenceDigest))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+        }
+
         ParentAbsenceDigestEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
-            Title = $"[Aurora College] Absentee Notice - Compulsory School Attendance",
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
+            Title = "[Aurora College] Absentee Notice - Compulsory School Attendance",
             StudentFirstName = student.Name.PreferredName,
             WholeAbsences = wholeAbsences,
             PartialAbsences = partialAbsences,
@@ -189,14 +240,26 @@ public sealed partial class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendStudentPartialAbsenceExplanationRequest))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+        }
+
         StudentAbsenceExplanationRequestEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
-            Title = $"[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
+            Title = "[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
             StudentName = student.Name.DisplayName,
-            Link = $"https://acos.aurora.nsw.edu.au/",
+            Link = "https://acos.aurora.nsw.edu.au/",
             Absences = absences
         };
 
@@ -225,13 +288,25 @@ public sealed partial class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendCoordinatorPartialAbsenceVerificationRequest))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+        }
+
         SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         CoordinatorAbsenceVerificationRequestEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = "Partial Absence Verification Request",
             StudentName = student.Name.DisplayName,
             SchoolName = enrolment?.SchoolName ?? "your school",
@@ -265,14 +340,26 @@ public sealed partial class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        if (recipients is null || recipients.Count == 0)
-            return null;
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendCoordinatorAbsenceDigest))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+        }
+
+        if (recipients.Count == 0)
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.UnknownError);
 
         CoordinatorAbsenceDigestEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = "Absence Explanation Request",
             StudentName = student.Name,
             SchoolName = school.Name,
@@ -305,14 +392,26 @@ public sealed partial class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
-        if (recipients is null || recipients.Count == 0)
-            return null;
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendStudentAbsenceDigest))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+        }
+
+        if (recipients.Count == 0)
+            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.UnknownError);
 
         StudentAbsenceDigestEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = "[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
             StudentName = student.Name,
             StudentId = student.Id,
@@ -346,11 +445,23 @@ public sealed partial class Service : IEmailService
         List<EmailRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
+        AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
+
+        if (configuration is null)
+        {
+            _logger
+                .ForContext("Action", nameof(SendNonResidentialParentAbsenceReasonToSchoolAdmin))
+                .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
+                .Warning("Failed to send absence email");
+
+            return;
+        }
+
         MissedWorkEmailViewModel viewModel = new()
         {
             Preheader = "",
-            SenderName = _configuration.Absences.AbsenceCoordinatorName,
-            SenderTitle = _configuration.Absences.AbsenceCoordinatorTitle,
+            SenderName = configuration.ContactName,
+            SenderTitle = configuration.ContactTitle,
             Title = "[Aurora College] Missed Classwork Notification",
             StudentName = student.Name.DisplayName,
             Subject = subjectName,

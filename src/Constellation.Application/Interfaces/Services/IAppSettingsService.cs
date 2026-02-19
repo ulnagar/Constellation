@@ -22,4 +22,16 @@ public interface IAppSettingsService
 
     Task<TutorialsConfiguration?> Tutorials(TutorialPosition position, CancellationToken cancellationToken = default);
     Task Tutorials(TutorialsConfiguration configuration, CancellationToken cancellationToken = default);
+
+    Task<AbsencesConfiguration?> Absences(CancellationToken cancellationToken = default);
+    Task Absences(AbsencesConfiguration configuration, CancellationToken cancellationToken = default);
+
+    Task<CanvasConfiguration?> Canvas(CancellationToken cancellationToken = default);
+    Task Canvas(CanvasConfiguration configuration, CancellationToken cancellationToken = default);
+
+    Task<SentralConfiguration?> Sentral(SentralPath type, CancellationToken cancellationToken = default);
+    Task Sentral(SentralConfiguration configuration, CancellationToken cancellationToken = default);
+
+    Task<TeamsConfiguration?> Teams(CancellationToken cancellationToken = default);
+    Task Teams(TeamsConfiguration configuration, CancellationToken cancellationToken = default);
 }

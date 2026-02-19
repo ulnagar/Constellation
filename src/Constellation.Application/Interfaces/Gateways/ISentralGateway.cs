@@ -18,25 +18,17 @@ using System.Threading.Tasks;
 
 public interface ISentralGateway
 {
-    Task<string> GetSentralStudentIdAsync(string studentName);
-
-    Task<List<(string SentralId, List<string> Flags)>> GetStudentFlags(
-        CancellationToken cancellationToken = default);
+    Task<List<(string SentralId, List<string> Flags)>> GetStudentFlags(CancellationToken cancellationToken = default);
     Task<List<SentralPeriodAbsenceDto>> GetAbsenceDataAsync(string sentralStudentId);
-    Task<List<SentralPeriodAbsenceDto>> GetPartialAbsenceDataAsync(string sentralStudentId);
     Task<string> GetSentralStudentIdFromSRN(string srn, string grade);
-    Task<Dictionary<string, List<string>>> GetFamilyGroupings();
-    Task<FamilyDetailsDto> GetParentContactEntry(string sentralStudentId);
     Task<List<DateOnly>> GetExcludedDatesFromCalendar(string year);
     Task<List<ValidAttendenceReportDate>> GetValidAttendanceReportDatesFromCalendar(string year);
     Task<ICollection<RollMarkReportDto>> GetRollMarkingReportAsync(DateOnly date);
-    Task<ICollection<FamilyDetailsDto>> GetFamilyDetailsReport(ILogger logger);
-    Task<byte[]> GetSentralStudentPhoto(string studentId);
     Task<ICollection<SentralReportDto>> GetStudentReportList(string sentralStudentId);
     Task<byte[]> GetStudentReport(string sentralStudentId, string reportId);
-    Task<HtmlDocument> GetAwardsReport(CancellationToken cancellationToken = default);
-    Task<HtmlDocument> GetAwardsListing(string sentralStudentId, string calYear, CancellationToken cancellationToken = default);
-    Task<HtmlDocument> GetIncidentDetailsPage(string uri, CancellationToken cancellationToken = default);
+    Task<HtmlDocument?> GetAwardsReport(CancellationToken cancellationToken = default);
+    Task<HtmlDocument?> GetAwardsListing(string sentralStudentId, string calYear, CancellationToken cancellationToken = default);
+    Task<HtmlDocument?> GetIncidentDetailsPage(string uri, CancellationToken cancellationToken = default);
     Task<byte[]> GetAwardDocument(string sentralStudentId, string incidentId);
     Task<SystemAttendanceData> GetAttendancePercentages(SchoolTerm term, SchoolWeek week, string year, DateOnly startDate, DateOnly endDate);
     Task<Result<(DateOnly StartDate, DateOnly EndDate)>> GetDatesForWeek(string year, SchoolTerm term, SchoolWeek week);

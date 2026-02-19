@@ -1,26 +1,21 @@
 ﻿namespace Constellation.Presentation.Parents.Areas.Parents.Pages.Shared.Components.ParentNav;
 
 using Application.Domains.Families.Queries.IsResidentialParent;
-using Application.Interfaces.Configuration;
 using Constellation.Core.Abstractions.Services;
 using Constellation.Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
 public class ParentNavViewComponent : ViewComponent
 {
-    private readonly IOptions<ParentPortalConfiguration> _configuration;
     private readonly ICurrentUserService _currentUserService;
     private readonly ISender _mediator;
 
     public ParentNavViewComponent(
-        IOptions<ParentPortalConfiguration> configuration,
         ICurrentUserService currentUserService,
         ISender mediator)
     {
-        _configuration = configuration;
         _currentUserService = currentUserService;
         _mediator = mediator;
     }
@@ -32,15 +27,12 @@ public class ParentNavViewComponent : ViewComponent
             ActivePage = activePage,
             ShowConsent = false
         };
+        
+        Result<bool> isResidentialParent = await _mediator.Send(new IsResidentialParentQuery(_currentUserService.EmailAddress));
 
-        if (_configuration.Value.ShowConsent)
-        {
-            Result<bool> isResidentialParent = await _mediator.Send(new IsResidentialParentQuery(_currentUserService.EmailAddress));
-
-            viewModel.ShowConsent = (isResidentialParent.IsFailure || isResidentialParent.Value == false)
-                ? false
-                : true;
-        }
+        viewModel.ShowConsent = (isResidentialParent.IsFailure || isResidentialParent.Value == false)
+            ? false
+            : true;
                 
         return View("ParentNav", viewModel);
     }
