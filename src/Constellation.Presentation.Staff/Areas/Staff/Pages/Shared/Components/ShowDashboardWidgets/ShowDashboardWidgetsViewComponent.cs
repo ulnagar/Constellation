@@ -42,6 +42,7 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
         var adminTest = await _authService.AuthorizeAsync(user, AuthPolicies.IsSiteAdmin);
         var trainingTest = await _authService.AuthorizeAsync(user, AuthPermission.SchoolAdmin_Training_Edit_Value);
         var absencesTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_AttendanceSettings_Edit_Value);
+        var attendancePlanTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_AttendancePlans_Edit_Value);
         var awardsTest = await _authService.AuthorizeAsync(user, AuthPermission.StudentAdmin_Awards_Edit_Value);
         var tutorialsTest = await _authService.AuthorizeAsync(user, AuthPermission.Subjects_Tutorials_Edit_Value);
 
@@ -77,19 +78,24 @@ public class ShowDashboardWidgetsViewComponent : ViewComponent
                 viewModel.PartialScanDisabled = absenceScanRequest.Value.Partial;
             }
 
+            Result<(int Active, int Ignored)> edvalDifferencesRequest = await _mediator.Send(new CountEdvalDifferencesQuery(), cancellationToken);
+
+            if (edvalDifferencesRequest.IsSuccess)
+            {
+                viewModel.EdvalDifferences = edvalDifferencesRequest.Value.Active;
+            }
+        }
+
+        if (attendancePlanTest.Succeeded || adminTest.Succeeded)
+        {
+            viewModel.ShowAttendancePlanWidgets = true;
+
             Result<(int Pending, int Processing)> attendancePlanRequest = await _mediator.Send(new CountAttendancePlansWithStatusQuery(), cancellationToken);
 
             if (attendancePlanRequest.IsSuccess)
             {
                 viewModel.PendingAttendancePlans = attendancePlanRequest.Value.Pending;
                 viewModel.ProcessingAttendancePlans = attendancePlanRequest.Value.Processing;
-            }
-
-            Result<(int Active, int Ignored)> edvalDifferencesRequest = await _mediator.Send(new CountEdvalDifferencesQuery(), cancellationToken);
-
-            if (edvalDifferencesRequest.IsSuccess)
-            {
-                viewModel.EdvalDifferences = edvalDifferencesRequest.Value.Active;
             }
         }
 

@@ -20,6 +20,7 @@ public sealed class ShowDashboardWidgetsViewComponentModel
 
     public int ActiveWorkFlowActions { get; set; }
 
+    public bool ShowAttendancePlanWidgets { get; set; }
     public int PendingAttendancePlans { get; set; }
     public int ProcessingAttendancePlans { get; set; }
 

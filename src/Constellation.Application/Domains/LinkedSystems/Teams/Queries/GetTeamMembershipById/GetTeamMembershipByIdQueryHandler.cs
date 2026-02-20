@@ -258,7 +258,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
 
                 // Cover administrators
                 // Only if class is being covered
-                if (coveringTeachers.Count > 1)
+                if (coveringTeachers.Count > 0)
                 {
                     foreach (EmployeeId employeeId in _configuration.Covers.CoverContacts)
                     {
