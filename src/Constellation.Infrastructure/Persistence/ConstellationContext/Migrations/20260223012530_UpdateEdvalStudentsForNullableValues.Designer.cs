@@ -5,6 +5,7 @@ using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,13 +13,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260223012530_UpdateEdvalStudentsForNullableValues")]
+    partial class UpdateEdvalStudentsForNullableValues
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -47,7 +50,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<DateTime>("ScheduledAt")
                         .HasColumnType("datetime2");
 
-                    b.ComplexProperty<Dictionary<string, object>>("ForwardTo", "Constellation.Application.Domains.ScheduledReports.Models.ScheduledReport.ForwardTo#EmailRecipient", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "ForwardTo", "Constellation.Application.Domains.ScheduledReports.Models.ScheduledReport.ForwardTo#EmailRecipient", b1 =>
                         {
                             b1.IsRequired();
 
@@ -194,7 +197,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Application.Models.Identity.AppUser.Name#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Application.Models.Identity.AppUser.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -456,6 +459,225 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("AbsenceId");
 
                     b.ToTable("Absences_Responses", (string)null);
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.AbsencesSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContactEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DiscountedPartialReasons")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DiscountedWholeReasons")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PartialLengthThreshold")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RollMarkingReportRecipients")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Absences", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.CanvasSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Admins")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("UseGroups")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("UseSections")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Canvas", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.ContactsSettings", b =>
+                {
+                    b.Property<string>("PositionName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Members")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PositionName");
+
+                    b.ToTable("Contacts", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.CoversSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContactName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Supervisor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Covers", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.LessonsSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CoordinatorEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CoordinatorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CoordinatorTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Supervisor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Lessons", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.MandatoryTrainingSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Contacts")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MandatoryTraining", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.SentralSettings", b =>
+                {
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Type");
+
+                    b.ToTable("Sentral", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.TeamsSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("MandatoryOwners")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentChannelOwners")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudentTeamOwners")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teams", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.TutorialsSettings", b =>
+                {
+                    b.Property<string>("PositionName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Members")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PositionName");
+
+                    b.ToTable("Tutorials", "AppSettings");
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.AppSettings.WorkflowSettings", b =>
+                {
+                    b.Property<string>("PositionName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Members")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PositionName");
+
+                    b.ToTable("Workflows", "AppSettings");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Assets.Allocation", b =>
@@ -895,7 +1117,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("SubmittedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Student", "Constellation.Core.Models.Attendance.AttendancePlan.Student#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Student", "Constellation.Core.Models.Attendance.AttendancePlan.Student#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -1118,7 +1340,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Student", "Constellation.Core.Models.Attendance.Checkin.CheckInResponse.Student#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Student", "Constellation.Core.Models.Attendance.Checkin.CheckInResponse.Student#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -1345,7 +1567,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.Casuals.Casual.Name#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.Casuals.Casual.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -1609,62 +1831,62 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.Property<string>("StudentId")
                         .HasColumnType("nvarchar(450)")
-                        .HasAnnotation("Relational:JsonPropertyName", "StudentId");
+                        .HasJsonPropertyName("StudentId");
 
                     b.Property<string>("EmailAddress")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Email");
+                        .HasJsonPropertyName("Email");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2")
-                        .HasAnnotation("Relational:JsonPropertyName", "EndDate");
+                        .HasJsonPropertyName("EndDate");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "FirstName");
+                        .HasJsonPropertyName("FirstName");
 
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Gender");
+                        .HasJsonPropertyName("Gender");
 
                     b.Property<string>("Grade")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Form");
+                        .HasJsonPropertyName("Form");
 
                     b.Property<string>("House")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "House");
+                        .HasJsonPropertyName("House");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Surname");
+                        .HasJsonPropertyName("Surname");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Phone");
+                        .HasJsonPropertyName("Phone");
 
                     b.Property<string>("PreferredName")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "PreferredName");
+                        .HasJsonPropertyName("PreferredName");
 
                     b.Property<string>("RollGroup")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "RollGroup");
+                        .HasJsonPropertyName("RollGroup");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2")
-                        .HasAnnotation("Relational:JsonPropertyName", "StartDate");
+                        .HasJsonPropertyName("StartDate");
 
                     b.Property<string>("StudentReference")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "StatewideId");
+                        .HasJsonPropertyName("StatewideId");
 
                     b.Property<string>("UniqueId")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Guid");
+                        .HasJsonPropertyName("Guid");
 
                     b.HasKey("StudentId");
 
@@ -1675,7 +1897,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                 {
                     b.Property<string>("UniqueId")
                         .HasColumnType("nvarchar(450)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Guid");
+                        .HasJsonPropertyName("Guid");
 
                     b.Property<string>("DaysAvailable")
                         .HasColumnType("nvarchar(max)");
@@ -1685,8 +1907,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Email");
+                        .HasJsonPropertyName("Email");
 
                     b.Property<string>("Faculty")
                         .IsRequired()
@@ -1702,11 +1925,11 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Surname");
+                        .HasJsonPropertyName("Surname");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "Phone");
+                        .HasJsonPropertyName("Phone");
 
                     b.Property<string>("PreferredName")
                         .HasColumnType("nvarchar(max)");
@@ -1764,7 +1987,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("Timetable")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasAnnotation("Relational:JsonPropertyName", "TtStructure");
+                        .HasJsonPropertyName("TtStructure");
 
                     b.HasKey("Id");
 
@@ -1853,7 +2076,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.ComplexProperty<Dictionary<string, object>>("AlertRecipient", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "AlertRecipient", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient", b1 =>
                         {
                             b1.IsRequired();
 
@@ -1865,7 +2088,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasColumnType("nvarchar(max)")
                                 .HasColumnName("PhoneNumber");
 
-                            b1.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient.Name#Name", b2 =>
+                            b1.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.EmergencyConsole.QueuedMessage.AlertRecipient#AlertRecipient.Name#Name", b2 =>
                                 {
                                     b2.IsRequired();
 
@@ -2105,7 +2328,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.Families.Parent.Name#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.Families.Parent.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -2786,7 +3009,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<bool>("SelfRegistered")
                         .HasColumnType("bit");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.SchoolContacts.SchoolContact.Name#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.SchoolContacts.SchoolContact.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -3063,7 +3286,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.StaffMembers.StaffMember.Name#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.StaffMembers.StaffMember.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -3399,7 +3622,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.Property<string>("StudentReferenceNumber")
                         .HasColumnType("nvarchar(450)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "Constellation.Core.Models.Students.Student.Name#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Constellation.Core.Models.Students.Student.Name#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -3660,7 +3883,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Student", "Constellation.Core.Models.ThirdPartyConsent.Transaction.Student#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Student", "Constellation.Core.Models.ThirdPartyConsent.Transaction.Student#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -3900,7 +4123,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Student", "Constellation.Core.Models.Tutorials.Request.Student#Name", b1 =>
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Student", "Constellation.Core.Models.Tutorials.Request.Student#Name", b1 =>
                         {
                             b1.IsRequired();
 
@@ -5339,37 +5562,32 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanFreePeriod", "FreePeriods", b1 =>
                         {
-                            b1.Property<Guid>("AttendancePlanId")
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<Guid>("AttendancePlanId");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
 
                             b1.Property<string>("Activity")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
                             b1.Property<string>("Day")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.Property<double>("Minutes")
-                                .HasColumnType("float");
+                            b1.Property<double>("Minutes");
 
                             b1.Property<string>("Period")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
                             b1.Property<string>("Week")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.HasKey("AttendancePlanId", "Id");
+                            b1.HasKey("AttendancePlanId", "__synthesizedOrdinal");
 
                             b1.ToTable("Plans", "Attendance");
 
-                            b1.ToJson("FreePeriods");
+                            b1
+                                .ToJson("FreePeriods")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("AttendancePlanId");
@@ -5377,28 +5595,25 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.OwnsMany("Constellation.Core.Models.Attendance.AttendancePlanMissedLesson", "MissedLessons", b1 =>
                         {
-                            b1.Property<Guid>("AttendancePlanId")
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<Guid>("AttendancePlanId");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
 
-                            b1.Property<double>("MinutesMissedPerCycle")
-                                .HasColumnType("float");
+                            b1.Property<double>("MinutesMissedPerCycle");
 
                             b1.Property<string>("Subject")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .IsRequired();
 
-                            b1.Property<double>("TotalMinutesPerCycle")
-                                .HasColumnType("float");
+                            b1.Property<double>("TotalMinutesPerCycle");
 
-                            b1.HasKey("AttendancePlanId", "Id");
+                            b1.HasKey("AttendancePlanId", "__synthesizedOrdinal");
 
                             b1.ToTable("Plans", "Attendance");
 
-                            b1.ToJson("MissedLessons");
+                            b1
+                                .ToJson("MissedLessons")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("AttendancePlanId");
