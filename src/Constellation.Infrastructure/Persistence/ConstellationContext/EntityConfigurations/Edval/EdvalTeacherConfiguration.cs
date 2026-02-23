@@ -32,5 +32,9 @@ internal class EdvalTeacherConfiguration : IEntityTypeConfiguration<EdvalTeacher
         builder
             .Property(entry => entry.PhoneNumber)
             .IsRequired(false);
+
+        builder
+            .Property(entry => entry.EmailAddress)
+            .IsRequired(false);
     }
 }

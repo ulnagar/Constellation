@@ -1,6 +1,7 @@
 ﻿<Project>
 	<PropertyGroup>
 		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+		<NoWarn>$(NoWarn);NU1608;</NoWarn>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageVersion Include="EPPlus" Version="7.5.0" />
