@@ -36,13 +36,5 @@ internal class EdvalStudentConfiguration : IEntityTypeConfiguration<EdvalStudent
         builder
             .Property(entry => entry.UniqueId)
             .IsRequired(false);
-
-        builder
-            .Property(entry => entry.Gender)
-            .IsRequired(false);
-
-        builder
-            .Property(entry => entry.EmailAddress)
-            .IsRequired(false);
     }
 }

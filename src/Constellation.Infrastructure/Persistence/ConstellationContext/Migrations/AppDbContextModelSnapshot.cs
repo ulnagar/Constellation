@@ -1612,6 +1612,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasAnnotation("Relational:JsonPropertyName", "StudentId");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Email");
 
@@ -1625,6 +1626,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasAnnotation("Relational:JsonPropertyName", "FirstName");
 
                     b.Property<string>("Gender")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Gender");
 
@@ -1685,6 +1687,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasAnnotation("Relational:JsonPropertyName", "Email");
 
