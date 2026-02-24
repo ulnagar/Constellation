@@ -53,7 +53,7 @@ public class LoginModel : PageModel
         [Required]
         //[EmailAddress]
         //[RegularExpression(@"^(?:~+.*$)|\w+(?:[-+.']\w+)*@det.nsw.edu.au$", ErrorMessage = "Invalid Email.")]
-        [RegularExpression(@"^(?:~+.*$)|^(?:[0-9]{10}$)|^\w+(?:[-+.']\w+)*@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$", ErrorMessage = "Invalid Email.")]
+        [RegularExpression(@"^(?:~+.*$)|^(?:!+.*$)|^(?:[0-9]{10}$)|^\w+(?:[-+.']\w+)*@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$", ErrorMessage = "Invalid Email.")]
         public string Email { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
@@ -179,6 +179,13 @@ public class LoginModel : PageModel
             await StartSingleSignOnProcess();
         }
 
+        if (loginType == LoginType.Domain)
+        {
+            Status = LoginStatus.WaitingPasswordInput;
+
+            return Page();
+        }
+
 #if DEBUG
         if (loginType == LoginType.Debug)
         {
@@ -237,14 +244,18 @@ public class LoginModel : PageModel
         
         switch (Input.Email)
         {
+            case not null when Input.Email.StartsWith('!'):
+                loginType = LoginType.SSO;
+                Input.Email = Input.Email.Replace("!", "", StringComparison.InvariantCultureIgnoreCase);
+                break;
             case not null when Input.Email.StartsWith('~'):
                 loginType = LoginType.Debug;
                 Input.Email = Input.Email.Replace("~", "", StringComparison.InvariantCultureIgnoreCase);
                 break;
             case not null when Input.Email.Contains("@det.nsw.edu.au", StringComparison.InvariantCultureIgnoreCase):
             case not null when Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase):
-                //loginType = LoginType.Domain;
-                loginType = LoginType.SSO;
+                loginType = LoginType.Domain;
+                //loginType = LoginType.SSO;
                 break;
             case not null when Input.Email.All(Char.IsDigit):
                 loginType = LoginType.Sms;
@@ -257,74 +268,74 @@ public class LoginModel : PageModel
         return loginType;
     }
 
-    //public async Task<IActionResult> OnPostPasswordLogin()
-    //{
-    //    if (string.IsNullOrWhiteSpace(Input.Password))
-    //    {
-    //        ModelState.TryAddModelError(nameof(Input.Password), "You must specify a password!");
+    public async Task<IActionResult> OnPostPasswordLogin()
+    {
+        if (string.IsNullOrWhiteSpace(Input.Password))
+        {
+            ModelState.TryAddModelError(nameof(Input.Password), "You must specify a password!");
 
-    //        Status = LoginStatus.WaitingPasswordInput;
-    //    }
+            Status = LoginStatus.WaitingPasswordInput;
+        }
 
-    //    if (!ModelState.IsValid) return Page();
+        if (!ModelState.IsValid) return Page();
 
-    //    LoginType loginType = GetLoginParameters();
-        
-    //    _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
-    //    AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
+        LoginType loginType = GetLoginParameters();
 
-    //    if (user is null)
-    //        return Page();
+        _logger.Information("Continuing Login Attempt by {Email}", Input.Email);
+        AppUser? user = await _userManager.FindByEmailAsync(Input.Email);
 
-    //    _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
+        if (user is null)
+            return Page();
 
-    //    if (loginType == LoginType.Domain)
-    //    {
-    //        _logger.Information(" - Attempting domain login by {Email}", Input.Email);
+        _logger.Information(" - Found user {user} for email {email}", user.Id, Input.Email);
 
-    //        PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
+        if (loginType == LoginType.Domain)
+        {
+            _logger.Information(" - Attempting domain login by {Email}", Input.Email);
 
-    //        bool result = Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase)
-    //            ? context.ValidateCredentials(Input.Email.Replace("education.nsw.gov.au", "detnsw", StringComparison.InvariantCultureIgnoreCase), Input.Password)
-    //            : context.ValidateCredentials(Input.Email, Input.Password);
+            PrincipalContext context = new(ContextType.Domain, "DETNSW.WIN");
 
-    //        context.Dispose();
+            bool result = Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase)
+                ? context.ValidateCredentials(Input.Email.Replace("education.nsw.gov.au", "detnsw", StringComparison.InvariantCultureIgnoreCase), Input.Password)
+                : context.ValidateCredentials(Input.Email, Input.Password);
 
-    //        if (!result)
-    //        {
-    //            _logger.Warning(" - Domain login failed for {Email}", Input.Email);
+            context.Dispose();
 
-    //            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            if (!result)
+            {
+                _logger.Warning(" - Domain login failed for {Email}", Input.Email);
 
-    //            Status = LoginStatus.WaitingPasswordInput;
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 
-    //            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+                Status = LoginStatus.WaitingPasswordInput;
 
-    //            await _userManager.UpdateAsync(user);
+                user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
 
-    //            return Page();
-    //        }
+                await _userManager.UpdateAsync(user);
 
-    //        _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
+                return Page();
+            }
 
-    //        await _signInManager.SignInAsync(user, false);
+            _logger.Information(" - Domain login succeeded for {Email}", Input.Email);
 
-    //        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
-    //        await _userManager.UpdateAsync(user);
+            await _signInManager.SignInAsync(user, false);
 
-    //        return LocalRedirect("/Index");
-    //    }
-        
-    //    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Success);
+            await _userManager.UpdateAsync(user);
 
-    //    Status = LoginStatus.InvalidUsername;
+            return LocalRedirect("/Index");
+        }
 
-    //    user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 
-    //    await _userManager.UpdateAsync(user);
+        Status = LoginStatus.InvalidUsername;
 
-    //    return Page();
-    //}
+        user.AddLogin(DateTime.UtcNow, Constellation.Application.Models.Identity.Enums.LoginStatus.Failed);
+
+        await _userManager.UpdateAsync(user);
+
+        return Page();
+    }
 
     public async Task<IActionResult> OnGetPasswordless(string token, string userId)
     {
