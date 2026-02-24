@@ -87,6 +87,7 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Admin_Authentication_Edit_Value = "Admin.Authentication.Edit";
     public const string Admin_Rollover_Edit_Value = "Admin.Rollover.Edit";
     public const string Admin_Automation_Edit_Value = "Admin.Automation.Edit";
+    public const string Admin_Configuration_Edit_Value = "Admin.Configuration.Edit";
 
     public const string SchoolsPortal_View_Value = "SchoolsPortal.View";
     public const string SchoolsPortal_Contacts_View_Value = "SchoolsPortal.Contacts.View";
@@ -185,6 +186,7 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Admin_Authentication_Edit = new(Admin_Authentication_Edit_Value, "Admin: Authentication: Edit");
     public static readonly AuthPermission Admin_Rollover_Edit = new(Admin_Rollover_Edit_Value, "Admin: Rollover: Edit");
     public static readonly AuthPermission Admin_Automation_Edit = new(Admin_Automation_Edit_Value, "Admin: Automation: Edit");
+    public static readonly AuthPermission Admin_Configuration_Edit = new(Admin_Configuration_Edit_Value, "Admin: Configuration: Edit");
 
     public static readonly AuthPermission SchoolsPortal_View = new(SchoolsPortal_View_Value, "SchoolsPortal: View");
     public static readonly AuthPermission SchoolsPortal_Contacts_View = new(SchoolsPortal_Contacts_View_Value, "SchoolsPortal: Contacts: View");
