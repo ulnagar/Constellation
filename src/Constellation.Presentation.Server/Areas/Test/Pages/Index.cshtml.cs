@@ -74,7 +74,6 @@ public class IndexModel : BasePageModel
             members);
         
         await _appSettingsService.Covers(configuration);
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateLessons()
@@ -95,7 +94,6 @@ public class IndexModel : BasePageModel
             members);
 
         await _appSettingsService.Lessons(configuration);
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateMandatoryTraining()
@@ -111,7 +109,6 @@ public class IndexModel : BasePageModel
         MandatoryTrainingConfiguration configuration = new(members);
 
         await _appSettingsService.MandatoryTraining(configuration);
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateWorkFlows()
@@ -138,8 +135,6 @@ public class IndexModel : BasePageModel
         await _appSettingsService.Workflow(attendanceConfiguration);
         await _appSettingsService.Workflow(complianceConfiguration);
         await _appSettingsService.Workflow(trainingConfiguration);
-
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateTutorials()
@@ -161,8 +156,6 @@ public class IndexModel : BasePageModel
 
         await _appSettingsService.Tutorials(approverConfiguration);
         await _appSettingsService.Tutorials(schedulerConfiguration);
-
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateAbsences()
@@ -206,7 +199,6 @@ public class IndexModel : BasePageModel
             contacts);
 
         await _appSettingsService.Absences(configuration);
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateContacts()
@@ -272,8 +264,6 @@ public class IndexModel : BasePageModel
 
         ContactsConfiguration principalConfiguration = new(ContactPosition.Principal, members);
         await _appSettingsService.Contacts(principalConfiguration);
-
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateCanvas()
@@ -292,7 +282,6 @@ public class IndexModel : BasePageModel
             members);
 
         await _appSettingsService.Canvas(configuration);
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateTeams()
@@ -356,7 +345,6 @@ public class IndexModel : BasePageModel
 
         TeamsConfiguration configuration = new(mandatoryOwners, studentTeamOwners, studentChannelOwners);
         await _appSettingsService.Teams(configuration);
-        await _unitOfWork.CompleteAsync();
     }
 
     private async Task MigrateSentral()
@@ -384,7 +372,5 @@ public class IndexModel : BasePageModel
         await _appSettingsService.Sentral(indigenousStatus);
         await _appSettingsService.Sentral(srnTable);
         await _appSettingsService.Sentral(enrolmentDates);
-
-        await _unitOfWork.CompleteAsync();
     }
 }

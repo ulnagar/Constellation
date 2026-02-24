@@ -15,17 +15,19 @@ using System.Collections.Generic;
 
 internal sealed class AppSettingsService : IAppSettingsService
 {
-    private readonly AppDbContext _context;
+    private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
 
     public AppSettingsService(
-        AppDbContext context)
+        IDbContextFactory<AppDbContext> dbContextFactory)
     {
-        _context = context;
+        _dbContextFactory = dbContextFactory;
     }
 
     public async Task<CoversConfiguration?> Covers(
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<CoversSettings> entry = await _context
             .Set<CoversSettings>()
             .ToListAsync(cancellationToken);
@@ -69,6 +71,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         CoversConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<CoversSettings> existingEntries = await _context.Set<CoversSettings>().ToListAsync(cancellationToken);
 
         if (existingEntries.Count > 0)
@@ -85,11 +89,15 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
 
         _context.Set<CoversSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<LessonsConfiguration?> Lessons(
     CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<LessonsSettings> entry = await _context
             .Set<LessonsSettings>()
             .ToListAsync(cancellationToken);
@@ -133,6 +141,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         LessonsConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<LessonsSettings> existingEntries = await _context.Set<LessonsSettings>().ToListAsync(cancellationToken);
 
         if (existingEntries.Count > 0)
@@ -149,12 +159,57 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
 
         _context.Set<LessonsSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<ContactsConfiguration>> Contacts(
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        List<ContactsSettings> entries = await _context
+            .Set<ContactsSettings>()
+            .ToListAsync(cancellationToken);
+
+        List<ContactsConfiguration> configurations = [];
+
+        foreach (ContactsSettings entry in entries)
+        {
+            List<StaffId> staffIds = entry.Members
+                .Select(memberLink => memberLink.StaffId)
+                .Distinct()
+                .ToList();
+
+            List<StaffMember> staffMembers = await _context
+                .Set<StaffMember>()
+                .Where(member => staffIds.Contains(member.Id))
+                .ToListAsync(cancellationToken);
+
+            Dictionary<StaffMember, List<Grade>> members = new();
+
+            foreach (var memberLink in entry.Members)
+            {
+                StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+                if (staffMember is null)
+                    continue;
+
+                members.Add(staffMember, memberLink.Grades.ToList());
+            }
+
+            configurations.Add(new(entry.PositionName, members));
+        }
+
+        return configurations;
     }
 
     public async Task<ContactsConfiguration?> Contacts(
         ContactPosition position, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<ContactsSettings> entry = await _context
             .Set<ContactsSettings>()
             .Where(settings => settings.PositionName == position)
@@ -199,6 +254,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         ContactsConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<ContactsSettings> existingEntries = await _context
             .Set<ContactsSettings>()
             .Where(settings => settings.PositionName == configuration.Position)
@@ -215,11 +272,15 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
 
         _context.Set<ContactsSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<MandatoryTrainingConfiguration?> MandatoryTraining(
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<MandatoryTrainingSettings> entry = await _context
             .Set<MandatoryTrainingSettings>()
             .ToListAsync(cancellationToken);
@@ -261,6 +322,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         MandatoryTrainingConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<MandatoryTrainingSettings> existingEntries = await _context
             .Set<MandatoryTrainingSettings>()
             .ToListAsync(cancellationToken);
@@ -276,12 +339,57 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
 
         _context.Set<MandatoryTrainingSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<WorkflowConfiguration>> Workflow(
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        List<WorkflowSettings> entries = await _context
+            .Set<WorkflowSettings>()
+            .ToListAsync(cancellationToken);
+
+        List<WorkflowConfiguration> configurations = [];
+
+        foreach (WorkflowSettings entry in entries)
+        {
+            List<StaffId> staffIds = entry.Members
+                .Select(memberLink => memberLink.StaffId)
+                .Distinct()
+                .ToList();
+
+            List<StaffMember> staffMembers = await _context
+                .Set<StaffMember>()
+                .Where(member => staffIds.Contains(member.Id))
+                .ToListAsync(cancellationToken);
+
+            Dictionary<StaffMember, List<Grade>> members = new();
+
+            foreach (var memberLink in entry.Members)
+            {
+                StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+                if (staffMember is null)
+                    continue;
+
+                members.Add(staffMember, memberLink.Grades.ToList());
+            }
+
+            configurations.Add(new(entry.PositionName, members));
+        }
+
+        return configurations;
     }
 
     public async Task<WorkflowConfiguration?> Workflow(
         WorkflowArea position, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<WorkflowSettings> entry = await _context
             .Set<WorkflowSettings>()
             .Where(settings => settings.PositionName == position)
@@ -326,6 +434,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         WorkflowConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<WorkflowSettings> existingEntries = await _context
             .Set<WorkflowSettings>()
             .Where(settings => settings.PositionName == configuration.Position)
@@ -342,12 +452,57 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
 
         _context.Set<WorkflowSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<TutorialsConfiguration>> Tutorials(
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        List<TutorialsSettings> entries = await _context
+            .Set<TutorialsSettings>()
+            .ToListAsync(cancellationToken);
+
+        List<TutorialsConfiguration> configurations = [];
+
+        foreach (TutorialsSettings entry in entries)
+        {
+            List<StaffId> staffIds = entry.Members
+                .Select(memberLink => memberLink.StaffId)
+                .Distinct()
+                .ToList();
+
+            List<StaffMember> staffMembers = await _context
+                .Set<StaffMember>()
+                .Where(member => staffIds.Contains(member.Id))
+                .ToListAsync(cancellationToken);
+
+            Dictionary<StaffMember, List<Grade>> members = new();
+
+            foreach (var memberLink in entry.Members)
+            {
+                StaffMember? staffMember = staffMembers.FirstOrDefault(staffMember => staffMember.Id == memberLink.StaffId);
+
+                if (staffMember is null)
+                    continue;
+
+                members.Add(staffMember, memberLink.Grades.ToList());
+            }
+
+            configurations.Add(new(entry.PositionName, members));
+        }
+
+        return configurations;
     }
 
     public async Task<TutorialsConfiguration?> Tutorials(
         TutorialPosition position, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<TutorialsSettings> entry = await _context
             .Set<TutorialsSettings>()
             .Where(settings => settings.PositionName == position)
@@ -392,6 +547,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         TutorialsConfiguration configuration, 
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<TutorialsSettings> existingEntries = await _context
             .Set<TutorialsSettings>()
             .Where(settings => settings.PositionName == configuration.Position)
@@ -408,11 +565,15 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
         
         _context.Set<TutorialsSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<AbsencesConfiguration?> Absences(
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<AbsencesSettings> entry = await _context
             .Set<AbsencesSettings>()
             .ToListAsync(cancellationToken);
@@ -456,6 +617,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         AbsencesConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<AbsencesSettings> existingEntries = await _context
             .Set<AbsencesSettings>()
             .ToListAsync(cancellationToken);
@@ -479,11 +642,15 @@ internal sealed class AppSettingsService : IAppSettingsService
             settings.AddReportRecipient(contact.Key.Id, contact.Value);
 
         _context.Set<AbsencesSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<CanvasConfiguration?> Canvas(
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<CanvasSettings> entry = await _context
             .Set<CanvasSettings>()
             .ToListAsync(cancellationToken);
@@ -527,6 +694,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         CanvasConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<CanvasSettings> existingEntries = await _context
             .Set<CanvasSettings>()
             .ToListAsync(cancellationToken);
@@ -544,12 +713,35 @@ internal sealed class AppSettingsService : IAppSettingsService
         }
 
         _context.Set<CanvasSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<SentralConfiguration>> Sentral(
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        List<SentralSettings> entries = await _context
+            .Set<SentralSettings>()
+            .ToListAsync(cancellationToken);
+
+        List<SentralConfiguration> configurations = [];
+
+        foreach (SentralSettings entry in entries)
+        {
+            configurations.Add(new(entry.Type, entry.Path));
+        }
+
+        return configurations;
     }
 
     public async Task<SentralConfiguration?> Sentral(
         SentralPath type,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<SentralSettings> entry = await _context
             .Set<SentralSettings>()
             .Where(entry => entry.Type == type)
@@ -572,6 +764,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         SentralConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<SentralSettings> existingEntries = await _context
             .Set<SentralSettings>()
             .Where(entry => entry.Type == configuration.Type)
@@ -585,11 +779,15 @@ internal sealed class AppSettingsService : IAppSettingsService
             configuration.Path);
         
         _context.Set<SentralSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<TeamsConfiguration?> Teams(
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<TeamsSettings> entry = await _context
             .Set<TeamsSettings>()
             .ToListAsync(cancellationToken);
@@ -678,6 +876,8 @@ internal sealed class AppSettingsService : IAppSettingsService
         TeamsConfiguration configuration,
         CancellationToken cancellationToken = default)
     {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
         List<TeamsSettings> existingEntries = await _context
             .Set<TeamsSettings>()
             .ToListAsync(cancellationToken);
@@ -697,5 +897,7 @@ internal sealed class AppSettingsService : IAppSettingsService
             settings.AddStudentChannelOwner(owner.Key.Id, owner.Value);
         
         _context.Set<TeamsSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

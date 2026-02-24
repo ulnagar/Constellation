@@ -103,7 +103,7 @@ builder.Services
 
 // Register Current User Service
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddTransient<ICurrentUserService, CurrentUserService>();
 
 // Register Hangfire
 builder.Services.AddHangfire((provider, configuration) => configuration

@@ -35,10 +35,31 @@ public static class ServicesRegistration
         // Add Constellation Context
 
         services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
-        services.AddScoped<UpdateAuditableEntitiesInterceptor>();
-        services.AddScoped<CreateAuditLogEntitiesInterceptor>();
+        services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
+        services.AddSingleton<CreateAuditLogEntitiesInterceptor>();
 
-        services.AddDbContext<AppDbContext>(
+        //services.AddDbContext<AppDbContext>(
+        //    (sp, options) =>
+        //    {
+        //        options.UseSqlServer(
+        //            configuration.GetConnectionString("DefaultConnection"),
+        //            b =>
+        //            {
+        //                b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+        //                b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+        //                b.CommandTimeout(120); // Increased command timeout to allow migrations to complete. May not be necessary after Term 1 2024.
+        //            });
+
+        //        options.EnableSensitiveDataLogging();
+
+        //        options.AddInterceptors(new List<IInterceptor> {
+        //            sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
+        //            sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>(),
+        //            sp.GetRequiredService<CreateAuditLogEntitiesInterceptor>()
+        //        });
+        //    });
+
+        services.AddDbContextFactory<AppDbContext>(
             (sp, options) =>
             {
                 options.UseSqlServer(
@@ -53,14 +74,16 @@ public static class ServicesRegistration
                 options.EnableSensitiveDataLogging();
 
                 options.AddInterceptors(new List<IInterceptor> {
-                    sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
-                    sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>(),
-                    sp.GetRequiredService<CreateAuditLogEntitiesInterceptor>()
-                });
+                            sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
+                            sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>(),
+                            sp.GetRequiredService<CreateAuditLogEntitiesInterceptor>()
+                        });
+
             });
 
         services.AddScoped<IAppDbContext, AppDbContext>();
-        services.AddScoped<AppDbContext>();
+        services.AddScoped<AppDbContext>(sp =>
+            sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Add TrackIt Context

@@ -11,15 +11,18 @@ public interface IAppSettingsService
     Task<LessonsConfiguration?> Lessons(CancellationToken cancellationToken = default);
     Task Lessons(LessonsConfiguration settings, CancellationToken cancellationToken = default);
 
+    Task<List<ContactsConfiguration>> Contacts(CancellationToken cancellationToken = default);
     Task<ContactsConfiguration?> Contacts(ContactPosition position, CancellationToken cancellationToken = default);
     Task Contacts(ContactsConfiguration settings, CancellationToken cancellationToken = default);
 
     Task<MandatoryTrainingConfiguration?> MandatoryTraining(CancellationToken cancellationToken = default);
     Task MandatoryTraining(MandatoryTrainingConfiguration settings, CancellationToken cancellationToken = default);
 
+    Task<List<WorkflowConfiguration>> Workflow(CancellationToken cancellationToken = default);
     Task<WorkflowConfiguration?> Workflow(WorkflowArea position, CancellationToken cancellationToken = default);
     Task Workflow(WorkflowConfiguration configuration, CancellationToken cancellationToken = default);
 
+    Task<List<TutorialsConfiguration>> Tutorials(CancellationToken cancellationToken = default);
     Task<TutorialsConfiguration?> Tutorials(TutorialPosition position, CancellationToken cancellationToken = default);
     Task Tutorials(TutorialsConfiguration configuration, CancellationToken cancellationToken = default);
 
@@ -29,6 +32,7 @@ public interface IAppSettingsService
     Task<CanvasConfiguration?> Canvas(CancellationToken cancellationToken = default);
     Task Canvas(CanvasConfiguration configuration, CancellationToken cancellationToken = default);
 
+    Task<List<SentralConfiguration>> Sentral(CancellationToken cancellationToken = default);
     Task<SentralConfiguration?> Sentral(SentralPath type, CancellationToken cancellationToken = default);
     Task Sentral(SentralConfiguration configuration, CancellationToken cancellationToken = default);
 

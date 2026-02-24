@@ -22,7 +22,7 @@ public sealed record TeamsConfiguration
 
     public static IReadOnlyList<EmailAddress> FallbackMandatoryOwners => new List<EmailAddress>
     {
-        EmailAddress.FromValue("nhi.auroracollege@det.nsw.edu.au"),
+        EmailAddress.FromValue("nhi.auroracollege@nhi.det.nsw.edu.au"),
         EmailAddress.FromValue("michael.necovski2@det.nsw.edu.au"),
         EmailAddress.FromValue("benjamin.hillsley@det.nsw.edu.au")
     };
