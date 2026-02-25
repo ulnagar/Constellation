@@ -64,12 +64,12 @@
                 <nav id="sidebarMenu" class="d-md-block bg-light sidebar collapse">
                     <div class="sidebar-sticky pt-3">
                         <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
-                            <span class="w-100">Hosting</span>
+                            <span class="w-100">Configuration</span>
                         </h4>
                         <ul class="nav flex-column mx-2">
                             <li class="nav-item">
-                                <a class="nav-link @(activePage?.ToString() == ActivePage.Hosting_Newsletters ? "active" : "")" asp-page="/Hosting/Newsletters" asp-area="Admin">
-                                    Newsletters
+                                <a class="nav-link @(activePage?.ToString() == ActivePage.Configuration ? "active" : "")" asp-page="/Configuration/Index" asp-area="Admin">
+                                    Configuration
                                 </a>
                             </li>
                         </ul>
@@ -86,6 +86,17 @@
                             <li class="nav-item">
                                 <a class="nav-link @(activePage?.ToString() == ActivePage.Auth_Roles ? "active" : "")" asp-page="/Auth/Roles/Index" asp-area="Admin">
                                     Roles
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        <h4 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mb-1 text-muted" role="button">
+                            <span class="w-100">Hosting</span>
+                        </h4>
+                        <ul class="nav flex-column mx-2">
+                            <li class="nav-item">
+                                <a class="nav-link @(activePage?.ToString() == ActivePage.Hosting_Newsletters ? "active" : "")" asp-page="/Hosting/Newsletters" asp-area="Admin">
+                                    Newsletters
                                 </a>
                             </li>
                         </ul>

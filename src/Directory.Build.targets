@@ -1,19 +1,19 @@
 <Project>
+	<Target Name="UpdateAssemblyVersion" BeforeTargets="BeforeBuild" Condition="'$(IsHotReloadBuild)' != 'true'">
+		<PropertyGroup>
+			<!-- YY -->
+			<_YearYY>$([System.DateTime]::Now.ToString('yy'))</_YearYY>
 
-	<PropertyGroup>
-		<!-- YY -->
-		<_YearYY>$([System.DateTime]::Now.ToString('yy'))</_YearYY>
+			<!-- DDD -->
+			<_DayOfYear>$([System.DateTime]::Now.DayOfYear.ToString('D3'))</_DayOfYear>
 
-		<!-- DDD -->
-		<_DayOfYear>$([System.DateTime]::Now.DayOfYear.ToString('D3'))</_DayOfYear>
+			<!-- YYDDD -->
+			<_BuildNumber>$(_YearYY)$(_DayOfYear)</_BuildNumber>
 
-		<!-- YYDDD -->
-		<_BuildNumber>$(_YearYY)$(_DayOfYear)</_BuildNumber>
-
-		<!-- Final versions -->
-		<AssemblyVersion>$(VersionPrefix).$(_BuildNumber)</AssemblyVersion>
-		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<InformationalVersion>$(AssemblyVersion)</InformationalVersion>
-	</PropertyGroup>
-
+			<!-- Final versions -->
+			<AssemblyVersion>$(VersionPrefix).$(_BuildNumber)</AssemblyVersion>
+			<FileVersion>$(AssemblyVersion)</FileVersion>
+			<InformationalVersion>$(AssemblyVersion)</InformationalVersion>
+		</PropertyGroup>
+	</Target>
 </Project>

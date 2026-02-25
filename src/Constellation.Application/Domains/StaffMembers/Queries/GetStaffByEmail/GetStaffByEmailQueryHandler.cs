@@ -31,6 +31,6 @@ internal sealed class GetStaffByEmailQueryHandler
 
         return teacher is null 
             ? Result.Failure<StaffSelectionListResponse>(StaffMemberErrors.NotFoundByEmail(request.EmailAddress)) 
-            : new StaffSelectionListResponse(teacher.Id, teacher.EmployeeId, teacher.Name);
+            : new StaffSelectionListResponse(teacher.Id, teacher.EmployeeId, teacher.Name, teacher.EmailAddress);
     }
 }

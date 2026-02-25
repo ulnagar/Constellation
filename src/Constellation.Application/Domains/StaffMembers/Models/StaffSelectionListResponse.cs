@@ -7,7 +7,8 @@ using Core.ValueObjects;
 public sealed record StaffSelectionListResponse(
     StaffId StaffId,
     EmployeeId EmployeeId,
-    Name Name)
+    Name Name,
+    EmailAddress EmailAddress)
 {
     public string DisplayName => Name.DisplayName;
 }

@@ -33,7 +33,8 @@ internal sealed class GetStaffForSelectionListQueryHandler
             returnData.Add(new StaffSelectionListResponse(
                 member.Id,
                 member.EmployeeId,
-                member.Name));
+                member.Name,
+                member.EmailAddress));
         }
 
         return returnData;

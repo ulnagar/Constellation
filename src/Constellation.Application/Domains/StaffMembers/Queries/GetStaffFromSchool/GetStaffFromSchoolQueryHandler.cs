@@ -35,7 +35,8 @@ internal sealed class GetStaffFromSchoolQueryHandler
             response.Add(new(
                 member.Id,
                 member.EmployeeId,
-                member.Name));
+                member.Name,
+                member.EmailAddress));
         }
 
         return response;
