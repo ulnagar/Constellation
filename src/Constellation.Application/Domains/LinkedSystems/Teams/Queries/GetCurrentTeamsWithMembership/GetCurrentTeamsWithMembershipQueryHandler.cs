@@ -737,20 +737,18 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                     members.Add(mandatoryOwnerEntry);
             }
         }
-        else
+
+        foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
         {
-            foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
-            {
-                TeamWithMembership.Member entry = new(
-                    owner,
-                    TeamsMembershipLevel.Owner.Value,
-                    []);
+            TeamWithMembership.Member entry = new(
+                owner,
+                TeamsMembershipLevel.Owner.Value,
+                []);
 
-                if (members.All(value => value.EmailAddress != entry.EmailAddress))
-                    members.Add(entry);
-            }
+            if (members.All(value => value.EmailAddress != entry.EmailAddress))
+                members.Add(entry);
         }
-
+        
         return members;
     }
 

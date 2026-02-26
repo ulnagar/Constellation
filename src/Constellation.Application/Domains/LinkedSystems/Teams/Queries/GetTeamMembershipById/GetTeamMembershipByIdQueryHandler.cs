@@ -597,7 +597,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
             {
                 if (grade == Grade.SpecialProgram)
                 {
-                    if (token.Contains("Year"))
+                    if (token.Contains("Year", StringComparison.InvariantCultureIgnoreCase))
                     {
                         var gradeNum = token.Split(' ')[1];
                         bool success = Enum.TryParse(gradeNum, true, out grade);
@@ -623,18 +623,16 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     returnData.Add(mandatoryOwnerEntry);
             }
         }
-        else
-        {
-            foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
-            {
-                TeamMembershipResponse mandatoryOwnerEntry = new(
-                    team.Id,
-                    owner,
-                    TeamsMembershipLevel.Owner.Value);
 
-                if (returnData.All(value => value.EmailAddress != mandatoryOwnerEntry.EmailAddress))
-                    returnData.Add(mandatoryOwnerEntry);
-            }
+        foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
+        {
+            TeamMembershipResponse mandatoryOwnerEntry = new(
+                team.Id,
+                owner,
+                TeamsMembershipLevel.Owner.Value);
+
+            if (returnData.All(value => value.EmailAddress != mandatoryOwnerEntry.EmailAddress))
+                returnData.Add(mandatoryOwnerEntry);
         }
 
         return returnData;
