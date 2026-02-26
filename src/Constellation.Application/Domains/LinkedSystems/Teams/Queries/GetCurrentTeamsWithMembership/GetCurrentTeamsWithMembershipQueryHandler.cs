@@ -725,24 +725,23 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
                     members.Add(mandatoryOwnerEntry);
             }
         }
-        else
+
+        List<string> standardOwners = new()
         {
-            List<string> standardOwners = new()
-            {
-                "michael.necovski2@det.nsw.edu.au",
-                "benjamin.hillsley@det.nsw.edu.au"
-            };
+            "nhi.auroracollege@nhi.det.nsw.edu.au",
+            "michael.necovski2@det.nsw.edu.au",
+            "benjamin.hillsley@det.nsw.edu.au"
+        };
 
-            foreach (string owner in standardOwners)
-            {
-                TeamWithMembership.Member entry = new(
-                    owner,
-                    TeamsMembershipLevel.Owner.Value,
-                    []);
+        foreach (string owner in standardOwners)
+        {
+            TeamWithMembership.Member entry = new(
+                owner,
+                TeamsMembershipLevel.Owner.Value,
+                []);
 
-                if (members.All(value => value.EmailAddress != entry.EmailAddress))
-                    members.Add(entry);
-            }
+            if (members.All(value => value.EmailAddress != entry.EmailAddress))
+                members.Add(entry);
         }
 
         return members;

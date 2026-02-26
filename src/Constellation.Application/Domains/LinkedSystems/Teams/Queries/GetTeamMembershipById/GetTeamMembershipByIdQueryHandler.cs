@@ -610,24 +610,23 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                     returnData.Add(lastEntry);
             }
         }
-        else
+
+        List<string> standardOwners =
+        [
+            "nhi.auroracollege@nhi.det.nsw.edu.au",
+            "michael.necovski2@det.nsw.edu.au",
+            "benjamin.hillsley@det.nsw.edu.au"
+        ];
+
+        foreach (string owner in standardOwners)
         {
-            List<string> standardOwners =
-            [
-                "michael.necovski2@det.nsw.edu.au",
-                "benjamin.hillsley@det.nsw.edu.au"
-            ];
+            TeamMembershipResponse entry = new(
+                team.Id,
+                owner,
+                TeamsMembershipLevel.Owner.Value);
 
-            foreach (string owner in standardOwners)
-            {
-                TeamMembershipResponse entry = new(
-                    team.Id,
-                    owner,
-                    TeamsMembershipLevel.Owner.Value);
-
-                if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
-                    returnData.Add(entry);
-            }
+            if (returnData.All(value => value.EmailAddress != entry.EmailAddress))
+                returnData.Add(entry);
         }
 
         return returnData;
