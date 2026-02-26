@@ -1,10 +1,9 @@
 ﻿@page
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.TeamsModel
 @using Constellation.Core.Enums
 @using Constellation.Core.Extensions
-@model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.TeamsModel
 @{
 }
-
 
 <h2>Teams Configuration</h2>
 
@@ -15,171 +14,15 @@
 <hr />
 
 <form method="post">
-    <div class="row">
-        <label asp-for="MandatoryOwners" class="col mb-1">Class Team Mandatory Owners</label>
-        <div class="w-100 mb-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#StaffListModal--Mandatory-Owners">Add Staff Member</button>
-        </div>
-    </div>
-    <div class="row row-cols-1 row-cols-xl-2 g-4 staff-member-card-container--mandatory-owners">
-        @foreach (var entry in Model.MandatoryOwners)
-        {
-            var staffMember = Model.StaffMembers.FirstOrDefault(member => member.StaffId == entry.Key);
-
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-11">
-                                <h5 class="card-title">@(staffMember?.DisplayName ?? "Unknown Person")</h5>
-                                <h6 class="card-subtitle">@(staffMember?.EmailAddress ?? "")</h6>
-
-                                <input type="hidden" name="MandatoryOwners.index" value="@entry.Key" />
-                                <input type="hidden" name="MandatoryOwners[@entry.Key].Key" value="@entry.Key" />
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn-close" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
-                        {
-                            if (grade == Grade.SpecialProgram)
-                                continue;
-
-                            var selected = entry.Value.Contains(grade);
-
-                            if (selected)
-                            {
-                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-property-name="MandatoryOwners" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
-
-                                <input type="hidden" name="MandatoryOwners[@entry.Key].Value.index" value="@grade" />
-                                <input type="hidden" name="MandatoryOwners[@entry.Key].Value[@grade]" value="@((int)grade)" />
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="MandatoryOwners" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
-                            }
-                        }
-                    </div>
-
-                </div>
-            </div>
-        }
-    </div>
-    
-    <hr />
-
-    <div class="row">
-        <label asp-for="StudentTeamOwners" class="col mb-1">Student Team Owners</label>
-        <div class="w-100 mb-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#StaffListModal--Team-Owners">Add Staff Member</button>
-        </div>
-    </div>
-    <div class="row row-cols-1 row-cols-xl-2 g-4 staff-member-card-container--team-owners">
-        @foreach (var entry in Model.StudentTeamOwners)
-        {
-            var staffMember = Model.StaffMembers.FirstOrDefault(member => member.StaffId == entry.Key);
-
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-11">
-                                <h5 class="card-title">@(staffMember?.DisplayName ?? "Unknown Person")</h5>
-                                <h6 class="card-subtitle">@(staffMember?.EmailAddress ?? "")</h6>
-
-                                <input type="hidden" name="StudentTeamOwners.index" value="@entry.Key" />
-                                <input type="hidden" name="StudentTeamOwners[@entry.Key].Key" value="@entry.Key" />
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn-close" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
-                        {
-                            if (grade == Grade.SpecialProgram)
-                                continue;
-
-                            var selected = entry.Value.Contains(grade);
-
-                            if (selected)
-                            {
-                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-property-name="StudentTeamOwners" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
-
-                                <input type="hidden" name="StudentTeamOwners[@entry.Key].Value.index" value="@grade" />
-                                <input type="hidden" name="StudentTeamOwners[@entry.Key].Value[@grade]" value="@((int)grade)" />
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="StudentTeamOwners" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
-                            }
-                        }
-                    </div>
-
-                </div>
-            </div>
-        }
-    </div>
+    <partial name="ConfigurationStaffCardList" model='("Mandatory Owners", "MandatoryOwners", "mandatory-owners", "StaffListModal--Mandatory-Owners", @Model.MandatoryOwners, @Model.StaffMembers)'/>
     
     <hr />
     
-    <div class="row">
-        <label asp-for="StudentChannelOwners" class="col mb-1">Student Team Channel Owners</label>
-        <div class="w-100 mb-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#StaffListModal--Channel-Owners">Add Staff Member</button>
-        </div>
-    </div>
-    <div class="row row-cols-1 row-cols-xl-2 g-4 staff-member-card-container--channel-owners">
-        @foreach (var entry in Model.StudentTeamOwners)
-        {
-            var staffMember = Model.StaffMembers.FirstOrDefault(member => member.StaffId == entry.Key);
+    <partial name="ConfigurationStaffCardList" model='("Student Team Owners", "StudentTeamOwners", "team-owners", "StaffListModal--Team-Owners", @Model.StudentTeamOwners, @Model.StaffMembers)' />
 
-            <div class="col">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-11">
-                                <h5 class="card-title">@(staffMember?.DisplayName ?? "Unknown Person")</h5>
-                                <h6 class="card-subtitle">@(staffMember?.EmailAddress ?? "")</h6>
-
-                                <input type="hidden" name="StudentChannelOwners.index" value="@entry.Key" />
-                                <input type="hidden" name="StudentChannelOwners[@entry.Key].Key" value="@entry.Key" />
-                            </div>
-                            <div class="col-1">
-                                <button type="button" class="btn-close" aria-label="Close"></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
-                        {
-                            if (grade == Grade.SpecialProgram)
-                                continue;
-
-                            var selected = entry.Value.Contains(grade);
-
-                            if (selected)
-                            {
-                                <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-property-name="StudentChannelOwners" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
-
-                                <input type="hidden" name="StudentChannelOwners[@entry.Key].Value.index" value="@grade" />
-                                <input type="hidden" name="StudentChannelOwners[@entry.Key].Value[@grade]" value="@((int)grade)" />
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="StudentChannelOwners" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
-                            }
-                        }
-                    </div>
-
-                </div>
-            </div>
-        }
-    </div>
+    <hr />
+    
+    <partial name="ConfigurationStaffCardList" model='("Student Team Channel Owners", "StudentChannelOwners", "channel-owners", "StaffListModal--Channel-Owners", @Model.StudentChannelOwners, @Model.StaffMembers)' />
 
     <div class="my-3 row">
         <div class="col-md-3 d-grid">
@@ -188,95 +31,9 @@
     </div>
 </form>
 
-<div class="modal" id="StaffListModal--Mandatory-Owners" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Select Staff Member to add</h4>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">Staff Member</span>
-                            <select id="StaffList--Mandatory-Owners">
-                                <option value="">-- Select --</option>
-                                @foreach (var entry in Model.StaffMembers.OrderBy(entry => entry.Name.SortOrder))
-                                {
-                                    <option value="@entry.StaffId" data-email="@entry.EmailAddress">@entry.Name.DisplayName</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success modal-save-button">Save</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal" id="StaffListModal--Team-Owners" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Select Staff Member to add</h4>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">Staff Member</span>
-                            <select id="StaffList--Team-Owners">
-                                <option value="">-- Select --</option>
-                                @foreach (var entry in Model.StaffMembers.OrderBy(entry => entry.Name.SortOrder))
-                                {
-                                    <option value="@entry.StaffId" data-email="@entry.EmailAddress">@entry.Name.DisplayName</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success modal-save-button">Save</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal" id="StaffListModal--Channel-Owners" tabindex="-1">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Select Staff Member to add</h4>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="form-group col">
-                            <span class="control-label">Staff Member</span>
-                            <select id="StaffList--Channel-Owners">
-                                <option value="">-- Select --</option>
-                                @foreach (var entry in Model.StaffMembers.OrderBy(entry => entry.Name.SortOrder))
-                                {
-                                    <option value="@entry.StaffId" data-email="@entry.EmailAddress">@entry.Name.DisplayName</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success modal-save-button">Save</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+<partial name="ConfigurationStaffModal" model='("StaffListModal--Mandatory-Owners", "MandatoryOwners", ".staff-member-card-container--mandatory-owners", @Model.StaffMembers)' />
+<partial name="ConfigurationStaffModal" model='("StaffListModal--Team-Owners", "StudentTeamOwners", ".staff-member-card-container--team-owners", @Model.StaffMembers)' />
+<partial name="ConfigurationStaffModal" model='("StaffListModal--Channel-Owners", "StudentChannelOwners", ".staff-member-card-container--channel-owners", @Model.StaffMembers)' />
 
 <template id="staff-member-card">
     <div class="col">
@@ -301,7 +58,7 @@
                     if (grade == Grade.SpecialProgram)
                         continue;
 
-                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-key="" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+                    <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="" data-key="" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
                 }
             </div>
         </div>
@@ -311,6 +68,16 @@
 @section scripts {
     <script>
         $('.modal').on('shown.bs.modal', function() {
+            const $modal = $(this);
+            const $scope = $($(this).data('search-scope'));
+
+            $modal.find('option').each(function () {
+                const value = $(this).val();
+                if($scope.find('input[name*="' + value + '"]').length) {
+                    $(this).prop('disabled', true);
+                }
+            });
+
             $(this).find('select').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $(this)
@@ -318,8 +85,8 @@
         });
 
         $('.row').on('click', '.btn-close', function() {
-            var button = $(this);
-            var container = button.closest('.col');
+            const button = $(this);
+            const container = button.closest('.col');
 
             document.startViewTransition(() => {
                 container.remove();
@@ -327,18 +94,18 @@
         });
 
         $('.row').on('click', '.grade-toggle-button', function() {
-            var button = $(this);
+            const button = $(this);
 
-            var staffId = button.data('key');
-            var gradeName = button.data('gradeName');
-            var gradeNumber = button.data('gradeNumber');
-            var propertyName = button.data('propertyName');
+            const staffId = button.data('key');
+            const gradeName = button.data('gradeName');
+            const gradeNumber = button.data('gradeNumber');
+            const propertyName = button.data('propertyName');
 
             if (button.hasClass('btn-primary'))
             {
                 // Currently selected, remove
-                var indexInput = $('input[name="' + propertyName + '[' + staffId + '].Value.index"][value="' + gradeName + '"]');
-                var valueInput = $('input[name="' + propertyName + '[' + staffId + '].Value[' + gradeName + ']"]');
+                const indexInput = $('input[name="' + propertyName + '[' + staffId + '].Value.index"][value="' + gradeName + '"]');
+                const valueInput = $('input[name="' + propertyName + '[' + staffId + '].Value[' + gradeName + ']"]');
 
                 indexInput.remove();
                 valueInput.remove();
@@ -349,11 +116,11 @@
             else
             {
                 // Currently not selected, add
-                var indexInput = $('<input>')
+                const indexInput = $('<input>')
                     .attr('type', "hidden")
                     .attr('name', propertyName + '[' + staffId + '].Value.index');
                 indexInput.val(gradeName);
-                var valueInput = $('<input>')
+                const valueInput = $('<input>')
                     .attr('type', "hidden")
                     .attr('name', propertyName + '[' + staffId + '].Value[' + gradeName + ']');
                 valueInput.val(gradeNumber);
@@ -366,90 +133,31 @@
             }
         });
 
-        $(document).ready(function() {
-            $('#StaffListModal--Mandatory-Owners .modal-save-button').on('click', function() {
-                var select = $('#StaffList--Mandatory-Owners');
+        $('.modal .modal-save-button').on('click', function() {
+            const $modal = $(this).closest('.modal');
+            const propertyName = $modal.data('property-name');
+            const container = $modal.data('search-scope');
+            const $select = $modal.find('select');
 
-                var staffId = select.val();
-                var staffName = $('#StaffList--Mandatory-Owners option:selected').text();
-                var staffEmail = $('#StaffList--Mandatory-Owners option:selected').data('email');
+            const staffId = $select.val();
+            const staffName = $select.find('option:selected').text();
+            const staffEmail = $select.find('option:selected').data('email');
 
-                if ($('[name="MandatoryOwners[' + staffId + '].Key"]').length === 0)
-                {
-                    const template = $('#staff-member-card').contents().clone();
-                    template.find('.card-title').text(staffName);
-                    template.find('.card-subtitle').text(staffEmail);
-                    template.find('[name=".index"]').attr('name', 'MandatoryOwners.index').val(staffId);
-                    template.find('[name="[].Key"]').attr('name', 'MandatoryOwners[' + staffId + '].Key').val(staffId);
-                    template.find('.grade-toggle-button').attr('data-key', staffId);
+            if ($('[name="' + propertyName + '[' + staffId + '].Key"]').length === 0) {
+                const template = $('#staff-member-card').contents().clone();
+                template.find('.card-title').text(staffName);
+                template.find('.card-subtitle').text(staffEmail);
+                template.find('[name=".index"]').attr('name', propertyName + '.index').val(staffId);
+                template.find('[name="[].Key"]').attr('name', propertyName + '[' + staffId + '].Key').val(staffId);
+                template.find('.grade-toggle-button').attr('data-key', staffId).attr('data-property-name', propertyName);
 
-                    document.startViewTransition(() => {
-                        $('.staff-member-card-container--mandatory-owners').append(template);
-                    });
-                }
+                document.startViewTransition(() => {
+                    $(container).append(template);
+                });
+            }
 
-                var modalElement = document.getElementById('StaffListModal--Mandatory-Owners');
-                var modal = bootstrap.Modal.getInstance(modalElement);
-                modal.hide();
-
-                select.val('');
-            });
-
-            $('#StaffListModal--Team-Owners .modal-save-button').on('click', function() {
-                var select = $('#StaffList--Team-Owners');
-
-                var staffId = select.val();
-                var staffName = $('#StaffList--Team-Owners option:selected').text();
-                var staffEmail = $('#StaffList--Team-Owners option:selected').data('email');
-
-                if ($('[name="StudentTeamOwners[' + staffId + '].Key"]').length === 0)
-                {
-                    const template = $('#staff-member-card').contents().clone();
-                    template.find('.card-title').text(staffName);
-                    template.find('.card-subtitle').text(staffEmail);
-                    template.find('[name=".index"]').attr('name', 'StudentTeamOwners.index').val(staffId);
-                    template.find('[name="[].Key"]').attr('name', 'StudentTeamOwners[' + staffId + '].Key').val(staffId);
-                    template.find('.grade-toggle-button').attr('data-key', staffId);
-
-                    // document.startViewTransition(() => {
-                        $('.staff-member-card-container--team-owners').append(template);
-                    // });
-                }
-
-                var modalElement = document.getElementById('StaffListModal--Team-Owners');
-                var modal = bootstrap.Modal.getInstance(modalElement);
-                modal.hide();
-
-                select.val('');
-            });
-
-            $('#StaffListModal--Channel-Owners .modal-save-button').on('click', function() {
-                var select = $('#StaffList--Channel-Owners');
-
-                var staffId = select.val();
-                var staffName = $('#StaffList--Channel-Owners option:selected').text();
-                var staffEmail = $('#StaffList--Channel-Owners option:selected').data('email');
-
-                if ($('[name="StudentChannelOwners[' + staffId + '].Key"]').length === 0)
-                {
-                    const template = $('#staff-member-card').contents().clone();
-                    template.find('.card-title').text(staffName);
-                    template.find('.card-subtitle').text(staffEmail);
-                    template.find('[name=".index"]').attr('name', 'StudentChannelOwners.index').val(staffId);
-                    template.find('[name="[].Key"]').attr('name', 'StudentChannelOwners[' + staffId + '].Key').val(staffId);
-                    template.find('.grade-toggle-button').attr('data-key', staffId);
-
-                    document.startViewTransition(() => {
-                        $('.staff-member-card-container--channel-owners').append(template);
-                    });
-                }
-
-                var modalElement = document.getElementById('StaffListModal--Channel-Owners');
-                var modal = bootstrap.Modal.getInstance(modalElement);
-                modal.hide();
-
-                select.val('');
-            });
+            bootstrap.Modal.getInstance($modal[0]).hide();
+            $select.val('');
         });
     </script>
 }

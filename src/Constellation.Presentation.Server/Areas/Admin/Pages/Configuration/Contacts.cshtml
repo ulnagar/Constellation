@@ -162,6 +162,13 @@
 @section scripts {
     <script>
         $('#StaffListModal').on('shown.bs.modal', function() {
+            $(this).find('option').each(function() {
+                const value = $(this).val();
+                if ($('input[name*="' + value + '"]').length) {
+                    $(this).prop('disabled', true);
+                };
+            });
+
             $(this).find('select').select2({
                 theme: 'bootstrap-5',
                 dropdownParent: $(this)

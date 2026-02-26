@@ -1,4 +1,33 @@
 ﻿@page
+@using Constellation.Core.Models.AppSettings.Enums
 @model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.SentralModel
 @{
+}
+
+<h2>Sentral Configuration</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+@foreach (var path in SentralPath.GetEnumerable)
+{
+    var existingEntry = Model.Configurations.FirstOrDefault(entry => entry.Type == path);
+
+    <form method="post">
+        <div class="mb-4 row">
+            <label class="col-md-2">@path.Name</label>
+            <div class="col-md-5">
+                <input name="type" type="hidden" value="@path.Value" />
+                <input name="path" class="form-control" value="@(existingEntry?.Path ?? string.Empty)"/>
+            </div>
+            <div class="col-2 col-offset-1">
+                <input asp-page-handler="Save" type="submit" value="Save" class="btn btn-success"/>
+            </div>
+        </div>
+    </form>
+
+    <hr />
 }

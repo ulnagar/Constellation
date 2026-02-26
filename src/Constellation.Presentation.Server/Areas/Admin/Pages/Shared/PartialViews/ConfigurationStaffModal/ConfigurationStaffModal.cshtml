@@ -1,0 +1,33 @@
+﻿@model (string Id, string PropertyName, string SearchScope, List<StaffSelectionListResponse> StaffMembers)
+
+@using Constellation.Application.Domains.StaffMembers.Models;
+
+<div class="modal" id="@Model.Id" data-search-scope="@Model.SearchScope" data-property-name="@Model.PropertyName" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Staff Member to add</h4>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="form-group col">
+                            <span class="control-label">Staff Member</span>
+                            <select>
+                                <option value="">-- Select --</option>
+                                @foreach (var entry in Model.StaffMembers.OrderBy(entry => entry.Name.SortOrder))
+                                {
+                                    <option value="@entry.StaffId" data-email="@entry.EmailAddress">@entry.Name.DisplayName</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success modal-save-button">Save</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

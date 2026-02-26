@@ -1,0 +1,60 @@
+﻿@model (string Title, string PropertyName, string Area, string ModalTarget, Dictionary<StaffId, List<Grade>> Entries, List<StaffSelectionListResponse> StaffMembers)
+
+@using Constellation.Core.Enums
+@using Constellation.Core.Extensions
+@using Constellation.Application.Domains.StaffMembers.Models
+@using Constellation.Core.Models.StaffMembers.Identifiers
+
+<div class="row">
+    <h3 class="col mb-1">@Model.Title</h3>
+    <div class="w-100 mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#@Model.ModalTarget">Add Staff Member</button>
+    </div>
+</div>
+<div class="row row-cols-1 row-cols-xl-2 g-4 staff-member-card-container--@Model.Area">
+    @foreach (var entry in Model.Entries)
+    {
+        var staffMember = Model.StaffMembers.FirstOrDefault(member => member.StaffId == entry.Key);
+
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-11">
+                            <h5 class="card-title">@(staffMember?.Name.DisplayName ?? "Unknown Person")</h5>
+                            <h6 class="card-subtitle">@(staffMember?.EmailAddress ?? "")</h6>
+
+                            <input type="hidden" name="@(Model.PropertyName).index" value="@entry.Key" />
+                            <input type="hidden" name="@(Model.PropertyName)[@entry.Key].Key" value="@entry.Key" />
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn-close" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    @foreach (var grade in Enum.GetValues<Grade>().OrderBy(grade => grade))
+                    {
+                        if (grade == Grade.SpecialProgram)
+                            continue;
+
+                        var selected = entry.Value.Contains(grade);
+
+                        if (selected)
+                        {
+                            <button type="button" class="btn btn-primary mb-1 grade-toggle-button" data-property-name="@Model.PropertyName" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+
+                            <input type="hidden" name="@(Model.PropertyName)[@entry.Key].Value.index" value="@grade" />
+                            <input type="hidden" name="@(Model.PropertyName)[@entry.Key].Value[@grade]" value="@((int)grade)" />
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-outline-secondary mb-1 grade-toggle-button" data-property-name="@Model.PropertyName" data-key="@entry.Key" data-grade-name="@grade" data-grade-number="@((int)grade)">@grade.AsName()</button>
+                        }
+                    }
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
