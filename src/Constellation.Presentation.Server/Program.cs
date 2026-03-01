@@ -6,6 +6,7 @@ using Constellation.Infrastructure.Identity.Authorization;
 using Constellation.Infrastructure.Identity.ClaimsPrincipalFactories;
 using Constellation.Infrastructure.Identity.MagicLink;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
+using Constellation.Presentation.Server.Areas.API.Endpoints;
 using Constellation.Presentation.Server.Helpers.HtmlGenerator;
 using Constellation.Presentation.Server.Helpers.Identity;
 using Constellation.Presentation.Server.Infrastructure;
@@ -222,6 +223,8 @@ app.MapControllers();
 app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.UseSession();
+
+app.MapSmsEndpoints();
 
 app.Map("/debug/services", hostBuilder => hostBuilder.Run(async context =>
 {

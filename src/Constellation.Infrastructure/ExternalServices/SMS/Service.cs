@@ -7,16 +7,30 @@ using Constellation.Application.Interfaces.Services;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Options;
 
 public class Service : ISMSService
 {
     private readonly ISMSGateway _service;
+    private readonly SMSGatewayConfiguration _configuration;
 
-    public Service(ISMSGateway service)
+    private readonly string? _deliveryReceiptUri;
+
+    public Service(
+        ISMSGateway service,
+        IOptions<SMSGatewayConfiguration> configuration,
+        LinkGenerator linkGenerator,
+        IHttpContextAccessor httpContextAccessor)
     {
         _service = service;
+        _configuration = configuration.Value;
+
+        _deliveryReceiptUri = linkGenerator.GetUriByName(
+            httpContextAccessor.HttpContext!,
+            "SmsDeliveryReceipt",   // matches the .WithName() registration
+            values: null);
     }
 
     public async Task<Result<SMSMessageCollectionDto>> SendAbsenceNotification(
@@ -35,10 +49,13 @@ public class Service : ISMSService
         
         SMSMessageToSend messageContent = new()
         {
-            origin = "Aurora",
+            origin = _configuration.OutgoingNumber,
             destinations = phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.None)).ToList(),
             message = messageText
         };
+
+        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
+            messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
 
         return await _service.SendSmsAsync(messageContent);
     }
@@ -52,10 +69,13 @@ public class Service : ISMSService
 
         SMSMessageToSend messageContent = new()
         {
-            origin = "Aurora",
+            origin = _configuration.OutgoingNumber,
             destinations = [phoneNumber.ToString(PhoneNumber.Format.None)],
             message = messageText
         };
+
+        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
+            messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
 
         return await _service.SendSmsAsync(messageContent);
     }
@@ -67,10 +87,13 @@ public class Service : ISMSService
     {
         SMSMessageToSend messageContent = new()
         {
-            origin = "Aurora",
+            origin = _configuration.OutgoingNumber,
             destinations = [recipient.PhoneNumber.ToString(PhoneNumber.Format.None)],
             message = message
         };
+
+        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
+            messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
 
         Result<SMSMessageCollectionDto> result = await _service.SendSmsAsync(messageContent);
 
