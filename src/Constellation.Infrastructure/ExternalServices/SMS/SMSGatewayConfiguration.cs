@@ -9,6 +9,7 @@ public class SMSGatewayConfiguration
     public string Version { get; set; }
     public string Key { get; set; }
     public string Secret { get; set; }
+    public string OutgoingNumber { get; set; }
 
     public bool IsConfigured()
     {
