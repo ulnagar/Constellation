@@ -167,6 +167,19 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
             }
 
+            List<TeamMembershipResponse.TeamMembershipChannelResponse> masterChannels = new();
+
+            foreach (Grade grade in Enum.GetValues<Grade>())
+                masterChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
+
+            TeamMembershipResponse masterUser = new(
+                team.Id,
+                "nhi.auroracollege@nhi.det.nsw.edu.au",
+                TeamsMembershipLevel.Owner.Value,
+                masterChannels);
+
+            returnData.Add(masterUser);
+
             return returnData;
         }
 
