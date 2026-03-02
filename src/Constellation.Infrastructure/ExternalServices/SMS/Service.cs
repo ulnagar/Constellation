@@ -73,8 +73,8 @@ public sealed class Service : ISMSService
         {
             SmsMessage message = new()
             {
-                SmsGlobalId = long.TryParse(confirmation.Id, out long id) ? id : null,
-                OutgoingId = long.TryParse(confirmation.OutgoingId, out long outgoingId) ? outgoingId : null,
+                SmsGlobalId = confirmation.Id ?? string.Empty,
+                OutgoingId = confirmation.OutgoingId ?? string.Empty,
                 From = confirmation.Origin ?? string.Empty,
                 To = confirmation.Destination ?? string.Empty,
                 Message = confirmation.Message ?? string.Empty,

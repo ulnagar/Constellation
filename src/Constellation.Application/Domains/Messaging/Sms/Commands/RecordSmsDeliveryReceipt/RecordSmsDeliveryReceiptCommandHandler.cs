@@ -1,21 +1,48 @@
 ﻿namespace Constellation.Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.Messaging.Sms.Enums;
 using Core.Shared;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Interfaces.Repositories;
+using Models;
+using Repositories;
+using Serilog;
 
 internal sealed class RecordSmsDeliveryReceiptCommandHandler
 : ICommandHandler<RecordSmsDeliveryReceiptCommand>
 {
-    public RecordSmsDeliveryReceiptCommandHandler()
+    private readonly ISmsRepository _smsRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger _logger;
+
+    public RecordSmsDeliveryReceiptCommandHandler(
+        ISmsRepository smsRepository,
+        IUnitOfWork unitOfWork,
+        ILogger logger)
     {
-        
+        _smsRepository = smsRepository;
+        _unitOfWork = unitOfWork;
+        _logger = logger
+            .ForContext<RecordSmsDeliveryReceiptCommand>();
     }
 
     public async Task<Result> Handle(RecordSmsDeliveryReceiptCommand request, CancellationToken cancellationToken)
     {
+        SmsMessage? existing = await _smsRepository.GetByOutgoingId(request.Receipt.OutgoingId!, cancellationToken);
+
+        if (existing is not null)
+        {
+            existing.Status = request.Receipt.Status switch
+            {
+                "Delivered" => SmsStatus.Delivered,
+                "Failed" => SmsStatus.Failed,
+                _ => existing.Status
+            };
+            existing.StatusUpdatedAt = request.Receipt.UpdateTime;
+        }
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
+
         return Result.Success();
     }
 }

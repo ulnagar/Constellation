@@ -4,13 +4,17 @@ using Enums;
 using Identifiers;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 public sealed class SmsMessage
 {
-    public SmsId Id { get; set; }
-    public long? SmsGlobalId { get; set; } // msgid from SMSGlobal (nullable - not known until sent/received)
-    public long? OutgoingId { get; set; } // outgoing_id from delivery receipt
+    public SmsMessage()
+    {
+        Id = new();
+    }
+
+    public SmsId Id { get; init; }
+    public string? SmsGlobalId { get; set; } // msgid from SMSGlobal (nullable - not known until sent/received)
+    public string? OutgoingId { get; set; } // outgoing_id from delivery receipt
 
     public required string From { get; set; }
     public required string To { get; set; }
@@ -24,7 +28,7 @@ public sealed class SmsMessage
     public DateTimeOffset? StatusUpdatedAt { get; set; } // update_time from delivery receipt
 
     // Self-referencing FK to link a reply to its original message
-    public long? ReplyToId { get; set; }
+    public SmsId? ReplyToId { get; set; }
     public SmsMessage? ReplyTo { get; set; }
     public ICollection<SmsMessage> Replies { get; set; } = [];
 }

@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Endpoints;
 
-using Constellation.Application.Domains.Messaging.Sms.Enums;
+using Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
+using Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 using Constellation.Application.Domains.Messaging.Sms.Models;
-using Models;
+using MediatR;
 using Serilog;
-using System.Globalization;
 
 public static class SmsEndpoints
 {
@@ -21,61 +21,42 @@ public static class SmsEndpoints
             .Accepts<SmsDeliveryReceipt>("application/json");
     }
 
-    private static IResult HandleIncomingSms(IncomingSms message)
+    private static async Task<IResult> HandleIncomingSms(IncomingSms message, ISender mediator)
     {
         if (string.IsNullOrWhiteSpace(message.From) || string.IsNullOrWhiteSpace(message.Msg))
         {
-            _logger.Warning("Received malformed SMSGlobal postback");
+            _logger
+                .ForContext(nameof(IncomingSms), message, true)
+                .Warning("Received malformed SMSGlobal postback");
+
             return Results.BadRequest();
         }
 
-        _logger.Information(
-            "Incoming SMS | From: {From} | To: {To} | MsgId: {MsgId} | Date: {Date} | Message: {Msg}",
-            message.From, message.To, message.MsgId, message.Date, message.Msg);
+        _logger
+            .ForContext(nameof(IncomingSms), message, true)
+            .Information("Incoming SMS From: {From}", message.From);
 
-        var inboundMessage = new SmsMessage
-        {
-            SmsGlobalId = message.MsgId,
-            From = message.From,
-            To = message.To.ToString(CultureInfo.InvariantCulture),
-            Message = message.Msg!,
-            Direction = SmsDirection.Inbound,
-            Status = SmsStatus.Received,
-            CreatedAt = DateTimeOffset.UtcNow,
-            SmsGlobalDate = DateTimeOffset.Parse(message.Date!, DateTimeFormatInfo.CurrentInfo),
-            ReplyToId = originalMessage?.Id   // null if no match found
-        };
+        await mediator.Send(new CreateNewIncomingSmsRecordCommand(message));
 
-        // SMSGlobal requires the response body to contain "OK"
         return Results.Ok("OK");
     }
 
-    private static IResult HandleDeliveryReceipt(SmsDeliveryReceipt receipt)
+    private static async Task<IResult> HandleDeliveryReceipt(SmsDeliveryReceipt receipt, ISender mediator)
     {
-        if (receipt.Id == 0 || string.IsNullOrWhiteSpace(receipt.Status))
+        if (string.IsNullOrWhiteSpace(receipt.Id) || string.IsNullOrWhiteSpace(receipt.Status))
         {
-            _logger.Warning("Received malformed SMSGlobal delivery receipt");
+            _logger
+                .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
+                .Warning("Received malformed SMSGlobal delivery receipt");
+
             return Results.BadRequest();
         }
 
-        _logger.Information(
-            "Delivery Receipt | Id: {Id} | OutgoingId: {OutgoingId} | Status: {Status} | UpdateTime: {UpdateTime}",
-            receipt.Id, receipt.OutgoingId, receipt.Status, receipt.UpdateTime);
+        _logger
+            .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
+            .Information("Delivery Receipt for Sms with OutgoingId: {OutgoingId}", receipt.OutgoingId);
 
-        var existing = await _db.SmsMessages
-            .FirstOrDefaultAsync(m => m.OutgoingId == receipt.OutgoingId);
-
-        if (existing is not null)
-        {
-            existing.Status = receipt.Status switch
-            {
-                "Delivered" => SmsStatus.Delivered,
-                "Failed" => SmsStatus.Failed,
-                _ => existing.Status
-            };
-            existing.StatusUpdatedAt = receipt.UpdateTime;
-            await _db.SaveChangesAsync();
-        }
+        await mediator.Send(new RecordSmsDeliveryReceiptCommand(receipt));
 
         return Results.Ok("OK");
     }
