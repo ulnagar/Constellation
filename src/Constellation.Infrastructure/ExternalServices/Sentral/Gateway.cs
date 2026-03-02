@@ -1620,7 +1620,7 @@ public class Gateway : ISentralGateway
                 HtmlNode? weekName = row.Descendants("th").FirstOrDefault();
 
                 if (weekName is not null)
-                    correctWeek = weekName.InnerText == week.Name;
+                    correctWeek = weekName.InnerText == week.Value;
 
                 HtmlNode monday = row.Descendants("td").First();
 

@@ -190,6 +190,26 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 }
             }
 
+            foreach (EmailAddress owner in TeamsConfiguration.FallbackMandatoryOwners)
+            {
+                List<TeamMembershipResponse.TeamMembershipChannelResponse> masterChannels = new();
+
+                List<Grade> masterGrades = Enum.GetValues<Grade>().ToList();
+                masterGrades.Remove(Grade.SpecialProgram);
+
+                foreach (Grade grade in masterGrades)
+                    masterChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Owner.Value));
+
+                TeamMembershipResponse mandatoryOwnerEntry = new(
+                    team.Id,
+                    owner,
+                    TeamsMembershipLevel.Owner.Value,
+                    masterChannels);
+
+                if (returnData.All(value => value.EmailAddress != mandatoryOwnerEntry.EmailAddress))
+                    returnData.Add(mandatoryOwnerEntry);
+            }
+
             return returnData;
         }
 
