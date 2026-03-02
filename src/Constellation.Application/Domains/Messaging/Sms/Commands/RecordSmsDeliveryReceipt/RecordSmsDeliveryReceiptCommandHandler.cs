@@ -16,6 +16,6 @@ internal sealed class RecordSmsDeliveryReceiptCommandHandler
 
     public async Task<Result> Handle(RecordSmsDeliveryReceiptCommand request, CancellationToken cancellationToken)
     {
-        
+        return Result.Success();
     }
 }

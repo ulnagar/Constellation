@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-public class SmsMessage
+public sealed class SmsMessage
 {
     public SmsId Id { get; set; }
     public long? SmsGlobalId { get; set; } // msgid from SMSGlobal (nullable - not known until sent/received)

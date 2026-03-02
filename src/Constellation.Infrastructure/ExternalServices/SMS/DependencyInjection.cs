@@ -6,17 +6,14 @@ using Constellation.Infrastructure.ExternalServices.SMS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-public static class SMSServicesRegistration
+public static class SmsServicesRegistration
 {
-    public static IServiceCollection AddSMSExternalService(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
+    public static IServiceCollection AddSmsExternalService(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddOptions<SMSGatewayConfiguration>();
         services.Configure<SMSGatewayConfiguration>(configuration.GetSection(SMSGatewayConfiguration.Section));
 
-        if (environment.IsDevelopment())
-            services.AddScoped<ISMSGateway, LogOnlyGateway>();
-        else
-            services.AddScoped<ISMSGateway, Gateway>();
+        services.AddScoped<ISMSGateway, Gateway>();
 
         services.AddScoped<ISMSService, Service>();
 

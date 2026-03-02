@@ -133,7 +133,7 @@ public static class ServicesRegistration
         services.AddEmailExternalService(configuration);
         services.AddNetworkStatisticsExternalService(configuration);
         services.AddSentralExternalService(configuration);
-        services.AddSMSExternalService(configuration, environment);
+        services.AddSmsExternalService(configuration, environment);
         services.AddTeamsExternalService(configuration);
         services.AddLissServer(configuration, environment);
         services.AddFileSystemService(configuration);
