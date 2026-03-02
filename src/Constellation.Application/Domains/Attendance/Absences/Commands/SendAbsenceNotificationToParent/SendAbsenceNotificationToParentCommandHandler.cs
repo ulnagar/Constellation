@@ -24,12 +24,14 @@ using Core.Models.Tutorials;
 using Core.Models.Tutorials.Errors;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
+using Messaging.Sms.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 internal sealed class SendAbsenceNotificationToParentCommandHandler
     : ICommandHandler<SendAbsenceNotificationToParentCommand>
@@ -184,7 +186,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
             {
                 if (phoneNumbers.Count > 0 && group.Key == DateOnly.FromDateTime(DateTime.Today.AddDays(-1)))
                 {
-                    Result<SMSMessageCollectionDto> sentMessages = await _smsService.SendAbsenceNotification(
+                    Result<List<OutgoingSmsConfirmation>> sentMessages = await _smsService.SendAbsenceNotification(
                         group.ToList(),
                         student,
                         phoneNumbers,
@@ -233,22 +235,28 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                     else
                     {
                         // Once the message has been sent, add it to the database.
-                        if (sentMessages.Value.Messages.Count <= 0)
+                        if (sentMessages.Value.Count == 0)
                             continue;
 
                         foreach (AbsenceEntry entry in group)
                         {
-                            string sentToNumbers = string.Join(", ",
-                                phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.Mobile)));
-                            Absence absence = absences.First(absence => absence.Id == entry.Id);
+                            foreach (OutgoingSmsConfirmation confirmation in sentMessages.Value)
+                            {
+                                Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                            absence.AddNotification(NotificationType.SMS, sentMessages.Value.Messages.First().MessageBody,
-                                sentToNumbers, sentMessages.Value.Messages.First().OutgoingId, _dateTime.Now);
+                                absence.AddNotification(
+                                    NotificationType.SMS, 
+                                    confirmation.Message ?? string.Empty,
+                                    confirmation.Destination ?? string.Empty, 
+                                    confirmation.OutgoingId ?? string.Empty, 
+                                    _dateTime.Now);
 
-                            foreach (PhoneNumber number in phoneNumbers)
                                 _logger.Information(
-                                    "{id}: Message sent via SMS to {number} for Whole Absence on {Date}", request.JobId,
-                                    number.ToString(PhoneNumber.Format.Mobile), group.Key.ToShortDateString());
+                                    "{id}: Message sent via SMS to {number} for Whole Absence on {Date}", 
+                                    request.JobId,
+                                    confirmation.Destination, 
+                                    group.Key.ToShortDateString());
+                            }
                         }
                     }
                 }

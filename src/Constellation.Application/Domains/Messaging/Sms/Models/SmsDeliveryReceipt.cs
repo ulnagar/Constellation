@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Server.Areas.API.Models;
+﻿namespace Constellation.Application.Domains.Messaging.Sms.Models;
 
 public sealed class SmsDeliveryReceipt
 {

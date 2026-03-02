@@ -1,7 +1,11 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS.Model;
 
-internal class CreditBalance : Response
+using System.Text.Json.Serialization;
+
+internal sealed class CreditBalance
 {
-    public double balance { get; set; }
-    public string currency { get; set; }
+    [JsonPropertyName("balance")]
+    public double Balance { get; set; }
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; }
 }

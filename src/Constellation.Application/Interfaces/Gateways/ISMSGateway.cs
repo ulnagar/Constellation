@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
-using Constellation.Application.DTOs;
 using Core.Shared;
+using Domains.Messaging.Sms.Models;
 using System.Threading.Tasks;
 
 public interface ISMSGateway
 {
-    Task<Result<double>> GetCreditBalanceAsync();
-    Task<Result<SMSMessageCollectionDto>> SendSmsAsync(object payload);
+    Task<Result<double>> GetCreditBalance(CancellationToken cancellationToken = default);
+    Task<Result<List<OutgoingSmsConfirmation>>> SendSms(object payload, CancellationToken cancellationToken = default);
 }
