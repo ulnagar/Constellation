@@ -8,6 +8,6 @@ public class CoordinatorAbsenceVerificationRequestEmailViewModel : EmailLayoutBa
 {
     public string StudentName { get; set; }
     public string SchoolName { get; set; }
-    public static string PortalLink = $"https://acos.aurora.nsw.edu.au/Schools/";
+    public static string PortalLink = $"https://acos.aurora.nsw.edu.au/";
     public List<AbsenceExplanation> ClassList { get; set; } = new();
 }

@@ -12,5 +12,5 @@ public sealed class StudentAbsenceDigestEmailViewModel : EmailLayoutBaseViewMode
     public List<AbsenceEntry> PartialAbsences { get; init; } = new();
     public StudentId StudentId { get; init; }   
 
-    public string Link => $"https://acos.aurora.nsw.edu.au/Portal/Absences/Students/{StudentId}";
+    public string Link => $"https://acos.aurora.nsw.edu.au/";
 }
