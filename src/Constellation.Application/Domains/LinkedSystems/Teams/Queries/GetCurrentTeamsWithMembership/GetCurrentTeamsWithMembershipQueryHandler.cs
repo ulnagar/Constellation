@@ -788,10 +788,12 @@ internal sealed class GetCurrentTeamsWithMembershipQueryHandler
         {
             Dictionary<string, string> staffChannels = new();
 
-            bool ownerExists = configuration.StudentChannelOwners.TryGetValue(staffMember, out List<Grade>? ownerGrades);
+            bool ownerExists = configuration.StudentChannelOwners.Any(entry => entry.Key.Id == staffMember.Id);
 
             if (ownerExists)
             {
+                List<Grade> ownerGrades = configuration.StudentChannelOwners.First(entry => entry.Key.Id == staffMember.Id).Value;
+
                 foreach (Grade grade in Enum.GetValues<Grade>())
                 {
                     if (ownerGrades!.Contains(grade))

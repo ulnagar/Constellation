@@ -62,8 +62,9 @@ public class SchoolContactRepository : ISchoolContactRepository
         await _context
             .Set<SchoolContact>()
             .Where(entry => 
-                name == entry.Name && 
-                entry.Assignments.Any(role =>
+                name == entry.Name &&
+                _context.Set<SchoolContactRole>().Any(role =>
+                    role.SchoolContactId == entry.Id &&
                     !role.IsDeleted &&
                     role.SchoolCode == schoolCode))
             .SingleOrDefaultAsync(cancellationToken);

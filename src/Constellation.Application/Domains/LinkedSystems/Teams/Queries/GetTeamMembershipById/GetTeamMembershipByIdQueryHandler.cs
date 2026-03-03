@@ -146,10 +146,12 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                 List<Grade> grades = Enum.GetValues<Grade>().ToList();
                 grades.Remove(Grade.SpecialProgram);
 
-                bool channelOwnerExists = teamsConfiguration.StudentChannelOwners.TryGetValue(staffMember, out List<Grade>? ownerChannelGrades);
-
+                bool channelOwnerExists = teamsConfiguration.StudentChannelOwners.Any(entry => entry.Key.Id == staffMember.Id);
+                
                 if (channelOwnerExists)
                 {
+                    List<Grade> ownerChannelGrades = teamsConfiguration.StudentChannelOwners.First(entry => entry.Key.Id == staffMember.Id).Value;
+
                     foreach (Grade grade in grades)
                     {
                         if (ownerChannelGrades!.Contains(grade))
@@ -164,7 +166,7 @@ internal sealed class GetTeamMembershipByIdQueryHandler
                         staffChannels.Add(new($"{_dateTime.CurrentYear} - {grade.AsName()}", TeamsMembershipLevel.Member.Value));
                 }
 
-                bool teamOwnerExists = teamsConfiguration.StudentTeamOwners.TryGetValue(staffMember, out _);
+                bool teamOwnerExists = teamsConfiguration.StudentTeamOwners.Any(entry => entry.Key.Id == staffMember.Id);
 
                 if (teamOwnerExists)
                 {
