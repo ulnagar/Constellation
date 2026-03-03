@@ -59,14 +59,15 @@ public class SchoolContactRepository : ISchoolContactRepository
         string name,
         string schoolCode,
         CancellationToken cancellationToken = default) =>
-        await _context
+        _context
             .Set<SchoolContact>()
             .Where(entry => 
-                name == entry.Name.DisplayName &&
                 entry.Assignments.Any(role =>
                     !role.IsDeleted &&
                     role.SchoolCode == schoolCode))
-            .SingleOrDefaultAsync(cancellationToken);
+            .AsEnumerable()
+            .Where(entry => entry.Name.DisplayName == name)
+            .SingleOrDefault();
     
     public async Task<List<SchoolContact>> GetPrincipalsForSchool(
         string schoolCode,
