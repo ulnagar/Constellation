@@ -43,7 +43,7 @@ public static class SmsEndpoints
 
     private static async Task<IResult> HandleDeliveryReceipt(SmsDeliveryReceipt receipt, ISender mediator)
     {
-        if (string.IsNullOrWhiteSpace(receipt.Id) || string.IsNullOrWhiteSpace(receipt.Status))
+        if (string.IsNullOrWhiteSpace(receipt.OutgoingId) || string.IsNullOrWhiteSpace(receipt.Status))
         {
             _logger
                 .ForContext(nameof(SmsDeliveryReceipt), receipt, true)

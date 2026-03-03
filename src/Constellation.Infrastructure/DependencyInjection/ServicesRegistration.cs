@@ -38,27 +38,6 @@ public static class ServicesRegistration
         services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
         services.AddSingleton<CreateAuditLogEntitiesInterceptor>();
 
-        //services.AddDbContext<AppDbContext>(
-        //    (sp, options) =>
-        //    {
-        //        options.UseSqlServer(
-        //            configuration.GetConnectionString("DefaultConnection"),
-        //            b =>
-        //            {
-        //                b.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
-        //                b.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-        //                b.CommandTimeout(120); // Increased command timeout to allow migrations to complete. May not be necessary after Term 1 2024.
-        //            });
-
-        //        options.EnableSensitiveDataLogging();
-
-        //        options.AddInterceptors(new List<IInterceptor> {
-        //            sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>(),
-        //            sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>(),
-        //            sp.GetRequiredService<CreateAuditLogEntitiesInterceptor>()
-        //        });
-        //    });
-
         services.AddDbContextFactory<AppDbContext>(
             (sp, options) =>
             {
