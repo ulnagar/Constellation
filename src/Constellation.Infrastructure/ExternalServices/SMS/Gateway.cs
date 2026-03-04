@@ -105,25 +105,31 @@ internal sealed class Gateway : ISMSGateway
         }
     }
 
-    private async Task<HttpResponseMessage> RequestAsync<T>(
-        string path, 
-        T? payload = default, 
+    private async Task<HttpResponseMessage> RequestAsync(
+        string path,
         string? filter = null,
         CancellationToken cancellationToken = default)
     {
-        (string credentials, Uri uri) = Credentials(path, null == payload ? "GET" : "POST", filter);
+        (string credentials, Uri uri) = Credentials(path, "GET", filter);
 
-        using HttpRequestMessage request = new(
-            payload is null ? HttpMethod.Get : HttpMethod.Post, 
-            uri);
-
+        using HttpRequestMessage request = new(HttpMethod.Get, uri);
         request.Headers.Authorization = new AuthenticationHeaderValue("MAC", credentials);
 
-        if (payload is not null)
-            request.Content = new StringContent(
-                JsonSerializer.Serialize(payload),
-                Encoding.UTF8, 
-                "application/json");
+        return await _client.GetAsync(uri, cancellationToken);
+    }
+
+    private async Task<HttpResponseMessage> RequestAsync<T>(
+        string path, 
+        T payload, 
+        string? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        (string credentials, Uri uri) = Credentials(path, "POST", filter);
+
+        using HttpRequestMessage request = new(HttpMethod.Post, uri);
+        request.Headers.Authorization = new AuthenticationHeaderValue("MAC", credentials);
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
         return await _client.GetAsync(uri, cancellationToken);
     }
