@@ -105,9 +105,9 @@ internal sealed class Gateway : ISMSGateway
         }
     }
 
-    private async Task<HttpResponseMessage> RequestAsync(
+    private async Task<HttpResponseMessage> RequestAsync<T>(
         string path, 
-        object? payload = null, 
+        T? payload = default, 
         string? filter = null,
         CancellationToken cancellationToken = default)
     {
@@ -119,7 +119,7 @@ internal sealed class Gateway : ISMSGateway
 
         request.Headers.Authorization = new AuthenticationHeaderValue("MAC", credentials);
 
-        if (payload is null)
+        if (payload is not null)
             request.Content = new StringContent(
                 JsonSerializer.Serialize(payload),
                 Encoding.UTF8, 
