@@ -33,7 +33,11 @@ public sealed class Service : ISMSService
         _configuration = configuration.Value;
 
         _deliveryReceiptUri = httpContextAccessor.HttpContext == null 
-            ? null 
+            ? linkGenerator.GetUriByName(
+                "SmsDeliveryReceipt",   // matches the .WithName() registration
+                values: null,
+                scheme: "https",
+                host: new HostString("acos.aurora.nsw.edu.au"))
             : linkGenerator.GetUriByName(
                 httpContextAccessor.HttpContext!,
                 "SmsDeliveryReceipt",   // matches the .WithName() registration

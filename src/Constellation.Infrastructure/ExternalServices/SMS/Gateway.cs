@@ -7,6 +7,7 @@ using Errors;
 using Microsoft.Extensions.Options;
 using Model;
 using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
@@ -115,7 +116,7 @@ internal sealed class Gateway : ISMSGateway
         using HttpRequestMessage request = new(HttpMethod.Get, uri);
         request.Headers.Authorization = new AuthenticationHeaderValue("MAC", credentials);
 
-        return await _client.GetAsync(uri, cancellationToken);
+        return await _client.SendAsync(request, cancellationToken);
     }
 
     private async Task<HttpResponseMessage> RequestAsync<T>(
@@ -125,25 +126,26 @@ internal sealed class Gateway : ISMSGateway
         CancellationToken cancellationToken = default)
     {
         (string credentials, Uri uri) = Credentials(path, "POST", filter);
-
+        
         using HttpRequestMessage request = new(HttpMethod.Post, uri);
         request.Headers.Authorization = new AuthenticationHeaderValue("MAC", credentials);
+
         request.Content = new StringContent(
             JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-        return await _client.GetAsync(uri, cancellationToken);
+        return await _client.SendAsync(request, cancellationToken);
     }
 
     private (string credentials, Uri uri) Credentials(
-        string path, 
-        string method = "GET", 
+        string path,
+        string method,
         string? filter = null)
     {
         string fullPath = $"https://{_settings.Host}/{_settings.Version}/{path}/";
         if (!string.IsNullOrWhiteSpace(filter))
             fullPath = $"{fullPath}?{filter}";
 
-        Uri uri = new Uri(fullPath);
+        Uri uri = new(fullPath);
 
         string timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
         string nonce = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
