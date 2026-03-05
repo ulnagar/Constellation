@@ -18,6 +18,7 @@ using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
+using Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +59,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
     public async Task Handle(AbsenceResponseReceivedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(notification.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(notification.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -67,7 +68,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        Response response = absence.Responses.FirstOrDefault(response => response.Id == notification.ResponseId);
+        Response? response = absence.Responses.FirstOrDefault(response => response.Id == notification.ResponseId);
 
         if (response is null)
         {
@@ -90,7 +91,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
         {
             OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             if (offering is null)
             {
@@ -109,7 +110,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
         {
             TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
             if (tutorial is null)
             {
@@ -124,7 +125,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             teachers.AddRange(await _staffRepository.GetCurrentTeachersForTutorial(tutorialId, cancellationToken));
         }
 
-        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -135,7 +136,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
 
         EmailDtos.AbsenceResponseEmail notificationEmail = new();
 
-        notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
+        notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox.Email);
         notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress.Email));
         notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
         notificationEmail.StudentName = student.Name.DisplayName;

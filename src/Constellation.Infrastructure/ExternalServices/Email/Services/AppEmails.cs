@@ -44,7 +44,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege];
+        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox];
 
         List<Attachment> attachments = new()
         {

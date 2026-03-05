@@ -70,7 +70,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
     public async Task Handle(PendingVerificationResponseCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         // Send email to ACC to let them know there is a response that requires verification.
-        Absence absence = await _absenceRepository.GetById(notification.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(notification.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -78,7 +78,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        Response response = absence.Responses.FirstOrDefault(response => response.Id == notification.ResponseId);
+        Response? response = absence.Responses.FirstOrDefault(response => response.Id == notification.ResponseId);
 
         if (response is null)
         {
@@ -86,7 +86,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -94,7 +94,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             return;
         }
 
-        SchoolEnrolment enrolment = student.CurrentEnrolment;
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
         {
@@ -118,7 +118,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
                 recipients.Add(result.Value);
         }
 
-        School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
         if (school is null)
         {
@@ -148,7 +148,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         {
             OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-            Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+            Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
             if (offering is null)
             {
@@ -164,7 +164,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
         {
             TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-            Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
             if (tutorial is null)
             {

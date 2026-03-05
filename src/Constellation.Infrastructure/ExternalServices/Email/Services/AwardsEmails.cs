@@ -41,7 +41,7 @@ public sealed partial class Service : IEmailService
 
         foreach (EmailRecipient recipient in recipients)
         {
-            await _emailSender.Send([recipient], EmailRecipient.NoReply.Email, viewModel.Title, body, new List<Attachment> { certificate }, MessagePriority.Normal, cancellationToken);
+            await _emailSender.Send([recipient], EmailRecipient.NoReply, viewModel.Title, body, new List<Attachment> { certificate }, MessagePriority.Normal, cancellationToken);
         }
     }
 

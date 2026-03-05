@@ -60,7 +60,7 @@ public sealed partial class Service : IEmailService
 
         await _emailSender.Send(
             toRecipients: recipients,
-            fromRecipient: EmailRecipient.AuroraCollege,
+            fromRecipient: EmailRecipient.AbsencesMailbox,
             subject: viewModel.Title,
             body: body,
             cancellationToken: cancellationToken);
@@ -87,7 +87,7 @@ public sealed partial class Service : IEmailService
 
         await _emailSender.Send(
             toRecipients: recipients,
-            fromRecipient: EmailRecipient.AuroraCollege,
+            fromRecipient: EmailRecipient.AbsencesMailbox,
             subject: viewModel.Title,
             body: body,
             cancellationToken: cancellationToken);

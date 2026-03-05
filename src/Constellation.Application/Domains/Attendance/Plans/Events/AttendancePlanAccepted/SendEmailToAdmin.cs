@@ -32,7 +32,7 @@ internal sealed class SendEmailToAdmin
 
     public async Task Handle(AttendancePlanAcceptedDomainEvent notification, CancellationToken cancellationToken)
     {
-        AttendancePlan plan = await _planRepository.GetById(notification.PlanId, cancellationToken);
+        AttendancePlan? plan = await _planRepository.GetById(notification.PlanId, cancellationToken);
 
         if (plan is null)
         {
@@ -43,19 +43,7 @@ internal sealed class SendEmailToAdmin
 
             return;
         }
-
-        Result<EmailRecipient> recipient = EmailRecipient.Create("Aurora College", "auroracoll-h.school@det.nsw.edu.au");
-
-        if (recipient.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(AttendancePlanAcceptedDomainEvent), notification, true)
-                .ForContext(nameof(Error), recipient.Error, true)
-                .Warning("Failed to send attendance plan email to school admin");
-
-            return;
-        }
-
-        await _emailService.SendAttendancePlanToAdmin([recipient.Value], plan, cancellationToken);
+        
+        await _emailService.SendAttendancePlanToAdmin([ EmailRecipient.AbsencesMailbox ], plan, cancellationToken);
     }
 }

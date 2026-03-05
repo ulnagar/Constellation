@@ -87,7 +87,7 @@ public sealed partial class Service : IEmailService
 
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/SchoolAttendanceReportEmail.cshtml", viewModel);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, null, null, null, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
+        Result<MimeMessage> message = await _emailSender.Send(recipients, [], [], string.Empty, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
 
         // Perhaps used for future where message file (.eml) is saved to database
         //var messageStream = new MemoryStream();
