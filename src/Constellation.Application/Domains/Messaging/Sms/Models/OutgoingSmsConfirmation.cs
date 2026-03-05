@@ -1,13 +1,16 @@
 ﻿namespace Constellation.Application.Domains.Messaging.Sms.Models;
 
+using Helpers.JsonConverters;
 using System.Text.Json.Serialization;
 
 public sealed class OutgoingSmsConfirmation
 {
     [JsonPropertyName("id")]
+    [JsonConverter(typeof(NumberOrStringConverter))]
     public string? Id { get; set; }                  // Message part identifier
 
     [JsonPropertyName("outgoing_id")]
+    [JsonConverter(typeof(NumberOrStringConverter))]
     public string? OutgoingId { get; set; }          // Outgoing message identifier
 
     [JsonPropertyName("origin")]
