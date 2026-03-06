@@ -4,6 +4,7 @@ using Application.Models.Identity;
 using Application.Models.Identity.Enums;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Pages.Auth;
 using Serilog;
 using System.Security.Claims;
@@ -28,21 +29,35 @@ internal static class IdentityHelpers
         _logger
             .Information("Resolved required services");
 
+        foreach (var claim in context.Principal?.Claims ?? [])
+        {
+            _logger.Information("Claim: {Type} = {Value}", claim.Type, claim.Value);
+        }
+
         // Get the external user's identifier (typically 'sub' claim)
         string? externalUserId = context.Principal?
             .FindFirstValue(ClaimTypes.NameIdentifier)
             ?? context.Principal?.FindFirstValue("sub");
 
         string? email = context.Principal?
-            .FindFirstValue(ClaimTypes.Email);
+            .FindFirstValue(ClaimTypes.Name);
 
         _logger
             .ForContext(ClaimTypes.NameIdentifier, externalUserId)
             .ForContext(ClaimTypes.Email, email)
             .Information("Tried to retrieve user claims");
-        
+
         if (externalUserId is null || email is null)
+        {
+            // Not enough information was found to process login
+            context.HandleResponse();
+            context.Response.Redirect("/Auth/AccessDeniedSSO");
+
+            _logger
+                .Information("Did not pass nullability checks");
+
             return;
+        }
 
         _logger
             .Information("Passed claim nullability checks");
