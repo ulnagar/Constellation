@@ -2,14 +2,10 @@ namespace Constellation.Presentation.Server.Pages.Auth;
 
 using BaseModels;
 using Constellation.Application.Models.Identity;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 [AllowAnonymous]
 public class CompleteSSOModel : BasePageModel
@@ -33,5 +29,11 @@ public class CompleteSSOModel : BasePageModel
     {
         // Redirect to home page
         return RedirectToPage("/Index");
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+
+        return RedirectToPage("/");
     }
 }

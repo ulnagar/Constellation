@@ -75,6 +75,7 @@ internal sealed class GetContactListQueryHandler
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
                 request.OfferingCodes,
+                request.CourseIds,
                 request.Grades,
                 request.SchoolCodes,
                 cancellationToken);
@@ -127,7 +128,7 @@ internal sealed class GetContactListQueryHandler
                 null,
                 null));
 
-            School school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
+            School? school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
 
             if (school is null)
                 continue;

@@ -27,7 +27,7 @@ public sealed class IsAssignedToActionByRoute : AuthorizationHandler<CanEditWork
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanEditWorkFlowActionRequirement requirement)
     {
-        HttpContext httpContext = context.Resource switch
+        HttpContext? httpContext = context.Resource switch
         {
             AuthorizationFilterContext mvcContext => mvcContext.HttpContext,
             HttpContext razorPageContext => razorPageContext,

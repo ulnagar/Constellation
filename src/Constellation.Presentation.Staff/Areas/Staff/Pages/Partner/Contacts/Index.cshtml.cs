@@ -5,6 +5,8 @@ using Application.Domains.Contacts.Interfaces;
 using Application.Domains.Contacts.Models;
 using Application.Domains.Contacts.Queries.ExportContactList;
 using Application.Domains.Contacts.Queries.GetContactList;
+using Application.Domains.Courses.Models;
+using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
 using Application.Domains.StaffMembers.Models;
@@ -18,6 +20,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Enums;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.Subjects.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,11 +63,13 @@ public class IndexModel : BasePageModel
     [BindProperty]
     public FilterDefinition Filter { get; set; } = new();
 
-    public List<ContactResponse> Contacts { get; set; } = new();
+    public List<ContactResponse> Contacts { get; set; } = [];
 
-    public List<ClassRecord> ClassSelectionList { get; set; } = new();
+    public List<ClassRecord> ClassSelectionList { get; set; } = [];
 
-    public List<SchoolSelectionListResponse> SchoolsList { get; set; } = new();
+    public List<CourseSelectListItemResponse> CourseSelectionList { get; set; } = [];
+
+    public List<SchoolSelectionListResponse> SchoolsList { get; set; } = [];
 
     public List<string> Flags { get; set; } = [];
 
@@ -83,17 +88,19 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken)
     {
-        List<ContactCategory> filterCategories = new();
+        List<ContactCategory> filterCategories = [];
 
         foreach (string entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
+        List<CourseId> courseIds = Filter.Courses.Select(CourseId.FromValue).ToList();
 
         AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         ExportContactListCommand command = new(
             offeringIds,
+            courseIds,
             Filter.Grades,
             Filter.Schools,
             filterCategories,
@@ -124,6 +131,23 @@ public class IndexModel : BasePageModel
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
     {
+        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery(true));
+
+        if (coursesResponse.IsFailure)
+        {
+            ModalContent = ErrorDisplay.Create(
+                coursesResponse.Error,
+                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+
+            _logger
+                .ForContext(nameof(Error), coursesResponse.Error, true)
+                .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
+
+            return Page();
+        }
+
+        CourseSelectionList = coursesResponse.Value;
+
         Result<List<OfferingSelectionListResponse>> classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
 
         if (classesResponse.IsFailure)
@@ -139,9 +163,9 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        foreach (OfferingSelectionListResponse course in classesResponse.Value)
+        foreach (OfferingSelectionListResponse offering in classesResponse.Value)
         {
-            Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(course.Id), cancellationToken);
+            Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(offering.Id), cancellationToken);
 
             if (teachers.Value.Count == 0)
                 continue;
@@ -156,10 +180,10 @@ public class IndexModel : BasePageModel
             StaffSelectionListResponse primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
 
             ClassSelectionList.Add(new ClassRecord(
-                course.Id,
-                course.Name,
+                offering.Id,
+                offering.Name,
                 $"{primaryTeacher.Name.PreferredName[..1]} {primaryTeacher.Name.LastName}",
-                $"Year {course.Name[..2]}"));
+                $"Year {offering.Name[..2]}"));
         }
 
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
@@ -180,7 +204,7 @@ public class IndexModel : BasePageModel
 
         SchoolsList = schoolsRequest.Value;
 
-        List<ContactCategory> filterCategories = new();
+        List<ContactCategory> filterCategories = [];
 
         foreach (string entry in Filter.Categories)
             filterCategories.Add(ContactCategory.FromValue(entry));
@@ -188,8 +212,10 @@ public class IndexModel : BasePageModel
         Flags = await _flagCache.GetFlags();
 
         List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
+        List<CourseId> courseIds = Filter.Courses.Select(CourseId.FromValue).ToList();
 
         if (offeringIds.Any() ||
+            courseIds.Any() ||
             filterCategories.Any() ||
             Filter.Grades.Any() ||
             Filter.Schools.Any() ||
@@ -200,6 +226,7 @@ public class IndexModel : BasePageModel
             Result<List<ContactResponse>> contactRequest = await _mediator.Send(
                 new GetContactListQuery(
                     offeringIds,
+                    courseIds,
                     Filter.Grades,
                     Filter.Schools,
                     filterCategories,
@@ -239,6 +266,7 @@ public class IndexModel : BasePageModel
         public List<string> Schools { get; set; } = [];
         public List<string> Categories { get; set; } = [];
         public List<string> Flags { get; set; } = [];
+        public List<Guid> Courses { get; set; } = [];
 
         public FilterAction Action { get; set; } = FilterAction.Filter;
 

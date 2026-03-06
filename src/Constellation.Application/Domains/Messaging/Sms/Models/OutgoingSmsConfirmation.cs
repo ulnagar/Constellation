@@ -23,6 +23,7 @@ public sealed class OutgoingSmsConfirmation
     public string? Message { get; set; }             // The message content
 
     [JsonPropertyName("dateTime")]
+    [JsonConverter(typeof(FlexibleDateTimeOffsetConverter))]
     public DateTimeOffset DateTime { get; set; }     // When SMSGlobal accepted the message
 
     [JsonPropertyName("status")]

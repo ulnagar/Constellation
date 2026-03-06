@@ -5,6 +5,7 @@ using Constellation.Application.Domains.Students.Models;
 using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Offerings.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using System;
@@ -25,7 +26,12 @@ internal sealed class GetStudentsQueryHandler
 
     public async Task<Result<List<StudentResponse>>> Handle(GetStudentsQuery request, CancellationToken cancellationToken)
     {
-        List<Student> students = await _studentRepository.GetFilteredStudents(new(), new(), new(), cancellationToken);
+        List<Student> students = await _studentRepository.GetFilteredStudents(
+            [],
+            [],
+            [],
+            [],
+            cancellationToken);
 
         if (students.Count == 0)
         {

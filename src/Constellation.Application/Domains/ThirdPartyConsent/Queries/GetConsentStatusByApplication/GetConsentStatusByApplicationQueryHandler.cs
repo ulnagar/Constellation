@@ -45,8 +45,9 @@ internal sealed class GetConsentStatusByApplicationQueryHandler
             request.Grades.Count > 0)
             students = await _studentRepository.GetFilteredStudents(
                 request.OfferingCodes,
+                [],
                 request.Grades,
-                new(),
+                [],
                 cancellationToken);
 
         if (students.Count == 0)

@@ -206,6 +206,7 @@ public class StudentRepository : IStudentRepository
 
     public async Task<List<Student>> GetFilteredStudents(
         List<OfferingId> offeringIds,
+        List<CourseId> courseIds,
         List<Grade> grades,
         List<string> schoolCodes,
         CancellationToken cancellationToken = default)
@@ -222,6 +223,20 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
+
+        if (courseIds.Count > 0)
+        {
+            List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
+                .Where(offering =>
+                    courseIds.Contains(offering.CourseId) &&
+                    offering.StartDate <= _dateTime.Today &&
+                    offering.EndDate >= _dateTime.Today)
+                .Select(offering => offering.Id)
+                .ToListAsync(cancellationToken);
+
+            offeringIds.AddRange(currentOfferingIds);
+            offeringIds = offeringIds.Distinct().ToList();
+        }
 
         if (offeringIds.Count > 0)
         {

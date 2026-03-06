@@ -12,5 +12,6 @@ public sealed class SmsDeliveryReceipt
     public string? OutgoingId { get; set; }
     public string? Status { get; set; }
     [JsonPropertyName("update_time")]
+    [JsonConverter(typeof(FlexibleDateTimeOffsetConverter))]
     public DateTimeOffset UpdateTime { get; set; }
 }

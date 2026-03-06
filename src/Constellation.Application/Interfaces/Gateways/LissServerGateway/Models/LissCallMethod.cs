@@ -1,4 +1,4 @@
-﻿namespace Constellation.Infrastructure.ExternalServices.LissServer.Models;
+﻿namespace Constellation.Application.Interfaces.Gateways.LissServerGateway.Models;
 
 using Constellation.Core.Primitives;
 using System;

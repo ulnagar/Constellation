@@ -42,7 +42,7 @@ public class CasualRepository : ICasualRepository
             .Where(casual => casual.IsDeleted)
             .ToListAsync(cancellationToken);
     
-    public async Task<Casual> GetByEmailAddress(
+    public async Task<Casual?> GetByEmailAddress(
         EmailAddress email,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -50,7 +50,7 @@ public class CasualRepository : ICasualRepository
             .Where(casual => casual.EmailAddress == email)
             .SingleOrDefaultAsync(cancellationToken);
 
-    public async Task<Casual> GetByEdvalCode(
+    public async Task<Casual?> GetByEdvalCode(
         string edvalCode,
         CancellationToken cancellationToken = default) =>
         await _context

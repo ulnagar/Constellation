@@ -37,23 +37,29 @@
 
 	                </div>
 	                <div class="col-md-6">
-		                <label asp-for="Filter.Categories">Contact Categories</label>
-		                <div id="SelectedCategoriesList"> </div>
+		                <label asp-for="Filter.Courses">Courses</label>
+		                <div id="SelectedCoursesList"> </div>
 
 	                </div>
                 </div>
                 <div class="row nested-row">
-	                <div class="col-md-6">
-		                <label asp-for="Filter.Flags">Flags</label>
-		                <div id="SelectedFlagsList"> </div>
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Categories">Contact Categories</label>
+                        <div id="SelectedCategoriesList"> </div>
 
-	                </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Filter.Flags">Flags</label>
+                        <div id="SelectedFlagsList"> </div>
+
+                    </div>
                 </div>
             </div>
             <div class="col-md-2">
                 <button id="ShowGradeSelectList" type="button" class="btn btn-primary btn-block">Add Grades</button>
                 <button id="ShowSchoolSelectList" type="button" class="btn btn-primary btn-block">Add Schools</button>
                 <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
+                <button id="ShowCourseSelectList" type="button" class="btn btn-primary btn-block">Add Courses</button>
                 <button id="ShowCategorySelectList" type="button" class="btn btn-primary btn-block">Add Categories</button>
 				<button id="ShowFlagSelectList" type="button" class="btn btn-primary btn-block">Add Student Flags</button>
 
@@ -320,6 +326,44 @@
     </div>
 </div>
 
+<div class="modal" id="CourseListModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Courses for Filter</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <h5 class="col-md-12">Selected Courses:</h5>
+                        <div class="col-md-12" id="ModalSelectedCoursesList"> </div>
+                    </div>
+                    @foreach (var grade in Model.CourseSelectionList.OrderBy(entry => entry.Grade).ThenBy(entry => entry.Name).GroupBy(entry => entry.Grade))
+                    {
+                        <div class="row">
+                            <div class="col-md-2">
+                                <h5>@grade.Key</h5>
+                            </div>
+                            <div class="col">
+                                @foreach (var course in grade)
+                                {
+                                    <button id="courseSelect-@course.Id" class="btn btn-outline-info select-button" onClick="toggleCourse('@course.Id')">@course.Grade @course.Name</button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="CategoryListModal" tabindex="-1">
 	<div class="modal-dialog modal-dialog-scrollable">
 		<div class="modal-content">
@@ -453,6 +497,10 @@
         $('#ShowClassSelectList').on('click', function () {
             $('#ClassListModal').modal('show');
         });
+        
+        $('#ShowCourseSelectList').on('click', function () {
+            $('#CourseListModal').modal('show');
+        });
 
         $('#ShowSchoolSelectList').on('click', function () {
             $('#SchoolListModal').modal('show');
@@ -576,6 +624,36 @@
             }
         }
 
+        function toggleCourse(courseId) {
+            var selectDiv = $('#courseSelect-' + courseId);
+            if (selectDiv.hasClass('btn-info')) {
+                // Selected, need to deselect
+                selectDiv.removeClass('btn-info');
+                selectDiv.addClass('btn-outline-info')
+
+                $('#pd-courseSelect-' + courseId).remove();
+                $('#md-courseSelect-' + courseId).remove();
+                $('#i-courseSelect-' + courseId).remove();
+            }
+            else {
+                // Deselected, need to select
+                selectDiv.addClass('btn-info');
+                selectDiv.removeClass('btn-outline-info')
+
+                var pageDisplayDiv = $('#courseSelect-' + courseId).clone().prop('id', 'pd-courseSelect-' + courseId);
+                pageDisplayDiv.appendTo('#SelectedCoursesList');
+                var modalDisplayDiv = $('#courseSelect-' + courseId).clone().prop('id', 'md-courseSelect-' + courseId);
+                modalDisplayDiv.appendTo('#ModalSelectedCourseList');
+
+                var input = $('<input>').attr('id', 'i-courseSelect-' + courseId)
+                    .attr('name', 'Filter.Courses')
+                    .attr('type', "hidden");
+                input.val(courseId);
+                var classInputDiv = $('#SelectedCoursesList');
+                classInputDiv.append(input);
+            }
+        }
+
         function toggleFlag(value) {
             var selectDiv = $('button[id="flagSelect-' + value + '"]');
             if (selectDiv.hasClass('btn-info')) {
@@ -650,6 +728,11 @@
             @foreach (var offering in Model.Filter.Offerings)
             {
                 @:toggleClass('@offering');
+            }
+
+            @foreach (var course in Model.Filter.Courses)
+            {
+                @:toggleCourse('@course');
             }
 
             @foreach (var school in Model.Filter.Schools)

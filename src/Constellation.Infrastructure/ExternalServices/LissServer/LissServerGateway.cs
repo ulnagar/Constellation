@@ -23,7 +23,6 @@ using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
-using Models;
 using System.Text.Json;
 
 internal sealed class LissServerGateway : ILissServerGateway
@@ -70,12 +69,15 @@ internal sealed class LissServerGateway : ILissServerGateway
             return LissResponseError.InvalidParameters;
         }
 
-        string requestValue = request[2].ToString();
+        string? requestValue = request[2].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
-        List<LissPublishStudents> students = JsonSerializer.Deserialize<List<LissPublishStudents>>(requestValue);
+        List<LissPublishStudents>? students = JsonSerializer.Deserialize<List<LissPublishStudents>>(requestValue);
+
+        if (students is null)
+            return new LissResponseBlank();
 
         await _edvalRepository.ClearStudents(cancellationToken);
 
@@ -98,12 +100,15 @@ internal sealed class LissServerGateway : ILissServerGateway
             return LissResponseError.InvalidParameters;
         }
 
-        string requestValue = request[1].ToString();
+        string? requestValue = request[1].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
-        List<LissPublishTimetable> timetables = JsonSerializer.Deserialize<List<LissPublishTimetable>>(requestValue);
+        List<LissPublishTimetable>? timetables = JsonSerializer.Deserialize<List<LissPublishTimetable>>(requestValue);
+
+        if (timetables is null)
+            return new LissResponseBlank();
 
         await _edvalRepository.ClearTimetables(cancellationToken);
 
@@ -112,9 +117,7 @@ internal sealed class LissServerGateway : ILissServerGateway
             EdvalTimetable convertedTimetable = timetable.ToTimetable();
 
             if (!string.IsNullOrWhiteSpace(convertedTimetable.TeacherId))
-            {
                 _edvalRepository.Insert(timetable.ToTimetable());
-            }
         }
 
         _edvalRepository.AddIntegrationEvent(new EdvalTimetablesUpdatedIntegrationEvent(new()));
@@ -133,8 +136,15 @@ internal sealed class LissServerGateway : ILissServerGateway
             return LissResponseError.InvalidParameters;
         }
 
-        string authorisationString = request[0].ToString();
-        LissCallAuthorisation authorisation = JsonSerializer.Deserialize<LissCallAuthorisation>(authorisationString!);
+        string? authorisationString = request[0].ToString();
+
+        if (string.IsNullOrWhiteSpace(authorisationString))
+            return LissResponseError.InvalidAuthentication;
+
+        LissCallAuthorisation? authorisation = JsonSerializer.Deserialize<LissCallAuthorisation>(authorisationString);
+
+        if (authorisation is null)
+            return LissResponseError.InvalidAuthentication;
 
         return authorisation.UserAgent switch
         {
@@ -147,14 +157,17 @@ internal sealed class LissServerGateway : ILissServerGateway
         object[] request, 
         CancellationToken cancellationToken = default)
     {
-        string requestValue = request[2].ToString();
+        string? requestValue = request[2].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
         List<string> errors = [];
 
-        List<LissPublishTeachers> teachers = JsonSerializer.Deserialize<List<LissPublishTeachers>>(requestValue);
+        List<LissPublishTeachers>? teachers = JsonSerializer.Deserialize<List<LissPublishTeachers>>(requestValue);
+
+        if (teachers is null)
+            return new LissResponseBlank();
 
         foreach (LissPublishTeachers teacher in teachers.Where(entry => entry.StaffType == "Casual"))
         {
@@ -219,7 +232,7 @@ internal sealed class LissServerGateway : ILissServerGateway
                 continue;
             }
 
-            StaffMemberSystemLink existingSystemLink = staffMember.SystemLinks
+            StaffMemberSystemLink? existingSystemLink = staffMember.SystemLinks
                 .SingleOrDefault(entry => entry.System.Equals(SystemType.Edval));
 
             if (existingSystemLink is not null && existingSystemLink.Value == teacher.TeacherId)
@@ -243,12 +256,15 @@ internal sealed class LissServerGateway : ILissServerGateway
         object[] request,
         CancellationToken cancellationToken = default)
     {
-        string requestValue = request[2].ToString();
+        string? requestValue = request[2].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
-        List<LissPublishTeachers> teachers = JsonSerializer.Deserialize<List<LissPublishTeachers>>(requestValue);
+        List<LissPublishTeachers>? teachers = JsonSerializer.Deserialize<List<LissPublishTeachers>>(requestValue);
+
+        if (teachers is null)
+            return new LissResponseBlank();
 
         await _edvalRepository.ClearTeachers(cancellationToken);
 
@@ -271,12 +287,15 @@ internal sealed class LissServerGateway : ILissServerGateway
             return LissResponseError.InvalidParameters;
         }
 
-        string requestValue = request[1].ToString();
+        string? requestValue = request[1].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
-        List<LissPublishClassMemberships> classMemberships = JsonSerializer.Deserialize<List<LissPublishClassMemberships>>(requestValue);
+        List<LissPublishClassMemberships>? classMemberships = JsonSerializer.Deserialize<List<LissPublishClassMemberships>>(requestValue);
+
+        if (classMemberships is null) 
+            return new LissResponseBlank();
 
         await _edvalRepository.ClearClassMemberships(cancellationToken);
 
@@ -295,16 +314,17 @@ internal sealed class LissServerGateway : ILissServerGateway
         CancellationToken cancellationToken = default)
     {
         if (request.Length != 3)
-        {
             return LissResponseError.InvalidParameters;
-        }
 
-        string requestValue = request[2].ToString();
+        string? requestValue = request[2].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
 
-        List<LissPublishClasses> classes = JsonSerializer.Deserialize<List<LissPublishClasses>>(requestValue);
+        List<LissPublishClasses>? classes = JsonSerializer.Deserialize<List<LissPublishClasses>>(requestValue);
+
+        if (classes is null) 
+            return new LissResponseBlank();
 
         await _edvalRepository.ClearClasses(cancellationToken);
 
@@ -327,7 +347,7 @@ internal sealed class LissServerGateway : ILissServerGateway
             return LissResponseError.InvalidParameters;
         }
 
-        string requestValue = request[3].ToString();
+        string? requestValue = request[3].ToString();
 
         if (string.IsNullOrWhiteSpace(requestValue))
             return new LissResponseBlank();
@@ -337,7 +357,10 @@ internal sealed class LissServerGateway : ILissServerGateway
         JsonSerializerOptions options = new();
         options.Converters.Add(new CustomLissDateTimeConverter());
 
-        List<LissPublishDailyData> classes = JsonSerializer.Deserialize<List<LissPublishDailyData>>(requestValue, options);
+        List<LissPublishDailyData>? classes = JsonSerializer.Deserialize<List<LissPublishDailyData>>(requestValue, options);
+
+        if (classes is null)
+            return new LissResponseBlank();
 
         List<LissPublishDailyData> coveredClasses = classes
             .Where(entry => 
@@ -371,7 +394,7 @@ internal sealed class LissServerGateway : ILissServerGateway
                 Casual? coveringCasual = await _casualRepository.GetByEdvalCode(edvalTeacherId, cancellationToken);
                 StaffMember? coveringTeacher = await _staffRepository.GetByEdvalCode(edvalTeacherId, cancellationToken);
 
-                CoverTeacherType teacherType =
+                CoverTeacherType? teacherType =
                     coveringTeacher is null && coveringCasual is not null ? CoverTeacherType.Casual :
                     coveringCasual is null && coveringTeacher is not null ? CoverTeacherType.Staff :
                     null;
@@ -388,12 +411,15 @@ internal sealed class LissServerGateway : ILissServerGateway
                     continue;
                 }
 
-                string teacherId = teacherType switch
+                string? teacherId = teacherType switch
                 {
                     _ when teacherType == CoverTeacherType.Casual => coveringCasual!.Id.ToString(),
                     _ when teacherType == CoverTeacherType.Staff => coveringTeacher!.Id.ToString(),
                     _ => null
                 };
+
+                if (string.IsNullOrWhiteSpace(teacherId))
+                    continue;
 
                 List<ClassCover> existingCovers = (await _coverRepository.GetAllForDateAndOfferingId(_dateTime.Today, offering.Id, cancellationToken))
                     .OfType<ClassCover>()

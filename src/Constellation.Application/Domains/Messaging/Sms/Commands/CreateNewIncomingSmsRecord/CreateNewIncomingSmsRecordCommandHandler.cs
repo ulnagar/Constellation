@@ -34,16 +34,16 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
             ? null
             : await _smsRepository.GetMostRecentOutboundToNumber(request.IncomingSms.From, cancellationToken);
         
-        SmsMessage inboundMessage = new SmsMessage()
+        SmsMessage inboundMessage = new()
         {
-            SmsGlobalId = request.IncomingSms.MsgId.ToString(CultureInfo.InvariantCulture),
+            SmsGlobalId = request.IncomingSms.MsgId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
             From = request.IncomingSms.From!,
-            To = request.IncomingSms.To.ToString(CultureInfo.InvariantCulture),
+            To = request.IncomingSms.To ?? string.Empty,
             Message = request.IncomingSms.Msg!,
             Direction = SmsDirection.Inbound,
             Status = SmsStatus.Received,
             CreatedAt = DateTimeOffset.UtcNow,
-            SmsGlobalDate = DateTimeOffset.Parse(request.IncomingSms.Date!, DateTimeFormatInfo.CurrentInfo),
+            SmsGlobalDate = request.IncomingSms.Date,
             ReplyToId = originalMessage?.Id ?? null
         };
 

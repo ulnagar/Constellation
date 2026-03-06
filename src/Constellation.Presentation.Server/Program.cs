@@ -89,6 +89,7 @@ builder.Services
         options.ClientId = oidcConfig["ClientId"];
         options.ClientSecret = oidcConfig["ClientSecret"];
 
+        options.CallbackPath = "/signin-oidc";
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.SaveTokens = true;
         options.GetClaimsFromUserInfoEndpoint = true;
@@ -225,6 +226,7 @@ app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=Home}/
 app.UseSession();
 
 app.MapSmsEndpoints();
+app.MapLissEndpoints();
 
 app.Map("/debug/services", hostBuilder => hostBuilder.Run(async context =>
 {

@@ -60,7 +60,8 @@ internal sealed class ExportAbsencesReportCommandHandler
         if (request.StudentIds.Count == 0 &&
             request.OfferingCodes.Count == 0 &&
             request.Grades.Count == 0 &&
-            request.SchoolCodes.Count == 0)
+            request.SchoolCodes.Count == 0 &&
+            request.CourseIds.Count == 0)
             return Result.Failure<FileDto>(DomainErrors.Absences.Report.NoFilterSupplied);
 
         List<Student> students = [];
@@ -68,10 +69,11 @@ internal sealed class ExportAbsencesReportCommandHandler
         if (request.StudentIds.Count > 0)
             students.AddRange(await _studentRepository.GetListFromIds(request.StudentIds, cancellationToken));
 
-        if (request.OfferingCodes.Count > 0 || request.Grades.Count > 0 || request.SchoolCodes.Count > 0)
+        if (request.OfferingCodes.Count > 0 || request.Grades.Count > 0 || request.SchoolCodes.Count > 0 || request.CourseIds.Count > 0)
             students.AddRange(await _studentRepository
                 .GetFilteredStudents(
                     request.OfferingCodes,
+                    request.CourseIds,
                     request.Grades,
                     request.SchoolCodes,
                     cancellationToken));

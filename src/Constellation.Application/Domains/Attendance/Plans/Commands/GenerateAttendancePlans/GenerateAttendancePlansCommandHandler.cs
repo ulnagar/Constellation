@@ -83,6 +83,7 @@ internal sealed class GenerateAttendancePlansCommandHandler
 
             List<Student> selectedStudents = await _studentRepository.GetFilteredStudents(
                 [],
+                [],
                 grades,
                 schoolCodes, 
                 cancellationToken);

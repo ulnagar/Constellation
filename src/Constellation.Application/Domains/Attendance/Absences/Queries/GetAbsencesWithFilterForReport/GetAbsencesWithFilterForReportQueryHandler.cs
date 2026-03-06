@@ -46,7 +46,8 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
         if (request.StudentIds.Count == 0 &&
             request.OfferingCodes.Count == 0 &&
             request.Grades.Count == 0 &&
-            request.SchoolCodes.Count == 0)
+            request.SchoolCodes.Count == 0 &&
+            request.CourseIds.Count == 0)
             return result;
 
         List<Student> students = [];
@@ -56,10 +57,12 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
 
         if (request.OfferingCodes.Count > 0 ||
             request.Grades.Count > 0 ||
-            request.SchoolCodes.Count > 0)
+            request.SchoolCodes.Count > 0 ||
+            request.CourseIds.Count > 0)
             students.AddRange(await _studentRepository
                 .GetFilteredStudents(
                     request.OfferingCodes,
+                    request.CourseIds,
                     request.Grades,
                     request.SchoolCodes,
                     cancellationToken));

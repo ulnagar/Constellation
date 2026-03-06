@@ -81,6 +81,7 @@ internal sealed class ExportContactListCommandHandler
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
                 request.OfferingCodes,
+                request.CourseIds,
                 request.Grades,
                 request.SchoolCodes,
                 cancellationToken);

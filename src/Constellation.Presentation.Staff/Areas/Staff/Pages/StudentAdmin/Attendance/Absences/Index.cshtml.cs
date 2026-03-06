@@ -82,6 +82,7 @@ public class IndexModel : BasePageModel
 
         ExportAbsencesReportCommand command = new(
             offeringIds,
+            [],
             Filter.Grades,
             Filter.Schools,
             Filter.Students);
@@ -189,6 +190,7 @@ public class IndexModel : BasePageModel
         Result<List<FilteredAbsenceResponse>> absenceRequest = await _mediator.Send(
             new GetAbsencesWithFilterForReportQuery(
                     offeringIds,
+                    [],
                     Filter.Grades,
                     Filter.Schools,
                     Filter.Students),
