@@ -4,12 +4,19 @@ using Application.Models.Identity;
 using Application.Models.Identity.Enums;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
+using Pages.Auth;
+using Serilog;
 using System.Security.Claims;
 
 internal static class IdentityHelpers
 {
+    private static readonly Serilog.ILogger _logger = Log.Logger.ForContext<CompleteSSOModel>();
+
     internal static async Task SyncUserWithIdentity(TokenValidatedContext context)
     {
+        _logger
+            .Information("Hit SyncUserWithIdentity");
+
         UserManager<AppUser> userManager = context.HttpContext
             .RequestServices
             .GetRequiredService<UserManager<AppUser>>();
@@ -17,6 +24,9 @@ internal static class IdentityHelpers
         SignInManager<AppUser> signInManager = context.HttpContext
             .RequestServices
             .GetRequiredService<SignInManager<AppUser>>();
+
+        _logger
+            .Information("Resolved required services");
 
         // Get the external user's identifier (typically 'sub' claim)
         string? externalUserId = context.Principal?
@@ -26,8 +36,16 @@ internal static class IdentityHelpers
         string? email = context.Principal?
             .FindFirstValue(ClaimTypes.Email);
 
+        _logger
+            .ForContext(ClaimTypes.NameIdentifier, externalUserId)
+            .ForContext(ClaimTypes.Email, email)
+            .Information("Tried to retrieve user claims");
+        
         if (externalUserId is null || email is null)
             return;
+
+        _logger
+            .Information("Passed claim nullability checks");
 
         // Find or create the user in Identity
         AppUser? user = await userManager.FindByLoginAsync("oidc", externalUserId);
@@ -42,6 +60,9 @@ internal static class IdentityHelpers
                 context.HandleResponse();
                 context.Response.Redirect("/Auth/AccessDeniedSSO");
 
+                _logger
+                    .Information("User cannot be found");
+
                 return;
             }
 
@@ -53,10 +74,17 @@ internal static class IdentityHelpers
                     "DoE Login"));
         }
 
+        _logger
+            .Information("User found by oidc value or email");
+        
         // Sign in with Identity
         user.AddLogin(DateTime.UtcNow, LoginStatus.SingleSignOn);
         await userManager.UpdateAsync(user);
         await signInManager.SignInAsync(user, isPersistent: false);
+
+        _logger
+            .ForContext("RedirectUri", context.Properties?.RedirectUri)
+            .Information("User logged in and being redirected");
 
         context.HandleResponse();
         context.Response.Redirect(context.Properties?.RedirectUri ?? "/");
