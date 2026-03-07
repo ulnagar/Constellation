@@ -28,169 +28,185 @@
                 </div>
             </div>
         </div>
-        <div class="content-box">
+        @if (Model.LoginEnabled)
+        {
+            <div class="content-box">
 
-            @if (Model.Status is LoginModel.LoginStatus.WaitingUserInput 
-                 or LoginModel.LoginStatus.InvalidUsername 
-                 or LoginModel.LoginStatus.TokenInvalid)
-            {
-                <form method="post">
+                @if (Model.Status is LoginModel.LoginStatus.WaitingUserInput
+                     or LoginModel.LoginStatus.InvalidUsername
+                     or LoginModel.LoginStatus.TokenInvalid)
+                {
+                    <form method="post">
+                        <div class="form-box">
+                            <div class="form-value">
+                                <h2>Login</h2>
+                                <div class="login-text">
+                                    <p>Sign in for Aurora College Constellation Portals.</p>
+                                </div>
+                                <div class="inputbox">
+                                    <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                                    <input asp-for="Input.Email" placeholder=" "/>
+                                    <label asp-for="Input.Email">Email</label>
+                                </div>
+                            </div>
+                            <div class="form-value bottom">
+                                <button type="submit">Log in</button>
+                                @* <a class="ssoButton" asp-page-handler="SingleSignOn">Log in with DoE</a> *@
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="help-box">
+                        <div class="form-value">
+                            <div class="login-text">
+                                @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
+                                {
+                                    <p class="warning">Sorry, that link has expired. Enter your email address above to generate a new link.</p>
+                                }
+                                @if (Model.ModelState.ErrorCount > 0)
+                                {
+                                    var errors = Model.ModelState
+                                        .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
+                                        .SelectMany(entry => entry.Value.Errors);
+
+                                    foreach (var error in errors)
+                                    {
+                                        <p class="warning">@error.ErrorMessage</p>
+                                    }
+                                }
+                                <p><strong>DoE Staff:</strong> Enter your DoE email address.</p>
+                                <p><strong>Parents:</strong> Enter your email address and an email with a direct login link will be sent to you.</p>
+                                <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Status == LoginModel.LoginStatus.WaitingPasswordInput)
+                {
+                    <form asp-page-handler="PasswordLogin" method="post">
+                        <div class="form-box">
+                            <div class="form-value">
+                                <h2>Login</h2>
+                                <div class="login-text">
+                                    <p>Sign in for Aurora College Constellation Portals.</p>
+                                </div>
+                                <div class="inputbox">
+                                    <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                                    <input asp-for="Input.Email" placeholder=" " readonly="readonly"/>
+                                    <label asp-for="Input.Email">Email</label>
+                                </div>
+                                <div class="inputbox">
+                                    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                                    <input asp-for="Input.Password" placeholder=" " required autofocus class="@(!Model.ModelState.IsValid ? "is-invalid" : "")"/>
+                                    <label asp-for="Input.Password">Password</label>
+                                </div>
+                            </div>
+                            <div class="form-value">
+                                <button type="submit">Log in</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="help-box">
+                        <div class="form-value">
+                            <div class="login-text">
+                                @if (Model.ModelState.ErrorCount > 0)
+                                {
+                                    var errors = Model.ModelState
+                                        .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
+                                        .SelectMany(entry => entry.Value.Errors);
+
+                                    foreach (var error in errors)
+                                    {
+                                        <p class="warning">@error.ErrorMessage</p>
+                                    }
+                                }
+                                <p><strong>DoE Staff:</strong> Enter DoE Portal password.</p>
+                                <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Status == LoginModel.LoginStatus.WaitingTokenInput)
+                {
+                    <form asp-page-handler="TokenLogin" method="post">
+                        <div class="form-box">
+                            <div class="form-value">
+                                <h2>Login</h2>
+                                <div class="login-text">
+                                    <p>Sign in for Aurora College Constellation Portals.</p>
+                                </div>
+                                <div class="inputbox">
+                                    <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+                                    <input asp-for="Input.Email" placeholder=" " readonly="readonly"/>
+                                    <label asp-for="Input.Email">Email</label>
+                                </div>
+                                <div class="inputbox">
+                                    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
+                                    <input asp-for="Input.Password" placeholder=" " required autofocus class="@(!Model.ModelState.IsValid ? "is-invalid" : "")"/>
+                                    <label asp-for="Input.Password">Token</label>
+                                </div>
+                            </div>
+                            <div class="form-value">
+                                <button type="submit">Log in</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="help-box">
+                        <div class="form-value">
+                            <div class="login-text">
+                                @if (Model.ModelState.ErrorCount > 0)
+                                {
+                                    var errors = Model.ModelState
+                                        .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
+                                        .SelectMany(entry => entry.Value.Errors);
+
+                                    foreach (var error in errors)
+                                    {
+                                        <p class="warning">@error.ErrorMessage</p>
+                                    }
+                                }
+                                <p><strong>Token:</strong> Enter the login token sent via SMS.</p>
+                                <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Status == LoginModel.LoginStatus.EmailSent)
+                {
                     <div class="form-box">
                         <div class="form-value">
                             <h2>Login</h2>
                             <div class="login-text">
                                 <p>Sign in for Aurora College Constellation Portals.</p>
                             </div>
-                            <div class="inputbox">
-                                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                                <input asp-for="Input.Email" placeholder=" "/>
-                                <label asp-for="Input.Email">Email</label>
-                            </div>
-                        </div>
-                        <div class="form-value bottom">
-                            <button type="submit">Log in</button>
-                            @* <a class="ssoButton" asp-page-handler="SingleSignOn">Log in with DoE</a> *@
-                        </div>
-                    </div>
-                </form>
-
-                <div class="help-box">
-                    <div class="form-value">
-                        <div class="login-text">
-                            @if (Model.Status == LoginModel.LoginStatus.TokenInvalid)
-                            {
-                                <p class="warning">Sorry, that link has expired. Enter your email address above to generate a new link.</p>
-                            }
-                            @if (Model.ModelState.ErrorCount > 0)
-                            {
-                                var errors = Model.ModelState
-                                .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
-                                .SelectMany(entry => entry.Value.Errors);
-
-                                foreach (var error in errors)
-                                {
-                                    <p class="warning">@error.ErrorMessage</p>
-                                }
-                            }
-                            <p><strong>DoE Staff:</strong> Enter your DoE email address.</p>
-                            <p><strong>Parents:</strong> Enter your email address and an email with a direct login link will be sent to you.</p>
-                            <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @if (Model.Status == LoginModel.LoginStatus.WaitingPasswordInput)
-            {
-                <form asp-page-handler="PasswordLogin" method="post">
-                    <div class="form-box">
-                        <div class="form-value">
-                            <h2>Login</h2>
                             <div class="login-text">
-                                <p>Sign in for Aurora College Constellation Portals.</p>
+                                <p>Your login link is on its way to your email!</p>
+                                <p>Please check your email for the link to log in to the Aurora College Parents Portal. Remember that it is only valid for the next 10 minutes.</p>
                             </div>
-                            <div class="inputbox">
-                                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                                <input asp-for="Input.Email" placeholder=" " readonly="readonly" />
-                                <label asp-for="Input.Email">Email</label>
-                            </div>
-                            <div class="inputbox">
-                                <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                                <input asp-for="Input.Password" placeholder=" " required autofocus class="@(!Model.ModelState.IsValid ? "is-invalid" : "")" />
-                                <label asp-for="Input.Password">Password</label>
-                            </div>
-                        </div>
-                        <div class="form-value">
-                            <button type="submit">Log in</button>
                         </div>
                     </div>
-                </form>
+                }
 
-                <div class="help-box">
-                    <div class="form-value">
-                        <div class="login-text">
-                            @if (Model.ModelState.ErrorCount > 0)
-                            {
-                                var errors = Model.ModelState
-                                    .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
-                                    .SelectMany(entry => entry.Value.Errors);
-
-                                foreach (var error in errors)
-                                {
-                                    <p class="warning">@error.ErrorMessage</p>
-                                }
-                            }
-                            <p><strong>DoE Staff:</strong> Enter DoE Portal password.</p>
-                            <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
-                        </div>
-                    </div>
+            </div>
+        }
+        else
+        {
+            <div class="content-box">
+                <h2>Login disabled</h2>
+                <div class="login-text">
+                    <p>Sign in has been disabled.</p>
                 </div>
-            }
-
-            @if (Model.Status == LoginModel.LoginStatus.WaitingTokenInput)
-            {
-                <form asp-page-handler="TokenLogin" method="post">
-                    <div class="form-box">
-                        <div class="form-value">
-                            <h2>Login</h2>
-                            <div class="login-text">
-                                <p>Sign in for Aurora College Constellation Portals.</p>
-                            </div>
-                            <div class="inputbox">
-                                <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-                                <input asp-for="Input.Email" placeholder=" " readonly="readonly" />
-                                <label asp-for="Input.Email">Email</label>
-                            </div>
-                            <div class="inputbox">
-                                <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
-                                <input asp-for="Input.Password" placeholder=" " required autofocus class="@(!Model.ModelState.IsValid ? "is-invalid" : "")" />
-                                <label asp-for="Input.Password">Token</label>
-                            </div>
-                        </div>
-                        <div class="form-value">
-                            <button type="submit">Log in</button>
-                        </div>
-                    </div>
-                </form>
-
-                <div class="help-box">
-                    <div class="form-value">
-                        <div class="login-text">
-                            @if (Model.ModelState.ErrorCount > 0)
-                            {
-                                var errors = Model.ModelState
-                                .Where(entry => entry.Value.ValidationState == ModelValidationState.Invalid)
-                                .SelectMany(entry => entry.Value.Errors);
-
-                                foreach (var error in errors)
-                                {
-                                    <p class="warning">@error.ErrorMessage</p>
-                                }
-                            }
-                            <p><strong>Token:</strong> Enter the login token sent via SMS.</p>
-                            <p>See the details of our latest update <a asp-page="/Changelog" asp-area="">here</a></p>
-                        </div>
-                    </div>
+                <div class="login-text">
+                    <p>Constellation is being updated.</p>
+                    <p>Please check back shortly for the new features.</p>
                 </div>
-            }
-
-            @if (Model.Status == LoginModel.LoginStatus.EmailSent)
-            {
-                <div class="form-box">
-                    <div class="form-value">
-                        <h2>Login</h2>
-                        <div class="login-text">
-                            <p>Sign in for Aurora College Constellation Portals.</p>
-                        </div>
-                        <div class="login-text">
-                            <p>Your login link is on its way to your email!</p>
-                            <p>Please check your email for the link to log in to the Aurora College Parents Portal. Remember that it is only valid for the next 10 minutes.</p>
-                        </div>
-                    </div>
-                </div>
-            }
-
-        </div>
+            </div>
+        }
     </section>
 
     <script src="~/lib/jquery/jquery.min.js"></script>
