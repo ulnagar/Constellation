@@ -3,6 +3,7 @@
 using Application.Domains.AppSettings.Models;
 using Application.Interfaces.Services;
 using Constellation.Core.Enums;
+using Core.Errors;
 using Core.Models.Absences.Enums;
 using Core.Models.AppSettings;
 using Core.Models.AppSettings.Enums;
@@ -897,6 +898,50 @@ internal sealed class AppSettingsService : IAppSettingsService
             settings.AddStudentChannelOwner(owner.Key.Id, owner.Value);
         
         _context.Set<TeamsSettings>().Add(settings);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<AuthenticationConfiguration?> Authentication(
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        List<AuthenticationSettings> entry = await _context
+            .Set<AuthenticationSettings>()
+            .ToListAsync(cancellationToken);
+
+        if (entry.Count == 0)
+            return null;
+
+        if (entry.Count > 1)
+            throw new ArgumentOutOfRangeException(nameof(AuthenticationSettings), "Too many AuthenticationSettings records found in database!");
+
+        AuthenticationSettings settings = entry.First();
+
+        return new AuthenticationConfiguration(
+            settings.LoginEnabled,
+            settings.SSOEnabled);
+    }
+
+    public async Task Authentication(
+        AuthenticationConfiguration configuration,
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext _context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        List<AuthenticationSettings> existingEntries = await _context
+            .Set<AuthenticationSettings>()
+            .ToListAsync(cancellationToken);
+
+        if (existingEntries.Count > 0)
+            _context.Set<AuthenticationSettings>().RemoveRange(existingEntries);
+
+        AuthenticationSettings settings = new(
+            configuration.LoginEnabled,
+            configuration.SSOEnabled);
+        
+        _context.Set<AuthenticationSettings>().Add(settings);
 
         await _context.SaveChangesAsync(cancellationToken);
     }

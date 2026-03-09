@@ -38,4 +38,7 @@ public interface IAppSettingsService
 
     Task<TeamsConfiguration?> Teams(CancellationToken cancellationToken = default);
     Task Teams(TeamsConfiguration configuration, CancellationToken cancellationToken = default);
+    
+    Task<AuthenticationConfiguration?> Authentication(CancellationToken cancellationToken = default);
+    Task Authentication(AuthenticationConfiguration configuration, CancellationToken cancellationToken = default);
 }

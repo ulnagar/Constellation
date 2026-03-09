@@ -1,0 +1,48 @@
+@page
+@model Constellation.Presentation.Server.Areas.Admin.Pages.Configuration.AuthenticationModel
+
+<h2>Authentication Configuration</h2>
+
+<div class="page-menu">
+    <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
+</div>
+
+<hr />
+
+<form method="post">
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="mb-4 row">
+            <div class="col-md-5">
+                <div class="form-check form-switch">
+                    <input asp-for="LoginEnabled" class="form-check-input" type="checkbox">
+                    <label class="form-check-label" asp-for="LoginEnabled">Login Enabled</label>
+                </div>
+            </div>
+
+            <div class="w-100">
+                <span class="col">Users will be presented with a message that login is temporarily disabled.</span>
+            </div>
+        </div>
+
+        <div class="mb-4 row">
+            <div class="col-md-5">
+                <div class="form-check form-switch">
+                    <input asp-for="SSOEnabled" class="form-check-input" type="checkbox">
+                    <label class="form-check-label" asp-for="SSOEnabled">SSO Enabled</label>
+                </div>
+            </div>
+
+            <div class="w-100">
+                <span class="col">Allow DoE users to sign in with OIDC/SSO.</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="my-3 row">
+        <div class="col-md-3 d-grid">
+            <input asp-page-handler="Save" type="submit" value="Save" class="btn btn-success btn-lg"/>
+        </div>
+    </div>
+</form>

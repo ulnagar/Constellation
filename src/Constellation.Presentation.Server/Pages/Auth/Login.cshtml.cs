@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Pages.Auth;
 
+using Application.Domains.AppSettings.Models;
 using Application.Domains.Auth.Queries.GetParentUserFromMobileNumber;
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
@@ -24,6 +25,7 @@ public class LoginModel : PageModel
     private readonly ISender _mediator;
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly IAppSettingsService _appSettings;
     private readonly IEmailService _emailService;
     private readonly ISMSService _smsService;
     private readonly ILogger _logger;
@@ -32,6 +34,7 @@ public class LoginModel : PageModel
         ISender mediator,
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
+        IAppSettingsService appSettings,
         IEmailService emailService,
         ISMSService smsService,
         ILogger logger)
@@ -39,6 +42,7 @@ public class LoginModel : PageModel
         _mediator = mediator;
         _userManager = userManager;
         _signInManager = signInManager;
+        _appSettings = appSettings;
         _emailService = emailService;
         _smsService = smsService;
         _logger = logger
@@ -47,6 +51,12 @@ public class LoginModel : PageModel
 
     [BindProperty]
     public InputModel Input { get; set; }
+
+    [BindProperty(SupportsGet = true)]
+    public bool Manual { get; set; }
+    
+    public bool LoginEnabled { get; set; } = true;
+    public bool SSOEnabled { get; set; }
 
     public class InputModel
     {
@@ -86,18 +96,24 @@ public class LoginModel : PageModel
     {
         // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync();
+        
+        AuthenticationConfiguration? configuration = await _appSettings.Authentication();
 
+        if (configuration is not null)
+        {
+            LoginEnabled = configuration.LoginEnabled;
+            SSOEnabled = configuration.SSOEnabled;
+        }
+        
+        if (!LoginEnabled && Manual)
+            LoginEnabled = true;
+        
         Status = LoginStatus.WaitingUserInput;
     }
 
     private async Task StartSingleSignOnProcess()
     {
-        AuthenticationProperties properties = new()
-        {
-            RedirectUri = "https://localhost:44350/Auth/CompleteSSO"
-        };
-
-        await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
+        await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
     }
 
     public Task OnGetSingleSignOn() => StartSingleSignOnProcess();
@@ -167,17 +183,8 @@ public class LoginModel : PageModel
 
         await _userManager.UpdateAsync(user);
 
-        //if (loginType == LoginType.Domain)
-        //{
-        //    Status = LoginStatus.WaitingPasswordInput;
-
-        //    return Page();
-        //}
-
         if (loginType == LoginType.SSO)
-        {
             await StartSingleSignOnProcess();
-        }
 
         if (loginType == LoginType.Domain)
         {
@@ -192,7 +199,7 @@ public class LoginModel : PageModel
             _logger.Information(" - DEBUG code found. Bypass login check.");
             await _signInManager.SignInAsync(user, false);
 
-            return LocalRedirect("/Index");
+            return LocalRedirect("/");
         }
 #endif
 
@@ -254,8 +261,11 @@ public class LoginModel : PageModel
                 break;
             case not null when Input.Email.Contains("@det.nsw.edu.au", StringComparison.InvariantCultureIgnoreCase):
             case not null when Input.Email.Contains("@education.nsw.gov.au", StringComparison.InvariantCultureIgnoreCase):
-                loginType = LoginType.Domain;
-                //loginType = LoginType.SSO;
+                if (SSOEnabled)
+                    loginType = LoginType.SSO;
+                else
+                    loginType = LoginType.Domain;
+                
                 break;
             case not null when Input.Email.All(Char.IsDigit):
                 loginType = LoginType.Sms;
