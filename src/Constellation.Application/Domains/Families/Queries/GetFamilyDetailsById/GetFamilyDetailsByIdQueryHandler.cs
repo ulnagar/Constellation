@@ -28,7 +28,7 @@ internal sealed class GetFamilyDetailsByIdQueryHandler
 
     public async Task<Result<FamilyDetailsResponse>> Handle(GetFamilyDetailsByIdQuery request, CancellationToken cancellationToken)
     {
-        Family family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
+        Family? family = await _familyRepository.GetFamilyById(request.FamilyId, cancellationToken);
 
         if (family is null)
             return Result.Failure<FamilyDetailsResponse>(FamilyErrors.NotFound(request.FamilyId));

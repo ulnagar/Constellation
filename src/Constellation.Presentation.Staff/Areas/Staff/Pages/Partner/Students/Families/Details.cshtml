@@ -82,7 +82,7 @@
                     <div class="card h-100">
                         <h5 class="card-header">@parent.Name.DisplayName</h5>
                         <div class="card-body">
-                            @if (parent.PhoneNumber is not null)
+                            @if (parent.PhoneNumber != PhoneNumber.Empty)
                             {
                                 <p class="card-text">M: @parent.PhoneNumber.ToString(PhoneNumber.Format.Mobile)</p>
                             }
