@@ -116,6 +116,10 @@ section {
     margin: auto;
 }
 
+.form-value.bottom {
+    margin-top: -5px;
+}
+
 h2 {
     font-size: 2em;
     color: #fff;
@@ -202,18 +206,17 @@ input:not(:placeholder-shown) ~ label {
     appearance: button;
     text-decoration: none;
     text-align: center;
-    margin-top: 1rem;
     width: 100%;
     height: 40px;
     line-height: 40px;
     border-radius: 40px;
-    background: #fff;
-    border: none;
+    background: #009b77;
+    border: 1.75px solid #005844;
     outline: none;
     cursor: pointer;
     font-size: 1em;
     font-weight: 600;
-    color: black;
+    color: white;
 }
 
 button {

@@ -6,6 +6,7 @@ using Application.Domains.Messaging.Sms.Models;
 using Application.Domains.Messaging.Sms.Repositories;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
+using Core.Errors;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
@@ -54,10 +55,19 @@ public sealed class Service : ISMSService
 
         string messageText = $"{student.Name.PreferredName} was absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
         
+        List<string> destinations = [];
+        foreach (var number in phoneNumbers)
+        {
+            if (number == PhoneNumber.Empty)
+                continue;
+
+            destinations.Add(number.ToString(PhoneNumber.Format.None));
+        }
+
         OutgoingSms messageContent = new()
         {
             origin = _configuration.OutgoingNumber,
-            destinations = phoneNumbers.Select(number => number.ToString(PhoneNumber.Format.None)).ToList(),
+            destinations = destinations,
             message = messageText
         };
 
@@ -96,6 +106,9 @@ public sealed class Service : ISMSService
     {
         string messageText = $"Use token {token} for Aurora College Parent Portal. Token will expire in 10 mins.";
 
+        if (phoneNumber == PhoneNumber.Empty)
+            return Result.Failure(SmsRecipientErrors.NumberEmpty);
+
         OutgoingSms messageContent = new()
         {
             origin = _configuration.OutgoingNumber,
@@ -114,6 +127,9 @@ public sealed class Service : ISMSService
         string message,
         CancellationToken cancellationToken = default)
     {
+        if (recipient.PhoneNumber == PhoneNumber.Empty)
+            return Result.Failure<string?>(SmsRecipientErrors.NumberEmpty);
+
         OutgoingSms messageContent = new()
         {
             origin = _configuration.OutgoingNumber,

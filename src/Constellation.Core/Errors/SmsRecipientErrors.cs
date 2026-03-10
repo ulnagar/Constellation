@@ -6,5 +6,9 @@ public static class SmsRecipientErrors
 {
     public static readonly Error NameEmpty = new(
         "SMSRecipient.NameEmpty",
-        "Email Recipient must have a valid name.");
+        "SMS Recipient must have a valid name.");
+
+    public static readonly Error NumberEmpty = new(
+        "SMSRecipient.NumberEmpty",
+        "SMS Recipient must have a valid number");
 }

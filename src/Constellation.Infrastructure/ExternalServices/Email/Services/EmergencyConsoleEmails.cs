@@ -4,8 +4,6 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
 using Core.ValueObjects;
 using MimeKit;
-using System.Security.Cryptography;
-using System.Text;
 using Templates.Views.Emails.Emergency;
 
 public sealed partial class Service : IEmailService
