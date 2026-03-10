@@ -10,7 +10,7 @@ public static class LissEndpoints
 {
     public static void MapLissEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/liss/json", HandleLissConnection)
+        app.MapPost("/liss/json", HandleLissConnection)
             .WithName("LissIncoming")
             .Accepts<object>("application/json");
     }
