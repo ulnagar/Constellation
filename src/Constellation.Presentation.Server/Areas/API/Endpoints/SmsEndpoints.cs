@@ -30,6 +30,10 @@ public static class SmsEndpoints
         [AsParameters] SmsGlobalIncomingMessage message,
         ISender mediator)
     {
+        _logger
+            .ForContext(nameof(SmsGlobalIncomingMessage), message, true)
+            .Information("Received SMSGlobal incoming message");
+
         if (string.IsNullOrWhiteSpace(message.From) || string.IsNullOrWhiteSpace(message.Msg))
         {
             _logger
