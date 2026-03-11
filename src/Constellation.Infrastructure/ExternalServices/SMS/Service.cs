@@ -40,6 +40,11 @@ public sealed class Service : ISMSService
                 "SmsDeliveryReceipt",   // matches the .WithName() registration
                 values: null);
     }
+    
+    public async Task<Result<List<OutgoingSmsConfirmation>>> SendMessage(
+        OutgoingSms message,
+        CancellationToken cancellationToken) =>
+        await _gateway.SendSms(message, cancellationToken);
 
     public async Task<Result<List<OutgoingSmsConfirmation>>> SendAbsenceNotification(
         List<AbsenceEntry> absences,

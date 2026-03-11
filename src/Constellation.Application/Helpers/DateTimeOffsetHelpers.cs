@@ -1,10 +1,8 @@
-﻿namespace Constellation.Application.Helpers.JsonConverters;
+﻿namespace Constellation.Application.Helpers;
 
 using System.Globalization;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
-public class FlexibleDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
+public static class DateTimeOffsetHelpers
 {
     private static readonly string[] _formats =
     [
@@ -16,10 +14,8 @@ public class FlexibleDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
         "yyyy-MM-ddTHH:mm:ssZ"          // ISO 8601 UTC
     ];
 
-    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public static DateTimeOffset AsDateTimeOffset(this string? value)
     {
-        string? value = reader.GetString();
-
         if (string.IsNullOrWhiteSpace(value))
             return default;
 
@@ -35,11 +31,6 @@ public class FlexibleDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
         if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result))
             return result;
 
-        throw new JsonException($"Unable to convert \"{value}\" to DateTimeOffset");
-    }
-
-    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture));
+        throw new Exception($"Unable to convert \"{value}\" to DateTimeOffset");
     }
 }

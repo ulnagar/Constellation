@@ -5,6 +5,7 @@ using Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 using Constellation.Application.Domains.Messaging.Sms.Models;
 using Core.Shared;
 using MediatR;
+using Models;
 using Serilog;
 using Shared.Helpers.Logging;
 using System.Text;
@@ -16,7 +17,7 @@ public static class SmsEndpoints
 
     public static void MapSmsEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/sms/incoming", HandleIncomingSms)
+        app.MapGet("/api/sms/incoming", HandleIncomingSms)
             .WithName("SmsIncoming")
             .Accepts<IncomingSms>("application/json");
 
@@ -25,33 +26,24 @@ public static class SmsEndpoints
             .Accepts<SmsDeliveryReceipt>("application/json");
     }
 
-    private static async Task<IResult> HandleIncomingSms(HttpContext context, ISender mediator)
+    private static async Task<IResult> HandleIncomingSms(
+        [AsParameters] SmsGlobalIncomingMessage message,
+        ISender mediator)
     {
-        context.Request.EnableBuffering();
-        using StreamReader reader = new(context.Request.Body, Encoding.UTF8, leaveOpen: true);
-        string rawBody = await reader.ReadToEndAsync();
-        context.Request.Body.Position = 0;
-
-        _logger
-            .ForContext("rawBody", rawBody)
-            .Information("Received Incoming SMS");
-
-        IncomingSms? message = JsonSerializer.Deserialize<IncomingSms>(rawBody);
-
-        if (message is null || string.IsNullOrWhiteSpace(message.From) || string.IsNullOrWhiteSpace(message.Msg))
+        if (string.IsNullOrWhiteSpace(message.From) || string.IsNullOrWhiteSpace(message.Msg))
         {
             _logger
-                .ForContext(nameof(IncomingSms), message, true)
+                .ForContext(nameof(SmsGlobalIncomingMessage), message, true)
                 .Warning("Received malformed Incoming SMS");
 
             return Results.BadRequest();
         }
 
         _logger
-            .ForContext(nameof(IncomingSms), message, true)
+            .ForContext(nameof(SmsGlobalIncomingMessage), message, true)
             .Information("Incoming SMS From: {From}", message.From);
 
-        await mediator.Send(new CreateNewIncomingSmsRecordCommand(message));
+        await mediator.Send(new CreateNewIncomingSmsRecordCommand(message.ToModel()));
 
         return Results.Ok("OK");
     }
