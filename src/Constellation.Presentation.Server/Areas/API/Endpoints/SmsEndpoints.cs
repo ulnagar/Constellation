@@ -5,6 +5,8 @@ using Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 using Constellation.Application.Domains.Messaging.Sms.Models;
 using MediatR;
 using Serilog;
+using System.Text;
+using System.Text.Json;
 
 public static class SmsEndpoints
 {
@@ -21,13 +23,24 @@ public static class SmsEndpoints
             .Accepts<SmsDeliveryReceipt>("application/json");
     }
 
-    private static async Task<IResult> HandleIncomingSms(IncomingSms message, ISender mediator)
+    private static async Task<IResult> HandleIncomingSms(HttpContext context, ISender mediator)
     {
-        if (string.IsNullOrWhiteSpace(message.From) || string.IsNullOrWhiteSpace(message.Msg))
+        context.Request.EnableBuffering();
+        using StreamReader reader = new(context.Request.Body, Encoding.UTF8, leaveOpen: true);
+        string rawBody = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+
+        _logger
+            .ForContext("rawBody", rawBody)
+            .Information("Received Incoming SMS");
+
+        IncomingSms? message = JsonSerializer.Deserialize<IncomingSms>(rawBody);
+
+        if (message is null || string.IsNullOrWhiteSpace(message.From) || string.IsNullOrWhiteSpace(message.Msg))
         {
             _logger
                 .ForContext(nameof(IncomingSms), message, true)
-                .Warning("Received malformed SMSGlobal postback");
+                .Warning("Received malformed Incoming SMS");
 
             return Results.BadRequest();
         }
@@ -41,9 +54,20 @@ public static class SmsEndpoints
         return Results.Ok("OK");
     }
 
-    private static async Task<IResult> HandleDeliveryReceipt(SmsDeliveryReceipt receipt, ISender mediator)
+    private static async Task<IResult> HandleDeliveryReceipt(HttpContext context, ISender mediator)
     {
-        if (string.IsNullOrWhiteSpace(receipt.OutgoingId) || string.IsNullOrWhiteSpace(receipt.Status))
+        context.Request.EnableBuffering();
+        using StreamReader reader = new(context.Request.Body, Encoding.UTF8, leaveOpen: true);
+        string rawBody = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+
+        _logger
+            .ForContext("rawBody", rawBody)
+            .Information("Received SMSGlobal delivery receipt");
+
+        SmsDeliveryReceipt? receipt = JsonSerializer.Deserialize<SmsDeliveryReceipt>(rawBody);
+
+        if (receipt is null || string.IsNullOrWhiteSpace(receipt.OutgoingId) || string.IsNullOrWhiteSpace(receipt.Status))
         {
             _logger
                 .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
