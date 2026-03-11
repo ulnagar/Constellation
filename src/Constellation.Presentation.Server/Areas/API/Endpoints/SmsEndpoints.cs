@@ -42,10 +42,6 @@ public static class SmsEndpoints
             return Results.BadRequest();
         }
 
-        _logger
-            .ForContext(nameof(SmsGlobalIncomingMessage), message, true)
-            .Information("Incoming SMS From: {From}", message.From);
-
         await mediator.Send(new CreateNewIncomingSmsRecordCommand(message.ToModel()));
 
         return Results.Ok("OK");

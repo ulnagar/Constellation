@@ -58,6 +58,9 @@
     <div class="col-3"><label class="form-label">Grade</label></div>
     <div class="col-9">@Model.Plan.Grade.AsName()</div>
     
+    <div class="col-3"><label class="form-label">School</label></div>
+    <div class="col-9">@Model.Plan.SchoolCode - @Model.Plan.School</div>
+    
     <div class="col-3"><label class="form-label">Status</label></div>
     <div class="col-9">@Model.Plan.Status.Name</div>
 </div>

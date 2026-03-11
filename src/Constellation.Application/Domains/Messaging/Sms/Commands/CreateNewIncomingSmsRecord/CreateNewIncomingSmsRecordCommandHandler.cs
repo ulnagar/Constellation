@@ -43,7 +43,7 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
             Direction = SmsDirection.Inbound,
             Status = SmsStatus.Received,
             CreatedAt = DateTimeOffset.UtcNow,
-            SmsGlobalDate = request.IncomingSms.Date,
+            SmsGlobalDate = request.IncomingSms.Date.ToUniversalTime(),
             ReplyToId = originalMessage?.Id ?? null
         };
 

@@ -6,14 +6,14 @@ using System.Text.Json.Serialization;
 
 public class FlexibleDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 {
-    private static readonly string[] _formats =
+    private static readonly (string format, DateTimeStyles style)[] _formats =
     [
-        "yyyy-MM-dd HH:mm:ss zzz",      // SMSGlobal send response format e.g. "2026-03-11 12:59:12 +1100"
-        "yyyy-MM-dd HH:mm:sszzz",       // without space before offset
-        "yyyy-MM-dd HH:mm:ss",          // no offset
-        "yyyy-MM-ddTHH:mm:sszzz",       // ISO 8601 with timezone
-        "yyyy-MM-ddTHH:mm:ss",          // ISO 8601 without timezone
-        "yyyy-MM-ddTHH:mm:ssZ"          // ISO 8601 UTC
+        ("yyyy-MM-dd HH:mm:ss zzz",  DateTimeStyles.None),           // with offset, space separated e.g. "2026-03-11 12:59:12 +1100"
+        ("yyyy-MM-dd HH:mm:sszzz",   DateTimeStyles.None),           // with offset, no space e.g. "2026-03-11 12:59:12+11:00"
+        ("yyyy-MM-dd HH:mm:ss",      DateTimeStyles.AssumeLocal),    // no offset - treat as local time e.g. "2026-03-11 13:00:28"
+        ("yyyy-MM-ddTHH:mm:sszzz",   DateTimeStyles.None),           // ISO 8601 with timezone
+        ("yyyy-MM-ddTHH:mm:ss",      DateTimeStyles.AssumeLocal),    // ISO 8601 no timezone
+        ("yyyy-MM-ddTHH:mm:ssZ",     DateTimeStyles.AssumeUniversal) // ISO 8601 UTC
     ];
 
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -23,17 +23,26 @@ public class FlexibleDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
         if (string.IsNullOrWhiteSpace(value))
             return default;
 
-        if (DateTimeOffset.TryParseExact(
-                value,
-                _formats,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal,
-                out DateTimeOffset result))
-            return result;
+        foreach ((string format, DateTimeStyles style) in _formats)
+        {
+            if (DateTimeOffset.TryParseExact(
+                    value,
+                    format,
+                    CultureInfo.InvariantCulture,
+                    style,
+                    out DateTimeOffset result))
+                return result;
+        }
 
-        // Fall back to standard parse if none of the explicit formats match
-        if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out result))
-            return result;
+        // Final fallback - let the runtime take its best guess
+        if (DateTimeOffset.TryParse(
+                value,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeLocal,
+                out DateTimeOffset fallback))
+        {
+            return fallback;
+        }
 
         throw new JsonException($"Unable to convert \"{value}\" to DateTimeOffset");
     }
