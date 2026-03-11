@@ -17,11 +17,10 @@ public static class SmsEndpoints
 
     public static void MapSmsEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/sms/incoming", HandleIncomingSms)
-            .WithName("SmsIncoming")
-            .Accepts<IncomingSms>("application/json");
+        app.MapGet("/api/sms", HandleIncomingSms)
+            .WithName("SmsIncoming");
 
-        app.MapPost("/api/sms/delivery-receipt", HandleDeliveryReceipt)
+        app.MapPost("/api/sms", HandleDeliveryReceipt)
             .WithName("SmsDeliveryReceipt")
             .Accepts<SmsDeliveryReceipt>("application/json");
     }
