@@ -20,7 +20,6 @@ public sealed class SmsDeliveryReceipt
     public DateTimeOffset DateTime { get; set; }
 
     [JsonPropertyName("message_ids")]
-    [JsonConverter(typeof(NumberOrStringConverter))]
     public List<string> MessageIds { get; set; } = [];
 
     [JsonPropertyName("status")]

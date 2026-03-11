@@ -3,6 +3,7 @@
 using Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
 using Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 using Constellation.Application.Domains.Messaging.Sms.Models;
+using Core.Shared;
 using MediatR;
 using Serilog;
 using Shared.Helpers.Logging;
@@ -85,7 +86,17 @@ public static class SmsEndpoints
             .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
             .Information("Delivery Receipt for Sms with OutgoingId: {OutgoingId}", receipt.OutgoingId);
 
-        await mediator.Send(new RecordSmsDeliveryReceiptCommand(receipt));
+        Result result = await mediator.Send(new RecordSmsDeliveryReceiptCommand(receipt));
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to record delivery receipt for Sms");
+
+            return Results.BadRequest();
+        }
 
         return Results.Ok("OK");
     }
