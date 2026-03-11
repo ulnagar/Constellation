@@ -54,7 +54,7 @@ public class IndexModel : BasePageModel
             origin = From,
             destinations = To.Split(',').Select(number => number.Replace(" ", "")).ToList(),
             message = Message,
-            notifyUrl = "json+https://acos.aurora.nsw.edu.au/api/sms/delivery-receipt"
+            notifyUrl = "json+https://acos.aurora.nsw.edu.au/api/sms"
         };
 
         Result<List<OutgoingSmsConfirmation>> results = await _smsService.SendMessage(outgoingSms, cancellationToken);
