@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Application.Domains.Messaging.Sms.Enums;
 using Core.Shared;
+using Errors;
 using Interfaces.Repositories;
 using Models;
 using Repositories;
@@ -30,16 +31,23 @@ internal sealed class RecordSmsDeliveryReceiptCommandHandler
     {
         SmsMessage? existing = await _smsRepository.GetByOutgoingId(request.Receipt.OutgoingId!, cancellationToken);
 
-        if (existing is not null)
+        if (existing is null)
         {
-            existing.Status = request.Receipt.Status switch
-            {
-                "Delivered" => SmsStatus.Delivered,
-                "Failed" => SmsStatus.Failed,
-                _ => existing.Status
-            };
-            existing.StatusUpdatedAt = request.Receipt.UpdateTime;
+            _logger
+                .ForContext(nameof(RecordSmsDeliveryReceiptCommand), request, true)
+                .ForContext(nameof(Error), SmsMessagingErrors.DeliveryReceiptIncomplete, true)
+                .Warning("SMS Delivery receipt received for unknown message");
+
+            return Result.Failure(SmsMessagingErrors.DeliveryReceiptIncomplete);
         }
+
+        existing.Status = request.Receipt.Status switch
+        {
+            "Delivered" => SmsStatus.Delivered,
+            "Failed" => SmsStatus.Failed,
+            _ => existing.Status
+        };
+        existing.StatusUpdatedAt = request.Receipt.DateTime;
 
         await _unitOfWork.CompleteAsync(cancellationToken);
 

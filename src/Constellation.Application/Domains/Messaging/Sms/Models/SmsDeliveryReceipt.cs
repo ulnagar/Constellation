@@ -5,13 +5,24 @@ using System.Text.Json.Serialization;
 
 public sealed class SmsDeliveryReceipt
 {
-    [JsonConverter(typeof(NumberOrStringConverter))]
-    public string? Id { get; set; }
     [JsonPropertyName("outgoing_id")]
     [JsonConverter(typeof(NumberOrStringConverter))]
     public string? OutgoingId { get; set; }
-    public string? Status { get; set; }
-    [JsonPropertyName("update_time")]
+
+    [JsonPropertyName("origin")]
+    public string? Origin { get; set; }
+
+    [JsonPropertyName("destination")]
+    public string? Destination { get; set; }
+
+    [JsonPropertyName("dateTime")]
     [JsonConverter(typeof(FlexibleDateTimeOffsetConverter))]
-    public DateTimeOffset UpdateTime { get; set; }
+    public DateTimeOffset DateTime { get; set; }
+
+    [JsonPropertyName("message_ids")]
+    [JsonConverter(typeof(NumberOrStringConverter))]
+    public List<string> MessageIds { get; set; } = [];
+
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
 }

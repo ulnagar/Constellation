@@ -5,12 +5,13 @@ using Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 using Constellation.Application.Domains.Messaging.Sms.Models;
 using MediatR;
 using Serilog;
+using Shared.Helpers.Logging;
 using System.Text;
 using System.Text.Json;
 
 public static class SmsEndpoints
 {
-    private static readonly Serilog.ILogger _logger = Log.Logger.ForContext(typeof(SmsEndpoints));
+    private static readonly Serilog.ILogger _logger = Log.Logger.ForContext(typeof(SmsEndpoints)).ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
 
     public static void MapSmsEndpoints(this IEndpointRouteBuilder app)
     {
@@ -67,9 +68,13 @@ public static class SmsEndpoints
 
         SmsDeliveryReceipt? receipt = JsonSerializer.Deserialize<SmsDeliveryReceipt>(rawBody);
 
-        if (receipt is null || string.IsNullOrWhiteSpace(receipt.OutgoingId) || string.IsNullOrWhiteSpace(receipt.Status))
+        if (receipt is null 
+            || string.IsNullOrWhiteSpace(receipt.OutgoingId) 
+            || string.IsNullOrWhiteSpace(receipt.Status)
+            || receipt.MessageIds.Count == 0)
         {
             _logger
+                .ForContext("RawBody", rawBody)
                 .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
                 .Warning("Received malformed SMSGlobal delivery receipt");
 
