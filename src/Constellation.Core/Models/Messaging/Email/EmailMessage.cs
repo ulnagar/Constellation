@@ -62,6 +62,7 @@ public sealed class EmailMessage
         _recipients.Add(new EmailMessageRecipient
         {
             Recipient = recipient,
+            Email = recipient.Email,
             RecipientType = recipientType,
             EmailId = Id
         });
@@ -97,6 +98,7 @@ public sealed class EmailMessage
             _recipients.Add(new EmailMessageRecipient
             {
                 Recipient = recipient,
+                Email = recipient.Email,
                 RecipientType = recipientType,
                 EmailId = Id
             });

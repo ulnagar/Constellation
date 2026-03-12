@@ -11,6 +11,19 @@ internal sealed class EmailMessageRecipientConfiguration : IEntityTypeConfigurat
         builder.ToTable("EmailRecipients", "Messages");
 
         builder
+            .HasKey(e => new
+            {
+                e.EmailId,
+                e.Email
+            });
+
+        builder
+            .Property(r => r.Email)
+            .HasColumnName("Email")
+            .IsRequired()
+            .HasMaxLength(320);
+
+        builder
             .OwnsOne(e => e.Recipient, owned =>
             {
                 owned
@@ -25,14 +38,7 @@ internal sealed class EmailMessageRecipientConfiguration : IEntityTypeConfigurat
                     .IsRequired()
                     .HasMaxLength(320);
             });
-
-        builder
-            .HasKey(e => new
-            {
-                e.EmailId, 
-                Email = EF.Property<string>(e, "Recipient.Email")
-            });
-
+        
         builder
             .Property(e => e.RecipientType)
             .HasConversion<string>()
@@ -47,7 +53,7 @@ internal sealed class EmailMessageRecipientConfiguration : IEntityTypeConfigurat
             .HasDatabaseName("IX_Messages_EmailRecipients_EmailId_RecipientType");
 
         builder
-            .HasIndex(e => EF.Property<string>(e, "Recipient.Email"))
+            .HasIndex(e => e.Email)
             .HasDatabaseName("IX_Messages_EmailRecipients_Email");
     }
 }

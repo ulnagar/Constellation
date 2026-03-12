@@ -7,6 +7,7 @@ using ValueObjects;
 public class EmailMessageRecipient
 {
     public EmailId EmailId { get; set; }
+    public required string Email { get; set; }
     public EmailRecipientType RecipientType { get; set; }  // To, Cc, Bcc
     public required EmailRecipient Recipient { get; set; }
 }
