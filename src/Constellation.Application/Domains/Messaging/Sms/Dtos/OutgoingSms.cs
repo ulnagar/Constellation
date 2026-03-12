@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Messaging.Sms.Models;
+﻿namespace Constellation.Application.Domains.Messaging.Sms.Dtos;
 
 public sealed class OutgoingSms
 {

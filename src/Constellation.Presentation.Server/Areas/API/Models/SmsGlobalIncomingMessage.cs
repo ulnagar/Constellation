@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Models;
 
-using Application.Domains.Messaging.Sms.Models;
+using Application.Domains.Messaging.Sms.Dtos;
 using Application.Helpers;
 using Microsoft.AspNetCore.Mvc;
 

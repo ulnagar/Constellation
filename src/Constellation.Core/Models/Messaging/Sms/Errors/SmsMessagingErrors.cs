@@ -1,6 +1,6 @@
-﻿namespace Constellation.Application.Domains.Messaging.Sms.Errors;
+﻿namespace Constellation.Core.Models.Messaging.Sms.Errors;
 
-using Core.Shared;
+using Shared;
 
 public static class SmsMessagingErrors
 {

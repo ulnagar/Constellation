@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Partner.Contacts;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Contacts;
 
 using Application.Common.PresentationModels;
 using Application.Domains.Contacts.Interfaces;

@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Application.Domains.Messaging.Sms.Enums;
-using Application.Domains.Messaging.Sms.Identifiers;
-using Application.Domains.Messaging.Sms.Models;
-using Application.Domains.Messaging.Sms.Repositories;
+using Core.Models.Messaging.Sms;
+using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms.Identifiers;
+using Core.Models.Messaging.Sms.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -41,7 +41,7 @@ internal sealed class SmsRepository : ISmsRepository
             .Set<SmsMessage>()
             .Where(message => message.To == phoneNumber
                         && message.CreatedAt >= windowStart
-                        && message.Direction == SmsDirection.Outbound)
+                        && message.Direction == MessageDirection.Outbound)
             .OrderByDescending(m => m.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
 

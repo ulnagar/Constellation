@@ -38,6 +38,8 @@
 	  <Folder Include="Domains\Edval\Models\" />
 	  <Folder Include="Domains\Faculties\Events\FacultyMemberAddedDomainEvent\" />
 	  <Folder Include="Domains\Faculties\Events\FacultyMemberRemovedDomainEvent\" />
+	  <Folder Include="Domains\Messaging\Email\Queries\" />
+	  <Folder Include="Domains\Messaging\Sms\Queries\" />
 	  <Folder Include="Domains\Operations\" />
 	  <Folder Include="Domains\WorkFlows\Enums\" />
 	</ItemGroup>

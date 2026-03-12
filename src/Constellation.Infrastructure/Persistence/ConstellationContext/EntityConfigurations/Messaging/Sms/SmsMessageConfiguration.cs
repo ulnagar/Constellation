@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Messaging.Sms;
 
-using Application.Domains.Messaging.Sms.Enums;
-using Application.Domains.Messaging.Sms.Identifiers;
-using Application.Domains.Messaging.Sms.Models;
+using Core.Models.Messaging.Sms;
+using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -40,22 +40,14 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
             .Property(message => message.Direction)
             .HasConversion(
                 direction => direction.Value,
-                value => SmsDirection.FromValue(value));
+                value => MessageDirection.FromValue(value));
 
         builder
             .Property(message => message.Status)
             .HasConversion(
                 status => status.Value,
                 value => SmsStatus.FromValue(value));
-
-        // Self-referencing relationship for reply threading
-        builder
-            .HasOne(message => message.ReplyTo)
-            .WithMany(message => message.Replies)
-            .HasForeignKey(message => message.ReplyToId)
-            .IsRequired(false)
-            .OnDelete(DeleteBehavior.Restrict);
-
+        
         // Indexes to support the common lookup patterns discussed earlier
         builder
             .HasIndex(message => message.SmsGlobalId);

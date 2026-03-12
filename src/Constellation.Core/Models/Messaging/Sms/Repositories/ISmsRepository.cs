@@ -1,11 +1,6 @@
-﻿namespace Constellation.Application.Domains.Messaging.Sms.Repositories;
+﻿namespace Constellation.Core.Models.Messaging.Sms.Repositories;
 
 using Identifiers;
-using Models;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 public interface ISmsRepository
 {

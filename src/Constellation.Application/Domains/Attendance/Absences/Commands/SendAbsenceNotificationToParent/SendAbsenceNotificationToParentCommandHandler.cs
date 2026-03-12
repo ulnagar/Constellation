@@ -24,7 +24,7 @@ using Core.Models.Tutorials;
 using Core.Models.Tutorials.Errors;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
-using Messaging.Sms.Models;
+using Messaging.Sms.Dtos;
 using Serilog;
 using System;
 using System.Collections.Generic;

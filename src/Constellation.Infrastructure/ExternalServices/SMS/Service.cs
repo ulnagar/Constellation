@@ -1,12 +1,13 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
 using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
-using Application.Domains.Messaging.Sms.Enums;
-using Application.Domains.Messaging.Sms.Models;
-using Application.Domains.Messaging.Sms.Repositories;
+using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
+using Core.Models.Messaging.Sms;
+using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms.Repositories;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
@@ -89,11 +90,12 @@ public sealed class Service : ISMSService
             SmsMessage message = new()
             {
                 SmsGlobalId = confirmation.Id ?? string.Empty,
+                SendingModule = "Absences",
                 OutgoingId = confirmation.OutgoingId ?? string.Empty,
                 From = confirmation.Origin ?? string.Empty,
                 To = confirmation.Destination ?? string.Empty,
                 Message = confirmation.Message ?? string.Empty,
-                Direction = SmsDirection.Outbound,
+                Direction = MessageDirection.Outbound,
                 Status = SmsStatus.Sent,
                 CreatedAt = confirmation.DateTime
             };

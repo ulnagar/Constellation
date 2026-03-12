@@ -1,7 +1,6 @@
-﻿namespace Constellation.Application.Domains.Messaging.Sms.Enums;
+﻿namespace Constellation.Core.Models.Messaging.Sms.Enums;
 
-using Core.Common;
-using System.Collections.Generic;
+using Common;
 
 public sealed class SmsStatus : StringEnumeration<SmsStatus>
 {

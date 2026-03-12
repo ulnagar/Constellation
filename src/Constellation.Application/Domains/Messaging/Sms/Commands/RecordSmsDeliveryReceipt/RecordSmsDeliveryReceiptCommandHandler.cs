@@ -1,12 +1,12 @@
 ﻿namespace Constellation.Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms;
+using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms.Errors;
+using Core.Models.Messaging.Sms.Repositories;
 using Core.Shared;
-using Errors;
 using Interfaces.Repositories;
-using Models;
-using Repositories;
 using Serilog;
 
 internal sealed class RecordSmsDeliveryReceiptCommandHandler

@@ -1,11 +1,11 @@
 ﻿namespace Constellation.Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.Messaging.Sms.Enums;
-using Constellation.Application.Domains.Messaging.Sms.Models;
+using Core.Models.Messaging.Sms;
+using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
-using Repositories;
 using Serilog;
 using System.Globalization;
 
@@ -29,22 +29,17 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
 
     public async Task<Result> Handle(CreateNewIncomingSmsRecordCommand request, CancellationToken cancellationToken)
     {
-        // Match to original outgoing message using phone number + time window
-        SmsMessage? originalMessage = string.IsNullOrWhiteSpace(request.IncomingSms.From)
-            ? null
-            : await _smsRepository.GetMostRecentOutboundToNumber(request.IncomingSms.From, cancellationToken);
-        
         SmsMessage inboundMessage = new()
         {
             SmsGlobalId = request.IncomingSms.MsgId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
+            SendingModule = string.Empty,
             From = request.IncomingSms.From!,
             To = request.IncomingSms.To ?? string.Empty,
             Message = request.IncomingSms.Msg!,
-            Direction = SmsDirection.Inbound,
+            Direction = MessageDirection.Inbound,
             Status = SmsStatus.Received,
             CreatedAt = DateTimeOffset.UtcNow,
-            SmsGlobalDate = request.IncomingSms.Date.ToUniversalTime(),
-            ReplyToId = originalMessage?.Id ?? null
+            SmsGlobalDate = request.IncomingSms.Date.ToUniversalTime()
         };
 
         _smsRepository.Insert(inboundMessage);

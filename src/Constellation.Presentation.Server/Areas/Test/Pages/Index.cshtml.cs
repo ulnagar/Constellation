@@ -1,14 +1,15 @@
 namespace Constellation.Presentation.Server.Areas.Test.Pages;
 
+using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Models.Auth;
 using BaseModels;
-using Constellation.Application.Domains.Messaging.Sms.Enums;
-using Constellation.Application.Domains.Messaging.Sms.Models;
-using Constellation.Application.Domains.Messaging.Sms.Repositories;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Messaging.Sms;
+using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Sms.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,11 +65,12 @@ public class IndexModel : BasePageModel
             SmsMessage message = new()
             {
                 SmsGlobalId = confirmation.Id ?? string.Empty,
+                SendingModule = "Testing",
                 OutgoingId = confirmation.OutgoingId ?? string.Empty,
                 From = confirmation.Origin ?? string.Empty,
                 To = confirmation.Destination ?? string.Empty,
                 Message = confirmation.Message ?? string.Empty,
-                Direction = SmsDirection.Outbound,
+                Direction = MessageDirection.Outbound,
                 Status = SmsStatus.Sent,
                 CreatedAt = confirmation.DateTime
             };

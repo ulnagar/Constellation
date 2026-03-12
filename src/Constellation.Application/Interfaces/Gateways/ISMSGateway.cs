@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Application.Interfaces.Gateways;
 
 using Core.Shared;
-using Domains.Messaging.Sms.Models;
+using Domains.Messaging.Sms.Dtos;
 using System.Threading.Tasks;
 
 public interface ISMSGateway

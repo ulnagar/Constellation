@@ -25,6 +25,10 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Partners_Families_View_Value = "Partners.Families.View";
     public const string Partners_Families_Edit_Value = "Partners.Families.Edit";
 
+    public const string Messaging_View_Value = "Messaging.View";
+    public const string Messaging_SMS_Send_Value = "Messaging.SMS.Send";
+    public const string Messaging_Email_Send_Value = "Messaging.Email.Send";
+
     public const string Subjects_Courses_View_Value = "Subjects.Courses.View";
     public const string Subjects_Courses_Edit_Value = "Subjects.Courses.Edit";
     public const string Subjects_Offerings_View_Value = "Subjects.Offerings.View";
@@ -109,7 +113,6 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string StudentPortal_View_Value = "StudentPortal.View";
     #endregion
 
-    public static readonly AuthPermission Partners_Contacts_View = new(Partners_Contacts_View_Value, "Partners: Contacts: View");
     public static readonly AuthPermission Partners_Schools_View = new(Partners_Schools_View_Value, "Partners: Schools: View");
     public static readonly AuthPermission Partners_Schools_Edit = new(Partners_Schools_Edit_Value, "Partners: Schools: Edit");
     public static readonly AuthPermission Partners_SchoolContacts_View = new(Partners_SchoolContacts_View_Value, "Partners: School Contacts: View");
@@ -123,6 +126,11 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Partners_Students_Edit = new(Partners_Students_Edit_Value, "Partners: Students: Edit");
     public static readonly AuthPermission Partners_Families_View = new(Partners_Families_View_Value, "Partners: Families: View");
     public static readonly AuthPermission Partners_Families_Edit = new(Partners_Families_Edit_Value, "Partners: Families: Edit");
+
+    public static readonly AuthPermission Partners_Contacts_View = new(Partners_Contacts_View_Value, "Messaging: Contacts: View");
+    public static readonly AuthPermission Messaging_View = new(Messaging_View_Value, "Messaging: View");
+    public static readonly AuthPermission Messaging_SMS_Send = new(Messaging_SMS_Send_Value, "Messaging: SMS: Send");
+    public static readonly AuthPermission Messaging_EMAIL_Send = new(Messaging_Email_Send_Value, "Messaging: Email: Send");
 
     public static readonly AuthPermission Subjects_Courses_View = new(Subjects_Courses_View_Value, "Subjects: Courses: View");
     public static readonly AuthPermission Subjects_Courses_Edit = new(Subjects_Courses_Edit_Value, "Subjects: Courses: Edit");

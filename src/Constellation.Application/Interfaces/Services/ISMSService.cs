@@ -4,7 +4,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.ValueObjects;
 using Core.Shared;
 using Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
-using Domains.Messaging.Sms.Models;
+using Domains.Messaging.Sms.Dtos;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;

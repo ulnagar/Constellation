@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Presentation.Server.Areas.API.Endpoints;
 
 using Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
-using Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
-using Constellation.Application.Domains.Messaging.Sms.Models;
-using Core.Shared;
+using Application.Domains.Messaging.Sms.Dtos;
+using Application.Interfaces.Services;
+using Core.Models.Messaging.Tracking;
 using MediatR;
 using Models;
 using Serilog;
@@ -47,7 +47,9 @@ public static class SmsEndpoints
         return Results.Ok("OK");
     }
 
-    private static async Task<IResult> HandleDeliveryReceipt(HttpContext context, ISender mediator)
+    private static async Task<IResult> HandleDeliveryReceipt(
+        ITrackingEventQueueService queue,
+        HttpContext context)
     {
         context.Request.EnableBuffering();
         using StreamReader reader = new(context.Request.Body, Encoding.UTF8, leaveOpen: true);
@@ -60,10 +62,7 @@ public static class SmsEndpoints
 
         SmsDeliveryReceipt? receipt = JsonSerializer.Deserialize<SmsDeliveryReceipt>(rawBody);
 
-        if (receipt is null 
-            || string.IsNullOrWhiteSpace(receipt.OutgoingId) 
-            || string.IsNullOrWhiteSpace(receipt.Status)
-            || receipt.MessageIds.Count == 0)
+        if (receipt is null || string.IsNullOrWhiteSpace(receipt.OutgoingId))
         {
             _logger
                 .ForContext("RawBody", rawBody)
@@ -77,17 +76,7 @@ public static class SmsEndpoints
             .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
             .Information("Delivery Receipt for Sms with OutgoingId: {OutgoingId}", receipt.OutgoingId);
 
-        Result result = await mediator.Send(new RecordSmsDeliveryReceiptCommand(receipt));
-
-        if (result.IsFailure)
-        {
-            _logger
-                .ForContext(nameof(SmsDeliveryReceipt), receipt, true)
-                .ForContext(nameof(Error), result.Error, true)
-                .Warning("Failed to record delivery receipt for Sms");
-
-            return Results.BadRequest();
-        }
+        await queue.EnqueueAsync(new SmsDeliveryReceiptEvent(receipt.OutgoingId, receipt.Status, receipt.DateTime));
 
         return Results.Ok("OK");
     }

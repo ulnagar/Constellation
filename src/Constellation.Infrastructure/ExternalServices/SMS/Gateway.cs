@@ -1,13 +1,12 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.SMS;
 
-using Application.Domains.Messaging.Sms.Models;
+using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
 using Core.Shared;
 using Errors;
 using Microsoft.Extensions.Options;
 using Model;
 using System.Globalization;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;

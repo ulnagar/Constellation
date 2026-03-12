@@ -1,7 +1,6 @@
-﻿namespace Constellation.Application.Domains.Messaging.Sms.Identifiers;
+﻿namespace Constellation.Core.Models.Messaging.Sms.Identifiers;
 
-using Core.Primitives;
-using System;
+using Primitives;
 
 public readonly record struct SmsId(Guid Value)
     : IStronglyTypedId
@@ -12,7 +11,7 @@ public readonly record struct SmsId(Guid Value)
         new(value);
 
     public SmsId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();
