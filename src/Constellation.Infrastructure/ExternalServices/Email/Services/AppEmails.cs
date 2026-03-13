@@ -3,12 +3,13 @@
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models;
+using Constellation.Core.Models.Messaging.Email;
+using Constellation.Core.Models.Messaging.Email.Enums;
 using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
@@ -18,22 +19,42 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>{studentName} cannot be located in the Sentral Users list and does not currently have a Sentral Student Id specified.</p>";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam];
+        EmailMessage message = new()
+        {
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = "[Aurora College] Student absence notification",
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, "[Aurora College] Student absence notification", body);
+        message.AddRecipient(EmailRecipient.InfoTechTeam, EmailRecipientType.To);
+        
+        await _emailSender.Send(message);
     }
 
     public async Task SendAdminAbsenceContactAlert(string studentName)
     {
         string viewModel = $"<p>Parent contact details for {studentName} cannot be located in Sentral.";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam];
+        EmailMessage message = new()
+        {
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = "[Aurora College] Constellation Data Issue Identified",
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, "[Aurora College] Constellation Data Issue Identified", body);
+        message.AddRecipient(EmailRecipient.InfoTechTeam, EmailRecipientType.To);
+
+        await _emailSender.Send(message);
     }
 
     public async Task SendParentContactChangeReportEmail(
@@ -42,27 +63,49 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>Parent Contact Change Report for {DateTime.Today.ToLongDateString()} is attached.</p>";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox];
+        EmailMessage message = new()
+        {
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}",
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
         List<Attachment> attachments = new()
         {
             new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile)
         };
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}", body, attachments, MessagePriority.Normal, cancellationToken);
+        message.AddRecipient(EmailRecipient.InfoTechTeam, EmailRecipientType.To);
+        message.AddRecipient(EmailRecipient.AbsencesMailbox, EmailRecipientType.To);
+
+        await _emailSender.Send(message, attachments, cancellationToken: cancellationToken);
     }
 
     public async Task SendAdminLowCreditAlert(double credit)
     {
         string viewModel = $"<p>The SMS Global account has a low balance of ${credit:c}.</p><p>Please top up the account immediately!</p>";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam, EmailRecipient.AuroraCollege];
+        EmailMessage message = new()
+        {
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = "[Aurora College] SMS Gateway Low Balance Alert",
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply.Email, "[Aurora College] SMS Gateway Low Balance Alert", body);
+        message.AddRecipient(EmailRecipient.InfoTechTeam, EmailRecipientType.To);
+        message.AddRecipient(EmailRecipient.AbsencesMailbox, EmailRecipientType.To);
+
+        await _emailSender.Send(message);
     }
 
     public async Task SendMasterFileConsistencyReportEmail(
@@ -72,21 +115,31 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> toRecipients = new();
-
-        Result<EmailRecipient> recipient = EmailRecipient.Create(emailAddress, emailAddress);
-
-        if (recipient.IsSuccess)
-            toRecipients.Add(recipient.Value);
+        EmailMessage message = new()
+        {
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}",
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
         List<Attachment> attachments = new()
         {
             new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile)
         };
+        
+        Result<EmailRecipient> recipient = EmailRecipient.Create(emailAddress, emailAddress);
 
-        await _emailSender.Send(toRecipients, EmailRecipient.NoReply, $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}", body, attachments, MessagePriority.Normal, cancellationToken);
+        if (recipient.IsSuccess)
+            message.AddRecipient(recipient.Value, EmailRecipientType.To);
+        else
+            return;
+
+        await _emailSender.Send(message, attachments, cancellationToken: cancellationToken);
     }
 
     public async Task SendServiceLogEmail(ServiceLogEmail notification)
@@ -95,14 +148,21 @@ public sealed partial class Service : IEmailService
         foreach (string line in notification.Log)
             viewModel += line + "<br>";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", viewModel);
 
-        List<EmailRecipient> recipients = notification.Recipients;
-        if (recipients.All(entry => entry.Email != EmailRecipient.InfoTechTeam.Email))
+        EmailMessage message = new()
         {
-            recipients.Add(EmailRecipient.InfoTechTeam);
-        }
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = $"[Aurora College] Service Log Output - {notification.Source}",
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, $"[Aurora College] Service Log Output - {notification.Source}", body);
+        message.AddRecipients(notification.Recipients, EmailRecipientType.To);
+        message.AddRecipient(EmailRecipient.InfoTechTeam, EmailRecipientType.To);
+
+        await _emailSender.Send(message);
     }
 }
