@@ -15,6 +15,6 @@ public sealed partial class Service : IEmailService
     {
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", description);
 
-        await _emailSender.Send([EmailRecipient.SupportQueue], submitter, subject, body, MessagePriority.Normal, cancellationToken);
+        await _emailSender.Send([EmailRecipient.SupportQueue, EmailRecipient.InfoTechTeam], submitter, subject, body, MessagePriority.Normal, cancellationToken);
     }
 }

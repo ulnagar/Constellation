@@ -22,6 +22,7 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
+using Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -61,7 +62,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
 
     public async Task<Result> Handle(ProvideParentWholeAbsenceExplanationCommand request, CancellationToken cancellationToken)
     {
-        Absence absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
+        Absence? absence = await _absenceRepository.GetById(request.AbsenceId, cancellationToken);
 
         if (absence is null)
         {
@@ -105,7 +106,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
             {
                 OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                 if (offering is null)
                 {
@@ -124,7 +125,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                 if (tutorial is null)
                 {
@@ -136,7 +137,7 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
                 activityName = tutorial.Name;
             }
 
-            Student student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(absence.StudentId, cancellationToken);
 
             if (student is null)
             {
@@ -150,7 +151,8 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
 
             EmailDtos.AbsenceResponseEmail notificationEmail = new();
 
-            notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
+            notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox.Email);
+            notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege.Email);
             notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, activityName, request.ParentEmail, request.Comment));
             notificationEmail.StudentName = student.Name.DisplayName;
 
