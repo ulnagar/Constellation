@@ -5,8 +5,11 @@ using System;
 
 public sealed class MissedWorkEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public string Subject { get; set; }
-    public string ClassName { get; set; }
-    public DateOnly AbsenceDate { get; set; }
+    private const string _viewLocation = "/Views/Emails/Absences/MissedWorkEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public required string StudentName { get; set; }
+    public required string Subject { get; set; }
+    public required string ClassName { get; set; }
+    public required DateOnly AbsenceDate { get; set; }
 }

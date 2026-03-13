@@ -4,10 +4,13 @@ using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEn
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System.Collections.Generic;
 
-public class ParentAbsenceNotificationEmailViewModel : EmailLayoutBaseViewModel
+public sealed class ParentAbsenceNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string ParentName { get; set; }
-    public string StudentFirstName { get; set; }
-    public static string Link => "https://acos.aurora.nsw.edu.au/";
-    public List<AbsenceEntry> Absences { get; set; } = new();
+    private const string _viewLocation = "/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    public static string Link => $"{BaseUrl}";
+
+    public required string ParentName { get; set; }
+    public required string StudentFirstName { get; set; }
+    public List<AbsenceEntry> Absences { get; set; } = [];
 }

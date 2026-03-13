@@ -1,28 +1,26 @@
-﻿using Constellation.Infrastructure.Templates.Views.Shared;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Absences;
+
+using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 using System.Collections.Generic;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.Absences
+public sealed class AbsenceExplanationToSchoolAdminEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class AbsenceExplanationToSchoolAdminEmailViewModel : EmailLayoutBaseViewModel
+    private const string _viewLocation = "/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+
+    public required string StudentName { get; set; } = string.Empty;
+    public List<AbsenceDto> Absences { get; set; } = [];
+
+    public class AbsenceDto
     {
-        public AbsenceExplanationToSchoolAdminEmailViewModel()
-        {
-            Absences = new List<AbsenceDto>();
-        }
-
-        public string StudentName { get; set; }
-        public ICollection<AbsenceDto> Absences { get; set; }
-
-        public class AbsenceDto
-        {
-            public DateTime AbsenceDate { get; set; }
-            public string ClassName { get; set; }
-            public string PeriodName { get; set; }
-            public string Explanation { get; set; }
-            public string Source { get; set; }
-            public string Type { get; set; }
-            public string AbsenceTime { get; set; }
-        }
+        public required DateTime AbsenceDate { get; set; }
+        public required string ClassName { get; set; }
+        public required string PeriodName { get; set; }
+        public required string Explanation { get; set; }
+        public required string Source { get; set; }
+        public required string Type { get; set; }
+        public required string AbsenceTime { get; set; }
     }
 }

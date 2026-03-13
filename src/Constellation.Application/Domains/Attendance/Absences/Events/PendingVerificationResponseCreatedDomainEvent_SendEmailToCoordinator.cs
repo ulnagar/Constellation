@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Events;
 
 using Commands.ConvertResponseToAbsenceExplanation;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Repositories;
@@ -18,6 +17,7 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using Core.Abstractions.Clock;
+using Core.Models.Messaging.Email;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -184,7 +184,7 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
             absence.AbsenceTimeframe, 
             response.Explanation);
 
-        Result<EmailDtos.SentEmail> message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
+        Result<EmailMessage> message = await _emailService.SendCoordinatorPartialAbsenceVerificationRequest(
             [ explanation ],
             student,
             recipients,
@@ -205,9 +205,9 @@ internal class PendingVerificationResponseCreatedDomainEvent_SendEmailToCoordina
 
         absence.AddNotification(
             NotificationType.Email,
-            message.Value.message,
+            message.Value.BodyText,
             emails,
-            message.Value.id,
+            message.Value.Id.ToString(),
             _dateTime.Now);
 
         foreach (EmailRecipient recipient in recipients)

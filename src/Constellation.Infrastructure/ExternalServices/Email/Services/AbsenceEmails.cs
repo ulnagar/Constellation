@@ -7,13 +7,12 @@ using Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Messaging.Email;
 using Core.Models.Students;
 using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Absences;
@@ -26,8 +25,7 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendAbsenceReasonToSchoolAdmin))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
@@ -57,23 +55,19 @@ public sealed partial class Service : IEmailService
             });
         }
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/AbsenceExplanationToSchoolAdminEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel, 
+            EmailRecipient.AbsencesMailbox, 
+            "Absences",
+            $"Absence Explanation Received - {viewModel.StudentName}", 
+            notificationEmail.Recipients);
 
-        List<EmailRecipient> toRecipients = new();
-        foreach (string entry in notificationEmail.Recipients)
+        if (result.IsFailure)
         {
-            if (toRecipients.Any(recipient => recipient.Email == entry))
-            {
-                continue;
-            }
-
-            Result<EmailRecipient> recipient = EmailRecipient.Create(entry, entry);
-
-            if (recipient.IsSuccess)
-                toRecipients.Add(recipient.Value);
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
         }
-
-        await _emailSender.Send(toRecipients, EmailRecipient.AbsencesMailbox, $"Absence Explanation Received - {viewModel.StudentName}", body);
     }
 
     public async Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
@@ -82,8 +76,7 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendNonResidentialParentAbsenceReasonToSchoolAdmin))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
@@ -113,26 +106,22 @@ public sealed partial class Service : IEmailService
             });
         }
 
-        string body = await _razorService.RenderViewToStringAsync(NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel.ViewLocation, viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            $"Non-Residential Parent Absence Explanation Received - {viewModel.StudentName}",
+            notificationEmail.Recipients);
 
-        List<EmailRecipient> toRecipients = new();
-        foreach (string entry in notificationEmail.Recipients)
+        if (result.IsFailure)
         {
-            if (toRecipients.Any(recipient => recipient.Email == entry))
-            {
-                continue;
-            }
-
-            Result<EmailRecipient> recipient = EmailRecipient.Create(entry, entry);
-
-            if (recipient.IsSuccess)
-                toRecipients.Add(recipient.Value);
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
         }
-
-        await _emailSender.Send(toRecipients, EmailRecipient.AbsencesMailbox, $"Non-Residential Parent Absence Explanation Received - {viewModel.StudentName}", body);
     }
 
-    public async Task<Result<EmailDtos.SentEmail>> SendParentWholeAbsenceAlert(
+    public async Task<Result<EmailMessage>> SendParentWholeAbsenceAlert(
        string familyName,
        List<AbsenceEntry> absences,
        Student student,
@@ -143,12 +132,11 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendParentWholeAbsenceAlert))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+            return Result.Failure<EmailMessage>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
         }
 
         ParentAbsenceNotificationEmailViewModel viewModel = new()
@@ -162,28 +150,24 @@ public sealed partial class Service : IEmailService
             Absences = absences
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceNotificationEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            emailAddresses);
 
-        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        if (message.IsFailure)
+        if (result.IsFailure)
         {
-            return Result.Failure<EmailDtos.SentEmail>(message.Error);
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
         }
 
-        return new EmailDtos.SentEmail
-        {
-            message = body,
-            id = message.Value.MessageId,
-            recipients = message.Value.To.ToString()
-        };
+        return result;
     }
 
-    public async Task<Result<EmailDtos.SentEmail>> SendParentAbsenceDigest(
+    public async Task<Result<EmailMessage>> SendParentAbsenceDigest(
         string familyName,
         List<AbsenceEntry> wholeAbsences,
         List<AbsenceEntry> partialAbsences,
@@ -195,12 +179,11 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendParentAbsenceDigest))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+            return Result.Failure<EmailMessage>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
         }
 
         ParentAbsenceDigestEmailViewModel viewModel = new()
@@ -215,26 +198,24 @@ public sealed partial class Service : IEmailService
             ParentName = familyName
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAbsenceDigestEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            emailAddresses);
 
-        Result<MimeMessage> message = await _emailSender.Send(emailAddresses, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        if (message.IsFailure)
-            return Result.Failure<EmailDtos.SentEmail>(message.Error);
-
-        return new EmailDtos.SentEmail()
+        if (result.IsFailure)
         {
-            message = body,
-            id = message.Value.MessageId,
-            recipients = message.Value.To.ToString()
-        };
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
+        }
+
+        return result;
     }
 
-    public async Task<Result<EmailDtos.SentEmail>> SendStudentPartialAbsenceExplanationRequest(
+    public async Task<Result<EmailMessage>> SendStudentPartialAbsenceExplanationRequest(
         List<AbsenceEntry> absences,
         Student student,
         List<EmailRecipient> recipients,
@@ -244,12 +225,11 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendStudentPartialAbsenceExplanationRequest))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+            return Result.Failure<EmailMessage>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
         }
 
         StudentAbsenceExplanationRequestEmailViewModel viewModel = new()
@@ -259,30 +239,27 @@ public sealed partial class Service : IEmailService
             SenderTitle = configuration.ContactTitle,
             Title = "[Aurora College] Partial Absentee Notice - Compulsory School Attendance",
             StudentName = student.Name.DisplayName,
-            Link = "https://acos.aurora.nsw.edu.au/",
             Absences = absences
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            recipients);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        if (message.IsFailure)
-            return Result.Failure<EmailDtos.SentEmail>(message.Error);
-
-        return new EmailDtos.SentEmail()
+        if (result.IsFailure)
         {
-            message = body,
-            id = message.Value.MessageId,
-            recipients = message.Value.To.ToString()
-        };
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
+        }
+
+        return result;
     }
 
-    public async Task<Result<EmailDtos.SentEmail>> SendCoordinatorPartialAbsenceVerificationRequest(
+    public async Task<Result<EmailMessage>> SendCoordinatorPartialAbsenceVerificationRequest(
         List<AbsenceExplanation> absences,
         Student student,
         List<EmailRecipient> recipients,
@@ -292,12 +269,11 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendCoordinatorPartialAbsenceVerificationRequest))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+            return Result.Failure<EmailMessage>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
         }
 
         SchoolEnrolment? enrolment = student.CurrentEnrolment;
@@ -313,26 +289,24 @@ public sealed partial class Service : IEmailService
             ClassList = absences
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml", viewModel);
-
-        Result<MimeMessage> message = await _emailSender.Send(recipients, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        if (message.IsFailure)
-            return Result.Failure<EmailDtos.SentEmail>(message.Error);
-
-        return new EmailDtos.SentEmail()
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            recipients);
+        
+        if (result.IsFailure)
         {
-            message = body,
-            id = message.Value.MessageId,
-            recipients = message.Value.To.ToString()
-        };
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
+        }
+
+        return result;
     }
 
-    public async Task<Result<EmailDtos.SentEmail>> SendCoordinatorAbsenceDigest(
+    public async Task<Result<EmailMessage>> SendCoordinatorAbsenceDigest(
         List<AbsenceEntry> wholeAbsences,
         List<AbsenceEntry> partialAbsences,
         Student student,
@@ -344,16 +318,15 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendCoordinatorAbsenceDigest))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+            return Result.Failure<EmailMessage>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
         }
 
         if (recipients.Count == 0)
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.UnknownError);
+            return Result.Failure<EmailMessage>(ApplicationErrors.UnknownError);
 
         CoordinatorAbsenceDigestEmailViewModel viewModel = new()
         {
@@ -367,26 +340,24 @@ public sealed partial class Service : IEmailService
             PartialAbsences = partialAbsences
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/CoordinatorAbsenceDigestEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            recipients);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        if (message.IsFailure)
-            return Result.Failure<EmailDtos.SentEmail>(message.Error);
-
-        return new EmailDtos.SentEmail()
+        if (result.IsFailure)
         {
-            message = body,
-            id = message.Value.MessageId,
-            recipients = message.Value.To.ToString()
-        };
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
+        }
+
+        return result;
     }
 
-    public async Task<Result<EmailDtos.SentEmail>> SendStudentAbsenceDigest(
+    public async Task<Result<EmailMessage>> SendStudentAbsenceDigest(
         List<AbsenceEntry> absences,
         Student student,
         List<EmailRecipient> recipients,
@@ -396,16 +367,15 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendStudentAbsenceDigest))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
+            return Result.Failure<EmailMessage>(ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)));
         }
 
         if (recipients.Count == 0)
-            return Result.Failure<EmailDtos.SentEmail>(ApplicationErrors.UnknownError);
+            return Result.Failure<EmailMessage>(ApplicationErrors.UnknownError);
 
         StudentAbsenceDigestEmailViewModel viewModel = new()
         {
@@ -418,23 +388,21 @@ public sealed partial class Service : IEmailService
             PartialAbsences = absences
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/StudentAbsenceDigestEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            recipients);
 
-        Result<MimeMessage> message = await _emailSender.Send(recipients, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        if (message.IsFailure)
-            return Result.Failure<EmailDtos.SentEmail>(message.Error);
-
-        return new EmailDtos.SentEmail()
+        if (result.IsFailure)
         {
-            message = body,
-            id = message.Value.MessageId,
-            recipients = message.Value.To.ToString()
-        };
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
+        }
+
+        return result;
     }
 
     public async Task SendMissedWorkEmail(
@@ -449,8 +417,7 @@ public sealed partial class Service : IEmailService
 
         if (configuration is null)
         {
-            _logger
-                .ForContext("Action", nameof(SendNonResidentialParentAbsenceReasonToSchoolAdmin))
+            GetLogger()
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
                 .Warning("Failed to send absence email");
 
@@ -469,8 +436,18 @@ public sealed partial class Service : IEmailService
             AbsenceDate = absenceDate
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/MissedWorkEmail.cshtml", viewModel);
+        Result<EmailMessage> result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Absences",
+            viewModel.Title,
+            recipients);
 
-        await _emailSender.Send(recipients, EmailRecipient.AbsencesMailbox, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        if (result.IsFailure)
+        {
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send absence email");
+        }
     }
 }

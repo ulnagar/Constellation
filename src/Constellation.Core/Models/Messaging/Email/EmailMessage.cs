@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Core.Models.Messaging.Email;
 
-using Constellation.Core.Errors;
 using Constellation.Core.Shared;
 using Enums;
 using Errors;
@@ -13,17 +12,12 @@ public sealed class EmailMessage
     private readonly List<EmailMessageRecipient> _recipients = [];
     private readonly List<EmailTrackingEvent> _events = [];
 
-    public EmailMessage()
-    {
-        Id = new();
+    public EmailId Id { get; init; } = new();
+    public required string SendingModule { get; set; }
 
-
-    }
-
-    public EmailId Id { get; init; }
-    public DateTimeOffset SentAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
-    public string SendingModule { get; set; }
+    public DateTimeOffset? SentAt { get; set; }
+    public DateTimeOffset? StatusUpdatedAt { get; set; }
 
     // Sender — single value, owned directly on the message
     public required EmailRecipient From { get; set; }
@@ -53,6 +47,54 @@ public sealed class EmailMessage
     // Navigation
     public IReadOnlyList<EmailMessageRecipient> Recipients => _recipients.AsReadOnly();
     public IReadOnlyList<EmailTrackingEvent> TrackingEvents => _events.AsReadOnly();
+
+    public Result MarkSent(string? providerMessageId = null)
+    {
+        if (Status != EmailStatus.Pending)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Sent));
+
+        Status = EmailStatus.Sent;
+        SentAt = DateTimeOffset.UtcNow;
+        StatusUpdatedAt = DateTimeOffset.UtcNow;
+        ProviderMessageId = providerMessageId;
+
+        return Result.Success();
+    }
+
+    public Result MarkFailed(string errorMessage)
+    {
+        if (Status != EmailStatus.Pending)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Failed));
+
+        Status = EmailStatus.Failed;
+        StatusUpdatedAt = DateTimeOffset.UtcNow;
+        ErrorMessage = errorMessage;
+
+        return Result.Success();
+    }
+
+    public Result MarkDelivered()
+    {
+        if (Status != EmailStatus.Sent)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Delivered));
+
+        Status = EmailStatus.Delivered;
+        StatusUpdatedAt = DateTimeOffset.UtcNow;
+
+        return Result.Success();
+    }
+
+    public Result MarkBounced(string? errorMessage = null)
+    {
+        if (Status != EmailStatus.Sent)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Bounced));
+
+        Status = EmailStatus.Bounced;
+        StatusUpdatedAt = DateTimeOffset.UtcNow;
+        ErrorMessage = errorMessage;
+
+        return Result.Success();
+    }
 
     public Result AddRecipient(EmailRecipient recipient, EmailRecipientType recipientType)
     {

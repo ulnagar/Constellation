@@ -25,6 +25,7 @@ using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
+using Core.Models.Messaging.Email;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
 
     public async Task<Result> Handle(SendAbsenceDigestToCoordinatorCommand request, CancellationToken cancellationToken) 
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -106,7 +107,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
                     recipients.Add(result.Value);
             }
 
-            School school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
+            School? school = await _schoolRepository.GetById(enrolment.SchoolCode, cancellationToken);
 
             if (school is null)
             {
@@ -135,7 +136,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             if (!wholeAbsenceEntries.Any() && !partialAbsenceEntries.Any())
                 return Result.Success();
 
-            Result<EmailDtos.SentEmail> sentMessage = await _emailService.SendCoordinatorAbsenceDigest(wholeAbsenceEntries, partialAbsenceEntries, student, school, recipients, cancellationToken);
+            Result<EmailMessage> sentMessage = await _emailService.SendCoordinatorAbsenceDigest(wholeAbsenceEntries, partialAbsenceEntries, student, school, recipients, cancellationToken);
 
             if (sentMessage.IsFailure)
             {
@@ -155,7 +156,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
     private void UpdateAbsenceWithNotification(
         Guid jobId,
         List<Absence> absences,
-        EmailDtos.SentEmail sentMessage,
+        EmailMessage sentMessage,
         List<EmailRecipient> recipients,
         Student student)
     {
@@ -165,9 +166,9 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
         {
             absence.AddNotification(
                 NotificationType.Email,
-                sentMessage.message,
+                sentMessage.BodyText,
                 emails,
-                sentMessage.id,
+                sentMessage.Id.ToString(),
                 _dateTime.Now);
 
             foreach (EmailRecipient recipient in recipients)
@@ -190,7 +191,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             {
                 OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                Offering offering = _cachedOfferings.FirstOrDefault(offering => offering.Id == offeringId);
+                Offering? offering = _cachedOfferings.FirstOrDefault(offering => offering.Id == offeringId);
 
                 if (offering is null)
                 {
@@ -209,7 +210,7 @@ internal sealed class SendAbsenceDigestToCoordinatorCommandHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
                 
-                Tutorial tutorial = _cachedTutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialId);
+                Tutorial? tutorial = _cachedTutorials.FirstOrDefault(tutorial => tutorial.Id == tutorialId);
 
                 if (tutorial is null)
                 {

@@ -3,9 +3,12 @@
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 
-public class ParentAttendanceReportEmailViewModel : EmailLayoutBaseViewModel
+public sealed class ParentAttendanceReportEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public DateOnly StartDate { get; set; }
-    public DateOnly EndDate { get; set; }
+    private const string _viewLocation = "/Views/Emails/Absences/ParentAttendanceReportEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public required string StudentName { get; set; }
+    public required DateOnly StartDate { get; set; }
+    public required DateOnly EndDate { get; set; }
 }

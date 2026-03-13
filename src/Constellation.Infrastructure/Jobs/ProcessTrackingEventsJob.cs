@@ -70,101 +70,97 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
 
     private async Task ProcessEntry(TrackingQueueEntry entry, CancellationToken ct)
     {
-        using (LogContext.PushProperty("QueueEntryId", entry.Id))
-        using (LogContext.PushProperty("EventType", entry.EventType))
-        using (LogContext.PushProperty("Attempt", entry.Attempts + 1))
+
+        using IServiceScope scope = _scopeFactory.CreateScope();
+        AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        try
         {
-            using var scope = _scopeFactory.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            TrackingEvent? evt = Deserialize(entry);
 
-            try
+            if (evt is null)
             {
-                var evt = Deserialize(entry);
+                _logger
+                    .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
+                    .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
+                    .ForContext("Attempt", entry.Attempts + 1)
+                    .Error("Failed to deserialize payload — dropping entry. Payload: {Payload}", entry.Payload);
 
-                if (evt is null)
-                {
-                    _logger
-                        .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
-                        .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
-                        .ForContext("Attempt", entry.Attempts + 1)
-                        .Error("Failed to deserialize payload — dropping entry. Payload: {Payload}", entry.Payload);
-
-                    await db.Set<TrackingQueueEntry>()
-                        .Where(e => e.Id == entry.Id)
-                        .ExecuteDeleteAsync(ct);
-
-                    return;
-                }
-
-                var parentExists = await ParentExists(evt, db, ct);
-
-                if (!parentExists)
-                {
-                    var nextAttempt = entry.Attempts + 1;
-
-                    if (nextAttempt >= _maxAttempts)
-                    {
-                        _logger
-                            .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
-                            .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
-                            .ForContext("Attempt", entry.Attempts + 1)
-                            .Warning("Dropping tracking event after {MaxAttempts} attempts — parent record never appeared. EnqueuedAt: {EnqueuedAt}", _maxAttempts, entry.EnqueuedAt);
-
-                        await db.Set<TrackingQueueEntry>()
-                            .Where(e => e.Id == entry.Id)
-                            .ExecuteDeleteAsync(ct);
-                        return;
-                    }
-
-                    double backoffMs = 500 * nextAttempt;
-
-                    _logger
-                        .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
-                        .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
-                        .ForContext("Attempt", entry.Attempts + 1)
-                        .Debug("Parent record not found, requeueing with {BackoffMs}ms backoff", backoffMs);
-
-                    await db.Set<TrackingQueueEntry>()
-                        .Where(e => e.Id == entry.Id)
-                        .ExecuteUpdateAsync(s => s
-                            .SetProperty(e => e.Attempts, nextAttempt)
-                            .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddMilliseconds(backoffMs)), ct);
-                    return;
-                }
-
-                await (evt switch
-                {
-                    EmailOpenEvent e => HandleEmailOpen(e, db, ct),
-                    SmsDeliveryReceiptEvent e => HandleSmsDelivery(e, db, ct),
-                    _ => throw new InvalidOperationException($"Unknown event type: {entry.EventType}")
-                });
-
-                // Delete the queue entry on success
                 await db.Set<TrackingQueueEntry>()
                     .Where(e => e.Id == entry.Id)
                     .ExecuteDeleteAsync(ct);
 
-                _logger
-                    .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
-                    .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
-                    .ForContext("Attempt", entry.Attempts + 1)
-                    .Information("Tracking event processed and removed from queue");
+                return;
             }
-            catch (Exception ex)
+
+            bool parentExists = await ParentExists(evt, db, ct);
+
+            if (!parentExists)
             {
+                int nextAttempt = entry.Attempts + 1;
+
+                if (nextAttempt >= _maxAttempts)
+                {
+                    _logger
+                        .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
+                        .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
+                        .ForContext("Attempt", entry.Attempts + 1)
+                        .Warning("Dropping tracking event after {MaxAttempts} attempts — parent record never appeared. EnqueuedAt: {EnqueuedAt}", _maxAttempts, entry.EnqueuedAt);
+
+                    await db.Set<TrackingQueueEntry>()
+                        .Where(e => e.Id == entry.Id)
+                        .ExecuteDeleteAsync(ct);
+                    return;
+                }
+
+                double backoffMs = 500 * nextAttempt;
+
                 _logger
                     .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
                     .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
                     .ForContext("Attempt", entry.Attempts + 1)
-                    .Error(ex, "Unhandled exception — requeueing entry. EnqueuedAt: {EnqueuedAt}", entry.EnqueuedAt);
+                    .Debug("Parent record not found, requeueing with {BackoffMs}ms backoff", backoffMs);
 
                 await db.Set<TrackingQueueEntry>()
                     .Where(e => e.Id == entry.Id)
                     .ExecuteUpdateAsync(s => s
-                        .SetProperty(e => e.Attempts, entry.Attempts + 1)
-                        .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddSeconds(5))
-                        .SetProperty(e => e.LastError, ex.Message), ct);
+                        .SetProperty(e => e.Attempts, nextAttempt)
+                        .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddMilliseconds(backoffMs)), ct);
+                return;
             }
+
+            await (evt switch
+            {
+                EmailOpenEvent e => HandleEmailOpen(e, db, ct),
+                SmsDeliveryReceiptEvent e => HandleSmsDelivery(e, db, ct),
+                _ => throw new InvalidOperationException($"Unknown event type: {entry.EventType}")
+            });
+
+            // Delete the queue entry on success
+            await db.Set<TrackingQueueEntry>()
+                .Where(e => e.Id == entry.Id)
+                .ExecuteDeleteAsync(ct);
+
+            _logger
+                .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
+                .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
+                .ForContext("Attempt", entry.Attempts + 1)
+                .Information("Tracking event processed and removed from queue");
+        }
+        catch (Exception ex)
+        {
+            _logger
+                .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
+                .ForContext(nameof(TrackingQueueEntry.EventType), entry.EventType)
+                .ForContext("Attempt", entry.Attempts + 1)
+                .Error(ex, "Unhandled exception — requeueing entry. EnqueuedAt: {EnqueuedAt}", entry.EnqueuedAt);
+
+            await db.Set<TrackingQueueEntry>()
+                .Where(e => e.Id == entry.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(e => e.Attempts, entry.Attempts + 1)
+                    .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddSeconds(5))
+                    .SetProperty(e => e.LastError, ex.Message), ct);
         }
     }
     private static TrackingEvent? Deserialize(TrackingQueueEntry entry) =>

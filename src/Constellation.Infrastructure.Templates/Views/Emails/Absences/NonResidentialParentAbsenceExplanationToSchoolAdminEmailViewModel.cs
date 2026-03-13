@@ -6,19 +6,20 @@ using System.Collections.Generic;
 
 public sealed class NonResidentialParentAbsenceExplanationToSchoolAdminEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/Absences/NonResidentialParentAbsenceExplanationToSchoolAdminEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/Absences/NonResidentialParentAbsenceExplanationToSchoolAdminEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public string StudentName { get; set; }
-    public List<AbsenceDto> Absences { get; set; } = new();
+    public required string StudentName { get; set; }
+    public List<AbsenceDto> Absences { get; set; } = [];
 
     public class AbsenceDto
     {
-        public DateTime AbsenceDate { get; set; }
-        public string ClassName { get; set; }
-        public string PeriodName { get; set; }
-        public string Explanation { get; set; }
-        public string Source { get; set; }
-        public string Type { get; set; }
-        public string AbsenceTime { get; set; }
+        public required DateTime AbsenceDate { get; set; }
+        public required string ClassName { get; set; }
+        public required string PeriodName { get; set; }
+        public required string Explanation { get; set; }
+        public required string Source { get; set; }
+        public required string Type { get; set; }
+        public required string AbsenceTime { get; set; }
     }
 }

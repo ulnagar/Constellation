@@ -4,10 +4,14 @@ using Application.Domains.Attendance.Absences.Commands.ConvertResponseToAbsenceE
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System.Collections.Generic;
 
-public class CoordinatorAbsenceVerificationRequestEmailViewModel : EmailLayoutBaseViewModel
+public sealed class CoordinatorAbsenceVerificationRequestEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public string SchoolName { get; set; }
-    public static string PortalLink = $"https://acos.aurora.nsw.edu.au/";
-    public List<AbsenceExplanation> ClassList { get; set; } = new();
+    private const string _viewLocation = "/Views/Emails/Absences/CoordinatorAbsenceVerificationRequestEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public const string PortalLink = $"{BaseUrl}";
+
+    public required string StudentName { get; set; }
+    public required string SchoolName { get; set; }
+    public List<AbsenceExplanation> ClassList { get; set; } = [];
 }

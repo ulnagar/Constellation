@@ -4,9 +4,12 @@ using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEn
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System.Collections.Generic;
 
-public class StudentAbsenceExplanationRequestEmailViewModel : EmailLayoutBaseViewModel
+public sealed class StudentAbsenceExplanationRequestEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public string Link { get; set; }
-    public List<AbsenceEntry> Absences { get; set; } = new();
+    private const string _viewLocation = "/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    public const string Link = $"{BaseUrl}";
+
+    public required string StudentName { get; set; }
+    public List<AbsenceEntry> Absences { get; set; } = [];
 }

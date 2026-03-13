@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.SendAbsenceNotificationToStudent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
@@ -21,6 +20,7 @@ using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
+using Core.Models.Messaging.Email;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -142,14 +142,14 @@ internal sealed class SendAbsenceNotificationToStudentCommandHandler
                 absence.AbsenceLength));
         }
 
-        Result<EmailDtos.SentEmail> sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
+        Result<EmailMessage> sentEmail = await _emailService.SendStudentPartialAbsenceExplanationRequest(absenceEntries, student, recipients, cancellationToken);
 
         if (sentEmail.IsFailure)
             return sentEmail;
 
         foreach (Absence absence in absences)
         {
-            absence.AddNotification(NotificationType.Email, sentEmail.Value.message, student.EmailAddress.Email, sentEmail.Value.id, _dateTime.Now);
+            absence.AddNotification(NotificationType.Email, sentEmail.Value.BodyText, student.EmailAddress.Email, sentEmail.Value.Id.ToString(), _dateTime.Now);
 
             foreach (EmailRecipient recipient in recipients)
                 _logger.Information("{id}: Message sent via Email to {student} ({email}) for Partial Absence on {Date}", request.JobId, recipient.Name, recipient.Email, absence.Date.ToShortDateString());

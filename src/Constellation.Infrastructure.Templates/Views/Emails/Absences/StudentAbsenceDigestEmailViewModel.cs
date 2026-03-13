@@ -8,9 +8,11 @@ using System.Collections.Generic;
 
 public sealed class StudentAbsenceDigestEmailViewModel : EmailLayoutBaseViewModel
 {
-    public Name StudentName { get; init; }
-    public List<AbsenceEntry> PartialAbsences { get; init; } = new();
-    public StudentId StudentId { get; init; }   
+    private const string _viewLocation = "/Views/Emails/Absences/StudentAbsenceDigestEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    public string Link => $"{BaseUrl}";
 
-    public string Link => $"https://acos.aurora.nsw.edu.au/";
+    public required Name StudentName { get; init; }
+    public List<AbsenceEntry> PartialAbsences { get; init; } = [];
+    public required StudentId StudentId { get; init; }
 }

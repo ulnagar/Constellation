@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.Attendance.Absences.Commands.SendAbsenceNotificationToParent;
 
 using Constellation.Application.Abstractions.Messaging;
-using Constellation.Application.DTOs;
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Abstractions.Clock;
 using Constellation.Core.Abstractions.Repositories;
@@ -18,10 +17,9 @@ using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
 using ConvertAbsenceToAbsenceEntry;
-using Core.Models.Offerings.Errors;
+using Core.Models.Messaging.Email;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Tutorials;
-using Core.Models.Tutorials.Errors;
 using Core.Models.Tutorials.Identifiers;
 using Core.Models.Tutorials.Repositories;
 using Messaging.Sms.Dtos;
@@ -31,7 +29,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 internal sealed class SendAbsenceNotificationToParentCommandHandler
     : ICommandHandler<SendAbsenceNotificationToParentCommand>
@@ -199,7 +196,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
                         if (recipients.Count > 0)
                         {
-                            Result<EmailDtos.SentEmail> message = await _emailService.SendParentWholeAbsenceAlert(
+                            Result<EmailMessage> message = await _emailService.SendParentWholeAbsenceAlert(
                                 family.FamilyTitle, 
                                 group.ToList(), 
                                 student, 
@@ -217,7 +214,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                                 string emails = string.Join(", ", recipients.Select(recipient => recipient.Email));
                                 Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                                absence.AddNotification(NotificationType.Email, message.Value.message, emails, message.Value.id,
+                                absence.AddNotification(NotificationType.Email, message.Value.BodyText, emails, message.Value.Id.ToString(),
                                     _dateTime.Now);
 
                                 foreach (EmailRecipient recipient in recipients)
@@ -262,7 +259,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                 }
                 else if (recipients.Count > 0)
                 {
-                    Result<EmailDtos.SentEmail> message = await _emailService.SendParentWholeAbsenceAlert(
+                    Result<EmailMessage> message = await _emailService.SendParentWholeAbsenceAlert(
                         family.FamilyTitle, 
                         group.ToList(), 
                         student, 
@@ -280,7 +277,7 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
                         string emails = string.Join(", ", recipients.Select(recipient => recipient.Email));
                         Absence absence = absences.First(absence => absence.Id == entry.Id);
 
-                        absence.AddNotification(NotificationType.Email, message.Value.message, emails, message.Value.id,
+                        absence.AddNotification(NotificationType.Email, message.Value.BodyText, emails, message.Value.Id.ToString(),
                             _dateTime.Now);
 
                         foreach (EmailRecipient recipient in recipients)
