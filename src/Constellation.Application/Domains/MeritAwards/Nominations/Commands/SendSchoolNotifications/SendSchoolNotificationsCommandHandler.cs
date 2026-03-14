@@ -7,6 +7,7 @@ using Constellation.Core.Models.Awards.Errors;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Abstractions.Services;
+using Core.Models.Messaging.Email;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -135,7 +136,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
                 }
             }
 
-            Result<string> emailResult = await _emailService.SendAwardNominationNotificationEmailToSchools(
+            Result<EmailMessage> emailResult = await _emailService.SendAwardNominationNotificationEmailToSchools(
                 toRecipients,
                 ccRecipients,
                 principalName,
@@ -156,7 +157,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
                 toRecipients,
                 ccRecipients,
                 "Student Awards",
-                emailResult.Value);
+                emailResult.Value.BodyText);
 
             period.AddNotification(notification);
 

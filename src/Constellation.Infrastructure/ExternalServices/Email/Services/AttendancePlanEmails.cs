@@ -5,29 +5,28 @@ using Constellation.Core.Models.Attendance;
 using Constellation.Infrastructure.Templates.Views.Emails.AttendancePlans;
 using Core.Extensions;
 using Core.ValueObjects;
-using MimeKit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 public sealed partial class Service : IEmailService
 {
     public async Task SendAttendancePlanToAdmin(
-    List<EmailRecipient> recipients,
-    AttendancePlan plan,
-    CancellationToken cancellationToken = default)
+        List<EmailRecipient> recipients,
+        AttendancePlan plan,
+        CancellationToken cancellationToken = default)
     {
         AttendancePlanDetailsOfUnavailabilityEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = string.Empty,
             SenderTitle = string.Empty,
-            Title = $"[Aurora College] Attendance Plan Details",
+            Title = "[Aurora College] Attendance Plan Details",
             Student = plan.Student.DisplayName,
             Grade = plan.Grade.AsName(),
             School = plan.School
         };
 
-        List<AttendancePlanDetailsOfUnavailabilityEmailViewModel.Unavailability> unavailabilities = new();
+        List<AttendancePlanDetailsOfUnavailabilityEmailViewModel.Unavailability> unavailabilities = [];
 
         foreach (var period in plan.Periods)
         {
@@ -56,13 +55,12 @@ public sealed partial class Service : IEmailService
 
         viewModel.Unavailabilities = unavailabilities;
 
-        string body = await _razorService.RenderViewToStringAsync(AttendancePlanDetailsOfUnavailabilityEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(
-            toRecipients: recipients,
-            fromRecipient: EmailRecipient.AbsencesMailbox,
-            subject: viewModel.Title,
-            body: body,
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Attendance Plans",
+            viewModel.Title,
+            recipients,
             cancellationToken: cancellationToken);
     }
 
@@ -77,19 +75,18 @@ public sealed partial class Service : IEmailService
             Preheader = "",
             SenderName = string.Empty,
             SenderTitle = string.Empty,
-            Title = $"[Aurora College] Attendance Plan Rejected",
+            Title = "[Aurora College] Attendance Plan Rejected",
             Student = plan.Student.DisplayName,
             Grade = plan.Grade.AsName(),
             Comment = comment
         };
 
-        string body = await _razorService.RenderViewToStringAsync(AttendancePlanRejectedNotificationEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(
-            toRecipients: recipients,
-            fromRecipient: EmailRecipient.AbsencesMailbox,
-            subject: viewModel.Title,
-            body: body,
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AbsencesMailbox,
+            "Attendance Plans",
+            viewModel.Title,
+            recipients,
             cancellationToken: cancellationToken);
     }
 }

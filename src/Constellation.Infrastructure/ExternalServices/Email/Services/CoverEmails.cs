@@ -2,13 +2,15 @@
 
 using Application.Domains.AppSettings.Models;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models;
 using Constellation.Core.Models.Covers;
+using Constellation.Core.Models.Messaging.Email;
+using Constellation.Core.Models.Messaging.Email.Enums;
 using Constellation.Infrastructure.Templates.Views.Emails.Covers;
 using Core.Errors;
 using Core.Models.Offerings;
 using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -17,16 +19,16 @@ using System.Threading.Tasks;
 public sealed partial class Service : IEmailService
 {
     public async Task SendNewCoverEmail(
-    Cover cover,
-    Offering offering,
-    EmailRecipient coveringTeacher,
-    List<EmailRecipient> primaryRecipients,
-    List<EmailRecipient> secondaryRecipients,
-    TimeOnly startTime,
-    TimeOnly endTime,
-    string teamLink,
-    List<Attachment> attachments,
-    CancellationToken cancellationToken = default)
+        Cover cover,
+        Offering offering,
+        EmailRecipient coveringTeacher,
+        List<EmailRecipient> primaryRecipients,
+        List<EmailRecipient> secondaryRecipients,
+        TimeOnly startTime,
+        TimeOnly endTime,
+        string teamLink,
+        List<Attachment> attachments,
+        CancellationToken cancellationToken = default)
     {
         // Determine whether email or invite
         bool singleDayCover = cover.StartDate == cover.EndDate;
@@ -61,7 +63,7 @@ public sealed partial class Service : IEmailService
 
         if (singleDayCover)
         {
-            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverAppointment.cshtml", viewModel);
+            RenderedEmail rendered = await _razorService.RenderEmail(viewModel.ViewLocation, viewModel);
 
             // Create and add ICS files
             string uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
@@ -74,15 +76,42 @@ public sealed partial class Service : IEmailService
             DateTime appointmentStart = cover.StartDate.ToDateTime(startTime);
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
 
-            string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
+            string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, MessagePriority.Normal, cancellationToken);
+            EmailMessage message = new()
+            {
+                From = EmailRecipient.AuroraCollege,
+                SendingModule = "Covers",
+                Subject = viewModel.Title,
+                BodyText = rendered.PlainText,
+                BodyHtml = rendered.Html,
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            foreach (EmailRecipient entry in primaryRecipients)
+                message.AddRecipient(entry, EmailRecipientType.To);
+
+            foreach (EmailRecipient entry in secondaryRecipients)
+                message.AddRecipient(entry, EmailRecipientType.Cc);
+
+            _emailRepository.Insert(message);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            await _emailSender.Send(message, attachments: attachments, calendarInfo: icsData, cancellationToken: cancellationToken);
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
         else
         {
-            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/NewCoverEmail.cshtml", viewModel);
-
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
+            await BuildAndSendEmail(
+                viewModel,
+                EmailRecipient.AuroraCollege,
+                "Covers",
+                viewModel.Title,
+                primaryRecipients,
+                ccRecipients: secondaryRecipients,
+                attachments: attachments,
+                cancellationToken: cancellationToken);
         }
 
     }
@@ -132,7 +161,7 @@ public sealed partial class Service : IEmailService
 
         if (singleDayCover)
         {
-            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverAppointment.cshtml", viewModel);
+            RenderedEmail rendered = await _razorService.RenderEmail(viewModel.ViewLocation, viewModel);
 
             // Create and add ICS files
             string uid = $"{cover.Id}-{cover.OfferingId}-{originalStartDate:yyyyMMdd}";
@@ -145,15 +174,42 @@ public sealed partial class Service : IEmailService
             DateTime appointmentStart = cover.StartDate.ToDateTime(startTime);
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
 
-            string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
+            string icsData = _calendarService.CreateInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, MessagePriority.Normal, cancellationToken);
+            EmailMessage message = new()
+            {
+                From = EmailRecipient.AuroraCollege,
+                SendingModule = "Covers",
+                Subject = viewModel.Title,
+                BodyText = rendered.PlainText,
+                BodyHtml = rendered.Html,
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            foreach (EmailRecipient entry in primaryRecipients)
+                message.AddRecipient(entry, EmailRecipientType.To);
+
+            foreach (EmailRecipient entry in secondaryRecipients)
+                message.AddRecipient(entry, EmailRecipientType.Cc);
+
+            _emailRepository.Insert(message);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            await _emailSender.Send(message, attachments: attachments, calendarInfo: icsData, cancellationToken: cancellationToken);
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
         else
         {
-            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/UpdatedCoverEmail.cshtml", viewModel);
-
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
+            await BuildAndSendEmail(
+                viewModel,
+                EmailRecipient.AuroraCollege,
+                "Covers",
+                viewModel.Title,
+                primaryRecipients,
+                ccRecipients: secondaryRecipients,
+                attachments: attachments,
+                cancellationToken: cancellationToken);
         }
     }
 
@@ -202,7 +258,7 @@ public sealed partial class Service : IEmailService
 
         if (singleDayCover)
         {
-            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverAppointment.cshtml", viewModel);
+            RenderedEmail rendered = await _razorService.RenderEmail(viewModel.ViewLocation, viewModel);
 
             // Create and add ICS files
             string uid = $"{cover.Id}-{cover.OfferingId}-{cover.StartDate:yyyyMMdd}";
@@ -211,15 +267,42 @@ public sealed partial class Service : IEmailService
 
             DateTime appointmentStart = cover.StartDate.ToDateTime(startTime);
             DateTime appointmentEnd = cover.EndDate.ToDateTime(endTime);
-            string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, body, appointmentStart, appointmentEnd, 0);
+            string icsData = _calendarService.CancelInvite(uid, coveringTeacher.Name, coveringTeacher.Email, summary, location, rendered.PlainText, appointmentStart, appointmentEnd, 0);
 
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, icsData, MessagePriority.Normal, cancellationToken);
+            EmailMessage message = new()
+            {
+                From = EmailRecipient.AuroraCollege,
+                SendingModule = "Covers",
+                Subject = viewModel.Title,
+                BodyText = rendered.PlainText,
+                BodyHtml = rendered.Html,
+                CreatedAt = DateTimeOffset.UtcNow
+            };
+
+            foreach (EmailRecipient entry in primaryRecipients)
+                message.AddRecipient(entry, EmailRecipientType.To);
+
+            foreach (EmailRecipient entry in secondaryRecipients)
+                message.AddRecipient(entry, EmailRecipientType.Cc);
+
+            _emailRepository.Insert(message);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            await _emailSender.Send(message, attachments: attachments, calendarInfo: icsData, cancellationToken: cancellationToken);
+
+            await _unitOfWork.CompleteAsync(cancellationToken);
         }
         else
         {
-            string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Covers/CancelledCoverEmail.cshtml", viewModel);
-
-            await _emailSender.Send(primaryRecipients, secondaryRecipients, EmailRecipient.AuroraCollege.Email, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
+            await BuildAndSendEmail(
+                viewModel,
+                EmailRecipient.AuroraCollege,
+                "Covers",
+                viewModel.Title,
+                primaryRecipients,
+                ccRecipients: secondaryRecipients,
+                attachments: attachments,
+                cancellationToken: cancellationToken);
         }
     }
 }

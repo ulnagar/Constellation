@@ -4,7 +4,6 @@ using Application.Domains.Compliance.Assessments.Models;
 using Constellation.Application.Interfaces.Services;
 using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Templates.Views.Emails.AssessmentProvisions;
@@ -26,9 +25,14 @@ public sealed partial class Service : IEmailService
             Student = provisions
         };
 
-        string body = await _razorService.RenderViewToStringAsync(AssessmentProvisionNotificationForFamiliesEmailViewModel.ViewLocation, viewModel);
-
-        return await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Assessment Provisions",
+            viewModel.Title,
+            recipients,
+            ccRecipients: ccRecipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<Result> SendAssessmentProvisionEmailToSchools(
@@ -48,8 +52,13 @@ public sealed partial class Service : IEmailService
             Students = students
         };
 
-        string body = await _razorService.RenderViewToStringAsync(AssessmentProvisionNotificationForSchoolsEmailViewModel.ViewLocation, viewModel);
-
-        return await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Assessment Provisions",
+            viewModel.Title,
+            recipients,
+            ccRecipients: ccRecipients,
+            cancellationToken: cancellationToken);
     }
 }

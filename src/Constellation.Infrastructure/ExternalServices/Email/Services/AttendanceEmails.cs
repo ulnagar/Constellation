@@ -5,7 +5,6 @@ using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -15,12 +14,12 @@ using Templates.Views.Emails.Absences;
 public sealed partial class Service : IEmailService
 {
     public async Task<Result> SendParentAttendanceReportEmail(
-    string studentName,
-    DateOnly startDate,
-    DateOnly endDate,
-    List<EmailRecipient> recipients,
-    List<Attachment> attachments,
-    CancellationToken cancellationToken = default)
+        string studentName,
+        DateOnly startDate,
+        DateOnly endDate,
+        List<EmailRecipient> recipients,
+        List<Attachment> attachments,
+        CancellationToken cancellationToken = default)
     {
         AbsencesConfiguration? configuration = await _appSettings.Absences(cancellationToken);
 
@@ -45,15 +44,14 @@ public sealed partial class Service : IEmailService
             EndDate = endDate
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/ParentAttendanceReportEmail.cshtml", viewModel);
-
-        Result<MimeMessage> message = await _emailSender.Send(recipients, [], [], string.Empty , viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        return message;
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Attendance",
+            viewModel.Title,
+            recipients, 
+            attachments: attachments, 
+            cancellationToken: cancellationToken);
     }
 
     public async Task<Result> SendSchoolAttendanceReportEmail(
@@ -85,14 +83,13 @@ public sealed partial class Service : IEmailService
             EndDate = endDate
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Absences/SchoolAttendanceReportEmail.cshtml", viewModel);
-
-        Result<MimeMessage> message = await _emailSender.Send(recipients, [], [], string.Empty, viewModel.Title, body, attachments, MessagePriority.Normal, cancellationToken);
-
-        // Perhaps used for future where message file (.eml) is saved to database
-        //var messageStream = new MemoryStream();
-        //message.WriteTo(messageStream);
-
-        return message;
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Attendance",
+            viewModel.Title,
+            recipients,
+            attachments: attachments,
+            cancellationToken: cancellationToken);
     }
 }

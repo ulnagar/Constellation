@@ -8,9 +8,7 @@ using Core.Models.Students;
 using Core.Models.Subjects;
 using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Assignments;
 
@@ -36,10 +34,6 @@ public sealed partial class Service : IEmailService
             SubmittedOn = DateOnly.FromDateTime(submission.SubmittedOn)
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Assignments/AssignmentSubmissionUploadReceiptEmail.cshtml", viewModel);
-
-        List<EmailRecipient> recipients = new();
-
         Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
 
         if (recipient.IsFailure)
@@ -48,13 +42,17 @@ public sealed partial class Service : IEmailService
                 .ForContext(nameof(AssignmentSubmissionUploadReceiptEmailViewModel), viewModel, true)
                 .ForContext(nameof(Error), recipient.Error, true)
                 .Warning("Failed to send Assignment Upload Receipt");
-
+            
             return Result.Failure(recipient.Error);
         }
 
-        recipients.Add(recipient.Value);
-
-        return await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "Assignments",
+            viewModel.Title,
+            [recipient.Value],
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendAssignmentUploadFailedNotification(
@@ -72,16 +70,11 @@ public sealed partial class Service : IEmailService
                 <dd>From {studentName} ({submissionId.Value})</dd>
             </dl>";
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
-
-        List<EmailRecipient> toRecipients = [EmailRecipient.InfoTechTeam];
-
-        await _emailSender.Send(
-            toRecipients,
+        await BuildAndSendEmail(
+            viewModel,
             EmailRecipient.NoReply,
-            "[Aurora College] Canvas Assignment Upload Failure",
-            body,
-            MessagePriority.Normal,
-            cancellationToken);
+            $"[Aurora College] Canvas Assignment Upload Failure: {assignmentName}",
+            [EmailRecipient.InfoTechTeam],
+            cancellationToken: cancellationToken);
     }
 }

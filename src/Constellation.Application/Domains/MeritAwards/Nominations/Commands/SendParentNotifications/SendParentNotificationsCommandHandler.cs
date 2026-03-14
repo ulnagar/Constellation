@@ -8,6 +8,7 @@ using Core.Models.Awards;
 using Core.Models.Awards.Enums;
 using Core.Models.Awards.Errors;
 using Core.Models.Families;
+using Core.Models.Messaging.Email;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.Repositories;
@@ -95,7 +96,7 @@ internal sealed class SendParentNotificationsCommandHandler
             {
                 Result<EmailRecipient> emailRecipient = EmailRecipient.Create(recipient.Value, recipient.Key);
 
-                Result<string> emailResult = await _emailService.SendAwardNominationNotificationEmailToParents(
+                Result<EmailMessage> emailResult = await _emailService.SendAwardNominationNotificationEmailToParents(
                     [emailRecipient.Value],
                     [],
                     recipient.Value,
@@ -117,7 +118,7 @@ internal sealed class SendParentNotificationsCommandHandler
                     [emailRecipient.Value],
                     [],
                     $"Student Awards - {student.Name.DisplayName}",
-                    emailResult.Value);
+                    emailResult.Value.BodyText);
 
                 period.AddNotification(notification);
             }

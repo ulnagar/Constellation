@@ -2,6 +2,9 @@
 
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Application.Models;
+using Constellation.Core.Models.Messaging.Email;
+using Constellation.Core.Models.Messaging.Email.Enums;
 using Constellation.Infrastructure.Templates.Views.Emails.Auth;
 using Core.ValueObjects;
 using System.Threading.Tasks;
@@ -21,8 +24,21 @@ public sealed partial class Service : IEmailService
             Link = notification.Link
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
+        RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/Auth/MagicLinkLoginEmail.cshtml", viewModel);
 
-        await _emailSender.Send(notification.Recipients, EmailRecipient.NoReply, viewModel.Title, body);
+        EmailMessage message = new()
+        {
+            From = EmailRecipient.NoReply,
+            SendingModule = string.Empty,
+            Subject = viewModel.Title,
+            BodyText = rendered.PlainText,
+            BodyHtml = rendered.Html,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+
+        foreach (EmailRecipient entry in notification.Recipients)
+            message.AddRecipient(entry, EmailRecipientType.To);
+
+        await _emailSender.Send(message);
     }
 }

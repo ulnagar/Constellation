@@ -7,8 +7,8 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Shared;
 using Constellation.Infrastructure.Templates.Views.Emails.AwardNominations;
 using Constellation.Infrastructure.Templates.Views.Emails.Awards;
+using Core.Models.Messaging.Email;
 using Core.ValueObjects;
-using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Net.Mail;
@@ -37,22 +37,27 @@ public sealed partial class Service : IEmailService
             TeacherName = teacher?.Name.DisplayName
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/Awards/NewAwardCertificateEmail.cshtml", viewModel);
-
         foreach (EmailRecipient recipient in recipients)
         {
-            await _emailSender.Send([recipient], EmailRecipient.NoReply, viewModel.Title, body, new List<Attachment> { certificate }, MessagePriority.Normal, cancellationToken);
+            await BuildAndSendEmail(
+                viewModel,
+                EmailRecipient.NoReply,
+                "Awards",
+                viewModel.Title,
+                [recipient],
+                attachments: [certificate],
+                cancellationToken: cancellationToken);
         }
     }
 
-    public async Task<Result<string>> SendAwardNominationNotificationEmailToSchools(
-    List<EmailRecipient> recipients,
-    List<EmailRecipient> ccRecipients,
-    Name contact,
-    string school,
-    DateOnly deliveryDate,
-    Dictionary<Name, List<Nomination>> students,
-    CancellationToken cancellationToken = default)
+    public async Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToSchools(
+        List<EmailRecipient> recipients,
+        List<EmailRecipient> ccRecipients,
+        Name contact,
+        string school,
+        DateOnly deliveryDate,
+        Dictionary<Name, List<Nomination>> students,
+        CancellationToken cancellationToken = default)
     {
         SchoolNotificationEmailViewModel viewModel = new()
         {
@@ -66,17 +71,17 @@ public sealed partial class Service : IEmailService
             Students = students
         };
 
-        string body = await _razorService.RenderViewToStringAsync(SchoolNotificationEmailViewModel.ViewLocation, viewModel);
-
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure<string>(emailSendOperation.Error);
-
-        return body;
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Awards",
+            viewModel.Title,
+            recipients,
+            ccRecipients: ccRecipients,
+            cancellationToken: cancellationToken);
     }
 
-    public async Task<Result<string>> SendAwardNominationNotificationEmailToParents(
+    public async Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToParents(
         List<EmailRecipient> recipients,
         List<EmailRecipient> ccRecipients,
         Name parent,
@@ -99,13 +104,13 @@ public sealed partial class Service : IEmailService
             Awards = awards
         };
 
-        string body = await _razorService.RenderViewToStringAsync(ParentNotificationEmailViewModel.ViewLocation, viewModel);
-
-        var emailSendOperation = await _emailSender.Send(recipients, ccRecipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure<string>(emailSendOperation.Error);
-
-        return body;
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Awards",
+            viewModel.Title,
+            recipients,
+            ccRecipients: ccRecipients,
+            cancellationToken: cancellationToken);
     }
 }
