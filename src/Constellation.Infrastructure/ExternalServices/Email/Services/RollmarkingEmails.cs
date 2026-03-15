@@ -25,7 +25,7 @@ public sealed partial class Service : IEmailService
             _logger
                 .ForContext("Action", nameof(SendDailyRollMarkingReport))
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
-                .Warning("Failed to send absence email");
+                .Warning("Failed to send roll marking report email");
 
             return;
         }
@@ -39,9 +39,19 @@ public sealed partial class Service : IEmailService
             RollEntries = entries
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/DailyReportEmail.cshtml", viewModel);
+        Result result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "RollMarking",
+            viewModel.Title,
+            recipients);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body);
+        if (result.IsFailure)
+        {
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send roll marking report email");
+        }
     }
 
     public async Task SendNoRollMarkingReport(
@@ -55,12 +65,12 @@ public sealed partial class Service : IEmailService
             _logger
                 .ForContext("Action", nameof(SendNoRollMarkingReport))
                 .ForContext(nameof(Error), ApplicationErrors.InvalidConfiguration(nameof(AbsencesConfiguration)), true)
-                .Warning("Failed to send absence email");
+                .Warning("Failed to send roll marking report email");
 
             return;
         }
 
-        DailyReportEmailViewModel viewModel = new()
+        NoReportEmailViewModel viewModel = new()
         {
             Preheader = "",
             SenderName = configuration.ContactName,
@@ -68,8 +78,18 @@ public sealed partial class Service : IEmailService
             Title = $"[Aurora College] Roll Marking Report - {reportDate.ToLongDateString()}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/RollMarking/NoReportEmail.cshtml", viewModel);
+        Result result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "RollMarking",
+            viewModel.Title,
+            recipients);
 
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body);
+        if (result.IsFailure)
+        {
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send roll marking report email");
+        }
     }
 }

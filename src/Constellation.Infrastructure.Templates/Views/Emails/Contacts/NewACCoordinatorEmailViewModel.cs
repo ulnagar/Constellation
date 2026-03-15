@@ -1,15 +1,15 @@
-﻿using Constellation.Infrastructure.Templates.Views.Shared;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Contacts;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.Contacts
+using Constellation.Infrastructure.Templates.Views.Shared;
+using Core.ValueObjects;
+
+public sealed class NewACCoordinatorEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class NewACCoordinatorEmailViewModel : EmailLayoutBaseViewModel
-    {
-        public NewACCoordinatorEmailViewModel()
-        {
-            
-        }
+    private const string _viewLocation = "/Views/Emails/Contacts/NewACCordinatorEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
+    public readonly string Link = $"{BaseUrl}";
+    public required string PartnerSchool { get; set; }
 
-        public string PartnerSchool { get; set; }
-    }
+    public required EmailRecipient InstructionalLeader { get; set; }
 }

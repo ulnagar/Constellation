@@ -60,7 +60,7 @@ internal sealed class EmergencyService : IEmergencyService
 
             if (matchingEntry.Type == MessageType.SMS && item.AlertRecipient.HasPhone)
             {
-                Result<string> result = await _smsService.SendEmergencyConsoleSms(item.AlertRecipient, messageEvent.Message, cancellationToken);
+                Result<string?> result = await _smsService.SendEmergencyConsoleSms(item.AlertRecipient, messageEvent.Message, cancellationToken);
 
                 matchingEntry.UpdateRecipient(
                     MessageType.SMS,
@@ -69,7 +69,7 @@ internal sealed class EmergencyService : IEmergencyService
             }
             else if (item.AlertRecipient.HasEmail)
             {
-                Result<string> result = await _emailService.SendEmergencyConsoleEmail(item.AlertRecipient, messageEvent.Message.ToHtml(), cancellationToken);
+                Result result = await _emailService.SendEmergencyConsoleEmail(item.AlertRecipient, messageEvent.Message.ToHtml(), cancellationToken);
 
                 matchingEntry.UpdateRecipient(
                     MessageType.Email,

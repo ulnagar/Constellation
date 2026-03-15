@@ -3,11 +3,14 @@
 using Constellation.Core.ValueObjects;
 using Constellation.Infrastructure.Templates.Views.Shared;
 
-public class AcademicReportEmailViewModel 
-    : EmailLayoutBaseViewModel
+public sealed class AcademicReportEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string ParentName { get; set; }
-    public Name StudentName { get; set; }
-    public string ReportingPeriod { get; set; }
-    public string Year { get; set; }
+    private const string _viewLocation = "/Views/Emails/Reports/AcademicReportEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    public readonly string Link = $"{BaseUrl}";
+
+    public required string ParentName { get; set; }
+    public required Name StudentName { get; set; }
+    public required string ReportingPeriod { get; set; }
+    public required string Year { get; set; }
 }

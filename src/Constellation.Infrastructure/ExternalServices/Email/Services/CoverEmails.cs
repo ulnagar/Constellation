@@ -56,7 +56,6 @@ public sealed partial class Service : IEmailService
             SenderTitle = configuration.ContactTitle,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
-            HasAdobeAccount = true,
             Preheader = "",
             ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
         };
@@ -154,7 +153,6 @@ public sealed partial class Service : IEmailService
             SenderTitle = configuration.ContactTitle,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
-            HasAdobeAccount = true,
             Preheader = "",
             ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
         };
@@ -251,7 +249,6 @@ public sealed partial class Service : IEmailService
             SenderTitle = configuration.ContactTitle,
             StartDate = cover.StartDate.ToDateTime(TimeOnly.MinValue),
             EndDate = cover.EndDate.ToDateTime(TimeOnly.MinValue),
-            HasAdobeAccount = true,
             Preheader = "",
             ClassWithLink = new Dictionary<string, string> { { "Class Team", teamLink } }
         };

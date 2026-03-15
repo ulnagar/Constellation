@@ -30,9 +30,14 @@ public sealed partial class Service : IEmailService
             SubmittedOn = submittedOn
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TransactionReceiptParentEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, [], [], string.Empty, viewModel.Title, body, [attachment], MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Third Party Consent",
+            viewModel.Title,
+            recipients,
+            attachments: [ attachment ],
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendConsentRefusedNotification(
@@ -53,8 +58,12 @@ public sealed partial class Service : IEmailService
             Title = $"[Aurora College] Third-party consent refused - {studentName} {submittedOn:dd-MM-yyyy}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync(ConsentRefusedNotificationEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, string.Empty, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Third Party Consent",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 }

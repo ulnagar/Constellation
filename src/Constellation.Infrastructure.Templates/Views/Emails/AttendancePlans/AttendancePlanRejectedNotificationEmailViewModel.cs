@@ -2,12 +2,12 @@
 
 using Constellation.Infrastructure.Templates.Views.Shared;
 
-public sealed class AttendancePlanRejectedNotificationEmailViewModel
-    : EmailLayoutBaseViewModel
+public sealed class AttendancePlanRejectedNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/AttendancePlans/AttendancePlanRejectedNotificationEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/AttendancePlans/AttendancePlanRejectedNotificationEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public string Student { get; set; }
-    public string Grade { get; set; }
-    public string Comment { get; set; }
+    public required string Student { get; set; }
+    public required string Grade { get; set; }
+    public required string Comment { get; set; }
 }

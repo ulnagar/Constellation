@@ -7,19 +7,20 @@ using System.Collections.Generic;
 
 public sealed class AttendancePlanDetailsOfUnavailabilityEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/AttendancePlans/AttendancePlanDetailsOfUnavailabilityEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/AttendancePlans/AttendancePlanDetailsOfUnavailabilityEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public string Student { get; set; }
-    public string School { get; set; }
-    public string Grade { get; set; }
+    public required string Student { get; set; }
+    public required string School { get; set; }
+    public required string Grade { get; set; }
 
-    public List<Unavailability> Unavailabilities { get; set; } = new();
+    public List<Unavailability> Unavailabilities { get; set; } = [];
 
     public sealed class Unavailability
     {
-        public PeriodWeek Week { get; set; }
-        public PeriodDay Day { get; set; }
-        public TimeOnly Start { get; set; }
-        public TimeOnly End { get; set; }
+        public required PeriodWeek Week { get; set; }
+        public required PeriodDay Day { get; set; }
+        public required TimeOnly Start { get; set; }
+        public required TimeOnly End { get; set; }
     }
 }

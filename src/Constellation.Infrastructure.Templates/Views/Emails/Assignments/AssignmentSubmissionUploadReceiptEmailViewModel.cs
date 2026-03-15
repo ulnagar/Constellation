@@ -5,8 +5,11 @@ using System;
 
 public class AssignmentSubmissionUploadReceiptEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public string CourseName { get; set; }
-    public string AssignmentName { get; set; }
-    public DateOnly SubmittedOn { get; set; }
+    private const string _viewLocation = "/Views/Emails/Assignments/AssignmentSubmissionUploadReceiptEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public required string StudentName { get; init; }
+    public required string CourseName { get; init; }
+    public required string AssignmentName { get; init; }
+    public required DateOnly SubmittedOn { get; init; }
 }

@@ -8,7 +8,7 @@ public sealed class StudentAbsenceExplanationRequestEmailViewModel : EmailLayout
 {
     private const string _viewLocation = "/Views/Emails/Absences/StudentAbsenceExplanationRequestEmail.cshtml";
     public override string ViewLocation => _viewLocation;
-    public const string Link = $"{BaseUrl}";
+    public string Link => $"{BaseUrl}";
 
     public required string StudentName { get; set; }
     public List<AbsenceEntry> Absences { get; set; } = [];

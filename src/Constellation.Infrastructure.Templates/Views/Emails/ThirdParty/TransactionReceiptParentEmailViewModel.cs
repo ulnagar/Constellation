@@ -3,10 +3,11 @@
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 
-public class TransactionReceiptParentEmailViewModel : EmailLayoutBaseViewModel
+public sealed class TransactionReceiptParentEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/ThirdParty/TransactionReceiptParentEmail.cshtml";
-
-    public string StudentName { get; set; }
-    public DateOnly SubmittedOn { get; set; }
+    private const string _viewLocation = "/Views/Emails/ThirdParty/TransactionReceiptParentEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    
+    public required string StudentName { get; set; }
+    public required DateOnly SubmittedOn { get; set; }
 }

@@ -1,11 +1,13 @@
-﻿using Constellation.Application.DTOs;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.RollMarking;
+
+using Constellation.Application.DTOs;
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System.Collections.Generic;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.RollMarking
+public sealed class DailyReportEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class DailyReportEmailViewModel : EmailLayoutBaseViewModel
-    {
-        public List<RollMarkingEmailDto> RollEntries { get; set; } = new();
-    }
+    private const string _viewLocation = "/Views/Emails/RollMarking/DailyReportEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    
+    public List<RollMarkingEmailDto> RollEntries { get; set; } = [];
 }

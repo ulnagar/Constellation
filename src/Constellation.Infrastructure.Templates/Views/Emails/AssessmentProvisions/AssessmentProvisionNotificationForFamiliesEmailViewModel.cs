@@ -5,7 +5,8 @@ using Constellation.Infrastructure.Templates.Views.Shared;
 
 public sealed class AssessmentProvisionNotificationForFamiliesEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/AssessmentProvisions/AssessmentProvisionNotificationForFamilies.cshtml";
+    private const string _viewLocation = "/Views/Emails/AssessmentProvisions/AssessmentProvisionNotificationForFamilies.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public StudentProvisions Student { get; set; }
+    public required StudentProvisions Student { get; set; }
 }

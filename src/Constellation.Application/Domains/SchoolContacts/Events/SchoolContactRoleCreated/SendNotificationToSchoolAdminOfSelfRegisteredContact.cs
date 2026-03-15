@@ -7,12 +7,8 @@ using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Events;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Shared;
-using Core.ValueObjects;
-using Interfaces.Gateways;
 using Interfaces.Services;
-using MimeKit;
 using Serilog;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,28 +17,25 @@ internal sealed class SendNotificationToSchoolAdminOfSelfRegisteredContact
     : IDomainEventHandler<SchoolContactRoleCreatedDomainEvent>
 {
     private readonly ISchoolContactRepository _contactRepository;
-    private readonly IRazorViewToStringRenderer _razorService;
-    private readonly IEmailGateway _emailSender;
+    private readonly IEmailService _emailService;
     private readonly IDateTimeProvider _dateTime;
     private readonly ILogger _logger;
 
     public SendNotificationToSchoolAdminOfSelfRegisteredContact(
         ISchoolContactRepository contactRepository,
-        IRazorViewToStringRenderer razorService,
-        IEmailGateway emailSender,
         IDateTimeProvider dateTime,
+        IEmailService emailService,
         ILogger logger)
     {
         _contactRepository = contactRepository;
-        _razorService = razorService;
-        _emailSender = emailSender;
         _dateTime = dateTime;
+        _emailService = emailService;
         _logger = logger;
     }
 
     public async Task Handle(SchoolContactRoleCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        SchoolContact contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
+        SchoolContact? contact = await _contactRepository.GetById(notification.ContactId, cancellationToken);
 
         if (contact is null)
         {
@@ -57,7 +50,7 @@ internal sealed class SendNotificationToSchoolAdminOfSelfRegisteredContact
         if (!contact.SelfRegistered || _dateTime.Now.Subtract(contact.CreatedAt).TotalDays > 5)
             return;
 
-        SchoolContactRole role = contact.Assignments.FirstOrDefault(role => role.Id == notification.RoleId);
+        SchoolContactRole? role = contact.Assignments.FirstOrDefault(role => role.Id == notification.RoleId);
 
         if (role is null)
         {
@@ -71,14 +64,6 @@ internal sealed class SendNotificationToSchoolAdminOfSelfRegisteredContact
         }
 
         // Send email to school requesting removal
-        string viewModel = "<p>A new school contact has been registered via the Schools Portal:</p>";
-        viewModel += $"<p><strong>{contact.DisplayName}</strong> is the <strong>{role.Role}</strong> at <strong>{role.SchoolName}</strong></p>";
-        viewModel += $"<p>This user was registered at <strong>{role.CreatedAt.ToLongDateString()}</strong>.";
-
-        string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", viewModel);
-
-        List<EmailRecipient> toRecipients = [EmailRecipient.AuroraCollege, EmailRecipient.InfoTechTeam];
-
-        await _emailSender.Send(toRecipients, "noreply@aurora.nsw.edu.au", "New School Contact registered", body, MessagePriority.Normal, cancellationToken);
+        await _emailService.SendSchoolContactAddedNotification(contact, role);
     }
 }

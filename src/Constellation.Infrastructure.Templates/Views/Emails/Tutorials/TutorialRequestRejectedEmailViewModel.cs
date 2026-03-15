@@ -7,15 +7,16 @@ using Shared;
 
 public sealed class TutorialRequestRejectedEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/Tutorials/TutorialRequestRejectedEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/Tutorials/TutorialRequestRejectedEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public Name Student { get; set; }
-    public Grade Grade { get; set; }
-    public string School { get; set; }
+    public required Name Student { get; set; }
+    public required Grade Grade { get; set; }
+    public required string School { get; set; }
 
-    public TutorialType Type { get; set; }
-    public string Subject { get; set; }
+    public required TutorialType Type { get; set; }
+    public required string Subject { get; set; }
     public string SupportType => Type == TutorialType.Study ? Type.ToString() : $"{Type} - {Subject}";
 
-    public string Reason { get; set; }
+    public required string Reason { get; set; }
 }

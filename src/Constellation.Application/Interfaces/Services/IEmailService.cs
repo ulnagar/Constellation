@@ -82,7 +82,7 @@ public interface IEmailService
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
     // Emergency Console Emails
-    Task<Result<string>> SendEmergencyConsoleEmail(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
+    Task<Result> SendEmergencyConsoleEmail(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
 
     // RollMarking Emails
     Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, List<EmailRecipient> recipients);
@@ -94,6 +94,8 @@ public interface IEmailService
     // School Contact Emails
     Task SendWelcomeEmailToCoordinator(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
     Task SendWelcomeEmailToSciencePracTeacher(List<EmailRecipient> recipients, string schoolName, CancellationToken cancellationToken = default);
+    Task<Result> SendSchoolContactRemovalRequest(SchoolContact contact, SchoolContactRole role, string cancelledBy, string cancelledAt, string comment);
+    Task SendSchoolContactAddedNotification(SchoolContact contact, SchoolContactRole role);
 
     // Science Prac Emails
     Task SendLessonMissedEmail(LessonMissedNotificationEmail notification);

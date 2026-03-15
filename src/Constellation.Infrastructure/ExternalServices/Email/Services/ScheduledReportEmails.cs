@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
 using Constellation.Application.Interfaces.Services;
+using Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Templates.Views.Emails.ScheduledReports;
@@ -23,8 +23,20 @@ public sealed partial class Service : IEmailService
             Recipient = recipient.Name
         };
 
-        string body = await _razorService.RenderViewToStringAsync(CompletedScheduledReportViewModel.ViewLocation, viewModel);
+        Result result = await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "RollMarking",
+            viewModel.Title,
+            [ recipient ],
+            attachments: [ attachment ],
+            cancellationToken: cancellationToken);
 
-        await _emailSender.Send([recipient], EmailRecipient.NoReply, viewModel.Title, body, [attachment], MessagePriority.Normal, cancellationToken);
+        if (result.IsFailure)
+        {
+            GetLogger()
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to send roll marking report email");
+        }
     }
 }

@@ -6,16 +6,17 @@ using System.Collections.Generic;
 
 public sealed class NewCoverEmailViewModel : EmailLayoutBaseViewModel
 {
+    private const string _viewLocation = "/Views/Emails/Covers/NewCoverEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
     public string Alert => BuildAlertString();
 
-    public string ContactName { get; set; }
-    public string ContactPhone { get; set; } = "1300 287 629"; 
+    public required string ContactName { get; set; }
+    public required string ContactPhone { get; set; } = "1300 287 629"; 
         
-    public string ToName { get; set; }
-    public Dictionary<string, string> ClassWithLink { get; set; } = new();
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public bool HasAdobeAccount { get; set; }
+    public required string ToName { get; set; }
+    public Dictionary<string, string> ClassWithLink { get; set; } = [];
+    public required DateTime StartDate { get; set; }
+    public required DateTime EndDate { get; set; }
     public string DateBlock => BuildDateBlock();
 
     private string BuildAlertString()

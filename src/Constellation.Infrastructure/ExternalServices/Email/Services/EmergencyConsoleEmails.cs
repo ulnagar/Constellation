@@ -3,12 +3,11 @@
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
 using Core.ValueObjects;
-using MimeKit;
 using Templates.Views.Emails.Emergency;
 
 public sealed partial class Service : IEmailService
 {
-    public async Task<Result<string>> SendEmergencyConsoleEmail(
+    public async Task<Result> SendEmergencyConsoleEmail(
         AlertRecipient recipient,
         string message,
         CancellationToken cancellationToken = default)
@@ -22,18 +21,19 @@ public sealed partial class Service : IEmailService
             Message = message
         };
 
-        string body = await _razorService.RenderViewToStringAsync(EmergencyConsoleEmailViewModel.ViewLocation, viewModel);
-
         Result<EmailRecipient> emailRecipient = recipient.GetEmailRecipient();
 
         if (emailRecipient.IsFailure)
-            return Result.Failure<string>(emailRecipient.Error);
+            return Result.Failure(emailRecipient.Error);
 
-        Result<MimeMessage> email = await _emailSender.Send([ emailRecipient.Value ], EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Urgent, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "Emergency Console",
+            viewModel.Title,
+            [emailRecipient.Value],
+            cancellationToken: cancellationToken);
 
-        if (email.IsSuccess)
-            return Result.Success(email.Value.MessageId);
-
-        return Result.Failure<string>(email.Error);
+        return Result.Success();
     }
 }

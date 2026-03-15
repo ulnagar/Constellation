@@ -8,16 +8,18 @@ using Shared;
 
 public sealed class TutorialRequestApprovedNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/Tutorials/TutorialRequestApprovedNotificationEmail.cshtml";
 
-    public Name Student { get; set; }
-    public Grade Grade { get; set; }
-    public string School { get; set; }
+    private const string _viewLocation = "/Views/Emails/Tutorials/TutorialRequestApprovedNotificationEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public TutorialType Type { get; set; }
-    public string Subject { get; set; }
+    public required Name Student { get; set; }
+    public required Grade Grade { get; set; }
+    public required string School { get; set; }
+
+    public required TutorialType Type { get; set; }
+    public required string Subject { get; set; }
     public string SupportType => Type == TutorialType.Study ? Type.ToString() : $"{Type} - {Subject}";
 
-    public RequestId RequestId { get; set; }
-    public string ApprovalLink => $"https://acos.aurora.nsw.edu.au/Staff/Subject/Tutorials/Requests/Details/{RequestId}";
+    public required RequestId RequestId { get; set; }
+    public string ApprovalLink => $"{BaseUrl}/Staff/Subject/Tutorials/Requests/Details/{RequestId}";
 }

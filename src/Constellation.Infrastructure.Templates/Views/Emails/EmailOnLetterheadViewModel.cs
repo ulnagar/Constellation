@@ -4,7 +4,8 @@ using Constellation.Infrastructure.Templates.Views.Shared;
 
 public sealed class EmailOnLetterheadViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/EmailOnLetterhead.cshtml";
+    private const string _viewLocation = "/Views/Emails/EmailOnLetterhead.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public string Body { get; set; }
+    public required string Body { get; set; }
 }

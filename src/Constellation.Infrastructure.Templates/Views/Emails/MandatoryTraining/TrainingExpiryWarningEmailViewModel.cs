@@ -3,9 +3,12 @@
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System.Collections.Generic;
 
-public abstract class TrainingExpiryWarningEmailViewModel : EmailLayoutBaseViewModel
+public sealed class TrainingExpiryWarningEmailViewModel : EmailLayoutBaseViewModel
 {
-    public Dictionary<string, string> Courses { get; set; } = new();
+    private const string _viewLocation = "/Views/Emails/MandatoryTraining/TrainingExpiryWarningEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    
+    public Dictionary<string, string> Courses { get; set; } = [];
 
-    public abstract string WarningText { get; }
+    public required string WarningText { get; set;  }
 }

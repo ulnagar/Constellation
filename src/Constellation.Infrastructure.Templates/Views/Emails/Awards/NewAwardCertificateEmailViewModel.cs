@@ -3,11 +3,14 @@
 using Constellation.Infrastructure.Templates.Views.Shared;
 using System;
 
-public class NewAwardCertificateEmailViewModel : EmailLayoutBaseViewModel
+public sealed class NewAwardCertificateEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public string AwardType { get; set; }
-    public string TeacherName { get; set; }
-    public string AwardReason { get; set; }
-    public DateTime AwardedOn { get; set; }
+    private const string _viewLocation = "/Views/Emails/Awards/NewAwardCertificateEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public required string StudentName { get; set; }
+    public required string AwardType { get; set; }
+    public required string TeacherName { get; set; }
+    public required string AwardReason { get; set; }
+    public required DateTime AwardedOn { get; set; }
 }

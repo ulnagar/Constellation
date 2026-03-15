@@ -4,9 +4,11 @@ using Constellation.Infrastructure.Templates.Views.Shared;
 
 public sealed class CaseActionsCompletedEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/WorkFlow/CaseActionsCompletedEmail.cshtml";
-
-    public string CaseDescription { get; set; }
-    public string Link { get; set; }
+    private const string _viewLocation = "/Views/Emails/WorkFlow/CaseActionsCompletedEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+    public string Link => $"{BaseUrl}{LinkPart}";
+    
+    public required string CaseDescription { get; set; }
+    public required string LinkPart { get; set; }
 
 }

@@ -7,8 +7,9 @@ using System.Collections.Generic;
 
 public sealed class AssessmentProvisionNotificationForSchoolsEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/AssessmentProvisions/AssessmentProvisionNotificationForSchools.cshtml";
+    private const string _viewLocation = "/Views/Emails/AssessmentProvisions/AssessmentProvisionNotificationForSchools.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public Name Contact { get; set; }
-    public List<StudentProvisions> Students { get; set; }
+    public required Name Contact { get; set; }
+    public List<StudentProvisions> Students { get; set; } = [];
 }

@@ -2,10 +2,8 @@
 
 using Application.Interfaces.Services;
 using Constellation.Core.Shared;
-using Core.Models.LinkedSystems;
 using Core.Models.Tutorials;
 using Core.ValueObjects;
-using MimeKit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Templates.Views.Emails.Tutorials;
@@ -31,14 +29,13 @@ public sealed partial class Service : IEmailService
             Subject = tutorialRequest.Subject
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TutorialRequestReceivedEmailViewModel.ViewLocation, viewModel);
-
-        Result<MimeMessage> emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure(emailSendOperation.Error);
-
-        return Result.Success();
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Tutorial Support",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<Result> SendTutorialRequestReceivedNotificationEmail(
@@ -61,14 +58,13 @@ public sealed partial class Service : IEmailService
             RequestId = tutorialRequest.Id
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TutorialRequestReceivedNotificationEmailViewModel.ViewLocation, viewModel);
-
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure(emailSendOperation.Error);
-
-        return Result.Success();
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Tutorial Support",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<Result> SendTutorialRequestApprovedNotificationEmail(
@@ -90,14 +86,13 @@ public sealed partial class Service : IEmailService
             RequestId = tutorialRequest.Id
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TutorialRequestApprovedNotificationEmailViewModel.ViewLocation, viewModel);
-
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure(emailSendOperation.Error);
-
-        return Result.Success();
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Tutorial Support",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<Result> SendTutorialRequestRejectedEmail(
@@ -119,14 +114,13 @@ public sealed partial class Service : IEmailService
             Reason = tutorialRequest.Notes.OrderBy(entry => entry.SubmittedAt).Last().Message
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TutorialRequestRejectedEmailViewModel.ViewLocation, viewModel);
-
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure(emailSendOperation.Error);
-
-        return Result.Success();
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Tutorial Support",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<Result> SendTutorialRequestScheduledEmail(
@@ -153,14 +147,13 @@ public sealed partial class Service : IEmailService
             ScheduledPeriods = periods
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TutorialRequestScheduledEmailViewModel.ViewLocation, viewModel);
-
-        var emailSendOperation = await _emailSender.Send(recipients, EmailRecipient.AuroraCollege, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
-
-        if (emailSendOperation.IsFailure)
-            return Result.Failure<string>(emailSendOperation.Error);
-
-        return Result.Success();
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.AuroraCollege,
+            "Tutorial Support",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
 }

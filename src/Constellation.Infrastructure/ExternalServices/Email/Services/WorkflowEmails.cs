@@ -31,12 +31,18 @@ public sealed partial class Service : IEmailService
             TeacherName = assignee.Name.DisplayName,
             ActionDescription = action.ToString(),
             CaseDescription = item.ToString(),
-            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
+            CaseId = item.Id,
+            ActionId = action.Id,
+            LinkPart = $"/Staff/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync(ActionAssignedEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "WorkFlows",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendActionCancelledEmail(
@@ -55,12 +61,18 @@ public sealed partial class Service : IEmailService
             TeacherName = assignee.Name.DisplayName,
             ActionDescription = action.ToString(),
             CaseDescription = item.ToString(),
-            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
+            CaseId = item.Id,
+            ActionId = action.Id,
+            LinkPart = $"/Staff/SchoolAdmin/WorkFlows/Actions/Update/{item.Id.Value}/{action.Id.Value}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync(ActionCancelledEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "WorkFlows",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendComplianceWorkFlowNotificationEmail(
@@ -87,12 +99,16 @@ public sealed partial class Service : IEmailService
             Subject = detail.Subject,
             IncidentLink = incidentLink,
             Age = incidentAge,
-            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Details/{caseId.Value}"
+            LinkPart = $"/Staff/SchoolAdmin/WorkFlows/Details/{caseId.Value}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync(ComplianceWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "WorkFlows",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendTrainingWorkFlowNotificationEmail(
@@ -112,9 +128,13 @@ public sealed partial class Service : IEmailService
             DaysUntilDue = detail.DaysUntilDue
         };
 
-        string body = await _razorService.RenderViewToStringAsync(TrainingWorkFlowNotificationEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "WorkFlows",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendAllActionsCompletedEmail(
@@ -129,12 +149,16 @@ public sealed partial class Service : IEmailService
             SenderTitle = "",
             Preheader = "",
             CaseDescription = item.ToString(),
-            Link = $"https://acos.aurora.nsw.edu.au/Staff/SchoolAdmin/WorkFlows/Details/{item.Id.Value}"
+            LinkPart = $"/Staff/SchoolAdmin/WorkFlows/Details/{item.Id.Value}"
         };
 
-        string body = await _razorService.RenderViewToStringAsync(CaseActionsCompletedEmailViewModel.ViewLocation, viewModel);
-
-        await _emailSender.Send(recipients, EmailRecipient.NoReply, viewModel.Title, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "WorkFlows",
+            viewModel.Title,
+            recipients,
+            cancellationToken: cancellationToken);
     }
 
     public async Task SendEnteredEmailForAction(
@@ -144,5 +168,12 @@ public sealed partial class Service : IEmailService
         string body,
         List<Attachment> attachments,
         CancellationToken cancellationToken = default) =>
-        await _emailSender.Send([], [], recipients, sender.Email, subject, body, attachments, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            body,
+            sender,
+            subject,
+            [],
+            bccRecipients: recipients,
+            attachments: attachments,
+            cancellationToken: cancellationToken);
 }

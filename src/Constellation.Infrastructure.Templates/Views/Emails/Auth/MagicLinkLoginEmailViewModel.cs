@@ -1,10 +1,12 @@
-﻿using Constellation.Infrastructure.Templates.Views.Shared;
+﻿namespace Constellation.Infrastructure.Templates.Views.Emails.Auth;
 
-namespace Constellation.Infrastructure.Templates.Views.Emails.Auth
+using Constellation.Infrastructure.Templates.Views.Shared;
+
+public sealed class MagicLinkLoginEmailViewModel : EmailLayoutBaseViewModel
 {
-    public class MagicLinkLoginEmailViewModel : EmailLayoutBaseViewModel
-    {
-        public string ToName { get; set; }
-        public string Link { get; set; }
-    }
+    private const string _viewLocation = "/Views/Emails/Auth/MagicLinkLoginEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public required string ToName { get; set; }
+    public required string Link { get; set; }
 }

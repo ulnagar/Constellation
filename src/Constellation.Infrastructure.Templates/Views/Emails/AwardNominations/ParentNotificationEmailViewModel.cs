@@ -5,15 +5,17 @@ using Core.ValueObjects;
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 public sealed class ParentNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/AwardNominations/ParentNotificationEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/AwardNominations/ParentNotificationEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public Name Parent { get; set; }
-    public Name Student { get; set; }
-    public string School { get; set; }
-    public DateOnly DeliveryDate { get; set; }
+    public required Name Parent { get; set; }
+    public required Name Student { get; set; }
+    public required string School { get; set; }
+    public required DateOnly DeliveryDate { get; set; }
     public List<Nomination> Awards { get; set; } = [];
-    public string Year => DeliveryDate.Year.ToString();
+    public string Year => DeliveryDate.Year.ToString(CultureInfo.InvariantCulture);
 }

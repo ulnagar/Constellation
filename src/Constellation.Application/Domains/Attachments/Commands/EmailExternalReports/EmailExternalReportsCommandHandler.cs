@@ -1,6 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Attachments.Commands.EmailExternalReports;
 
 using Abstractions.Messaging;
+using Constellation.Application.Models;
+using Constellation.Core.Models.Messaging.Email.Enums;
 using Core.Abstractions.Repositories;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
@@ -9,6 +11,7 @@ using Core.Models.Attachments.Services;
 using Core.Models.Attachments.ValueObjects;
 using Core.Models.Families;
 using Core.Models.Families.Errors;
+using Core.Models.Messaging.Email;
 using Core.Models.Reports;
 using Core.Models.Reports.Repositories;
 using Core.Models.Students;
@@ -19,10 +22,11 @@ using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Gateways;
 using Interfaces.Repositories;
-using MimeKit;
+using Interfaces.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -36,6 +40,7 @@ internal sealed class EmailExternalReportsCommandHandler
     private readonly IStudentRepository _studentRepository;
     private readonly IFamilyRepository _familyRepository;
     private readonly IAttachmentService _attachmentService;
+    private readonly IRazorViewToStringRenderer _razorService;
     private readonly IEmailGateway _emailGateway;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
@@ -46,6 +51,7 @@ internal sealed class EmailExternalReportsCommandHandler
         IStudentRepository studentRepository,
         IFamilyRepository familyRepository,
         IAttachmentService attachmentService,
+        IRazorViewToStringRenderer razorService,
         IEmailGateway emailGateway,
         IUnitOfWork unitOfWork,
         ILogger logger)
@@ -55,6 +61,7 @@ internal sealed class EmailExternalReportsCommandHandler
         _studentRepository = studentRepository;
         _familyRepository = familyRepository;
         _attachmentService = attachmentService;
+        _razorService = razorService;
         _emailGateway = emailGateway;
         _unitOfWork = unitOfWork;
         _logger = logger
@@ -124,7 +131,7 @@ internal sealed class EmailExternalReportsCommandHandler
                 continue;
 
             MemoryStream fileStream = new(fileData.Value.FileData);
-            System.Net.Mail.Attachment emailAttachment = new(fileStream, fileData.Value.FileName, fileData.Value.FileType);
+            using System.Net.Mail.Attachment emailAttachment = new(fileStream, fileData.Value.FileName, fileData.Value.FileType);
 
             // Convert to External Report
             ExternalReport externalReport = ExternalReport.ConvertFromTempExternalReport(report);
@@ -178,14 +185,28 @@ internal sealed class EmailExternalReportsCommandHandler
             {
                 string subject = request.Subject.Replace("::parent_name::", recipient.Name, StringComparison.CurrentCultureIgnoreCase);
                 subject = subject.Replace("::report_type::", report.Type.ToString(), StringComparison.CurrentCultureIgnoreCase);
-                subject = subject.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy"), StringComparison.CurrentCultureIgnoreCase);
+                subject = subject.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture), StringComparison.CurrentCultureIgnoreCase);
 
                 string body = request.Body.Replace("::parent_name::", recipient.Name, StringComparison.CurrentCultureIgnoreCase);
                 body = body.Replace("::report_type::", report.Type.ToString(), StringComparison.CurrentCultureIgnoreCase);
-                body = body.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy"), StringComparison.CurrentCultureIgnoreCase);
+                body = body.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture), StringComparison.CurrentCultureIgnoreCase);
 
-                // Send email with subject and body
-                await _emailGateway.Send([recipient], EmailRecipient.AuroraCollege, subject, body, [emailAttachment], MessagePriority.Normal, cancellationToken);
+                RenderedEmail rendered = await _razorService.RenderEmail("/Views/Emails/PlainEmail.cshtml", body);
+
+                EmailMessage message = new()
+                {
+                    From = EmailRecipient.AuroraCollege,
+                    SendingModule = string.Empty,
+                    Subject = subject,
+                    BodyText = rendered.PlainText,
+                    BodyHtml = rendered.Html,
+                    CreatedAt = DateTimeOffset.UtcNow
+                };
+
+                foreach (EmailRecipient entry in recipients)
+                    message.AddRecipient(entry, EmailRecipientType.To);
+
+                await _emailGateway.Send(message, attachments: [ emailAttachment ], cancellationToken: cancellationToken);
             }
         }
 

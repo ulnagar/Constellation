@@ -2,7 +2,6 @@
 
 using Constellation.Application.Interfaces.Services;
 using Core.ValueObjects;
-using MimeKit;
 using System.Threading.Tasks;
 
 public sealed partial class Service : IEmailService
@@ -15,6 +14,11 @@ public sealed partial class Service : IEmailService
     {
         string body = await _razorService.RenderViewToStringAsync("/Views/Emails/PlainEmail.cshtml", description);
 
-        await _emailSender.Send([EmailRecipient.SupportQueue], submitter, subject, body, MessagePriority.Normal, cancellationToken);
+        await BuildAndSendEmail(
+            body,
+            submitter,
+            $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}",
+            [ EmailRecipient.InfoTechTeam, EmailRecipient.SupportQueue ],
+            cancellationToken: cancellationToken);
     }
 }

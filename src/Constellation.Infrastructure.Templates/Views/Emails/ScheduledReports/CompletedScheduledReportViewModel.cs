@@ -4,7 +4,9 @@ using Shared;
 
 public sealed class CompletedScheduledReportViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/ScheduledReports/CompletedScheduledReport.cshtml";
 
-    public string Recipient { get; set; }
+    private const string _viewLocation = "/Views/Emails/ScheduledReports/CompletedScheduledReport.cshtml";
+    public override string ViewLocation => _viewLocation;
+    
+    public required string Recipient { get; set; }
 }

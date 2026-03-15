@@ -8,11 +8,12 @@ using System.Collections.Generic;
 
 public sealed class SchoolNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/AwardNominations/SchoolNotificationEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/AwardNominations/SchoolNotificationEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public Name Contact { get; set; }
-    public string School { get; set; }
-    public DateOnly DeliveryDate { get; set; }
-    
-    public Dictionary<Name, List<Nomination>> Students { get; set; }
+    public required Name Contact { get; set; }
+    public required string School { get; set; }
+    public required DateOnly DeliveryDate { get; set; }
+
+    public Dictionary<Name, List<Nomination>> Students { get; set; } = [];
 }

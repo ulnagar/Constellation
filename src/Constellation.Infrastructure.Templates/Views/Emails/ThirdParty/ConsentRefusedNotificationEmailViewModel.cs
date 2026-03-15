@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 
 public sealed class ConsentRefusedNotificationEmailViewModel : EmailLayoutBaseViewModel
 {
-    public const string ViewLocation = "/Views/Emails/ThirdParty/ConsentRefusedNotificationEmail.cshtml";
+    private const string _viewLocation = "/Views/Emails/ThirdParty/ConsentRefusedNotificationEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
 
-    public string Student { get; set; }
-    public DateOnly SubmittedOn { get; set; }
-    public List<string> RefusedConsents { get; set; }
+    public required string Student { get; set; }
+    public required DateOnly SubmittedOn { get; set; }
+    public List<string> RefusedConsents { get; set; } = [];
 }

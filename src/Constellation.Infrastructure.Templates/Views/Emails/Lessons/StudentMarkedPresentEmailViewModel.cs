@@ -2,9 +2,12 @@
 
 using Constellation.Infrastructure.Templates.Views.Shared;
 
-public class StudentMarkedPresentEmailViewModel : EmailLayoutBaseViewModel
+public sealed class StudentMarkedPresentEmailViewModel : EmailLayoutBaseViewModel
 {
-    public string StudentName { get; set; }
-    public string Subject { get; set; }
-    public string LessonTitle { get; set; }
+    private const string _viewLocation = "/Views/Emails/Lessons/StudentMarkedPresentEmail.cshtml";
+    public override string ViewLocation => _viewLocation;
+
+    public required string StudentName { get; set; }
+    public required string Subject { get; set; }
+    public required string LessonTitle { get; set; }
 }
