@@ -35,6 +35,8 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
                     .HasColumnName("From_Email")
                     .IsRequired()
                     .HasMaxLength(320);
+
+                owned.WithOwner();
             });
 
         // Nullable owned type for ReplyTo
@@ -50,6 +52,8 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
                     .Property(r => r.Email)
                     .HasColumnName("ReplyTo_Email")
                     .HasMaxLength(320);
+
+                owned.WithOwner();
             });
 
         builder

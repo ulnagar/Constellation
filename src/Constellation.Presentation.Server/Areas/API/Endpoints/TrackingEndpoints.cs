@@ -3,6 +3,7 @@
 using Application.Interfaces.Services;
 using Core.Models.Messaging.Email.Identifiers;
 using Core.Models.Messaging.Tracking;
+using Microsoft.AspNetCore.Mvc;
 
 public static class TrackingEndpoints
 {

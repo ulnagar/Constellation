@@ -227,6 +227,7 @@ app.UseSession();
 
 app.MapSmsEndpoints();
 app.MapLissEndpoints();
+app.MapTrackingEndpoints();
 
 app.Map("/debug/services", hostBuilder => hostBuilder.Run(async context =>
 {

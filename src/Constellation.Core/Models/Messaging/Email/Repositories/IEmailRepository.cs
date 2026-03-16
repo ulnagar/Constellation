@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Core.Models.Messaging.Email.Repositories;
 
-using Constellation.Core.Models.Messaging.Sms;
 using Identifiers;
 
 public interface IEmailRepository

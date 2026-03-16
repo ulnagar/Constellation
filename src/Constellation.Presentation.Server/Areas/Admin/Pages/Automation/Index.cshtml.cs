@@ -43,6 +43,7 @@ public class IndexModel : BasePageModel
         JobDefinitions.Add(new(typeof(IMandatoryTrainingScanJob), nameof(IMandatoryTrainingScanJob), "0 12 * * 1"));
         JobDefinitions.Add(new(typeof(IProcessOutboxMessagesJob), nameof(IProcessOutboxMessagesJob), "* 2-22 * * *"));
         JobDefinitions.Add(new(typeof(IProcessScheduledReportsJob), nameof(IProcessScheduledReportsJob), "* 7-22 * *"));
+        JobDefinitions.Add(new(typeof(IProcessTrackingEventsJob), nameof(IProcessTrackingEventsJob), "* 2-22 * * *"));
         JobDefinitions.Add(new(typeof(IGroupTutorialExpiryScanJob), nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5"));
         JobDefinitions.Add(new(typeof(IAssignmentSubmissionJob), nameof(IAssignmentSubmissionJob), "30 12 * * *"));
         JobDefinitions.Add(new(typeof(IAttachmentManagementJob), nameof(IAttachmentManagementJob), "0 4 * * *"));
@@ -74,12 +75,12 @@ public class IndexModel : BasePageModel
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
 
-        JobDefinition definition = JobDefinitions.FirstOrDefault(jobDefinition => jobDefinition.TypeName == actionName);
+        JobDefinition? definition = JobDefinitions.FirstOrDefault(jobDefinition => jobDefinition.TypeName == actionName);
 
         if (definition == null)
             return;
 
-        IHangfireJob job = scope.ServiceProvider.GetService(definition.JobType) as IHangfireJob;
+        IHangfireJob? job = scope.ServiceProvider.GetService(definition.JobType) as IHangfireJob;
 
         await job.StartJob(Guid.NewGuid(), default);
     }

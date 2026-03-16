@@ -14,6 +14,19 @@ public readonly record struct EmailId(Guid Value)
     public EmailId()
         : this(Guid.CreateVersion7()) { }
 
+    // Required by ASP.NET Core minimal API route binding
+    public static bool TryParse(string? value, out EmailId result)
+    {
+        if (Guid.TryParse(value, out Guid guid))
+        {
+            result = new EmailId(guid);
+            return true;
+        }
+
+        result = default!;
+        return false;
+    }
+
     public override string ToString() =>
         Value.ToString();
 }

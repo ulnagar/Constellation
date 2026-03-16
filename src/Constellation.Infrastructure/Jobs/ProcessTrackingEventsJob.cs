@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Jobs;
 
 using Application.Interfaces.Jobs;
+using Application.Interfaces.Repositories;
 using Constellation.Core.Models.Messaging.Sms.Enums;
 using Constellation.Core.Models.Messaging.Tracking;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
@@ -9,15 +10,14 @@ using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Sms;
 using Core.Models.Messaging.Tracking.Identifiers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
 internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
 {
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private const int _maxAttempts = 5;
     private const int _batchSize = 50;
@@ -31,10 +31,12 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 .AsNoTracking());
 
     public ProcessTrackingEventsJob(
-        IServiceScopeFactory scopeFactory,
+        AppDbContext context,
+        IUnitOfWork unitOfWork,
         ILogger logger)
     {
-        _scopeFactory = scopeFactory;
+        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<IProcessTrackingEventsJob>();
     }
@@ -43,20 +45,15 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
     {
         _logger.Information("Tracking event processor started");
 
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            await ProcessBatch(cancellationToken);
-            await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
-        }
+        await ProcessBatch(cancellationToken);
+
+        _logger.Information("Tracking event processor stopped");
     }
 
-    private async Task ProcessBatch(CancellationToken ct)
+    private async Task ProcessBatch(CancellationToken cancellationToken)
     {
-        using IServiceScope scope = _scopeFactory.CreateScope();
-        AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
         List<TrackingQueueEntry> entries = [];
-        await foreach (TrackingQueueEntry entry in _getPendingEntries(db, DateTime.UtcNow))
+        await foreach (TrackingQueueEntry entry in _getPendingEntries(_context, DateTime.UtcNow))
             entries.Add(entry);
 
         if (entries.Count == 0) return;
@@ -65,15 +62,13 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             Debug("Processing batch of {Count} tracking events", entries.Count);
 
         foreach (TrackingQueueEntry entry in entries)
-            await ProcessEntry(entry, ct);
+            await ProcessEntry(entry, cancellationToken);
+
+        await _unitOfWork.CompleteAsync(cancellationToken);
     }
 
-    private async Task ProcessEntry(TrackingQueueEntry entry, CancellationToken ct)
+    private async Task ProcessEntry(TrackingQueueEntry entry, CancellationToken cancellationToken)
     {
-
-        using IServiceScope scope = _scopeFactory.CreateScope();
-        AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
         try
         {
             TrackingEvent? evt = Deserialize(entry);
@@ -86,14 +81,14 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                     .ForContext("Attempt", entry.Attempts + 1)
                     .Error("Failed to deserialize payload — dropping entry. Payload: {Payload}", entry.Payload);
 
-                await db.Set<TrackingQueueEntry>()
+                await _context.Set<TrackingQueueEntry>()
                     .Where(e => e.Id == entry.Id)
-                    .ExecuteDeleteAsync(ct);
+                    .ExecuteDeleteAsync(cancellationToken);
 
                 return;
             }
 
-            bool parentExists = await ParentExists(evt, db, ct);
+            bool parentExists = await ParentExists(evt, _context, cancellationToken);
 
             if (!parentExists)
             {
@@ -107,9 +102,9 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                         .ForContext("Attempt", entry.Attempts + 1)
                         .Warning("Dropping tracking event after {MaxAttempts} attempts — parent record never appeared. EnqueuedAt: {EnqueuedAt}", _maxAttempts, entry.EnqueuedAt);
 
-                    await db.Set<TrackingQueueEntry>()
+                    await _context.Set<TrackingQueueEntry>()
                         .Where(e => e.Id == entry.Id)
-                        .ExecuteDeleteAsync(ct);
+                        .ExecuteDeleteAsync(cancellationToken);
                     return;
                 }
 
@@ -121,25 +116,25 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                     .ForContext("Attempt", entry.Attempts + 1)
                     .Debug("Parent record not found, requeueing with {BackoffMs}ms backoff", backoffMs);
 
-                await db.Set<TrackingQueueEntry>()
+                await _context.Set<TrackingQueueEntry>()
                     .Where(e => e.Id == entry.Id)
                     .ExecuteUpdateAsync(s => s
                         .SetProperty(e => e.Attempts, nextAttempt)
-                        .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddMilliseconds(backoffMs)), ct);
+                        .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddMilliseconds(backoffMs)), cancellationToken);
                 return;
             }
 
             await (evt switch
             {
-                EmailOpenEvent e => HandleEmailOpen(e, db, ct),
-                SmsDeliveryReceiptEvent e => HandleSmsDelivery(e, db, ct),
+                EmailOpenEvent e => HandleEmailOpen(e, _context, cancellationToken),
+                SmsDeliveryReceiptEvent e => HandleSmsDelivery(e, _context, cancellationToken),
                 _ => throw new InvalidOperationException($"Unknown event type: {entry.EventType}")
             });
 
             // Delete the queue entry on success
-            await db.Set<TrackingQueueEntry>()
+            await _context.Set<TrackingQueueEntry>()
                 .Where(e => e.Id == entry.Id)
-                .ExecuteDeleteAsync(ct);
+                .ExecuteDeleteAsync(cancellationToken);
 
             _logger
                 .ForContext(nameof(TrackingQueueEntryId), entry.Id.ToString())
@@ -155,12 +150,12 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 .ForContext("Attempt", entry.Attempts + 1)
                 .Error(ex, "Unhandled exception — requeueing entry. EnqueuedAt: {EnqueuedAt}", entry.EnqueuedAt);
 
-            await db.Set<TrackingQueueEntry>()
+            await _context.Set<TrackingQueueEntry>()
                 .Where(e => e.Id == entry.Id)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(e => e.Attempts, entry.Attempts + 1)
                     .SetProperty(e => e.RetryAfter, DateTime.UtcNow.AddSeconds(5))
-                    .SetProperty(e => e.LastError, ex.Message), ct);
+                    .SetProperty(e => e.LastError, ex.Message), cancellationToken);
         }
     }
     private static TrackingEvent? Deserialize(TrackingQueueEntry entry) =>
@@ -171,18 +166,19 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             _ => null
         };
 
-    private static async Task<bool> ParentExists(TrackingEvent evt, AppDbContext db, CancellationToken ct) =>
+    private static async Task<bool> ParentExists(TrackingEvent evt, AppDbContext context, CancellationToken ct) =>
         evt switch
         {
-            EmailOpenEvent e => await db.Set<EmailMessage>().AnyAsync(m => m.Id == e.EmailId, ct),
-            SmsDeliveryReceiptEvent e => await db.Set<SmsMessage>().AnyAsync(m => m.OutgoingId == e.OutgoingId, ct),
+            EmailOpenEvent e => await context.Set<EmailMessage>().AnyAsync(m => m.Id == e.EmailId, ct),
+            SmsDeliveryReceiptEvent e => await context.Set<SmsMessage>().AnyAsync(m => m.OutgoingId == e.OutgoingId, ct),
             _ => true
         };
 
-    private static async Task HandleEmailOpen(EmailOpenEvent evt, AppDbContext db, CancellationToken ct)
+    private static async Task HandleEmailOpen(EmailOpenEvent evt, AppDbContext context, CancellationToken ct)
     {
-        db.Set<EmailTrackingEvent>().Add(new EmailTrackingEvent
+        context.Set<EmailTrackingEvent>().Add(new EmailTrackingEvent
         {
+            Id = new(),
             EmailId = evt.EmailId,
             EventType = EmailEventType.Opened,
             OccurredAt = evt.OccurredAt,
@@ -190,7 +186,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             UserAgent = evt.UserAgent
         });
 
-        await db.Set<EmailMessage>()
+        await context.Set<EmailMessage>()
             .Where(m => m.Id == evt.EmailId)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(m => m.OpenCount, m => m.OpenCount + 1)
@@ -198,9 +194,9 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 .SetProperty(m => m.FirstOpenedAt, m => m.FirstOpenedAt ?? evt.OccurredAt), ct);
     }
 
-    private static async Task HandleSmsDelivery(SmsDeliveryReceiptEvent evt, AppDbContext db, CancellationToken ct)
+    private static async Task HandleSmsDelivery(SmsDeliveryReceiptEvent evt, AppDbContext context, CancellationToken ct)
     {
-        IQueryable<SmsMessage> query = db.Set<SmsMessage>()
+        IQueryable<SmsMessage> query = context.Set<SmsMessage>()
             .Where(m => m.OutgoingId == evt.OutgoingId);
 
         if (evt.Status is not null)
