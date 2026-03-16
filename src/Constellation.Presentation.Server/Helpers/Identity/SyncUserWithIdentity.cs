@@ -4,19 +4,21 @@ using Application.Models.Identity;
 using Application.Models.Identity.Enums;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Pages.Auth;
 using Serilog;
+using Shared.Helpers.Logging;
 using System.Security.Claims;
 
 internal static class IdentityHelpers
 {
-    private static readonly Serilog.ILogger _logger = Log.Logger.ForContext<CompleteSSOModel>();
+    private static readonly Serilog.ILogger _logger = Log.Logger
+        .ForContext<CompleteSSOModel>()
+        .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
 
     internal static async Task SyncUserWithIdentity(TokenValidatedContext context)
     {
         _logger
-            .Information("Hit SyncUserWithIdentity");
+            .Debug("Hit SyncUserWithIdentity");
 
         UserManager<AppUser> userManager = context.HttpContext
             .RequestServices
@@ -27,7 +29,7 @@ internal static class IdentityHelpers
             .GetRequiredService<SignInManager<AppUser>>();
 
         _logger
-            .Information("Resolved required services");
+            .Debug("Resolved required services");
 
         foreach (var claim in context.Principal?.Claims ?? [])
         {
@@ -45,7 +47,7 @@ internal static class IdentityHelpers
         _logger
             .ForContext(ClaimTypes.NameIdentifier, externalUserId)
             .ForContext(ClaimTypes.Email, email)
-            .Information("Tried to retrieve user claims");
+            .Debug("Tried to retrieve user claims");
 
         if (externalUserId is null || email is null)
         {
@@ -54,13 +56,15 @@ internal static class IdentityHelpers
             context.Response.Redirect("/Auth/AccessDeniedSSO");
 
             _logger
-                .Information("Did not pass nullability checks");
+                .ForContext(ClaimTypes.NameIdentifier, externalUserId)
+                .ForContext(ClaimTypes.Email, email)
+                .Warning("SSO Login: Did not pass claim nullability checks");
 
             return;
         }
 
         _logger
-            .Information("Passed claim nullability checks");
+            .Debug("Passed claim nullability checks");
 
         // Find or create the user in Identity
         AppUser? user = await userManager.FindByLoginAsync("oidc", externalUserId);
@@ -76,7 +80,9 @@ internal static class IdentityHelpers
                 context.Response.Redirect("/Auth/AccessDeniedSSO");
 
                 _logger
-                    .Information("User cannot be found");
+                    .ForContext(ClaimTypes.NameIdentifier, externalUserId)
+                    .ForContext(ClaimTypes.Email, email)
+                    .Warning("SSO Login: User cannot be found");
 
                 return;
             }
@@ -90,7 +96,7 @@ internal static class IdentityHelpers
         }
 
         _logger
-            .Information("User found by oidc value or email");
+            .Debug("User found by oidc value or email");
         
         // Sign in with Identity
         user.AddLogin(DateTime.UtcNow, LoginStatus.SingleSignOn);
@@ -99,9 +105,9 @@ internal static class IdentityHelpers
 
         _logger
             .ForContext("RedirectUri", context.Properties?.RedirectUri)
-            .Information("User logged in and being redirected");
+            .Debug("User logged in and being redirected");
 
         context.HandleResponse();
-        context.Response.Redirect(context.Properties?.RedirectUri ?? "/");
+        context.Response.Redirect("/");
     }
 }
