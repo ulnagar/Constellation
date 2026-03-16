@@ -10,6 +10,7 @@ using Constellation.Core.Models.Tutorials;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Models.Absences;
+using Core.Models.Absences.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Shared;
@@ -111,7 +112,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
                     absence.AbsenceLength,
                     absence.AbsenceTimeframe,
                     activityName,
-                    pendingResponse?.Id);
+                    pendingResponse?.Id ?? AbsenceResponseId.Empty);
 
                 results.Add(entry);
             }

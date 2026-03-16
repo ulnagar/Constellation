@@ -12,7 +12,7 @@ public record struct AssignmentSubmissionId(Guid Value)
         new(value);
 
     public AssignmentSubmissionId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

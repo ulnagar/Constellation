@@ -10,7 +10,7 @@ public record struct IntegrationEventId(Guid Value)
         new(value);
 
     public IntegrationEventId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

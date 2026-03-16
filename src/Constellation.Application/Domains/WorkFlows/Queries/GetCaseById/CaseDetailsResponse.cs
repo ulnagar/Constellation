@@ -14,7 +14,7 @@ public sealed record CaseDetailsResponse(
 {
     public sealed record CaseActionSummary(
         ActionId ActionId,
-        ActionId? ParentActionId,
+        ActionId ParentActionId,
         DateTime CreatedAt);
 
 }

@@ -12,7 +12,7 @@ public record struct ConsentTransactionId(Guid Value)
         new(value);
 
     public ConsentTransactionId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

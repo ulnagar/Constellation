@@ -6,6 +6,7 @@ using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Errors;
+using Core.Models.WorkFlow.Identifiers;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -35,7 +36,7 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
 
     public async Task<Result> Handle(AddCaseDetailUpdateActionCommand request, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(request.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(request.CaseId, cancellationToken);
         if (item is null)
         {
             _logger
@@ -46,12 +47,12 @@ internal sealed class AddCaseDetailUpdateActionCommandHandler
             return Result.Failure(CaseErrors.NotFound(request.CaseId));
         }
 
-        StaffMember teacher = await _staffRepository.GetByEmployeeId(request.StaffId, cancellationToken);
+        StaffMember? teacher = await _staffRepository.GetByEmployeeId(request.StaffId, cancellationToken);
 
         if (teacher is null)
             return Result.Failure(StaffMemberErrors.NotFoundByEmployeeId(request.StaffId));
 
-        Result<CaseDetailUpdateAction> action = CaseDetailUpdateAction.Create(null, item.Id, teacher, request.Details);
+        Result<CaseDetailUpdateAction> action = CaseDetailUpdateAction.Create(ActionId.Empty, item.Id, teacher, request.Details);
 
         if (action.IsFailure)
         {

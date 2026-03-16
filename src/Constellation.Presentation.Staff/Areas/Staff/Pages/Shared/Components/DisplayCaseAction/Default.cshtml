@@ -2,10 +2,10 @@
 
 @using Constellation.Core.Models.WorkFlow.Enums
 @using System.Text.RegularExpressions
-@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.DisplayCaseActionDetails
+@using Constellation.Core.Models.WorkFlow.Identifiers
 
 @{
-    var subAction = Model.Action.ParentActionId is not null;
+    var subAction = Model.Action.ParentActionId != ActionId.Empty;
     var notesDiv = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "");
 }
 

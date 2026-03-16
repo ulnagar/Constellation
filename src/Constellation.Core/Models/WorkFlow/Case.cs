@@ -30,7 +30,7 @@ public sealed class Case : AggregateRoot, IAuditableEntity
     public CaseId Id { get; private set; } = new();
     public CaseType? Type { get; private set; }
 
-    public CaseDetailId? DetailId { get; private set; }
+    public CaseDetailId DetailId { get; private set; } = CaseDetailId.Empty;
     public CaseDetail? Detail { get; private set; }
 
     public CaseStatus Status { get; private set; } = CaseStatus.Open;

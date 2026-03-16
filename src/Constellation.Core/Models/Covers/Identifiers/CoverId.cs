@@ -12,7 +12,7 @@ public record struct CoverId(Guid Value)
         new(value);
 
     public CoverId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

@@ -12,7 +12,7 @@ public readonly record struct AttendancePlanNoteId(Guid Value)
         new(value);
 
     public AttendancePlanNoteId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() => 
         Value.ToString();

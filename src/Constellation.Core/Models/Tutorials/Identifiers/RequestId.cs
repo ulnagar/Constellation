@@ -12,7 +12,7 @@ public readonly record struct RequestId(Guid Value)
         new(value);
 
     public RequestId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

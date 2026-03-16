@@ -3,7 +3,7 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record TemplateId(Guid Value)
+public readonly record struct TemplateId(Guid Value)
     : IStronglyTypedId
 {
     public static readonly TemplateId Empty = new(Guid.Empty);
@@ -12,7 +12,7 @@ public sealed record TemplateId(Guid Value)
         new(value);
 
     public TemplateId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

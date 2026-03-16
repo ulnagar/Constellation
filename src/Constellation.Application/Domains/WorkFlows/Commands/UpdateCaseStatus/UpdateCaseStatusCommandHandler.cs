@@ -9,6 +9,7 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
+using Core.Models.WorkFlow.Identifiers;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -45,7 +46,7 @@ internal sealed class UpdateCaseStatusCommandHandler
 
     public async Task<Result> Handle(UpdateCaseStatusCommand request, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetById(request.CaseId, cancellationToken);
+        Case? item = await _caseRepository.GetById(request.CaseId, cancellationToken);
 
         if (item is null)
         {
@@ -74,7 +75,7 @@ internal sealed class UpdateCaseStatusCommandHandler
 
         Result<EmailAddress> emailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
 
-        StaffMember currentUser = emailAddress.IsSuccess
+        StaffMember? currentUser = emailAddress.IsSuccess
             ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
             : null;
 
@@ -90,7 +91,7 @@ internal sealed class UpdateCaseStatusCommandHandler
         }
 
         Result<CaseDetailUpdateAction> updateAction = CaseDetailUpdateAction.Create(
-            null,
+            ActionId.Empty,
             item.Id,
             currentUser,
             $"Case status changed from {currentStatus} to {request.Status} by {_currentUserService.UserName} at {_dateTime.Now}");

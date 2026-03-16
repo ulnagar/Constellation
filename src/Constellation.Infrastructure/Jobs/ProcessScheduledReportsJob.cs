@@ -37,7 +37,7 @@ internal sealed class ProcessScheduledReportsJob : IProcessScheduledReportsJob
 
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
-        ScheduledReport message = await _context
+        ScheduledReport? message = await _context
             .Set<ScheduledReport>()
             .Where(report => report.IsCompleted == false)
             .OrderBy(report => report.ScheduledAt)

@@ -12,7 +12,7 @@ public readonly record struct StocktakeSightingId(Guid Value)
         new(value);
 
     public StocktakeSightingId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

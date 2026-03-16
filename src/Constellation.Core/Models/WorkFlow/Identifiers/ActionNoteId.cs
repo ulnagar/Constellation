@@ -3,14 +3,14 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record ActionNoteId(Guid Value)
+public readonly record struct ActionNoteId(Guid Value)
     : IStronglyTypedId
 {
     public static ActionNoteId FromValue(Guid value) =>
         new(value);
 
     public ActionNoteId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

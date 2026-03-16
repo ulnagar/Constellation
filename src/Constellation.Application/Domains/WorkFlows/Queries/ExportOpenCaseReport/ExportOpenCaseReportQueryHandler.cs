@@ -8,6 +8,7 @@ using Core.Models.Students.Errors;
 using Core.Models.Students.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
+using Core.Models.WorkFlow.Identifiers;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -99,7 +100,7 @@ internal sealed class ExportOpenCaseReportQueryHandler
 
 
                 List<Action> parentActions = item.Actions
-                    .Where(entry => entry.ParentActionId is null)
+                    .Where(entry => entry.ParentActionId == ActionId.Empty)
                     .OrderBy(entry => entry.CreatedAt)
                     .ToList();
 

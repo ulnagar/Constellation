@@ -12,7 +12,7 @@ public readonly record struct DifferenceId(Guid Value)
         new(value);
 
     public DifferenceId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

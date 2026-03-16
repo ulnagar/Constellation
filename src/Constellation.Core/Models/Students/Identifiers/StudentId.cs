@@ -12,7 +12,7 @@ public readonly record struct StudentId(Guid Value)
         new(value);
 
     public StudentId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()){}
 
     public override string ToString() =>
         Value.ToString();

@@ -10,7 +10,7 @@ public readonly record struct ExternalReportId(Guid Value)
         new(value);
 
     public ExternalReportId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

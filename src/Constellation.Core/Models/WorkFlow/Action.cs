@@ -25,7 +25,7 @@ public abstract class Action : IAuditableEntity
 
     public ActionId Id { get; private protected set; } = new();
     public CaseId? CaseId { get; private protected set; }
-    public ActionId? ParentActionId { get; private protected set; }
+    public ActionId ParentActionId { get; private protected set; } = ActionId.Empty;
     public ActionStatus Status { get; private protected set; } = ActionStatus.Open;
     public IReadOnlyList<ActionNote> Notes => _notes.ToList();
     
@@ -537,7 +537,7 @@ public sealed class CaseDetailUpdateAction : Action
     public string Details { get; private set; } = string.Empty;
 
     public static Result<CaseDetailUpdateAction> Create(
-        ActionId? parentId,
+        ActionId parentId,
         CaseId caseId,
         StaffMember assignee,
         string details)

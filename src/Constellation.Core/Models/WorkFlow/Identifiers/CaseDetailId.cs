@@ -3,14 +3,16 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record CaseDetailId(Guid Value)
+public readonly record struct CaseDetailId(Guid Value)
     : IStronglyTypedId
 {
+    public static CaseDetailId Empty => new(Guid.Empty);
+
     public static CaseDetailId FromValue(Guid value) =>
         new(value);
 
     public CaseDetailId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

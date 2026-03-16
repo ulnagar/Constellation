@@ -11,6 +11,7 @@ using Core.Models.StaffMembers.Repositories;
 using Core.Models.WorkFlow;
 using Core.Models.WorkFlow.Enums;
 using Core.Models.WorkFlow.Errors;
+using Core.Models.WorkFlow.Identifiers;
 using Core.Models.WorkFlow.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -47,7 +48,7 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
 
     public async Task<Result> Handle(UpdateAttendanceCaseDetailsCommand request, CancellationToken cancellationToken)
     {
-        Case item = await _caseRepository.GetOpenAttendanceCaseForStudent(request.StudentId, cancellationToken);
+        Case? item = await _caseRepository.GetOpenAttendanceCaseForStudent(request.StudentId, cancellationToken);
 
         if (item is null)
         {
@@ -62,7 +63,7 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
         if (!item.Type!.Equals(CaseType.Attendance))
             return Result.Failure(ActionErrors.CreateCaseTypeMismatch(CaseType.Attendance.Value, item.Type.Value));
 
-        AttendanceValue value = await _attendanceRepository.GetLatestForStudent(request.StudentId, cancellationToken);
+        AttendanceValue? value = await _attendanceRepository.GetLatestForStudent(request.StudentId, cancellationToken);
 
         if (value is null)
         {
@@ -76,7 +77,7 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
 
         Result<EmailAddress> emailAddress = EmailAddress.Create(_currentUserService.EmailAddress);
 
-        StaffMember teacher = emailAddress.IsSuccess
+        StaffMember? teacher = emailAddress.IsSuccess
             ? await _staffRepository.GetCurrentByEmailAddress(emailAddress.Value, cancellationToken)
             : null;
 
@@ -92,7 +93,7 @@ internal sealed class UpdateAttendanceCaseDetailsCommandHandler
 
         string details = $"Attendance percentage for period {value.PeriodLabel} is {value.PerMinuteWeekPercentage}";
 
-        Result<CaseDetailUpdateAction> action = CaseDetailUpdateAction.Create(null, item.Id, teacher, details);
+        Result<CaseDetailUpdateAction> action = CaseDetailUpdateAction.Create(ActionId.Empty, item.Id, teacher, details);
 
         if (action.IsFailure)
         {

@@ -3,7 +3,7 @@
 using Primitives;
 using System;
 
-public sealed record EventId(Guid Value)
+public readonly record struct EventId(Guid Value)
     : IStronglyTypedId
 {
     public static readonly EventId Empty = new(Guid.Empty);
@@ -12,7 +12,7 @@ public sealed record EventId(Guid Value)
         new(value);
 
     public EventId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() => 
         Value.ToString();

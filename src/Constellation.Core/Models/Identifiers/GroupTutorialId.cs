@@ -9,7 +9,7 @@ public record struct GroupTutorialId(Guid Value)
     public static GroupTutorialId Empty => new(Guid.Empty);
 
     public GroupTutorialId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public static GroupTutorialId FromValue(Guid value) =>
         new(value);

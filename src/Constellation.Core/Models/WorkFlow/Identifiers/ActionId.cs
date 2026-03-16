@@ -3,7 +3,7 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record ActionId(Guid Value)
+public readonly record struct ActionId(Guid Value)
     : IStronglyTypedId
 {
     public static readonly ActionId Empty = new(Guid.Empty);
@@ -12,7 +12,7 @@ public sealed record ActionId(Guid Value)
         new(value);
 
     public ActionId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

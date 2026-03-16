@@ -12,7 +12,7 @@ public record struct CasualId(Guid Value)
         new(value);
 
     public CasualId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

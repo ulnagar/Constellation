@@ -12,7 +12,7 @@ public readonly record struct TeamsResourceId(Guid Value)
         new(value);
 
     public TeamsResourceId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

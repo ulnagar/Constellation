@@ -3,14 +3,14 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record AbsenceId(Guid Value)
+public readonly record struct AbsenceId(Guid Value)
     : IStronglyTypedId
 {
     public static AbsenceId FromValue(Guid value) =>
         new(value);
 
     public AbsenceId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

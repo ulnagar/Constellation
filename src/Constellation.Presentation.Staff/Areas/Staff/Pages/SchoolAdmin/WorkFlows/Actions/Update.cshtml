@@ -5,7 +5,7 @@
 
 @{
     bool hasParent = Model.Case.Actions.Any(action => action.ActionId == Model.ActionId);
-    ActionId? parentId = (hasParent) ? Model.Case.Actions.First(action => action.ActionId == Model.ActionId).ParentActionId : null;
+    ActionId parentId = (hasParent) ? Model.Case.Actions.First(action => action.ActionId == Model.ActionId).ParentActionId : ActionId.Empty;
 }
 
 <h2>WorkFlow Case</h2>
@@ -32,7 +32,7 @@
             </dl>
         </div>
     </div>
-    @if (hasParent && parentId is not null)
+    @if (hasParent && parentId != ActionId.Empty)
     {
         <vc:display-case-action case-id="@Model.CaseId" action-id="@parentId" show-menu="false" />
     }

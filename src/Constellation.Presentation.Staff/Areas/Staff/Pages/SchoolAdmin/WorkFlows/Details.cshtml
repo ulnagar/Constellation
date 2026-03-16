@@ -1,4 +1,6 @@
 ﻿@page "{Id}"
+@using Constellation.Application.Domains.WorkFlows.Queries.GetCaseById
+@using Constellation.Core.Models.WorkFlow.Identifiers
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.SchoolAdmin.Workflows.DetailsModel
 
 @inject IAuthorizationService authService
@@ -38,13 +40,19 @@
             </dl>
         </div>
     </div>
-    @foreach (var action in Model.Case?.Actions.Where(action => action.ParentActionId is null).OrderBy(action => action.CreatedAt))
-    {
-        <vc:display-case-action case-id="@Model.Id" action-id="@action.ActionId" show-menu="true" />
+    @{
+        List<CaseDetailsResponse.CaseActionSummary> actions = Model.Case?.Actions.Where(action => action.ParentActionId == ActionId.Empty).OrderBy(action => action.CreatedAt).ToList() ?? [];
 
-        @foreach (var subAction in Model.Case?.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt))
+        foreach (CaseDetailsResponse.CaseActionSummary action in actions)
         {
-            <vc:display-case-action case-id="@Model.Id" action-id="@subAction.ActionId" show-menu="true" />
+            <vc:display-case-action case-id="@Model.Id" action-id="@action.ActionId" show-menu="true"/>
+
+            List<CaseDetailsResponse.CaseActionSummary> subActions = Model.Case?.Actions.Where(item => item.ParentActionId == action.ActionId).OrderBy(item => item.CreatedAt).ToList() ?? [];
+
+            @foreach (CaseDetailsResponse.CaseActionSummary subAction in subActions)
+            {
+                <vc:display-case-action case-id="@Model.Id" action-id="@subAction.ActionId" show-menu="true"/>
+            }
         }
     }
 </div>

@@ -12,7 +12,7 @@ public record struct FamilyId(Guid Value)
         new(value);
 
     public FamilyId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

@@ -12,7 +12,7 @@ public readonly record struct InterviewAttendeeId(Guid Value)
         new(value);
 
     public InterviewAttendeeId() 
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) {}
 
     public override string ToString() =>
         Value.ToString();

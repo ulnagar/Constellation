@@ -12,7 +12,7 @@ public record struct TutorialTeacherId(Guid Value)
         new(value);
 
     public TutorialTeacherId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

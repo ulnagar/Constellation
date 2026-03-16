@@ -3,14 +3,14 @@
 using Constellation.Core.Primitives;
 using System;
 
-public sealed record AwardNominationId(Guid Value)
+public readonly record struct AwardNominationId(Guid Value)
     : IStronglyTypedId
 {
     public static AwardNominationId FromValue(Guid Value) =>
         new(Value);
 
     public AwardNominationId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

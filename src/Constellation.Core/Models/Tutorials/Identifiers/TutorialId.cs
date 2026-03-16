@@ -12,7 +12,7 @@ public readonly record struct TutorialId(Guid Value)
         new(value);
 
     public TutorialId()
-        : this(Guid.NewGuid()) { }
+        : this(Guid.CreateVersion7()) { }
 
     public override string ToString() =>
         Value.ToString();

@@ -56,7 +56,7 @@ public class IndexModel : BasePageModel
     public List<AlertRecipient>? Recipients { get; set; } = [];
 
     [BindProperty]
-    public TemplateId? TemplateId { get; set; } = TemplateId.Empty;
+    public TemplateId TemplateId { get; set; } = TemplateId.Empty;
 
     [BindProperty]
     public string? Message { get; set; } = string.Empty;
