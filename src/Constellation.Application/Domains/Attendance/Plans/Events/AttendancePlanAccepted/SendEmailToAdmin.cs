@@ -44,6 +44,6 @@ internal sealed class SendEmailToAdmin
             return;
         }
         
-        await _emailService.SendAttendancePlanToAdmin([ EmailRecipient.AbsencesMailbox ], plan, cancellationToken);
+        await _emailService.SendAttendancePlanToAdmin([ EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege ], plan, cancellationToken);
     }
 }

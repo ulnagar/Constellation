@@ -155,7 +155,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            emailAddresses);
+            emailAddresses,
+            cancellationToken: cancellationToken);
 
         if (result.IsFailure)
         {
@@ -203,7 +204,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            emailAddresses);
+            emailAddresses,
+            cancellationToken: cancellationToken);
 
         if (result.IsFailure)
         {
@@ -247,7 +249,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            recipients);
+            recipients,
+            cancellationToken: cancellationToken);
 
         if (result.IsFailure)
         {
@@ -294,7 +297,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            recipients);
+            recipients, 
+            cancellationToken: cancellationToken);
         
         if (result.IsFailure)
         {
@@ -345,7 +349,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            recipients);
+            recipients,
+            cancellationToken: cancellationToken);
 
         if (result.IsFailure)
         {
@@ -393,7 +398,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            recipients);
+            recipients, 
+            cancellationToken: cancellationToken);
 
         if (result.IsFailure)
         {
@@ -441,7 +447,8 @@ public sealed partial class Service : IEmailService
             EmailRecipient.AbsencesMailbox,
             "Absences",
             viewModel.Title,
-            recipients);
+            recipients, 
+            cancellationToken: cancellationToken);
 
         if (result.IsFailure)
         {

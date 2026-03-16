@@ -43,7 +43,7 @@ public sealed partial class Service : IEmailService
             viewModel,
             EmailRecipient.NoReply,
             $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}",
-            [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox],
+            [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege],
             attachments: new List<Attachment> { new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile) },
             cancellationToken: cancellationToken);
     }
@@ -56,7 +56,7 @@ public sealed partial class Service : IEmailService
             viewModel,
             EmailRecipient.NoReply,
             "[Aurora College] SMS Gateway Low Balance Alert",
-            [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox]);
+            [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege]);
     }
 
     public async Task SendMasterFileConsistencyReportEmail(

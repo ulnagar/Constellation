@@ -137,6 +137,7 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
         EmailDtos.AbsenceResponseEmail notificationEmail = new();
 
         notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox.Email);
+        notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege.Email);
         notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress.Email));
         notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
         notificationEmail.StudentName = student.Name.DisplayName;
