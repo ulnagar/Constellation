@@ -25,9 +25,7 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
             .OwnsOne(e => e.From, owned =>
             {
                 owned.WithOwner();
-
-                owned.HasKey(r => r.Email);
-
+                
                 owned
                     .Property(r => r.Name)
                     .HasColumnName("From_Name")
@@ -46,8 +44,6 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
             .OwnsOne(e => e.ReplyTo, owned =>
             {
                 owned.WithOwner();
-
-                owned.HasKey(r => r.Email);
 
                 owned
                     .Property(r => r.Name)
