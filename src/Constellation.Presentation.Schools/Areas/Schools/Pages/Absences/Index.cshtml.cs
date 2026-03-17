@@ -6,6 +6,7 @@ using Constellation.Application.Domains.Attendance.Absences.Queries.GetOutstandi
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Core.Abstractions.Services;
+using Core.Models.Absences.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -55,7 +56,7 @@ public class IndexModel : BasePageModel
     {
         _logger.Information("Requested to retrieve absence data by user {user} of type {type}", _currentUserService.UserName, Type);
         
-        Result<List<OutstandingAbsencesForSchoolResponse>> absencesRequest = await _mediator.Send(new GetOutstandingAbsencesForSchoolQuery(CurrentSchoolCode));
+        Result<List<OutstandingAbsencesForSchoolResponse>> absencesRequest = await _mediator.Send(new GetOutstandingAbsencesForSchoolQuery(CurrentSchoolCode!));
 
         if (absencesRequest.IsFailure)
         {
@@ -66,23 +67,24 @@ public class IndexModel : BasePageModel
 
         Absences = absencesRequest.Value;
 
-        UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId == null);
-        UnverifiedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId != null);
+        UnexplainedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId == AbsenceResponseId.Empty);
+        UnverifiedPartialsCount = Absences.Count(absence => absence.AbsenceTimeframe != absence.PeriodTimeframe && absence.AbsenceResponseId != AbsenceResponseId.Empty);
         UnexplainedWholesCount = Absences.Count(absence => absence.AbsenceTimeframe == absence.PeriodTimeframe);
 
         Absences = Type switch
         {
             AbsenceCategory.UnexplainedPartials => Absences.Where(absence =>
                     absence.AbsenceTimeframe != absence.PeriodTimeframe &&
-                    absence.AbsenceResponseId == null)
+                    absence.AbsenceResponseId == AbsenceResponseId.Empty)
                 .ToList(),
             AbsenceCategory.UnexplainedWholes => Absences.Where(absence =>
                     absence.AbsenceTimeframe == absence.PeriodTimeframe)
                 .ToList(),
             AbsenceCategory.UnverifiedPartials => Absences.Where(absence =>
                     absence.AbsenceTimeframe != absence.PeriodTimeframe &&
-                    absence.AbsenceResponseId != null)
-                .ToList()
+                    absence.AbsenceResponseId != AbsenceResponseId.Empty)
+                .ToList(),
+            _ => Absences
         };
 
         Absences = Absences

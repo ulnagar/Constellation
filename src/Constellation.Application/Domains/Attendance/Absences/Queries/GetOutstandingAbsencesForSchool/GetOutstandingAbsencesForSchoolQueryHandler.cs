@@ -59,7 +59,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
 
         foreach (Student student in students)
         {
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             if (enrolment is null)
                 continue;
@@ -74,7 +74,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
                 if (absence.Explained)
                     continue;
 
-                Response pendingResponse = absence
+                Response? pendingResponse = absence
                     .Responses
                     .FirstOrDefault(response => 
                         response.VerificationStatus == ResponseVerificationStatus.Pending);
@@ -85,7 +85,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
                 {
                     OfferingId offeringId = OfferingId.FromValue(absence.SourceId);
 
-                    Offering offering = await _offeringRepository.GetById(offeringId, cancellationToken);
+                    Offering? offering = await _offeringRepository.GetById(offeringId, cancellationToken);
 
                     if (offering is not null)
                         activityName = offering.Name;
@@ -95,7 +95,7 @@ internal sealed class GetOutstandingAbsencesForSchoolQueryHandler
                 {
                     TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                    Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                    Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                     if (tutorial is not null)
                         activityName = tutorial.Name;
