@@ -10,9 +10,9 @@ public sealed class EmailExternalReportsSelection
     }
 
     public string Subject { get; set; } = $"[Aurora College] ::report_type::";
-    public string Body { get; set; } = string.Empty;
+    public string Body { get; set; }
 
-    private string GetDefaultTemplate()
+    private static string GetDefaultTemplate()
     {
         StringBuilder builder = new StringBuilder();
         builder.AppendLine("<p>Dear ::parent_name::</p>");
@@ -27,7 +27,8 @@ public sealed class EmailExternalReportsSelection
         builder.AppendLine("<li>Confidence band. A confidence band is the range of values surrounding an estimate or statistic within which we are fairly confident the true value lies. It describes the uncertainty associated with knowing what the actual mean is, especially when taking into account many variables, such as students not performing well that day due to illness or variance in testing conditions such as location, noise level, etc.</li>");
         builder.AppendLine("</ul>");
         builder.AppendLine("<p>PAT norms are established by taking a representative sample of Australian students at each year level to form the norm reference sample. The reference samples consist of students, both boys and girls, from all States and Territories and all of the educational sectors: Government, Catholic and Independent. Results from PAT tests administered to these reference samples of Australian students are used to ascertain the average scores and standard deviations of each year level, and (assuming a normal distribution) to calculate the set of percentile ranks associated with achieved scale scores.</p>");
-        builder.AppendLine("<p>If you have any queries regarding these reports, please do not hesitate to contact Aurora College via phone on 1300 287 629 or via email at auroracoll-h.school@det.nsw.edu.au");
+        builder.AppendLine("<p>To download a copy of the report, please log into the Constellation Parent Portal at <a href=\"https://acos.aurora.nsw.edu.au/\">https://acos.aurora.nsw.edu.au/</a></p>");
+        builder.AppendLine("<p>If you have any queries regarding these reports, please do not hesitate to contact Aurora College via phone on 1300 287 629 or via email at auroracoll-h.school@det.nsw.edu.au</p>");
         builder.AppendLine("<br/><br/>");
         builder.AppendLine("<p>Julie Ruming</p>");
         builder.AppendLine("<p>Head Teacher Wellbeing</p>");

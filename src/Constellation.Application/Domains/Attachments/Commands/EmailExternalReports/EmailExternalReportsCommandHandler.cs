@@ -180,9 +180,6 @@ internal sealed class EmailExternalReportsCommandHandler
 
             foreach (EmailRecipient recipient in recipients)
             {
-                MemoryStream fileStream = new(fileData.Value.FileData);
-                using System.Net.Mail.Attachment emailAttachment = new(fileStream, fileData.Value.FileName, fileData.Value.FileType);
-
                 string subject = request.Subject.Replace("::parent_name::", recipient.Name, StringComparison.CurrentCultureIgnoreCase);
                 subject = subject.Replace("::report_type::", report.Type.ToString(), StringComparison.CurrentCultureIgnoreCase);
                 subject = subject.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture), StringComparison.CurrentCultureIgnoreCase);
@@ -205,7 +202,7 @@ internal sealed class EmailExternalReportsCommandHandler
 
                 message.AddRecipient(recipient, EmailRecipientType.To);
 
-                await _emailGateway.Send(message, attachments: [ emailAttachment ], cancellationToken: cancellationToken);
+                await _emailGateway.Send(message, cancellationToken: cancellationToken);
             }
         }
 
