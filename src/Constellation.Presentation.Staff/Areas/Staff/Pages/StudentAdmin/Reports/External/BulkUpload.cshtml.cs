@@ -3,6 +3,7 @@
 using Application.Domains.Attachments.Commands.BulkPublishTemporaryFiles;
 using Application.Domains.Attachments.Commands.DeleteTemporaryFile;
 using Application.Domains.Attachments.Commands.EmailExternalReports;
+using Application.Domains.Attachments.Commands.ImportPATReportFromDisk;
 using Application.Domains.Attachments.Commands.ProcessPATReportZipFile;
 using Application.Domains.Attachments.Commands.PublishTemporaryFile;
 using Application.Domains.Attachments.Models;
@@ -22,6 +23,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Routing;
+using Org.BouncyCastle.Asn1.X509;
 using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
@@ -61,6 +63,24 @@ public class BulkUploadModel : BasePageModel
     public List<string> Messages { get; set; } = new();
 
     public async Task OnGet() => await PreparePage();
+
+    public async Task<IActionResult> OnGetImport()
+    {
+        Result result = await _mediator.Send(new ImportPATReportFromDiskCommand());
+
+        if (result.IsFailure)
+        {
+            _logger
+                .ForContext(nameof(Error), result.Error, true)
+                .Warning("Failed to import External Reports by user {User}", _currentUserService.UserName);
+
+            ModalContent = ErrorDisplay.Create(
+                result.Error,
+                _linkGenerator.GetPathByPage("/StudentAdmin/Reports/External/Index", values: new { area = "Staff" }));
+        }
+
+        return RedirectToPage();
+    }
 
     public async Task OnPost([FromForm] IFormCollection formData)
     {

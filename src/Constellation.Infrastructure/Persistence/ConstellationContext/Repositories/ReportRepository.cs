@@ -29,7 +29,7 @@ internal sealed class ReportRepository : IReportRepository
             .Set<AcademicReport>()
             .ToListAsync(cancellationToken);
 
-    public async Task<AcademicReport> GetAcademicReportByPublishId(
+    public async Task<AcademicReport?> GetAcademicReportByPublishId(
         string PublishId,
         CancellationToken cancellationToken = default) =>
         await _context
