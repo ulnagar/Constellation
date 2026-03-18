@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Constellation.Application.Models;
 using Constellation.Core.Models.Messaging.Email.Enums;
+using Constellation.Core.Models.Messaging.Email.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Attachments;
 using Core.Models.Attachments.DTOs;
@@ -27,7 +28,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,6 +42,7 @@ internal sealed class EmailExternalReportsCommandHandler
     private readonly IAttachmentService _attachmentService;
     private readonly IRazorViewToStringRenderer _razorService;
     private readonly IEmailGateway _emailGateway;
+    private readonly IEmailRepository _emailRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -53,6 +54,7 @@ internal sealed class EmailExternalReportsCommandHandler
         IAttachmentService attachmentService,
         IRazorViewToStringRenderer razorService,
         IEmailGateway emailGateway,
+        IEmailRepository emailRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
@@ -63,6 +65,7 @@ internal sealed class EmailExternalReportsCommandHandler
         _attachmentService = attachmentService;
         _razorService = razorService;
         _emailGateway = emailGateway;
+        _emailRepository = emailRepository;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<EmailExternalReportsCommand>();
@@ -202,7 +205,12 @@ internal sealed class EmailExternalReportsCommandHandler
 
                 message.AddRecipient(recipient, EmailRecipientType.To);
 
+                _emailRepository.Insert(message);
+                await _unitOfWork.CompleteAsync(cancellationToken);
+
                 await _emailGateway.Send(message, cancellationToken: cancellationToken);
+
+                await _unitOfWork.CompleteAsync(cancellationToken);
             }
         }
 
