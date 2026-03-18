@@ -17,7 +17,6 @@ using Constellation.Core.Models.Timetables;
 using Constellation.Core.Models.Timetables.Enums;
 using Constellation.Core.Models.Timetables.Repositories;
 using Core.Models.Enrolments;
-using Core.Models.Students.Enums;
 using Core.Shared;
 using Helpers;
 using Interfaces.Gateways;
@@ -255,18 +254,24 @@ internal sealed class GenerateHistoricalDailyAttendanceReportQueryHandler
                 absentDates.Add(group.Key, string.Join(",", group.Select(entry => entry.AbsenceReason?.Name)));
             }
 
-            Grade grade = offerings.First().Name.Value[..2] switch
+            Grade grade = student.SchoolEnrolments.Where(entry => entry.Year.ToString() == request.Year)
+                .MinBy(entry => entry.CreatedAt)?.Grade ?? Grade.SpecialProgram;
+
+            if (grade == Grade.SpecialProgram)
             {
-                "05" => Grade.Y05,
-                "06" => Grade.Y06,
-                "07" => Grade.Y07,
-                "08" => Grade.Y08,
-                "09" => Grade.Y09,
-                "10" => Grade.Y10,
-                "11" => Grade.Y11,
-                "12" => Grade.Y12,
-                _ => Grade.SpecialProgram
-            };
+                grade = offerings.First().Name.Value[..2] switch
+                {
+                    "05" => Grade.Y05,
+                    "06" => Grade.Y06,
+                    "07" => Grade.Y07,
+                    "08" => Grade.Y08,
+                    "09" => Grade.Y09,
+                    "10" => Grade.Y10,
+                    "11" => Grade.Y11,
+                    "12" => Grade.Y12,
+                    _ => Grade.SpecialProgram
+                };
+            }
 
             records.Add(new(
                 sentralId,

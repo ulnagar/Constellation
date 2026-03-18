@@ -1818,6 +1818,43 @@ public class ExcelService : IExcelService
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFitColumns();
         worksheet.Cells[1, 1, worksheet.Dimension.Rows, worksheet.Dimension.Columns].AutoFilter = true;
 
+        ExcelWorksheet dataSheet = excel.Workbook.Worksheets.Add("Background Data");
+        dataSheet.Cells[1, 1].Value = "Student Id";
+        dataSheet.Cells[1, 2].Value = "Student";
+        dataSheet.Cells[1, 3].Value = "Grade";
+        dataSheet.Cells[1, 4].Value = "Type";
+        dataSheet.Cells[1, 5].Value = "Data";
+
+        row = 2;
+        foreach (var entry in attendanceData)
+        {
+            foreach (var line in entry.AbsentDateData)
+            {
+                dataSheet.Cells[row, 1].Value = entry.StudentReferenceNumber.ToString();
+                dataSheet.Cells[row, 2].Value = entry.Student.DisplayName;
+                dataSheet.Cells[row, 3].Value = entry.Grade.AsName();
+                dataSheet.Cells[row, 4].Value = "Absent";
+                dataSheet.Cells[row, 5].Value = line;
+
+                row++;
+            }
+
+            foreach (var line in entry.JustifiedAbsentDateData)
+            {
+                dataSheet.Cells[row, 1].Value = entry.StudentReferenceNumber.ToString();
+                dataSheet.Cells[row, 2].Value = entry.Student.DisplayName;
+                dataSheet.Cells[row, 3].Value = entry.Grade.AsName();
+                dataSheet.Cells[row, 4].Value = "Justified";
+                dataSheet.Cells[row, 5].Value = line;
+
+                row++;
+            }
+        }
+
+        dataSheet.View.FreezePanes(2, 1);
+        dataSheet.Cells[1, 1, dataSheet.Dimension.Rows, dataSheet.Dimension.Columns].AutoFitColumns();
+        dataSheet.Cells[1, 1, dataSheet.Dimension.Rows, dataSheet.Dimension.Columns].AutoFilter = true;
+
         MemoryStream memoryStream = new();
         await excel.SaveAsAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;

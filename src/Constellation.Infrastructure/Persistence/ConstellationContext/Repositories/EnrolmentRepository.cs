@@ -214,7 +214,7 @@ public class EnrolmentRepository : IEnrolmentRepository
             .Set<Enrolment>()
             .Where(enrolment => 
                 enrolment.StudentId == studentId &&
-                enrolment.CreatedAt < endDateTime &&
+                (enrolment.CreatedAt < endDateTime && enrolment.CreatedAt >= startDateTime) &&
                 (enrolment.DeletedAt == DateTime.MinValue || enrolment.DeletedAt > startDateTime))
             .ToListAsync(cancellationToken);
     }
