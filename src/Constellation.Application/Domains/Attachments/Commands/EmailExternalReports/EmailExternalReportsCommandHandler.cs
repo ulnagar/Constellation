@@ -129,10 +129,7 @@ internal sealed class EmailExternalReportsCommandHandler
 
             if (fileData.IsFailure)
                 continue;
-
-            MemoryStream fileStream = new(fileData.Value.FileData);
-            using System.Net.Mail.Attachment emailAttachment = new(fileStream, fileData.Value.FileName, fileData.Value.FileType);
-
+            
             // Convert to External Report
             ExternalReport externalReport = ExternalReport.ConvertFromTempExternalReport(report);
             Attachment newAttachment = Attachment.CreateExternalReportAttachment(attachment.Name, attachment.FileType, externalReport.Id.ToString(), attachment.CreatedAt);
@@ -183,6 +180,9 @@ internal sealed class EmailExternalReportsCommandHandler
 
             foreach (EmailRecipient recipient in recipients)
             {
+                MemoryStream fileStream = new(fileData.Value.FileData);
+                using System.Net.Mail.Attachment emailAttachment = new(fileStream, fileData.Value.FileName, fileData.Value.FileType);
+
                 string subject = request.Subject.Replace("::parent_name::", recipient.Name, StringComparison.CurrentCultureIgnoreCase);
                 subject = subject.Replace("::report_type::", report.Type.ToString(), StringComparison.CurrentCultureIgnoreCase);
                 subject = subject.Replace("::report_month::", report.IssuedDate.ToString("MMM yyyy", CultureInfo.InvariantCulture), StringComparison.CurrentCultureIgnoreCase);
@@ -203,8 +203,7 @@ internal sealed class EmailExternalReportsCommandHandler
                     CreatedAt = DateTimeOffset.UtcNow
                 };
 
-                foreach (EmailRecipient entry in recipients)
-                    message.AddRecipient(entry, EmailRecipientType.To);
+                message.AddRecipient(recipient, EmailRecipientType.To);
 
                 await _emailGateway.Send(message, attachments: [ emailAttachment ], cancellationToken: cancellationToken);
             }

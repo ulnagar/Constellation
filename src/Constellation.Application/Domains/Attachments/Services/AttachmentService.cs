@@ -94,15 +94,15 @@ internal sealed class AttachmentService : IAttachmentService
     {
         bool useDisk = _configuration.IsConfigured();
 
-        SHA256 sha = SHA256.Create();
+        using SHA256 sha = SHA256.Create();
         byte[] checksum = sha.ComputeHash(fileData);
 
         if (!string.IsNullOrWhiteSpace(attachment.Checksum))
         {
-            if (attachment.Checksum != BitConverter.ToString(checksum).Replace("-", string.Empty) && overwrite == false)
+            if (attachment.Checksum != Convert.ToHexString(checksum).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase) && !overwrite)
                 return Result.Failure(AttachmentErrors.FileDataExists);
 
-            if (attachment.Checksum == BitConverter.ToString(checksum).Replace("-", string.Empty))
+            if (attachment.Checksum == Convert.ToHexString(checksum).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase))
                 return Result.Success();
         }
 
@@ -123,7 +123,7 @@ internal sealed class AttachmentService : IAttachmentService
                 $"{basePath}/{attachment.LinkType.Value}/{attachment.Id}.{extension}" :
                 $"{basePath}/{attachment.LinkType.Value}/{attachment.LinkId[..2]}/{attachment.LinkId}.{extension}";
 
-            Result attempt = attachment.AttachPath(filePath, fileData.Length, BitConverter.ToString(checksum).Replace("-", string.Empty), overwrite);
+            Result attempt = attachment.AttachPath(filePath, fileData.Length, Convert.ToHexString(checksum).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase), overwrite);
 
             if (attempt.IsFailure)
                 return attempt;
@@ -137,7 +137,7 @@ internal sealed class AttachmentService : IAttachmentService
         else
         {
             // Store file in database
-            Result attempt = attachment.AttachData(fileData, BitConverter.ToString(checksum).Replace("-", string.Empty), overwrite);
+            Result attempt = attachment.AttachData(fileData, Convert.ToHexString(checksum).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase), overwrite);
 
             return attempt;
         }
@@ -171,10 +171,10 @@ internal sealed class AttachmentService : IAttachmentService
             byte[] fileContents = await File.ReadAllBytesAsync(filePath, cancellationToken);
             int fileSize = fileContents.Length;
 
-            SHA256 sha = SHA256.Create();
+            using SHA256 sha = SHA256.Create();
             byte[] checksum = sha.ComputeHash(fileContents);
 
-            Result attempt = attachment.AttachPath(filePath, fileSize, BitConverter.ToString(checksum).Replace("-", string.Empty), true);
+            Result attempt = attachment.AttachPath(filePath, fileSize, Convert.ToHexString(checksum).Replace("-", string.Empty, StringComparison.InvariantCultureIgnoreCase), true);
             
             return attempt;
         }
