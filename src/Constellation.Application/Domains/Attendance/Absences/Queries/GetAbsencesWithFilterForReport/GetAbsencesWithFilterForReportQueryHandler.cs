@@ -98,7 +98,7 @@ internal sealed class GetAbsencesWithFilterForReportQueryHandler
             {
                 TutorialId tutorialId = TutorialId.FromValue(absence.SourceId);
 
-                Tutorial tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
+                Tutorial? tutorial = await _tutorialRepository.GetById(tutorialId, cancellationToken);
 
                 if (tutorial is not null)
                     activityName = tutorial.Name;

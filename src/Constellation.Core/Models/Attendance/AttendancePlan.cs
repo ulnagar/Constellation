@@ -8,6 +8,7 @@ using Enums;
 using Errors;
 using Events;
 using Identifiers;
+using Models.Identifiers;
 using Offerings;
 using Primitives;
 using Shared;
@@ -49,7 +50,7 @@ public sealed class AttendancePlan : AggregateRoot, IFullyAuditableEntity
     public StudentId StudentId { get; private set; }
     public Name Student { get; private set; }
     public Grade Grade { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
     public string School { get; private set; }
     public IReadOnlyList<AttendancePlanPeriod> Periods => _periods.AsReadOnly();
     public IReadOnlyList<AttendancePlanFreePeriod> FreePeriods => _freePeriods.AsReadOnly();

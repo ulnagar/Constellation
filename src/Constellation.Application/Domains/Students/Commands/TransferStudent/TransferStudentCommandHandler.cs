@@ -38,7 +38,7 @@ internal sealed class TransferStudentCommandHandler
 
     public async Task<Result> Handle(TransferStudentCommand request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -50,7 +50,7 @@ internal sealed class TransferStudentCommandHandler
             return Result.Failure(StudentErrors.NotFound(request.StudentId));
         }
 
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {

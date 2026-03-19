@@ -19,6 +19,7 @@ using Constellation.Core.Models.Stocktake.Identifiers;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
+using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -177,7 +178,7 @@ public class ManualModel : BasePageModel
             .OrderBy(teacher => teacher.Name.SortOrder)
             .ToList();
 
-        Result<List<string>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());
+        Result<List<SchoolCode>> schoolCodes = await _mediator.Send(new GetCurrentPartnerSchoolCodesQuery());
 
         if (schoolCodes.IsFailure)
         {

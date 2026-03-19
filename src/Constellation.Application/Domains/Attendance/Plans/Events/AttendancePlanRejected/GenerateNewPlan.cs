@@ -39,7 +39,7 @@ internal sealed class GenerateNewPlan
 
     public async Task Handle(AttendancePlanRejectedDomainEvent notification, CancellationToken cancellationToken)
     {
-        AttendancePlan plan = await _planRepository.GetById(notification.PlanId, cancellationToken);
+        AttendancePlan? plan = await _planRepository.GetById(notification.PlanId, cancellationToken);
 
         if (plan is null)
         {

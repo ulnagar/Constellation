@@ -15,7 +15,7 @@
 <h2>School Details</h2>
 
 <div class="page-menu">
-    <a asp-page="/Partner/Schools/Upsert" asp-area="Staff" asp-route-id="@Model.School.SchoolCode" class="btn btn-warning">Edit</a>
+    <a asp-page="/Partner/Schools/Upsert" asp-area="Staff" asp-route-schoolCode="@Model.School.SchoolCode" class="btn btn-warning">Edit</a>
     
     <a href="javascript:history.go(-1)" class="btn btn-danger btn-pull-right">Go Back</a>
 </div>

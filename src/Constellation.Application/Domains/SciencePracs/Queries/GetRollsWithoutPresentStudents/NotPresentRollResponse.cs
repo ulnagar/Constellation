@@ -4,7 +4,7 @@ using Core.Models.Identifiers;
 using System;
 
 public sealed record NotPresentRollResponse(
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string SchoolName,
     SciencePracLessonId LessonId,
     SciencePracRollId RollId,

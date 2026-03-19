@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using DTOs;
@@ -12,7 +13,7 @@ public sealed record ExportContactListCommand(
     List<OfferingId> OfferingCodes,
     List<CourseId> CourseIds,
     List<Grade> Grades,
-    List<string> SchoolCodes,
+    List<SchoolCode> SchoolCodes,
     List<ContactCategory> ContactCateogries,
     List<string> Flags,
     bool IncludeRestrictedRoles)

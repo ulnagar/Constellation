@@ -7,6 +7,7 @@ using Application.DTOs;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +41,7 @@ public class DetailsModel : BasePageModel
     [ViewData] public string PageTitle { get; set; } = "School Details";
 
     [BindProperty(SupportsGet = true)]
-    public string Id { get; set; }
+    public SchoolCode Id { get; set; } = SchoolCode.Empty;
 
     public SchoolDetailsResponse School { get; set; }
 
@@ -68,7 +69,7 @@ public class DetailsModel : BasePageModel
         PageTitle = $"Details - {request.Value.Name}";
     }
 
-    public async Task<IActionResult> OnGetAjaxGetGraphData(string id, int day)
+    public async Task<IActionResult> OnGetAjaxGetGraphData(SchoolCode id, int day)
     {
         GraphData data = await _mediator.Send(new GetGraphDataForSchoolQuery { SchoolCode = id, Day = day });
 

@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Tutorials.Tutorials.Queries.GetTutorialDetails;
 
 using Constellation.Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.ValueObjects;
 using Core.Models.Students.Enums;
@@ -30,7 +31,7 @@ public sealed record TutorialDetailsResponse(
         Gender Gender,
         Name Name,
         Grade? Grade,
-        string SchoolCode,
+        SchoolCode SchoolCode,
         string SchoolName,
         bool CurrentEnrolment);
 

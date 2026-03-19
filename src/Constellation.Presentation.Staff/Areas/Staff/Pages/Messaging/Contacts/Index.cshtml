@@ -80,6 +80,7 @@
             <th>Contact Name</th>
             <th>Contact Email</th>
             <th>Contact Phone</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -194,6 +195,9 @@
                     </td>
                     <td>@contact.ContactEmail.Email</td>
                     <td>@contact.ContactPhone?.ToString()</td>
+                    <td>
+                        <a asp-page="/Messaging/History/Details" asp-area="Staff" asp-route-type="@contact.Id.GetType().Name" asp-route-id="@contact.Id" class="btn btn-sm btn-info btn-show-hover">View Comms</a>
+                    </td>
                 </tr>
             }
         }

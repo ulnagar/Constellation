@@ -48,7 +48,7 @@ internal sealed class AddToLessonRolls
 
     public async Task Handle(EnrolmentCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Enrolment enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
+        Enrolment? enrolment = await _enrolmentRepository.GetById(notification.EnrolmentId, cancellationToken);
 
         if (enrolment is null)
         {
@@ -63,9 +63,9 @@ internal sealed class AddToLessonRolls
         if (enrolment is not OfferingEnrolment)
             return;
 
-        OfferingEnrolment offeringEnrolment = enrolment as OfferingEnrolment;
+        OfferingEnrolment offeringEnrolment = (enrolment as OfferingEnrolment)!;
 
-        Student student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(enrolment.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -77,7 +77,7 @@ internal sealed class AddToLessonRolls
             return;
         }
 
-        SchoolEnrolment schoolEnrolment = student.CurrentEnrolment;
+        SchoolEnrolment? schoolEnrolment = student.CurrentEnrolment;
 
         if (schoolEnrolment is null)
         {

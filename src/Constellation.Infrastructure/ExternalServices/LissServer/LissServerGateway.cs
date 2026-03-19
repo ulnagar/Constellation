@@ -15,6 +15,7 @@ using Core.Models.Covers;
 using Core.Models.Covers.Enums;
 using Core.Models.Edval;
 using Core.Models.Edval.Events;
+using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Errors;
 using Core.Models.Offerings.Repositories;
@@ -187,7 +188,7 @@ internal sealed class LissServerGateway : ILissServerGateway
                     teacher.FirstName,
                     teacher.LastName,
                     teacher.EmailAddress,
-                    "8912",
+                    SchoolCode.FromValue("8912"),
                     teacher.TeacherId);
 
                 await _mediator.Send(command, cancellationToken);

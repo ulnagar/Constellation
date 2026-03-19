@@ -19,6 +19,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using MediatR;
@@ -263,7 +264,7 @@ public class IndexModel : BasePageModel
     {
         public List<Guid> Offerings { get; set; } = [];
         public List<Grade> Grades { get; set; } = [];
-        public List<string> Schools { get; set; } = [];
+        public List<SchoolCode> Schools { get; set; } = [];
         public List<string> Categories { get; set; } = [];
         public List<string> Flags { get; set; } = [];
         public List<Guid> Courses { get; set; } = [];

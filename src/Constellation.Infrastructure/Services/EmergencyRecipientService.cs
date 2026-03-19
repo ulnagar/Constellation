@@ -10,6 +10,7 @@ using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Models.EmergencyConsole.Services;
 using Core.Models.Families;
+using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.Offerings.ValueObjects;
@@ -273,7 +274,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 students = students.DistinctBy(student => student.Id).ToList();
             }
 
-            List<string> schoolCodes = students.Select(student => student.CurrentEnrolment?.SchoolCode ?? string.Empty).ToList();
+            List<SchoolCode> schoolCodes = students.Select(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty).ToList();
 
             List<SchoolContact> contacts = await _schoolContactRepository.GetActiveByRole(Position.Coordinator, cancellationToken);
 
@@ -317,7 +318,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 students = students.DistinctBy(student => student.Id).ToList();
             }
 
-            List<string> schoolCodes = students.Select(student => student.CurrentEnrolment?.SchoolCode ?? string.Empty).ToList();
+            List<SchoolCode> schoolCodes = students.Select(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty).ToList();
 
             List<SchoolContact> contacts = await _schoolContactRepository.GetActiveByRole(Position.Coordinator, cancellationToken);
 

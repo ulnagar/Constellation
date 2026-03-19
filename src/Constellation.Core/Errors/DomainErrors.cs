@@ -7,7 +7,6 @@ using Constellation.Core.Models.Absences.Identifiers;
 using Constellation.Core.Models.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Constellation.Core.Shared;
-using Models.Tutorials.Identifiers;
 using System;
 
 public static class DomainErrors
@@ -258,9 +257,13 @@ public static class DomainErrors
 
         public static class School
         {
-            public static readonly Func<string, Error> NotFound = id => new(
+            public static readonly Func<SchoolCode, Error> NotFound = id => new(
                 "Partners.School.NotFound",
                 $"A school with the code {id} could not be found");
+
+            public static readonly Error InvalidValue = new(
+                "Partners.School.SchoolCode.InvalidValue",
+                "A School Code must be exactly four digits long");
         }
     }
 

@@ -17,6 +17,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,7 +129,7 @@ public class ReportsModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostCreateAssignment(
-        string schoolCode,
+        SchoolCode schoolCode,
         Position roleName,
         string note,
         SchoolContactId contactId)

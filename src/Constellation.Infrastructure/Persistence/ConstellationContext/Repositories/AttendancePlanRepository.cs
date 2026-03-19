@@ -1,11 +1,12 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Enums;
 using Core.Abstractions.Clock;
+using Core.Enums;
 using Core.Models.Attendance;
 using Core.Models.Attendance.Enums;
 using Core.Models.Attendance.Identifiers;
 using Core.Models.Attendance.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
         _dateTime = dateTime;
     }
 
-    public async Task<AttendancePlan> GetById(
+    public async Task<AttendancePlan?> GetById(
         AttendancePlanId id,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -58,7 +59,7 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<AttendancePlan>> GetPendingForSchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<AttendancePlan>()
@@ -68,7 +69,7 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<AttendancePlan>> GetForSchool(
-        string schoolCode,
+        SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<AttendancePlan>()
@@ -77,7 +78,7 @@ public sealed class AttendancePlanRepository : IAttendancePlanRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<AttendancePlan>> GetRecentForSchoolAndGrade(
-        string schoolCode,
+        SchoolCode schoolCode,
         Grade grade,
         CancellationToken cancellationToken = default) =>
         await _context

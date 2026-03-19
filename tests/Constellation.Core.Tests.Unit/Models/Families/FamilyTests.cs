@@ -5,6 +5,7 @@ using Constellation.Core.Models.Families.Events;
 using Constellation.Core.Models.Identifiers;
 using Core.Models.Families.Errors;
 using Core.Models.Students.Identifiers;
+using ValueObjects;
 
 public class FamilyTests
 {
@@ -327,7 +328,7 @@ public class FamilyTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<Parent>();
-        result.Value.MobileNumber.Should().Be(_parentMobile);
+        result.Value.MobileNumber.ToString(PhoneNumber.Format.None).Should().Be(_parentMobile);
     }
 
     [Fact]
@@ -501,7 +502,7 @@ public class FamilyTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeOfType<Parent>();
-        result.Value.MobileNumber.Should().Be(_parentMobile);
+        result.Value.MobileNumber.ToString(PhoneNumber.Format.None).Should().Be(_parentMobile);
     }
 
     [Fact]

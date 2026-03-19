@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;
@@ -29,7 +30,7 @@ internal sealed class UpsertSchoolCommandHandler
     {
         _logger.Information("UpsertSchoolCommandHandler called with request {@request}", request);
 
-        School entity = await _schoolRepository.GetById(request.Code, cancellationToken);
+        School? entity = await _schoolRepository.GetById(request.Code, cancellationToken);
         bool newSchool = false;
 
         if (entity is null)

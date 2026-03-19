@@ -6,6 +6,7 @@ namespace Constellation.Core.Models.Assets;
 
 using Enums;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using System;
 
@@ -18,7 +19,7 @@ public sealed record Location : IAuditableEntity
         AssetId assetId,
         LocationCategory category,
         string site,
-        string schoolCode,
+        SchoolCode schoolCode,
         string room,
         bool current,
         DateOnly arrivalDate)
@@ -37,7 +38,7 @@ public sealed record Location : IAuditableEntity
     public AssetId AssetId { get; private set; }
     public LocationCategory Category { get; private set; } = LocationCategory.CoordinatingOffice;
     public string Site { get; private set; } = string.Empty;
-    public string SchoolCode { get; private set; } = string.Empty;
+    public SchoolCode SchoolCode { get; private set; } = SchoolCode.Empty;
     public string Room { get; private set; } = string.Empty;
     public bool CurrentLocation { get; private set; }
 
@@ -62,7 +63,7 @@ public sealed record Location : IAuditableEntity
             assetId,
             LocationCategory.CoordinatingOffice,
             "Aurora College",
-            "8912",
+            SchoolCode.FromValue("8912"),
             room,
             current,
             arrivalDate);
@@ -73,7 +74,7 @@ public sealed record Location : IAuditableEntity
     public static Result<Location> CreatePublicSchoolLocationRecord(
         AssetId assetId,
         string site,
-        string schoolCode,
+        SchoolCode schoolCode,
         bool current,
         DateOnly arrivalDate)
     {
@@ -102,7 +103,7 @@ public sealed record Location : IAuditableEntity
             assetId,
             LocationCategory.CorporateOffice, 
             site,
-            string.Empty,
+            SchoolCode.Empty,
             string.Empty,
             current,
             arrivalDate);
@@ -119,7 +120,7 @@ public sealed record Location : IAuditableEntity
             assetId,
             LocationCategory.PrivateResidence, 
             LocationCategory.PrivateResidence.Name,
-            string.Empty,
+            SchoolCode.Empty,
             string.Empty,
             current,
             arrivalDate);

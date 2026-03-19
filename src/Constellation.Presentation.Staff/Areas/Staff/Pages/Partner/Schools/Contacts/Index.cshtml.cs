@@ -15,6 +15,7 @@ using Constellation.Core.Models.SchoolContacts.Enums;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -154,7 +155,7 @@ public class IndexModel : BasePageModel
     }
 
     public async Task<IActionResult> OnPostCreateAssignment(
-        string schoolCode,
+        SchoolCode schoolCode,
         Position roleName,
         string note,
         SchoolContactId contactId)

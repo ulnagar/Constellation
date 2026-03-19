@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Attendance;
 
 using Core.Models.Attendance.Checkin;
+using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Offerings.ValueObjects;
 using Core.Models.Students;
@@ -65,5 +66,11 @@ internal sealed class CheckInResponseConfiguration : IEntityTypeConfiguration<Ch
             .HasConversion(
                 name => name.Value,
                 value => OfferingName.FromValue(value).Value);
+
+        builder
+            .Property(response => response.SchoolCode)
+            .HasConversion(
+                id => id.Value,
+                value => SchoolCode.FromValue(value));
     }
 }

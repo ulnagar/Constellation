@@ -4,6 +4,7 @@ using Constellation.Core.Models.Faculties.Identifiers;
 using Constellation.Core.Models.Offerings.Identifiers;
 using Core.ValueObjects;
 using Identifiers;
+using Models.Identifiers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,8 +25,8 @@ public interface IStaffRepository
     Task<List<StaffMember>> GetFacultyHeadTeachersForOffering(OfferingId offeringId, CancellationToken cancellationToken = default);
     Task<List<StaffMember>> GetAllActive(CancellationToken cancellationToken = default);
     Task<List<StaffId>> GetAllActiveStaffIds(CancellationToken cancellationToken = default);
-    Task<List<StaffMember>> GetActiveFromSchool(string schoolCode, CancellationToken cancellationToken = default);
-    Task<int> GetCountCurrentStaffFromSchool(string schoolCode, CancellationToken cancellationToken = default);
+    Task<List<StaffMember>> GetActiveFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
+    Task<int> GetCountCurrentStaffFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get current staff member with the specified email address.
@@ -42,7 +43,7 @@ public interface IStaffRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<StaffMember?> GetAnyByEmailAddress(EmailAddress emailAddress, CancellationToken cancellationToken = default);
-    Task<StaffMember> GetFromName(string name, CancellationToken cancellationToken = default);
+    Task<StaffMember?> GetFromName(string name, CancellationToken cancellationToken = default);
 
     void Insert(StaffMember member);
 }

@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Constellation.Core.Models.Students.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.ValueObjects;
@@ -22,12 +23,12 @@ internal sealed class GetStudentByIdQueryHandler
 
     public async Task<Result<StudentResponse>> Handle(GetStudentByIdQuery request, CancellationToken cancellationToken)
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
             return Result.Failure<StudentResponse>(StudentErrors.NotFound(request.StudentId));
 
-        SchoolEnrolment enrolment = student.CurrentEnrolment;
+        SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
         if (enrolment is null)
         {
@@ -38,8 +39,8 @@ internal sealed class GetStudentByIdQueryHandler
                 student.PreferredGender,
                 null,
                 student.EmailAddress,
-                null,
-                null,
+                string.Empty,
+                SchoolCode.Empty,
                 false,
                 student.IsDeleted);
         }

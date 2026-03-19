@@ -38,7 +38,7 @@ internal sealed class GetSchoolsForSelectionListQueryHandler
         returnData.AddRange(schools
             .Select(school => 
                 new SchoolSelectionListResponse(
-                    school.Code, 
+                    school.Code.ToString(), 
                     school.Name))
             .ToList());
 

@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Shared;
 using Interfaces.Repositories;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 internal sealed class GetCurrentPartnerSchoolCodesQueryHandler 
-    : IQueryHandler<GetCurrentPartnerSchoolCodesQuery, List<string>>
+    : IQueryHandler<GetCurrentPartnerSchoolCodesQuery, List<SchoolCode>>
 {
     private readonly ISchoolRepository _schoolRepository;
 
@@ -20,7 +21,7 @@ internal sealed class GetCurrentPartnerSchoolCodesQueryHandler
         _schoolRepository = schoolRepository;
     }
 
-    public async Task<Result<List<string>>> Handle(GetCurrentPartnerSchoolCodesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SchoolCode>>> Handle(GetCurrentPartnerSchoolCodesQuery request, CancellationToken cancellationToken)
     {
         List<School> schools = await _schoolRepository.GetAllActive(cancellationToken);
 

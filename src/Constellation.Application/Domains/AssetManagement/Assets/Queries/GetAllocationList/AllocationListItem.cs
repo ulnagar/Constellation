@@ -10,11 +10,11 @@ public sealed record AllocationListItem(
     string UserGroup,
     AssetId AssetId,
     AssetNumber AssetNumber,
-    string SerialNumber,
+    string? SerialNumber,
     string ModelDescription,
-    AssetStatus Status,
+    AssetStatus? Status,
     AllocationId? AllocationId,
-    string AllocatedTo,
+    string? AllocatedTo,
     LocationId? LocationId,
-    string LocationType,
-    string LocationName);
+    string? LocationType,
+    string? LocationName);

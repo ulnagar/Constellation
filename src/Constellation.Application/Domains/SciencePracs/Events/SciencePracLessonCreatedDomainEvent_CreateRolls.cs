@@ -5,6 +5,7 @@ using Core.Abstractions.Repositories;
 using Core.DomainEvents;
 using Core.Models.Enrolments;
 using Core.Models.Enrolments.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.SciencePracs;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -40,7 +41,7 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
     }
     public async Task Handle(SciencePracLessonCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
-        SciencePracLesson lesson = await _lessonRepository.GetById(notification.LessonId, cancellationToken);
+        SciencePracLesson? lesson = await _lessonRepository.GetById(notification.LessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -61,10 +62,13 @@ internal sealed class SciencePracLessonCreatedDomainEvent_CreateRolls
 
         List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-        IEnumerable<IGrouping<string, Student>> groupedStudents = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode);
+        IEnumerable<IGrouping<SchoolCode, Student>> groupedStudents = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty);
 
-        foreach (IGrouping<string, Student> schoolGroup in groupedStudents)
+        foreach (IGrouping<SchoolCode, Student> schoolGroup in groupedStudents)
         {
+            if (schoolGroup.Key == SchoolCode.Empty)
+                continue;
+
             SciencePracRoll roll = new(
                 lesson.Id,
                 schoolGroup.Key);

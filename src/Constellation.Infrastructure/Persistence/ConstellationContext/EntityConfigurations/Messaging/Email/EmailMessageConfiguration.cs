@@ -110,6 +110,10 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
+            .Navigation(e => e.Recipients)
+            .AutoInclude();
+
+        builder
             .HasMany(e => e.TrackingEvents)
             .WithOne()
             .HasForeignKey(e => e.EmailId)

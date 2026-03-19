@@ -3,6 +3,7 @@
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Identifiers;
 using Core.Models.Messaging.Email.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class EmailRepository : IEmailRepository
@@ -21,6 +22,16 @@ internal sealed class EmailRepository : IEmailRepository
         await _context
             .Set<EmailMessage>()
             .FirstOrDefaultAsync(message => message.Id == id, cancellationToken);
+
+    public async Task<List<EmailMessage>> GetByRecipient(
+        EmailAddress email, 
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EmailMessage>()
+            .Where(message => 
+                message.Recipients.Any(recipient => 
+                    recipient.Email == email))
+            .ToListAsync(cancellationToken);
 
     public void Insert(EmailMessage message) => 
         _context.Set<EmailMessage>().Add(message);

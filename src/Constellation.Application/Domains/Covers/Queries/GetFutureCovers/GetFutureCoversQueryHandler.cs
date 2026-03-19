@@ -59,17 +59,17 @@ internal sealed class GetFutureCoversQueryHandler
 
         foreach (Cover cover in covers)
         {
-            Offering offering = await _offeringRepository
+            Offering? offering = await _offeringRepository
                 .GetById(cover.OfferingId, cancellationToken);
 
             string offeringName = offering?.Name ?? string.Empty;
 
-            string teacherName = "";
-            string teacherSchool = "";
+            string teacherName;
+            string teacherSchool;
 
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
-                Casual teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
+                Casual? teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
                 if (teacher is null)
                 {
@@ -78,12 +78,10 @@ internal sealed class GetFutureCoversQueryHandler
 
                 teacherName = teacher.Name.DisplayName;
 
-                School school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
+                School? school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 
                 if (school is null)
-                {
                     continue;
-                }
 
                 teacherSchool = school.Name;
             }
@@ -91,7 +89,7 @@ internal sealed class GetFutureCoversQueryHandler
             {
                 StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
 
-                StaffMember teacher = staffId == StaffId.Empty
+                StaffMember? teacher = staffId == StaffId.Empty
                     ? null
                     : await _staffRepository.GetById(staffId, cancellationToken);
                 
@@ -103,7 +101,7 @@ internal sealed class GetFutureCoversQueryHandler
                 if (teacher.CurrentAssignment is null)
                     continue;
 
-                School school = await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken);
+                School? school = await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken);
 
                 if (school is null)
                     continue;
@@ -111,7 +109,7 @@ internal sealed class GetFutureCoversQueryHandler
                 teacherSchool = school.Name;
             }
 
-            CoverType coverType = cover switch
+            CoverType? coverType = cover switch
             {
                 ClassCover => CoverType.ClassCover,
                 AccessCover => CoverType.AccessCover,

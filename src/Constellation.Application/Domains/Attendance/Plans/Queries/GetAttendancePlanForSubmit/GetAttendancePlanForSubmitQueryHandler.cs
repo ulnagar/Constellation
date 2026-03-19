@@ -44,7 +44,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
 
     public async Task<Result<AttendancePlanEntry>> Handle(GetAttendancePlanForSubmitQuery request, CancellationToken cancellationToken)
     {
-        AttendancePlan plan = await _planRepository.GetById(request.PlanId, cancellationToken);
+        AttendancePlan? plan = await _planRepository.GetById(request.PlanId, cancellationToken);
 
         if (plan is null)
         {
@@ -69,7 +69,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
 
         foreach (var period in timetablePeriods)
         {
-            AttendancePlanPeriod planPeriod = plan.Periods.FirstOrDefault(planPeriod => planPeriod.PeriodId == period.Id);
+            AttendancePlanPeriod? planPeriod = plan.Periods.FirstOrDefault(planPeriod => planPeriod.PeriodId == period.Id);
 
             if (planPeriod is null)
             {
@@ -128,7 +128,7 @@ internal sealed class GetAttendancePlanForSubmitQueryHandler
                 period.PercentMissed));
         }
 
-        AttendancePlanEntry.SciencePracLesson scienceLesson = plan.SciencePracLesson is not null
+        AttendancePlanEntry.SciencePracLesson? scienceLesson = plan.SciencePracLesson is not null
             ? new(
                 plan.SciencePracLesson.Week,
                 plan.SciencePracLesson.Day,

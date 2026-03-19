@@ -42,7 +42,7 @@ internal sealed class GetRollsWithoutPresentStudentsQueryHandler
 
         foreach (SciencePracLesson lesson in lessons)
         {
-            Course course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
+            Course? course = await _courseRepository.GetByLessonId(lesson.Id, cancellationToken);
 
             if (course is null)
                 continue;
@@ -54,7 +54,7 @@ internal sealed class GetRollsWithoutPresentStudentsQueryHandler
 
             foreach (SciencePracRoll roll in rolls)
             {
-                School school = schools.FirstOrDefault(entry => entry.Code == roll.SchoolCode);
+                School? school = schools.FirstOrDefault(entry => entry.Code == roll.SchoolCode);
 
                 if (school is null)
                     continue;

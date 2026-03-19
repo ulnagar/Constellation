@@ -8,6 +8,6 @@ public sealed record UpdateCasualCommand(
     string FirstName,
     string LastName,
     string EmailAddress,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string AdobeConnectId)
     : ICommand;

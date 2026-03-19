@@ -63,7 +63,7 @@ public class UpsertModel : BasePageModel
 
     [BindProperty]
     [Required]
-    public string SchoolCode { get; set; } = string.Empty;
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
     
     public List<SchoolSelectionListResponse> Schools { get; set; } = new();
 

@@ -8,6 +8,7 @@ using Constellation.Core.Models.Students.Errors;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Models.Students.Repositories;
 using Constellation.Core.Shared;
+using Core.Models.Identifiers;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,10 +38,19 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
         // If a StudentId is present, process it first
         if (request.StudentId != StudentId.Empty)
         {
-            Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+
+            if (student is null)
+            {
+                _logger
+                    .ForContext(nameof(Error), StudentErrors.NotFound(request.StudentId), true)
+                    .Warning("Failed to add Absence Configuration for student");
+
+                return Result.Failure(StudentErrors.NotFound(request.StudentId));
+            }
 
             Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
-                student.Id,
+                request.StudentId,
                 request.AbsenceType,
                 request.StartDate,
                 request.EndDate);
@@ -72,18 +82,15 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
 
 
         // If a School and Grade is selected, process it next
-        if (!string.IsNullOrWhiteSpace(request.SchoolCode) && request.GradeFilter is not null)
+        if (request.SchoolCode != SchoolCode.Empty && request.GradeFilter is not null)
         {
             List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
-            if (request.GradeFilter is not null)
-            {
-                students = students
-                    .Where(student => student.CurrentEnrolment?.Grade == (Grade)request.GradeFilter)
-                    .ToList();
-            }
+            students = students
+                .Where(student => student.CurrentEnrolment?.Grade == (Grade)request.GradeFilter)
+                .ToList();
 
-            foreach (var student in students)
+            foreach (Student student in students)
             {
                 Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
                     student.Id,
@@ -118,11 +125,11 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
         }
 
         // If only a school is selected, process it next
-        if (!string.IsNullOrWhiteSpace(request.SchoolCode))
+        if (request.SchoolCode != SchoolCode.Empty)
         {
             List<Student> students = await _studentRepository.GetCurrentStudentsFromSchool(request.SchoolCode, cancellationToken);
 
-            foreach (var student in students)
+            foreach (Student student in students)
             {
                 Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
                     student.Id,
@@ -163,7 +170,7 @@ internal sealed class SetAbsenceConfigurationForStudentCommandHandler
 
             List<Student> students = await _studentRepository.GetCurrentStudentFromGrade(grade, cancellationToken);
 
-            foreach (var student in students)
+            foreach (Student student in students)
             {
                 Result<AbsenceConfiguration> configRequest = AbsenceConfiguration.Create(
                     student.Id,

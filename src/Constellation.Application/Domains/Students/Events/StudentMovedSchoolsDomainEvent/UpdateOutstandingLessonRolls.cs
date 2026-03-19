@@ -50,7 +50,7 @@ internal sealed class UpdateOutstandingLessonRolls
             "Updating lesson rolls for student ({studentId}) move notification from {oldSchool} to {newSchool}",
             notification.StudentId, notification.PreviousSchoolCode, notification.CurrentSchoolCode);
 
-        Student student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(notification.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -66,7 +66,7 @@ internal sealed class UpdateOutstandingLessonRolls
 
         List<OfferingId> offeringIds = enrolments
             .OfType<OfferingEnrolment>()
-            .Select(enrolments => enrolments.OfferingId)
+            .Select(offeringEnrolment => offeringEnrolment.OfferingId)
             .Distinct()
             .ToList();
 
@@ -76,7 +76,7 @@ internal sealed class UpdateOutstandingLessonRolls
         List<SciencePracLessonId> updatedLessonIds = new();
 
         // The PreviousSchoolCode item may be blank if there was no active previous school when the transfer was created.
-        if (!string.IsNullOrWhiteSpace(notification.PreviousSchoolCode))
+        if (notification.PreviousSchoolCode != SchoolCode.Empty)
         {
             List<SciencePracRoll> oldRolls = lessons
                 .SelectMany(lesson => lesson.Rolls)
@@ -101,7 +101,7 @@ internal sealed class UpdateOutstandingLessonRolls
                 }
 
                 // Remove the student from the roll
-                SciencePracAttendance attendance = roll.RemoveStudent(notification.StudentId);
+                SciencePracAttendance? attendance = roll.RemoveStudent(notification.StudentId);
 
                 if (attendance is not null)
                 {
@@ -117,7 +117,7 @@ internal sealed class UpdateOutstandingLessonRolls
         }
 
         // The CurrentSchoolCode item may be blank if there was no active current school when the transfer was created.
-        if (!string.IsNullOrWhiteSpace(notification.CurrentSchoolCode))
+        if (notification.CurrentSchoolCode != SchoolCode.Empty)
         {
             List<SciencePracRoll> existingRollsAtNewSchool = lessons
                 .Where(lesson => lesson.Offerings.Any(record => offeringIds.Contains(record.OfferingId)))

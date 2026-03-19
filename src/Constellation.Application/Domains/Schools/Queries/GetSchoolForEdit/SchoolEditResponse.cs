@@ -1,7 +1,9 @@
 ﻿namespace Constellation.Application.Domains.Schools.Queries.GetSchoolForEdit;
 
+using Core.Models.Identifiers;
+
 public sealed record SchoolEditResponse(
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string Name,
     string Address,
     string Town,

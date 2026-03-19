@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Core.Models;
 
+using Identifiers;
 using SchoolContacts;
 using System.Collections.Generic;
 
@@ -11,7 +12,7 @@ public class School
         StaffAssignments = new List<SchoolContactRole>();
     }
 
-    public string Code { get; set; }
+    public SchoolCode Code { get; set; }
     public string Name { get; set; }
     public string Address { get; set; }
     public string Town { get; set; }

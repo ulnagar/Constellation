@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Stocktake.Identifiers;
 using Core.Abstractions.Clock;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Stocktake;
 using Core.Models.Stocktake.Enums;
@@ -29,7 +30,7 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .Set<StocktakeEvent>()
             .ToListAsync(cancellationToken);
 
-    public async Task<StocktakeEvent> GetById(
+    public async Task<StocktakeEvent?> GetById(
         StocktakeEventId eventId,
         CancellationToken cancellationToken = default) =>
         await _context
@@ -37,7 +38,7 @@ internal sealed class StocktakeRepository : IStocktakeRepository
             .Where(stocktake => stocktake.Id == eventId)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<StocktakeEvent> GetByIdWithSightings(
+    public async Task<StocktakeEvent?> GetByIdWithSightings(
         StocktakeEventId eventId, 
         CancellationToken cancellationToken = default) =>
         await _context
@@ -57,13 +58,13 @@ internal sealed class StocktakeRepository : IStocktakeRepository
 
     public async Task<List<StocktakeSighting>> GetActiveSightingsForSchool(
         StocktakeEventId stocktakeEventId, 
-        string schoolCode, 
+        SchoolCode schoolCode, 
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<StocktakeSighting>()
             .Where(sighting =>
                 sighting.StocktakeEventId == stocktakeEventId &&
-                sighting.LocationCode == schoolCode &&
+                sighting.LocationCode == schoolCode.ToString() &&
                 !sighting.IsCancelled)
             .ToListAsync(cancellationToken);
 

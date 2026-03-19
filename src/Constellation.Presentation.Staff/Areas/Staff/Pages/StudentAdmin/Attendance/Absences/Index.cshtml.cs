@@ -19,6 +19,7 @@ using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.Logging;
 using Constellation.Presentation.Staff.Areas.Staff.Models;
+using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -78,7 +79,7 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken)
     {
-        List<OfferingId> offeringIds = Filter.Offerings.Select(id => OfferingId.FromValue(id)).ToList();
+        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
 
         ExportAbsencesReportCommand command = new(
             offeringIds,
@@ -222,7 +223,7 @@ public class IndexModel : BasePageModel
     {
         public List<Guid> Offerings { get; set; } = new();
         public List<Grade> Grades { get; set; } = new();
-        public List<string> Schools { get; set; } = new();
+        public List<SchoolCode> Schools { get; set; } = new();
         public List<StudentId> Students { get; set; } = new();
 
         public FilterAction Action { get; set; } = FilterAction.Filter;

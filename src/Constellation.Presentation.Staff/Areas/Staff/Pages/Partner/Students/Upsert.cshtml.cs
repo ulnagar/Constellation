@@ -12,6 +12,7 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Shared.Helpers.ModelBinders;
 using Core.Abstractions.Services;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Students.Enums;
 using Core.Models.Students.Identifiers;
 using Core.Models.Students.ValueObjects;
@@ -75,7 +76,7 @@ public class UpsertModel : BasePageModel
     public string? EmailAddress { get; set; } = string.Empty;
 
     [BindProperty]
-    public string? SchoolCode { get; set; } = string.Empty;
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
 
     public SelectList SchoolList { get; set; }
 

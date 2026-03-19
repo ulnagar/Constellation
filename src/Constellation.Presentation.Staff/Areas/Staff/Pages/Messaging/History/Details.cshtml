@@ -1,0 +1,35 @@
+﻿@page "{type}/{id}"
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.History.DetailsModel
+@{
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Subject</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        @foreach (var message in Model.Records.OrderByDescending(entry => entry.Timestamp))
+        {
+            <tr>
+                <td>@message.Type.Name</td>
+                <td>@message.From</td>
+                <td>
+                    @foreach (var entry in message.To)
+                    {
+                        @entry <br />
+                    }
+                </td>
+                <td>@message.Subject</td>
+                <td>@message.Status.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

@@ -2,12 +2,13 @@
 
 using Abstractions.Messaging;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using System;
 
 public sealed record TransferStudentCommand(
     StudentId StudentId,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     Grade Grade,
     DateOnly StartDate)
     : ICommand;

@@ -45,7 +45,7 @@ public class LessonRepository : ILessonRepository
             .ToListAsync(cancellationToken);
 
     public async Task<List<SciencePracLesson>> GetAllForSchool(
-        string SchoolCode, 
+        SchoolCode SchoolCode, 
         CancellationToken cancellationToken = default) => 
         await _context
             .Set<SciencePracLesson>()

@@ -38,8 +38,8 @@ public sealed record OfferingDetailsResponse(
         Gender Gender,
         Name Name,
         Grade? Grade,
-        string SchoolCode,
-        string SchoolName,
+        SchoolCode SchoolCode,
+        string? SchoolName,
         bool CurrentEnrolment);
 
     public sealed record SessionSummary(

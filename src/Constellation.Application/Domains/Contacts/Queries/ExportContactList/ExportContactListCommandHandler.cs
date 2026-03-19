@@ -31,6 +31,7 @@ using Interfaces;
 using Models;
 using SchoolContacts.Helpers;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -86,7 +87,7 @@ internal sealed class ExportContactListCommandHandler
                 request.SchoolCodes,
                 cancellationToken);
 
-        if (request.Flags.Any())
+        if (request.Flags.Count > 0)
         {
             List<StudentId> studentIds = [];
 
@@ -124,7 +125,7 @@ internal sealed class ExportContactListCommandHandler
             if (enrolment is null)
                 continue;
 
-            School school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
+            School? school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
 
             if (school is null)
                 continue;
@@ -135,10 +136,11 @@ internal sealed class ExportContactListCommandHandler
                 enrolment.Grade,
                 enrolment.SchoolName,
                 ContactCategory.Student,
+                student.Id,
                 student.Name.DisplayName,
                 student.EmailAddress,
                 null,
-                null));
+                string.Empty));
 
             Result<PhoneNumber> schoolPhone = PhoneNumber.Create(school.PhoneNumber);
 
@@ -152,10 +154,11 @@ internal sealed class ExportContactListCommandHandler
                     enrolment.Grade,
                     enrolment.SchoolName,
                     ContactCategory.PartnerSchoolSchool,
+                    school.Code,
                     enrolment.SchoolName,
                     schoolEmail.Value,
                     schoolPhone.IsSuccess ? schoolPhone.Value : null,
-                    null));
+                    string.Empty));
             }
             
             List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(enrolment.SchoolCode, cancellationToken);
@@ -182,6 +185,7 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         category,
+                        contact.Id,
                         contact.Name.DisplayName,
                         contact.EmailAddress,
                         contact.PhoneNumber,
@@ -208,10 +212,11 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.ResidentialFamily,
+                        family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
                         null,
-                        null));
+                        string.Empty));
 
                     foreach (Parent parent in family.Parents)
                     {
@@ -233,10 +238,11 @@ internal sealed class ExportContactListCommandHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             category,
+                            parent.Id,
                             parent.Name.DisplayName,
                             parentEmail.Value,
                             parent.MobileNumber,
-                            null));
+                            string.Empty));
                     }
                 }
                 else
@@ -247,10 +253,11 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.NonResidentialFamily,
+                        family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
                         null,
-                        null));
+                        string.Empty));
 
                     foreach (Parent parent in family.Parents)
                     {
@@ -260,10 +267,11 @@ internal sealed class ExportContactListCommandHandler
                             enrolment.Grade,
                             enrolment.SchoolName,
                             ContactCategory.NonResidentialParent,
+                            parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
                             parent.MobileNumber,
-                            null));
+                            string.Empty));
                     }
                 }
             }
@@ -293,10 +301,11 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.AuroraTeacher,
+                        teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
                         null,
-                        null));
+                        string.Empty));
                 }
 
                 Course course = courses.First(entry => entry.Id == offering.CourseId);
@@ -334,15 +343,16 @@ internal sealed class ExportContactListCommandHandler
                         enrolment.Grade,
                         enrolment.SchoolName,
                         ContactCategory.AuroraHeadTeacher,
+                        headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
                         null,
-                        null));
+                        string.Empty));
                 }
             }
         }
 
-        if (request.ContactCateogries.Any())
+        if (request.ContactCateogries.Count > 0)
         {
             result = result
                 .Where(entry =>

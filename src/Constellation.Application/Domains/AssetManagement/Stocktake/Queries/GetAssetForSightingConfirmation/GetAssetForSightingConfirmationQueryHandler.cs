@@ -8,7 +8,6 @@ using Constellation.Core.Models.Stocktake.Enums;
 using Core.Extensions;
 using Core.Models.Assets.Repositories;
 using Core.Models.Assets.ValueObjects;
-using Core.Models.Stocktake.Errors;
 using Core.Shared;
 using Serilog;
 using System.Threading;
@@ -33,7 +32,7 @@ internal sealed class GetAssetForSightingConfirmationQueryHandler
 
     public async Task<Result<AssetSightingResponse>> Handle(GetAssetForSightingConfirmationQuery request, CancellationToken cancellationToken)
     {
-        Asset asset = (request.AssetNumber != AssetNumber.Empty)
+        Asset? asset = (request.AssetNumber != AssetNumber.Empty)
             ? await _assetRepository.GetByAssetNumber(request.AssetNumber, cancellationToken)
             : await _assetRepository.GetBySerialNumber(request.SerialNumber, cancellationToken);
 
@@ -58,7 +57,7 @@ internal sealed class GetAssetForSightingConfirmationQueryHandler
             asset.ModelDescription,
             asset.CurrentLocation?.Category.AsStocktakeLocationCategory() ?? LocationCategory.Other,
             asset.CurrentLocation?.Site ?? string.Empty,
-            asset.CurrentLocation?.SchoolCode ?? string.Empty,
+            asset.CurrentLocation?.SchoolCode.ToString() ?? string.Empty,
             asset.CurrentAllocation?.AllocationType.AsStocktakeUserType() ?? UserType.Other,
             asset.CurrentAllocation?.ResponsibleOfficer ?? string.Empty,
             asset.CurrentAllocation?.UserId ?? string.Empty);

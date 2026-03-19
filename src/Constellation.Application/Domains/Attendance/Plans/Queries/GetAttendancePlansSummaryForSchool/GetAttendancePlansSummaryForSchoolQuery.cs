@@ -2,9 +2,9 @@
 
 using Abstractions.Messaging;
 using Constellation.Application.Domains.Attendance.Plans.Queries.GetAttendancePlansSummary;
-using GetAttendancePlansSummary;
+using Core.Models.Identifiers;
 using System.Collections.Generic;
 
 public sealed record GetAttendancePlansSummaryForSchoolQuery(
-    string SchoolCode)
+    SchoolCode SchoolCode)
     : IQuery<List<AttendancePlanSummaryResponse>>;

@@ -1,7 +1,6 @@
 ﻿namespace Constellation.Application.Domains.SciencePracs.Queries.GetLessonRollDetails;
 
 using Abstractions.Messaging;
-using Constellation.Application.Domains.SchoolContacts.Commands.CreateContact;
 using Core.Abstractions.Repositories;
 using Core.Errors;
 using Core.Models;
@@ -46,7 +45,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
     public async Task<Result<LessonRollDetailsResponse>> Handle(GetLessonRollDetailsQuery request, CancellationToken cancellationToken)
     {
-        SciencePracLesson lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
+        SciencePracLesson? lesson = await _lessonRepository.GetById(request.LessonId, cancellationToken);
 
         if (lesson is null)
         {
@@ -55,7 +54,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
             return Result.Failure<LessonRollDetailsResponse>(SciencePracLessonErrors.NotFound(request.LessonId));
         }
 
-        SciencePracRoll roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
+        SciencePracRoll? roll = lesson.Rolls.SingleOrDefault(roll => roll.Id == request.RollId);
 
         if (roll is null)
         {
@@ -68,7 +67,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
 
         foreach (SciencePracAttendance entry in roll.Attendance)
         {
-            Student student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
+            Student? student = await _studentRepository.GetById(entry.StudentId, cancellationToken);
 
             if (student is null)
                 continue;
@@ -81,7 +80,7 @@ internal sealed class GetLessonRollDetailsQueryHandler
                 entry.Present));
         }
 
-        School school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(roll.SchoolCode, cancellationToken);
 
         if (school is null)
         {

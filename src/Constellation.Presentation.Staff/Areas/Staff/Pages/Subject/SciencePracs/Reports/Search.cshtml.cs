@@ -12,6 +12,7 @@ using Constellation.Application.Models.Auth;
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.Students.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,7 @@ public class SearchModel : BasePageModel
     [ViewData] public string PageTitle => "Lesson Roll Reports";
 
     [BindProperty(SupportsGet = true)]
-    public string SchoolCode { get; set; }
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
 
     [BindProperty(SupportsGet = true)]
     public StudentId StudentId { get; set; } = StudentId.Empty;
@@ -76,7 +77,7 @@ public class SearchModel : BasePageModel
             ReportFor = student.IsSuccess ? student.Value.Name.DisplayName : $"student with Id {StudentId}";
         }
 
-        if (!string.IsNullOrWhiteSpace(SchoolCode))
+        if (SchoolCode != SchoolCode.Empty)
         {
             _logger.Information("Requested to retrieve Lesson Rolls for School with id {Id} by user {User}", SchoolCode, _currentUserService.UserName);
 

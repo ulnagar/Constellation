@@ -3,6 +3,7 @@
 using Abstractions.Messaging;
 using Core.Errors;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Errors;
 using Core.Models.SchoolContacts.Identifiers;
@@ -59,7 +60,7 @@ internal sealed class GetSchoolsForContactQueryHandler
         }
         else
         {
-            SchoolContact contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
+            SchoolContact? contact = await _contactRepository.GetById(request.ContactId, cancellationToken);
 
             if (contact is null)
             {
@@ -71,7 +72,7 @@ internal sealed class GetSchoolsForContactQueryHandler
                 return Result.Failure<List<SchoolResponse>>(SchoolContactErrors.NotFound(request.ContactId));
             }
 
-            List<string> activeSchoolCodes = contact.Assignments
+            List<SchoolCode> activeSchoolCodes = contact.Assignments
                 .Where(entry => !entry.IsDeleted)
                 .Select(entry => entry.SchoolCode)
                 .ToList();

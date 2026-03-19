@@ -307,7 +307,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations", (string)null);
+                    b.ToTable("JobActivations");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -1760,7 +1760,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes", (string)null);
+                    b.ToTable("DeviceNotes");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -3328,6 +3328,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<Guid>("SchoolContactId")
@@ -3427,6 +3428,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasColumnType("int");
 
                     b.Property<string>("SchoolCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(4)");
 
                     b.Property<int>("Status")
@@ -6163,7 +6165,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailMessage", b =>
                 {
-                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "From", b1 =>
+                    b.OwnsOne("Constellation.Core.ValueObjects.EmailSender", "From", b1 =>
                         {
                             b1.Property<Guid>("EmailMessageId")
                                 .HasColumnType("uniqueidentifier");
@@ -6188,7 +6190,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                                 .HasForeignKey("EmailMessageId");
                         });
 
-                    b.OwnsOne("Constellation.Core.ValueObjects.EmailRecipient", "ReplyTo", b1 =>
+                    b.OwnsOne("Constellation.Core.ValueObjects.EmailSender", "ReplyTo", b1 =>
                         {
                             b1.Property<Guid>("EmailMessageId")
                                 .HasColumnType("uniqueidentifier");
@@ -6346,7 +6348,8 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasOne("Constellation.Core.Models.School", null)
                         .WithMany("StaffAssignments")
                         .HasForeignKey("SchoolCode")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Constellation.Core.Models.SchoolContacts.SchoolContact", null)
                         .WithMany("Assignments")
@@ -6395,7 +6398,9 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasOne("Constellation.Core.Models.School", null)
                         .WithMany()
-                        .HasForeignKey("SchoolCode");
+                        .HasForeignKey("SchoolCode")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.StaffMembers.SchoolAssignment", b =>
@@ -6812,7 +6817,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions", (string)null);
+                            b1.ToTable("WorkFlows_Actions");
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");

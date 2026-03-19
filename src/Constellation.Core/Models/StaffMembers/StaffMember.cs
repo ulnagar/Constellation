@@ -9,6 +9,7 @@ using Enums;
 using Errors;
 using Events;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using System;
 using System.Collections.Generic;
@@ -113,7 +114,7 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
     }
 
     public Result AddSchoolAssignment(
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         IDateTimeProvider dateTime,
         DateOnly? startDate = null)
@@ -133,10 +134,10 @@ public sealed class StaffMember : AggregateRoot, IAuditableEntity
         switch (currentAssignment)
         {
             case null when startDate != dateTime.Today:
-                RaiseDomainEvent(new StaffMemberMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode, startDate));
+                RaiseDomainEvent(new StaffMemberMovedSchoolsDomainEvent(new(), Id, SchoolCode.Empty, schoolCode, startDate));
                 break;
             case null when startDate == dateTime.Today:
-                RaiseDomainEvent(new StaffMemberMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode));
+                RaiseDomainEvent(new StaffMemberMovedSchoolsDomainEvent(new(), Id, SchoolCode.Empty, schoolCode));
                 break;
             case not null when startDate != dateTime.Today:
                 RaiseDomainEvent(new StaffMemberMovedSchoolsDomainEvent(new(), Id, currentAssignment.SchoolCode, schoolCode, startDate));

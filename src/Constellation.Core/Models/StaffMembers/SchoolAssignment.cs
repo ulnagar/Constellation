@@ -4,6 +4,7 @@ using Abstractions.Clock;
 using Constellation.Core.Errors;
 using Errors;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -14,7 +15,7 @@ public sealed class SchoolAssignment : IAuditableEntity
 
     private SchoolAssignment(
         StaffId staffId,
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         DateOnly startDate,
         DateOnly? endDate)
@@ -29,7 +30,7 @@ public sealed class SchoolAssignment : IAuditableEntity
 
     public SchoolAssignmentId Id { get; private set; }
     public StaffId StaffId { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
     public string SchoolName { get; private set; }
     public DateOnly StartDate { get; private set; }
     public DateOnly? EndDate { get; private set; }
@@ -44,7 +45,7 @@ public sealed class SchoolAssignment : IAuditableEntity
 
     internal static Result<SchoolAssignment> Create(
         StaffId staffId,
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         DateOnly? startDate,
         DateOnly? endDate,
@@ -53,7 +54,7 @@ public sealed class SchoolAssignment : IAuditableEntity
         if (staffId == StaffId.Empty)
             return Result.Failure<SchoolAssignment>(StaffMemberErrors.InvalidId);
 
-        if (string.IsNullOrWhiteSpace(schoolCode) || string.IsNullOrWhiteSpace(schoolName))
+        if (schoolCode == Models.Identifiers.SchoolCode.Empty)
             return Result.Failure<SchoolAssignment>(DomainErrors.Partners.School.NotFound(schoolCode));
 
         startDate ??= dateTime.Today;

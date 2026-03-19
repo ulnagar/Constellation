@@ -15,7 +15,7 @@ public sealed class SciencePracRoll
 
     public SciencePracRoll(
         SciencePracLessonId lessonId,
-        string schoolCode)
+        SchoolCode schoolCode)
     {
         Id = new();
 
@@ -27,7 +27,7 @@ public sealed class SciencePracRoll
 
     public SciencePracRollId Id { get; private set; }
     public SciencePracLessonId LessonId { get; private set; }
-    public string SchoolCode { get; private set; }
+    public SchoolCode SchoolCode { get; private set; }
     public string SubmittedBy { get; private set; } = string.Empty;
 
     public IReadOnlyCollection<SciencePracAttendance> Attendance => _attendance;
@@ -49,25 +49,19 @@ public sealed class SciencePracRoll
 
         foreach (StudentId studentId in presentStudents)
         {
-            SciencePracAttendance attendance = _attendance.SingleOrDefault(entry => entry.StudentId == studentId);
+            SciencePracAttendance? attendance = _attendance.SingleOrDefault(entry => entry.StudentId == studentId);
 
-            if (attendance is null)
-                continue;
-
-            attendance.UpdateAttendance(true);
+            attendance?.UpdateAttendance(true);
         }
 
         foreach (StudentId studentId in absentStudents)
         {
-            SciencePracAttendance attendance = _attendance.SingleOrDefault(entry => entry.StudentId == studentId);
+            SciencePracAttendance? attendance = _attendance.SingleOrDefault(entry => entry.StudentId == studentId);
 
-            if (attendance is null)
-                continue;
-
-            attendance.UpdateAttendance(false);
+            attendance?.UpdateAttendance(false);
         }
 
-        if (_attendance.Count(entry => entry.Present) == 0 && string.IsNullOrWhiteSpace(comment))
+        if (!_attendance.Any(entry => entry.Present) && string.IsNullOrWhiteSpace(comment))
             return Result.Failure(SciencePracRollErrors.CommentRequiredNonePresent);
 
         SubmittedBy = submittedBy;
@@ -105,7 +99,7 @@ public sealed class SciencePracRoll
 
     public void AddStudent(StudentId studentId)
     {
-        SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
+        SciencePracAttendance? record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
         
         if (record is not null)
             return;
@@ -122,7 +116,7 @@ public sealed class SciencePracRoll
     /// <param name="studentId"></param>
     public SciencePracAttendance? RemoveStudent(StudentId studentId)
     {
-        SciencePracAttendance record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
+        SciencePracAttendance? record = _attendance.FirstOrDefault(entry => entry.StudentId == studentId);
 
         if (record is null)
             return null;

@@ -13,6 +13,7 @@ using Constellation.Core.Enums;
 using Constellation.Core.Models.Absences.Enums;
 using Constellation.Core.Models.Students.Identifiers;
 using Constellation.Core.Shared;
+using Core.Models.Identifiers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -57,7 +58,7 @@ public class SettingsModel : BasePageModel
     [BindProperty] 
     public StudentId StudentId { get; set; } = StudentId.Empty;
     [BindProperty]
-    public string? SchoolCode { get; set; }
+    public SchoolCode SchoolCode { get; set; } = SchoolCode.Empty;
     [BindProperty]
     public int? Grade { get; set; }
 
@@ -72,7 +73,7 @@ public class SettingsModel : BasePageModel
 
     public async Task<IActionResult> OnPost(CancellationToken cancellationToken = default)
     {
-        if (StudentId == StudentId.Empty && string.IsNullOrWhiteSpace(SchoolCode) && !Grade.HasValue)
+        if (StudentId == StudentId.Empty && SchoolCode == SchoolCode.Empty && !Grade.HasValue)
         {
             Error error = new("Validation.Page.EmptyValues", "You must select a value for Student or Grade or School to continue");
 

@@ -4,6 +4,7 @@ using Core.Models.Messaging.Sms;
 using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Identifiers;
 using Core.Models.Messaging.Sms.Repositories;
+using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -47,6 +48,18 @@ internal sealed class SmsRepository : ISmsRepository
 
         return originalMessage;
     }
+
+    public async Task<List<SmsMessage>> GetByNumber(
+        PhoneNumber phoneNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SmsMessage>()
+            .Where(message => 
+                message.From == phoneNumber.ToString(PhoneNumber.Format.International) ||
+                message.From == phoneNumber.ToString(PhoneNumber.Format.None) ||
+                message.To == phoneNumber.ToString(PhoneNumber.Format.International) ||
+                message.To == phoneNumber.ToString(PhoneNumber.Format.None))
+            .ToListAsync(cancellationToken);
 
     public void Insert(SmsMessage message) => _context.Set<SmsMessage>().Add(message);
 }

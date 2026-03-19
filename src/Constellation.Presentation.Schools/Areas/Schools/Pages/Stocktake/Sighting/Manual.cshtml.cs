@@ -81,7 +81,7 @@ public class ManualModel : BasePageModel
         if (UserType.Equals(UserType.School))
         {
             UserName = school.Value.Name;
-            UserCode = school.Value.SchoolCode;
+            UserCode = school.Value.SchoolCode.ToString();
         }
 
         RegisterManualSightingCommand command = new(
@@ -90,7 +90,7 @@ public class ManualModel : BasePageModel
             Description,
             LocationCategory.PublicSchool,
             school.Value.Name,
-            school.Value.SchoolCode,
+            school.Value.SchoolCode.ToString(),
             UserType,
             UserName,
             UserCode,

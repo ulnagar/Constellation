@@ -80,10 +80,11 @@ public sealed class PhoneNumber : ValueObject
         {
             Format.Mobile => $"{Number[..4]} {Number[4..7]} {Number[7..10]}",
             Format.LandLine => $"({Number[..2]}) {Number[2..6]} {Number[6..10]}",
+            Format.International => $"61{Number[1..]}",
             Format.None => Number,
             _ => Number
         };
-
+    
     private string Number { get; }
 
     public bool IsMobile()
@@ -110,6 +111,7 @@ public sealed class PhoneNumber : ValueObject
     {
         LandLine,
         Mobile,
+        International,
         None
     }
 }

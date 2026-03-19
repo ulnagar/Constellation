@@ -13,7 +13,7 @@ public sealed record LessonRollDetailsResponse(
     SciencePracLessonId LessonId,
     string Name,
     DateOnly DueDate,
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string SchoolName,
     LessonRollDetailsResponse.Contact ContactDetails,
     DateOnly? DateDelivered,

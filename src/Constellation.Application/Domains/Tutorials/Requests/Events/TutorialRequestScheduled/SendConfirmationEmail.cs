@@ -7,8 +7,7 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
-using Core.Models.LinkedSystems;
-using Core.Models.LinkedSystems.Errors;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -180,17 +179,20 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(familyRecipient.Value);
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode, Position.Coordinator, cancellationToken);
-
-        foreach (var contact in contacts)
+        if (student.CurrentEnrolment is not null && student.CurrentEnrolment.SchoolCode != SchoolCode.Empty)
         {
-            if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
-                continue;
+            List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment.SchoolCode, Position.Coordinator, cancellationToken);
 
-            Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();
+            foreach (var contact in contacts)
+            {
+                if (recipients.Any(entry => entry.Email == contact.EmailAddress.Email))
+                    continue;
 
-            if (contactRecipient.IsSuccess)
-                recipients.Add(contactRecipient.Value);
+                Result<EmailRecipient> contactRecipient = contact.GetEmailRecipient();
+
+                if (contactRecipient.IsSuccess)
+                    recipients.Add(contactRecipient.Value);
+            }
         }
 
         Result result = await _emailService.SendTutorialRequestScheduledEmail(recipients, tutorialRequest, teamName, tutorialSchedule, firstLessonDate, cancellationToken);

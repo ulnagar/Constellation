@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.StaffMembers.Queries.GetStaffById;
 
 using Abstractions.Messaging;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Errors;
 using Core.Models.StaffMembers.Repositories;
@@ -41,7 +42,7 @@ internal sealed class GetStaffByIdQueryHandler
             staffMember.Gender,
             staffMember.EmailAddress,
             staffMember.PhoneNumber,
-            staffMember.CurrentAssignment?.SchoolCode!,
+            staffMember.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty,
             staffMember.IsShared);
 
         return response;

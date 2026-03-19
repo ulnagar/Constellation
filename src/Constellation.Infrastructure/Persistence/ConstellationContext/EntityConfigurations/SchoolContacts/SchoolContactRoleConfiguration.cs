@@ -2,6 +2,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityCo
 
 using Constellation.Core.Models.SchoolContacts;
 using Core.Models;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,8 @@ internal sealed class SchoolContactRoleConfiguration : IEntityTypeConfiguration<
 
         builder
             .Property(entry => entry.SchoolCode)
-            .IsRequired(false);
+            .HasConversion(
+                id => id.Value,
+                value => SchoolCode.FromValue(value));
     }
 }

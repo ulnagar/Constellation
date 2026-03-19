@@ -2,6 +2,7 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Clock;
+using Core.Models.Identifiers;
 using Core.Models.Students;
 using Core.Models.Students.Errors;
 using Core.Models.Students.Events;
@@ -38,7 +39,7 @@ internal sealed class RemovePreviousSchoolEnrolment
     public async Task Handle(StudentMovedSchoolsDomainEvent notification, CancellationToken cancellationToken)
     {
         // This event is only for post-dated events. These cannot occur without a previousSchoolCode and currentSchoolCode entry.
-        if (string.IsNullOrEmpty(notification.PreviousSchoolCode) || string.IsNullOrEmpty(notification.CurrentSchoolCode))
+        if (notification.PreviousSchoolCode == SchoolCode.Empty || notification.CurrentSchoolCode == SchoolCode.Empty)
             return;
 
         _logger

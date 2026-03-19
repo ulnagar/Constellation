@@ -47,7 +47,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
     public async Task<Result<AttendancePlanDetailsResponse>> Handle(GetAttendancePlanDetailsQuery request, CancellationToken cancellationToken)
     {
-        AttendancePlan plan = await _planRepository.GetById(request.PlanId, cancellationToken);
+        AttendancePlan? plan = await _planRepository.GetById(request.PlanId, cancellationToken);
 
         if (plan is null)
         {
@@ -65,7 +65,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
         foreach (var period in timetablePeriods)
         {
-            AttendancePlanPeriod planPeriod = plan.Periods.FirstOrDefault(planPeriod => planPeriod.PeriodId == period.Id);
+            AttendancePlanPeriod? planPeriod = plan.Periods.FirstOrDefault(planPeriod => planPeriod.PeriodId == period.Id);
 
             if (planPeriod is null)
             {
@@ -124,7 +124,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
                 period.PercentMissed));
         }
 
-        AttendancePlanDetailsResponse.SciencePracLesson scienceLesson = plan.SciencePracLesson is not null
+        AttendancePlanDetailsResponse.SciencePracLesson? scienceLesson = plan.SciencePracLesson is not null
             ? new(
                 plan.SciencePracLesson.Week,
                 plan.SciencePracLesson.Day,
@@ -154,7 +154,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
         foreach (Offering offering in offerings.OrderBy(offering => offering.Name))
         {
-            Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+            Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
             IEnumerable<PeriodId> periodIds = offering.Sessions
                 .Where(session => !session.IsDeleted)
@@ -164,7 +164,7 @@ internal sealed class GetAttendancePlanDetailsQueryHandler
 
             foreach (PeriodId periodId in periodIds)
             {
-                AttendancePlanPeriod matchingPeriod = plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
+                AttendancePlanPeriod? matchingPeriod = plan.Periods.FirstOrDefault(period => period.PeriodId == periodId);
 
                 if (matchingPeriod is null)
                     continue;

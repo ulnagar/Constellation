@@ -8,6 +8,7 @@ using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Models.Students.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -59,15 +60,18 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
         DateOnly endDate = startDate.AddDays(12);
 
         List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
-        List<IGrouping<string, Student>> studentsBySchool = students
+        List<IGrouping<SchoolCode?, Student>> studentsBySchool = students
             .OrderBy(s => s.CurrentEnrolment?.SchoolName)
             .GroupBy(s => s.CurrentEnrolment?.SchoolCode)
             .ToList();
 
-        foreach (IGrouping<string, Student> school in studentsBySchool)
+        foreach (IGrouping<SchoolCode?, Student> school in studentsBySchool)
         {
             if (cancellationToken.IsCancellationRequested)
                 return;
+
+            if (school.Key is null)
+                continue;
 
             _logger.Information("{id}: Processing School: {name}", JobId, school.First().CurrentEnrolment?.SchoolName);
 
@@ -130,7 +134,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
             }
 
             // Email the file to the school contacts
-            await SendSchoolEmailAsync(school.Key, attachmentList, startDate, cancellationToken);
+            await SendSchoolEmailAsync(school.Key.Value, attachmentList, startDate, cancellationToken);
 
             _logger.Information("{id}: Cleaning up temporary files created for {school}", JobId, school.First().CurrentEnrolment?.SchoolName);
 
@@ -201,7 +205,7 @@ internal sealed class AttendanceReportJob : IAttendanceReportJob
     }
     
     private async Task SendSchoolEmailAsync(
-        string schoolCode, 
+        SchoolCode schoolCode, 
         List<Attachment> attachmentList, 
         DateOnly dateToReport, 
         CancellationToken cancellationToken)

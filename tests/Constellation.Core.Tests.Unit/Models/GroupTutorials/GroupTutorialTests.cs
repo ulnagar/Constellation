@@ -18,7 +18,7 @@ public class GroupTutorialTests
 {
     private IDateTimeProvider _dateTimeProvider = new DateTimeProvider();
 
-    private School School => new School() { Code = "1234", Name = "Imaginarium Public School" };
+    private School School => new School() { Code = SchoolCode.FromValue("1234"), Name = "Imaginarium Public School" };
 
     private Student Student => Student.Create(
             StudentReferenceNumber.FromValue("123456789"),

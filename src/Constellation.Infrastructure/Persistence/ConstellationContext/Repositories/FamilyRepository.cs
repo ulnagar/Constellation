@@ -84,6 +84,14 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Include(family => family.Students)
             .FirstOrDefaultAsync(family => family.Id == Id, cancellationToken);
 
+    public async Task<Parent?> GetParentById(
+        ParentId id,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .Where(parent => parent.Id == id)
+            .SingleOrDefaultAsync(cancellationToken);
+
     public async Task<List<Family>> GetFamiliesByStudentId(
         StudentId studentId,
         CancellationToken cancellationToken = default) =>

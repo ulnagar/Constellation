@@ -8,6 +8,7 @@ using Enums;
 using Errors;
 using Events;
 using Identifiers;
+using Models.Identifiers;
 using Primitives;
 using Shared;
 using System;
@@ -73,7 +74,7 @@ public class Student : AggregateRoot, IAuditableEntity
         IDateTimeProvider dateTime)
     {
         Student entry = new(
-            null,
+            StudentReferenceNumber.Empty,
             name,
             EmailAddress.None,
             gender,
@@ -92,7 +93,7 @@ public class Student : AggregateRoot, IAuditableEntity
         Name name,
         EmailAddress emailAddress,
         Grade grade,
-        School school,
+        School? school,
         Gender gender,
         IDateTimeProvider dateTime)
     {
@@ -105,10 +106,14 @@ public class Student : AggregateRoot, IAuditableEntity
             emailAddress,
             gender,
             null);
-        Result enrolment = entry.AddSchoolEnrolment(school.Code, school.Name, grade, dateTime);
 
-        if (enrolment.IsFailure)
-            return Result.Failure<Student>(enrolment.Error);
+        if (school is not null)
+        {
+            Result enrolment = entry.AddSchoolEnrolment(school.Code, school.Name, grade, dateTime);
+
+            if (enrolment.IsFailure)
+                return Result.Failure<Student>(enrolment.Error);
+        }
 
         entry.AwardTally = new(entry.Id);
         entry.IndigenousStatus = IndigenousStatus.Unknown;
@@ -121,7 +126,7 @@ public class Student : AggregateRoot, IAuditableEntity
     public void UpdateIndigenousStatus(IndigenousStatus status) => IndigenousStatus = status;
     
     public Result AddSchoolEnrolment(
-        string schoolCode,
+        SchoolCode schoolCode,
         string schoolName,
         Grade grade,
         IDateTimeProvider dateTime,
@@ -143,10 +148,10 @@ public class Student : AggregateRoot, IAuditableEntity
         switch (currentEnrolment)
         {
             case null when startDate != dateTime.Today:
-                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode, startDate));
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, SchoolCode.Empty, schoolCode, startDate));
                 break;
             case null when startDate == dateTime.Today:
-                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, string.Empty, schoolCode));
+                RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, SchoolCode.Empty, schoolCode));
                 break;
             case not null when startDate != dateTime.Today:
                 RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, currentEnrolment.SchoolCode, schoolCode, startDate));
@@ -178,14 +183,14 @@ public class Student : AggregateRoot, IAuditableEntity
     {
         enrolment.Delete(dateTime.Today, dateTime);
 
-        RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, enrolment.SchoolCode, string.Empty, dateTime.Today));
+        RaiseDomainEvent(new StudentMovedSchoolsDomainEvent(new(), Id, enrolment.SchoolCode, SchoolCode.Empty, dateTime.Today));
     }
 
     public Result AddSystemLink(
         SystemType type,
         string value)
     {
-        StudentSystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+        StudentSystemLink? existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
 
         Result<StudentSystemLink> entry = StudentSystemLink.Create(Id, type, value);
 
@@ -203,7 +208,7 @@ public class Student : AggregateRoot, IAuditableEntity
     public Result RemoveSystemLink(
         SystemType type)
     {
-        StudentSystemLink existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
+        StudentSystemLink? existingEntry = _systemLinks.FirstOrDefault(entry => entry.System == type);
 
         if (existingEntry is null)
             return Result.Failure(SystemLinkErrors.NotFound(type));
@@ -241,7 +246,7 @@ public class Student : AggregateRoot, IAuditableEntity
     /// <param name="secondStart"></param>
     /// <param name="secondEnd"></param>
     /// <returns></returns>
-    private bool DoDateRangesOverlap(DateOnly firstStart, DateOnly firstEnd, DateOnly secondStart, DateOnly secondEnd)
+    private static bool DoDateRangesOverlap(DateOnly firstStart, DateOnly firstEnd, DateOnly secondStart, DateOnly secondEnd)
     {
         if (firstStart == secondStart)
         {
@@ -280,9 +285,8 @@ public class Student : AggregateRoot, IAuditableEntity
     {
         IsDeleted = true;
 
-        if (CurrentEnrolment is not null)
-            CurrentEnrolment.Delete(dateTime.Today, dateTime);
-     
+        CurrentEnrolment?.Delete(dateTime.Today, dateTime);
+
         RaiseDomainEvent(new StudentWithdrawnDomainEvent(new(), Id));
     }
 

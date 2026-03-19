@@ -59,7 +59,7 @@ public class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        if (string.IsNullOrWhiteSpace(CurrentSchoolCode))
+        if (CurrentSchoolCode == SchoolCode.Empty)
         {
             ModalContent = ErrorDisplay.Create(ApplicationErrors.SchoolInvalid);
 

@@ -67,7 +67,7 @@ internal sealed class GetSchoolDetailsQueryHandler
 
     public async Task<Result<SchoolDetailsResponse>> Handle(GetSchoolDetailsQuery request, CancellationToken cancellationToken)
     {
-        School school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
+        School? school = await _schoolRepository.GetById(request.SchoolCode, cancellationToken);
 
         if (school is null)
         {
@@ -95,7 +95,7 @@ internal sealed class GetSchoolDetailsQueryHandler
                 {
                     case OfferingEnrolment offeringEnrolment:
                         {
-                            Offering offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
+                            Offering? offering = await _offeringRepository.GetById(offeringEnrolment.OfferingId, cancellationToken);
 
                             if (offering is null)
                                 continue;
@@ -109,7 +109,7 @@ internal sealed class GetSchoolDetailsQueryHandler
                         }
                     case TutorialEnrolment tutorialEnrolment:
                         {
-                            Tutorial tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
+                            Tutorial? tutorial = await _tutorialRepository.GetById(tutorialEnrolment.TutorialId, cancellationToken);
 
                             if (tutorial is null)
                                 continue;
@@ -137,10 +137,10 @@ internal sealed class GetSchoolDetailsQueryHandler
                 {
                     int maxYear = student.SchoolEnrolments.Max(item => item.Year);
 
-                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                    SchoolEnrolmentId? enrolmentId = student.SchoolEnrolments
                         .Where(entry => entry.Year == maxYear)
                         .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
-                    .MaxBy(entry => entry.Date)
+                    .MaxBy(entry => entry.Date)?
                         .Id;
 
                     schoolEnrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
@@ -152,7 +152,7 @@ internal sealed class GetSchoolDetailsQueryHandler
                 student.StudentReferenceNumber,
                 student.Name,
                 student.Gender,
-                schoolEnrolment?.SchoolName,
+                schoolEnrolment?.SchoolName ?? string.Empty,
                 schoolEnrolment?.Grade,
                 studentOfferings,
                 currentEnrolment));

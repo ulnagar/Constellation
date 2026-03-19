@@ -6,7 +6,9 @@ using Constellation.Core.Models.Covers.Enums;
 using Constellation.Core.Models.Covers.Repositories;
 using Core.Abstractions.Repositories;
 using Core.Models;
+using Core.Models.Casuals;
 using Core.Models.Identifiers;
+using Core.Models.Offerings;
 using Core.Models.Offerings.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Identifiers;
@@ -47,7 +49,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
     {
         List<CoversListResponse> returnData = new();
 
-        var covers = await _coverRepository
+        List<Cover> covers = await _coverRepository
             .GetAllCurrentAndUpcoming(cancellationToken);
 
         if (covers.Count == 0)
@@ -55,19 +57,19 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
             return returnData;
         }
 
-        foreach (var cover in covers)
+        foreach (Cover cover in covers)
         {
-            var offering = await _offeringRepository
+            Offering? offering = await _offeringRepository
                 .GetById(cover.OfferingId, cancellationToken);
 
-            var offeringName = offering is null ? "" : offering.Name;
+            string offeringName = offering?.Name ?? string.Empty;
 
-            string teacherName = "";
-            string teacherSchool = "";
+            string teacherName;
+            string teacherSchool;
 
             if (cover.TeacherType == CoverTeacherType.Casual)
             {
-                var teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
+                Casual? teacher = await _casualRepository.GetById(CasualId.FromValue(Guid.Parse(cover.TeacherId)), cancellationToken);
 
                 if (teacher is null)
                 {
@@ -76,7 +78,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
 
                 teacherName = teacher.Name.DisplayName;
 
-                var school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
+                School? school = await _schoolRepository.GetById(teacher.SchoolCode, cancellationToken);
 
                 if (school is null)
                 {
@@ -89,7 +91,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
             {
                 StaffId staffId = StaffId.FromValue(Guid.Parse(cover.TeacherId));
 
-                StaffMember teacher = staffId == StaffId.Empty
+                StaffMember? teacher = staffId == StaffId.Empty
                     ? null
                     : await _staffRepository.GetById(staffId, cancellationToken);
 
@@ -101,7 +103,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
                 if (teacher.CurrentAssignment is null)
                     continue;
 
-                School school = await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken);
+                School? school = await _schoolRepository.GetById(teacher.CurrentAssignment.SchoolCode, cancellationToken);
 
                 if (school is null)
                     continue;
@@ -109,7 +111,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
                 teacherSchool = school.Name;
             }
 
-            CoverType coverType = cover switch
+            CoverType? coverType = cover switch
             {
                 ClassCover => CoverType.ClassCover,
                 AccessCover => CoverType.AccessCover,
@@ -117,7 +119,7 @@ internal sealed class GetAllCurrentAndFutureCoversQueryHandler
             };
 
 
-            var entry = new CoversListResponse(
+            CoversListResponse entry = new CoversListResponse(
                 cover.Id,
                 offeringName,
                 cover.TeacherId,

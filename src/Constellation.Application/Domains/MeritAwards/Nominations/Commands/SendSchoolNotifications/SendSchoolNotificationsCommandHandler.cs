@@ -7,6 +7,7 @@ using Constellation.Core.Models.Awards.Errors;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
 using Core.Abstractions.Services;
+using Core.Models.Identifiers;
 using Core.Models.Messaging.Email;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
@@ -59,7 +60,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
 
     public async Task<Result> Handle(SendSchoolNotificationsCommand request, CancellationToken cancellationToken)
     {
-        NominationPeriod period = await _awardRepository.GetById(request.PeriodId, cancellationToken);
+        NominationPeriod? period = await _awardRepository.GetById(request.PeriodId, cancellationToken);
 
         if (period is null)
         {
@@ -82,11 +83,14 @@ internal sealed class SendSchoolNotificationsCommandHandler
 
         List<Student> students = await _studentRepository.GetListFromIds(studentIds, cancellationToken);
 
-        IEnumerable<IGrouping<string, Student>> studentsBySchool = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode ?? string.Empty);
+        IEnumerable<IGrouping<SchoolCode, Student>> studentsBySchool = students.GroupBy(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty);
 
         foreach (var schoolGroup in studentsBySchool)
         {
-            string school = schoolGroup.First().CurrentEnrolment?.SchoolName;
+            if (schoolGroup.Key == SchoolCode.Empty)
+                continue;
+
+            string? school = schoolGroup.First().CurrentEnrolment?.SchoolName;
 
             Dictionary<Name, List<Nomination>> schoolStudents = new();
 
@@ -105,7 +109,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
 
             List<EmailRecipient> toRecipients = [];
             List<EmailRecipient> ccRecipients = [];
-            Name principalName = null;
+            Name? principalName = null;
 
             foreach (SchoolContact contact in contacts)
             {

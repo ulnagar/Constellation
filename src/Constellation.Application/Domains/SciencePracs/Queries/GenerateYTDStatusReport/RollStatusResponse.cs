@@ -1,10 +1,11 @@
 ﻿namespace Constellation.Application.Domains.SciencePracs.Queries.GenerateYTDStatusReport;
 
 using Core.Enums;
+using Core.Models.Identifiers;
 using System.Collections.Generic;
 
 public sealed record RollStatusResponse(
-    string SchoolCode,
+    SchoolCode SchoolCode,
     string SchoolName,
     List<RollStatusResponse.RollStatusGradeData> GradeData)
 {

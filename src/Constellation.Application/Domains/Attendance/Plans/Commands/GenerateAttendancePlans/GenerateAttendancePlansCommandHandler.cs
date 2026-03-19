@@ -9,6 +9,7 @@ using Constellation.Core.Models.Timetables.Repositories;
 using Core.Abstractions.Clock;
 using Core.Enums;
 using Core.Models.Attendance.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.Offerings;
 using Core.Models.Students;
 using Core.Models.Students.Identifiers;
@@ -69,16 +70,16 @@ internal sealed class GenerateAttendancePlansCommandHandler
             if (student is not null)
                 students.Add(student);
         }
-        else if (!string.IsNullOrWhiteSpace(request.SchoolCode) || request.Grade.HasValue)
+        else if (request.SchoolCode != SchoolCode.Empty || request.Grade.HasValue)
         {
             List<Grade> grades = new();
 
             if (request.Grade.HasValue)
                 grades.Add(request.Grade.Value);
 
-            List<string> schoolCodes = new();
+            List<SchoolCode> schoolCodes = new();
 
-            if (!string.IsNullOrWhiteSpace(request.SchoolCode))
+            if (request.SchoolCode != SchoolCode.Empty)
                 schoolCodes.Add(request.SchoolCode);
 
             List<Student> selectedStudents = await _studentRepository.GetFilteredStudents(

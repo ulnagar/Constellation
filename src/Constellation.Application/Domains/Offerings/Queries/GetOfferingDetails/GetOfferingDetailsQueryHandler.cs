@@ -14,6 +14,7 @@ using Constellation.Core.Models.Subjects;
 using Constellation.Core.Models.Subjects.Errors;
 using Constellation.Core.Shared;
 using Core.Enums;
+using Core.Models.Identifiers;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students.Identifiers;
@@ -61,7 +62,7 @@ internal sealed class GetOfferingDetailsQueryHandler
 
     public async Task<Result<OfferingDetailsResponse>> Handle(GetOfferingDetailsQuery request, CancellationToken cancellationToken)
     {
-        Offering offering = await _offeringRepository.GetById(request.Id, cancellationToken);
+        Offering? offering = await _offeringRepository.GetById(request.Id, cancellationToken);
 
         if (offering is null)
         {
@@ -70,7 +71,7 @@ internal sealed class GetOfferingDetailsQueryHandler
             return Result.Failure<OfferingDetailsResponse>(OfferingErrors.NotFound(request.Id));
         }
 
-        Course course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
+        Course? course = await _courseRepository.GetById(offering.CourseId, cancellationToken);
 
         if (course is null)
         {
@@ -85,7 +86,7 @@ internal sealed class GetOfferingDetailsQueryHandler
 
         foreach (Student student in enrolledStudents)
         {
-            SchoolEnrolment enrolment = student.CurrentEnrolment;
+            SchoolEnrolment? enrolment = student.CurrentEnrolment;
 
             bool currentEnrolment = true;
 
@@ -98,10 +99,10 @@ internal sealed class GetOfferingDetailsQueryHandler
 
                     int maxYear = student.SchoolEnrolments.Max(item => item.Year);
 
-                    SchoolEnrolmentId enrolmentId = student.SchoolEnrolments
+                    SchoolEnrolmentId? enrolmentId = student.SchoolEnrolments
                         .Where(entry => entry.Year == maxYear)
                         .Select(entry => new { entry.Id, Date = entry.EndDate ?? DateOnly.MaxValue })
-                        .MaxBy(entry => entry.Date)
+                        .MaxBy(entry => entry.Date)?
                         .Id;
 
                     enrolment = student.SchoolEnrolments.FirstOrDefault(entry => entry.Id == enrolmentId);
@@ -114,7 +115,7 @@ internal sealed class GetOfferingDetailsQueryHandler
                 student.Gender,
                 student.Name,
                 enrolment?.Grade,
-                enrolment?.SchoolCode,
+                enrolment?.SchoolCode ?? SchoolCode.Empty,
                 enrolment?.SchoolName,
                 currentEnrolment));
         }
@@ -126,7 +127,7 @@ internal sealed class GetOfferingDetailsQueryHandler
             if (session.IsDeleted)
                 continue;
 
-            Period period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
+            Period? period = await _periodRepository.GetById(session.PeriodId, cancellationToken);
 
             if (period is null)
             {
@@ -150,7 +151,7 @@ internal sealed class GetOfferingDetailsQueryHandler
             if (assignment.IsDeleted)
                 continue;
 
-            StaffMember teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
+            StaffMember? teacher = await _staffRepository.GetById(assignment.StaffId, cancellationToken);
 
             if (teacher is null)
             {

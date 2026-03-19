@@ -42,13 +42,13 @@ internal sealed class GetSchoolAllocationListQueryHandler
         foreach (School school in schools)
         {
             List<Asset> schoolAssets = assets
-                .Where(entry => entry.CurrentAllocation?.UserId == school.Code)
+                .Where(entry => entry.CurrentAllocation?.UserId == school.Code.ToString())
                 .ToList();
 
-            if (!schoolAssets.Any())
+            if (schoolAssets.Count == 0)
             {
                 response.Add(new(
-                    school.Code,
+                    school.Code.ToString(),
                     school.Name,
                     string.Empty,
                     AssetId.Empty,
@@ -66,7 +66,7 @@ internal sealed class GetSchoolAllocationListQueryHandler
             foreach (Asset asset in schoolAssets)
             {
                 response.Add(new(
-                    school.Code,
+                    school.Code.ToString(),
                     school.Name,
                     string.Empty,
                     asset.Id,

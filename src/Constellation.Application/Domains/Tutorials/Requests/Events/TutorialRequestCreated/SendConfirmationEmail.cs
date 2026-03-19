@@ -7,6 +7,7 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Shared;
 using Core.Abstractions.Repositories;
 using Core.Models.Families;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Enums;
 using Core.Models.SchoolContacts.Repositories;
@@ -112,7 +113,7 @@ internal sealed class SendConfirmationEmail
                 recipients.Add(familyRecipient.Value);
         }
 
-        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode ?? string.Empty, Position.Coordinator, cancellationToken);
+        List<SchoolContact> contacts = await _contactRepository.GetBySchoolAndRole(student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty, Position.Coordinator, cancellationToken);
 
         foreach (SchoolContact contact in contacts)
         {

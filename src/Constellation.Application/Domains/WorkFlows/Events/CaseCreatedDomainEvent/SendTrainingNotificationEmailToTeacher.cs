@@ -6,6 +6,7 @@ using Constellation.Application.Extensions;
 using Constellation.Core.Models.AppSettings.Enums;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Repositories;
+using Core.Models.Identifiers;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
@@ -160,9 +161,9 @@ internal sealed class SendTrainingNotificationEmailToTeacher
 
             if (assignee.IsShared)
             {
-                string? schoolCode = assignee.CurrentAssignment?.SchoolCode ?? null;
+                SchoolCode schoolCode = assignee.CurrentAssignment?.SchoolCode ?? SchoolCode.Empty;
 
-                if (schoolCode is not null)
+                if (schoolCode != SchoolCode.Empty)
                 {
                     List<SchoolContact> sharedSchoolPrincipals = await _contactRepository.GetPrincipalsForSchool(schoolCode, cancellationToken);
 

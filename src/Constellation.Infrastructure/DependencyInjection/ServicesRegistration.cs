@@ -139,7 +139,7 @@ public static class ServicesRegistration
             selector.FromAssemblies(
                 Constellation.Application.AssemblyReference.Assembly,
                 Constellation.Infrastructure.AssemblyReference.Assembly)
-            .AddClasses(classes => classes.InNamespaceOf<ActiveDirectoryActionsService>(), false)
+            .AddClasses(classes => classes.InNamespaceOf<AppSettingsService>(), false)
             .UsingRegistrationStrategy(RegistrationStrategy.Skip)
             .AsMatchingInterface()
             .WithScopedLifetime());

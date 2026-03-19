@@ -8,7 +8,7 @@ using System;
 public sealed record StaffMemberMovedSchoolsDomainEvent(
     DomainEventId Id,
     StaffId StaffId,
-    string PreviousSchoolCode,
-    string CurrentSchoolCode,
+    SchoolCode PreviousSchoolCode,
+    SchoolCode CurrentSchoolCode,
     DateOnly? DelayUntil = null)
     : DomainEvent(Id, DelayUntil);

@@ -2,10 +2,12 @@
 
 namespace Constellation.Application.DTOs
 {
+    using Core.Models.Identifiers;
+
     public class SchoolDto
     {
         [Required]
-        public string Code { get; set; }
+        public SchoolCode Code { get; set; }
 
         [Required]
         public string Name { get; set; }
