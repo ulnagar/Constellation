@@ -82,6 +82,11 @@ internal sealed class SendAbsenceDigestToParentCommandHandler
 
         foreach (Family family in families)
         {
+            StudentFamilyMembership? link = family.Students.FirstOrDefault(entry => entry.StudentId == student.Id);
+
+            if (link is null || !link.IsResidentialFamily)
+                continue;
+
             List<EmailRecipient> recipients = new();
 
             Result<EmailRecipient> familyEmail = EmailRecipient.Create(family.FamilyTitle, family.FamilyEmail);

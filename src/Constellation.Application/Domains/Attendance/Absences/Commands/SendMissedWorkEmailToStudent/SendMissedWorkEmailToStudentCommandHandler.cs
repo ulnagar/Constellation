@@ -47,7 +47,7 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
 
     public async Task<Result> Handle(SendMissedWorkEmailToStudentCommand request, CancellationToken cancellationToken) 
     {
-        Student student = await _studentRepository.GetById(request.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(request.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -60,6 +60,11 @@ internal sealed class SendMissedWorkEmailToStudentCommandHandler
 
         foreach (var family in families)
         {
+            StudentFamilyMembership? link = family.Students.FirstOrDefault(entry => entry.StudentId == student.Id);
+
+            if (link is null || !link.IsResidentialFamily)
+                continue;
+
             List<EmailRecipient> recipients = new();
 
             Result<EmailRecipient> studentEmailResult = EmailRecipient.Create(student.Name.DisplayName, student.EmailAddress.Email);

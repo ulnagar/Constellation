@@ -154,6 +154,11 @@ internal sealed class SendAbsenceNotificationToParentCommandHandler
 
         foreach (Family family in families)
         {
+            StudentFamilyMembership? link = family.Students.FirstOrDefault(entry => entry.StudentId == student.Id);
+
+            if (link is null || !link.IsResidentialFamily)
+                continue;
+
             List<EmailRecipient> recipients = [];
             List<PhoneNumber> phoneNumbers = [];
 
