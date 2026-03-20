@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Messaging.History.Queries;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Messaging.Email.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.Models;
 using Core.Models.EmergencyConsole.Enums;
@@ -83,12 +84,22 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 _ => MessageStatus.Error
             };
 
+            List<CommunicationRecordResponse.Recipient> recipients = [];
+
+            foreach (EmailMessageRecipient recipient in email.Recipients)
+            {
+                recipients.Add(new(
+                    recipient.RecipientType,
+                    recipient.Recipient.Name,
+                    recipient.Recipient.Email));
+            }
+
             responses.Add(new(
                 email.Id,
                 MessageType.Email,
                 MessageDirection.Outbound, 
                 $"{email.From.Name} <{email.From.Email}>",
-                email.Recipients.Select(recipient => $"{recipient.RecipientType.ToString()}: {recipient.Recipient.Name} <{recipient.Recipient.Email}>").ToList(),
+                recipients,
                 email.Subject,
                 status,
                 email.CreatedAt));
@@ -105,12 +116,21 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 _ => MessageStatus.Error
             };
 
+            List<CommunicationRecordResponse.Recipient> recipients =
+            [
+                new(
+                    EmailRecipientType.To,
+                    sms.To,
+                    sms.To)
+
+            ];
+
             responses.Add(new(
                 sms.Id,
                 MessageType.SMS,
                 sms.Direction,
                 sms.From,
-                [ sms.To ],
+                recipients,
                 sms.Message,
                 status,
                 sms.CreatedAt));

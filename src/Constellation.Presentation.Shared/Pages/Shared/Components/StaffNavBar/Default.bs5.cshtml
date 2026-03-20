@@ -33,6 +33,19 @@
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Families/Index">Families</a></li>
                 </ul>
             </li>
+            
+            <li class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="False">Messaging <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Index">Recent</a></li>
+                    @if (Model.CanAccessEmergencyConsole)
+                    {
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Emergency/Index">Emergency Console</a></li>
+                    }
+                </ul>
+            </li>
 
             <li class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Subjects <span class="caret"></span></a>

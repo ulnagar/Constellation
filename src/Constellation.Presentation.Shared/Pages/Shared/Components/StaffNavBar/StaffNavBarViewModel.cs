@@ -8,4 +8,5 @@ public sealed class StaffNavBarViewModel
 
     public bool CanAccessParentPortal { get; set; }
     public bool CanAccessSchoolPortal { get; set; }
+    public bool CanAccessEmergencyConsole { get; set; }
 }

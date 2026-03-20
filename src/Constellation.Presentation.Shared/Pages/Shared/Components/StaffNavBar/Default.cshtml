@@ -14,7 +14,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
-        <div class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
+        <a class="navbar-collapse collapse d-xl-inline-flex justify-content-between">
             <ul class="navbar-nav flex-grow-1 mr-auto">
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Partners <span class="caret"></span></a>
@@ -29,6 +29,19 @@
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Index">Students</a>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Students/Families/Index">Families</a>
+                    </div>
+                </li>
+                
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="False">Messaging <span class="caret"></span></a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a>
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Index">Recent</a>
+                        @if (Model.CanAccessEmergencyConsole)
+                        {
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" asp-area="Admin" asp-page="/Emergency/Index">Emergency Console</a>
+                        }
                     </div>
                 </li>
 
