@@ -70,7 +70,7 @@ internal sealed class GetContactListQueryHandler
 
     public async Task<Result<List<ContactResponse>>> Handle(GetContactListQuery request, CancellationToken cancellationToken)
     {
-        List<ContactResponse> result = new();
+        List<ContactResponse> result = [];
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
@@ -125,8 +125,8 @@ internal sealed class GetContactListQueryHandler
                 ContactCategory.Student,
                 student.Name.DisplayName,
                 student.EmailAddress,
-                null,
-                null));
+                PhoneNumber.Empty,
+                string.Empty));
 
             School? school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
 
@@ -147,8 +147,8 @@ internal sealed class GetContactListQueryHandler
                     ContactCategory.PartnerSchoolSchool,
                     enrolment.SchoolName,
                     schoolEmail.Value,
-                    schoolPhone.IsSuccess ? schoolPhone.Value : null,
-                    null));
+                    schoolPhone.IsSuccess ? schoolPhone.Value : PhoneNumber.Empty,
+                    string.Empty));
             }
 
             List<SchoolContact> contacts = await _contactRepository.GetWithRolesBySchool(enrolment.SchoolCode, cancellationToken);
@@ -206,8 +206,8 @@ internal sealed class GetContactListQueryHandler
                         ContactCategory.ResidentialFamily,
                         family.FamilyTitle,
                         familyEmail.Value,
-                        null,
-                        null));
+                        PhoneNumber.Empty,
+                        string.Empty));
 
                     foreach (Parent parent in family.Parents)
                     {
@@ -227,7 +227,7 @@ internal sealed class GetContactListQueryHandler
                             parent.Name.DisplayName,
                             parent.EmailAddress,
                             parent.MobileNumber,
-                            null));
+                            string.Empty));
                     }
                 }
                 else
@@ -240,8 +240,8 @@ internal sealed class GetContactListQueryHandler
                         ContactCategory.NonResidentialFamily,
                         family.FamilyTitle,
                         familyEmail.Value,
-                        null,
-                        null));
+                        PhoneNumber.Empty,
+                        string.Empty));
 
                     foreach (Parent parent in family.Parents)
                     {
@@ -254,7 +254,7 @@ internal sealed class GetContactListQueryHandler
                             parent.Name.DisplayName,
                             parent.EmailAddress,
                             parent.MobileNumber,
-                            null));
+                            string.Empty));
                     }
                 }
             }
@@ -286,8 +286,8 @@ internal sealed class GetContactListQueryHandler
                         ContactCategory.AuroraTeacher,
                         teacherName,
                         teacher.EmailAddress,
-                        null,
-                        null));
+                        PhoneNumber.Empty,
+                        string.Empty));
                 }
 
                 Course course = courses.First(entry => entry.Id == offering.CourseId);
@@ -327,13 +327,13 @@ internal sealed class GetContactListQueryHandler
                         ContactCategory.AuroraHeadTeacher,
                         teacherName,
                         headTeacher.EmailAddress,
-                        null,
-                        null));
+                        PhoneNumber.Empty, 
+                        string.Empty));
                 }
             }
         }
 
-        if (request.ContactCategories.Any())
+        if (request.ContactCategories.Count > 0)
         {
             result = result
                 .Where(entry => 
