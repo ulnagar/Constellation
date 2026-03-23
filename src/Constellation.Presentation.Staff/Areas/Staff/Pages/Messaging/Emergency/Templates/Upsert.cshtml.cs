@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Templates;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates;
 
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Commands.CreateNewEmergencyConsoleMessageTemplate;
@@ -7,6 +7,7 @@ using Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessag
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
+using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
@@ -19,7 +20,7 @@ using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.ComponentModel.DataAnnotations;
 
-[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
+[HasPermission(AuthPermission.Messaging_EmergencyConsole_Edit_Value)]
 public class UpsertModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -41,7 +42,7 @@ public class UpsertModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Admin_Emergency_Templates;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Templates;
 
     [ViewData]
     public string PageTitle => "Templates";

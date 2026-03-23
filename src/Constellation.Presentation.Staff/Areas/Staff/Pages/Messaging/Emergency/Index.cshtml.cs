@@ -1,9 +1,10 @@
-namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency;
 
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Commands.SendEmergencyMessage;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
+using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Models.EmergencyConsole.Enums;
@@ -17,7 +18,7 @@ using Presentation.Shared.Helpers.Attributes;
 using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 
-[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
+[HasPermission(AuthPermission.Messaging_EmergencyConsole_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -39,7 +40,7 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Admin_Emergency_Console;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Console;
 
     [ViewData]
     public string PageTitle => "Emergency Console";
@@ -86,7 +87,8 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostSend()
     {
-        if (RecipientGroups.Count == 0 && Recipients.Count == 0)
+        if (RecipientGroups is not null && RecipientGroups.Count == 0 && 
+            Recipients is not null && Recipients.Count == 0)
             ModelState.AddModelError(nameof(Recipients), "Must include at least one recipient or group");
 
         if (string.IsNullOrWhiteSpace(Message))
@@ -99,7 +101,7 @@ public class IndexModel : BasePageModel
             return Page();
         }
 
-        Result result = await _mediator.Send(new SendEmergencyMessageCommand(RecipientGroups, Recipients, Type, Message));
+        Result result = await _mediator.Send(new SendEmergencyMessageCommand(RecipientGroups!, Recipients!, Type, Message!));
 
         if (result.IsFailure)
         {

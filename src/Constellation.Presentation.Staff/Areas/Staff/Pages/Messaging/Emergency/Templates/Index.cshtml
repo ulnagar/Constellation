@@ -1,12 +1,12 @@
 ﻿@page
-@model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Templates.IndexModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates.IndexModel
 @{
 }
 
-<h2>MessageEvent Templates</h2>
+<h2>Message Templates</h2>
 
 <div class="page-menu">
-    <a asp-page="/Emergency/Templates/Upsert" asp-area="Admin" class="btn btn-success">New</a>
+    <a asp-page="/Messaging/Emergency/Templates/Upsert" asp-area="Staff" class="btn btn-success">New</a>
 </div>
 
 <hr />
@@ -26,7 +26,7 @@
                 <td>@message.TemplateType.Name</td>
                 <td>@message.Name</td>
                 <td>
-                    <a asp-page="/Emergency/Templates/Upsert" asp-area="Admin" asp-route-id="@message.Id" class="btn btn-sm btn-warning btn-show-hover">Edit</a>
+                    <a asp-page="/Messaging/Emergency/Templates/Upsert" asp-area="Staff" asp-route-id="@message.Id" class="btn btn-sm btn-warning btn-show-hover">Edit</a>
                 </td>
             </tr>
         }

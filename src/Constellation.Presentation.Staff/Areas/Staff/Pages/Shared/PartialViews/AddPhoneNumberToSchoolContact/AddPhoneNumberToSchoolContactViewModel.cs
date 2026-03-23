@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Shared.PartialViews.AddPhoneNumberToSchoolContact;
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddPhoneNumberToSchoolContact;
 
 using Core.Models.SchoolContacts.Identifiers;
 using Core.ValueObjects;

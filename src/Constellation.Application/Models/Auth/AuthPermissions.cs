@@ -10,7 +10,6 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
 {
 
 #region const_def
-    public const string Partners_Contacts_View_Value = "Partners.Contacts.View";
     public const string Partners_Schools_View_Value = "Partners.Schools.View";
     public const string Partners_Schools_Edit_Value = "Partners.Schools.Edit";
     public const string Partners_SchoolContacts_View_Value = "Partners.SchoolContacts.View";
@@ -25,9 +24,11 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Partners_Families_View_Value = "Partners.Families.View";
     public const string Partners_Families_Edit_Value = "Partners.Families.Edit";
 
+    public const string Messaging_Contacts_View_Value = "Partners.Contacts.View";
     public const string Messaging_View_Value = "Messaging.View";
     public const string Messaging_SMS_Send_Value = "Messaging.SMS.Send";
     public const string Messaging_Email_Send_Value = "Messaging.Email.Send";
+    public const string Messaging_EmergencyConsole_Edit_Value = "Admin.EmergencyConsole.Edit";
 
     public const string Subjects_Courses_View_Value = "Subjects.Courses.View";
     public const string Subjects_Courses_Edit_Value = "Subjects.Courses.Edit";
@@ -84,7 +85,6 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Equipment_Stocktake_Edit_Value = "Equipment.Stocktake.Edit";
     public const string Equipment_Stocktake_Submit_Value = "Equipment.Stocktake.Submit";
 
-    public const string Admin_EmergencyConsole_Edit_Value = "Admin.EmergencyConsole.Edit";
     public const string Admin_Hosting_View_Value = "Admin.Hosting.View";
     public const string Admin_Hosting_Edit_Value = "Admin.Hosting.Edit";
     public const string Admin_Authentication_View_Value = "Admin.Authentication.View";
@@ -127,11 +127,12 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Partners_Families_View = new(Partners_Families_View_Value, "Partners: Families: View");
     public static readonly AuthPermission Partners_Families_Edit = new(Partners_Families_Edit_Value, "Partners: Families: Edit");
 
-    public static readonly AuthPermission Partners_Contacts_View = new(Partners_Contacts_View_Value, "Messaging: Contacts: View");
+    public static readonly AuthPermission Messaging_Contacts_View = new(Messaging_Contacts_View_Value, "Messaging: Contacts: View");
     public static readonly AuthPermission Messaging_View = new(Messaging_View_Value, "Messaging: View");
     public static readonly AuthPermission Messaging_SMS_Send = new(Messaging_SMS_Send_Value, "Messaging: SMS: Send");
     public static readonly AuthPermission Messaging_EMAIL_Send = new(Messaging_Email_Send_Value, "Messaging: Email: Send");
-
+    public static readonly AuthPermission Messaging_EmergencyConsole_Edit = new(Messaging_EmergencyConsole_Edit_Value, "Admin: Emergency Console: Edit");
+    
     public static readonly AuthPermission Subjects_Courses_View = new(Subjects_Courses_View_Value, "Subjects: Courses: View");
     public static readonly AuthPermission Subjects_Courses_Edit = new(Subjects_Courses_Edit_Value, "Subjects: Courses: Edit");
     public static readonly AuthPermission Subjects_Offerings_View = new(Subjects_Offerings_View_Value, "Subjects: Offerings: View");
@@ -187,7 +188,6 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Equipment_Stocktake_Edit = new(Equipment_Stocktake_Edit_Value, "Equipment: Stocktake: Edit");
     public static readonly AuthPermission Equipment_Stocktake_Submit = new(Equipment_Stocktake_Submit_Value, "Equipment: Stocktake: Submit");
 
-    public static readonly AuthPermission Admin_EmergencyConsole_Edit = new(Admin_EmergencyConsole_Edit_Value, "Admin: Emergency Console: Edit");
     public static readonly AuthPermission Admin_Hosting_View = new(Admin_Hosting_View_Value, "Admin: Hosting: View");
     public static readonly AuthPermission Admin_Hosting_Edit = new(Admin_Hosting_Edit_Value, "Admin: Hosting: Edit");
     public static readonly AuthPermission Admin_Authentication_View = new(Admin_Authentication_View_Value, "Admin: Authentication: View");

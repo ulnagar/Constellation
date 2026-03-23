@@ -1,6 +1,6 @@
-@model AddPhoneNumberToStaffMemberViewModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddPhoneNumberToSchoolContact.AddPhoneNumberToSchoolContactViewModel
 
-<form asp-page-handler="StaffPhoneUpdate" method="post">
+<form asp-page-handler="ContactPhoneUpdate" method="post">
     <div class="modal-header">
         <h5 class="modal-title">Add Phone Number</h5>
     </div>
@@ -8,14 +8,14 @@
         <div class="row mb-2">
             <label class="col-md-12">Phone Number</label>
             <div class="col-md-12">
-                <input type="hidden" asp-for="StaffId" />
+                <input type="hidden" asp-for="ContactId" />
                 <input asp-for="PhoneNumber" type="tel" pattern="^(\s*\d\s*){10}$" class="form-control" />
                 <span class="text-danger">Enter a ten-digit mobile number</span>
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button type="submit" class="btn btn-success">Save</button>
+        <button type="submit" class="btn btn-success show-loader">Save</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
     </div>
 </form>

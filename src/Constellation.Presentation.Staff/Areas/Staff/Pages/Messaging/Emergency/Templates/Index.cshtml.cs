@@ -1,9 +1,10 @@
-namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Templates;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates;
 
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
+using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.EmergencyConsole;
 using Core.Shared;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Serilog;
 
-[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
+[HasPermission(AuthPermission.Messaging_EmergencyConsole_Edit_Value)]
 public sealed class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -34,7 +35,7 @@ public sealed class IndexModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Admin_Emergency_Templates;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Templates;
 
     [ViewData]
     public string PageTitle => "Templates";

@@ -1,4 +1,4 @@
-﻿namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Shared.PartialViews.AddPhoneNumberToStaffMember;
+﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.PartialViews.AddPhoneNumberToStaffMember;
 
 using Core.Models.StaffMembers.Identifiers;
 using Core.ValueObjects;

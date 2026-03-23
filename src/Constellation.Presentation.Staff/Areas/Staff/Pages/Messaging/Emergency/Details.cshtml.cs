@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency;
 
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventDetails;
@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
 
-[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
+[HasPermission(AuthPermission.Messaging_EmergencyConsole_Edit_Value)]
 public class DetailsModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -33,7 +33,7 @@ public class DetailsModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Admin_Emergency_Sent;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Sent;
 
     [ViewData]
     public string PageTitle => "Emergency - Sent";

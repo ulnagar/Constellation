@@ -1,0 +1,127 @@
+@using Constellation.Presentation.Staff.Areas.Staff.Pages.Shared.Components.StaffSidebarMenu
+@model (string ActivePage, bool ShowEmergencyConsole)
+
+@{
+    var segments = Model.ActivePage.Split('.');
+    var module = segments[1];
+}
+
+<nav id="accordion" class="d-none d-md-block bg-light sidebar">
+    <div class="sidebar-sticky pt-3">
+        <div class="card">
+            <div class="card-header" id="contactsHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#contacts" data-toggle="collapse" data-target="#contacts" role="button">
+                    Contacts
+                </h4>
+            </div>
+
+            <div id="contacts" class="collapse @(module == "Contacts" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model.ActivePage == ActivePage.Messaging_Contacts_List ? "active" : "")" asp-page="/Messaging/Contacts/Index" asp-area="Staff">
+                                List
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" id="historyHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#history" data-toggle="collapse" data-target="#history" role="button">
+                    History
+                </h4>
+            </div>
+
+            <div id="history" class="collapse @(module == "History" ? "show" : "")" data-parent="#accordion">
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model.ActivePage == ActivePage.Messaging_History_List ? "active" : "")" asp-page="/Messaging/History/Index" asp-area="Staff">
+                                Recent
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        @if (Model.ShowEmergencyConsole)
+        {
+            <div class="card">
+                <div class="card-header" id="emergencyHeading">
+                    <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#emergency" data-toggle="collapse" data-target="#emergency" role="button">
+                        Emergency Console
+                    </h4>
+                </div>
+
+                <div id="emergency" class="collapse @(module == "Emergency" ? "show" : "")" data-parent="#accordion">
+                    <div class="card-body">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link @(Model.ActivePage == ActivePage.Messaging_Emergency_Console ? "active" : "")" asp-page="/Messaging/Emergency/Index" asp-area="Staff">
+                                    Emergency Console
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(Model.ActivePage == ActivePage.Messaging_Emergency_Sent ? "active" : "")" asp-page="/Messaging/Emergency/Sent" asp-area="Staff">
+                                    Send Log
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(Model.ActivePage == ActivePage.Messaging_Emergency_Templates ? "active" : "")" asp-page="/Messaging/Emergency/Templates/Index" asp-area="Staff">
+                                    Templates
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(Model.ActivePage == ActivePage.Messaging_Emergency_Contacts ? "active" : "")" asp-page="/Messaging/Emergency/Contacts/Index" asp-area="Staff">
+                                    Contacts
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</nav>
+
+<nav class="navbar navbar-expand-md navbar-toggleable-sm d-md-none bg-light">
+    <div class="mx-2">
+        <h4 class="navbar-brand px-2">Messaging</h4>
+    </div>
+    <div class="me-2">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-navbar" data-toggle="collapse" data-target="#sidebar-navbar" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse justify-content-between" id="sidebar-navbar">
+        <ul class="navbar-nav me-auto ms-3 mb-2">
+            <li class="nav-item dropdown">
+                <a class="nav-link" asp-page="/Messaging/Contacts/Index" asp-area="Staff">Contacts</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link" asp-page="/Messaging/History/Index" asp-area="Staff">Recent</a>
+            </li>
+            
+            @if (Model.ShowEmergencyConsole)
+            {
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" data-toggle="dropdown" role="button">Emergency</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-page="/Messaging/Emergency/Index" asp-area="Staff">Emergency Console</a></li>
+                        <li><a class="dropdown-item" asp-page="/Messaging/Emergency/Sent" asp-area="Staff">Send Log</a></li>
+                        <li><a class="dropdown-item" asp-page="/Messaging/Emergency/Templates/Index" asp-area="Staff">Templates</a></li>
+                        <li><a class="dropdown-item" asp-page="/Messaging/Emergency/Contacts/Index" asp-area="Staff">Contacts</a></li>
+                    </ul>
+                </li>
+            }
+        </ul>
+    </div>
+</nav>

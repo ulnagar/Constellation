@@ -1,9 +1,9 @@
 ﻿@page
-@model Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.SentModel
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.SentModel
 @{
 }
 
-<h2>Sent Emergency MessageEvents</h2>
+<h2>Sent Emergency Messages</h2>
 
 <div class="page-menu">
 
@@ -45,7 +45,7 @@
                     @item.Recipients
                 </td>
                 <td>
-                    <a asp-page="/Emergency/Details" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
+                    <a asp-page="/Messaging/Emergency/Details" asp-area="Staff" asp-route-id="@item.Id" class="btn btn-sm btn-info btn-show-hover">More Info...</a>
                 </td>
             </tr>
         }

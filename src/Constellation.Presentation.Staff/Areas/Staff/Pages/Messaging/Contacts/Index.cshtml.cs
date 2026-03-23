@@ -30,7 +30,7 @@ using Models;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
-[HasPermission(AuthPermission.Partners_Contacts_View_Value)]
+[HasPermission(AuthPermission.Messaging_Contacts_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -58,7 +58,7 @@ public class IndexModel : BasePageModel
             .ForContext(LogDefaults.Application, LogDefaults.StaffPortal);
     }
 
-    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Partner_Contacts_List;
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Contacts_List;
     [ViewData] public string PageTitle => "Contacts List";
 
     [BindProperty]

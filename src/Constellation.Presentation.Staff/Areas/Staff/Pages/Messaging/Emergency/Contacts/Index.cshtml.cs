@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Admin.Pages.Emergency.Contacts;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Contacts;
 
 using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Queries.GetContactDetails;
@@ -8,6 +8,7 @@ using Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;
 using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
+using Constellation.Presentation.Staff.Areas;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
 using Core.Shared;
@@ -20,7 +21,7 @@ using Serilog;
 using Shared.PartialViews.AddPhoneNumberToSchoolContact;
 using Shared.PartialViews.AddPhoneNumberToStaffMember;
 
-[HasPermission(AuthPermission.Admin_EmergencyConsole_Edit_Value)]
+[HasPermission(AuthPermission.Messaging_EmergencyConsole_Edit_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -42,7 +43,7 @@ public class IndexModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Admin_Emergency_Contacts;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Contacts;
 
     [ViewData]
     public string PageTitle => "Contacts";
