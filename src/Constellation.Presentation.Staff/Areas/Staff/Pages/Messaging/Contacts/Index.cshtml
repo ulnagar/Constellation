@@ -743,7 +743,27 @@
                 ]
             });
 
-        $('#SendEmail').on('click', function() {
+        $('#SendEmail').on('click', async function() {
+            const recipients = getRecipientsFromTable();
+
+            if (recipients.length === 0) {
+                alert('No recipients found.');
+                return;
+            }
+
+            const response = await fetch('?handler=AddRecipients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: JSON.stringify({ recipients })
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+
             var email = '';
 
             table.column(4, { search: 'applied' }).data().each(function (value, index) {
@@ -774,6 +794,27 @@
             }
         });
 
+        function getRecipientsFromTable() {
+            const recipients = [];
+
+            // rows({ search: 'applied' }) respects the current filter/search state
+            table.rows({ search: 'applied' }).every(function() {
+                const row = this.node();
+
+                const name         = $('td:eq(2)', row).text().trim().split('\n')[0].trim(); // column 3 (0-indexed)
+                const emailAddress = $('td:eq(3)', row).text().trim(); // column 4
+                const phoneNumber  = $('td:eq(4)', row).text().trim(); // column 5
+
+                recipients.push({
+                    name: name,
+                    emailAddress: { value: emailAddress },
+                    phoneNumber:  { value: phoneNumber }
+                });
+            });
+
+            return recipients;
+        };
+
         function makeModal(message) {
             return `
                     <div class="modal fade" id="dummyModal" tabindex="-1">
@@ -786,7 +827,7 @@
                                     ${message}
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button
                                 </div>
                             </div>
                         </div>

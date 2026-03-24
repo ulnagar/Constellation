@@ -12,6 +12,8 @@ using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsLi
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 using Application.DTOs;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Models.Auth;
 using Areas;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
@@ -20,6 +22,8 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Enums;
 using Core.Models.Identifiers;
+using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Drafts.Repositories;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.Subjects.Identifiers;
 using MediatR;
@@ -27,6 +31,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Models;
+using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
 using Serilog;
 
@@ -36,6 +41,7 @@ public class IndexModel : BasePageModel
     private readonly ISender _mediator;
     private readonly IStudentFlagCacheService _flagCache;
     private readonly LinkGenerator _linkGenerator;
+    private readonly IMessageDraftService _draftService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger _logger;
@@ -44,6 +50,7 @@ public class IndexModel : BasePageModel
         ISender mediator,
         IStudentFlagCacheService flagCache,
         LinkGenerator linkGenerator,
+        IMessageDraftService draftService,
         ICurrentUserService currentUserService,
         IAuthorizationService authorizationService,
         ILogger logger)
@@ -51,6 +58,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
         _flagCache = flagCache;
         _linkGenerator = linkGenerator;
+        _draftService = draftService;
         _currentUserService = currentUserService;
         _authorizationService = authorizationService;
         _logger = logger
@@ -128,6 +136,16 @@ public class IndexModel : BasePageModel
         }
 
         return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostAddRecipients(List<MessageRecipient> recipients)
+    {
+        await _draftService.DeleteDraft(User.GetUserId());
+
+        foreach (var recipient in recipients)
+            await _draftService.AddRecipient(recipient, User.GetUserId());
+
+        return new OkResult();
     }
 
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)

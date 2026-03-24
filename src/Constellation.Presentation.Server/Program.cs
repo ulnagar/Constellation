@@ -156,6 +156,7 @@ builder.Services.AddMvc(options =>
         options.ModelBinderProviders.Insert(0, new RecipientGroupBinderProvider());
         options.ModelBinderProviders.Insert(0, new AlertRecipientBinderProvider());
         options.ModelBinderProviders.Insert(0, new AuthPermissionBinderProvider());
+        options.ModelBinderProviders.Insert(0, new MessageRecipientListBinderProvider());
     })
     .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 

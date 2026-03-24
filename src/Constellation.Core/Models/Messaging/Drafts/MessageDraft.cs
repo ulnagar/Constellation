@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Core.Models.Messaging.Drafts;
 
-using EmergencyConsole.Enums;
 using Enums;
 using System;
 using System.Collections.Generic;
