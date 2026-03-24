@@ -1,7 +1,7 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.EntityConfigurations.Messaging.Sms;
 
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Identifiers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -46,7 +46,7 @@ internal class SmsMessageConfiguration : IEntityTypeConfiguration<SmsMessage>
             .Property(message => message.Status)
             .HasConversion(
                 status => status.Value,
-                value => SmsStatus.FromValue(value));
+                value => MessageStatus.FromValue(value));
         
         // Indexes to support the common lookup patterns discussed earlier
         builder

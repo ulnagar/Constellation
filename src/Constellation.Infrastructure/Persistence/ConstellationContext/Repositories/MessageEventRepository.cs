@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Identifiers;
-using Core.Models.EmergencyConsole.Repositories;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;

@@ -2,7 +2,7 @@
 
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Repositories;
-using Constellation.Core.Models.Messaging.Sms.Enums;
+using Constellation.Core.Models.Messaging.Enums;
 using Constellation.Core.Models.Messaging.Tracking;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Models.Messaging.Email;
@@ -204,8 +204,8 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             await query.ExecuteUpdateAsync(s => s
                 .SetProperty(m => m.Status, evt.Status switch
                 {
-                    "Delivered" => SmsStatus.Delivered,
-                    "Failed" => SmsStatus.Failed,
+                    "Delivered" => MessageStatus.Delivered,
+                    "Failed" => MessageStatus.Error,
                     _ => throw new ArgumentOutOfRangeException()
                 })
                 .SetProperty(m => m.SmsGlobalDate, evt.OccurredAt), ct);

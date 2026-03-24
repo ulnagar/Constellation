@@ -6,9 +6,10 @@ using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTem
 using Application.Models.Auth;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Enums;
-using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Enums;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
 using MediatR;

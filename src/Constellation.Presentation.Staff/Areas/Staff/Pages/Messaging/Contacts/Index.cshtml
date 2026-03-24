@@ -8,7 +8,7 @@
 <h2>Contacts List</h2>
 
 <div class="page-menu">
-    <button type="button" class="btn btn-warning" data-toggle="collapse" data-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+    <button type="button" class="btn btn-warning" data-bs-toggle="collapse" data-bs-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
     <button id="SubmitFormAsExport" class="btn btn-warning show-loader-5">Export Current Filter</button>
     <button id="SendEmail" class="btn btn-warning">Send Email</button>
 </div>
@@ -56,14 +56,14 @@
                 </div>
             </div>
             <div class="col-md-2">
-                <button id="ShowGradeSelectList" type="button" class="btn btn-primary btn-block">Add Grades</button>
-                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary btn-block">Add Schools</button>
-                <button id="ShowClassSelectList" type="button" class="btn btn-primary btn-block">Add Classes</button>
-                <button id="ShowCourseSelectList" type="button" class="btn btn-primary btn-block">Add Courses</button>
-                <button id="ShowCategorySelectList" type="button" class="btn btn-primary btn-block">Add Categories</button>
-				<button id="ShowFlagSelectList" type="button" class="btn btn-primary btn-block">Add Student Flags</button>
+                <button id="ShowGradeSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Grades</button>
+                <button id="ShowSchoolSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Schools</button>
+                <button id="ShowClassSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Classes</button>
+                <button id="ShowCourseSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Courses</button>
+                <button id="ShowCategorySelectList" type="button" class="btn btn-primary w-100 mt-1">Add Categories</button>
+                <button id="ShowFlagSelectList" type="button" class="btn btn-primary w-100 mt-1">Add Student Flags</button>
 
-                <button id="SubmitFormAsFilter" type="button" class="btn btn-success btn-block mt-3">Filter</button>
+                <button id="SubmitFormAsFilter" type="button" class="btn btn-success w-100 mt-3">Filter</button>
             </div>
         </div>
     </form>
@@ -209,9 +209,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Grades for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -254,7 +251,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -265,9 +262,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Schools for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -286,7 +280,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -297,9 +291,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Classes for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -324,7 +315,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -335,9 +326,6 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Select Courses for Filter</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body">
                 <div class="container-fluid">
@@ -362,7 +350,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -373,9 +361,6 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Select Categories for Filter</h4>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
 			</div>
 			<div class="modal-body">
 				<div class="container-fluid">
@@ -439,7 +424,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>
@@ -450,9 +435,6 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Select Student Flags for Filter</h4>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
 			</div>
 			<div class="modal-body">
 				<div class="container-fluid">
@@ -474,7 +456,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>

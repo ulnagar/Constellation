@@ -2626,6 +2626,31 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.ToTable("LinkedSystems_Teams", (string)null);
                 });
 
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.MessageDraft", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Drafts", "Messages");
+                });
+
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6161,6 +6186,39 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                         .HasForeignKey("TutorialId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.MessageDraft", b =>
+                {
+                    b.OwnsMany("Constellation.Core.Models.Messaging.Drafts.MessageRecipient", "Recipients", b1 =>
+                        {
+                            b1.Property<Guid>("MessageDraftUserId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("EmailAddress")
+                                .IsRequired();
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<string>("PhoneNumber")
+                                .IsRequired();
+
+                            b1.HasKey("MessageDraftUserId", "__synthesizedOrdinal");
+
+                            b1.ToTable("Drafts", "Messages");
+
+                            b1
+                                .ToJson("Recipients")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MessageDraftUserId");
+                        });
+
+                    b.Navigation("Recipients");
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Email.EmailMessage", b =>

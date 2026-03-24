@@ -7,8 +7,8 @@ using Application.Models.Auth;
 using BaseModels;
 using Constellation.Core.Shared;
 using Core.Abstractions.Services;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -71,7 +71,7 @@ public class IndexModel : BasePageModel
                 To = confirmation.Destination ?? string.Empty,
                 Message = confirmation.Message ?? string.Empty,
                 Direction = MessageDirection.Outbound,
-                Status = SmsStatus.Sent,
+                Status = MessageStatus.Sent,
                 CreatedAt = confirmation.DateTime
             };
 

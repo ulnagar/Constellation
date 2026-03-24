@@ -1,9 +1,9 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventDetails;
 
 using Abstractions.Messaging;
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Errors;
-using Core.Models.EmergencyConsole.Repositories;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Errors;
+using Core.Models.Messaging.EmergencyConsole.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Threading.Tasks;

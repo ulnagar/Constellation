@@ -3,14 +3,15 @@
 using Application.Extensions;
 using Application.Interfaces.Repositories;
 using Constellation.Application.Interfaces.Services;
-using Constellation.Core.Models.EmergencyConsole;
-using Constellation.Core.Models.EmergencyConsole.Enums;
 using Constellation.Core.Shared;
 using Constellation.Core.ValueObjects;
-using Core.Models.EmergencyConsole.Errors;
-using Core.Models.EmergencyConsole.Identifiers;
-using Core.Models.EmergencyConsole.Repositories;
-using Core.Models.EmergencyConsole.Services;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Enums;
+using Core.Models.Messaging.EmergencyConsole.Errors;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Repositories;
+using Core.Models.Messaging.EmergencyConsole.Services;
+using Core.Models.Messaging.Enums;
 
 internal sealed class EmergencyService : IEmergencyService
 {

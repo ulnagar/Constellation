@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Messaging.Sms.Commands.CreateNewIncomingSmsRecord;
 
 using Abstractions.Messaging;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
@@ -37,7 +37,7 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
             To = request.IncomingSms.To ?? string.Empty,
             Message = request.IncomingSms.Msg!,
             Direction = MessageDirection.Inbound,
-            Status = SmsStatus.Received,
+            Status = MessageStatus.Received,
             CreatedAt = DateTimeOffset.UtcNow,
             SmsGlobalDate = request.IncomingSms.Date.ToUniversalTime()
         };

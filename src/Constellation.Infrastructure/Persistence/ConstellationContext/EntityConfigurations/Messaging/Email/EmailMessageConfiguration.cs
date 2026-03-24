@@ -2,6 +2,7 @@
 
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Identifiers;
+using Core.Models.Messaging.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -96,7 +97,9 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
             .HasColumnType("nvarchar(max)");
 
         builder.Property(e => e.Status)
-            .HasConversion<string>()
+            .HasConversion(
+                status => status.Value,
+                value => MessageStatus.FromValue(value))
             .HasMaxLength(50);
 
         builder

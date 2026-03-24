@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
 using Application.Interfaces.Services;
-using Core.Models.EmergencyConsole.Identifiers;
-using Core.Models.EmergencyConsole.Services;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Services;
 using Hangfire;
 using System.Threading.Tasks;
 

@@ -5,8 +5,8 @@ using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.Models.Students;
 using Core.Shared;
@@ -96,7 +96,7 @@ public sealed class Service : ISMSService
                 To = confirmation.Destination ?? string.Empty,
                 Message = confirmation.Message ?? string.Empty,
                 Direction = MessageDirection.Outbound,
-                Status = SmsStatus.Sent,
+                Status = MessageStatus.Sent,
                 CreatedAt = confirmation.DateTime
             };
 

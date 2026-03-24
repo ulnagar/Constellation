@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventSummaries;
 
-using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
 
 public sealed record MessageEventSummary(
     EventId Id,

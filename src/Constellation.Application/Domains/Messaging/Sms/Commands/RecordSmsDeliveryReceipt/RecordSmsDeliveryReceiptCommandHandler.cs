@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.Messaging.Sms.Commands.RecordSmsDeliveryReceipt;
 
 using Abstractions.Messaging;
+using Constellation.Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Errors;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.Shared;
@@ -43,8 +43,8 @@ internal sealed class RecordSmsDeliveryReceiptCommandHandler
 
         existing.Status = request.Receipt.Status switch
         {
-            "Delivered" => SmsStatus.Delivered,
-            "Failed" => SmsStatus.Failed,
+            "Delivered" => MessageStatus.Delivered,
+            "Failed" => MessageStatus.Error,
             _ => existing.Status
         };
         existing.StatusUpdatedAt = request.Receipt.DateTime;

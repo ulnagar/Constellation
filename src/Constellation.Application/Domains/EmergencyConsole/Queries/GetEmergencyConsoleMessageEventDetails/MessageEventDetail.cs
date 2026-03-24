@@ -1,7 +1,8 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventDetails;
 
-using Core.Models.EmergencyConsole.Enums;
-using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Enums;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.Enums;
 
 public sealed record MessageEventDetail(
     EventId EventId,

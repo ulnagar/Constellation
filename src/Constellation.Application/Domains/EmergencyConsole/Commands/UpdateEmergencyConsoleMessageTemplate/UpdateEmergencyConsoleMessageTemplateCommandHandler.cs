@@ -1,10 +1,10 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.EmergencyConsole.Errors;
 using Core.Abstractions.Services;
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Repositories;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Errors;
+using Core.Models.Messaging.EmergencyConsole.Repositories;
 using Core.Shared;
 using Interfaces.Repositories;
 using Serilog;

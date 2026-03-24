@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Messaging.Email.Errors;
 
-using Enums;
+using Messaging.Enums;
 using Shared;
 using System.Collections.Generic;
 
@@ -18,7 +18,7 @@ public static class EmailMessagingErrors
         "EmailMessage.DuplicateRecipientInBatch",
         $"The following email addresses appear more than once in the recipient list: {string.Join(", ", emails)}.");
 
-    public static Error InvalidStatusTransition(EmailStatus current, EmailStatus attempted) => new(
+    public static Error InvalidStatusTransition(MessageStatus current, MessageStatus attempted) => new(
         "EmailMessage.InvalidStatusTransition",
             $"Cannot transition email status from '{current}' to '{attempted}'.")
             ;

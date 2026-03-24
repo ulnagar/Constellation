@@ -1,8 +1,8 @@
 ﻿namespace Constellation.Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventSummaries;
 
 using Abstractions.Messaging;
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Repositories;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Collections.Generic;

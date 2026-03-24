@@ -6,7 +6,7 @@ using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
-using Core.Models.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

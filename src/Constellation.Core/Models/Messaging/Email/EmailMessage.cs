@@ -4,6 +4,7 @@ using Constellation.Core.Shared;
 using Enums;
 using Errors;
 using Identifiers;
+using Messaging.Enums;
 using System;
 using ValueObjects;
 
@@ -29,7 +30,7 @@ public sealed class EmailMessage
     public required string BodyHtml { get; set; }
 
     // Status & Delivery
-    public EmailStatus Status { get; set; } = EmailStatus.Pending;
+    public MessageStatus Status { get; set; } = MessageStatus.Pending;
     public string? Provider { get; set; }
     public string? ProviderMessageId { get; set; }
     public string? ErrorMessage { get; set; }
@@ -50,10 +51,10 @@ public sealed class EmailMessage
 
     public Result MarkSent(string? providerMessageId = null)
     {
-        if (Status != EmailStatus.Pending)
-            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Sent));
+        if (Status != MessageStatus.Pending)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, MessageStatus.Sent));
 
-        Status = EmailStatus.Sent;
+        Status = MessageStatus.Sent;
         SentAt = DateTimeOffset.UtcNow;
         StatusUpdatedAt = DateTimeOffset.UtcNow;
         ProviderMessageId = providerMessageId;
@@ -63,10 +64,10 @@ public sealed class EmailMessage
 
     public Result MarkFailed(string errorMessage)
     {
-        if (Status != EmailStatus.Pending)
-            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Failed));
+        if (Status != MessageStatus.Pending)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, MessageStatus.Error));
 
-        Status = EmailStatus.Failed;
+        Status = MessageStatus.Error;
         StatusUpdatedAt = DateTimeOffset.UtcNow;
         ErrorMessage = errorMessage;
 
@@ -75,23 +76,11 @@ public sealed class EmailMessage
 
     public Result MarkDelivered()
     {
-        if (Status != EmailStatus.Sent)
-            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Delivered));
+        if (Status != MessageStatus.Sent)
+            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, MessageStatus.Delivered));
 
-        Status = EmailStatus.Delivered;
+        Status = MessageStatus.Delivered;
         StatusUpdatedAt = DateTimeOffset.UtcNow;
-
-        return Result.Success();
-    }
-
-    public Result MarkBounced(string? errorMessage = null)
-    {
-        if (Status != EmailStatus.Sent)
-            return Result.Failure(EmailMessagingErrors.InvalidStatusTransition(Status, EmailStatus.Bounced));
-
-        Status = EmailStatus.Bounced;
-        StatusUpdatedAt = DateTimeOffset.UtcNow;
-        ErrorMessage = errorMessage;
 
         return Result.Success();
     }

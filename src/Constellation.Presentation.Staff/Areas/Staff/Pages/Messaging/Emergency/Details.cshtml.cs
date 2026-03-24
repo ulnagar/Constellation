@@ -4,7 +4,7 @@ using Application.Common.PresentationModels;
 using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventDetails;
 using Application.Models.Auth;
 using Constellation.Core.Abstractions.Services;
-using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
 using Core.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

@@ -1,17 +1,15 @@
 ﻿namespace Constellation.Application.Domains.Messaging.History.Queries;
 
 using Abstractions.Messaging;
-using Constellation.Core.Models.Messaging.Email.Identifiers;
 using Core.Abstractions.Repositories;
 using Core.Models;
-using Core.Models.EmergencyConsole.Enums;
 using Core.Models.Families;
 using Core.Models.Identifiers;
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Email.Repositories;
+using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
-using Core.Models.Messaging.Sms.Enums;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.Models.SchoolContacts;
 using Core.Models.SchoolContacts.Identifiers;
@@ -25,7 +23,6 @@ using Core.Models.Students.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Interfaces.Repositories;
-using MediatR.NotificationPublishers;
 using System;
 using System.Collections.Generic;
 
@@ -76,14 +73,6 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
 
         foreach (var email in communications.Emails)
         {
-            MessageStatus status = email.Status switch
-            {
-                EmailStatus.Pending => MessageStatus.Pending,
-                EmailStatus.Sent => MessageStatus.Sent,
-                EmailStatus.Delivered => MessageStatus.Delivered,
-                _ => MessageStatus.Error
-            };
-
             List<CommunicationRecordResponse.Recipient> recipients = [];
 
             foreach (EmailMessageRecipient recipient in email.Recipients)
@@ -101,21 +90,12 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 $"{email.From.Name} <{email.From.Email}>",
                 recipients,
                 email.Subject,
-                status,
+                email.Status,
                 email.CreatedAt));
         }
 
         foreach (var sms in communications.Sms)
         {
-            MessageStatus status = sms.Status switch
-            {
-                _ when sms.Status == SmsStatus.Pending => MessageStatus.Pending,
-                _ when sms.Status == SmsStatus.Sent => MessageStatus.Sent,
-                _ when sms.Status == SmsStatus.Delivered => MessageStatus.Delivered,
-                _ when sms.Status == SmsStatus.Received => MessageStatus.Delivered,
-                _ => MessageStatus.Error
-            };
-
             List<CommunicationRecordResponse.Recipient> recipients =
             [
                 new(
@@ -132,7 +112,7 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 sms.From,
                 recipients,
                 sms.Message,
-                status,
+                sms.Status,
                 sms.CreatedAt));
         }
 

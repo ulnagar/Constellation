@@ -2,9 +2,9 @@
 
 using Abstractions.Messaging;
 using Core.Abstractions.Services;
-using Core.Models.EmergencyConsole;
-using Core.Models.EmergencyConsole.Errors;
-using Core.Models.EmergencyConsole.Repositories;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Errors;
+using Core.Models.Messaging.EmergencyConsole.Repositories;
 using Core.Shared;
 using Serilog;
 using System.Threading;

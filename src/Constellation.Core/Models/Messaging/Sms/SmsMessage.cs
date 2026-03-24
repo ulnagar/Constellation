@@ -20,7 +20,7 @@ public sealed class SmsMessage
     public required string Message { get; set; }
 
     public MessageDirection Direction { get; set; }
-    public SmsStatus Status { get; set; }
+    public MessageStatus Status { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; } // When we created the record
     public DateTimeOffset? SmsGlobalDate { get; set; } // date field from SMSGlobal

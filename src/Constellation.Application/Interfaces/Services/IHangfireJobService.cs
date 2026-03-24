@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Application.Interfaces.Services;
 
-using Core.Models.EmergencyConsole.Identifiers;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
 
 public interface IHangfireJobService
 {

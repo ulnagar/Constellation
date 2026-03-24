@@ -1,8 +1,7 @@
 ﻿namespace Constellation.Application.Domains.Messaging.History.Queries;
 
-using Core.Models.EmergencyConsole.Enums;
 using Core.Models.Messaging.Email.Enums;
-using Core.Models.Messaging.Sms.Enums;
+using Core.Models.Messaging.Enums;
 using Core.Primitives;
 
 public sealed record CommunicationRecordResponse(
