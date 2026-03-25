@@ -33,6 +33,15 @@ internal sealed class EmailRepository : IEmailRepository
                     recipient.Email == email))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<EmailMessage>> GetRecent(
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<EmailMessage>()
+            .OrderByDescending(message => message.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
+
     public void Insert(EmailMessage message) => 
         _context.Set<EmailMessage>().Add(message);
 }

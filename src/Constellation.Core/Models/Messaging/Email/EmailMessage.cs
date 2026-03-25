@@ -5,10 +5,11 @@ using Enums;
 using Errors;
 using Identifiers;
 using Messaging.Enums;
+using Primitives;
 using System;
 using ValueObjects;
 
-public sealed class EmailMessage
+public sealed class EmailMessage : IHasCreatedAt
 {
     private readonly List<EmailMessageRecipient> _recipients = [];
     private readonly List<EmailTrackingEvent> _events = [];

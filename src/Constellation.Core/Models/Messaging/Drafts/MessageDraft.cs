@@ -11,6 +11,7 @@ public sealed class MessageDraft
     public MessageDraft(Guid userId)
     {
         UserId = userId;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public Guid UserId { get; init; }

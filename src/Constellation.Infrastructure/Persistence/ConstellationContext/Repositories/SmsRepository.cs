@@ -61,5 +61,14 @@ internal sealed class SmsRepository : ISmsRepository
                 message.To == phoneNumber.ToString(PhoneNumber.Format.None))
             .ToListAsync(cancellationToken);
 
+    public async Task<List<SmsMessage>> GetRecent(
+        int count,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SmsMessage>()
+            .OrderByDescending(message => message.CreatedAt)
+            .Take(count)
+            .ToListAsync(cancellationToken);
+
     public void Insert(SmsMessage message) => _context.Set<SmsMessage>().Add(message);
 }

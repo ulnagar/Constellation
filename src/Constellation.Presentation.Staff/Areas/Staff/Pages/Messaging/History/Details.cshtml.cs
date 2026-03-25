@@ -1,7 +1,8 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.History;
 
-using Application.Domains.Messaging.History.Queries;
+using Application.Domains.Messaging.History.Queries.GetCommunicationsHistoryForContact;
 using Application.Models.Auth;
+using Constellation.Application.Domains.Messaging.History.Models;
 using Constellation.Core.Abstractions.Services;
 using Core.Models.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
@@ -40,6 +41,10 @@ public class DetailsModel : BasePageModel
         _authorizationService = authorizationService;
         _logger = logger;
     }
+
+    [ViewData] public string ActivePage => Shared.Components.StaffSidebarMenu.ActivePage.Messaging_History_List;
+    [ViewData] public string PageTitle => "Messaging History";
+
 
     [BindProperty(SupportsGet = true)]
     public string Type { get; set; }

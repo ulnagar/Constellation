@@ -59,7 +59,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
     public async Task Handle(AwardCertificateDownloadedDomainEvent notification, CancellationToken cancellationToken)
     {
         // Gather details
-        StudentAward award = await _awardRepository.GetById(notification.AwardId, cancellationToken);
+        StudentAward? award = await _awardRepository.GetById(notification.AwardId, cancellationToken);
 
         if (award is null)
         {
@@ -92,7 +92,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
 
         List<Parent> parents = families.SelectMany(family => family.Parents).ToList();
 
-        List<EmailRecipient> recipients = new();
+        List<EmailRecipient> recipients = [];
 
         foreach (Parent parent in parents)
         {
@@ -125,11 +125,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
             return;
         }
 
-        MemoryStream stream = new(fileRequest.Value.FileData);
-
-        Attachment attachment = new(stream, fileRequest.Value.FileName, fileRequest.Value.FileType);
-
-        Student student = await _studentRepository.GetById(award.StudentId, cancellationToken);
+        Student? student = await _studentRepository.GetById(award.StudentId, cancellationToken);
 
         if (student is null)
         {
@@ -140,7 +136,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
             return;
         }
 
-        StaffMember teacher = await _staffRepository.GetById(award.TeacherId, cancellationToken);
+        StaffMember? teacher = await _staffRepository.GetById(award.TeacherId, cancellationToken);
 
         if (teacher is null)
         {
@@ -153,7 +149,7 @@ internal sealed class AwardCertificateDownloadedDomainEvent_SendAwardCertificate
 
         await _emailService.SendAwardCertificateParentEmail(
             recipients,
-            attachment,
+            fileRequest.Value,
             award,
             student,
             teacher,

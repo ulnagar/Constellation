@@ -9,6 +9,6 @@ public interface ISmsRepository
     Task<SmsMessage?> GetByOutgoingId(string outgoingId, CancellationToken cancellationToken = default);
     Task<SmsMessage?> GetMostRecentOutboundToNumber(string phoneNumber, CancellationToken cancellationToken = default);
     Task<List<SmsMessage>> GetByNumber(PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
-
+    Task<List<SmsMessage>> GetRecent(int count, CancellationToken cancellationToken = default);
     void Insert(SmsMessage message);
 }

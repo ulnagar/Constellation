@@ -1,6 +1,7 @@
 ﻿namespace Constellation.Infrastructure.ExternalServices.Email.Services;
 
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.StaffMembers;
 using Constellation.Core.Models.Students;
@@ -18,10 +19,10 @@ public sealed partial class Service : IEmailService
 {
     public async Task SendAwardCertificateParentEmail(
         List<EmailRecipient> recipients,
-        Attachment certificate,
+        AttachmentResponse certificate,
         StudentAward award,
-        Student? student,
-        StaffMember? teacher,
+        Student student,
+        StaffMember teacher,
         CancellationToken cancellationToken = default)
     {
         NewAwardCertificateEmailViewModel viewModel = new()
@@ -33,19 +34,23 @@ public sealed partial class Service : IEmailService
             AwardType = award.Type,
             AwardedOn = award.AwardedOn,
             AwardReason = award.Reason,
-            StudentName = student?.Name.DisplayName,
-            TeacherName = teacher?.Name.DisplayName
+            StudentName = student.Name.DisplayName,
+            TeacherName = teacher.Name.DisplayName
         };
-
+        
         foreach (EmailRecipient recipient in recipients)
         {
+            MemoryStream stream = new(certificate.FileData);
+
+            using Attachment attachment = new(stream, certificate.FileName, certificate.FileType);
+
             await BuildAndSendEmail(
                 viewModel,
                 EmailRecipient.NoReply,
                 "Awards",
                 viewModel.Title,
                 [recipient],
-                attachments: [certificate],
+                attachments: [attachment],
                 cancellationToken: cancellationToken);
         }
     }
@@ -53,7 +58,6 @@ public sealed partial class Service : IEmailService
     public async Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToSchools(
         List<EmailRecipient> recipients,
         List<EmailRecipient> ccRecipients,
-        Name contact,
         string school,
         DateOnly deliveryDate,
         Dictionary<Name, List<Nomination>> students,
@@ -65,7 +69,6 @@ public sealed partial class Service : IEmailService
             SenderName = "Aurora College",
             SenderTitle = "",
             Preheader = "",
-            Contact = contact,
             School = school,
             DeliveryDate = deliveryDate,
             Students = students

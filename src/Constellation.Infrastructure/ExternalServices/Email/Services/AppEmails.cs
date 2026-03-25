@@ -5,7 +5,6 @@ using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Services;
 using Core.ValueObjects;
 using System;
-using System.Collections.Generic;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
@@ -39,12 +38,14 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>Parent Contact Change Report for {DateTime.Today.ToLongDateString()} is attached.</p>";
 
+        using Attachment attachment = new(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile);
+
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
             $"[Aurora College] Parent Contact Change Report - {DateTime.Today.ToLongDateString()}",
             [EmailRecipient.InfoTechTeam, EmailRecipient.AbsencesMailbox, EmailRecipient.AuroraCollege],
-            attachments: new List<Attachment> { new Attachment(report, "Change Report.xlsx", FileContentTypes.ExcelModernFile) },
+            attachments: [ attachment ],
             cancellationToken: cancellationToken);
     }
 
@@ -66,12 +67,14 @@ public sealed partial class Service : IEmailService
     {
         string viewModel = $"<p>MasterFile Consistency Report generated {DateTime.Today.ToLongDateString()} is attached.</p>";
 
+        using Attachment attachment = new(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile);
+
         await BuildAndSendEmail(
             viewModel,
             EmailRecipient.NoReply,
             $"[Aurora College] MasterFile Consistency Report - {DateTime.Today.ToLongDateString()}",
             [ emailAddress ],
-            attachments: new List<Attachment> { new Attachment(report, "Consistency Report.xlsx", FileContentTypes.ExcelModernFile) },
+            attachments: [ attachment ],
             cancellationToken: cancellationToken);
     }
 

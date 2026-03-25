@@ -1,0 +1,77 @@
+﻿@page
+@using Constellation.Core.Models.Messaging.Email.Enums
+@using Constellation.Core.Models.Messaging.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.History.RecentModel
+@{
+}
+
+<h2>Recent Messages</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Timestamp</th>
+            <th>From</th>
+            <th>Recipients</th>
+            <th>Subject</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var day in Model.Records.OrderByDescending(entry => entry.Timestamp).GroupBy(entry => entry.Timestamp.ToLocalTime().Date))
+        {
+            <tr>
+                <th colspan="6">@day.Key.Date.ToLongDateString()</th>
+            </tr>
+            foreach (var message in day)
+            {
+                <tr>
+                    <td>
+                        @if (message.Type == MessageType.Email)
+                        {
+                            <i class="fal fa-envelope"></i>
+                        }
+                        else if (message.Type == MessageType.SMS)
+                        {
+                            <i class="fal fa-comment-alt-lines"></i>
+                        }
+                    </td>
+                    <td><span class="text-nowrap">@message.Timestamp.ToLocalTime().ToString("hh:mm:ss tt")</span></td>
+                    <td>@message.From</td>
+                    <td>
+                        <span class="font-weight-bold">To:</span>
+                        @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.To).OrderBy(entry => entry.Name))
+                        {
+                            <span title="@entry.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@entry.Name</span>
+                            <br/>
+                        }
+
+                        @if (message.Recipients.Any(entry => entry.Type == EmailRecipientType.Cc))
+                        {
+                            <span class="font-weight-bold">Cc:</span>
+                        }
+                        @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.Cc).OrderBy(entry => entry.Name))
+                        {
+                            <span title="@entry.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@entry.Name</span>
+                            <br/>
+                        }
+
+                        @if (message.Recipients.Any(entry => entry.Type == EmailRecipientType.Bcc))
+                        {
+                            <span class="font-weight-bold">Bcc:</span>
+                        }
+                        @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.Bcc).OrderBy(entry => entry.Name))
+                        {
+                            <span title="@entry.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@entry.Name</span>
+                            <br/>
+                        }
+                    </td>
+                    <td>@message.Subject</td>
+                    <td>@message.Status.Name</td>
+                </tr>
+            }
+        }
+        </tbody>
+</table>

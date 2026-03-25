@@ -90,7 +90,7 @@ internal sealed class SendSchoolNotificationsCommandHandler
             if (schoolGroup.Key == SchoolCode.Empty)
                 continue;
 
-            string? school = schoolGroup.First().CurrentEnrolment?.SchoolName;
+            string school = schoolGroup.First().CurrentEnrolment!.SchoolName;
 
             Dictionary<Name, List<Nomination>> schoolStudents = new();
 
@@ -109,7 +109,6 @@ internal sealed class SendSchoolNotificationsCommandHandler
 
             List<EmailRecipient> toRecipients = [];
             List<EmailRecipient> ccRecipients = [];
-            Name? principalName = null;
 
             foreach (SchoolContact contact in contacts)
             {
@@ -143,7 +142,6 @@ internal sealed class SendSchoolNotificationsCommandHandler
             Result<EmailMessage> emailResult = await _emailService.SendAwardNominationNotificationEmailToSchools(
                 toRecipients,
                 ccRecipients,
-                principalName,
                 school,
                 request.DeliveryDate,
                 schoolStudents,

@@ -34,7 +34,7 @@ public sealed partial class Service : IEmailService
             SubmittedOn = DateOnly.FromDateTime(submission.SubmittedOn)
         };
 
-        Result<EmailRecipient> recipient = EmailRecipient.Create(contact.Name, contact.EmailAddress);
+        Result<EmailRecipient> recipient = contact.GetEmailRecipient();
 
         if (recipient.IsFailure)
         {

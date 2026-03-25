@@ -60,7 +60,6 @@ public static class ServicesRegistration
 
             });
 
-        services.AddScoped<IAppDbContext, AppDbContext>();
         services.AddScoped<AppDbContext>(sp =>
             sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
         services.AddScoped<IUnitOfWork, UnitOfWork>();

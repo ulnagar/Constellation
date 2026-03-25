@@ -19,7 +19,7 @@ using Templates.Views.Emails.Absences;
 
 public sealed partial class Service : IEmailService
 {
-    public async Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
+    public async Task SendAbsenceReasonToSchoolAdmin(AbsenceResponseEmail notificationEmail)
     {
         AbsencesConfiguration? configuration = await _appSettings.Absences();
 
@@ -41,7 +41,7 @@ public sealed partial class Service : IEmailService
             StudentName = notificationEmail.StudentName
         };
 
-        foreach (EmailDtos.AbsenceResponseEmail.AbsenceDto absence in notificationEmail.WholeAbsences)
+        foreach (AbsenceResponseEmail.AbsenceDto absence in notificationEmail.WholeAbsences)
         {
             viewModel.Absences.Add(new AbsenceExplanationToSchoolAdminEmailViewModel.AbsenceDto
             {
@@ -70,7 +70,7 @@ public sealed partial class Service : IEmailService
         }
     }
 
-    public async Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail)
+    public async Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(AbsenceResponseEmail notificationEmail)
     {
         AbsencesConfiguration? configuration = await _appSettings.Absences();
 
@@ -92,7 +92,7 @@ public sealed partial class Service : IEmailService
             StudentName = notificationEmail.StudentName
         };
 
-        foreach (EmailDtos.AbsenceResponseEmail.AbsenceDto absence in notificationEmail.WholeAbsences)
+        foreach (AbsenceResponseEmail.AbsenceDto absence in notificationEmail.WholeAbsences)
         {
             viewModel.Absences.Add(new()
             {

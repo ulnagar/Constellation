@@ -2,8 +2,9 @@
 
 using Enums;
 using Identifiers;
+using Primitives;
 
-public sealed class SmsMessage
+public sealed class SmsMessage : IHasCreatedAt
 {
     public SmsMessage()
     {

@@ -22,6 +22,7 @@ using Constellation.Core.Models.Tutorials.Errors;
 using Constellation.Core.Models.Tutorials.Identifiers;
 using Constellation.Core.Models.Tutorials.Repositories;
 using Constellation.Core.Shared;
+using Core.ValueObjects;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading;
@@ -148,10 +149,10 @@ internal sealed class ProvideParentWholeAbsenceExplanationCommandHandler
                 return Result.Failure(StudentErrors.NotFound(absence.StudentId));
             }
 
-            EmailDtos.AbsenceResponseEmail notificationEmail = new();
+            AbsenceResponseEmail notificationEmail = new();
 
-            notificationEmail.Recipients.Add("auroracoll-h.school@det.nsw.edu.au");
-            notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, activityName, request.ParentEmail, request.Comment));
+            notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege);
+            notificationEmail.WholeAbsences.Add(new AbsenceResponseEmail.AbsenceDto(absence, activityName, request.ParentEmail, request.Comment));
             notificationEmail.StudentName = student.Name.DisplayName;
 
             await _emailService.SendNonResidentialParentAbsenceReasonToSchoolAdmin(notificationEmail);

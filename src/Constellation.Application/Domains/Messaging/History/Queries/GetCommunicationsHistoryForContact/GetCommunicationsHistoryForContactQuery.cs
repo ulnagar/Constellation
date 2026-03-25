@@ -1,10 +1,8 @@
-﻿namespace Constellation.Application.Domains.Messaging.History.Queries;
+﻿namespace Constellation.Application.Domains.Messaging.History.Queries.GetCommunicationsHistoryForContact;
 
 using Abstractions.Messaging;
+using Constellation.Application.Domains.Messaging.History.Models;
 using Core.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 public sealed record GetCommunicationsHistoryForContactQuery(
     IStronglyTypedId Id)

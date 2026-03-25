@@ -19,6 +19,7 @@ using Constellation.Core.Models.Tutorials.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.ValueObjects;
+using Extensions;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -134,12 +135,12 @@ internal sealed class AbsenceResponseReceivedDomainEvent_SendEmailToSchoolAdmin
             return;
         }
 
-        EmailDtos.AbsenceResponseEmail notificationEmail = new();
+        AbsenceResponseEmail notificationEmail = new();
 
-        notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox.Email);
-        notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege.Email);
-        notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.EmailAddress.Email));
-        notificationEmail.WholeAbsences.Add(new EmailDtos.AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
+        notificationEmail.Recipients.Add(EmailRecipient.AbsencesMailbox);
+        notificationEmail.Recipients.Add(EmailRecipient.AuroraCollege);
+        notificationEmail.Recipients.AddRange(teachers.Select(teacher => teacher.GetEmailRecipient().Value));
+        notificationEmail.WholeAbsences.Add(new AbsenceResponseEmail.AbsenceDto(absence, response, activityName));
         notificationEmail.StudentName = student.Name.DisplayName;
 
         await _emailService.SendAbsenceReasonToSchoolAdmin(notificationEmail);

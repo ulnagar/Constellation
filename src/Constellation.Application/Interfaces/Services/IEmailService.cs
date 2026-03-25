@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models;
 using Constellation.Core.Models.Assignments.Identifiers;
+using Constellation.Core.Models.Attachments.DTOs;
 using Constellation.Core.Models.Attendance;
 using Constellation.Core.Models.Awards;
 using Constellation.Core.Models.Covers;
@@ -34,14 +35,14 @@ using Action = Core.Models.WorkFlow.Action;
 public interface IEmailService
 {
     // Absence Emails
-    Task SendAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
+    Task SendAbsenceReasonToSchoolAdmin(AbsenceResponseEmail notificationEmail);
     Task<Result<EmailMessage>> SendCoordinatorPartialAbsenceVerificationRequest(List<AbsenceExplanation> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendStudentAbsenceDigest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendCoordinatorAbsenceDigest(List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, School school, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendParentWholeAbsenceAlert(string familyName, List<AbsenceEntry> absences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendParentAbsenceDigest(string familyName, List<AbsenceEntry> wholeAbsences, List<AbsenceEntry> partialAbsences, Student student, List<EmailRecipient> emailAddresses, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendStudentPartialAbsenceExplanationRequest(List<AbsenceEntry> absences, Student student, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
-    Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(EmailDtos.AbsenceResponseEmail notificationEmail);
+    Task SendNonResidentialParentAbsenceReasonToSchoolAdmin(AbsenceResponseEmail notificationEmail);
     Task SendMissedWorkEmail(Student student, string subjectName, string className, DateOnly absenceDate, List<EmailRecipient> recipients, CancellationToken cancellationToken = default);
     
     // App Emails
@@ -53,7 +54,7 @@ public interface IEmailService
     Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default);
 
     // Assessment Provisions Emails
-    Task<Result> SendAssessmentProvisionEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, List<StudentProvisions> adjustments, CancellationToken cancellationToken = default);
+    Task<Result> SendAssessmentProvisionEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, List<StudentProvisions> students, CancellationToken cancellationToken = default);
     Task<Result> SendAssessmentProvisionEmailToFamilies(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, StudentProvisions provisions, CancellationToken cancellationToken = default);
 
     // Assignment Emails
@@ -72,9 +73,9 @@ public interface IEmailService
     Task SendMagicLinkLoginEmail(MagicLinkEmail notification);
 
     // Awards Emails
-    Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, Attachment certificate, StudentAward award, Student? student, StaffMember? teacher, CancellationToken cancellationToken = default);
+    Task SendAwardCertificateParentEmail(List<EmailRecipient> recipients, AttachmentResponse certificate, StudentAward award, Student student, StaffMember teacher, CancellationToken cancellationToken = default);
     Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToParents(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name parent, Name student, string school, DateOnly deliveryDate, List<Nomination> awards, CancellationToken cancellationToken = default);
-    Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name? contact, string? school, DateOnly deliveryDate, Dictionary<Name, List<Nomination>> students, CancellationToken cancellationToken = default);
+    Task<Result<EmailMessage>> SendAwardNominationNotificationEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, string school, DateOnly deliveryDate, Dictionary<Name, List<Nomination>> students, CancellationToken cancellationToken = default);
 
     // Cover Emails
     Task SendCancelledCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);

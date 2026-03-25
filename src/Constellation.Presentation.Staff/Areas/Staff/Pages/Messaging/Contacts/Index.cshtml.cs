@@ -12,8 +12,6 @@ using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsLi
 using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 using Application.DTOs;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
 using Application.Models.Auth;
 using Areas;
 using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelectionList;
@@ -40,8 +38,8 @@ public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
     private readonly IStudentFlagCacheService _flagCache;
+    private readonly IMessageDraftRepository _draftRepository;
     private readonly LinkGenerator _linkGenerator;
-    private readonly IMessageDraftService _draftService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger _logger;
@@ -49,16 +47,16 @@ public class IndexModel : BasePageModel
     public IndexModel(
         ISender mediator,
         IStudentFlagCacheService flagCache,
+        IMessageDraftRepository draftRepository,
         LinkGenerator linkGenerator,
-        IMessageDraftService draftService,
         ICurrentUserService currentUserService,
         IAuthorizationService authorizationService,
         ILogger logger)
     {
         _mediator = mediator;
         _flagCache = flagCache;
+        _draftRepository = draftRepository;
         _linkGenerator = linkGenerator;
-        _draftService = draftService;
         _currentUserService = currentUserService;
         _authorizationService = authorizationService;
         _logger = logger
@@ -140,10 +138,8 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostAddRecipients(List<MessageRecipient> recipients)
     {
-        await _draftService.DeleteDraft(User.GetUserId());
-
         foreach (var recipient in recipients)
-            await _draftService.AddRecipient(recipient, User.GetUserId());
+            await _draftRepository.AddRecipient(recipient, User.GetUserId());
 
         return new OkResult();
     }

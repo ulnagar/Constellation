@@ -1,4 +1,4 @@
-﻿namespace Constellation.Application.Domains.Messaging.History.Queries;
+﻿namespace Constellation.Application.Domains.Messaging.History.Models;
 
 using Core.Models.Messaging.Email.Enums;
 using Core.Models.Messaging.Enums;

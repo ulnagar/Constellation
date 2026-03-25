@@ -764,34 +764,8 @@
                 window.location.href = response.url;
             }
 
-            var email = '';
-
-            table.column(4, { search: 'applied' }).data().each(function (value, index) {
-                email += value.replace(/<.*?>/ig, '') + ';';
-            });
-
-            var arr = email.split(';');
-            arr = arr.filter((item, index) => arr.indexOf(item) === index);
-            email = arr.join(";");
-
-            if (email.length > 2048)
-            {
-                console.log("This string is too long!");
-
-                var dummy = document.createElement("textarea");
-                document.body.appendChild(dummy);
-                dummy.textContent = email;
-                dummy.select();
-                document.execCommand("copy");
-                document.body.removeChild(dummy);
-
-                var dummyModal = $(makeModal('<p>The email addresses of all contacts in the table displayed below have been copied to your clipboard.</p><p>Please paste (with Ctrl+V) into your email client <strong>BCC field</strong> now.</p>'));
-                dummyModal.modal('show');
-            }
-            else
-            {
-                window.location = 'mailto:?bcc=' + email;
-            }
+            var dummyModal = $(makeModal('<p>The details of all contacts in the table displayed below have been added to your draft message.</p><p>Please use the Messaging module to send your message.</p>'));
+            dummyModal.modal('show');
         });
 
         function getRecipientsFromTable() {

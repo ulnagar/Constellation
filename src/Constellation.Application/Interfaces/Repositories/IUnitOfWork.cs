@@ -7,6 +7,5 @@ using System.Threading.Tasks;
 public interface IUnitOfWork
 {
     Task AddIntegrationEvent(IIntegrationEvent integrationEvent);
-    Task CompleteAsync(CancellationToken token);
-    Task CompleteAsync();
+    Task CompleteAsync(CancellationToken token = default);
 }
