@@ -4,7 +4,7 @@ using Enums;
 using Identifiers;
 using ValueObjects;
 
-public class EmailMessageRecipient
+public sealed class EmailMessageRecipient
 {
     public EmailId EmailId { get; set; }
     public required string Email { get; set; }

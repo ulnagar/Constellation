@@ -2,7 +2,6 @@
 
 using Converters;
 using Core.Models.Messaging.Drafts;
-using Core.Models.Messaging.EmergencyConsole.Enums;
 using Core.Models.Messaging.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

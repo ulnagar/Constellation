@@ -45,15 +45,9 @@ internal sealed class EmailMessageRecipientConfiguration : IEntityTypeConfigurat
             .HasMaxLength(10);
 
         builder
-            .HasIndex(e => new
-            {
-                e.EmailId,
-                e.RecipientType
-            })
-            .HasDatabaseName("IX_Messages_EmailRecipients_EmailId_RecipientType");
+            .HasIndex(e => new { e.EmailId, e.RecipientType });
 
         builder
-            .HasIndex(e => e.Email)
-            .HasDatabaseName("IX_Messages_EmailRecipients_Email");
+            .HasIndex(e => e.Email);
     }
 }

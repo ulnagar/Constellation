@@ -125,17 +125,18 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
         builder.Navigation(e => e.TrackingEvents)
             .HasField("_events")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
-        
-        builder
-            .HasIndex(e => e.ProviderMessageId)
-            .HasDatabaseName("IX_Messages_Email_ProviderMessageId");
+
+        builder.Navigation(e => e.Links)
+            .HasField("_links")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder
-            .HasIndex(e => e.Status)
-            .HasDatabaseName("IX_Messages_Email_Status");
+            .HasIndex(e => e.ProviderMessageId);
 
         builder
-            .HasIndex(e => e.SentAt)
-            .HasDatabaseName("IX_Messages_Email_SentAt");
+            .HasIndex(e => e.Status);
+
+        builder
+            .HasIndex(e => e.SentAt);
     }
 }

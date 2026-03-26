@@ -13,6 +13,7 @@ public sealed class EmailMessage : IHasCreatedAt
 {
     private readonly List<EmailMessageRecipient> _recipients = [];
     private readonly List<EmailTrackingEvent> _events = [];
+    private readonly List<EmailLink> _links = [];
 
     public EmailId Id { get; init; } = new();
     public required string SendingModule { get; set; }
@@ -40,6 +41,10 @@ public sealed class EmailMessage : IHasCreatedAt
     public int OpenCount { get; set; } = 0;
     public DateTimeOffset? FirstOpenedAt { get; set; }
     public DateTimeOffset? LastOpenedAt { get; set; }
+    public int ClickCount { get; set; } = 0;
+    public DateTimeOffset? FirstClickedAt { get; set; }
+    public DateTimeOffset? LastClickedAt { get; set; }
+
 
     // Metadata
     public string? TemplateId { get; set; }
@@ -49,6 +54,7 @@ public sealed class EmailMessage : IHasCreatedAt
     // Navigation
     public IReadOnlyList<EmailMessageRecipient> Recipients => _recipients.AsReadOnly();
     public IReadOnlyList<EmailTrackingEvent> TrackingEvents => _events.AsReadOnly();
+    public IReadOnlyList<EmailLink> Links => _links.AsReadOnly();
 
     public Result MarkSent(string? providerMessageId = null)
     {
@@ -135,6 +141,20 @@ public sealed class EmailMessage : IHasCreatedAt
                 EmailId = Id
             });
         }
+
+        return Result.Success();
+    }
+
+    public Result RegisterLink(string destinationUrl)
+    {
+        if (_links.Any(l => l.DestinationUrl.Equals(destinationUrl, StringComparison.OrdinalIgnoreCase)))
+            return Result.Success(); // Already registered — not an error, just a duplicate link in the template
+
+        _links.Add(new EmailLink
+        {
+            DestinationUrl = destinationUrl,
+            EmailId = Id
+        });
 
         return Result.Success();
     }

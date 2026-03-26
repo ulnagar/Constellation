@@ -7,6 +7,7 @@ using Constellation.Core.Models.Messaging.Tracking;
 using Constellation.Infrastructure.Persistence.ConstellationContext;
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Email.Enums;
+using Core.Models.Messaging.Email.Identifiers;
 using Core.Models.Messaging.Sms;
 using Core.Models.Messaging.Tracking.Identifiers;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +128,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
             await (evt switch
             {
                 EmailOpenEvent e => HandleEmailOpen(e, _context, cancellationToken),
+                EmailClickEvent e => HandleEmailClick(e, _context, cancellationToken),
                 SmsDeliveryReceiptEvent e => HandleSmsDelivery(e, _context, cancellationToken),
                 _ => throw new InvalidOperationException($"Unknown event type: {entry.EventType}")
             });
@@ -162,6 +164,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
         entry.EventType switch
         {
             nameof(EmailOpenEvent) => JsonSerializer.Deserialize<EmailOpenEvent>(entry.Payload),
+            nameof(EmailClickEvent) => JsonSerializer.Deserialize<EmailClickEvent>(entry.Payload),
             nameof(SmsDeliveryReceiptEvent) => JsonSerializer.Deserialize<SmsDeliveryReceiptEvent>(entry.Payload),
             _ => null
         };
@@ -170,6 +173,7 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
         evt switch
         {
             EmailOpenEvent e => await context.Set<EmailMessage>().AnyAsync(m => m.Id == e.EmailId, ct),
+            EmailClickEvent e => await context.Set<EmailMessage>().AnyAsync(m => m.Id == e.EmailId, ct),
             SmsDeliveryReceiptEvent e => await context.Set<SmsMessage>().AnyAsync(m => m.OutgoingId == e.OutgoingId, ct),
             _ => true
         };
@@ -192,6 +196,47 @@ internal sealed class ProcessTrackingEventsJob : IProcessTrackingEventsJob
                 .SetProperty(m => m.OpenCount, m => m.OpenCount + 1)
                 .SetProperty(m => m.LastOpenedAt, evt.OccurredAt)
                 .SetProperty(m => m.FirstOpenedAt, m => m.FirstOpenedAt ?? evt.OccurredAt), ct);
+    }
+
+    private async Task HandleEmailClick(EmailClickEvent evt, AppDbContext context, CancellationToken ct)
+    {
+        var now = evt.OccurredAt;
+
+        var linkUpdated = await context.Set<EmailLink>()
+            .Where(link => link.EmailId == evt.EmailId
+                            && link.DestinationUrl == evt.DestinationUrl)
+            .ExecuteUpdateAsync(s => s
+                    .SetProperty(link => link.ClickCount, link => link.ClickCount + 1)
+                    .SetProperty(link => link.LastClickedAt, now)
+                    .SetProperty(link => link.FirstClickedAt, link => link.FirstClickedAt ?? now),
+                ct);
+
+        if (linkUpdated == 0)
+        {
+            _logger
+                .ForContext(nameof(EmailId), evt.EmailId.ToString())
+                .ForContext(nameof(EmailClickEvent.DestinationUrl), evt.DestinationUrl)
+                .Warning("Click received for unregistered link");
+        }
+
+        context.Set<EmailTrackingEvent>().Add(new EmailTrackingEvent()
+        {
+            EmailId = evt.EmailId,
+            EventType = EmailEventType.Clicked,
+            OccurredAt = evt.OccurredAt,
+            IpAddress = evt.IpAddress,
+            UserAgent = evt.UserAgent,
+            LinkUrl = evt.DestinationUrl
+        });
+
+        await context
+            .Set<EmailMessage>()
+            .Where(message => message.Id == evt.EmailId)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(message => message.ClickCount, message => message.ClickCount + 1)
+                .SetProperty(message => message.LastClickedAt, evt.OccurredAt)
+                .SetProperty(message => message.FirstClickedAt, message => message.FirstClickedAt ?? evt.OccurredAt),
+                ct);
     }
 
     private static async Task HandleSmsDelivery(SmsDeliveryReceiptEvent evt, AppDbContext context, CancellationToken ct)
