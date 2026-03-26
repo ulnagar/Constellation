@@ -258,5 +258,13 @@ public class StaffRepository : IStaffRepository
             .SingleOrDefaultAsync(member => member.EmailAddress.Email.Contains(username), cancellationToken);
     }
 
+    public async Task<StaffMember?> GetCurrentByPhoneNumber(
+        PhoneNumber number,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<StaffMember>()
+            .Where(member => member.PhoneNumber == number)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public void Insert(StaffMember member) => _context.Set<StaffMember>().Add(member);
 }

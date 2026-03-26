@@ -68,26 +68,26 @@ internal sealed class GetAwardDetailsFromSentralQueryHandler
             // Index 7 = First Name
             // Index 8 = Last Name
 
-            bool success = DateTime.TryParse(split[2].FormatField(), out DateTime awardedDate);
+            bool success = DateTime.TryParse(split[2].FormatField, out DateTime awardedDate);
             if (!success)
                 continue;
 
-            success = DateTime.TryParse(split[3].FormatField(), out DateTime awardCreated);
+            success = DateTime.TryParse(split[3].FormatField, out DateTime awardCreated);
             if (!success)
                 continue;
 
             awardCreated = awardCreated.AddSeconds(-awardCreated.Second);
 
             response.Add(new(
-                split[0].FormatField(),
-                split[1].FormatField(),
+                split[0].FormatField,
+                split[1].FormatField,
                 awardedDate,
                 awardCreated,
-                split[4].FormatField(),
-                split[5].FormatField(),
-                split[6].FormatField(),
-                split[7].FormatField(),
-                split[8].FormatField()));
+                split[4].FormatField,
+                split[5].FormatField,
+                split[6].FormatField,
+                split[7].FormatField,
+                split[8].FormatField));
         }
 
         return response;

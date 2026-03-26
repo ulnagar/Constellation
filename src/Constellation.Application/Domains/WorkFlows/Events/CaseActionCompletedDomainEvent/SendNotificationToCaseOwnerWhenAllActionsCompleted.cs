@@ -77,7 +77,7 @@ internal sealed class SendNotificationToCaseOwnerWhenAllActionsCompleted
 
         foreach (var contact in configuration.Contacts)
         {
-            Result<EmailRecipient> contactEmail = contact.Key.GetEmailRecipient();
+            Result<EmailRecipient> contactEmail = contact.Key.GetEmailRecipient;
 
             if (contactEmail.IsFailure)
             {

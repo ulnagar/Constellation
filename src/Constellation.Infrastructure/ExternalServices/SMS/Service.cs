@@ -50,7 +50,7 @@ public sealed class Service : ISMSService
     public async Task<Result<List<OutgoingSmsConfirmation>>> SendAbsenceNotification(
         List<AbsenceEntry> absences,
         Student student,
-        List<PhoneNumber> phoneNumbers,
+        List<SmsRecipient> recipients,
         CancellationToken cancellationToken = default)
     {
         string classListString = string.Empty;
@@ -60,15 +60,8 @@ public sealed class Service : ISMSService
         string link = $"http://edu.nsw.link/aurora";
 
         string messageText = $"{student.Name.PreferredName} was absent from the following classes on {absences.First().Date.ToShortDateString()}\r\n{classListString}To explain these absences, please click here {link}";
-        
-        List<string> destinations = [];
-        foreach (var number in phoneNumbers)
-        {
-            if (number == PhoneNumber.Empty)
-                continue;
 
-            destinations.Add(number.ToString(PhoneNumber.Format.None));
-        }
+        List<string> destinations = recipients.Select(recipient => recipient.Number).ToList();
 
         OutgoingSms messageContent = new()
         {
@@ -87,13 +80,28 @@ public sealed class Service : ISMSService
 
         foreach (OutgoingSmsConfirmation confirmation in results.Value)
         {
+            SmsRecipient sender = SmsRecipient.Unknown;
+
+            if (confirmation.Origin == SmsRecipient.AuroraNoReply.Number)
+                sender = SmsRecipient.AuroraNoReply;
+
+            if (confirmation.Origin == SmsRecipient.Aurora.Number)
+                sender = SmsRecipient.Aurora;
+
+            Result<PhoneNumber> recipientPhoneNumber = PhoneNumber.Create(confirmation.Destination ?? string.Empty);
+
+            SmsRecipient receiver = recipients
+                .FirstOrDefault(recipient => 
+                    recipient.Number == recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None)) 
+                ?? SmsRecipient.Unknown;
+
             SmsMessage message = new()
             {
                 SmsGlobalId = confirmation.Id ?? string.Empty,
                 SendingModule = "Absences",
                 OutgoingId = confirmation.OutgoingId ?? string.Empty,
-                From = confirmation.Origin ?? string.Empty,
-                To = confirmation.Destination ?? string.Empty,
+                Sender = sender,
+                Recipient = receiver,
                 Message = confirmation.Message ?? string.Empty,
                 Direction = MessageDirection.Outbound,
                 Status = MessageStatus.Sent,

@@ -1284,7 +1284,7 @@ public class Gateway : ISentralGateway
 
         foreach (DataRow row in completeWorksheet.Tables[0].Rows)
         {
-            string srn = row[0].ToString()?.FormatField() ?? string.Empty;
+            string srn = row[0].ToString()?.FormatField ?? string.Empty;
 
             if (srn == "Student ID") // This is a header row
                 continue;
@@ -1302,15 +1302,15 @@ public class Gateway : ISentralGateway
 
             SentralPeriodAbsenceDto absence = new();
             absence.StudentReferenceNumber = studentReferenceNumber.Value;
-            string stringDate = row[2].ToString()?.FormatField() ?? string.Empty;
+            string stringDate = row[2].ToString()?.FormatField ?? string.Empty;
             bool exactConversion = DateOnly.TryParseExact(stringDate, "yyyy-MM-dd", out DateOnly rowDate);
             if (!exactConversion)
                 continue;
 
             absence.Date = rowDate;
-            absence.Reason = row[9].ToString()?.FormatField() ?? string.Empty;
+            absence.Reason = row[9].ToString()?.FormatField ?? string.Empty;
 
-            absence.Timeframe = row[10].ToString()?.FormatField() ?? string.Empty;
+            absence.Timeframe = row[10].ToString()?.FormatField ?? string.Empty;
             if (string.IsNullOrWhiteSpace(absence.Timeframe))
             {
                 absence.WholeDay = true;
@@ -1346,17 +1346,17 @@ public class Gateway : ISentralGateway
                 }
             }
 
-            string comment = row[11].ToString()?.FormatField() ?? string.Empty;
+            string comment = row[11].ToString()?.FormatField ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(comment))
             {
-                string explainer = row[12].ToString()?.FormatField() ?? string.Empty;
+                string explainer = row[12].ToString()?.FormatField ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(explainer))
                 {
                     absence.ExternalExplanation = comment;
                 }
                 else
                 {
-                    string explainerSource = row[13].ToString()?.FormatField() ?? string.Empty;
+                    string explainerSource = row[13].ToString()?.FormatField ?? string.Empty;
                     absence.ExternalExplanation = comment;
                     absence.ExternalExplanationSource = string.IsNullOrWhiteSpace(explainerSource)
                         ? explainer

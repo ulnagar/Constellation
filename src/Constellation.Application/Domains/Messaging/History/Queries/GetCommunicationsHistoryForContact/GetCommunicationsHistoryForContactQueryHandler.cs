@@ -99,16 +99,15 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
             [
                 new(
                     EmailRecipientType.To,
-                    sms.To,
-                    sms.To)
-
+                    sms.Recipient.Name,
+                    sms.Recipient.Number)
             ];
 
             responses.Add(new(
                 sms.Id,
                 MessageType.SMS,
                 sms.Direction,
-                sms.From,
+                sms.Sender.Name,
                 recipients,
                 sms.Message,
                 sms.Status,

@@ -223,7 +223,7 @@ internal sealed class SendCoverCreatedEmailHandler
                     secondaryRecipients.Any(entry => entry.Email == teacher.Key.EmailAddress))
                     continue;
 
-                Result<EmailRecipient> address = teacher.Key.GetEmailRecipient();
+                Result<EmailRecipient> address = teacher.Key.GetEmailRecipient;
 
                 if (address.IsFailure)
                 {

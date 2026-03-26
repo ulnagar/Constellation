@@ -82,7 +82,7 @@ internal sealed class SendNotificationEmail
                 if (!approver.Value.Contains(tutorialRequest.Grade))
                     continue;
 
-                Result<EmailRecipient> approverEmail = approver.Key.GetEmailRecipient();
+                Result<EmailRecipient> approverEmail = approver.Key.GetEmailRecipient;
 
                 if (approverEmail.IsFailure)
                 {

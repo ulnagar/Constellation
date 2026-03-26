@@ -9,6 +9,7 @@ using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Sms;
 using Core.Primitives;
 using Core.Shared;
+using Core.ValueObjects;
 using Models;
 using System.Collections.Generic;
 
@@ -70,16 +71,15 @@ internal sealed class GetRecentCommunicationsHistoryQueryHandler
                 [
                     new(
                         EmailRecipientType.To,
-                        sms.To,
-                        sms.To)
-
+                        sms.Recipient.Name,
+                        sms.Recipient.Number)
                 ];
 
                 responses.Add(new(
                     sms.Id,
                     MessageType.SMS,
                     sms.Direction,
-                    sms.From,
+                    sms.Sender.Name,
                     recipients,
                     sms.Message,
                     sms.Status,

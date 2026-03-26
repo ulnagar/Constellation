@@ -130,6 +130,16 @@ internal sealed class FamilyRepository : IFamilyRepository
             .Set<Parent>()
             .CountAsync(parent => parent.EmailAddress == email, cancellationToken);
 
+    public async Task<Parent?> GetParentByMobileNumber(
+        PhoneNumber phoneNumber,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<Parent>()
+            .Where(parent =>
+                parent.MobileNumber == phoneNumber)
+            .FirstOrDefaultAsync(cancellationToken);
+
+
     public void Insert(Family family) =>
         _context.Set<Family>().Add(family);
 

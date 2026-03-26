@@ -123,7 +123,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
         {
             foreach (var reviewer in reviewers.Contacts)
             {
-                Result<EmailRecipient> reviewerEmail = reviewer.Key.GetEmailRecipient();
+                Result<EmailRecipient> reviewerEmail = reviewer.Key.GetEmailRecipient;
 
                 if (reviewerEmail.IsFailure)
                 {
@@ -210,7 +210,7 @@ internal sealed class SendTrainingNotificationEmailToRecipients
             {
                 foreach (var principal in principals.Contacts)
                 {
-                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient();
+                    Result<EmailRecipient> principalEmail = principal.Key.GetEmailRecipient;
 
                     if (principalEmail.IsFailure)
                     {

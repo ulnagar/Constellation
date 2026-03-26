@@ -39,7 +39,7 @@
                 <div class="card-body">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link show-loader @(Model.ActivePage == ActivePage.Messaging_History_List ? "active" : "")" asp-page="/Messaging/History/Index" asp-area="Staff">
+                            <a class="nav-link show-loader @(Model.ActivePage == ActivePage.Messaging_History_List ? "active" : "")" asp-page="/Messaging/History/Recent" asp-area="Staff">
                                 Recent
                             </a>
                         </li>
@@ -107,7 +107,7 @@
             </li>
 
             <li class="nav-item dropdown">
-                <a class="nav-link" asp-page="/Messaging/History/Index" asp-area="Staff">Recent</a>
+                <a class="nav-link" asp-page="/Messaging/History/Recent" asp-area="Staff">Recent</a>
             </li>
             
             @if (Model.ShowEmergencyConsole)

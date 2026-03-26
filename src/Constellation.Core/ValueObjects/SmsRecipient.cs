@@ -3,10 +3,13 @@
 using Errors;
 using Primitives;
 using Shared;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public sealed class SmsRecipient : ValueObject
 {
+    public static readonly SmsRecipient AuroraNoReply = new("Aurora", "Aurora");
+    public static readonly SmsRecipient Aurora = new("Aurora", "0400896896");
+    public static readonly SmsRecipient Unknown = new(string.Empty, string.Empty);
+    
     private SmsRecipient() { } // Required by EF Core
 
     private SmsRecipient(string name, string phoneNumber)

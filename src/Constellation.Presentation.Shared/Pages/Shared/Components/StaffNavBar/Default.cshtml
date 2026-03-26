@@ -19,8 +19,6 @@
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Partners <span class="caret"></span></a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a>
-                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Index">Schools</a>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Partner/Schools/Contacts/Index">School Contacts</a>
                         <div class="dropdown-divider"></div>
@@ -36,7 +34,7 @@
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="False">Messaging <span class="caret"></span></a>
                     <div class="dropdown-menu">
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a>
-                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Index">Recent</a>
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a>
                         @if (Model.CanAccessEmergencyConsole)
                         {
                             <div class="dropdown-divider"></div>

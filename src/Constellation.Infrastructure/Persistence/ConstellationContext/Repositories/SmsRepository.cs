@@ -1,12 +1,10 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
 using Core.Models.Messaging.Sms.Identifiers;
 using Core.Models.Messaging.Sms.Repositories;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 internal sealed class SmsRepository : ISmsRepository
 {
@@ -33,32 +31,14 @@ internal sealed class SmsRepository : ISmsRepository
             .Where(message => message.OutgoingId == outgoingId)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<SmsMessage?> GetMostRecentOutboundToNumber(
-        string phoneNumber, 
-        CancellationToken cancellationToken = default)
-    {
-        var windowStart = DateTimeOffset.UtcNow.AddHours(-24);
-        var originalMessage = await _context
-            .Set<SmsMessage>()
-            .Where(message => message.To == phoneNumber
-                        && message.CreatedAt >= windowStart
-                        && message.Direction == MessageDirection.Outbound)
-            .OrderByDescending(m => m.CreatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return originalMessage;
-    }
-
     public async Task<List<SmsMessage>> GetByNumber(
         PhoneNumber phoneNumber,
         CancellationToken cancellationToken = default) =>
         await _context
             .Set<SmsMessage>()
             .Where(message => 
-                message.From == phoneNumber.ToString(PhoneNumber.Format.International) ||
-                message.From == phoneNumber.ToString(PhoneNumber.Format.None) ||
-                message.To == phoneNumber.ToString(PhoneNumber.Format.International) ||
-                message.To == phoneNumber.ToString(PhoneNumber.Format.None))
+                message.Sender.Number == phoneNumber.ToString(PhoneNumber.Format.None) ||
+                message.Recipient.Number == phoneNumber.ToString(PhoneNumber.Format.None))
             .ToListAsync(cancellationToken);
 
     public async Task<List<SmsMessage>> GetRecent(

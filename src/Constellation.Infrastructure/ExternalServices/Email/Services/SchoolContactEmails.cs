@@ -33,7 +33,7 @@ public sealed partial class Service : IEmailService
         }
 
         StaffMember instructionalLeader = configuration.Contacts.First().Key;
-        Result<EmailRecipient> instructionalLeaderRecipient = instructionalLeader.GetEmailRecipient();
+        Result<EmailRecipient> instructionalLeaderRecipient = instructionalLeader.GetEmailRecipient;
 
         if (instructionalLeaderRecipient.IsFailure)
         {
@@ -79,7 +79,7 @@ public sealed partial class Service : IEmailService
             return;
         }
 
-        Result<EmailRecipient> headTeacher = configuration.Contacts.First().Key.GetEmailRecipient();
+        Result<EmailRecipient> headTeacher = configuration.Contacts.First().Key.GetEmailRecipient;
 
         if (headTeacher.IsFailure)
         {

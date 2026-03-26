@@ -112,7 +112,7 @@ internal sealed class SendLessonNotificationCommandHandler
             if (!headTeacher.Value.Contains(course.Grade))
                 continue;
 
-            Result<EmailRecipient> htResult = headTeacher.Key.GetEmailRecipient();
+            Result<EmailRecipient> htResult = headTeacher.Key.GetEmailRecipient;
 
             if (htResult.IsSuccess && facultyContacts.All(contact => contact.Email != htResult.Value.Email))
                 facultyContacts.Add(htResult.Value);

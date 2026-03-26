@@ -22,6 +22,7 @@ public interface IFamilyRepository
 
     Task<bool> DoesEmailBelongToParentOrFamily(string email, CancellationToken cancellationToken = default);
     Task<List<Family>> GetFamilyByMobileNumber(PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
+    Task<Parent?> GetParentByMobileNumber(PhoneNumber phoneNumber, CancellationToken cancellationToken = default);
     Task<Dictionary<StudentId, bool>> GetStudentIdsFromFamilyWithEmail(string email, CancellationToken cancellation = default);
     Task<int> CountOfParentsWithEmailAddress(string email, CancellationToken cancellationToken = default);
     void Insert(Family family);

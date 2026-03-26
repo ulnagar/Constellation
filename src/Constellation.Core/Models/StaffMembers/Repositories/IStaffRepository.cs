@@ -28,6 +28,8 @@ public interface IStaffRepository
     Task<List<StaffMember>> GetActiveFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
     Task<int> GetCountCurrentStaffFromSchool(SchoolCode schoolCode, CancellationToken cancellationToken = default);
 
+    Task<StaffMember?> GetCurrentByPhoneNumber(PhoneNumber number, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Get current staff member with the specified email address.
     /// </summary>
