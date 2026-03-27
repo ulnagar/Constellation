@@ -21,8 +21,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Identity.Client;
-using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Serilog;
 using System.Text;
@@ -62,7 +60,8 @@ builder.Services
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "Constellation.Identity";
-    options.ExpireTimeSpan = TimeSpan.FromHours(7);
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+    options.SlidingExpiration = true;
     options.LoginPath = new PathString("/Auth/Login");
     options.LogoutPath = new PathString("/Auth/Logout");
 });
@@ -76,13 +75,16 @@ builder.Services
     .AddCookie(options =>
     {
         options.Cookie.Name = "Constellation.Identity";
-        options.ExpireTimeSpan = TimeSpan.FromHours(7);
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
         options.LoginPath = new PathString("/Auth/Login");
         options.LogoutPath = new PathString("/Auth/Logout");
     })
     .AddOpenIdConnect(options =>
     {
+#if DEBUG
         options.RequireHttpsMetadata = false; // DEVELOPMENT ONLY
+#endif
         var oidcConfig = builder.Configuration.GetSection("OpenIDConnectSettings");
 
         options.Authority = oidcConfig["Authority"];
@@ -147,18 +149,17 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMvc(options =>
-    {
-        options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
-        options.ModelBinderProviders.Insert(0, new StringEnumerationBinderProvider());
-        options.ModelBinderProviders.Insert(0, new PositionEnumBinderProvider());
-        options.ModelBinderProviders.Insert(0, new ContactPositionBinderProvider());
-        options.ModelBinderProviders.Insert(0, new AssetNumberBinderProvider());
-        options.ModelBinderProviders.Insert(0, new RecipientGroupBinderProvider());
-        options.ModelBinderProviders.Insert(0, new AlertRecipientBinderProvider());
-        options.ModelBinderProviders.Insert(0, new AuthPermissionBinderProvider());
-        options.ModelBinderProviders.Insert(0, new MessageRecipientListBinderProvider());
-    })
-    .AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+{
+    options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
+    options.ModelBinderProviders.Insert(0, new StringEnumerationBinderProvider());
+    options.ModelBinderProviders.Insert(0, new PositionEnumBinderProvider());
+    options.ModelBinderProviders.Insert(0, new ContactPositionBinderProvider());
+    options.ModelBinderProviders.Insert(0, new AssetNumberBinderProvider());
+    options.ModelBinderProviders.Insert(0, new RecipientGroupBinderProvider());
+    options.ModelBinderProviders.Insert(0, new AlertRecipientBinderProvider());
+    options.ModelBinderProviders.Insert(0, new AuthPermissionBinderProvider());
+    options.ModelBinderProviders.Insert(0, new MessageRecipientListBinderProvider());
+});
 
 builder.Services.Replace(ServiceDescriptor.Singleton<IHtmlGenerator, CustomHtmlGenerator>());
 

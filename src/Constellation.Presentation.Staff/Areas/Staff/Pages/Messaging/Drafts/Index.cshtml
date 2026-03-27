@@ -1,0 +1,192 @@
+@page
+@using Constellation.Core.ValueObjects
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.IndexModel
+
+<h2>Message Draft</h2>
+
+<form>
+    <div class="mb-3 row" id="recipients-row">
+        <div class="col-md-2">
+            <label asp-for="Recipients"></label>
+            <div class="float-end">
+                <span id="recipients-overflow" class="badge text-bg-secondary d-none"></span>
+                <button type="button"
+                        id="recipients-toggle"
+                        class="btn btn-sm btn-link p-0 me-1 d-none"
+                        aria-expanded="false"
+                        aria-controls="recipients-container"
+                        title="Show all recipients">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div id="recipients-container">
+                @foreach (var recipient in Model.Recipients)
+                {
+                    <span class="badge text-bg-warning mb-1" data-recipient="@recipient.Id">
+                        <span class="align-text-top">@recipient.Name</span>
+                        <span class="ms-2 me-2">
+                            @if (recipient.HasEmail)
+                            {
+                                <i class="fas fa-envelope-square large" title="@recipient.EmailAddress.Email"></i>
+                            }
+                            @if (recipient.HasPhone)
+                            {
+                                <i class="fas fa-phone-square-alt large" title="@recipient.PhoneNumber.ToString(PhoneNumber.Format.None)"></i>
+                            }
+                        </span>
+                        <button type="button" class="btn-close" aria-label="Close"></button>
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3 row">
+        <label asp-for="Subject" class="col-md-2"></label>
+        <div class="col-md-6">
+            <input asp-for="Subject" class="form-control" />
+            <span asp-validation-for="Subject" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3 row">
+        <label asp-for="Body" class="col-md-2"></label>
+        <div class="col-md-6">
+            <textarea id="@Html.IdFor(m => m.Body)" name="@Html.NameFor(m => m.Body)" rows="20" cols="150" class="form-control">@Model.Body</textarea>
+            <span class="d-block d-none text-danger message-counter">The message contains <span id="character-count">@Model.Body.Count()</span> characters. Messages sent via SMS will be split into 160 character blocks and sent separately.</span>
+            <span asp-validation-for="Body" class="text-danger"></span>
+            <span id="autosave-status" style="font-size: 0.85em; color: grey;"></span>
+        </div>
+    </div>
+
+</form>
+
+@Html.AntiForgeryToken()
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $('textarea').on("input", function() {
+          var currentLength = $(this).val().length;
+          $('#character-count').text(currentLength);
+        });
+
+        $('#recipients-container').on('click', '.btn-close', async function() {
+            var badge = $(this).parent();
+            var recipientId = badge.attr('data-recipient');
+
+            try {
+                const response = await fetch('?handler=AjaxRemoveRecipient&recipientId=' + recipientId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                });
+
+                if (response.ok) {
+                    badge.remove();
+                    collapseRecipients();
+                }
+                else {
+                    badge.addClass('badge-flash');
+                    badge.one('animationend', () => badge.removeClass('badge-flash'));
+                }
+            } catch {
+                badge.addClass('badge-flash');
+                badge.one('animationend', () => badge.removeClass('badge-flash'));
+            }
+        });
+
+        function debounce(fn, delay) {
+            let timer;
+            return function(...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        const saveDraft = debounce(async function() {
+            const subject = $('#Subject').val();
+            const body    = $('#Body').val();
+
+            try {
+                const response = await fetch('?handler=AjaxAutoSave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    body: JSON.stringify({ subject, body })
+                });
+
+                $('#autosave-status').text(response.ok ? 'Draft saved' : 'Save failed');
+            } catch {
+                $('#autosave-status').text('Save failed');
+            }
+        }, 800); // wait 800ms after last keypress before saving
+
+        $('#Subject, #Body').on('input', saveDraft);
+
+        $('#recipients-toggle').on('click', function() {
+            const expanded   = $(this).attr('aria-expanded') === 'true';
+            const container  = document.getElementById('recipients-container');
+            const badges     = [...container.querySelectorAll('.badge[data-recipient]')];
+
+            if (expanded) {
+                // Collapse — re-measure and hide overflow
+                $(this).attr('aria-expanded', 'false')
+                       .find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                collapseRecipients();
+            } else {
+                // Expand — show everything
+                badges.forEach(b => b.classList.remove('d-none'));
+                $('#recipients-overflow').addClass('d-none');
+                $(this).attr('aria-expanded', 'true')
+                       .find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
+        });
+
+        $(document).ready(function() {
+            collapseRecipients();
+        });
+
+        // Re-run if the container is resized (e.g. responsive layout shift)
+        new ResizeObserver(() => {
+            if ($('#recipients-toggle').attr('aria-expanded') === 'false') {
+                collapseRecipients();
+            }
+        }).observe(document.getElementById('recipients-container'));
+
+        function collapseRecipients() {
+            const container  = document.getElementById('recipients-container');
+            const overflow   = document.getElementById('recipients-overflow');
+            const toggle     = document.getElementById('recipients-toggle');
+            const badges     = [...container.querySelectorAll('.badge[data-recipient]')];
+
+            if (badges.length === 0) return;
+
+            // Make all visible first so we can measure real positions
+            badges.forEach(b => b.classList.remove('d-none'));
+            overflow.classList.add('d-none');
+            toggle.classList.add('d-none');
+
+            const firstRowTop = badges[0].offsetTop;
+            const hidden      = badges.filter(b => b.offsetTop > firstRowTop);
+
+            if (hidden.length === 0) return;
+
+            // Only hide if we're in collapsed state
+            if (toggle.getAttribute('aria-expanded') === 'false') {
+                hidden.forEach(b => b.classList.add('d-none'));
+                overflow.textContent = `+${hidden.length} more`;
+                overflow.classList.remove('d-none');
+                toggle.classList.remove('d-none');
+            }
+        }
+    </script>
+}

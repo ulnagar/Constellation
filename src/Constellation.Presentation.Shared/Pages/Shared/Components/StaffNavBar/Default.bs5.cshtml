@@ -36,6 +36,8 @@
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="False">Messaging <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Index">Drafts</a></li>
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a></li>
                     @if (Model.CanAccessEmergencyConsole)
                     {

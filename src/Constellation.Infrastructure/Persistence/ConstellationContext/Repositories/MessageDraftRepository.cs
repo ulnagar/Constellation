@@ -2,6 +2,7 @@
 
 using Constellation.Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
@@ -18,22 +19,32 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         _dbContextFactory = dbContextFactory;
     }
 
+    private async Task<MessageDraft> GetOrCreateDraft(
+        AppDbContext context,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        MessageDraft? draft = await context
+            .Set<MessageDraft>()
+            .FirstOrDefaultAsync(draft => draft.UserId == userId, cancellationToken);
+
+        if (draft is not null)
+            return draft;
+
+        draft = new(userId);
+        context.Set<MessageDraft>().Add(draft);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return draft;
+    }
+
     public async Task<MessageDraft> GetDraft(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
         await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        bool exists = await context
-            .Set<MessageDraft>()
-            .AnyAsync(draft => draft.UserId == userId, cancellationToken);
-
-        if (!exists)
-        {
-            MessageDraft newDraft = new(userId);
-            context.Set<MessageDraft>().Add(newDraft);
-            await context.SaveChangesAsync(cancellationToken);
-        }
+        await GetOrCreateDraft(context, userId, cancellationToken);
 
         return await context
             .Set<MessageDraft>()
@@ -49,17 +60,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     {
         await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        MessageDraft? draft = await context
-            .Set<MessageDraft>()
-            .SingleOrDefaultAsync(draft => draft.UserId == userId,
-                cancellationToken);
-
-        if (draft is null)
-        {
-            draft = new(userId);
-            context.Set<MessageDraft>().Add(draft);
-            await context.SaveChangesAsync(cancellationToken);
-        }
+        MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
 
         if (recipient.EmailAddress != EmailAddress.None && draft.Recipients.Any(entry => entry.EmailAddress == recipient.EmailAddress))
             return Result.Failure(MessageDraftErrors.AddRecipient.DuplicateEmailFound);
@@ -75,21 +76,17 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     }
 
     public async Task<Result> RemoveRecipient(
-        MessageRecipient recipient,
+        MessageRecipientId recipientId,
         Guid userId,
         CancellationToken cancellationToken = default)
     {
         await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        MessageDraft? draft = await context
-            .Set<MessageDraft>()
-            .SingleOrDefaultAsync(draft => draft.UserId == userId,
-                cancellationToken);
+        MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
 
-        if (draft is null)
-            return Result.Failure(MessageDraftErrors.NotFound);
+        MessageRecipient? recipient = draft.Recipients.FirstOrDefault(recipient => recipient.Id == recipientId);
 
-        if (!draft.Recipients.Contains(recipient))
+        if (recipient is null)
             return Result.Failure(MessageDraftErrors.RemoveRecipient.NotFound);
 
         draft.RemoveRecipient(recipient);
@@ -105,8 +102,11 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     {
         await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        context.Set<MessageDraft>().Attach(draft);
-        draft.UpdatedAt = DateTimeOffset.UtcNow;
+        MessageDraft existingDraft = await GetOrCreateDraft(context, draft.UserId, cancellationToken);
+        existingDraft.Subject = draft.Subject;
+        existingDraft.Body = draft.Body;
+        existingDraft.UpdatedAt = DateTimeOffset.UtcNow;
+        
         await context.SaveChangesAsync(cancellationToken); 
         return Result.Success();
     }

@@ -9,7 +9,6 @@ using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Sms;
 using Core.Primitives;
 using Core.Shared;
-using Core.ValueObjects;
 using Models;
 using System.Collections.Generic;
 
@@ -58,7 +57,7 @@ internal sealed class GetRecentCommunicationsHistoryQueryHandler
                     email.Id,
                     MessageType.Email,
                     MessageDirection.Outbound,
-                    $"{email.From.Name} <{email.From.Email}>",
+                    new(email.From.Name, email.From.Email),
                     recipients,
                     email.Subject,
                     email.Status,
@@ -79,7 +78,7 @@ internal sealed class GetRecentCommunicationsHistoryQueryHandler
                     sms.Id,
                     MessageType.SMS,
                     sms.Direction,
-                    sms.Sender.Name,
+                    new(sms.Sender.Name, sms.Sender.Number),
                     recipients,
                     sms.Message,
                     sms.Status,

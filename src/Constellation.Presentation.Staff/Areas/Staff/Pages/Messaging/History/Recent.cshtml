@@ -39,7 +39,9 @@
                         }
                     </td>
                     <td><span class="text-nowrap">@message.Timestamp.ToLocalTime().ToString("hh:mm:ss tt")</span></td>
-                    <td>@message.From</td>
+                    <td>
+                        <span title="@message.From.Contact" role="button" class="badge border border-secondary text-secondary text-nowrap">@message.From.Name</span>
+                    </td>
                     <td>
                         <span class="font-weight-bold">To:</span>
                         @foreach (var entry in message.Recipients.Where(entry => entry.Type == EmailRecipientType.To).OrderBy(entry => entry.Name))

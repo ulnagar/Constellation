@@ -29,15 +29,20 @@
         </div>
 
         <div class="card">
-            <div class="card-header" id="historyHeading">
-                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#history" data-toggle="collapse" data-target="#history" role="button">
-                    History
+            <div class="card-header" id="messagesHeading">
+                <h4 class="sidebar-heading d-flex justify-content-between p-3 mb-1 text-muted" data-bs-toggle="collapse" data-bs-target="#messages" data-toggle="collapse" data-target="#messages" role="button">
+                    Messages
                 </h4>
             </div>
 
-            <div id="history" class="collapse @(module == "History" ? "show" : "")" data-parent="#accordion">
+            <div id="messages" class="collapse @(module == "History" || module == "Drafts" ? "show" : "")" data-parent="#accordion">
                 <div class="card-body">
                     <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link show-loader @(Model.ActivePage == ActivePage.Messaging_Drafts ? "active" : "")" asp-page="/Messaging/Drafts/Index" asp-area="Staff">
+                                Drafts
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link show-loader @(Model.ActivePage == ActivePage.Messaging_History_List ? "active" : "")" asp-page="/Messaging/History/Recent" asp-area="Staff">
                                 Recent
@@ -104,6 +109,10 @@
         <ul class="navbar-nav me-auto ms-3 mb-2">
             <li class="nav-item dropdown">
                 <a class="nav-link" asp-page="/Messaging/Contacts/Index" asp-area="Staff">Contacts</a>
+            </li>
+            
+            <li class="nav-item dropdown">
+                <a class="nav-link" asp-page="/Messaging/Drafts/Index" asp-area="Staff">Drafts</a>
             </li>
 
             <li class="nav-item dropdown">

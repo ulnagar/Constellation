@@ -2,6 +2,7 @@
 
 using Converters;
 using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,6 +26,12 @@ internal sealed class MessageDraftConfiguration : IEntityTypeConfiguration<Messa
             .OwnsMany(draft => draft.Recipients,
                 navigation =>
                 {
+                    navigation
+                        .Property(recipient => recipient.Id)
+                        .HasConversion(
+                            id => id.Value,
+                            value => new MessageRecipientId(value));
+
                     navigation
                         .Property(recipient => recipient.EmailAddress)
                         .HasConversion<EmailAddressConverter>();

@@ -744,6 +744,7 @@
             });
 
         $('#SendEmail').on('click', async function() {
+            toggleLoader();
             const recipients = getRecipientsFromTable();
 
             if (recipients.length === 0) {
@@ -766,6 +767,7 @@
 
             var dummyModal = $(makeModal('<p>The details of all contacts in the table displayed below have been added to your draft message.</p><p>Please use the Messaging module to send your message.</p>'));
             dummyModal.modal('show');
+            toggleLoader();
         });
 
         function getRecipientsFromTable() {

@@ -8,12 +8,16 @@ public sealed record CommunicationRecordResponse(
     IStronglyTypedId Id,
     MessageType Type,
     MessageDirection Direction,
-    string From,
+    CommunicationRecordResponse.Sender From,
     List<CommunicationRecordResponse.Recipient> Recipients,
     string Subject,
     MessageStatus Status,
     DateTimeOffset Timestamp)
 {
+    public sealed record Sender(
+        string Name,
+        string Contact);
+
     public sealed record Recipient(
         EmailRecipientType Type,
         string Name,
