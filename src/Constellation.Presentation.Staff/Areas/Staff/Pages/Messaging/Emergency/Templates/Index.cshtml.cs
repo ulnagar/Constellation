@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;

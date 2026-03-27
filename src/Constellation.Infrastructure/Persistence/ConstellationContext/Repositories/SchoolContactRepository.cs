@@ -73,6 +73,14 @@ public class SchoolContactRepository : ISchoolContactRepository
             .SingleOrDefault(entry => entry.Name.DisplayName == name);
     }
 
+    public async Task<SchoolContact?> GetByPhoneNumber(
+        PhoneNumber number,
+        CancellationToken cancellationToken = default) =>
+        await _context
+            .Set<SchoolContact>()
+            .Where(contact => contact.PhoneNumber == number)
+            .FirstOrDefaultAsync(cancellationToken);
+
     public async Task<List<SchoolContact>> GetPrincipalsForSchool(
         SchoolCode schoolCode,
         CancellationToken cancellationToken = default) =>

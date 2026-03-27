@@ -3,8 +3,10 @@
 using Constellation.Application.DTOs.EmailRequests;
 using Constellation.Application.Helpers;
 using Constellation.Application.Interfaces.Services;
+using Constellation.Core.Models.Messaging.Sms;
 using Core.ValueObjects;
 using System;
+using System.Globalization;
 using System.Net.Mail;
 using System.Threading.Tasks;
 
@@ -92,4 +94,24 @@ public sealed partial class Service : IEmailService
             $"[Aurora College] Service Log Output - {notification.Source}",
             notification.Recipients);
     }
+
+    public async Task SendIncomingSmsAlert(
+        SmsMessage message,
+        CancellationToken cancellationToken = default)
+    {
+        string viewModel = $"""
+                            The following message was received as an SMS<br />
+                            <strong>Sender: </strong>{message.Sender.Name} ({message.Sender.Number})<br />
+                            <strong>Message: </strong>{message.Message}<br />
+                            <strong>Received: </strong>{message.CreatedAt.LocalDateTime.ToString("F", DateTimeFormatInfo.InvariantInfo)}
+                            """;
+
+        await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            $"[Aurora College] SMS Received from {message.Sender.Name}",
+            [EmailRecipient.AuroraCollege],
+            cancellationToken: cancellationToken);
+    }
+
 }

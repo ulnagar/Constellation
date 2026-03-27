@@ -1,6 +1,6 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency;
 
-using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventSummaries;
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetEmergencyConsoleMessageEventSummaries;
 using Application.Models.Auth;
 using Constellation.Application.Common.PresentationModels;
 using Constellation.Core.Abstractions.Services;

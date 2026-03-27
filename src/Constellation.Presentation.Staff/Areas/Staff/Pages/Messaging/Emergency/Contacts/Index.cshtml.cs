@@ -1,7 +1,7 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Contacts;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EmergencyConsole.Queries.GetContactDetails;
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetContactDetails;
 using Application.Domains.SchoolContacts.Commands.UpdateSchoolContactPhoneNumber;
 using Application.Domains.SchoolContacts.Queries.GetContactSummary;
 using Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;

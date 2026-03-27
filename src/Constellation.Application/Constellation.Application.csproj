@@ -5,12 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Domains\EmergencyConsole\Helpers\**" />
-    <EmbeddedResource Remove="Domains\EmergencyConsole\Helpers\**" />
-    <None Remove="Domains\EmergencyConsole\Helpers\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Constellation.Core\Constellation.Core.csproj" />
   </ItemGroup>
 

@@ -95,17 +95,17 @@ public sealed class Service : ISMSService
                     recipient.Number == recipientPhoneNumber.Value.ToString(PhoneNumber.Format.None)) 
                 ?? SmsRecipient.Unknown;
 
-            SmsMessage message = new()
+            SmsMessage message = new(
+                "Absences",
+                confirmation.Id ?? string.Empty,
+                sender,
+                receiver,
+                confirmation.Message ?? string.Empty,
+                MessageDirection.Outbound,
+                MessageStatus.Sent,
+                confirmation.DateTime)
             {
-                SmsGlobalId = confirmation.Id ?? string.Empty,
-                SendingModule = "Absences",
                 OutgoingId = confirmation.OutgoingId ?? string.Empty,
-                Sender = sender,
-                Recipient = receiver,
-                Message = confirmation.Message ?? string.Empty,
-                Direction = MessageDirection.Outbound,
-                Status = MessageStatus.Sent,
-                CreatedAt = confirmation.DateTime
             };
 
             _smsRepository.Insert(message);

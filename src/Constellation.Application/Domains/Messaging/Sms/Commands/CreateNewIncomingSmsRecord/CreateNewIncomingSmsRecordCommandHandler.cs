@@ -6,6 +6,8 @@ using Core.Models.Families;
 using Core.Models.Messaging.Enums;
 using Core.Models.Messaging.Sms;
 using Core.Models.Messaging.Sms.Repositories;
+using Core.Models.SchoolContacts;
+using Core.Models.SchoolContacts.Repositories;
 using Core.Models.StaffMembers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Shared;
@@ -20,6 +22,7 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
     private readonly ISmsRepository _smsRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly IFamilyRepository _familyRepository;
+    private readonly ISchoolContactRepository _contactRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
 
@@ -27,12 +30,14 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
         ISmsRepository smsRepository,
         IStaffRepository staffRepository,
         IFamilyRepository familyRepository,
+        ISchoolContactRepository contactRepository,
         IUnitOfWork unitOfWork,
         ILogger logger)
     {
         _smsRepository = smsRepository;
         _staffRepository = staffRepository;
         _familyRepository = familyRepository;
+        _contactRepository = contactRepository;
         _unitOfWork = unitOfWork;
         _logger = logger
             .ForContext<CreateNewIncomingSmsRecordCommand>();
@@ -54,10 +59,14 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
 
         SmsRecipient sender = SmsRecipient.Unknown;
 
+        SchoolContact? contact = await _contactRepository.GetByPhoneNumber(senderPhoneNumber.Value, cancellationToken);
+        if (contact is not null)
+            sender = SmsRecipient.Create(contact.Name, senderPhoneNumber.Value).Value;
+
         StaffMember? teacher = await _staffRepository.GetCurrentByPhoneNumber(senderPhoneNumber.Value, cancellationToken);
         if (teacher is not null)
             sender = SmsRecipient.Create(teacher.Name, senderPhoneNumber.Value).Value;
-
+        
         Parent? parent = await _familyRepository.GetParentByMobileNumber(senderPhoneNumber.Value, cancellationToken);
         if (parent is not null && sender == SmsRecipient.Unknown)
             sender = SmsRecipient.Create(parent.Name, senderPhoneNumber.Value).Value;
@@ -65,16 +74,16 @@ internal sealed class CreateNewIncomingSmsRecordCommandHandler
         if (sender ==  SmsRecipient.Unknown)
             sender = SmsRecipient.Create("Unknown", senderPhoneNumber.Value.ToString(PhoneNumber.Format.None)).Value;
 
-        SmsMessage inboundMessage = new()
+        SmsMessage inboundMessage = new(
+            string.Empty,
+            request.IncomingSms.MsgId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
+            sender,
+            receiver,
+            request.IncomingSms.Msg!,
+            MessageDirection.Inbound,
+            MessageStatus.Received,
+            DateTimeOffset.UtcNow)
         {
-            SmsGlobalId = request.IncomingSms.MsgId?.ToString(CultureInfo.InvariantCulture) ?? string.Empty,
-            SendingModule = string.Empty,
-            Sender = sender,
-            Recipient = receiver,
-            Message = request.IncomingSms.Msg!,
-            Direction = MessageDirection.Inbound,
-            Status = MessageStatus.Received,
-            CreatedAt = DateTimeOffset.UtcNow,
             SmsGlobalDate = request.IncomingSms.Date.ToUniversalTime()
         };
 

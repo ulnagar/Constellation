@@ -1,10 +1,10 @@
 namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates;
 
 using Application.Common.PresentationModels;
-using Application.Domains.EmergencyConsole.Commands.CreateNewEmergencyConsoleMessageTemplate;
-using Application.Domains.EmergencyConsole.Commands.DeleteEmergencyConsoleMessageTemplate;
-using Application.Domains.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
-using Application.Domains.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
+using Application.Domains.Messaging.EmergencyConsole.Commands.CreateNewEmergencyConsoleMessageTemplate;
+using Application.Domains.Messaging.EmergencyConsole.Commands.DeleteEmergencyConsoleMessageTemplate;
+using Application.Domains.Messaging.EmergencyConsole.Commands.UpdateEmergencyConsoleMessageTemplate;
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;

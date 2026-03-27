@@ -11,6 +11,7 @@ using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Core.Models.Assignments;
 using Core.Models.Messaging.Email;
+using Core.Models.Messaging.Sms;
 using Core.Models.SchoolContacts;
 using Core.Models.StaffMembers;
 using Core.Models.Subjects;
@@ -52,6 +53,7 @@ public interface IEmailService
     Task SendAdminAbsenceSentralAlert(string studentName);
     Task SendAdminLowCreditAlert(double credit);
     Task SendMasterFileConsistencyReportEmail(MemoryStream report, string emailAddress, CancellationToken cancellationToken = default);
+    Task SendIncomingSmsAlert(SmsMessage message, CancellationToken cancellationToken = default);
 
     // Assessment Provisions Emails
     Task<Result> SendAssessmentProvisionEmailToSchools(List<EmailRecipient> recipients, List<EmailRecipient> ccRecipients, Name contact, List<StudentProvisions> students, CancellationToken cancellationToken = default);
