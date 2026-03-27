@@ -97,15 +97,16 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
     }
 
     public async Task<Result> UpdateDraft(
-        MessageDraft draft,
+        Guid userId,
+        Action<MessageDraft> apply,
         CancellationToken cancellationToken = default)
     {
         await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        MessageDraft existingDraft = await GetOrCreateDraft(context, draft.UserId, cancellationToken);
-        existingDraft.Subject = draft.Subject;
-        existingDraft.Body = draft.Body;
-        existingDraft.UpdatedAt = DateTimeOffset.UtcNow;
+        MessageDraft draft = await GetOrCreateDraft(context, userId, cancellationToken);
+
+        apply(draft);
+        draft.UpdatedAt = DateTimeOffset.UtcNow;
         
         await context.SaveChangesAsync(cancellationToken); 
         return Result.Success();

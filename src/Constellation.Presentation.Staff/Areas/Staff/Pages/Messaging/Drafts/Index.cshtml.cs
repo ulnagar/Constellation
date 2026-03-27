@@ -5,7 +5,9 @@ using Core.Abstractions.Services;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
+using Core.Models.Messaging.Enums;
 using Core.Shared;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +46,7 @@ public class IndexModel : BasePageModel
     [ViewData] public string PageTitle => "Message Draft";
 
     public List<MessageRecipient> Recipients { get; set; } = [];
+    public MessageType Type { get; set; }
     public string? Subject { get; set; } = string.Empty;
     public string? Body { get; set; } = string.Empty;
 
@@ -52,6 +55,7 @@ public class IndexModel : BasePageModel
         MessageDraft draft = await _draftRepository.GetDraft(User.GetUserId());
 
         Recipients = draft.Recipients.ToList();
+        Type = draft.Type;
         Subject = draft.Subject;
         Body = draft.Body;
     }
@@ -59,13 +63,44 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnPostAjaxAutoSave([FromBody] AutoSaveViewModel vm)
     {
         await _draftRepository.UpdateDraft(
-            new(User.GetUserId())
+            User.GetUserId(),
+            draft =>
             {
-                Subject = vm.Subject,
-                Body = vm.Body
+                draft.Subject = vm.Subject;
+                draft.Body = vm.Body;
             });
 
         return new OkResult();
+    }
+
+    public async Task<IActionResult> OnPostAddRecipient(AddRecipientViewModel vm)
+    {
+        EmailAddress email = EmailAddress.None;
+        PhoneNumber phone = PhoneNumber.Empty;
+        bool updated = false;
+
+        Result<EmailAddress> emailAttempt = EmailAddress.Create(vm.Email);
+        if (emailAttempt.IsSuccess)
+        {
+            email = emailAttempt.Value;
+            updated = true;
+        }
+
+        Result<PhoneNumber> phoneAttempt = PhoneNumber.Create(vm.Phone);
+        if (phoneAttempt.IsSuccess)
+        {
+            phone = phoneAttempt.Value;
+            updated = true;
+        }
+
+        if (!updated)
+            return RedirectToPage();
+
+        MessageRecipient recipient = new MessageRecipient(email, phone, vm.Name);
+
+        await _draftRepository.AddRecipient(recipient, User.GetUserId());
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAjaxRemoveRecipient(MessageRecipientId recipientId)
@@ -78,9 +113,36 @@ public class IndexModel : BasePageModel
         return BadRequest();
     }
 
+    public async Task<IActionResult> OnPostAjaxChangeType(string type)
+    {
+        if (string.IsNullOrWhiteSpace(type))
+            return BadRequest();
+
+        MessageType? messageType = MessageType.FromName(type);
+
+        if (messageType is null)
+            return BadRequest();
+
+        await _draftRepository.UpdateDraft(
+            User.GetUserId(),
+            draft =>
+            {
+                draft.Type = messageType;
+            });
+
+        return new OkResult();
+    }
+
     public sealed class AutoSaveViewModel
     {
         public string? Subject { get; set; }
         public string Body { get; set; } = string.Empty;
+    }
+
+    public sealed class AddRecipientViewModel
+    {
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
     }
 }

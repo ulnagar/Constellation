@@ -1,10 +1,25 @@
 @page
+@using Constellation.Core.Models.Messaging.Enums
 @using Constellation.Core.ValueObjects
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.IndexModel
 
 <h2>Message Draft</h2>
 
 <form>
+    <div class="mb-3 row">
+        <label asp-for="Type" class="col-md-2"></label>
+        <div class="col-md-3">
+            <div class="btn-group" role="group">
+                @foreach (var option in MessageType.GetOptions)
+                {
+                    <input type="radio" class="btn-check" asp-for="Type" value="@option.Value" id="type-@option.Value" />
+                    <label class="btn btn-outline-success" for="type-@option.Value">@option.Name</label>
+                }
+            </div>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+    </div>
+
     <div class="mb-3 row" id="recipients-row">
         <div class="col-md-2">
             <label asp-for="Recipients"></label>
@@ -41,12 +56,16 @@
                 }
             </div>
         </div>
+        
+        <div class="col-md-2 col-offset-md-2">
+            <button type="button" data-bs-toggle="modal" data-bs-target="#ManualRecipientModal" class="btn btn-secondary">Add</button>
+        </div>
     </div>
-
-    <div class="mb-3 row">
+    
+    <div class="mb-3 row @(Model.Type == MessageType.SMS ? "d-none" : "")" id="subject-row">
         <label asp-for="Subject" class="col-md-2"></label>
         <div class="col-md-6">
-            <input asp-for="Subject" class="form-control" />
+            <input asp-for="Subject" class="form-control"/>
             <span asp-validation-for="Subject" class="text-danger"></span>
         </div>
     </div>
@@ -63,6 +82,50 @@
 
 </form>
 
+<form asp-page-handler="AddRecipient">
+    <div class="modal" id="ManualRecipientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Enter Manual Recipient</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <label class="col-md-12">Name</label>
+                            <div class="col-md-12">
+                                <input name="Name" type="text" class="form-control" required="required" autofocus />
+                                <span class="text-danger">(Required) Enter the name of the contact</span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-12">Email</label>
+                            <div class="col-md-12">
+                                <input name="Email" type="email" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a valid email address</span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <label class="col-md-12">Phone Number</label>
+                            <div class="col-md-12">
+                                <input name="Phone" type="tel" pattern="^(\s*\d\s*){10}$" class="form-control" />
+                                <span class="text-danger">(Optional) Enter a ten-digit mobile number</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Add</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
 @Html.AntiForgeryToken()
 
 @section Scripts
@@ -73,6 +136,26 @@
         $('textarea').on("input", function() {
           var currentLength = $(this).val().length;
           $('#character-count').text(currentLength);
+        });
+
+        $('input[name="Type"]').on('change', async function() {
+            var typeSwitch = $(this);
+            var type = typeSwitch.val();
+
+            const response = await fetch('?handler=AjaxChangeType&type=' + type, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                }
+            });
+
+            document.startViewTransition(() => {
+                if (type === 'SMS')
+                    $('#subject-row').addClass('d-none');
+                else
+                    $('#subject-row').removeClass('d-none');
+            });
         });
 
         $('#recipients-container').on('click', '.btn-close', async function() {
@@ -89,8 +172,10 @@
                 });
 
                 if (response.ok) {
-                    badge.remove();
-                    collapseRecipients();
+                    document.startViewTransition(() => {
+                        badge.remove();
+                        collapseRecipients();
+                    });
                 }
                 else {
                     badge.addClass('badge-flash');

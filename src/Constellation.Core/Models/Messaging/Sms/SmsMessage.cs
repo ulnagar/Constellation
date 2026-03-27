@@ -8,6 +8,8 @@ using ValueObjects;
 
 public sealed class SmsMessage : AggregateRoot, IHasCreatedAt
 {
+    private SmsMessage() { }
+
     public SmsMessage(
         string module,
         string? smsGlobalId,
