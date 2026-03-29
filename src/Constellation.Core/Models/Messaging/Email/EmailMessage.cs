@@ -23,8 +23,8 @@ public sealed class EmailMessage : IHasCreatedAt
     public DateTimeOffset? StatusUpdatedAt { get; set; }
 
     // Sender — single value, owned directly on the message
-    public required EmailSender From { get; set; }
-    public EmailSender? ReplyTo { get; set; }
+    public required MessageSender From { get; set; }
+    public MessageSender? ReplyTo { get; set; }
 
     // Content
     public required string Subject { get; set; }

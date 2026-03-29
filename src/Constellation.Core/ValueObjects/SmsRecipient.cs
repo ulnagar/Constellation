@@ -6,7 +6,7 @@ using Shared;
 
 public sealed class SmsRecipient : ValueObject
 {
-    public static readonly SmsRecipient AuroraNoReply = new("Aurora", "Aurora");
+    public static readonly SmsRecipient AuroraNoReply = new("Aurora - No Reply", "Aurora");
     public static readonly SmsRecipient Aurora = new("Aurora", "0400896896");
     public static readonly SmsRecipient Unknown = new(string.Empty, string.Empty);
     

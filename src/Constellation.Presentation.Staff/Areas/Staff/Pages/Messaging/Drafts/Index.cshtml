@@ -5,18 +5,64 @@
 
 <h2>Message Draft</h2>
 
+<div class="page-menu">
+    <a asp-page-handler="ClearDraft" class="btn btn-warning">Reset Draft</a>
+</div>
+
+<hr />
+
 <form>
     <div class="mb-3 row">
         <label asp-for="Type" class="col-md-2"></label>
         <div class="col-md-3">
             <div class="btn-group" role="group">
-                @foreach (var option in MessageType.GetOptions)
+                <input type="radio" class="btn-check" asp-for="Type" value="@MessageType.Email.Value" id="type-@MessageType.Email.Value" />
+                <label class="btn btn-outline-success" for="type-@MessageType.Email.Value">@MessageType.Email.Name</label>
+                
+                @if (Model.CanSendSms)
                 {
-                    <input type="radio" class="btn-check" asp-for="Type" value="@option.Value" id="type-@option.Value" />
-                    <label class="btn btn-outline-success" for="type-@option.Value">@option.Name</label>
+                    <input type="radio" class="btn-check" asp-for="Type" value="@MessageType.SMS.Value" id="type-@MessageType.SMS.Value" />
+                    <label class="btn btn-outline-success" for="type-@MessageType.SMS.Value">@MessageType.SMS.Name</label>
                 }
+                else
+                {
+                    <input type="radio" class="btn-check" disabled="disabled" asp-for="Type" value="@MessageType.SMS.Value" id="type-@MessageType.SMS.Value" />
+                    <label class="btn btn-outline-success" disabled="disabled" for="type-@MessageType.SMS.Value">@MessageType.SMS.Name</label>
+                }
+                
             </div>
             <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3 row">
+        <label class="col-md-2 col-form-label">Sender</label>
+        <div class="col-md-6">
+
+            <select id="sender-email" class="form-select @(Model.Type != MessageType.Email ? "d-none" : "")">
+                <option value="">-- Select sender --</option>
+                @foreach (var sender in Model.EmailSenders)
+                {
+                    <option value="@sender.Destination"
+                            data-name="@sender.Name"
+                            selected="@(Model.Sender?.Destination == sender.Destination)">
+                        @sender.Name (@sender.Destination)
+                    </option>
+                }
+            </select>
+
+            <select id="sender-sms" class="form-select @(Model.Type != MessageType.SMS ? "d-none" : "")">
+                <option value="">-- Select sender --</option>
+                @foreach (var sender in Model.SmsSenders)
+                {
+                    <option value="@sender.Destination"
+                            data-name="@sender.Name"
+                            selected="@(Model.Sender?.Destination == sender.Destination)">
+                        @sender.Name (@sender.Destination)
+                    </option>
+                }
+            </select>
+
         </div>
     </div>
 
@@ -33,6 +79,10 @@
                         title="Show all recipients">
                     <i class="fas fa-chevron-down"></i>
                 </button>
+            </div>
+                    
+            <div class="w-100 d-grid mt-2">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#ManualRecipientModal" class="btn btn-secondary">Add</button>
             </div>
         </div>
         <div class="col-md-8">
@@ -56,10 +106,6 @@
                 }
             </div>
         </div>
-        
-        <div class="col-md-2 col-offset-md-2">
-            <button type="button" data-bs-toggle="modal" data-bs-target="#ManualRecipientModal" class="btn btn-secondary">Add</button>
-        </div>
     </div>
     
     <div class="mb-3 row @(Model.Type == MessageType.SMS ? "d-none" : "")" id="subject-row">
@@ -73,7 +119,7 @@
     <div class="mb-3 row">
         <label asp-for="Body" class="col-md-2"></label>
         <div class="col-md-6">
-            <textarea id="@Html.IdFor(m => m.Body)" name="@Html.NameFor(m => m.Body)" rows="20" cols="150" class="form-control">@Model.Body</textarea>
+            <textarea id="@Html.IdFor(m => m.Body)" name="@Html.NameFor(m => m.Body)" rows="20" cols="150" class="form-control summernote">@Model.Body</textarea>
             <span class="d-block d-none text-danger message-counter">The message contains <span id="character-count">@Model.Body.Count()</span> characters. Messages sent via SMS will be split into 160 character blocks and sent separately.</span>
             <span asp-validation-for="Body" class="text-danger"></span>
             <span id="autosave-status" style="font-size: 0.85em; color: grey;"></span>
@@ -136,26 +182,51 @@
         $('textarea').on("input", function() {
           var currentLength = $(this).val().length;
           $('#character-count').text(currentLength);
-        });
+        }); 
 
-        $('input[name="Type"]').on('change', async function() {
-            var typeSwitch = $(this);
-            var type = typeSwitch.val();
+        function getActiveSenderSelect() {
+            return $('input[name="Type"]:checked').val() === 'Email' ? $('#sender-email') : $('#sender-sms');
+        }
 
-            const response = await fetch('?handler=AjaxChangeType&type=' + type, {
+        function saveSender() {
+            const type = $('input[name="Type"]:checked').val()
+            const active = getActiveSenderSelect();
+            const selected = active.find('option:selected');
+
+            return fetch('?handler=AjaxAutoSaveSender', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                }
+                },
+                body: JSON.stringify({
+                    messageType:        type,
+                    senderName:         selected.data('name') ?? '',
+                    senderDestination:  selected.val() ?? ''
+                })
             });
+        }
+
+        // Switch visible dropdown when type changes
+        $('input[name="Type"]').on('change', async function() {
+            const value = $(this).val();
+            const isEmail = value === 'Email';
 
             document.startViewTransition(() => {
-                if (type === 'SMS')
-                    $('#subject-row').addClass('d-none');
-                else
-                    $('#subject-row').removeClass('d-none');
+                $('#sender-email').toggleClass('d-none', !isEmail);
+                $('#sender-sms').toggleClass('d-none', isEmail);
+                $('#subject-row').toggleClass('d-none', !isEmail);
             });
+
+            // Reset the now-hidden dropdown selection
+            (isEmail ? $('#sender-sms') : $('#sender-email')).val('');
+
+            await saveSender();
+        });
+
+        // Autosave when sender selection changes
+        $('#sender-email, #sender-sms').on('change', async function() {
+            await saveSender();
         });
 
         $('#recipients-container').on('click', '.btn-close', async function() {
@@ -197,7 +268,8 @@
 
         const saveDraft = debounce(async function() {
             const subject = $('#Subject').val();
-            const body    = $('#Body').val();
+            // const body    = $('#Body').val();
+            const body = $('.summernote').summernote('code')
 
             try {
                 const response = await fetch('?handler=AjaxAutoSave', {
@@ -216,6 +288,8 @@
         }, 800); // wait 800ms after last keypress before saving
 
         $('#Subject, #Body').on('input', saveDraft);
+
+        $('.summernote').on('summernote.keyup', saveDraft);
 
         $('#recipients-toggle').on('click', function() {
             const expanded   = $(this).attr('aria-expanded') === 'true';

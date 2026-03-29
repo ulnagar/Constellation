@@ -23,6 +23,16 @@ internal sealed class MessageDraftConfiguration : IEntityTypeConfiguration<Messa
                 value => MessageType.FromValue(value));
 
         builder
+            .OwnsOne(draft => draft.Sender, s =>
+            {
+                s.Property(sender => sender.Name)
+                    .HasColumnName("SenderName");
+
+                s.Property(sender => sender.Destination)
+                    .HasColumnName("SenderDestination");
+            });
+
+        builder
             .OwnsMany(draft => draft.Recipients,
                 navigation =>
                 {

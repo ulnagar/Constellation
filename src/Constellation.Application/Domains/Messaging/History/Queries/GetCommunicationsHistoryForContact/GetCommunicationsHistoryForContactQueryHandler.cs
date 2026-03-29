@@ -86,7 +86,7 @@ internal sealed class GetCommunicationsHistoryForContactQueryHandler
                 email.Id,
                 MessageType.Email,
                 MessageDirection.Outbound, 
-                new(email.From.Name, email.From.Email),
+                new(email.From.Name, email.From.Destination),
                 recipients,
                 email.Subject,
                 email.Status,

@@ -3,6 +3,7 @@
 using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
 using Core.Models.Messaging.Enums;
@@ -15,8 +16,9 @@ using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
 using Serilog;
+using System.Reflection;
 
-[HasPermission(AuthPermission.Messaging_View_Value)]
+[HasPermission(AuthPermission.Messaging_Email_Send_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;
@@ -47,17 +49,68 @@ public class IndexModel : BasePageModel
 
     public List<MessageRecipient> Recipients { get; set; } = [];
     public MessageType Type { get; set; }
+    public MessageSender Sender { get; set; }
     public string? Subject { get; set; } = string.Empty;
     public string? Body { get; set; } = string.Empty;
+    public bool CanSendSms { get; set; } = false;
+
+    public IReadOnlyList<MessageSender> EmailSenders { get; set; }
+        
+    public IReadOnlyList<MessageSender> SmsSenders { get; } =
+        typeof(SmsRecipient)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.FieldType == typeof(SmsRecipient))
+            .Select(f => (MessageSender)(SmsRecipient)f.GetValue(null)!)
+            .Where(s => !string.IsNullOrWhiteSpace(s.Name)) // exclude Unknown
+            .ToList();
+
+    private async Task<IReadOnlyList<MessageSender>> GetEmailSenders()
+    {
+        List<MessageSender> list = [];
+
+        Result<EmailRecipient> recipient = EmailRecipient.Create(_currentUserService.UserName, _currentUserService.EmailAddress);
+
+        if (recipient.IsSuccess)
+            list.Add(recipient.Value);
+
+        AuthorizationResult allowAllSenders = await _authorizationService.AuthorizeAsync(User, AuthPermission.Messaging_Email_SendFromAll_Value);
+        if (allowAllSenders.Succeeded)
+        {
+            list.AddRange(typeof(EmailRecipient)
+                .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(f => f.FieldType == typeof(EmailRecipient))
+                .Select(f => (MessageSender)(EmailRecipient)f.GetValue(null)!)
+                .ToList());
+        }
+        else
+        {
+            list.Add(EmailRecipient.AuroraCollege);
+        }
+  
+        return list.AsReadOnly();
+    }
 
     public async Task OnGet()
     {
+        EmailSenders = await GetEmailSenders();
+
         MessageDraft draft = await _draftRepository.GetDraft(User.GetUserId());
 
         Recipients = draft.Recipients.ToList();
+        Sender = draft.Sender;
         Type = draft.Type;
         Subject = draft.Subject;
         Body = draft.Body;
+
+        AuthorizationResult canSendSms = await _authorizationService.AuthorizeAsync(User, AuthPermission.Messaging_SMS_Send_Value);
+        CanSendSms = canSendSms.Succeeded;
+    }
+
+    public async Task<IActionResult> OnGetClearDraft()
+    {
+        await _draftRepository.DeleteDraft(User.GetUserId());
+
+        return RedirectToPage();
     }
 
     public async Task<IActionResult> OnPostAjaxAutoSave([FromBody] AutoSaveViewModel vm)
@@ -132,6 +185,50 @@ public class IndexModel : BasePageModel
 
         return new OkResult();
     }
+
+    public async Task<IActionResult> OnPostAjaxAutoSaveSender(
+        [FromBody] ChangeTypeViewModel request)
+    {
+        MessageType? messageType = MessageType.FromValue(request.MessageType);
+
+        if (messageType is null)
+            return BadRequest("Invalid message type.");
+
+        Result<MessageSender> sender = Result.Failure<MessageSender>(MessageDraftErrors.InvalidSender);
+
+        if (messageType == MessageType.Email)
+        {
+            Result<EmailRecipient> emailSender = EmailRecipient.Create(request.SenderName, request.SenderDestination);
+
+            if (emailSender.IsSuccess)
+                sender = Result.Success((MessageSender)emailSender.Value);
+        }
+        else if (messageType == MessageType.SMS)
+        {
+            if (request.SenderName == SmsRecipient.AuroraNoReply.Name)
+                sender = Result.Success((MessageSender)SmsRecipient.AuroraNoReply);
+            else
+            {
+                Result<SmsRecipient> smsSender = SmsRecipient.Create(request.SenderName, request.SenderDestination);
+
+                if (smsSender.IsSuccess)
+                    sender = Result.Success((MessageSender)smsSender.Value);
+            }
+        }
+
+        await _draftRepository.UpdateDraft(User.GetUserId(), d =>
+        {
+            d.Type = messageType;
+            d.Sender = sender.IsSuccess ? sender.Value : null;
+        });
+
+        return new OkResult();
+    }
+
+    public record ChangeTypeViewModel(
+        string MessageType, 
+        string SenderName, 
+        string SenderDestination);
 
     public sealed class AutoSaveViewModel
     {

@@ -3,6 +3,7 @@
 using Enums;
 using System;
 using System.Collections.Generic;
+using ValueObjects;
 
 public sealed class MessageDraft
 {
@@ -16,6 +17,7 @@ public sealed class MessageDraft
 
     public Guid UserId { get; init; }
     public MessageType Type { get; set; } = MessageType.Email;
+    public MessageSender? Sender { get; set; } = EmailRecipient.NoReply;
     public IReadOnlyList<MessageRecipient> Recipients => _recipients.AsReadOnly(); 
     public string? Subject { get; set; }
     public string Body { get; set; } = string.Empty;

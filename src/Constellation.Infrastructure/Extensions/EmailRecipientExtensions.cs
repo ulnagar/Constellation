@@ -11,6 +11,6 @@ public static class EmailRecipientExtensions
 
 public static class EmailSenderExtensions
 {
-    public static MailboxAddress ToMailboxAddress(this EmailSender sender) =>
-        new(sender.Name, sender.Email);
+    public static MailboxAddress ToMailboxAddress(this MessageSender sender) =>
+        new(sender.Name, sender.Destination);
 }

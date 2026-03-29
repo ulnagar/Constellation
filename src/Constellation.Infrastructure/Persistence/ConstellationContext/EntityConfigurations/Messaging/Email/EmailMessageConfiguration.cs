@@ -34,7 +34,7 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
                     .HasMaxLength(200);
 
                 owned
-                    .Property(r => r.Email)
+                    .Property(r => r.Destination)
                     .HasColumnName("From_Email")
                     .IsRequired()
                     .HasMaxLength(320);
@@ -52,7 +52,7 @@ internal sealed class EmailMessageConfiguration : IEntityTypeConfiguration<Email
                     .HasMaxLength(200);
 
                 owned
-                    .Property(r => r.Email)
+                    .Property(r => r.Destination)
                     .HasColumnName("ReplyTo_Email")
                     .HasMaxLength(320);
             });

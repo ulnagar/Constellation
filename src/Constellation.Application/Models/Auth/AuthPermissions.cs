@@ -28,6 +28,7 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public const string Messaging_View_Value = "Messaging.View";
     public const string Messaging_SMS_Send_Value = "Messaging.SMS.Send";
     public const string Messaging_Email_Send_Value = "Messaging.Email.Send";
+    public const string Messaging_Email_SendFromAll_Value = "Messaging.Email.SendFromAll";
     public const string Messaging_EmergencyConsole_Edit_Value = "Admin.EmergencyConsole.Edit";
 
     public const string Subjects_Courses_View_Value = "Subjects.Courses.View";
@@ -130,7 +131,8 @@ public sealed class AuthPermission : StringEnumeration<AuthPermission>
     public static readonly AuthPermission Messaging_Contacts_View = new(Messaging_Contacts_View_Value, "Messaging: Contacts: View");
     public static readonly AuthPermission Messaging_View = new(Messaging_View_Value, "Messaging: View");
     public static readonly AuthPermission Messaging_SMS_Send = new(Messaging_SMS_Send_Value, "Messaging: SMS: Send");
-    public static readonly AuthPermission Messaging_EMAIL_Send = new(Messaging_Email_Send_Value, "Messaging: Email: Send");
+    public static readonly AuthPermission Messaging_Email_Send = new(Messaging_Email_Send_Value, "Messaging: Email: Send");
+    public static readonly AuthPermission Messaging_Email_SendFromAll = new(Messaging_Email_SendFromAll_Value, "Messaging: Email: Send From All");
     public static readonly AuthPermission Messaging_EmergencyConsole_Edit = new(Messaging_EmergencyConsole_Edit_Value, "Admin: Emergency Console: Edit");
     
     public static readonly AuthPermission Subjects_Courses_View = new(Subjects_Courses_View_Value, "Subjects: Courses: View");

@@ -8,6 +8,10 @@ public static class MessageDraftErrors
         "MessageDraft.NotFound",
         "Could not find a draft for the user");
 
+    public static readonly Error InvalidSender = new(
+        "MessageDraft.InvalidSender",
+        "The sender provided is not valid");
+
     public static class AddRecipient
     {
         public static readonly Error DuplicateEmailFound = new(
