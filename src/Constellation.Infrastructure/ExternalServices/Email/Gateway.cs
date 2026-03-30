@@ -91,9 +91,9 @@ public class Gateway : IEmailGateway
         {
             _logger
                 .Information("{id}: Adding {name} ({email}) to {type} field.",
-                message.Id, recipient.Recipient.Name, recipient.Email, recipient.RecipientType);
+                message.Id, recipient.Name, recipient.Email, recipient.RecipientType);
 
-            MailboxAddress mailbox = recipient.Recipient.ToMailboxAddress();
+            MailboxAddress mailbox = recipient.ToMailboxAddress();
 
             switch (recipient.RecipientType)
             {

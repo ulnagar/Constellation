@@ -2,12 +2,11 @@
 
 using Enums;
 using Identifiers;
-using ValueObjects;
 
 public sealed class EmailMessageRecipient
 {
     public EmailId EmailId { get; set; }
     public required string Email { get; set; }
+    public required string Name { get; set; }
     public EmailRecipientType RecipientType { get; set; }  // To, Cc, Bcc
-    public required EmailRecipient Recipient { get; set; }
 }

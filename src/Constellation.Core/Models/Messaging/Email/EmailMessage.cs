@@ -94,12 +94,12 @@ public sealed class EmailMessage : IHasCreatedAt
 
     public Result AddRecipient(EmailRecipient recipient, EmailRecipientType recipientType)
     {
-        if (_recipients.Any(r => r.Recipient.Email.Equals(recipient.Email, StringComparison.OrdinalIgnoreCase)))
+        if (_recipients.Any(r => r.Email.Equals(recipient.Email, StringComparison.OrdinalIgnoreCase)))
             return Result.Failure(EmailMessagingErrors.DuplicateRecipient(recipient.Email));
 
         _recipients.Add(new EmailMessageRecipient
         {
-            Recipient = recipient,
+            Name = recipient.Name,
             Email = recipient.Email,
             RecipientType = recipientType,
             EmailId = Id
@@ -124,7 +124,7 @@ public sealed class EmailMessage : IHasCreatedAt
 
         List<string> duplicateExisting = incoming
             .Where(r => _recipients.Any(existing =>
-                existing.Recipient.Email.Equals(r.Email, StringComparison.OrdinalIgnoreCase)))
+                existing.Email.Equals(r.Email, StringComparison.OrdinalIgnoreCase)))
             .Select(r => r.Email)
             .ToList();
 
@@ -135,7 +135,7 @@ public sealed class EmailMessage : IHasCreatedAt
         {
             _recipients.Add(new EmailMessageRecipient
             {
-                Recipient = recipient,
+                Name = recipient.Name,
                 Email = recipient.Email,
                 RecipientType = recipientType,
                 EmailId = Id

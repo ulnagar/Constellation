@@ -18,7 +18,7 @@ using Presentation.Shared.Helpers.Logging;
 using Serilog;
 using System.Threading;
 
-[HasPermission(AuthPermission.StudentAdmin_Consent_Edit_Value)]
+[HasPermission(AuthPermission.StudentAdmin_Consent_View_Value)]
 public class IndexModel : BasePageModel
 {
     private readonly ISender _mediator;

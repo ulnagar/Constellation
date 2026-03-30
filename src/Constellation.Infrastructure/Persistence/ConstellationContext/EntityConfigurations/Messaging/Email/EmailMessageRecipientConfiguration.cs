@@ -18,27 +18,17 @@ internal sealed class EmailMessageRecipientConfiguration : IEntityTypeConfigurat
             });
 
         builder
+            .Property(email => email.Name)
+            .HasColumnName(nameof(EmailMessageRecipient.Name))
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder
             .Property(r => r.Email)
-            .HasColumnName("Email")
+            .HasColumnName(nameof(EmailMessageRecipient.Email))
             .IsRequired()
             .HasMaxLength(320);
 
-        builder
-            .OwnsOne(e => e.Recipient, owned =>
-            {
-                owned
-                    .Property(r => r.Name)
-                    .HasColumnName("Name")
-                    .IsRequired()
-                    .HasMaxLength(200);
-
-                owned
-                    .Property(r => r.Email)
-                    .HasColumnName("Email")
-                    .IsRequired()
-                    .HasMaxLength(320);
-            });
-        
         builder
             .Property(e => e.RecipientType)
             .HasConversion<string>()

@@ -49,8 +49,8 @@ internal sealed class GetRecentCommunicationsHistoryQueryHandler
                 {
                     recipients.Add(new(
                         recipient.RecipientType,
-                        recipient.Recipient.Name,
-                        recipient.Recipient.Email));
+                        recipient.Name,
+                        recipient.Email));
                 }
 
                 responses.Add(new(

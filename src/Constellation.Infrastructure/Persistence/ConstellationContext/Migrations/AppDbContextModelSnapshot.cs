@@ -307,7 +307,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                     b.HasIndex("JobName")
                         .IsUnique();
 
-                    b.ToTable("JobActivations");
+                    b.ToTable("JobActivations", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Absences.Absence", b =>
@@ -1760,7 +1760,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                     b.HasIndex("SerialNumber");
 
-                    b.ToTable("DeviceNotes");
+                    b.ToTable("DeviceNotes", (string)null);
                 });
 
             modelBuilder.Entity("Constellation.Core.Models.Edval.Difference", b =>
@@ -6193,29 +6193,6 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
             modelBuilder.Entity("Constellation.Core.Models.Messaging.Drafts.MessageDraft", b =>
                 {
-                    b.OwnsOne("Constellation.Core.ValueObjects.MessageSender", "Sender", b1 =>
-                        {
-                            b1.Property<Guid>("MessageDraftUserId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Destination")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("SenderDestination");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("SenderName");
-
-                            b1.HasKey("MessageDraftUserId");
-
-                            b1.ToTable("Drafts", "Messages");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MessageDraftUserId");
-                        });
-
                     b.OwnsMany("Constellation.Core.Models.Messaging.Drafts.MessageRecipient", "Recipients", b1 =>
                         {
                             b1.Property<Guid>("MessageDraftUserId");
@@ -6241,6 +6218,29 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
                             b1
                                 .ToJson("Recipients")
                                 .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MessageDraftUserId");
+                        });
+
+                    b.OwnsOne("Constellation.Core.ValueObjects.MessageSender", "Sender", b1 =>
+                        {
+                            b1.Property<Guid>("MessageDraftUserId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Destination")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SenderDestination");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("SenderName");
+
+                            b1.HasKey("MessageDraftUserId");
+
+                            b1.ToTable("Drafts", "Messages");
 
                             b1.WithOwner()
                                 .HasForeignKey("MessageDraftUserId");
@@ -6986,7 +6986,7 @@ namespace Constellation.Infrastructure.Persistence.ConstellationContext.Migratio
 
                             b1.HasKey("SendEmailActionId");
 
-                            b1.ToTable("WorkFlows_Actions");
+                            b1.ToTable("WorkFlows_Actions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("SendEmailActionId");
