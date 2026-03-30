@@ -36,4 +36,29 @@ public sealed partial class Service : IEmailService
 
         return Result.Success();
     }
+
+    public async Task<Result> SendQueuedMessage(
+        MessageSender sender,
+        EmailRecipient receiver,
+        string subject,
+        string messageBody,
+        CancellationToken cancellationToken = default)
+    {
+        EmergencyConsoleEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = sender.Name,
+            SenderTitle = string.Empty,
+            Title = subject,
+            Message = messageBody
+        };
+
+        return await BuildAndSendEmail(
+            viewModel,
+            sender,
+            "Messaging",
+            subject,
+            [receiver],
+            cancellationToken: cancellationToken);
+    }
 }

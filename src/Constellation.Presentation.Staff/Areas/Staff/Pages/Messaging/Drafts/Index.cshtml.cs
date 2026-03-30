@@ -113,6 +113,11 @@ public class IndexModel : BasePageModel
         return RedirectToPage();
     }
 
+    public async Task<IActionResult> OnPost()
+    {
+        return RedirectToPage();
+    }
+
     public async Task<IActionResult> OnPostAjaxAutoSave([FromBody] AutoSaveViewModel vm)
     {
         await _draftRepository.UpdateDraft(

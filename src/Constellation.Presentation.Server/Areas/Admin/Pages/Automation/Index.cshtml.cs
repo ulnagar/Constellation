@@ -2,9 +2,7 @@ namespace Constellation.Presentation.Server.Areas.Admin.Pages.Automation;
 
 using Application.Interfaces.Services;
 using Constellation.Application.Interfaces.Jobs;
-using Constellation.Application.Models.Auth;
 using Constellation.Presentation.Server.BaseModels;
-using Constellation.Presentation.Shared.Helpers.Attributes;
 using Hangfire;
 using Hangfire.Common;
 using Hangfire.Storage;
@@ -16,7 +14,7 @@ public class IndexModel : BasePageModel
     private readonly IRecurringJobManager _jobManager;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public readonly List<JobDefinition> JobDefinitions = new();
+    public readonly List<JobDefinition> JobDefinitions = [];
 
     public IndexModel(
         IRecurringJobManager jobManager,
@@ -42,6 +40,7 @@ public class IndexModel : BasePageModel
         JobDefinitions.Add(new(typeof(ISentralAwardSyncJob), nameof(ISentralAwardSyncJob), "15 5 * * 1-6"));
         JobDefinitions.Add(new(typeof(IMandatoryTrainingScanJob), nameof(IMandatoryTrainingScanJob), "0 12 * * 1"));
         JobDefinitions.Add(new(typeof(IProcessOutboxMessagesJob), nameof(IProcessOutboxMessagesJob), "* 2-22 * * *"));
+        JobDefinitions.Add(new(typeof(IProcessQueuedMessagesJob), nameof(IProcessQueuedMessagesJob), "* 2-22 * * *"));
         JobDefinitions.Add(new(typeof(IProcessScheduledReportsJob), nameof(IProcessScheduledReportsJob), "* 7-22 * *"));
         JobDefinitions.Add(new(typeof(IProcessTrackingEventsJob), nameof(IProcessTrackingEventsJob), "* 2-22 * * *"));
         JobDefinitions.Add(new(typeof(IGroupTutorialExpiryScanJob), nameof(IGroupTutorialExpiryScanJob), "0 7 * * 1-5"));
@@ -82,7 +81,10 @@ public class IndexModel : BasePageModel
 
         IHangfireJob? job = scope.ServiceProvider.GetService(definition.JobType) as IHangfireJob;
 
-        await job.StartJob(Guid.NewGuid(), default);
+        if (job is null)
+            return;
+
+        await job.StartJob(Guid.NewGuid(), CancellationToken.None);
     }
 
     public void OnPostRemoveJob(string actionName) => _jobManager.RemoveIfExists(actionName);
@@ -93,7 +95,7 @@ public class IndexModel : BasePageModel
 
         try
         {
-            RecurringJobDto job = storage
+            RecurringJobDto? job = storage
                 .GetRecurringJobs(new List<string> { actionName })
                 .FirstOrDefault();
 
@@ -110,7 +112,7 @@ public class IndexModel : BasePageModel
 
     public void OnPostAddJob(string actionName, string cronExpression)
     {
-        JobDefinition definition = JobDefinitions.FirstOrDefault(jobDefinition => jobDefinition.TypeName == actionName);
+        JobDefinition? definition = JobDefinitions.FirstOrDefault(jobDefinition => jobDefinition.TypeName == actionName);
 
         if (definition == null)
             return;
@@ -119,7 +121,7 @@ public class IndexModel : BasePageModel
 
         Type constructedType = dispatcherType.MakeGenericType(definition.JobType);
 
-        Job job = new Job(constructedType, constructedType.GetMethod("StartJob"), CancellationToken.None);
+        Job job = new(constructedType, constructedType.GetMethod("StartJob"), CancellationToken.None);
 
         _jobManager.AddOrUpdate(actionName, job, cronExpression, new RecurringJobOptions() { TimeZone = TimeZoneInfo.Local });
     }

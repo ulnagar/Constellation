@@ -87,6 +87,9 @@ public interface IEmailService
     // Emergency Console Emails
     Task<Result> SendEmergencyConsoleEmail(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
 
+    // Messaging Emails
+    Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, CancellationToken cancellationToken = default);
+
     // RollMarking Emails
     Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, List<EmailRecipient> recipients);
     Task SendNoRollMarkingReport(DateOnly reportDate, List<EmailRecipient> recipients);

@@ -11,7 +11,7 @@
 
 <hr />
 
-<form>
+<form method="post">
     <div class="mb-3 row">
         <label asp-for="Type" class="col-md-2"></label>
         <div class="col-md-3">
@@ -126,6 +126,11 @@
         </div>
     </div>
 
+    <div class="mb-3">
+        <div class="col-md-offset-2 col-md-3 d-grid">
+            <button type="button" onclick="sendMessage()" class="btn btn-primary btn-lg">Send</button>
+        </div>
+    </div>
 </form>
 
 <form asp-page-handler="AddRecipient">
@@ -176,6 +181,16 @@
 
 @section Scripts
 {
+    <script>
+        $(document).ready(function() {
+            $.validator.setDefaults({
+                ignore: '.note-editable, .note-editor *'
+            });
+
+            collapseRecipients();
+        });
+    </script>
+
     <partial name="_ValidationScriptsPartial" />
     
     <script>
@@ -258,6 +273,23 @@
             }
         });
 
+        async function sendMessage() {
+            try {
+                const [draftResponse, senderResponse] = await Promise.all([saveDraft(), saveSender()]);
+
+                console.log(draftResponse, senderResponse);
+
+                if (!draftResponse?.ok || !senderResponse?.ok) {
+                    $('#autosave-status').text('Failed to save before sending. Please try again.');
+                    return;
+                }
+
+                document.querySelector('form').submit();
+            } catch {
+                $('#autosave-status').text('Failed to save before sending. Please try again.');
+            }
+        }
+
         function debounce(fn, delay) {
             let timer;
             return function(...args) {
@@ -266,7 +298,7 @@
             };
         }
 
-        const saveDraft = debounce(async function() {
+        async function saveDraft() {
             const subject = $('#Subject').val();
             // const body    = $('#Body').val();
             const body = $('.summernote').summernote('code')
@@ -282,14 +314,17 @@
                 });
 
                 $('#autosave-status').text(response.ok ? 'Draft saved' : 'Save failed');
+                return response;
             } catch {
                 $('#autosave-status').text('Save failed');
             }
-        }, 800); // wait 800ms after last keypress before saving
+        }
 
-        $('#Subject, #Body').on('input', saveDraft);
+        const waitSaveDraft = debounce(saveDraft, 800); // wait 800ms after last keypress before saving
 
-        $('.summernote').on('summernote.keyup', saveDraft);
+        $('#Subject').on('input', waitSaveDraft);
+
+        $('.summernote').on('summernote.keyup', waitSaveDraft);
 
         $('#recipients-toggle').on('click', function() {
             const expanded   = $(this).attr('aria-expanded') === 'true';
@@ -308,10 +343,6 @@
                 $(this).attr('aria-expanded', 'true')
                        .find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
             }
-        });
-
-        $(document).ready(function() {
-            collapseRecipients();
         });
 
         // Re-run if the container is resized (e.g. responsive layout shift)

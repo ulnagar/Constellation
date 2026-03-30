@@ -1,6 +1,6 @@
 ﻿namespace Constellation.Core.Models.Messaging.Drafts;
 
-using Enums;
+using Constellation.Core.Models.Messaging.Enums;
 using System;
 using System.Collections.Generic;
 using ValueObjects;

@@ -3,6 +3,7 @@
 using Application.Domains.Attendance.Absences.Commands.ConvertAbsenceToAbsenceEntry;
 using Application.Domains.Messaging.Sms.Dtos;
 using Application.Interfaces.Gateways;
+using Azure.Messaging;
 using Constellation.Application.Interfaces.Services;
 using Core.Errors;
 using Core.Models.Messaging.Enums;
@@ -46,6 +47,44 @@ public sealed class Service : ISMSService
         OutgoingSms message,
         CancellationToken cancellationToken) =>
         await _gateway.SendSms(message, cancellationToken);
+
+
+    public async Task<Result> SendQueuedMessage(
+        MessageSender sender,
+        SmsRecipient receiver,
+        string messageBody,
+        CancellationToken cancellationToken = default)
+    {
+        OutgoingSms message = new()
+        {
+            origin = _configuration.OutgoingNumber, destinations = [receiver.Number], message = messageBody
+        };
+
+        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
+            message.notifyUrl = $"json+{_deliveryReceiptUri}";
+
+        Result<List<OutgoingSmsConfirmation>> results = await _gateway.SendSms(message, cancellationToken);
+
+        if (results.IsFailure)
+            return results;
+
+        foreach (OutgoingSmsConfirmation confirmation in results.Value)
+        {
+            SmsMessage messageRecord = new(
+                "Messaging",
+                confirmation.Id ?? string.Empty,
+                sender,
+                receiver,
+                confirmation.Message ?? string.Empty,
+                MessageDirection.Outbound,
+                MessageStatus.Sent,
+                confirmation.DateTime) { OutgoingId = confirmation.OutgoingId ?? string.Empty, };
+
+            _smsRepository.Insert(messageRecord);
+        }
+
+        return results;
+    }
 
     public async Task<Result<List<OutgoingSmsConfirmation>>> SendAbsenceNotification(
         List<AbsenceEntry> absences,

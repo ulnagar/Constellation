@@ -7,7 +7,9 @@ using Core.Models.Messaging.Drafts.Repositories;
 using Core.Shared;
 using Core.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using System;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 internal sealed class MessageDraftRepository : IMessageDraftRepository
 {
@@ -109,6 +111,30 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         draft.UpdatedAt = DateTimeOffset.UtcNow;
         
         await context.SaveChangesAsync(cancellationToken); 
+        return Result.Success();
+    }
+
+    public async Task<Result> SendDraft(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        MessageDraft? draft = await context
+            .Set<MessageDraft>()
+            .FirstOrDefaultAsync(draft => draft.UserId == userId, cancellationToken);
+
+        if (draft is null)
+            return Result.Failure(MessageDraftErrors.NotFound);
+
+        QueuedMessage queued = QueuedMessage.FromDraft(draft);
+
+        context.Set<QueuedMessage>().Add(queued);
+
+        await DeleteDraft(userId, cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+
         return Result.Success();
     }
 
