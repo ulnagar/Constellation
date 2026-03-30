@@ -111,6 +111,11 @@ public class LoginModel : PageModel
             LoginEnabled = true;
         
         Status = LoginStatus.WaitingUserInput;
+
+        foreach (var header in HttpContext.Request.Headers)
+        {
+            _logger.Information("Header: {Type} = {Value}", header.Key, string.Join("::", header.Value));
+        }
     }
 
     private async Task StartSingleSignOnProcess()
