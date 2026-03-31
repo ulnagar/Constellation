@@ -10,6 +10,7 @@ using Constellation.Core.Models.Offerings;
 using Constellation.Core.Models.Students;
 using Constellation.Core.Models.WorkFlow.Identifiers;
 using Core.Models.Assignments;
+using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Email;
 using Core.Models.Messaging.Sms;
 using Core.Models.SchoolContacts;
@@ -84,11 +85,10 @@ public interface IEmailService
     Task SendNewCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
     Task SendUpdatedCoverEmail(Cover cover, Offering offering, EmailRecipient coveringTeacher, List<EmailRecipient> primaryRecipients, List<EmailRecipient> secondaryRecipients, DateOnly originalStartDate, TimeOnly startTime, TimeOnly endTime, string teamLink, List<Attachment> attachments, CancellationToken cancellationToken = default);
 
-    // Emergency Console Emails
-    Task<Result> SendEmergencyConsoleEmail(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
-
     // Messaging Emails
+    Task<Result> SendEmergencyConsoleEmail(AlertRecipient recipient, string message, CancellationToken cancellationToken = default);
     Task<Result> SendQueuedMessage(MessageSender sender, EmailRecipient receiver, string subject, string messageBody, CancellationToken cancellationToken = default);
+    Task<Result> SendQueuedMessageLog(EmailRecipient receiver, QueuedMessage message, CancellationToken cancellationToken = default);
 
     // RollMarking Emails
     Task SendDailyRollMarkingReport(List<RollMarkingEmailDto> entries, DateOnly reportDate, List<EmailRecipient> recipients);

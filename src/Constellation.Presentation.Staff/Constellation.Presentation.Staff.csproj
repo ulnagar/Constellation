@@ -17,5 +17,9 @@
     <ProjectReference Include="..\Constellation.Presentation.Shared\Constellation.Presentation.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Areas\Staff\Pages\Shared\PartialViews\ContactsTable\" />
+  </ItemGroup>
+
 
 </Project>

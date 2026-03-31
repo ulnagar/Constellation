@@ -2,8 +2,9 @@
 
 using Constellation.Application.Interfaces.Services;
 using Constellation.Core.Shared;
+using Constellation.Infrastructure.Templates.Views.Emails.Messaging;
+using Core.Models.Messaging.Drafts;
 using Core.ValueObjects;
-using Templates.Views.Emails.Emergency;
 
 public sealed partial class Service : IEmailService
 {
@@ -58,6 +59,29 @@ public sealed partial class Service : IEmailService
             sender,
             "Messaging",
             subject,
+            [receiver],
+            cancellationToken: cancellationToken);
+    }
+
+    public async Task<Result> SendQueuedMessageLog(
+        EmailRecipient receiver,
+        QueuedMessage message,
+        CancellationToken cancellationToken = default)
+    {
+        QueuedMessageLogEmailViewModel viewModel = new()
+        {
+            Preheader = "",
+            SenderName = string.Empty,
+            SenderTitle = string.Empty,
+            Title = $"Delivery Report: {message.Subject}",
+            Message = message
+        };
+
+        return await BuildAndSendEmail(
+            viewModel,
+            EmailRecipient.NoReply,
+            "Messaging",
+            viewModel.Title,
             [receiver],
             cancellationToken: cancellationToken);
     }

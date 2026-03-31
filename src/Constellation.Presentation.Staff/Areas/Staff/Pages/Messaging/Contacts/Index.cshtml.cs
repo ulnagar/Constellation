@@ -7,9 +7,13 @@ using Application.Domains.Contacts.Queries.ExportContactList;
 using Application.Domains.Contacts.Queries.GetContactList;
 using Application.Domains.Courses.Models;
 using Application.Domains.Courses.Queries.GetCoursesForSelectionList;
+using Application.Domains.SchoolContacts.Commands.UpdateSchoolContactPhoneNumber;
+using Application.Domains.SchoolContacts.Queries.GetContactSummary;
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
+using Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;
 using Application.Domains.StaffMembers.Models;
+using Application.Domains.StaffMembers.Queries.GetStaffById;
 using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
 using Application.DTOs;
 using Application.Models.Auth;
@@ -23,7 +27,10 @@ using Core.Models.Identifiers;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Repositories;
 using Core.Models.Offerings.Identifiers;
+using Core.Models.SchoolContacts.Identifiers;
+using Core.Models.StaffMembers.Identifiers;
 using Core.Models.Subjects.Identifiers;
+using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +38,10 @@ using Microsoft.AspNetCore.Routing;
 using Models;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Logging;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
+using Shared.PartialViews.AddPhoneNumberToSchoolContact;
+using Shared.PartialViews.AddPhoneNumberToStaffMember;
 
 [HasPermission(AuthPermission.Messaging_Contacts_View_Value)]
 public class IndexModel : BasePageModel
@@ -124,7 +134,7 @@ public class IndexModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(
                 file.Error,
-                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
 
             _logger
                 .ForContext(nameof(Error), file.Error, true)
@@ -144,7 +154,109 @@ public class IndexModel : BasePageModel
         return new OkResult();
     }
 
-    private async Task<IActionResult> PreparePage(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnPostAjaxContactPhoneUpdate(SchoolContactId contactId)
+    {
+        Result<ContactSummaryResponse> contact = await _mediator.Send(new GetContactSummaryQuery(contactId));
+
+        if (contact.IsFailure)
+            return Content(string.Empty);
+
+        AddPhoneNumberToSchoolContactViewModel viewModel = new()
+        {
+            ContactId = contact.Value.ContactId,
+            PhoneNumber = contact.Value.PhoneNumber
+        };
+
+        return Partial("AddPhoneNumberToSchoolContact", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostAjaxStaffPhoneUpdate(StaffId staffId)
+    {
+        Result<StaffResponse> staffMember = await _mediator.Send(new GetStaffByIdQuery(staffId));
+
+        if (staffMember.IsFailure)
+            return Content(string.Empty);
+
+        AddPhoneNumberToStaffMemberViewModel viewModel = new()
+        {
+            StaffId = staffMember.Value.StaffId,
+            PhoneNumber = staffMember.Value.PhoneNumber
+        };
+
+        return Partial("AddPhoneNumberToStaffMember", viewModel);
+    }
+
+    public async Task<IActionResult> OnPostStaffPhoneUpdate(StaffId staffId, [ModelBinder(typeof(FromValueBinder))] PhoneNumber phoneNumber)
+    {
+        if (phoneNumber == PhoneNumber.Empty)
+            return new JsonResult(new { success = false, error = "Phone number is required." });
+
+        Result update = await _mediator.Send(new UpdateStaffMemberPhoneNumberCommand(staffId, phoneNumber));
+
+        if (update.IsFailure)
+            return new JsonResult(new { success = false, error = update.Error.Message });
+
+        return new JsonResult(new { success = true, phoneNumber = phoneNumber.ToString() });
+    }
+
+    public async Task<IActionResult> OnPostContactPhoneUpdate(SchoolContactId contactId, [ModelBinder(typeof(FromValueBinder))] PhoneNumber phoneNumber)
+    {
+        if (phoneNumber == PhoneNumber.Empty)
+            return new JsonResult(new { success = false, error = "Phone number is required." });
+
+        Result update = await _mediator.Send(new UpdateSchoolContactPhoneNumberCommand(contactId, phoneNumber));
+
+        if (update.IsFailure)
+            return new JsonResult(new { success = false, error = update.Error.Message });
+
+        return new JsonResult(new { success = true, phoneNumber = phoneNumber.ToString() });
+    }
+
+    public async Task<IActionResult> OnPostFilterPartial(CancellationToken cancellationToken)
+    {
+        List<ContactCategory> filterCategories = Filter
+            .Categories
+            .Select(ContactCategory.FromValue)
+            .ToList();
+
+        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
+        List<CourseId> courseIds = Filter.Courses.Select(CourseId.FromValue).ToList();
+
+        if (!offeringIds.Any() 
+            && !courseIds.Any() 
+            && !filterCategories.Any()
+            && !Filter.Grades.Any() 
+            && !Filter.Schools.Any() 
+            && !Filter.Flags.Any())
+            return Partial("ContactsTable", (new List<ContactResponse>(), false));
+
+        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
+
+        Result<List<ContactResponse>> contactRequest = await _mediator.Send(
+            new GetContactListQuery(
+                offeringIds,
+                courseIds,
+                Filter.Grades,
+                Filter.Schools,
+                filterCategories,
+                Filter.Flags,
+                execMemberTest.Succeeded),
+            cancellationToken);
+
+        if (contactRequest.IsFailure)
+            return new JsonResult(new { success = false, error = contactRequest.Error.Message });
+
+        List<ContactResponse> contacts = contactRequest
+            .Value
+            .OrderBy(c => c.StudentGrade)
+            .ThenBy(c => c.Student.LastName)
+            .ThenBy(c => c.Student.FirstName)
+            .ToList();
+
+        return Partial("ContactsTable", (contacts, execMemberTest));
+    }
+
+    private async Task<IActionResult> PreparePage(CancellationToken cancellationToken = default)
     {
         Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery(true));
 
@@ -152,7 +264,7 @@ public class IndexModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(
                 coursesResponse.Error,
-                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
 
             _logger
                 .ForContext(nameof(Error), coursesResponse.Error, true)
@@ -169,7 +281,7 @@ public class IndexModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(
                 classesResponse.Error,
-                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
 
             _logger
                 .ForContext(nameof(Error), classesResponse.Error, true)
@@ -207,7 +319,7 @@ public class IndexModel : BasePageModel
         {
             ModalContent = ErrorDisplay.Create(
                 schoolsRequest.Error,
-                _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
 
 
             _logger
@@ -253,7 +365,7 @@ public class IndexModel : BasePageModel
             {
                 ModalContent = ErrorDisplay.Create(
                     contactRequest.Error,
-                    _linkGenerator.GetPathByPage("/Contacts/Index", values: new { area = "Partner" }));
+                    _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
 
                 _logger
                     .ForContext(nameof(Error), contactRequest.Error, true)

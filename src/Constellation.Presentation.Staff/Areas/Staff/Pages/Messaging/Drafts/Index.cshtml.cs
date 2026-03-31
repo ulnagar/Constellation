@@ -115,6 +115,8 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPost()
     {
+        await _draftRepository.SendDraft(User.GetUserId());
+
         return RedirectToPage();
     }
 

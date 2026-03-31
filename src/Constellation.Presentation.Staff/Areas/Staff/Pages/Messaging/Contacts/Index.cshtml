@@ -5,6 +5,11 @@
 @using Constellation.Core.Enums;
 @using Constellation.Core.Extensions
 
+@inject IAuthorizationService AuthorizationService
+@{
+    AuthorizationResult execMemberTest = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
+}
+
 <h2>Contacts List</h2>
 
 <div class="page-menu">
@@ -71,138 +76,9 @@
 
 <hr />
 
-<table class="table table-striped table-hover custom-data-table">
-    <thead>
-        <tr>
-            <th>Student Name</th>
-            <th></th>
-            <th></th>
-            <th>Contact Name</th>
-            <th>Contact Email</th>
-            <th>Contact Phone</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Contacts.Any())
-        {
-            foreach (var contact in Model.Contacts)
-            {
-                <tr>
-                    <td>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</td>
-                    <td>
-                        @{
-                            if (contact.Category.Value.Contains("PartnerSchool"))
-                            {
-                                <i class="fal fa-school" title="Partner School"></i>
-                            }
-
-                            if (contact.Category.Value.Contains("NonResidential"))
-                            {
-                                <i class="fal fa-house-damage" title="Non-Residential Family"></i>
-                            }
-
-                            if (contact.Category.Value.Contains(".Residential"))
-                            {
-                                <i class="fal fa-house" title="Residential Family"></i>
-                            }
-
-                            if (contact.Category.Value.Contains("Student"))
-                            {
-                                <i class="fal fa-child" title="Student"></i>
-                            }
-
-                            if (contact.Category.Value.Contains("Aurora."))
-                            {
-                                <i class="fal fa-chalkboard-teacher" title="Aurora College"></i>
-                            }
-                        }
-                    </td>
-                    <td>
-                        @{
-                            if (contact.Category.Value.Contains(".Family"))
-                            {
-                                //<i class="fal fa-house-leave" title="Family Contact"></i>
-                                @:Family
-                            }
-
-                            if (contact.Category.Value.Contains(".Mother"))
-                            {
-                                //<i class="fal fa-female" title="Mother"></i>
-                                @:Mother
-                            }
-
-                            if (contact.Category.Value.Contains(".Father"))
-                            {
-                                //<i class="fal fa-male" title="Father"></i>
-                                @:Father
-                            }
-
-                            if (contact.Category.Value.Contains(".Parent"))
-                            {
-                                //<i class="fal fa-restroom" title="Parent"></i>
-                                @:Parent
-                            }
-
-                            if (contact.Category.Value.Contains(".School"))
-                            {
-                                //<i class="fal fa-chalkboard-teacher" title="School"></i>
-                                @:School
-                            }
-
-                            if (contact.Category.Value.Contains(".Principal"))
-                            {
-                                //<i class="fal fa-restroom" title="Principal"></i>
-                                @:Principal
-                            }
-
-                            if (contact.Category.Value.Contains(".AuroraCollegeCoordinator"))
-                            {
-                                //<i class="fal fa-restroom" title="ACC"></i>
-                                @:ACC
-                            }
-
-                            if (contact.Category.Value.Contains(".SciencePracticalTeacher"))
-                            {
-                                //<i class="fal fa-restroom" title="SPT"></i>
-                                @:SPT
-                            }
-
-                            if (contact.Category.Value.Contains(".OtherStaff"))
-                            {
-                                //<i class="fal fa-restroom" title="Other Staff"></i>
-                                @:Other Staff
-                            }
-
-                            if (contact.Category.Value.Contains(".Teacher"))
-                            {
-                                @:Teacher
-                            }
-
-                            if (contact.Category.Value.Contains(".HeadTeacher"))
-                            {
-                                @:Head Teacher
-                            }
-                        }
-                    </td>
-                    <td>
-                        @contact.Contact
-                        @if (!string.IsNullOrWhiteSpace(contact.AdditionalNotes))
-                        {
-                            <br/>
-                            <span class="font-italic text-muted">@contact.AdditionalNotes</span>
-                        }
-                    </td>
-                    <td>@contact.ContactEmail.Email</td>
-                    <td>@contact.ContactPhone?.ToString()</td>
-                    <td>
-                        <a asp-page="/Messaging/History/Details" asp-area="Staff" asp-route-type="@contact.Id.GetType().Name" asp-route-id="@contact.Id" class="btn btn-sm btn-info btn-show-hover">View Comms</a>
-                    </td>
-                </tr>
-            }
-        }
-    </tbody>
-</table>
+<div id="contacts-table-container">
+    @await Html.PartialAsync("ContactsTable", (Model.Contacts, execMemberTest))
+</div>
 
 <div class="modal" id="GradeListModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -777,7 +653,7 @@
             table.rows({ search: 'applied' }).every(function() {
                 const row = this.node();
 
-                const name         = $('td:eq(2)', row).text().trim().split('\n')[0].trim(); // column 3 (0-indexed)
+                const name = $('td:eq(2)', row).text().trim().split('\n')[0].trim().replace(/\s*\(.*$/, '');
                 const emailAddress = $('td:eq(3)', row).text().trim(); // column 4
                 const phoneNumber  = $('td:eq(4)', row).text().trim(); // column 5
 
@@ -810,5 +686,94 @@
                     </div>`;
         }
 
+        var activePhoneHandler = '';
+        var clickedRow = null;
+
+        // function refreshContactsTable() {
+        //     toggleLoader();
+
+        //     $.ajax({
+        //         url: '?handler=FilterPartial',
+        //         type: 'POST',
+        //         data: $('#filterForm').serialize()
+        //     }).done(function (html) {
+        //         // Destroy the existing DataTable before replacing the HTML
+        //         if ($.fn.DataTable.isDataTable('.custom-data-table')) {
+        //             table.destroy();
+        //         }
+
+        //         $('#contacts-table-container').html(html);
+                
+        //         // Re-initialise DataTable on the new HTML
+        //         table = $('.custom-data-table').DataTable({
+        //             "order": [],
+        //             "rowGroup": { "dataSrc": 0 },
+        //             "columnDefs": [{ "visible": false, "targets": 0 }]
+        //         });
+        //     });
+
+        //     toggleLoader();
+        // }
+
+        $('#contacts-table-container').on('click', '.staff-phone', function(){
+            activePhoneHandler = 'StaffPhoneUpdate';
+            clickedRow = $(this).closest('tr');
+            var id = $(this).data("id");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxStaffPhoneUpdate",
+                type: "POST",
+                data: {
+                    staffId: id,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        $('#contacts-table-container').on('click', '.contact-phone', function() {
+            activePhoneHandler = 'ContactPhoneUpdate';
+            clickedRow = $(this).closest('tr');
+            var id = $(this).data("id");
+            var xsrfHeader = $('input:hidden[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: "?handler=AjaxContactPhoneUpdate",
+                type: "POST",
+                data: {
+                    contactId: id,
+                    __RequestVerificationToken: xsrfHeader
+                }
+            }).done(function (data) {
+                $('#page-modal .modal-content').html(data);
+                $('#page-modal').modal('show');
+            });
+        });
+
+        // Intercept the modal form submit — works for both staff and contact phone forms
+        // without needing to modify either partial view
+        $('#page-modal').on('submit', 'form', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '?handler=' + activePhoneHandler,
+                type: 'POST',
+                data: $(this).serialize()
+            }).done(function (result) {
+                if (result.success) {
+                    $('#page-modal').modal('hide');
+                    
+                    table.cell(clickedRow, 5).data(result.phoneNumber).draw(false);
+                    clickedRow = null;
+                } else {
+                    $('#page-modal .error-message').text(result.error).show();
+                }
+            }).fail(function () {
+                $('#page-modal .error-message').text('An unexpected error occurred.').show();
+            });
+        });
     </script>
 }

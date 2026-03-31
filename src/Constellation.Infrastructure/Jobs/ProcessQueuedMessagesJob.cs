@@ -2,6 +2,7 @@
 
 using Application.Interfaces.Jobs;
 using Application.Interfaces.Services;
+using Application.Models.Identity;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Enums;
 using Core.Shared;
@@ -32,7 +33,7 @@ internal sealed class ProcessQueuedMessagesJob : IProcessQueuedMessagesJob
     public async Task StartJob(Guid jobId, CancellationToken cancellationToken)
     {
         List<QueuedMessage> messages = await _context.Set<QueuedMessage>()
-            .Where(m => m.ProcessedAt == null && m.Error == null)
+            .Where(m => m.ProcessedAt == null && !m.HasErrors)
             .OrderByDescending(m => m.Priority) // higher enum value = higher priority
             .ThenBy(m => m.QueuedAt) // within same priority, oldest first
             .Take(20)
@@ -42,7 +43,7 @@ internal sealed class ProcessQueuedMessagesJob : IProcessQueuedMessagesJob
         {
             try
             {
-                await SendAsync(message, cancellationToken);
+                await SendMessage(message, cancellationToken);
                 message.MarkProcessed();
             }
             catch (Exception ex)
@@ -51,19 +52,20 @@ internal sealed class ProcessQueuedMessagesJob : IProcessQueuedMessagesJob
                     .ForContext(nameof(QueuedMessage), message, true)
                     .Error(ex, "Failed to process queued message {MessageId}. Marking as failed.", message.Id);
 
-                message.MarkFailed(ex.ToString());
+                message.AddError(ExceptionError.FromException(ex));
             }
+
+            if (message.Errors.Count > 0)
+                await SendLog(message, cancellationToken);
         }
 
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SendAsync(
+    private async Task SendMessage(
         QueuedMessage message, 
         CancellationToken cancellationToken = default)
     {
-        int missedCount = 0;
-
         foreach (var recipient in message.Recipients)
         {
             bool sent = false;
@@ -74,36 +76,56 @@ internal sealed class ProcessQueuedMessagesJob : IProcessQueuedMessagesJob
 
                 if (smsRecipient.IsSuccess)
                 {
-                    await _smsService.SendQueuedMessage(message.Sender!, smsRecipient.Value, message.Body, cancellationToken);
-                    sent = true;
+                    Result result = await _smsService.SendQueuedMessage(message.Sender!, smsRecipient.Value, message.Body, cancellationToken);
+
+                    if (result.IsSuccess)
+                        sent = true;
+                    else
+                        message.AddError(new RecipientError(recipient, result.Error.ToString()));
                 }
             }
 
             if (!sent && recipient.HasEmail)
             {
-                Result<EmailRecipient> emailRecipient = EmailRecipient.Create(recipient.Name, recipient.EmailAddress);
+                Result<EmailRecipient> emailRecipient = EmailRecipient.Create(recipient.Name, recipient.EmailAddress.Email);
 
                 if (emailRecipient.IsSuccess)
                 {
-                    await _emailService.SendQueuedMessage(message.Sender!, emailRecipient.Value, message.Subject ?? string.Empty, message.Body, cancellationToken);
-                    sent = true;
+                    Result result = await _emailService.SendQueuedMessage(message.Sender!, emailRecipient.Value, message.Subject ?? string.Empty, message.Body, cancellationToken);
+                    
+                    if (result.IsSuccess)
+                        sent = true;
+                    else
+                        message.AddError(new RecipientError(recipient, result.Error.ToString()));
                 }
             }
 
             if (!sent)
             {
-                missedCount++;
+                message.AddError(new RecipientError(recipient, "No valid contact information found."));
 
                 _logger
                     .Warning("Failed to send message {MessageId} to recipient {RecipientName}. No valid contact information.", message.Id, recipient.Name);
             }
-
-            await _context.SaveChangesAsync(cancellationToken);
         }
+    }
 
-        if (missedCount == message.Recipients.Count || missedCount / message.Recipients.Count >= 0.25f)
-        {
-            throw new InvalidOperationException($"Message {message.Id} has no valid recipients.");
-        }
+    private async Task SendLog(
+        QueuedMessage message, 
+        CancellationToken cancellationToken = default)
+    {
+        AppUser? user = await _context
+            .Set<AppUser>()
+            .FirstOrDefaultAsync(user => user.Id == message.UserId, cancellationToken);
+
+        if (user is null)
+            return;
+
+        Result<EmailRecipient> logRecipient = EmailRecipient.Create(user.Name, user.Email ?? string.Empty);
+
+        if (logRecipient.IsFailure)
+            return;
+
+        await _emailService.SendQueuedMessageLog(logRecipient.Value, message, cancellationToken);
     }
 }

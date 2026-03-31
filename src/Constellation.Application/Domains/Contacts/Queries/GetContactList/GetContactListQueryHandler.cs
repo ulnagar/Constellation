@@ -293,7 +293,7 @@ internal sealed class GetContactListQueryHandler
                         teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
-                        null,
+                        teacher.PhoneNumber,
                         string.Empty));
                 }
 
@@ -335,7 +335,7 @@ internal sealed class GetContactListQueryHandler
                         headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
-                        null,
+                        headTeacher.PhoneNumber,
                         string.Empty));
                 }
             }

@@ -23,6 +23,10 @@ internal sealed class QueuedMessageConfiguration : IEntityTypeConfiguration<Queu
                 value => QueuedMessageId.FromValue(value));
 
         builder
+            .Property(item => item.UserId)
+            .IsRequired();
+        
+        builder
             .Property(item => item.Type)
             .HasConversion(
                 type => type.Value,
@@ -62,5 +66,12 @@ internal sealed class QueuedMessageConfiguration : IEntityTypeConfiguration<Queu
 
                     navigation.ToJson();
                 });
+
+        builder
+            .Property(item => item.ErrorsJson)
+            .HasColumnName("Errors");
+
+        builder
+            .Ignore(item => item.Errors);
     }
 }
