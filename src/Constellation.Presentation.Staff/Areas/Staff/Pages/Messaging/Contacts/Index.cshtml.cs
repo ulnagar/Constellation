@@ -12,9 +12,8 @@ using Application.Domains.SchoolContacts.Queries.GetContactSummary;
 using Application.Domains.Schools.Models;
 using Application.Domains.Schools.Queries.GetCurrentPartnerSchoolsWithStudentsList;
 using Application.Domains.StaffMembers.Commands.UpdateStaffMemberPhoneNumber;
-using Application.Domains.StaffMembers.Models;
 using Application.Domains.StaffMembers.Queries.GetStaffById;
-using Application.Domains.StaffMembers.Queries.GetStaffLinkedToOffering;
+using Application.Domains.StaffMembers.Queries.GetStaffLinkedToAllOfferings;
 using Application.DTOs;
 using Application.Models.Auth;
 using Areas;
@@ -22,14 +21,11 @@ using Constellation.Application.Domains.Offerings.Queries.GetOfferingsForSelecti
 using Constellation.Core.Shared;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
-using Core.Enums;
-using Core.Models.Identifiers;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Repositories;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
-using Core.Models.Subjects.Identifiers;
 using Core.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -78,7 +74,7 @@ public class IndexModel : BasePageModel
     [ViewData] public string PageTitle => "Contacts List";
 
     [BindProperty]
-    public FilterDefinition Filter { get; set; } = new();
+    public ContactFilter Filter { get; set; } = new();
 
     public List<ContactResponse> Contacts { get; set; } = [];
 
@@ -88,16 +84,16 @@ public class IndexModel : BasePageModel
 
     public List<SchoolSelectionListResponse> SchoolsList { get; set; } = [];
 
-    public List<string> Flags { get; set; } = [];
+    public List<StudentFlag> Flags { get; set; } = [];
 
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
 
     public async Task<IActionResult> OnPostFilter(CancellationToken cancellationToken)
     {
-        if (Filter.Action == FilterDefinition.FilterAction.Filter)
+        if (Filter.Action == ContactFilter.FilterAction.Filter)
             return await PreparePage(cancellationToken);
 
-        if (Filter.Action == FilterDefinition.FilterAction.Export)
+        if (Filter.Action == ContactFilter.FilterAction.Export)
             return await OnPostExport(cancellationToken);
 
         return await PreparePage(cancellationToken);
@@ -105,23 +101,10 @@ public class IndexModel : BasePageModel
 
     public async Task<IActionResult> OnPostExport(CancellationToken cancellationToken)
     {
-        List<ContactCategory> filterCategories = [];
-
-        foreach (string entry in Filter.Categories)
-            filterCategories.Add(ContactCategory.FromValue(entry));
-
-        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
-        List<CourseId> courseIds = Filter.Courses.Select(CourseId.FromValue).ToList();
-
         AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
         ExportContactListCommand command = new(
-            offeringIds,
-            courseIds,
-            Filter.Grades,
-            Filter.Schools,
-            filterCategories,
-            Filter.Flags,
+            Filter,
             execMemberTest.Succeeded);
 
         _logger
@@ -212,171 +195,65 @@ public class IndexModel : BasePageModel
         return new JsonResult(new { success = true, phoneNumber = phoneNumber.ToString() });
     }
 
-    public async Task<IActionResult> OnPostFilterPartial(CancellationToken cancellationToken)
-    {
-        List<ContactCategory> filterCategories = Filter
-            .Categories
-            .Select(ContactCategory.FromValue)
-            .ToList();
-
-        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
-        List<CourseId> courseIds = Filter.Courses.Select(CourseId.FromValue).ToList();
-
-        if (!offeringIds.Any() 
-            && !courseIds.Any() 
-            && !filterCategories.Any()
-            && !Filter.Grades.Any() 
-            && !Filter.Schools.Any() 
-            && !Filter.Flags.Any())
-            return Partial("ContactsTable", (new List<ContactResponse>(), false));
-
-        AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
-
-        Result<List<ContactResponse>> contactRequest = await _mediator.Send(
-            new GetContactListQuery(
-                offeringIds,
-                courseIds,
-                Filter.Grades,
-                Filter.Schools,
-                filterCategories,
-                Filter.Flags,
-                execMemberTest.Succeeded),
-            cancellationToken);
-
-        if (contactRequest.IsFailure)
-            return new JsonResult(new { success = false, error = contactRequest.Error.Message });
-
-        List<ContactResponse> contacts = contactRequest
-            .Value
-            .OrderBy(c => c.StudentGrade)
-            .ThenBy(c => c.Student.LastName)
-            .ThenBy(c => c.Student.FirstName)
-            .ToList();
-
-        return Partial("ContactsTable", (contacts, execMemberTest));
-    }
-
     private async Task<IActionResult> PreparePage(CancellationToken cancellationToken = default)
     {
-        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery(true));
-
+        Result<List<CourseSelectListItemResponse>> coursesResponse = await _mediator.Send(new GetCoursesForSelectionListQuery(true), cancellationToken);
         if (coursesResponse.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(
-                coursesResponse.Error,
-                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
-
-            _logger
-                .ForContext(nameof(Error), coursesResponse.Error, true)
-                .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
-
-            return Page();
-        }
-
-        CourseSelectionList = coursesResponse.Value;
+            return FailPage(coursesResponse.Error, "Failed to retrieve course list");
 
         Result<List<OfferingSelectionListResponse>> classesResponse = await _mediator.Send(new GetOfferingsForSelectionListQuery(), cancellationToken);
-
         if (classesResponse.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(
-                classesResponse.Error,
-                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
-
-            _logger
-                .ForContext(nameof(Error), classesResponse.Error, true)
-                .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
-
-            return Page();
-        }
-
-        foreach (OfferingSelectionListResponse offering in classesResponse.Value)
-        {
-            Result<List<StaffSelectionListResponse>> teachers = await _mediator.Send(new GetStaffLinkedToOfferingQuery(offering.Id), cancellationToken);
-
-            if (teachers.Value.Count == 0)
-                continue;
-
-            var frequency = teachers
-                .Value
-                .GroupBy(x => x.StaffId)
-                .Select(group => new { StaffId = group.Key, Count = group.Count() })
-                .OrderByDescending(x => x.Count)
-                .First();
-
-            StaffSelectionListResponse primaryTeacher = teachers.Value.First(teacher => teacher.StaffId == frequency.StaffId);
-
-            ClassSelectionList.Add(new ClassRecord(
-                offering.Id,
-                offering.Name,
-                $"{primaryTeacher.Name.PreferredName[..1]} {primaryTeacher.Name.LastName}",
-                $"Year {offering.Name[..2]}"));
-        }
+            return FailPage(classesResponse.Error, "Failed to retrieve offerings list");
 
         Result<List<SchoolSelectionListResponse>> schoolsRequest = await _mediator.Send(new GetCurrentPartnerSchoolsWithStudentsListQuery(), cancellationToken);
-
         if (schoolsRequest.IsFailure)
-        {
-            ModalContent = ErrorDisplay.Create(
-                schoolsRequest.Error,
-                _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
-
-
-            _logger
-                .ForContext(nameof(Error), schoolsRequest.Error, true)
-                .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
-
-            return Page();
-        }
-
+            return FailPage(schoolsRequest.Error, "Failed to retrieve schools list");
+        
+        CourseSelectionList = coursesResponse.Value;
         SchoolsList = schoolsRequest.Value;
-
-        List<ContactCategory> filterCategories = [];
-
-        foreach (string entry in Filter.Categories)
-            filterCategories.Add(ContactCategory.FromValue(entry));
-
         Flags = await _flagCache.GetFlags();
 
-        List<OfferingId> offeringIds = Filter.Offerings.Select(OfferingId.FromValue).ToList();
-        List<CourseId> courseIds = Filter.Courses.Select(CourseId.FromValue).ToList();
+        Result<List<OfferingStaffResponse>> allStaffResponse = await _mediator.Send(new GetStaffLinkedToAllOfferingsQuery(), cancellationToken);
 
-        if (offeringIds.Any() ||
-            courseIds.Any() ||
-            filterCategories.Any() ||
-            Filter.Grades.Any() ||
-            Filter.Schools.Any() ||
-            Filter.Flags.Any())
+        if (allStaffResponse.IsSuccess)
+        {
+            ILookup<OfferingId, OfferingStaffResponse> staffByOffering =
+                allStaffResponse.Value.ToLookup(x => x.OfferingId);
+
+            foreach (OfferingSelectionListResponse offering in classesResponse.Value)
+            {
+                IEnumerable<OfferingStaffResponse> teachers = staffByOffering[offering.Id];
+                if (!teachers.Any())
+                    continue;
+
+                OfferingStaffResponse primaryTeacher = teachers
+                    .GroupBy(x => x.StaffId)
+                    .OrderByDescending(g => g.Count())
+                    .First()
+                    .First();
+                    
+                ClassSelectionList.Add(new ClassRecord(
+                    offering.Id,
+                    offering.Name,
+                    $"{primaryTeacher.Name.PreferredName[..1]} {primaryTeacher.Name.LastName}",
+                    $"Year {offering.Name[..2]}"));
+            }
+        }
+
+        if (Filter.AnyDefined)
         {
             AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
 
             Result<List<ContactResponse>> contactRequest = await _mediator.Send(
                 new GetContactListQuery(
-                    offeringIds,
-                    courseIds,
-                    Filter.Grades,
-                    Filter.Schools,
-                    filterCategories,
-                    Filter.Flags,
+                    Filter,
                     execMemberTest.Succeeded),
                 cancellationToken);
 
             if (contactRequest.IsFailure)
-            {
-                ModalContent = ErrorDisplay.Create(
-                    contactRequest.Error,
-                    _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
+                return FailPage(contactRequest.Error, "Failed to retrieve contact list");
 
-                _logger
-                    .ForContext(nameof(Error), contactRequest.Error, true)
-                    .Warning("Failed to retrieve contact list by user {User}", _currentUserService.UserName);
-
-                return Page();
-            }
-
-            Contacts = contactRequest.Value;
-
-            Contacts = Contacts
+            Contacts = contactRequest.Value
                 .OrderBy(contact => contact.StudentGrade)
                 .ThenBy(contact => contact.Student.LastName)
                 .ThenBy(contact => contact.Student.FirstName)
@@ -386,22 +263,17 @@ public class IndexModel : BasePageModel
         return Page();
     }
 
-    public class FilterDefinition
+    // Helper to reduce the repeated error-handling boilerplate
+    private IActionResult FailPage(Error error, string message)
     {
-        public List<Guid> Offerings { get; set; } = [];
-        public List<Grade> Grades { get; set; } = [];
-        public List<SchoolCode> Schools { get; set; } = [];
-        public List<string> Categories { get; set; } = [];
-        public List<string> Flags { get; set; } = [];
-        public List<Guid> Courses { get; set; } = [];
+        ModalContent = ErrorDisplay.Create(
+            error,
+            _linkGenerator.GetPathByPage("/Messaging/Contacts/Index", values: new { area = "Staff" }));
 
-        public FilterAction Action { get; set; } = FilterAction.Filter;
+        _logger
+            .ForContext(nameof(Error), error, true)
+            .Warning("{Message} by user {User}", message, _currentUserService.UserName);
 
-        public enum FilterAction
-        {
-            Filter,
-            Export,
-            Email
-        }
+        return Page();
     }
 }

@@ -31,7 +31,6 @@ using Interfaces;
 using Models;
 using SchoolContacts.Helpers;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -81,17 +80,17 @@ internal sealed class ExportContactListCommandHandler
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
-                request.OfferingCodes,
-                request.CourseIds,
-                request.Grades,
-                request.SchoolCodes,
+                request.Filter.OfferingIds,
+                request.Filter.CourseIds,
+                request.Filter.Grades,
+                request.Filter.SchoolCodes,
                 cancellationToken);
 
-        if (request.Flags.Count > 0)
+        if (request.Filter.Flags.Count > 0)
         {
             List<StudentId> studentIds = [];
 
-            foreach (string flag in request.Flags)
+            foreach (StudentFlag flag in request.Filter.Flags)
             {
                 List<StudentId> idsWithFlag = await _flagCache.GetStudentsWithFlag(flag);
                 studentIds.AddRange(idsWithFlag);
@@ -352,11 +351,11 @@ internal sealed class ExportContactListCommandHandler
             }
         }
 
-        if (request.ContactCateogries.Count > 0)
+        if (request.Filter.Categories.Count > 0)
         {
             result = result
                 .Where(entry =>
-                    request.ContactCateogries.Contains(entry.Category))
+                    request.Filter.Categories.Contains(entry.Category))
                 .ToList();
         }
 

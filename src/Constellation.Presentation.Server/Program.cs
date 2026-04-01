@@ -150,6 +150,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddMvc(options =>
 {
+    options.ModelBinderProviders.Insert(0, new StudentFlagBinderProvider());
     options.ModelBinderProviders.Insert(0, new StronglyTypedIdBinderProvider());
     options.ModelBinderProviders.Insert(0, new StringEnumerationBinderProvider());
     options.ModelBinderProviders.Insert(0, new PositionEnumBinderProvider());

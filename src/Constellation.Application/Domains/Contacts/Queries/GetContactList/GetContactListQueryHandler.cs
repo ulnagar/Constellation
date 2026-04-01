@@ -73,17 +73,17 @@ internal sealed class GetContactListQueryHandler
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
-                request.OfferingCodes,
-                request.CourseIds,
-                request.Grades,
-                request.SchoolCodes,
+                request.Filter.OfferingIds,
+                request.Filter.CourseIds,
+                request.Filter.Grades,
+                request.Filter.SchoolCodes,
                 cancellationToken);
 
-        if (request.Flags.Count > 0)
+        if (request.Filter.Flags.Count > 0)
         {
             List<StudentId> studentIds = [];
 
-            foreach (string flag in request.Flags)
+            foreach (StudentFlag flag in request.Filter.Flags)
             {
                 List<StudentId> idsWithFlag = await _flagCache.GetStudentsWithFlag(flag);
                 studentIds.AddRange(idsWithFlag);
@@ -341,11 +341,11 @@ internal sealed class GetContactListQueryHandler
             }
         }
 
-        if (request.ContactCategories.Count > 0)
+        if (request.Filter.Categories.Count > 0)
         {
             result = result
                 .Where(entry => 
-                    request.ContactCategories.Contains(entry.Category))
+                    request.Filter.Categories.Contains(entry.Category))
                 .ToList();
         }
 

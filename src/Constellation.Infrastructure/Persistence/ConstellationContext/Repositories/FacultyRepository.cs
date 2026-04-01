@@ -1,14 +1,13 @@
-﻿#nullable enable
-namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
+﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
-using Constellation.Core.Models.Offerings;
-using Constellation.Core.Models.Offerings.Identifiers;
-using Constellation.Core.Models.Subjects;
-using Constellation.Core.Models.Subjects.Identifiers;
 using Core.Models.Faculties;
 using Core.Models.Faculties.Identifiers;
 using Core.Models.Faculties.Repositories;
+using Core.Models.Offerings;
+using Core.Models.Offerings.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
+using Core.Models.Subjects;
+using Core.Models.Subjects.Identifiers;
 using Microsoft.EntityFrameworkCore;
 
 internal sealed class FacultyRepository : IFacultyRepository
@@ -26,7 +25,7 @@ internal sealed class FacultyRepository : IFacultyRepository
             .Set<Faculty>()
             .ToListAsync(cancellationToken);
 
-    public async Task<Faculty> GetById(
+    public async Task<Faculty?> GetById(
         FacultyId facultyId,
         CancellationToken cancellationToken = default) =>
         await _dbContext
@@ -42,14 +41,14 @@ internal sealed class FacultyRepository : IFacultyRepository
             .Where(faculty => faculty.Members.Any(member => !member.IsDeleted && member.StaffId == staffId))
             .ToListAsync(cancellationToken);
 
-    public async Task<Faculty> GetByCourseId(
+    public async Task<Faculty?> GetByCourseId(
         CourseId courseId,
         CancellationToken cancellationToken = default)
     {
         FacultyId? facultyId = await _dbContext
             .Set<Course>()
             .Where(course => course.Id == courseId)
-            .Select(course => course.FacultyId)
+            .Select(course => (FacultyId?)course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         return (facultyId is null)
@@ -73,7 +72,7 @@ internal sealed class FacultyRepository : IFacultyRepository
         FacultyId? facultyId = await _dbContext
             .Set<Course>()
             .Where(course => course.Id == courseId)
-            .Select(course => course.FacultyId)
+            .Select(course => (FacultyId?)course.FacultyId)
             .FirstOrDefaultAsync(cancellationToken);
 
         return (facultyId is null)
