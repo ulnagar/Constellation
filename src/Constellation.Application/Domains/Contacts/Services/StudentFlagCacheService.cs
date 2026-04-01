@@ -62,7 +62,8 @@ internal class StudentFlagCacheService : IStudentFlagCacheService
         _flags.AddRange(result
             .SelectMany(entry => entry.Flags)
             .Distinct()
-            .Select(flag => new StudentFlag(flag)));
+            .Select(flag => new StudentFlag(flag))
+            .Where(flag => !string.IsNullOrWhiteSpace(flag.Name)));
 
         IStudentRepository studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
         List<Student> students = await studentRepository.GetCurrentStudents();
@@ -81,6 +82,9 @@ internal class StudentFlagCacheService : IStudentFlagCacheService
 
             foreach (string studentFlag in entry.Flags)
             {
+                if (string.IsNullOrWhiteSpace(studentFlag))
+                    continue;
+
                 StudentFlag? flag = _flags.FirstOrDefault(flag => flag.Name == studentFlag);
 
                 if (flag is null)

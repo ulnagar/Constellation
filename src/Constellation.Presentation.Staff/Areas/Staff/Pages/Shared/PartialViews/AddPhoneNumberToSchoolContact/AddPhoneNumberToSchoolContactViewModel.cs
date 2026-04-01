@@ -2,12 +2,19 @@
 
 using Core.Models.SchoolContacts.Identifiers;
 using Core.ValueObjects;
-using Microsoft.AspNetCore.Mvc;
-using Presentation.Shared.Helpers.ModelBinders;
 
 public sealed class AddPhoneNumberToSchoolContactViewModel
 {
-    [ModelBinder(typeof(FromValueBinder))]
-    public PhoneNumber PhoneNumber { get; set; }
-    public SchoolContactId ContactId { get; set; }
+    private AddPhoneNumberToSchoolContactViewModel() { }
+
+    public AddPhoneNumberToSchoolContactViewModel(
+        PhoneNumber phoneNumber,
+        SchoolContactId contactId)
+    {
+        PhoneNumber = phoneNumber.ToString(Core.ValueObjects.PhoneNumber.Format.None);
+        ContactId = contactId;
+    }
+
+    public string PhoneNumber { get; private set; }
+    public SchoolContactId ContactId { get; private set; }
 }

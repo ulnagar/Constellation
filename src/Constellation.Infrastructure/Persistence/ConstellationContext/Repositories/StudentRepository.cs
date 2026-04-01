@@ -211,6 +211,8 @@ public class StudentRepository : IStudentRepository
         List<SchoolCode> schoolCodes,
         CancellationToken cancellationToken = default)
     {
+        List<OfferingId> selectedOfferingIds = offeringIds.ToList();
+
         List<SchoolEnrolment> schoolEnrolments = await _context
             .Set<SchoolEnrolment>()
             .Where(enrolment => 
@@ -223,7 +225,7 @@ public class StudentRepository : IStudentRepository
             .Set<Student>()
             .Where(student => !student.IsDeleted)
             .ToListAsync(cancellationToken);
-
+        
         if (courseIds.Count > 0)
         {
             List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
@@ -234,15 +236,15 @@ public class StudentRepository : IStudentRepository
                 .Select(offering => offering.Id)
                 .ToListAsync(cancellationToken);
 
-            offeringIds.AddRange(currentOfferingIds);
-            offeringIds = offeringIds.Distinct().ToList();
+            selectedOfferingIds.AddRange(currentOfferingIds);
+            selectedOfferingIds = selectedOfferingIds.Distinct().ToList();
         }
 
-        if (offeringIds.Count > 0)
+        if (selectedOfferingIds.Count > 0)
         {
             List<OfferingId> currentOfferingIds = await _context.Set<Offering>()
                 .Where(offering =>
-                    offeringIds.Contains(offering.Id) &&
+                    selectedOfferingIds.Contains(offering.Id) &&
                     offering.StartDate <= _dateTime.Today &&
                     offering.EndDate >= _dateTime.Today)
                 .Select(offering => offering.Id)

@@ -2,12 +2,19 @@
 
 using Core.Models.StaffMembers.Identifiers;
 using Core.ValueObjects;
-using Microsoft.AspNetCore.Mvc;
-using Presentation.Shared.Helpers.ModelBinders;
 
 public sealed class AddPhoneNumberToStaffMemberViewModel
 {
-    [ModelBinder(typeof(FromValueBinder))]
-    public PhoneNumber PhoneNumber { get; set; }
+    private AddPhoneNumberToStaffMemberViewModel() { }
+
+    public AddPhoneNumberToStaffMemberViewModel(
+        PhoneNumber phoneNumber,
+        StaffId staffId)
+    {
+        PhoneNumber = phoneNumber.ToString(Core.ValueObjects.PhoneNumber.Format.None);
+        StaffId = staffId;
+    }
+
+    public string PhoneNumber { get; private set; }
     public StaffId StaffId { get; set; }
 }

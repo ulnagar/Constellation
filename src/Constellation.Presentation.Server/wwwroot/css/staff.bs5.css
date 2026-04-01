@@ -559,3 +559,8 @@ a.Senior-5:focus, a.Senior-5.focus {
 @view-transition {
     navigation: auto;
 }
+
+/* Filter buttons used in multiple pages */
+.select-button {
+    margin: 2.5px;
+}

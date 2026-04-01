@@ -69,21 +69,22 @@ public class IndexModel : BasePageModel
         if (staffMember.IsFailure)
             return Content(string.Empty);
 
-        AddPhoneNumberToStaffMemberViewModel viewModel = new()
-        {
-            StaffId = staffMember.Value.StaffId,
-            PhoneNumber = staffMember.Value.PhoneNumber
-        };
+        AddPhoneNumberToStaffMemberViewModel viewModel = new(staffMember.Value.PhoneNumber, staffMember.Value.StaffId);
 
         return Partial("AddPhoneNumberToStaffMember", viewModel);
     }
 
     public async Task<IActionResult> OnPostStaffPhoneUpdate(AddPhoneNumberToStaffMemberViewModel viewModel)
     {
-        if (viewModel.PhoneNumber == PhoneNumber.Empty)
+        if (string.IsNullOrWhiteSpace(viewModel.PhoneNumber))
             return RedirectToPage();
 
-        Result update = await _mediator.Send(new UpdateStaffMemberPhoneNumberCommand(viewModel.StaffId, viewModel.PhoneNumber));
+        Result<PhoneNumber> phoneNumber = PhoneNumber.Create(viewModel.PhoneNumber);
+
+        if (phoneNumber.IsFailure)
+            return RedirectToPage();
+
+        Result update = await _mediator.Send(new UpdateStaffMemberPhoneNumberCommand(viewModel.StaffId, phoneNumber.Value));
 
         if (update.IsFailure)
         {
@@ -104,21 +105,22 @@ public class IndexModel : BasePageModel
         if (contact.IsFailure)
             return Content(string.Empty);
 
-        AddPhoneNumberToSchoolContactViewModel viewModel = new()
-        {
-            ContactId = contact.Value.ContactId,
-            PhoneNumber = contact.Value.PhoneNumber
-        };
+        AddPhoneNumberToSchoolContactViewModel viewModel = new(contact.Value.PhoneNumber, contact.Value.ContactId);
 
         return Partial("AddPhoneNumberToSchoolContact", viewModel);
     }
 
     public async Task<IActionResult> OnPostContactPhoneUpdate(AddPhoneNumberToSchoolContactViewModel viewModel)
     {
-        if (viewModel.PhoneNumber == PhoneNumber.Empty)
+        if (string.IsNullOrWhiteSpace(viewModel.PhoneNumber))
             return RedirectToPage();
 
-        Result update = await _mediator.Send(new UpdateSchoolContactPhoneNumberCommand(viewModel.ContactId, viewModel.PhoneNumber));
+        Result<PhoneNumber> phoneNumber = PhoneNumber.Create(viewModel.PhoneNumber);
+        
+        if (phoneNumber.IsFailure)
+            return RedirectToPage();
+
+        Result update = await _mediator.Send(new UpdateSchoolContactPhoneNumberCommand(viewModel.ContactId, phoneNumber.Value));
 
         if (update.IsFailure)
         {

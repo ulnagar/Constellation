@@ -148,7 +148,7 @@ internal sealed class GetContactListQueryHandler
                     school.Code,
                     enrolment.SchoolName,
                     schoolEmail.Value,
-                    schoolPhone.IsSuccess ? schoolPhone.Value : null,
+                    schoolPhone.IsSuccess && schoolPhone.Value.IsMobile() ? schoolPhone.Value : null,
                     string.Empty));
             }
 
@@ -182,7 +182,7 @@ internal sealed class GetContactListQueryHandler
                         contact.Id,
                         contact.Name.DisplayName,
                         contact.EmailAddress,
-                        contact.PhoneNumber,
+                        contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
                         role.Note));
                 }
             }
@@ -230,7 +230,7 @@ internal sealed class GetContactListQueryHandler
                             parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
-                            parent.MobileNumber,
+                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
                             string.Empty));
                     }
                 }
@@ -259,7 +259,7 @@ internal sealed class GetContactListQueryHandler
                             parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
-                            parent.MobileNumber,
+                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
                             string.Empty));
                     }
                 }
@@ -293,7 +293,7 @@ internal sealed class GetContactListQueryHandler
                         teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
-                        teacher.PhoneNumber,
+                        teacher.PhoneNumber.IsMobile() ? teacher.PhoneNumber : null,
                         string.Empty));
                 }
 
@@ -335,7 +335,7 @@ internal sealed class GetContactListQueryHandler
                         headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
-                        headTeacher.PhoneNumber,
+                        headTeacher.PhoneNumber.IsMobile() ? headTeacher.PhoneNumber : null,
                         string.Empty));
                 }
             }

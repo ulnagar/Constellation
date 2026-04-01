@@ -4,6 +4,7 @@
 @using Constellation.Application.Domains.Contacts.Models
 @using Constellation.Core.Enums;
 @using Constellation.Core.Extensions
+@using Constellation.Core.Models.Messaging.EmergencyConsole.Enums
 
 @inject IAuthorizationService AuthorizationService
 @{
@@ -14,6 +15,20 @@
 
 <div class="page-menu">
     <button type="button" class="btn btn-warning" data-bs-toggle="collapse" data-bs-target="#filterDefinition" aria-expanded="false" aria-controls="filterDefinition">Show Filter</button>
+    
+    @if (execMemberTest.Succeeded)
+    {
+        <div class="dropdown">
+            <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Emergency Groups</button>
+            <ul class="dropdown-menu">
+                @foreach (var group in RecipientGroup.GetOptions.OrderBy(entry => entry.Order))
+                {
+                    <li><a class="dropdown-item" href="#">@group.Name</a></li>
+                }
+            </ul>
+        </div>
+    }
+
     <button id="SubmitFormAsExport" class="btn btn-warning show-loader-5">Export Current Filter</button>
     <button id="SendEmail" class="btn btn-warning">Send Email</button>
 </div>
@@ -470,11 +485,8 @@
 
 					<div class="row">
 						<h5 class="col-md-12">Available Flags:</h5>
-                        <div class="col">
-							@foreach (var flag in Model.Flags.OrderBy(entry => entry))
-							{
-								<button id="flagSelect-@flag" class="btn btn-outline-info select-button" onClick="toggleFlag('@flag')">@flag</button>
-							}
+                        <div class="col" id="FlagButtonsList">
+                            <span class="text-muted fst-italic">Loading flags...</span>
                         </div>
 					</div>
 					
@@ -503,12 +515,66 @@
             'ShowSchoolSelectList':   'SchoolListModal',
             'ShowClassSelectList':    'ClassListModal',
             'ShowCourseSelectList':   'CourseListModal',
-            'ShowCategorySelectList': 'CategoryListModal',
-            'ShowFlagSelectList':     'FlagListModal'
+            'ShowCategorySelectList': 'CategoryListModal'
         };
 
         Object.entries(modalTriggers).forEach(([btnId, modalId]) => {
             $(`#${btnId}`).on('click', () => $(`#${modalId}`).modal('show'));
+        });
+
+        // ─── Flag modal — lazy load on first open ─────────────────────────────────
+        // Pre-selected flags emitted from the server so they can be restored on
+        // page load without waiting for the modal to open.
+        const preSelectedFlags = new Set([
+            @Html.Raw(string.Join(",", Model.Filter.Flags.Select(f => $"'{f.Name}'")))
+        ]);
+
+        let flagsLoaded = false;
+
+        $('#ShowFlagSelectList').on('click', async function () {
+            $('#FlagListModal').modal('show');
+
+            if (flagsLoaded) return;
+
+            try {
+                const response = await fetch('?handler=FlagList');
+                const flags = await response.json();
+                const $container = $('#FlagButtonsList').empty();
+
+                flags.forEach(flag => {
+                    const flagName = flag.replace(/ /g, "_");
+                    const isSelected = preSelectedFlags.has(flag);
+
+                    const button = $('<button>');
+                    button.attr('id', `flagSelect-${flag}`);
+                    button.attr('type', 'button');
+                    button.addClass(isSelected ? 'btn btn-info select-button' : 'btn btn-outline-info select-button');
+                    button.text(flag);
+                    button.on('click', () => toggleFlag(flag));
+                    button.appendTo($container);
+
+                    // $('<button>')
+                    //     .attr('id', `flagSelect-${flag.replace(/ /g, "_")}`)
+                    //     .attr('type', 'button')
+                    //     .addClass(isSelected ? 'btn btn-info select-button' : 'btn btn-outline-info select-button')
+                    //     .text(flag)
+                    //     .on('click', () => toggleFlag(flag))
+                    //     .appendTo($container);
+
+                    // Populate the modal selected list for pre-selected flags
+                    if (isSelected) {
+                        $('<button>')
+                            .attr('id', `md-flagSelect-${flag}`)
+                            .addClass('btn btn-info select-button')
+                            .text(flag)
+                            .appendTo('#ModalSelectedFlagsList');
+                    }
+                });
+
+                flagsLoaded = true;
+            } catch {
+                $('#FlagButtonsList').html('<span class="text-danger">Failed to load flags. Please try again.</span>');
+            }
         });
 
         // ─── Filter form submission ───────────────────────────────────────────────
@@ -590,10 +656,22 @@
                 @:toggleSchool('@school'); 
             }
 
-            @foreach (var flag in Model.Filter.Flags)          
-            { 
-                @:toggleFlag('@flag'); 
-            }
+            // Flags: the modal buttons don't exist yet, so we directly create the
+            // page-side display badge and hidden input for each pre-selected flag.
+            // The modal selected list and button states are handled when the modal loads.
+            preSelectedFlags.forEach(flag => {
+                $('<button>')
+                    .attr('id', `pd-flagSelect-${flag}`)
+                    .addClass('btn btn-info select-button')
+                    .text(flag)
+                    .on('click', () => toggleFlag(flag))
+                    .appendTo('#SelectedFlagsList');
+
+                $('<input>')
+                    .attr({ id: `i-flagSelect-${flag}`, name: 'Filter.Flags', type: 'hidden' })
+                    .val(flag)
+                    .appendTo('#SelectedFlagsList');
+            });
         });
 
         // ─── DataTable ────────────────────────────────────────────────────────────
@@ -698,6 +776,7 @@
         // without needing to modify either partial view.
         $('#page-modal').on('submit', 'form', function (e) {
             e.preventDefault();
+            toggleLoader();
 
             $.ajax({
                 url: '?handler=' + activePhoneHandler,
@@ -711,8 +790,10 @@
                 } else {
                     $('#page-modal .error-message').text(result.error).show();
                 }
+                toggleLoader();
             }).fail(function () {
                 $('#page-modal .error-message').text('An unexpected error occurred.').show();
+                toggleLoader();
             });
         });
     </script>

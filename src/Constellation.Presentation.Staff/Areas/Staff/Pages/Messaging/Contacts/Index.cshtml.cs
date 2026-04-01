@@ -83,10 +83,14 @@ public class IndexModel : BasePageModel
     public List<CourseSelectListItemResponse> CourseSelectionList { get; set; } = [];
 
     public List<SchoolSelectionListResponse> SchoolsList { get; set; } = [];
-
-    public List<StudentFlag> Flags { get; set; } = [];
-
+    
     public async Task<IActionResult> OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
+    
+    public async Task<IActionResult> OnGetFlagList()
+    {
+        List<StudentFlag> flags = await _flagCache.GetFlags();
+        return new JsonResult(flags.OrderBy(f => f.Name).Select(f => f.Name));
+    }
 
     public async Task<IActionResult> OnPostFilter(CancellationToken cancellationToken)
     {
@@ -144,11 +148,7 @@ public class IndexModel : BasePageModel
         if (contact.IsFailure)
             return Content(string.Empty);
 
-        AddPhoneNumberToSchoolContactViewModel viewModel = new()
-        {
-            ContactId = contact.Value.ContactId,
-            PhoneNumber = contact.Value.PhoneNumber
-        };
+        AddPhoneNumberToSchoolContactViewModel viewModel = new(contact.Value.PhoneNumber, contact.Value.ContactId);
 
         return Partial("AddPhoneNumberToSchoolContact", viewModel);
     }
@@ -160,11 +160,7 @@ public class IndexModel : BasePageModel
         if (staffMember.IsFailure)
             return Content(string.Empty);
 
-        AddPhoneNumberToStaffMemberViewModel viewModel = new()
-        {
-            StaffId = staffMember.Value.StaffId,
-            PhoneNumber = staffMember.Value.PhoneNumber
-        };
+        AddPhoneNumberToStaffMemberViewModel viewModel = new(staffMember.Value.PhoneNumber, staffMember.Value.StaffId);
 
         return Partial("AddPhoneNumberToStaffMember", viewModel);
     }
@@ -211,7 +207,6 @@ public class IndexModel : BasePageModel
         
         CourseSelectionList = coursesResponse.Value;
         SchoolsList = schoolsRequest.Value;
-        Flags = await _flagCache.GetFlags();
 
         Result<List<OfferingStaffResponse>> allStaffResponse = await _mediator.Send(new GetStaffLinkedToAllOfferingsQuery(), cancellationToken);
 
