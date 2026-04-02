@@ -1,4 +1,4 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.Templates;
 
 using Application.Common.PresentationModels;
 using Application.Domains.Messaging.EmergencyConsole.Commands.CreateNewEmergencyConsoleMessageTemplate;
@@ -10,7 +10,6 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
 using Core.Abstractions.Services;
 using Core.Models.Messaging.EmergencyConsole;
-using Core.Models.Messaging.EmergencyConsole.Enums;
 using Core.Models.Messaging.EmergencyConsole.Identifiers;
 using Core.Models.Messaging.Enums;
 using Core.Shared;
@@ -43,7 +42,7 @@ public class UpsertModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Templates;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Drafts_Templates;
 
     [ViewData]
     public string PageTitle => "Templates";
@@ -78,11 +77,11 @@ public class UpsertModel : BasePageModel
             _logger
                 .ForContext(nameof(GetEmergencyConsoleMessageTemplateQuery), query, true)
                 .ForContext(nameof(Error), template.Error, true)
-                .Warning("Failed to retrieve MessageEvent Template for edit by user {User}", _currentUserService.UserName);
+                .Warning("Failed to retrieve Message Template for edit by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(
                 template.Error,
-                _linkGenerator.GetPathByPage("/Emergency/Templates/Index", values: new { area = "Admin" }));
+                _linkGenerator.GetPathByPage("/Messaging/Drafts/Templates/Index", values: new { area = "Staff" }));
 
             return;
         }
@@ -98,7 +97,7 @@ public class UpsertModel : BasePageModel
 
         _logger
             .ForContext(nameof(DeleteEmergencyConsoleMessageTemplateCommand), command, true)
-            .Information("Requested to delete MessageEvent Template by user {User}", _currentUserService.UserName);
+            .Information("Requested to delete Message Template by user {User}", _currentUserService.UserName);
 
         Result result = await _mediator.Send(command);
 
@@ -106,16 +105,16 @@ public class UpsertModel : BasePageModel
         {
             _logger
                 .ForContext(nameof(Error), result.Error, true)
-                .Information("Requested to delete MessageEvent Template by user {User}", _currentUserService.UserName);
+                .Information("Requested to delete Message Template by user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(
                 result.Error,
-                _linkGenerator.GetPathByPage("/Emergency/Templates/Index", values: new { area = "Admin" }));
+                _linkGenerator.GetPathByPage("/Messaging/Drafts/Templates/Index", values: new { area = "Staff" }));
 
             return Page();
         }
 
-        return RedirectToPage("/Emergency/Templates/Index", new { area = "Admin" });
+        return RedirectToPage("/Messaging/Drafts/Templates/Index", new { area = "Staff" });
     }
 
     public async Task<IActionResult> OnPostAjaxDelete()
@@ -136,14 +135,14 @@ public class UpsertModel : BasePageModel
                 _logger
                     .ForContext(nameof(CreateNewEmergencyConsoleMessageTemplateCommand), command, true)
                     .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to create new MessageEvent Template for edit by user {User}", _currentUserService.UserName);
+                    .Warning("Failed to create new Message Template for edit by user {User}", _currentUserService.UserName);
 
                 ModalContent = ErrorDisplay.Create(result.Error);
 
                 return Page();
             }
 
-            return RedirectToPage("/Emergency/Templates/Index", new { area = "Admin" });
+            return RedirectToPage("/Messaging/Drafts/Templates/Index", new { area = "Staff" });
         }
         else
         {
@@ -156,14 +155,14 @@ public class UpsertModel : BasePageModel
                 _logger
                     .ForContext(nameof(UpdateEmergencyConsoleMessageTemplateCommand), command, true)
                     .ForContext(nameof(Error), result.Error, true)
-                    .Warning("Failed to update MessageEvent Template for edit by user {User}", _currentUserService.UserName);
+                    .Warning("Failed to update Message Template for edit by user {User}", _currentUserService.UserName);
 
                 ModalContent = ErrorDisplay.Create(result.Error);
 
                 return Page();
             }
 
-            return RedirectToPage("/Emergency/Templates/Index", new { area = "Admin" });
+            return RedirectToPage("/Messaging/Drafts/Templates/Index", new { area = "Staff" });
         }
     }
 }

@@ -11,7 +11,7 @@ internal static class ActivePage
     public const string Messaging_History_List = "Messaging.History.List";
     public const string Messaging_Drafts = "Messaging.Drafts.";
     public const string Messaging_Emergency_Console = "Messaging.Emergency.Console";
-    public const string Messaging_Emergency_Templates = "Messaging.Emergency.Templates";
+    public const string Messaging_Drafts_Templates = "Messaging.Drafts.Templates";
     public const string Messaging_Emergency_Sent = "Messaging.Emergency.Sent";
     public const string Messaging_Emergency_Contacts = "Messaging.Emergency.Contacts";
 

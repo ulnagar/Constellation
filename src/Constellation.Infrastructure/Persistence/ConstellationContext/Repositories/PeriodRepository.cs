@@ -190,12 +190,12 @@ public class PeriodRepository : IPeriodRepository
     public async Task<List<Period>> GetByDayNumber(
         int dayNumber,
         CancellationToken cancellationToken = default) =>
-        await _context
+        _context
             .Set<Period>()
-            .Where(period =>
-                !period.IsDeleted &&
-                period.DayNumber == dayNumber)
-            .ToListAsync(cancellationToken);
+            .Where(period => !period.IsDeleted)
+            .AsEnumerable()
+            .Where(period => period.DayNumber == dayNumber)
+            .ToList();
 
     public void Insert(Period period) => _context.Set<Period>().Add(period);
 }

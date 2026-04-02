@@ -1,7 +1,14 @@
 @page
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.IndexModel
+
 @using Constellation.Core.Models.Messaging.Enums
 @using Constellation.Core.ValueObjects
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.IndexModel
+
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var canAccessEmergencyFunctions = await AuthorizationService.AuthorizeAsync(User, AuthPermission.Messaging_EmergencyConsole_Edit_Value);
+}
 
 <h2>Message Draft</h2>
 
@@ -108,6 +115,22 @@
         </div>
     </div>
     
+    @if (canAccessEmergencyFunctions.Succeeded)
+    {
+        <div class="mb-3 row">
+            <label asp-for="Templates" class="col-md-2">Template</label>
+            <div class="col-md-6">
+                <select id="template-select" class="form-select">
+                    <option value="">-- Select template --</option>
+                    @foreach (var template in Model.Templates.OrderBy(entry => entry.Name))
+                    {
+                        <option value="@template.Id">@template.Name (@template.TemplateType.Name)</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+
     <div class="mb-3 row @(Model.Type == MessageType.SMS ? "d-none" : "")" id="subject-row">
         <label asp-for="Subject" class="col-md-2"></label>
         <div class="col-md-6">
@@ -177,8 +200,6 @@
     </div>
 </form>
 
-@Html.AntiForgeryToken()
-
 @section Scripts
 {
     <script>
@@ -198,6 +219,23 @@
           var currentLength = $(this).val().length;
           $('#character-count').text(currentLength);
         }); 
+
+        $('#template-select').on('change', async function() {
+            toggleLoader();
+            const templateId = $(this).val();
+
+            $.ajax({
+                url: `?handler=AjaxLoadTemplate&templateId=${templateId}`,
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                }
+            }).done(function (result) {
+                $('.summernote').summernote('code', result);
+            }).always(function () {
+                toggleLoader();
+            });
+        });
 
         function getActiveSenderSelect() {
             return $('input[name="Type"]:checked').val() === 'Email' ? $('#sender-email') : $('#sender-sms');

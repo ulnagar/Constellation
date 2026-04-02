@@ -36,12 +36,11 @@
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Index">Drafts</a>
-                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a>
                         @if (Model.CanAccessEmergencyConsole)
                         {
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Emergency/Index">Emergency Console</a>
+                            <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Templates/Index">Templates</a>
                         }
+                        <a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a>
                     </div>
                 </li>
 

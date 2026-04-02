@@ -25,9 +25,9 @@ public sealed class Name : ValueObject, IComparable, IEquatable<Name>
         }
 
         string[] tokens = mononym.Split(' ');
-        string firstName = tokens[0];
+        string firstName = string.Join(' ', tokens[..^1]);
         string preferredName = firstName;
-        string lastName = string.Join(" ", tokens[1..]);
+        string lastName = tokens[^1];
 
         return new Name(
             firstName.Trim(),

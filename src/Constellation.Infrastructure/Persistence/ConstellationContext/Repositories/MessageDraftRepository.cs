@@ -1,5 +1,6 @@
 ﻿namespace Constellation.Infrastructure.Persistence.ConstellationContext.Repositories;
 
+using Application.Models.Identity;
 using Constellation.Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Identifiers;
@@ -30,8 +31,21 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
 
         if (draft is not null)
             return draft;
-
+        
         draft = new(userId);
+
+        AppUser? user = await context
+            .Set<AppUser>()
+            .FirstOrDefaultAsync(entry => entry.Id == userId, cancellationToken);
+
+        if (user is not null)
+        {
+            Result<EmailRecipient> recipient = EmailRecipient.Create(user.Name, user.Email);
+
+            if (recipient.IsSuccess)
+                draft.Sender = recipient.Value;
+        }
+        
         context.Set<MessageDraft>().Add(draft);
         await context.SaveChangesAsync(cancellationToken);
 

@@ -1,12 +1,17 @@
 ﻿namespace Constellation.Infrastructure.Services;
 
+using Application.Domains.Contacts.Models;
 using Application.Extensions;
 using Application.Models.Auth;
 using Application.Models.Identity;
 using Application.Models.Identity.Enums;
 using Application.Models.Identity.Repositories;
+using Constellation.Core.Models.Students.Identifiers;
 using Core.Abstractions.Clock;
 using Core.Abstractions.Repositories;
+using Core.Enums;
+using Core.Models.Enrolments;
+using Core.Models.Enrolments.Repositories;
 using Core.Models.Families;
 using Core.Models.Identifiers;
 using Core.Models.Messaging.EmergencyConsole.Enums;
@@ -22,6 +27,7 @@ using Core.Models.StaffMembers.Identifiers;
 using Core.Models.StaffMembers.Repositories;
 using Core.Models.Students;
 using Core.Models.Students.Repositories;
+using Core.Models.Students.ValueObjects;
 using Core.Models.Timetables;
 using Core.Models.Timetables.Identifiers;
 using Core.Models.Timetables.Repositories;
@@ -36,6 +42,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
     private readonly IFamilyRepository _familyRepository;
     private readonly IStaffRepository _staffRepository;
     private readonly ISchoolContactRepository _schoolContactRepository;
+    private readonly IEnrolmentRepository _enrolmentRepository;
     private readonly IDateTimeProvider _dateTime;
     private readonly IOfferingRepository _offeringRepository;
     private readonly IIdentityRepository _identityRepository;
@@ -46,6 +53,7 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
         IFamilyRepository familyRepository,
         IStaffRepository staffRepository,
         ISchoolContactRepository schoolContactRepository,
+        IEnrolmentRepository enrolmentRepository,
         IDateTimeProvider dateTime,
         IOfferingRepository offeringRepository,
         IIdentityRepository identityRepository,
@@ -55,25 +63,43 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
         _familyRepository = familyRepository;
         _staffRepository = staffRepository;
         _schoolContactRepository = schoolContactRepository;
+        _enrolmentRepository = enrolmentRepository;
         _dateTime = dateTime;
         _offeringRepository = offeringRepository;
         _identityRepository = identityRepository;
         _periodRepository = periodRepository;
     }
 
-    public async Task<List<AlertRecipient>> GetSelectedRecipientsFromGroup(
+    public async Task<List<ContactResponse>> GetSelectedRecipientsFromGroup(
         RecipientGroup group,
         CancellationToken cancellationToken = default)
     {
-        List<AlertRecipient> recipients = [];
+        List<ContactResponse> recipients = [];
+
+        List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
+        List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
+        List<Enrolment> enrolments = await _enrolmentRepository.GetCurrent(cancellationToken);
+        List<SchoolContact> contacts = await _schoolContactRepository.GetActiveByRole(Position.Coordinator, cancellationToken);
+        List<Family> families = await _familyRepository.GetAllCurrent(cancellationToken);
+
+        Result<Name> noStudentName = Name.Create("Not Applicable");
 
         if (group == RecipientGroup.AllStaff)
         {
-            List<StaffMember> staffMembers = await _staffRepository.GetAllActive(cancellationToken);
 
             foreach (StaffMember member in staffMembers)
             {
-                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
+                ContactResponse recipient = new(
+                    StudentReferenceNumber.Empty,
+                    noStudentName.Value,
+                    Grade.SpecialProgram,
+                    string.Empty,
+                    ContactCategory.AuroraTeacher,
+                    member.Id,
+                    member.Name.DisplayName,
+                    member.EmailAddress,
+                    member.PhoneNumber,
+                    string.Empty);
                 
                 recipients.Add(recipient);
             }
@@ -91,11 +117,23 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 .Select(link => StaffId.FromValue(link.LinkId))
                 .ToList();
 
-            List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(staffIds, cancellationToken);
+            List<StaffMember> execStaffMembers = staffMembers
+                .Where(entry => staffIds.Contains(entry.Id))
+                .ToList();
 
-            foreach (StaffMember member in staffMembers)
+            foreach (StaffMember member in execStaffMembers)
             {
-                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
+                ContactResponse recipient = new(
+                    StudentReferenceNumber.Empty,
+                    noStudentName.Value,
+                    Grade.SpecialProgram,
+                    string.Empty,
+                    ContactCategory.AuroraTeacher,
+                    member.Id,
+                    member.Name.DisplayName,
+                    member.EmailAddress,
+                    member.PhoneNumber,
+                    string.Empty);
 
                 recipients.Add(recipient);
             }
@@ -121,11 +159,23 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                     .Select(teacher => teacher.StaffId))
                 .ToList();
 
-            List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
+            List<StaffMember> currentClassTeachers = staffMembers
+                .Where(entry => teacherIds.Contains(entry.Id))
+                .ToList();
 
-            foreach (StaffMember member in staffMembers)
+            foreach (StaffMember member in currentClassTeachers)
             {
-                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
+                ContactResponse recipient = new(
+                    StudentReferenceNumber.Empty,
+                    noStudentName.Value,
+                    Grade.SpecialProgram,
+                    string.Empty,
+                    ContactCategory.AuroraTeacher,
+                    member.Id,
+                    member.Name.DisplayName,
+                    member.EmailAddress,
+                    member.PhoneNumber,
+                    string.Empty);
 
                 recipients.Add(recipient);
             }
@@ -150,11 +200,23 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                         .Select(teacher => teacher.StaffId))
                 .ToList();
 
-            List<StaffMember> staffMembers = await _staffRepository.GetListFromIds(teacherIds, cancellationToken);
+            List<StaffMember> todayClassTeachers = staffMembers
+                .Where(entry => teacherIds.Contains(entry.Id))
+                .ToList();
 
-            foreach (StaffMember member in staffMembers)
+            foreach (StaffMember member in todayClassTeachers)
             {
-                AlertRecipient recipient = AlertRecipient.Create(member.Name, member.EmailAddress, member.PhoneNumber);
+                ContactResponse recipient = new(
+                    StudentReferenceNumber.Empty,
+                    noStudentName.Value,
+                    Grade.SpecialProgram,
+                    string.Empty,
+                    ContactCategory.AuroraTeacher,
+                    member.Id,
+                    member.Name.DisplayName,
+                    member.EmailAddress,
+                    member.PhoneNumber,
+                    string.Empty);
 
                 recipients.Add(recipient);
             }
@@ -162,11 +224,21 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
         if (group == RecipientGroup.AllStudents)
         {
-            List<Student> students = await _studentRepository.GetCurrentStudents(cancellationToken);
-
             foreach (Student student in students)
             {
-                AlertRecipient recipient = AlertRecipient.Create(student.Name, student.EmailAddress);
+                SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+                ContactResponse recipient = new(
+                    student.StudentReferenceNumber,
+                    student.Name,
+                    enrolment?.Grade ?? Grade.SpecialProgram,
+                    enrolment?.SchoolName ?? string.Empty,
+                    ContactCategory.Student,
+                    student.Id,
+                    student.Name.DisplayName,
+                    student.EmailAddress,
+                    null,
+                    string.Empty);
 
                 recipients.Add(recipient);
             }
@@ -186,20 +258,41 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(currentPeriodIds, cancellationToken);
 
-            List<Student> students = [];
+            List<Student> currentClassStudents = [];
 
             foreach (Offering offering in currentOfferings)
             {
-                List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
+                List<StudentId> classStudentIds = enrolments
+                    .Where(entry =>
+                        entry is OfferingEnrolment { IsDeleted: false } enrolment
+                        && enrolment.OfferingId == offering.Id)
+                    .Select(entry => entry.StudentId)
+                    .ToList();
 
-                students.AddRange(classStudents);
+                List<Student> classStudents = students
+                    .Where(entry => classStudentIds.Contains(entry.Id))
+                    .ToList();
 
-                students = students.DistinctBy(student => student.Id).ToList();
+                currentClassStudents.AddRange(classStudents);
+
+                currentClassStudents = currentClassStudents.DistinctBy(student => student.Id).ToList();
             }
 
-            foreach (Student student in students)
+            foreach (Student student in currentClassStudents)
             {
-                AlertRecipient recipient = AlertRecipient.Create(student.Name, student.EmailAddress);
+                SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+                ContactResponse recipient = new(
+                    student.StudentReferenceNumber,
+                    student.Name,
+                    enrolment?.Grade ?? Grade.SpecialProgram,
+                    enrolment?.SchoolName ?? string.Empty,
+                    ContactCategory.Student,
+                    student.Id,
+                    student.Name.DisplayName,
+                    student.EmailAddress,
+                    null,
+                    string.Empty);
 
                 recipients.Add(recipient);
             }
@@ -216,22 +309,43 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
                 .Select(period => period.Id)
                 .ToList();
 
-            List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(restOfDayPeriodIds, cancellationToken);
+            List<Offering> todaysOfferings = await _offeringRepository.GetFromListOfPeriodIds(restOfDayPeriodIds, cancellationToken);
 
-            List<Student> students = [];
+            List<Student> todaysClassStudents = [];
 
-            foreach (Offering offering in currentOfferings)
+            foreach (Offering offering in todaysOfferings)
             {
-                List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
+                List<StudentId> classStudentIds = enrolments
+                    .Where(entry =>
+                        entry is OfferingEnrolment { IsDeleted: false } enrolment
+                        && enrolment.OfferingId == offering.Id)
+                    .Select(entry => entry.StudentId)
+                    .ToList();
 
-                students.AddRange(classStudents);
+                List<Student> classStudents = students
+                    .Where(entry => classStudentIds.Contains(entry.Id))
+                    .ToList();
 
-                students = students.DistinctBy(student => student.Id).ToList();
+                todaysClassStudents.AddRange(classStudents);
+
+                todaysClassStudents = todaysClassStudents.DistinctBy(student => student.Id).ToList();
             }
 
-            foreach (Student student in students)
+            foreach (Student student in todaysClassStudents)
             {
-                AlertRecipient recipient = AlertRecipient.Create(student.Name, student.EmailAddress);
+                SchoolEnrolment? enrolment = student.CurrentEnrolment;
+
+                ContactResponse recipient = new(
+                    student.StudentReferenceNumber,
+                    student.Name,
+                    enrolment?.Grade ?? Grade.SpecialProgram,
+                    enrolment?.SchoolName ?? string.Empty,
+                    ContactCategory.Student,
+                    student.Id,
+                    student.Name.DisplayName,
+                    student.EmailAddress,
+                    null,
+                    string.Empty);
 
                 recipients.Add(recipient);
             }
@@ -239,13 +353,45 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
         if (group == RecipientGroup.AllACCs)
         {
-            List<SchoolContact> contacts = await _schoolContactRepository.GetActiveByRole(Position.Coordinator, cancellationToken);
-
             foreach (SchoolContact contact in contacts)
             {
-                AlertRecipient recipient = AlertRecipient.Create(contact.Name, contact.EmailAddress, contact.PhoneNumber);
+                foreach (SchoolContactRole assignment in contact.Assignments.Where(entry => !entry.IsDeleted))
+                {
+                    Result<Name> schoolName = Name.Create(assignment.SchoolName);
 
-                recipients.Add(recipient);
+                    if (schoolName.IsFailure)
+                    {
+                        ContactResponse recipient = new(
+                            StudentReferenceNumber.Empty,
+                            noStudentName.Value,
+                            Grade.SpecialProgram,
+                            assignment.SchoolName,
+                            ContactCategory.PartnerSchoolACC,
+                            contact.Id,
+                            contact.Name.DisplayName,
+                            contact.EmailAddress,
+                            contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+                    }
+                    else
+                    {
+                        ContactResponse recipient = new(
+                            StudentReferenceNumber.Empty,
+                            schoolName.Value,
+                            Grade.SpecialProgram,
+                            assignment.SchoolName,
+                            ContactCategory.PartnerSchoolACC,
+                            contact.Id,
+                            contact.Name.DisplayName,
+                            contact.EmailAddress,
+                            contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+                    }
+                }
             }
         }
 
@@ -263,34 +409,78 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(currentPeriodIds, cancellationToken);
 
-            List<Student> students = [];
+            List<Student> currentClassStudents = [];
 
             foreach (Offering offering in currentOfferings)
             {
-                List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
+                List<StudentId> classStudentIds = enrolments
+                    .Where(entry =>
+                        entry is OfferingEnrolment { IsDeleted: false } enrolment
+                        && enrolment.OfferingId == offering.Id)
+                    .Select(entry => entry.StudentId)
+                    .ToList();
 
-                students.AddRange(classStudents);
+                List<Student> classStudents = students
+                    .Where(entry => classStudentIds.Contains(entry.Id))
+                    .ToList();
 
-                students = students.DistinctBy(student => student.Id).ToList();
+                currentClassStudents.AddRange(classStudents);
+
+                currentClassStudents = currentClassStudents.DistinctBy(student => student.Id).ToList();
             }
 
-            List<SchoolCode> schoolCodes = students.Select(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty).ToList();
+            List<SchoolCode> schoolCodes = currentClassStudents
+                .Select(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty)
+                .ToList();
 
-            List<SchoolContact> contacts = await _schoolContactRepository.GetActiveByRole(Position.Coordinator, cancellationToken);
-
-            contacts = contacts
+             List<SchoolContact> currentClassCoordinators = contacts
                 .Where(contact => 
+                    !contact.IsDeleted &&
                     contact.Assignments.Any(role =>
                         !role.IsDeleted && 
                         role.Role == Position.Coordinator && 
                         schoolCodes.Contains(role.SchoolCode)))
                 .ToList();
 
-            foreach (SchoolContact contact in contacts)
+            foreach (SchoolContact contact in currentClassCoordinators)
             {
-                AlertRecipient recipient = AlertRecipient.Create(contact.Name, contact.EmailAddress, contact.PhoneNumber);
+                foreach (SchoolContactRole assignment in contact.Assignments.Where(entry => !entry.IsDeleted))
+                {
+                    Result<Name> schoolName = Name.Create(assignment.SchoolName);
 
-                recipients.Add(recipient);
+                    if (schoolName.IsFailure)
+                    {
+                        ContactResponse recipient = new(
+                            StudentReferenceNumber.Empty,
+                            noStudentName.Value,
+                            Grade.SpecialProgram,
+                            assignment.SchoolName,
+                            ContactCategory.PartnerSchoolACC,
+                            contact.Id,
+                            contact.Name.DisplayName,
+                            contact.EmailAddress,
+                            contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+                    }
+                    else
+                    {
+                        ContactResponse recipient = new(
+                            StudentReferenceNumber.Empty,
+                            schoolName.Value,
+                            Grade.SpecialProgram,
+                            assignment.SchoolName,
+                            ContactCategory.PartnerSchoolACC,
+                            contact.Id,
+                            contact.Name.DisplayName,
+                            contact.EmailAddress,
+                            contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+                    }
+                }
             }
         }
 
@@ -307,73 +497,133 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(restOfDayPeriodIds, cancellationToken);
 
-            List<Student> students = [];
+            List<Student> todaysClassStudents = [];
 
             foreach (Offering offering in currentOfferings)
             {
-                List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
+                List<StudentId> classStudentIds = enrolments
+                    .Where(entry =>
+                        entry is OfferingEnrolment { IsDeleted: false } enrolment
+                        && enrolment.OfferingId == offering.Id)
+                    .Select(entry => entry.StudentId)
+                    .ToList();
 
-                students.AddRange(classStudents);
+                List<Student> classStudents = students
+                    .Where(entry => classStudentIds.Contains(entry.Id))
+                    .ToList();
 
-                students = students.DistinctBy(student => student.Id).ToList();
+                todaysClassStudents.AddRange(classStudents);
+
+                todaysClassStudents = todaysClassStudents.DistinctBy(student => student.Id).ToList();
             }
 
-            List<SchoolCode> schoolCodes = students.Select(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty).ToList();
-
-            List<SchoolContact> contacts = await _schoolContactRepository.GetActiveByRole(Position.Coordinator, cancellationToken);
-
-            contacts = contacts
+            List<SchoolCode> schoolCodes = todaysClassStudents.Select(student => student.CurrentEnrolment?.SchoolCode ?? SchoolCode.Empty).ToList();
+            
+            List<SchoolContact> todaysClassCoordinators = contacts
                 .Where(contact =>
+                    !contact.IsDeleted &&
                     contact.Assignments.Any(role =>
                         !role.IsDeleted &&
                         role.Role == Position.Coordinator &&
                         schoolCodes.Contains(role.SchoolCode)))
                 .ToList();
 
-            foreach (SchoolContact contact in contacts)
+            foreach (SchoolContact contact in todaysClassCoordinators)
             {
-                AlertRecipient recipient = AlertRecipient.Create(contact.Name, contact.EmailAddress, contact.PhoneNumber);
+                foreach (SchoolContactRole assignment in contact.Assignments.Where(entry => !entry.IsDeleted))
+                {
+                    Result<Name> schoolName = Name.Create(assignment.SchoolName);
 
-                recipients.Add(recipient);
+                    if (schoolName.IsFailure)
+                    {
+                        ContactResponse recipient = new(
+                            StudentReferenceNumber.Empty,
+                            noStudentName.Value,
+                            Grade.SpecialProgram,
+                            assignment.SchoolName,
+                            ContactCategory.PartnerSchoolACC,
+                            contact.Id,
+                            contact.Name.DisplayName,
+                            contact.EmailAddress,
+                            contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+                    }
+                    else
+                    {
+                        ContactResponse recipient = new(
+                            StudentReferenceNumber.Empty,
+                            schoolName.Value,
+                            Grade.SpecialProgram,
+                            assignment.SchoolName,
+                            ContactCategory.PartnerSchoolACC,
+                            contact.Id,
+                            contact.Name.DisplayName,
+                            contact.EmailAddress,
+                            contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+                    }
+                }
             }
         }
 
         if (group == RecipientGroup.AllParents)
         {
-            List<Family> families = await _familyRepository.GetAllCurrent(cancellationToken);
-
             foreach (Family family in families)
             {
                 if (family.Students.Any(entry => !entry.IsResidentialFamily))
                     continue;
 
-                Result<Name> familyName = Name.Create(
-                    family.FamilyTitle.Split(' ')[0], string.Empty,
-                    string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
+                Result<Name> familyName = Name.Create(family.FamilyTitle);
                 Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
                 if (familyName.IsSuccess && familyEmail.IsSuccess)
                 {
-                    AlertRecipient familyRecipient = AlertRecipient.Create(familyName.Value, familyEmail.Value);
-                    recipients.Add(familyRecipient);
-                }
+                    foreach (var studentLink in family.Students)
+                    {
+                        Student? student = students.FirstOrDefault(entry => entry.Id == studentLink.StudentId);
 
-                foreach (Parent parent in family.Parents)
-                {
-                    if (parent.EmailAddress != EmailAddress.None && parent.MobileNumber != PhoneNumber.Empty)
-                    {
-                        AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress, parent.MobileNumber);
-                        recipients.Add(parentRecipient);
-                    }
-                    else if (parent.MobileNumber != PhoneNumber.Empty)
-                    {
-                        AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.MobileNumber);
-                        recipients.Add(parentRecipient);
-                    }
-                    else if (parent.EmailAddress != EmailAddress.None)
-                    {
-                        AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress);
-                        recipients.Add(parentRecipient);
+                        if (student is null)
+                            continue;
+
+                        ContactResponse recipient = new(
+                            student.StudentReferenceNumber,
+                            student.Name,
+                            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                            student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                            ContactCategory.ResidentialFamily,
+                            family.Id,
+                            familyName.Value,
+                            familyEmail.Value,
+                            null,
+                            string.Empty);
+
+                        recipients.Add(recipient);
+
+                        foreach (Parent parent in family.Parents)
+                        {
+                            ContactCategory category = parent.SentralLink switch
+                            {
+                                Parent.SentralReference.Father => ContactCategory.ResidentialFather,
+                                Parent.SentralReference.Mother => ContactCategory.ResidentialMother,
+                                _ => ContactCategory.ResidentialFamily
+                            };
+
+                            recipients.Add(new(
+                                student.StudentReferenceNumber,
+                                student.Name,
+                                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                                student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                                category,
+                                parent.Id,
+                                parent.Name.DisplayName,
+                                parent.EmailAddress,
+                                parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
+                                string.Empty));
+                        }
                     }
                 }
             }
@@ -393,53 +643,76 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(currentPeriodIds, cancellationToken);
 
-            List<Student> students = [];
+            List<Student> currentClassStudents = [];
 
             foreach (Offering offering in currentOfferings)
             {
-                List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
+                List<StudentId> classStudentIds = enrolments
+                    .Where(entry =>
+                        entry is OfferingEnrolment { IsDeleted: false } enrolment
+                        && enrolment.OfferingId == offering.Id)
+                    .Select(entry => entry.StudentId)
+                    .ToList();
 
-                students.AddRange(classStudents);
+                List<Student> classStudents = students
+                    .Where(entry => classStudentIds.Contains(entry.Id))
+                    .ToList();
 
-                students = students.DistinctBy(student => student.Id).ToList();
+                currentClassStudents.AddRange(classStudents);
+
+                currentClassStudents = currentClassStudents.DistinctBy(student => student.Id).ToList();
             }
 
-            foreach (Student student in students)
+            foreach (Student student in currentClassStudents)
             {
-                List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
+                List<Family> studentFamilies = families
+                    .Where(entry => entry.Students.Any(link => link.StudentId == student.Id))
+                    .ToList();
 
-                foreach (Family family in families)
+                foreach (Family family in studentFamilies)
                 {
                     if (family.Students.Any(entry => !entry.IsResidentialFamily))
                         continue;
 
-                    Result<Name> familyName = Name.Create(
-                        family.FamilyTitle.Split(' ')[0], string.Empty,
-                        string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
+                    Result<Name> familyName = Name.Create(family.FamilyTitle);
                     Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
                     if (familyName.IsSuccess && familyEmail.IsSuccess)
                     {
-                        AlertRecipient familyRecipient = AlertRecipient.Create(familyName.Value, familyEmail.Value);
-                        recipients.Add(familyRecipient);
-                    }
+                        ContactResponse recipient = new(
+                            student.StudentReferenceNumber,
+                            student.Name,
+                            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                            student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                            ContactCategory.ResidentialFamily,
+                            family.Id,
+                            familyName.Value,
+                            familyEmail.Value,
+                            null,
+                            string.Empty);
 
-                    foreach (Parent parent in family.Parents)
-                    {
-                        if (parent.EmailAddress != EmailAddress.None && parent.MobileNumber != PhoneNumber.Empty)
+                        recipients.Add(recipient);
+
+                        foreach (Parent parent in family.Parents)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress, parent.MobileNumber);
-                            recipients.Add(parentRecipient);
-                        }
-                        else if (parent.MobileNumber != PhoneNumber.Empty)
-                        {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.MobileNumber);
-                            recipients.Add(parentRecipient);
-                        }
-                        else if (parent.EmailAddress != EmailAddress.None)
-                        {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress);
-                            recipients.Add(parentRecipient);
+                            ContactCategory category = parent.SentralLink switch
+                            {
+                                Parent.SentralReference.Father => ContactCategory.ResidentialFather,
+                                Parent.SentralReference.Mother => ContactCategory.ResidentialMother,
+                                _ => ContactCategory.ResidentialFamily
+                            };
+
+                            recipients.Add(new(
+                                student.StudentReferenceNumber,
+                                student.Name,
+                                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                                student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                                category,
+                                parent.Id,
+                                parent.Name.DisplayName,
+                                parent.EmailAddress,
+                                parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
+                                string.Empty));
                         }
                     }
                 }
@@ -452,60 +725,84 @@ internal sealed class EmergencyRecipientService : IEmergencyRecipientService
 
             List<Period> todaysPeriods = await _periodRepository.GetByDayNumber(dayNumber, cancellationToken);
 
-            List<PeriodId> restOfDayPeriodIds = todaysPeriods.Where(period =>
-                    period.StartTime >= _dateTime.Now.TimeOfDay)
+            List<PeriodId> currentPeriodIds = todaysPeriods.Where(period =>
+                    period.StartTime <= _dateTime.Now.TimeOfDay &&
+                    period.EndTime >= _dateTime.Now.TimeOfDay)
                 .Select(period => period.Id)
                 .ToList();
 
-            List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(restOfDayPeriodIds, cancellationToken);
+            List<Offering> currentOfferings = await _offeringRepository.GetFromListOfPeriodIds(currentPeriodIds, cancellationToken);
 
-            List<Student> students = [];
+            List<Student> todaysClassStudents = [];
 
             foreach (Offering offering in currentOfferings)
             {
-                List<Student> classStudents = await _studentRepository.GetCurrentEnrolmentsForOffering(offering.Id, cancellationToken);
+                List<StudentId> classStudentIds = enrolments
+                    .Where(entry =>
+                        entry is OfferingEnrolment { IsDeleted: false } enrolment
+                        && enrolment.OfferingId == offering.Id)
+                    .Select(entry => entry.StudentId)
+                    .ToList();
 
-                students.AddRange(classStudents);
+                List<Student> classStudents = students
+                    .Where(entry => classStudentIds.Contains(entry.Id))
+                    .ToList();
 
-                students = students.DistinctBy(student => student.Id).ToList();
+                todaysClassStudents.AddRange(classStudents);
+
+                todaysClassStudents = todaysClassStudents.DistinctBy(student => student.Id).ToList();
             }
 
-            foreach (Student student in students)
+            foreach (Student student in todaysClassStudents)
             {
-                List<Family> families = await _familyRepository.GetFamiliesByStudentId(student.Id, cancellationToken);
+                List<Family> studentFamilies = families
+                    .Where(entry => entry.Students.Any(link => link.StudentId == student.Id))
+                    .ToList();
 
-                foreach (Family family in families)
+                foreach (Family family in studentFamilies)
                 {
                     if (family.Students.Any(entry => !entry.IsResidentialFamily))
                         continue;
 
-                    Result<Name> familyName = Name.Create(
-                        family.FamilyTitle.Split(' ')[0], string.Empty,
-                        string.Join(' ', family.FamilyTitle.Split(' ')[1..]));
+                    Result<Name> familyName = Name.Create(family.FamilyTitle);
                     Result<EmailAddress> familyEmail = EmailAddress.Create(family.FamilyEmail);
 
                     if (familyName.IsSuccess && familyEmail.IsSuccess)
                     {
-                        AlertRecipient familyRecipient = AlertRecipient.Create(familyName.Value, familyEmail.Value);
-                        recipients.Add(familyRecipient);
-                    }
+                        ContactResponse recipient = new(
+                            student.StudentReferenceNumber,
+                            student.Name,
+                            student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                            student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                            ContactCategory.ResidentialFamily,
+                            family.Id,
+                            familyName.Value,
+                            familyEmail.Value,
+                            null,
+                            string.Empty);
 
-                    foreach (Parent parent in family.Parents)
-                    {
-                        if (parent.EmailAddress != EmailAddress.None && parent.MobileNumber != PhoneNumber.Empty)
+                        recipients.Add(recipient);
+
+                        foreach (Parent parent in family.Parents)
                         {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress, parent.MobileNumber);
-                            recipients.Add(parentRecipient);
-                        }
-                        else if (parent.MobileNumber != PhoneNumber.Empty)
-                        {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.MobileNumber);
-                            recipients.Add(parentRecipient);
-                        }
-                        else if (parent.EmailAddress != EmailAddress.None)
-                        {
-                            AlertRecipient parentRecipient = AlertRecipient.Create(parent.Name, parent.EmailAddress);
-                            recipients.Add(parentRecipient);
+                            ContactCategory category = parent.SentralLink switch
+                            {
+                                Parent.SentralReference.Father => ContactCategory.ResidentialFather,
+                                Parent.SentralReference.Mother => ContactCategory.ResidentialMother,
+                                _ => ContactCategory.ResidentialFamily
+                            };
+
+                            recipients.Add(new(
+                                student.StudentReferenceNumber,
+                                student.Name,
+                                student.CurrentEnrolment?.Grade ?? Grade.SpecialProgram,
+                                student.CurrentEnrolment?.SchoolName ?? string.Empty,
+                                category,
+                                parent.Id,
+                                parent.Name.DisplayName,
+                                parent.EmailAddress,
+                                parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
+                                string.Empty));
                         }
                     }
                 }

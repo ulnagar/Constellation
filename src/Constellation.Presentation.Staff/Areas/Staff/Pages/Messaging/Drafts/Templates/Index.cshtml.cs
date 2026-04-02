@@ -1,7 +1,7 @@
-namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates;
+namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.Templates;
 
 using Application.Common.PresentationModels;
-using Application.Domains.Messaging.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplates;
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetAllEmergencyConsoleMessageTemplates;
 using Application.Models.Auth;
 using Constellation.Presentation.Shared.Helpers.Attributes;
 using Constellation.Presentation.Staff.Areas;
@@ -35,7 +35,7 @@ public sealed class IndexModel : BasePageModel
     }
 
     [ViewData]
-    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Emergency_Templates;
+    public string ActivePage => Staff.Pages.Shared.Components.StaffSidebarMenu.ActivePage.Messaging_Drafts_Templates;
 
     [ViewData]
     public string PageTitle => "Templates";
@@ -44,13 +44,13 @@ public sealed class IndexModel : BasePageModel
 
     public async Task OnGet()
     {
-        Result<List<MessageTemplate>> templates = await _mediator.Send(new GetEmergencyConsoleMessageTemplatesQuery());
+        Result<List<MessageTemplate>> templates = await _mediator.Send(new GetAllEmergencyConsoleMessageTemplatesQuery());
 
         if (templates.IsFailure)
         {
             _logger
                 .ForContext(nameof(Error), templates.Error, true)
-                .Warning("Failed to retrieve Emergency Console MessageEvent Templates for user {User}", _currentUserService.UserName);
+                .Warning("Failed to retrieve Emergency Console Message Templates for user {User}", _currentUserService.UserName);
 
             ModalContent = ErrorDisplay.Create(templates.Error);
 

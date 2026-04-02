@@ -1,8 +1,8 @@
 ﻿@page "{id?}"
-@using Constellation.Core.Models.Messaging.EmergencyConsole.Enums
+@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.Templates.UpsertModel
+
 @using Constellation.Core.Models.Messaging.EmergencyConsole.Identifiers
 @using Constellation.Core.Models.Messaging.Enums
-@model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Emergency.Templates.UpsertModel
 
 @{
 }
@@ -54,9 +54,9 @@
         </div>
 
         <div class="mb-3 row">
-            <label asp-for="Template" class="col-md-2">MessageEvent</label>
-            <div class="col-md-3">
-                <textarea asp-for="Template" rows="10" cols="100" class="form-control"></textarea>
+            <label asp-for="Template" class="col-md-2">Message</label>
+            <div class="col-md-6">
+                <textarea asp-for="Template" rows="10" cols="100" class="form-control summernote"></textarea>
                 <span asp-validation-for="Template" class="text-danger"></span>
             </div>
         </div>

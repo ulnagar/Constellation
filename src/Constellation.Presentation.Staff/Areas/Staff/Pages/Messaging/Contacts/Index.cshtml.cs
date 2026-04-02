@@ -23,6 +23,8 @@ using Constellation.Presentation.Shared.Helpers.Attributes;
 using Core.Abstractions.Services;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Repositories;
+using Core.Models.Messaging.EmergencyConsole.Enums;
+using Core.Models.Messaging.EmergencyConsole.Services;
 using Core.Models.Offerings.Identifiers;
 using Core.Models.SchoolContacts.Identifiers;
 using Core.Models.StaffMembers.Identifiers;
@@ -45,6 +47,7 @@ public class IndexModel : BasePageModel
     private readonly ISender _mediator;
     private readonly IStudentFlagCacheService _flagCache;
     private readonly IMessageDraftRepository _draftRepository;
+    private readonly IEmergencyRecipientService _recipientService;
     private readonly LinkGenerator _linkGenerator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IAuthorizationService _authorizationService;
@@ -54,6 +57,7 @@ public class IndexModel : BasePageModel
         ISender mediator,
         IStudentFlagCacheService flagCache,
         IMessageDraftRepository draftRepository,
+        IEmergencyRecipientService recipientService,
         LinkGenerator linkGenerator,
         ICurrentUserService currentUserService,
         IAuthorizationService authorizationService,
@@ -62,6 +66,7 @@ public class IndexModel : BasePageModel
         _mediator = mediator;
         _flagCache = flagCache;
         _draftRepository = draftRepository;
+        _recipientService = recipientService;
         _linkGenerator = linkGenerator;
         _currentUserService = currentUserService;
         _authorizationService = authorizationService;
@@ -84,8 +89,31 @@ public class IndexModel : BasePageModel
 
     public List<SchoolSelectionListResponse> SchoolsList { get; set; } = [];
     
-    public async Task<IActionResult> OnGet(CancellationToken cancellationToken) => await PreparePage(cancellationToken);
-    
+    public async Task<IActionResult> OnGet(CancellationToken cancellationToken)
+    {
+        if (Filter.AnyDefined)
+        {
+            AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
+
+            Result<List<ContactResponse>> contactRequest = await _mediator.Send(
+                new GetContactListQuery(
+                    Filter,
+                    execMemberTest.Succeeded),
+                cancellationToken);
+
+            if (contactRequest.IsFailure)
+                return FailPage(contactRequest.Error, "Failed to retrieve contact list");
+
+            Contacts = contactRequest.Value
+                .OrderBy(contact => contact.StudentGrade)
+                .ThenBy(contact => contact.Student.LastName)
+                .ThenBy(contact => contact.Student.FirstName)
+                .ToList();
+        }
+
+        return await PreparePage(cancellationToken);
+    }
+
     public async Task<IActionResult> OnGetFlagList()
     {
         List<StudentFlag> flags = await _flagCache.GetFlags();
@@ -95,7 +123,29 @@ public class IndexModel : BasePageModel
     public async Task<IActionResult> OnPostFilter(CancellationToken cancellationToken)
     {
         if (Filter.Action == ContactFilter.FilterAction.Filter)
+        {
+            if (Filter.AnyDefined)
+            {
+                AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
+
+                Result<List<ContactResponse>> contactRequest = await _mediator.Send(
+                    new GetContactListQuery(
+                        Filter,
+                        execMemberTest.Succeeded),
+                    cancellationToken);
+
+                if (contactRequest.IsFailure)
+                    return FailPage(contactRequest.Error, "Failed to retrieve contact list");
+
+                Contacts = contactRequest.Value
+                    .OrderBy(contact => contact.StudentGrade)
+                    .ThenBy(contact => contact.Student.LastName)
+                    .ThenBy(contact => contact.Student.FirstName)
+                    .ToList();
+            }
+
             return await PreparePage(cancellationToken);
+        }
 
         if (Filter.Action == ContactFilter.FilterAction.Export)
             return await OnPostExport(cancellationToken);
@@ -131,6 +181,22 @@ public class IndexModel : BasePageModel
         }
 
         return File(file.Value.FileData, file.Value.FileType, file.Value.FileName);
+    }
+
+    public async Task<IActionResult> OnPostEmergencyGroup(RecipientGroup group)
+    {
+        Result<List<ContactResponse>> contactRequest = await _recipientService.GetSelectedRecipientsFromGroup(group);
+
+        if (contactRequest.IsFailure)
+            return FailPage(contactRequest.Error, "Failed to retrieve contact list");
+
+        Contacts = contactRequest.Value
+            .OrderBy(contact => contact.StudentGrade)
+            .ThenBy(contact => contact.Student.LastName)
+            .ThenBy(contact => contact.Student.FirstName)
+            .ToList();
+
+        return await PreparePage();
     }
 
     public async Task<IActionResult> OnPostAddRecipients(List<MessageRecipient> recipients)
@@ -233,26 +299,6 @@ public class IndexModel : BasePageModel
                     $"{primaryTeacher.Name.PreferredName[..1]} {primaryTeacher.Name.LastName}",
                     $"Year {offering.Name[..2]}"));
             }
-        }
-
-        if (Filter.AnyDefined)
-        {
-            AuthorizationResult execMemberTest = await _authorizationService.AuthorizeAsync(User, AuthPermission.Partners_SchoolContacts_ShowPrincipals_Value);
-
-            Result<List<ContactResponse>> contactRequest = await _mediator.Send(
-                new GetContactListQuery(
-                    Filter,
-                    execMemberTest.Succeeded),
-                cancellationToken);
-
-            if (contactRequest.IsFailure)
-                return FailPage(contactRequest.Error, "Failed to retrieve contact list");
-
-            Contacts = contactRequest.Value
-                .OrderBy(contact => contact.StudentGrade)
-                .ThenBy(contact => contact.Student.LastName)
-                .ThenBy(contact => contact.Student.FirstName)
-                .ToList();
         }
 
         return Page();

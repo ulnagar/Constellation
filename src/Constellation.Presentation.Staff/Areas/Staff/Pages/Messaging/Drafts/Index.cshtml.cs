@@ -1,11 +1,15 @@
 ﻿namespace Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts;
 
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetAllEmergencyConsoleMessageTemplates;
+using Application.Domains.Messaging.EmergencyConsole.Queries.GetEmergencyConsoleMessageTemplate;
 using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.Messaging.Drafts;
 using Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
+using Core.Models.Messaging.EmergencyConsole;
+using Core.Models.Messaging.EmergencyConsole.Identifiers;
 using Core.Models.Messaging.Enums;
 using Core.Shared;
 using Core.ValueObjects;
@@ -15,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Presentation.Shared.Extensions;
 using Presentation.Shared.Helpers.Attributes;
+using Presentation.Shared.Helpers.ModelBinders;
 using Serilog;
 using System.Reflection;
 
@@ -53,6 +58,8 @@ public class IndexModel : BasePageModel
     public string? Subject { get; set; } = string.Empty;
     public string? Body { get; set; } = string.Empty;
     public bool CanSendSms { get; set; } = false;
+
+    public IReadOnlyList<MessageTemplate> Templates { get; set; }
 
     public IReadOnlyList<MessageSender> EmailSenders { get; set; }
         
@@ -104,6 +111,15 @@ public class IndexModel : BasePageModel
 
         AuthorizationResult canSendSms = await _authorizationService.AuthorizeAsync(User, AuthPermission.Messaging_SMS_Send_Value);
         CanSendSms = canSendSms.Succeeded;
+
+        Result<List<MessageTemplate>> templatesRequest = await _mediator.Send(new GetAllEmergencyConsoleMessageTemplatesQuery());
+
+        if (templatesRequest.IsFailure)
+        {
+            return;
+        }
+
+        Templates = templatesRequest.Value;
     }
 
     public async Task<IActionResult> OnGetClearDraft()
@@ -118,6 +134,13 @@ public class IndexModel : BasePageModel
         await _draftRepository.SendDraft(User.GetUserId());
 
         return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostAjaxLoadTemplate(TemplateId templateId)
+    {
+        Result<MessageTemplate> templateRequest = await _mediator.Send(new GetEmergencyConsoleMessageTemplateQuery(templateId));
+
+        return templateRequest.IsFailure ? BadRequest() : new JsonResult(templateRequest.Value.Template);
     }
 
     public async Task<IActionResult> OnPostAjaxAutoSave([FromBody] AutoSaveViewModel vm)
@@ -232,7 +255,7 @@ public class IndexModel : BasePageModel
         return new OkResult();
     }
 
-    public record ChangeTypeViewModel(
+    public sealed record ChangeTypeViewModel(
         string MessageType, 
         string SenderName, 
         string SenderDestination);

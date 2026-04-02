@@ -38,12 +38,11 @@
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Contacts/Index">Contacts</a></li>
                     <li><hr class="dropdown-divider" /></li>
                     <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Index">Drafts</a></li>
-                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a></li>
                     @if (Model.CanAccessEmergencyConsole)
                     {
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Emergency/Index">Emergency Console</a></li>
+                        <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/Drafts/Templates/Index">Templates</a></li>
                     }
+                    <li><a class="dropdown-item" asp-area="Staff" asp-page="/Messaging/History/Recent">Recent</a></li>
                 </ul>
             </li>
 

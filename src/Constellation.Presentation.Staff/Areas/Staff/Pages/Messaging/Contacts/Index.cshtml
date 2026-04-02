@@ -18,12 +18,12 @@
     
     @if (execMemberTest.Succeeded)
     {
-        <div class="dropdown">
+        <div class="dropdown d-inline-block">
             <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Emergency Groups</button>
             <ul class="dropdown-menu">
                 @foreach (var group in RecipientGroup.GetOptions.OrderBy(entry => entry.Order))
                 {
-                    <li><a class="dropdown-item" href="#">@group.Name</a></li>
+                    <li><button type="button" class="dropdown-item" onclick="loadEmergencyGroup('@group.Value')">@group.Name</button></li>
                 }
             </ul>
         </div>
@@ -107,10 +107,21 @@
         <tbody>
             @if (Model.Contacts.Any())
             {
-                foreach (var contact in Model.Contacts)
+                foreach (var contact in Model.Contacts.OrderBy(entry => entry.Student.SortOrder))
                 {
                     <tr>
-                        <td>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</td>
+                        <td>
+                            @{
+                                if (contact.StudentGrade == Grade.SpecialProgram)
+                                {
+                                    <span>@contact.Student.DisplayName</span>
+                                }
+                                else
+                                {
+                                    <span>@contact.Student.DisplayName (@contact.StudentGrade.AsName())</span>
+                                }
+                            }
+                        </td>
                         <td>
                             @{
                                 if (contact.Category.Value.Contains("PartnerSchool"))
@@ -506,6 +517,11 @@
     }
 </div>
 
+<div class="hidden">
+    <form id="emergency-groups" method="post" asp-page-handler="EmergencyGroup">
+        <input type="hidden" name="group" id="group-input" />
+    </form>
+</div>
 
 @section scripts {
     <script>
@@ -521,6 +537,12 @@
         Object.entries(modalTriggers).forEach(([btnId, modalId]) => {
             $(`#${btnId}`).on('click', () => $(`#${modalId}`).modal('show'));
         });
+
+        // ─── Emergency Group dropdown ─────────────────────────────────────────────
+        function loadEmergencyGroup(value) {
+            document.getElementById('group-input').value = value;
+            document.getElementById('emergency-groups').submit();
+        }
 
         // ─── Flag modal — lazy load on first open ─────────────────────────────────
         // Pre-selected flags emitted from the server so they can be restored on
