@@ -43,12 +43,6 @@ public sealed class Service : ISMSService
                 values: null);
     }
     
-    public async Task<Result<List<OutgoingSmsConfirmation>>> SendMessage(
-        OutgoingSms message,
-        CancellationToken cancellationToken) =>
-        await _gateway.SendSms(message, cancellationToken);
-
-
     public async Task<Result> SendQueuedMessage(
         MessageSender sender,
         SmsRecipient receiver,
@@ -57,7 +51,9 @@ public sealed class Service : ISMSService
     {
         OutgoingSms message = new()
         {
-            origin = _configuration.OutgoingNumber, destinations = [receiver.Number], message = messageBody
+            origin = sender.Destination, 
+            destinations = [receiver.Number], 
+            message = messageBody
         };
 
         if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
@@ -174,31 +170,5 @@ public sealed class Service : ISMSService
             messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
 
         return await _gateway.SendSms(messageContent, cancellationToken);
-    }
-
-    public async Task<Result<string?>> SendEmergencyConsoleSms(
-        AlertRecipient recipient,
-        string message,
-        CancellationToken cancellationToken = default)
-    {
-        if (recipient.PhoneNumber == PhoneNumber.Empty)
-            return Result.Failure<string?>(SmsRecipientErrors.NumberEmpty);
-
-        OutgoingSms messageContent = new()
-        {
-            origin = _configuration.OutgoingNumber,
-            destinations = [recipient.PhoneNumber.ToString(PhoneNumber.Format.None)],
-            message = message
-        };
-
-        if (!string.IsNullOrWhiteSpace(_deliveryReceiptUri))
-            messageContent.notifyUrl = $"json+{_deliveryReceiptUri}";
-
-        Result<List<OutgoingSmsConfirmation>> result = await _gateway.SendSms(messageContent, cancellationToken);
-
-        if (result.IsFailure)
-            return Result.Failure<string?>(result.Error);
-
-        return Result.Success(result.Value.First().OutgoingId);
     }
 }
