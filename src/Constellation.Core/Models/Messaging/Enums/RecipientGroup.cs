@@ -1,4 +1,4 @@
-﻿namespace Constellation.Core.Models.Messaging.EmergencyConsole.Enums;
+﻿namespace Constellation.Core.Models.Messaging.Enums;
 
 using Common;
 

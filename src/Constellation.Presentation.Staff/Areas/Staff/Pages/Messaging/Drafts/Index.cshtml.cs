@@ -5,6 +5,7 @@ using Application.Domains.Messaging.EmergencyConsole.Queries.GetEmergencyConsole
 using Application.Models.Auth;
 using Core.Abstractions.Services;
 using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Drafts.Enums;
 using Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
@@ -129,9 +130,9 @@ public class IndexModel : BasePageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost(MessagePriority priority = MessagePriority.Normal)
     {
-        await _draftRepository.SendDraft(User.GetUserId());
+        await _draftRepository.SendDraft(User.GetUserId(), priority);
 
         return RedirectToPage();
     }

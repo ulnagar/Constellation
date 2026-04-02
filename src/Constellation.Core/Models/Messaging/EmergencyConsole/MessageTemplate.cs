@@ -1,6 +1,5 @@
 ﻿namespace Constellation.Core.Models.Messaging.EmergencyConsole;
 
-using Enums;
 using Errors;
 using Identifiers;
 using Messaging.Enums;

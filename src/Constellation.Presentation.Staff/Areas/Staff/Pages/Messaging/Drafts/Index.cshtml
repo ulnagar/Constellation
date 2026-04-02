@@ -1,6 +1,7 @@
 @page
 @model Constellation.Presentation.Staff.Areas.Staff.Pages.Messaging.Drafts.IndexModel
 
+@using Constellation.Core.Models.Messaging.Drafts.Enums
 @using Constellation.Core.Models.Messaging.Enums
 @using Constellation.Core.ValueObjects
 
@@ -125,6 +126,25 @@
                     @foreach (var template in Model.Templates.OrderBy(entry => entry.Name))
                     {
                         <option value="@template.Id">@template.Name (@template.TemplateType.Name)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label class="col-md-2">Priority</label>
+            <div class="col-md-6">
+                <select name="priority" class="form-select">
+                    @foreach (var priority in Enum.GetValues<MessagePriority>().OrderBy(entry => entry))
+                    {
+                        if (priority == MessagePriority.Normal)
+                        {
+                            <option value="@priority" selected="selected">@priority.ToString()</option>
+                        }
+                        else
+                        {
+                            <option value="@priority">@priority.ToString()</option>
+                        }
                     }
                 </select>
             </div>
@@ -314,8 +334,6 @@
         async function sendMessage() {
             try {
                 const [draftResponse, senderResponse] = await Promise.all([saveDraft(), saveSender()]);
-
-                console.log(draftResponse, senderResponse);
 
                 if (!draftResponse?.ok || !senderResponse?.ok) {
                     $('#autosave-status').text('Failed to save before sending. Please try again.');

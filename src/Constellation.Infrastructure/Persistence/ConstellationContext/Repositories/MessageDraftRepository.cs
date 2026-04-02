@@ -3,6 +3,7 @@
 using Application.Models.Identity;
 using Constellation.Core.Models.Messaging.Drafts.Errors;
 using Core.Models.Messaging.Drafts;
+using Core.Models.Messaging.Drafts.Enums;
 using Core.Models.Messaging.Drafts.Identifiers;
 using Core.Models.Messaging.Drafts.Repositories;
 using Core.Shared;
@@ -122,6 +123,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
 
     public async Task<Result> SendDraft(
         Guid userId,
+        MessagePriority priority = MessagePriority.Normal,
         CancellationToken cancellationToken = default)
     {
         await using AppDbContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -133,7 +135,7 @@ internal sealed class MessageDraftRepository : IMessageDraftRepository
         if (draft is null)
             return Result.Failure(MessageDraftErrors.NotFound);
 
-        QueuedMessage queued = QueuedMessage.FromDraft(draft);
+        QueuedMessage queued = QueuedMessage.FromDraft(draft, priority);
 
         context.Set<QueuedMessage>().Add(queued);
         context.Set<MessageDraft>().Remove(draft);
