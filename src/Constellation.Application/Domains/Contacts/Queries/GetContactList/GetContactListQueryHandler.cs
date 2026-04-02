@@ -69,7 +69,7 @@ internal sealed class GetContactListQueryHandler
 
     public async Task<Result<List<ContactResponse>>> Handle(GetContactListQuery request, CancellationToken cancellationToken)
     {
-        List<ContactResponse> result = new();
+        List<ContactResponse> result = [];
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
@@ -125,7 +125,7 @@ internal sealed class GetContactListQueryHandler
                 student.Id,
                 student.Name.DisplayName,
                 student.EmailAddress,
-                null,
+                PhoneNumber.Empty,
                 string.Empty));
 
             School? school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
@@ -148,7 +148,7 @@ internal sealed class GetContactListQueryHandler
                     school.Code,
                     enrolment.SchoolName,
                     schoolEmail.Value,
-                    schoolPhone.IsSuccess && schoolPhone.Value.IsMobile() ? schoolPhone.Value : null,
+                    schoolPhone.IsSuccess && schoolPhone.Value.IsMobile() ? schoolPhone.Value : PhoneNumber.Empty,
                     string.Empty));
             }
 
@@ -182,7 +182,7 @@ internal sealed class GetContactListQueryHandler
                         contact.Id,
                         contact.Name.DisplayName,
                         contact.EmailAddress,
-                        contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : null,
+                        contact.PhoneNumber.IsMobile() ? contact.PhoneNumber : PhoneNumber.Empty,
                         role.Note));
                 }
             }
@@ -209,7 +209,7 @@ internal sealed class GetContactListQueryHandler
                         family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
-                        null,
+                        PhoneNumber.Empty,
                         string.Empty));
 
                     foreach (Parent parent in family.Parents)
@@ -230,7 +230,7 @@ internal sealed class GetContactListQueryHandler
                             parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
-                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
+                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : PhoneNumber.Empty,
                             string.Empty));
                     }
                 }
@@ -245,7 +245,7 @@ internal sealed class GetContactListQueryHandler
                         family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
-                        null,
+                        PhoneNumber.Empty,
                         string.Empty));
 
                     foreach (Parent parent in family.Parents)
@@ -259,7 +259,7 @@ internal sealed class GetContactListQueryHandler
                             parent.Id,
                             parent.Name.DisplayName,
                             parent.EmailAddress,
-                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : null,
+                            parent.MobileNumber.IsMobile() ? parent.MobileNumber : PhoneNumber.Empty,
                             string.Empty));
                     }
                 }
@@ -293,7 +293,7 @@ internal sealed class GetContactListQueryHandler
                         teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
-                        teacher.PhoneNumber.IsMobile() ? teacher.PhoneNumber : null,
+                        teacher.PhoneNumber.IsMobile() ? teacher.PhoneNumber : PhoneNumber.Empty,
                         string.Empty));
                 }
 
@@ -335,7 +335,7 @@ internal sealed class GetContactListQueryHandler
                         headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
-                        headTeacher.PhoneNumber.IsMobile() ? headTeacher.PhoneNumber : null,
+                        headTeacher.PhoneNumber.IsMobile() ? headTeacher.PhoneNumber : PhoneNumber.Empty,
                         string.Empty));
                 }
             }

@@ -76,7 +76,7 @@ internal sealed class ExportContactListCommandHandler
 
     public async Task<Result<FileDto>> Handle(ExportContactListCommand request, CancellationToken cancellationToken)
     {
-        List<ContactResponse> result = new();
+        List<ContactResponse> result = [];
 
         List<Student> students = await _studentRepository
             .GetFilteredStudents(
@@ -124,11 +124,6 @@ internal sealed class ExportContactListCommandHandler
             if (enrolment is null)
                 continue;
 
-            School? school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
-
-            if (school is null)
-                continue;
-
             result.Add(new(
                 student.StudentReferenceNumber,
                 student.Name,
@@ -138,8 +133,13 @@ internal sealed class ExportContactListCommandHandler
                 student.Id,
                 student.Name.DisplayName,
                 student.EmailAddress,
-                null,
+                PhoneNumber.Empty,
                 string.Empty));
+
+            School? school = schools.FirstOrDefault(entry => entry.Code == enrolment.SchoolCode);
+
+            if (school is null)
+                continue;
 
             Result<PhoneNumber> schoolPhone = PhoneNumber.Create(school.PhoneNumber);
 
@@ -156,7 +156,7 @@ internal sealed class ExportContactListCommandHandler
                     school.Code,
                     enrolment.SchoolName,
                     schoolEmail.Value,
-                    schoolPhone.IsSuccess ? schoolPhone.Value : null,
+                    schoolPhone.IsSuccess ? schoolPhone.Value : PhoneNumber.Empty,
                     string.Empty));
             }
             
@@ -164,8 +164,11 @@ internal sealed class ExportContactListCommandHandler
 
             foreach (SchoolContact contact in contacts)
             {
-                foreach (SchoolContactRole role in contact.Assignments)
+                foreach (SchoolContactRole role in contact.Assignments.Where(role => role.SchoolCode == enrolment.SchoolCode))
                 {
+                    if (role.IsDeleted)
+                        continue;
+
                     // If the request should not include restricted roles, ignore restricted roles.
                     if (!request.IncludeRestrictedRoles && role.IsContactRoleRestricted())
                         continue;
@@ -188,7 +191,7 @@ internal sealed class ExportContactListCommandHandler
                         contact.Name.DisplayName,
                         contact.EmailAddress,
                         contact.PhoneNumber,
-                        role.Note));
+                        category == ContactCategory.PartnerSchoolOtherStaff ? role.Role.Name + ": " + role.Note : role.Note));
                 }
             }
 
@@ -214,16 +217,11 @@ internal sealed class ExportContactListCommandHandler
                         family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
-                        null,
+                        PhoneNumber.Empty,
                         string.Empty));
 
                     foreach (Parent parent in family.Parents)
                     {
-                        Result<EmailAddress> parentEmail = EmailAddress.Create(parent.EmailAddress);
-
-                        if (parentEmail.IsFailure)
-                            continue;
-
                         ContactCategory category = parent.SentralLink switch
                         {
                             Parent.SentralReference.Father => ContactCategory.ResidentialFather,
@@ -239,7 +237,7 @@ internal sealed class ExportContactListCommandHandler
                             category,
                             parent.Id,
                             parent.Name.DisplayName,
-                            parentEmail.Value,
+                            parent.EmailAddress,
                             parent.MobileNumber,
                             string.Empty));
                     }
@@ -255,7 +253,7 @@ internal sealed class ExportContactListCommandHandler
                         family.Id,
                         family.FamilyTitle,
                         familyEmail.Value,
-                        null,
+                        PhoneNumber.Empty,
                         string.Empty));
 
                     foreach (Parent parent in family.Parents)
@@ -303,7 +301,7 @@ internal sealed class ExportContactListCommandHandler
                         teacher.Id,
                         teacherName,
                         teacher.EmailAddress,
-                        null,
+                        PhoneNumber.Empty,
                         string.Empty));
                 }
 
@@ -345,7 +343,7 @@ internal sealed class ExportContactListCommandHandler
                         headTeacher.Id,
                         teacherName,
                         headTeacher.EmailAddress,
-                        null,
+                        PhoneNumber.Empty,
                         string.Empty));
                 }
             }
